@@ -1216,9 +1216,9 @@ subroutine ebands_print(ebands, header, unit, prtvol)
    '  Occupation option ................... ',ebands%occopt,ch10
  call wrtout(unt, msg)
 
- write(msg,"(2a)")" kptrlatt .............. ",trim(ltoa(reshape(ebands%kptrlatt, [9])))
+ write(msg,"(2a)")"  kptrlatt .............. ",trim(ltoa(reshape(ebands%kptrlatt, [9])))
  call wrtout(unt, msg)
- write(msg,"(2a)")" shiftk ................ ",trim(ltoa(reshape(ebands%shiftk, [3 * ebands%nshiftk])))
+ write(msg,"(2a)")"  shiftk ................ ",trim(ltoa(reshape(ebands%shiftk, [3 * ebands%nshiftk])))
  call wrtout(unt, msg)
 
  write(msg,'(3(a,f14.2,a),4(a,f14.6,a))')&

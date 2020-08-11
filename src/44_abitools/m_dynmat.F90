@@ -3742,6 +3742,7 @@ subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghat
 !scalars
  integer :: ia,ib,iqpt,irpt,mu,nu,cnt,my_rank,nprocs, ierr
  real(dp) :: facti,factr,im,kr,re
+ !real(dp) : w(2, natom, natom)
 !arrays
  real(dp) :: kk(3)
 
@@ -3785,6 +3786,23 @@ subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghat
          !end if
        end do
      end do
+
+     ! MG: New version: I don't know if it's faster.
+     !w(1,:,:) = re * wghatm(:,:,irpt)
+     !w(2,:,:) = im * wghatm(:,:,irpt)
+     !do ib=1,natom
+     !  do nu=1,3
+     !    do ia=1,natom
+     !      do mu=1,3
+     !        ! Real and imaginary part of the dynamical matrices
+     !        ! Atmfrc should be real
+     !        dynmat(1,mu,ia,nu,ib,iqpt) = dynmat(1,mu,ia,nu,ib,iqpt) + w(1,ia,ib) * atmfrc(mu,ia,nu,ib,irpt)
+     !        dynmat(2,mu,ia,nu,ib,iqpt) = dynmat(2,mu,ia,nu,ib,iqpt) + w(2,ia,ib) * atmfrc(mu,ia,nu,ib,irpt)
+     !     end do
+     !    end do
+     !  end do
+     !end do
+
    end do
  end do
 

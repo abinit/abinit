@@ -380,6 +380,7 @@ interface xmpi_bcast
   module procedure xmpi_bcast_int1d
   module procedure xmpi_bcast_int2d
   module procedure xmpi_bcast_int3d
+  module procedure xmpi_bcast_int4d
   module procedure xmpi_bcast_dpv
   module procedure xmpi_bcast_dp1d
   module procedure xmpi_bcast_dp2d
@@ -413,9 +414,11 @@ end interface xmpi_bcast
 
 interface xmpi_ibcast
   module procedure xmpi_ibcast_int1d
+  module procedure xmpi_ibcast_int4d
   module procedure xmpi_ibcast_dp1d
   module procedure xmpi_ibcast_dp2d
   module procedure xmpi_ibcast_dp3d
+  module procedure xmpi_ibcast_dp4d
 end interface xmpi_ibcast
 
 !----------------------------------------------------------------------
@@ -2385,11 +2388,11 @@ end subroutine xmpi_split_list
 !!
 !! SOURCE
 
-subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop)
+subroutine xmpi_split_work2_i4b(ntasks, nprocs, istart, istop)
 
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,nprocs
- integer,intent(inout) :: istart(nprocs),istop(nprocs)
+ integer,intent(inout) :: istart(nprocs), istop(nprocs)
 
 !Local variables-------------------------------
  integer :: res,irank,block,block_tmp
@@ -2611,8 +2614,8 @@ end function xmpi_distrib_with_replicas
 !!  routines when the number of elements to communicate exceeds a 32bit integer.
 !!
 !! INPUTS
-!!  inputtype= (INTEGER) input type (typically INTEGER, REAL(dp), ...)
 !!  largecount= total number of elements expressed as a 64bit integer
+!!  inputtype= (INTEGER) input type (typically INTEGER, REAL(dp), ...)
 !!  op_type= type of operation that will be applied during collective comms
 !!           At present, MPI_SUM, MPI_LOR, MPI_LAND are implemented
 !!
@@ -2633,7 +2636,7 @@ end function xmpi_distrib_with_replicas
 !!       copies of the Software, and to permit persons to whom the Software is
 !!       furnished to do so.
 !!
-!!  From MPI4 specification, thiss routine is useless aslarge-count MPI communications
+!!  From MPI4 specification, this routine is useless as large-count MPI communications
 !!    can be called with the use of the MPI_count datatype (instead of INTEGER).
 !!
 !! SOURCE

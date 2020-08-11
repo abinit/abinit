@@ -556,6 +556,50 @@ module m_sigmaph
 
  public :: test_phrotation
 
+!----------------------------------------------------------------------
+
+!!****t* m_sigmaph/phstore_t
+!! NAME
+!! phstore_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type,private :: phstore_t
+
+   integer :: nqibz
+   integer :: comm
+   integer :: nprocs
+   integer :: my_rank
+   integer :: natom
+   integer :: natom3
+
+   logical :: use_ifc_fourq = .False.
+
+   integer :: requests(3)
+   integer,allocatable :: qibz_start(:), qibz_stop(:)
+
+   real(dp),pointer :: qibz(:,:)
+
+   real(dp),allocatable :: phfreqs_qibz(:,:)    !, (natom3, sigma%nqibz))
+   real(dp),allocatable :: pheigvec_qibz(:,:,:,:) !, (2, natom3, natom3, sigma%nqibz))
+
+   real(dp),allocatable :: phfrq(:)
+   ! natom3
+   real(dp),allocatable :: displ_cart(:,:,:,:), displ_red(:,:,:,:)
+   !real(dp),allocatable :: displ_cart(2, 3, natom, self%natom3), displ_red(2, self%natom3, self%natom3)
+
+  contains
+    procedure :: async_rotate => phstore_async_rotate
+    procedure :: wait => phstore_wait
+    procedure :: free => phstore_free
+
+ end type phstore_t
+!!***
+
+ private :: phstore_new   ! Creation method (allocates memory, initialize data from input vars).
+
 contains  !=====================================================
 !!***
 
@@ -640,7 +684,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
  real(dp) :: vkk_norm, osc_ecut
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx
- logical :: isirr_k, isirr_kq, gen_eigenpb, is_qzero, isirr_q
+ logical :: isirr_k, isirr_kq, gen_eigenpb, is_qzero, isirr_q, use_ifc_fourq
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -648,6 +692,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(ddkop_t) :: ddkop
  type(rf2_t) :: rf2
  type(hdr_type) :: pot_hdr
+ type(phstore_t) :: phstore
  character(len=500) :: msg
  character(len=fnlen) :: sigeph_filepath
 !arrays
@@ -674,7 +719,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:)
- real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
+ !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
  real(dp) :: ylmgr_dum(1,1,1)
  logical,allocatable :: osc_mask(:)
  real(dp),allocatable :: gkq2_lr(:,:,:)
@@ -946,20 +991,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
 
  ! Precompute phonon frequencies and eigenvectors in the IBZ.
- ! These terms are used to symmetrize quantities for q in the IBZ(k) in order
+ ! These quantities are then used to symmetrize quantities for q in the IBZ(k) in order
  ! to reduce the number of calls to ifc%fourq
- call wrtout(std_out, " Computing phonon frequencies and eigenvectors in the IBZ.")
- write(msg, "(a,f8.1,a)")" Memory required by pheigvec_qibz: ", 2 * natom3**2 * sigma%nqibz * dp * b2Mb, " [Mb] <<< MEM"
- call wrtout(std_out, msg)
- ABI_MALLOC(eigvec_qpt, (2, natom3, natom3))
- ABI_CALLOC(phfreqs_qibz, (natom3, sigma%nqibz))
- ABI_CALLOC(pheigvec_qibz, (2, natom3, natom3, sigma%nqibz))
- do iq_ibz=1,sigma%nqibz
-   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
-   call ifc%fourq(cryst, sigma%qibz(:,iq_ibz), phfreqs_qibz(:, iq_ibz), displ_cart, out_eigvec=pheigvec_qibz(:,:,:,iq_ibz))
- end do
- call xmpi_sum(phfreqs_qibz, comm, ierr)
- call xmpi_sum(pheigvec_qibz, comm, ierr)
+ use_ifc_fourq = dtset%userib == 123
+ use_ifc_fourq = .True.
+ use_ifc_fourq = .False.
+ phstore = phstore_new(cryst, ifc, sigma%nqibz, sigma%qibz, use_ifc_fourq, sigma%pert_comm%value)
  call cwtime_report(" phonons in the q-IBZ", cpu_ks, wall_ks, gflops_ks)
 
  ! Radius of sphere with volume equivalent to the micro zone.
@@ -1308,17 +1345,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
        !call timab(1901, 1, tsec)
+
+       call phstore%async_rotate(cryst, ifc, iq_ibz, sigma%qibz(:, iq_ibz), qpt, isym_q, trev_q)
+
        !call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%pert_comm%value)
 
-       phfrq = phfreqs_qibz(:, iq_ibz)
-       if (isirr_q) then
-         call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, pheigvec_qibz(:,:,:,iq_ibz), displ_cart)
-         call phdispl_cart2red(natom, cryst%gprimd, displ_cart, displ_red)
-       else
-         call pheigvec_rotate(cryst, sigma%qibz(:, iq_ibz), qpt, isym_q, trev_q, pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
-         call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, displ_cart)
-         call phdispl_cart2red(natom, cryst%gprimd, displ_cart, displ_red)
-       end if
+       !phfrq = phfreqs_qibz(:, iq_ibz)
+       !if (isirr_q) then
+       !  call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, pheigvec_qibz(:,:,:,iq_ibz), displ_cart)
+       !  call phdispl_cart2red(natom, cryst%gprimd, displ_cart, displ_red)
+       !else
+       !  call pheigvec_rotate(cryst, sigma%qibz(:, iq_ibz), qpt, isym_q, trev_q, pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
+       !  call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, displ_cart)
+       !  call phdispl_cart2red(natom, cryst%gprimd, displ_cart, displ_red)
+       !end if
 
        ! Double grid stuff
        if (sigma%use_doublegrid) then
@@ -1563,6 +1603,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(gvnlx1)
        ABI_FREE(vlocal1)
        ABI_FREE(v1scf)
+
+       ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+       call phstore%wait(phfrq, displ_cart,  displ_red)
 
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ! Add contribution to Fan-Migdal self-energy coming from Sternheimer.
@@ -2303,9 +2346,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_SFREE(vcar_ibz)
  ABI_SFREE(have_vcar_ibz)
 
- ABI_SFREE(phfreqs_qibz)
- ABI_SFREE(pheigvec_qibz)
- ABI_SFREE(eigvec_qpt)
+ !ABI_SFREE(phfreqs_qibz)
+ !ABI_SFREE(pheigvec_qibz)
+ !ABI_SFREE(eigvec_qpt)
 
  call gs_hamkq%free()
  call wfd%free()
@@ -2314,6 +2357,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
  call ddkop%free()
+ call phstore%free()
  call sigma%free()
 
  ! This to make sure that the parallel output of SIGEPH is completed
@@ -5504,7 +5548,6 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
  use m_symtk, only : sg_multable
 
-
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: comm
@@ -5687,6 +5730,201 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  !stop
 
 end subroutine test_phrotation
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_sigma/phstore_new
+!! NAME
+!! phstore_new
+!!
+!! FUNCTION
+!!  Create new object with ph quantities in the IBZ.
+!!
+!! INPUTS
+!!
+
+type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, comm) result(new)
+
+!Arguments ------------------------------------
+ type(crystal_t),intent(in) :: cryst
+ type(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: nqibz, comm
+ logical,intent(in) :: use_ifc_fourq
+ real(dp),target,intent(in) :: qibz(3, nqibz)
+
+!Local variables ------------------------------
+!scalars
+ integer :: natom3, my_q1, my_q2, iq_ibz
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ new%qibz => qibz
+
+ new%natom = cryst%natom
+ natom3 = cryst%natom * 3
+ new%natom3 = natom3
+ new%comm = comm
+ new%nprocs = xmpi_comm_size(comm)
+ new%my_rank = xmpi_comm_rank(comm)
+ new%use_ifc_fourq = use_ifc_fourq
+
+ ABI_MALLOC(new%displ_cart, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(new%displ_red, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(new%phfrq, (3*cryst%natom))
+
+ if (new%use_ifc_fourq) return
+
+ ! Split qibz in blocks inside comm
+ ABI_MALLOC(new%qibz_start, (0:new%nprocs-1))
+ ABI_MALLOC(new%qibz_stop, (0:new%nprocs-1))
+ call xmpi_split_work2_i4b(nqibz, new%nprocs, new%qibz_start, new%qibz_stop)
+ my_q1 = new%qibz_start(new%my_rank)
+ my_q2 = new%qibz_stop(new%my_rank)
+
+ call wrtout(std_out, " Computing phonon frequencies and eigenvectors in the IBZ.")
+ write(msg, "(a,f8.1,a)")&
+   " Memory required by pheigvec_qibz: ", 2 * natom3**2 * (my_q2 - my_q1 + 1) * dp * b2Mb, " [Mb] <<< MEM"
+ call wrtout(std_out, msg)
+
+ ABI_MALLOC(new%phfreqs_qibz, (natom3, my_q1:my_q2))
+ ABI_MALLOC(new%pheigvec_qibz, (2, natom3, natom3, my_q1:my_q2))
+
+ do iq_ibz=my_q1, my_q2
+   call ifc%fourq(cryst, qibz(:,iq_ibz), new%phfreqs_qibz(:, iq_ibz), new%displ_cart, &
+                  out_eigvec=new%pheigvec_qibz(:,:,:,iq_ibz))
+ end do
+
+ !ABI_MALLOC(new%eigvec_qpt, (2, natom3, natom3))
+
+end function phstore_new
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_sigma/phstore_free
+!! NAME
+!! phstore_free
+!!
+!! FUNCTION
+!!  Free memory.
+!!
+!! INPUTS
+
+subroutine phstore_free(self)
+
+!Arguments ------------------------------------
+ class(phstore_t),intent(inout) :: self
+
+! *************************************************************************
+
+ ABI_SFREE(self%qibz_start)
+ ABI_SFREE(self%qibz_stop)
+
+ ABI_SFREE(self%phfreqs_qibz)
+ ABI_SFREE(self%pheigvec_qibz)
+ ABI_SFREE(self%displ_cart)
+ ABI_SFREE(self%displ_red)
+ ABI_SFREE(self%phfrq)
+
+ self%qibz => null()
+
+end subroutine phstore_free
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_sigma/phstore_async_rotate
+!! NAME
+!! phstore_async_rotate
+!!
+!! FUNCTION
+!!  Obtain phonon frequencies and eigenvectors in the BZ from data in the IBZ.
+!!
+!! INPUTS
+!!
+
+subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_q, trev_q)
+
+!Arguments ------------------------------------
+ class(phstore_t),intent(inout) :: self
+ type(crystal_t), intent(in) :: cryst
+ type(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: iq_ibz, isym_q, trev_q
+ real(dp),intent(in) :: qpt_ibz(3), qpt_bz(3)
+
+!Local variables ------------------------------
+!scalars
+ integer :: rank, master, ierr
+ logical :: isirr_q
+ real(dp) :: eigvec_qpt(2, self%natom3, self%natom3)
+
+! *************************************************************************
+
+ if (self%use_ifc_fourq) then
+   call ifc%fourq(cryst, qpt_bz, self%phfrq, self%displ_cart, out_displ_red=self%displ_red) !, comm=self%comm)
+   return
+ end if
+
+ do rank=0,self%nprocs-1
+   if (iq_ibz >= self%qibz_start(rank) .and. iq_ibz <= self%qibz_stop(rank)) then
+     master = rank; exit
+   end if
+ end do
+ ABI_CHECK(rank /= self%nprocs, sjoin("Nobody has iq_ibz: ", itoa(iq_ibz)))
+
+ if (self%my_rank == master) then
+   self%phfrq = self%phfreqs_qibz(:, iq_ibz)
+   ! Don't test if umklapp == 0 because we use the gauge phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
+   isirr_q = (isym_q == 1 .and. trev_q == 0)
+   if (isirr_q) then
+     call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, &
+                              self%pheigvec_qibz(:,:,:,iq_ibz), self%displ_cart)
+     call phdispl_cart2red(cryst%natom, cryst%gprimd, self%displ_cart, self%displ_red)
+   else
+     call pheigvec_rotate(cryst, self%qibz(:, iq_ibz), qpt_bz, isym_q, trev_q, self%pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
+     call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, self%displ_cart)
+     call phdispl_cart2red(cryst%natom, cryst%gprimd, self%displ_cart, self%displ_red)
+   end if
+ end if
+
+ ! Begin non-blocking communication.
+ call xmpi_ibcast(self%phfrq, master, self%comm, self%requests(1), ierr)
+ call xmpi_ibcast(self%displ_cart, master, self%comm, self%requests(2), ierr)
+ call xmpi_ibcast(self%displ_red, master, self%comm, self%requests(3), ierr)
+
+end subroutine phstore_async_rotate
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_sigma/phstore_wait
+!! NAME
+!! phstore_wait
+!!
+!! FUNCTION
+!!  Wait from non-blocking MPI BCAST, returns phonon frequencies and displacement in
+!!  Cartesian and reduced coordinates.
+!!
+!! INPUTS
+!!
+
+subroutine phstore_wait(self, phfrq, displ_cart, displ_red)
+
+!Arguments ------------------------------------
+ class(phstore_t),intent(inout) :: self
+ real(dp),intent(out) :: phfrq(self%natom3)
+ real(dp),intent(out) :: displ_cart(2, 3, self%natom, self%natom3), displ_red(2, 3, self%natom, self%natom3)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ierr
+
+! *************************************************************************
+
+ if (.not. self%use_ifc_fourq) call xmpi_waitall(self%requests, ierr)
+ phfrq = self%phfrq
+ displ_cart = self%displ_cart
+ displ_red = self%displ_red
+
+end subroutine phstore_wait
 !!***
 
 end module m_sigmaph

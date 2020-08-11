@@ -527,7 +527,7 @@ end subroutine krank_print
 !! FUNCTION
 !! Use symmetries to map input kptn2 to the list of k-points used to generate krank_t.
 !! Similar to listkk but, unlike listkk, this algo does not try to minimize the distance
-!! Mainly used tp map two set of k-points associated to the same grid (e.g. BZ --> IBZ, IBZ(q) --> IBZ ect.
+!! Mainly used to map two set of k-points associated to the same grid (e.g. BZ --> IBZ, IBZ(q) --> IBZ etc.
 !! Must faster than listkk for dense meshes
 !! although this routine requires the allocation of temporary array of shape (2, self%min_rank:self%max_rank)
 !! Returns indirect indexing list indkk.
