@@ -472,9 +472,9 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
                if (ierr/=0) then
                  MSG_ERROR("Accuracy not reached")
                end if
-                 gcutoff(ii)= quad*gpq(ii)
+                 gcutoff(ii)= -quad*gpq(ii)
              else
-                 gcutoff(ii)= zero
+                 gcutoff(ii)=  zero !-pi*rcut_loc**2*(two*LOG(rcut_loc)-one)
             end if
            end if
 
