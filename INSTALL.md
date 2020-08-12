@@ -27,10 +27,8 @@ Optionally, install the package inside the `prefix` directory with:
 
 ./make install
 
-For troubleshooting, more elaborate installation instructions are contained
-in the [doc/install\_notes](doc/install_notes) directory of this package
-(take the html file that corresponds to the version that you are using), or
-can also be found on-line at <https://www.abinit.org/installation> for the latest production version.
+For troubleshooting, more elaborate installation instructions can be
+found starting from the [ABINIT installation web page](https://docs.abinit.org/installation/).
 
 # GNU AUTOTOOLS SUPPORT
 
@@ -52,5 +50,3 @@ this distribution:
 
  * DocBook-utils 0.6.13 <http://sources.redhat.com/docbook-tools/>
 
-Any question regarding the GNU Autotools support inside ABINIT should be
-directed to Yann Pouillon <yann.pouillon@ehu.es>.
