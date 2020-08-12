@@ -100,7 +100,7 @@ Other options available by typing:
 
 ## Compiling from source under MacOSX
 
-### Prerequesites
+### Prerequisites
 
 1. Mac OSX
 
@@ -149,7 +149,7 @@ For the parallel version (only with MPI installed):
 
 Compile with:
 
-    make mj4
+    make -j4
 
 Install (optional):
 

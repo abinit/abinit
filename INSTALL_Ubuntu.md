@@ -116,7 +116,7 @@ where 'my_config_file.ac9' is either a self made config file. More on the config
 
 Compile with:
 
-    make mj4
+    make -j4
 
 Install (optional):
 
@@ -134,7 +134,7 @@ tells ABINIT to configure for a compilation with gfortran and to enable MPI supp
 
 Most options are detected automatically by ABINIT. For example, if `with_mpi` is set to 'yes', ABINIT will try to use the parallel fortran compiler (mpifort) and detect directories with useful library (.so) and header (.h) files for MPI support. When you installed the Open MPI package via apt, these directories can be displayed by using `dpkg -L 'libopenmpi-dev'`.
 
-When a lot of options are used, it is advised to use a config file. For example, a parallellized version of abinit using lapack and blas is obtained by using the config file
+When a lot of options are used, it is advised to use a config file. For example, a parallelized version of abinit using lapack and blas is obtained by using the config file
 
     # MPI settings
     with_mpi="yes"
@@ -156,7 +156,7 @@ Remark that
   - the LINALG_LIBS variable was explicitly set for this linux distrubution. The directory was extracted via `dpkg -L liblapack-dev` and `dpkg -L libblas-dev`.
   - when finetuning variables and flags for a particular linux distribution, it is advised to take a look at the template file `~abinit/doc/build/config-template.ac9`. For example, the setting of `LINALG_LIBS` in this template file is given by the line `#LINALG_LIBS="-L/usr/local/lib -llapack -lblas"`.
 
-More specialized libraries might be harder to detect. For example, following section was added to the config file to detect a customized FFT and XML library. These libraries are available via apt (`libfftw3-dev `and `libxml2-dev`). The directories for the corresponding library and header files can be found by using `dpkg -L [package]` and other flags can be extracted from the `~abinit/doc/build/config-template.ac9` template
+More specialized libraries might be harder to detect. For example, the following section was added to the config file to detect customized FFT and XML libraries. These libraries are available via apt (`libfftw3-dev `and `libxml2-dev`). The directories for the corresponding library and header files can be found by using `dpkg -L [package]` and other flags can be extracted from the `~abinit/doc/build/config-template.ac9` template
 
     # fast fourier settings
     with_fft_flavor="fftw3"
