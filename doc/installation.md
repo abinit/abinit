@@ -21,7 +21,7 @@ For the vast majority of people willing to use ABINIT (simple users -not develop
 the installation steps are:
 
   1. Prerequisite : you need a Fortran compiler, a C compiler, the Python interpreter (>2.7.5), 
-     some mandatory libraries (Linalg, NetCDF, LibXC), 
+     some mandatory libraries (Linalg, FFT, NetCDF, HDF5, LibXC), 
      possibly some recommended libraries (MPI) and other optional libraries (Wannier90, ...). 
      So, know how to invoke these prerequisites, install the libraries if not available immediately with your OS, and know the location of libraries. 
      The libraries can be installed with the help of the "fallback" procedure. See below for more info on this step.
@@ -32,7 +32,7 @@ the installation steps are:
      This is not mandatory, as ABINIT will try to detect the place where these are, but the detection procedure can fail.
      See below for more information, as well as in [this section](#how-to-make-the-hostnameac9-file) ...
   4. Issue "configure -q" or "./configure -q" (or first create a tmp directory, then "cd tmp", then "../configure -q").
-     [More information](#https://wiki.abinit.org/doku.php?id=build:configure) ...
+     [More information](https://wiki.abinit.org/doku.php?id=build:configure) ...
   5. Issue "make" (or "make -j<n>" for compiling with <n> processors on a SMP machine, e.g. "make -j4" for four processors). Might take dozen of minutes.
      [More information](#how-to-make-the-executables) ...
   6. Issue (optionally) "make install".
@@ -40,13 +40,14 @@ the installation steps are:
 The details of step 1 and 3 might vary a lot depending on the operating system.
 So, we provide a [Compilation tutorial](tutorial/compilation), covering different installation environments and scenario.
 Moreover, there are also Web pages that focus specifically on [MacOSX](INSTALL_MacOSX) users and [Ubuntu](INSTALL_Ubuntu) users. 
-They also show how to short-circuit the above-mentioned steps using homebrew or MacPorts (for MacOSX) or apt (for Ubuntu). 
+The two latter Web pages also show how to short-circuit the above-mentioned steps using homebrew or MacPorts (for MacOSX) or apt (for Ubuntu). 
 For step 3, examples of configuration files to configure and compile Abinit on clusters are available
-in the |abiconfig| package on github while the configuration files
+in the |abiconfig| package on github (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters))
+while the configuration files
 used for our buildbot testfarm are available in the [autoconf_examples section](developers/autoconf_examples/). 
 The [ABINIT Wiki](https://wiki.abinit.org) also has a **build abinit** section, that might prove very useful. In particular,
 the current documentation of the fallback procedure is available 
-[there](https://wiki.abinit.org/doku.php?id=build:fallbacks), as well as [information on the configure](https://wiki.abinit.org/doku.php?id=build:configure).
+[here](https://wiki.abinit.org/doku.php?id=build:fallbacks), as well as [information on the configure](https://wiki.abinit.org/doku.php?id=build:configure).
 
 If you succeeded to make the executables, but would like to check whether
 ABINIT has been installed correctly, please go to the [Internal tests section](#how-to-make-the-internal-tests)
@@ -162,11 +163,12 @@ will install abinit in the /usr/local directory.
 
 Let's come back to the case where the build system needs some more
 information. This information should be stored in a file named "hostname".ac9,
-where "hostname" is the result of (i) executing the command `hostname` on your
-machine, e.g. abiref.pcpm.ucl.ac.be or my_machine ... , and (ii) taking the first
-word of the returned chain of character, e.g. abiref or my_machine ...
+where "hostname" is the result of executing the command `hostname -s` on your
+machine. Note that the command `hostname` will return the fully qualified domain name (FQDN), 
+e.g. abiref.pcpm.ucl.ac.be, 
+while only the first word of the returned chain of character is needed, e.g. abiref .
 
-There is a template for such a file, located in ~abinit/doc/config/. Its name
+There is a template for such "hostname".ac9 file, located in ~abinit/doc/config/. Its name
 is config-template.ac9. Examples of such files, that have been used for testing
 the package, can be found in ~abinit/doc/build/config-examples/. 
 
@@ -443,6 +445,13 @@ ABINIT distribution.
 If you want to have a full handle on the package (compilation, modification of files, writing
 of scripts, you need additional prerequisites, the 
 (free) software applications git, automake, autoconf, libtools. 
+
+More explicitly, you need minimally (version numbers can  be upgraded)
+
+ * [GNU Autoconf 2.69](ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz)
+ * [GNU Automake 1.15](ftp://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz)
+ * [GNU Libtool 2.2.4](ftp://ftp.gnu.org/gnu/libtool/libtool-2.2.4.tar.gz)
+ * [GNU M4 1.4](ftp://ftp.gnu.org/gnu/m4/m4-1.4.4.tar.gz)
 
 If you do not have these tools, and would like to have them, please consult
 your local computer guru, and/or the following pages:
