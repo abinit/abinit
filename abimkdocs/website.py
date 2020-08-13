@@ -477,7 +477,9 @@ Change the input yaml files or the python code
         app("""
 # Autoconf examples
 
-This page gathers the autoconf files used by the buildbot testfarm
+This page gathers the autoconf files used by the buildbot testfarm. The different
+bots are described in the Wiki: [slave matrix](https://wiki.abinit.org/doku.php?id=bb:slaves)
+and [builder matrix](https://wiki.abinit.org/doku.php?id=bb:builder).
 
 """)
         for f in os.listdir(dirpath):

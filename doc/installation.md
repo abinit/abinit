@@ -17,7 +17,7 @@ Simply contact the ABINIT group <https://forum.abinit.org/>
 
 ## Overview
 
-For the vast majority of people willing to use ABINIT (simple users -not developers- with Unix/Linux or MacOSX under terminal mode), 
+For the vast majority of people willing to use ABINIT (simple users -not developers- with Unix/Linux or MacOS under terminal mode), 
 the installation steps are:
 
   1. Prerequisite : you need a Fortran compiler, a C compiler, the Python interpreter (>2.7.5), 
@@ -39,8 +39,8 @@ the installation steps are:
 
 The details of step 1 and 3 might vary a lot depending on the operating system.
 So, we provide a [Compilation tutorial](tutorial/compilation), covering different installation environments and scenario.
-Moreover, there are also Web pages that focus specifically on [MacOSX](INSTALL_MacOSX) users and [Ubuntu](INSTALL_Ubuntu) users. 
-The two latter Web pages also show how to short-circuit the above-mentioned steps using homebrew or MacPorts (for MacOSX) or apt (for Ubuntu). 
+Moreover, there are also Web pages that focus specifically on [MacOS](INSTALL_MacOS) users and [Ubuntu](INSTALL_Ubuntu) users. 
+The two latter Web pages also show how to short-circuit the above-mentioned steps using homebrew or MacPorts (for MacOS) or apt (for Ubuntu). 
 For step 3, examples of configuration files to configure and compile Abinit on clusters are available
 in the |abiconfig| package on github (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters))
 while the configuration files
@@ -277,7 +277,11 @@ This is the recommended procedure for developers. In order to execute these
 tests, you will need a larger disk space than for the simple installation of
 the code (the total additional disk space required is on the order of 1GB).
 
-The video below gives an overwiew of the command line options of `runtests.py`
+The comman line options of runtests.py are numerous. Please issue
+
+    ./runtests.py --help
+
+in order to get the list, or consult the video below.
 
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 

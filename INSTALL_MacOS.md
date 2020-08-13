@@ -2,9 +2,9 @@
 authors: M. Torrent
 ---
 
-# How to install ABINIT on Mac OSX
+# How to install ABINIT on Mac OS
 
-This file describes how to install ABINIT on Mac OS X:
+This file describes how to install ABINIT on Mac OS :
 
  - Using the Homebrew package manager
  - Using the MacPorts package manager
@@ -98,11 +98,11 @@ Other options available by typing:
 
     port info abinit
 
-## Compiling from source under MacOSX
+## Compiling from source under MacOS
 
 ### Prerequisites
 
-1. Mac OSX
+1. Mac OS
 
 2. Xcode installed with "Xcode command line tools"; just type:
 
@@ -122,7 +122,7 @@ Other options available by typing:
       - openmpi from [http://www.open-mpi.org](http://www.open-mpi.org), or via a package manager
 
 5. A Linear Algebra library installed.
-  By default the `accelerate` Framework is installed on MacOSX
+  By default the `accelerate` Framework is installed on MacOS
   and ABINIT build system should find it.
   But you might want to install a parallel library: `scalapack`, `atlas`, `mkl`, ...
 

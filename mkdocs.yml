@@ -34,7 +34,7 @@ pages:
     - a-TDEP: guide/a-TDEP.md
     - Installation:
         - HowTo: installation.md
-        - MacOSX: INSTALL_MacOSX.md
+        - MacOS: INSTALL_MacOS.md
         - Ubuntu: INSTALL_Ubuntu.md
         - GPUs: INSTALL_gpu.md
 
