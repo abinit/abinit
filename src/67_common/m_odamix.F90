@@ -174,11 +174,11 @@ contains
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      dotprod_vn,fourdp,hartre,metric,pawdenpot,pawmknhat,rhotoxc,timab
-!!      xcdata_init,xmpi_sum
+!!      dotprod_vn,fourdp,hartre,metric,pawdenpot,pawmknhat,pawrhoij_filter
+!!      rhotoxc,timab,xcdata_init,xmpi_sum
 !!
 !! SOURCE
 

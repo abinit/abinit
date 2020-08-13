@@ -55,7 +55,6 @@ module m_cutoff_sphere
 !!      m_vcoul
 !!
 !! CHILDREN
-!!      calck0,paw_jbessel,quadrature
 !!
 !! SOURCE
 

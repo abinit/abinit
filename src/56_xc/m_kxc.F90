@@ -1016,7 +1016,7 @@ end subroutine kxc_eok
 !!  No nl core correction
 !!
 !! PARENTS
-!!      screening,sigma
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
@@ -1269,7 +1269,7 @@ end subroutine kxc_driver
 !!  No nl core correction
 !!
 !! PARENTS
-!!      screening,sigma
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq

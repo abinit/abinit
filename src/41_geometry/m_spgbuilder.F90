@@ -80,11 +80,9 @@ contains
 !! brvltt = input variable giving Bravais lattice
 !!
 !! PARENTS
-!!      ingeo
+!!      m_ingeo
 !!
 !! CHILDREN
-!!      chkgrp,print_symmetries,symsgcube,symsghexa,symsgmono,symsgortho
-!!      symsgtetra
 !!
 !! SOURCE
 
@@ -588,7 +586,7 @@ end subroutine gensymspgr
 !! shubnikov = type of the shubnikov group
 !!
 !! PARENTS
-!!      ingeo
+!!      m_ingeo
 !!
 !! CHILDREN
 !!
@@ -1294,7 +1292,7 @@ end subroutine gensymshub
 !!  and with magnetic operations at output
 !!
 !! PARENTS
-!!      ingeo
+!!      m_ingeo
 !!
 !! CHILDREN
 !!

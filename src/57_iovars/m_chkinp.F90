@@ -81,7 +81,7 @@ contains
 !!
 !! CHILDREN
 !!      chkdpr,chkgrp,chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne,chkorthsy
-!!      dtset_copy,dtset_free,metric,wrtout,xmpi_sum
+!!      dt%free,metric,wrtout,xmpi_sum
 !!
 !! SOURCE
 

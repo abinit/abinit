@@ -415,6 +415,11 @@ contains
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!      abitk
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine get_path_ebands_cryst(path, ebands, cryst, comm, argpos)
@@ -451,6 +456,11 @@ end subroutine get_path_ebands_cryst
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!      abitk
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine get_path_ebands(path, ebands, comm)
@@ -483,6 +493,11 @@ end subroutine get_path_ebands
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!      abitk
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine get_path_cryst(path, cryst, comm)
@@ -514,6 +529,11 @@ end subroutine get_path_cryst
 !! INPUTS
 !!
 !! OUTPUT
+!!
+!! PARENTS
+!!      abitk
+!!
+!! CHILDREN
 !!
 !! SOURCE
 

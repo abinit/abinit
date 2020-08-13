@@ -187,26 +187,11 @@ contains
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      alloc_hamilt_gpu,atm2fft,check_kxc,chkpawovlp,chkph3,crystal_free
-!!      crystal_init,d2frnl,d2sym3,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write
-!!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1,dfpt_eltfrhar
-!!      dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_gatherdy
-!!      dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free,efmasdeg_free_array
-!!      efmasval_free_array,eig2tot,eigen_meandege,elph2_fanddw,elt_ewald
-!!      exit_check,fourdp,getcut,getph,hartre,hdr_free,hdr_init,hdr_update
-!!      initrhoij,initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q
-!!      matr3inv,mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free
-!!      paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init
-!!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
-!!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
-!!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
-!!      q0dy3_calc,read_rhor,rhotoxc,setsym,setsym_ylm,setup1,status,symdij
-!!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
-!!      wings3,wrtloctens,wrtout,xcdata_init,xmpi_bcast
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1870,10 +1855,11 @@ end subroutine respfn
 !!  The localization tensor cannot be defined in the metallic case. It should not be computed.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      wrtout
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2107,9 +2093,11 @@ end subroutine wrtloctens
 !! In consequence, no use of message and wrtout routine.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3416,10 +3404,11 @@ end subroutine dfpt_dyout
 !!  no cartesian coordinates : simply second derivatives)
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      asria_calc,asria_corr,cart29,cart39,chneu9
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3938,10 +3927,11 @@ end subroutine dfpt_gatherdy
 !!                    If PAW,  it depends on two atoms
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      atm2fft,dfpt_sydy,fourdp,mkcore,mklocl_recipspace,timab,zerosym
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4154,7 +4144,7 @@ end subroutine dfpt_dyfro
 !!    core-correction (part1) part of the dynamical matrix
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab

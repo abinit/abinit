@@ -298,7 +298,7 @@ end function ncname_from_id
 !!  fform=Kind of the array in the file (0 signals an error)
 !!
 !! PARENTS
-!!      m_io_screening,m_screen,m_screening,mrgscr,setup_bse
+!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -401,7 +401,7 @@ end subroutine hscr_from_file
 !! no check is done, it is up to the developer.
 !!
 !! PARENTS
-!!      m_io_screening,m_screening,screening
+!!      m_io_screening,m_screening,m_screening_driver
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -716,7 +716,7 @@ end subroutine hscr_io
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_io_screening,m_screen,m_screening,mrgscr,setup_bse
+!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -955,7 +955,7 @@ end function hscr_new
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      m_io_screening,setup_bse
+!!      m_bethe_salpeter,m_io_screening
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -1082,7 +1082,8 @@ end subroutine hscr_malloc
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      m_io_screening,m_screen,m_screening,mrgscr,screening,setup_bse
+!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,m_screening_driver
+!!      mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -1366,7 +1367,7 @@ end subroutine hscr_merge
 !!  (only writing on file)
 !!
 !! PARENTS
-!!      m_io_screening,m_screening,screening
+!!      m_io_screening,m_screening,m_screening_driver
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -1474,7 +1475,7 @@ end subroutine write_screening
 !!    will be truncated. If nomegaA > Hscr%nomega an error will occur
 !!
 !! PARENTS
-!!      calc_ucrpa,m_io_screening,m_screen,m_screening,mrgscr
+!!      m_calc_ucrpa,m_io_screening,m_screen,m_screening,mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout

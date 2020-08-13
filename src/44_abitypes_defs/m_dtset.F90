@@ -994,9 +994,9 @@ CONTAINS  !=====================================================================
 !!   |   will be an output for occopt==1 or 3 ... 8
 !!
 !! PARENTS
-!!      invars2
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2106,10 +2106,10 @@ end function dtset_copy
 !!  dtset <type(dataset_type)>=free all allocated allocatable.
 !!
 !! PARENTS
-!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_ab7_invars_f90,m_io_kss
-!!      mover_effpot
+!!      m_xchybrid
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2217,6 +2217,7 @@ end subroutine dtset_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2263,10 +2264,10 @@ end subroutine dtset_free_nkpt_arrays
 !! miximage(mxnimage,mxnimage)=coefficients of mixing of the images of the old dataset, to initialize the new dataset images
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      wrtout
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2346,11 +2347,9 @@ end subroutine find_getdtset
 !!  nband_rbz= nband in the reduced brillouin zone
 !!
 !! PARENTS
-!!      finddistrproc,initmpi_pert,mpi_setup
 !!
 !! CHILDREN
-!!      irreducible_set_pert,littlegroup_pert,littlegroup_q,mati3inv,metric
-!!      mkrdim,symatm,symkpt,wrtout
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2728,10 +2727,10 @@ end function dtset_testsusmat
 !!   The dataset with number 0 should NOT be modified in the present routine.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      intagm
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2967,9 +2966,10 @@ end subroutine macroin
 !!   The dataset with number 0 should NOT be modified in the present routine.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -3020,9 +3020,10 @@ end subroutine macroin2
 !! OUTPUT
 !!
 !! PARENTS
-!!      abinit
+!!      abinit,m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 

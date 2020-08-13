@@ -165,11 +165,10 @@ contains
 !! * Note the use of "symrec" in the symmetrization expression above.
 !!
 !! PARENTS
-!!      etotfor,forstr
+!!      m_forstr,m_scfcv_core
 !!
 !! CHILDREN
-!!      atm2fft,constrf,dgemv,fourdp,fred2fcart,fresid,fresidrsp,metric,mkcore
-!!      mkcore_alt,mkcore_wvl,mklocl,sygrad,timab,xchybrid_ncpp_cc,zerosym
+!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -672,9 +671,10 @@ end subroutine forces
 !! Note the use of "symrec" in the symmetrization expression above.
 !!
 !! PARENTS
-!!      forces
+!!      m_forces
 !!
 !! CHILDREN
+!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -763,10 +763,10 @@ end subroutine sygrad
 !! gresid(3,natom)=forces due to the residual of the potential
 !!
 !! PARENTS
-!!      forces
+!!      m_forces
 !!
 !! CHILDREN
-!!      atm2fft,fourdp,wrtout
+!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -897,10 +897,10 @@ end subroutine fresidrsp
 !! So they have to be considered as a first step before a comprehensive parallelization of this routine.
 !!
 !! PARENTS
-!!      forces,prcref,prcref_PMA,scfcv
+!!      m_forces,m_prcref,m_scfcv_core
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,mean_fftr,pre_gather,pre_scatter
+!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -1518,7 +1518,7 @@ end subroutine fresid
 !! TODO
 !!
 !! PARENTS
-!!      forces
+!!      m_forces
 !!
 !! CHILDREN
 !!      dposv,prtxvf,wrtout,xred2xcart

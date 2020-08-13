@@ -116,10 +116,11 @@ contains
 !!  scf_history <type(scf_history_type)>=arrays obtained from previous SCF cycles
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      atm2fft,extrapwf,jellium,pawrhoij_alloc,wrtout
+!!      cgcprj_cholesky,dotprod_set_cgcprj,lincom_cgcprj,pawcprj_alloc
+!!      pawcprj_axpby,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_put,zgesv
 !!
 !! SOURCE
 
@@ -526,12 +527,11 @@ end subroutine extraprho
 !!  SHOULD BE CAREFULY TESTED AND DEBUGGED (ESPECIALLY WITHIN PAW).
 !!
 !! PARENTS
-!!      extraprho
+!!      m_extraprho
 !!
 !! CHILDREN
-!!      ctocprj,dotprod_g,getph,hermit,metric,pawcprj_alloc,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_lincom,pawcprj_put
-!!      pawcprj_zaxpby,xmpi_allgather,xmpi_alltoallv,zgemm,zhpev
+!!      cgcprj_cholesky,dotprod_set_cgcprj,lincom_cgcprj,pawcprj_alloc
+!!      pawcprj_axpby,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_put,zgesv
 !!
 !! SOURCE
 
@@ -1137,12 +1137,11 @@ end subroutine extrapwf
 !!  scf_history_wf <type(scf_history_type)>=arrays obtained from previous SCF cycles
 !!
 !! PARENTS
-!!      scfcv_core
+!!      m_extraprho
 !!
 !! CHILDREN
-!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
-!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
-!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
+!!      cgcprj_cholesky,dotprod_set_cgcprj,lincom_cgcprj,pawcprj_alloc
+!!      pawcprj_axpby,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_put,zgesv
 !!
 !! SOURCE
 

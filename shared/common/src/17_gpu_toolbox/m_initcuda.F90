@@ -202,7 +202,7 @@ CONTAINS !===========================================================
 !! Give the number of device with capability>=1.2
 !!
 !! PARENTS
-!!      invars0,m_gpu_detect
+!!      m_gpu_detect,m_invars1
 !!
 !! CHILDREN
 !!

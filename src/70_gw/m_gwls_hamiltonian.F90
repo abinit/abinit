@@ -196,6 +196,11 @@ contains
 !!      m_gwls_hamiltonian
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -284,6 +289,11 @@ end subroutine DistributeValenceWavefunctions
 !!      m_gwls_hamiltonian
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -363,10 +373,15 @@ end subroutine DistributeValenceKernel
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray,gwls_Projected_AT,gwls_hamiltonian
-!!      gwls_lineqsolver,gwls_model_polarisability,gwls_polarisability
+!!      m_gwls_DielectricArray,m_gwls_Projected_AT,m_gwls_hamiltonian
+!!      m_gwls_lineqsolver,m_gwls_model_polarisability,m_gwls_polarisability
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -453,11 +468,16 @@ end subroutine pc_k_valence_kernel
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray,gwls_GWlanczos,gwls_LanczosBasis,gwls_Projected_AT
-!!      gwls_Projected_BT,gwls_hamiltonian,gwls_model_polarisability
-!!      gwls_polarisability
+!!      m_gwls_DielectricArray,m_gwls_GWlanczos,m_gwls_LanczosBasis
+!!      m_gwls_Projected_AT,m_gwls_Projected_BT,m_gwls_hamiltonian
+!!      m_gwls_model_polarisability,m_gwls_polarisability
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -815,9 +835,14 @@ end function dft_xc_energy
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_LanczosResolvents,gwls_lineqsolver
+!!      m_gwls_LanczosResolvents,m_gwls_lineqsolver
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -931,9 +956,14 @@ end subroutine set_precondition
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_lineqsolver
+!!      m_gwls_lineqsolver
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -957,9 +987,14 @@ end subroutine unset_precondition
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_lineqsolver
+!!      m_gwls_lineqsolver
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -989,9 +1024,14 @@ end subroutine precondition
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_lineqsolver
+!!      m_gwls_lineqsolver
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -1020,10 +1060,15 @@ end subroutine precondition_cplx
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray,gwls_GWlanczos,gwls_LanczosBasis,gwls_hamiltonian
-!!      gwls_model_polarisability,gwls_polarisability
+!!      m_gwls_DielectricArray,m_gwls_GWlanczos,m_gwls_LanczosBasis
+!!      m_gwls_hamiltonian,m_gwls_model_polarisability,m_gwls_polarisability
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -1057,10 +1102,15 @@ end subroutine sqrt_vc_k
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray,gwls_LanczosResolvents,gwls_hamiltonian
-!!      gwls_lineqsolver,gwls_polarisability
+!!      m_gwls_DielectricArray,m_gwls_LanczosResolvents,m_gwls_hamiltonian
+!!      m_gwls_lineqsolver,m_gwls_polarisability
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -1134,9 +1184,14 @@ end subroutine Hpsik
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_lineqsolver
+!!      m_gwls_lineqsolver
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -1249,11 +1304,16 @@ end subroutine Hpsikc
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray,gwls_GWlanczos,gwls_GenerateEpsilon
-!!      gwls_LanczosBasis,gwls_hamiltonian,gwls_model_polarisability
-!!      gwls_polarisability
+!!      m_gwls_DielectricArray,m_gwls_GWlanczos,m_gwls_GenerateEpsilon
+!!      m_gwls_LanczosBasis,m_gwls_hamiltonian,m_gwls_model_polarisability
+!!      m_gwls_polarisability
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -1317,10 +1377,15 @@ end subroutine g_to_r
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray,gwls_GWlanczos,gwls_LanczosBasis,gwls_hamiltonian
-!!      gwls_model_polarisability,gwls_polarisability
+!!      m_gwls_DielectricArray,m_gwls_GWlanczos,m_gwls_LanczosBasis
+!!      m_gwls_hamiltonian,m_gwls_model_polarisability,m_gwls_polarisability
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -1375,9 +1440,14 @@ end subroutine gr_to_g
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_hamiltonian
+!!      m_gwls_hamiltonian
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -1427,9 +1497,14 @@ end subroutine kbkb_to_kb
 !! OUTPUT
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -1461,9 +1536,14 @@ end subroutine build_vxc
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_sternheimer
+!!      m_gwls_sternheimer
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 
@@ -1610,9 +1690,14 @@ end subroutine destroy_H
 !! OUTPUT
 !!
 !! PARENTS
-!!      vtowfk
+!!      m_vtowfk
 !!
 !! CHILDREN
+!!      copy_hamiltonian,copy_mpi_enreg,cryst%print,crystal_init
+!!      distributevalencekernel,distributevalencewavefunctions,fftpac
+!!      find_qmesh,gs_hamk%load_k,gsph_init,hpsik,kmesh_init,kmesh_print
+!!      make_gvec_kss,pc_k_valence_kernel,print_gsphere,set_wf,vcoul_init
+!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 

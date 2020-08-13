@@ -2,7 +2,7 @@
 EXTRA_DIST += \
 	KNOWN_PROBLEMS \
 	PACKAGING \
-	INSTALL_MacOSX.md \
+	INSTALL_MacOS.md \
         INSTALL_Ubuntu.md \
 	INSTALL_gpu.md \
 	RELNOTES \

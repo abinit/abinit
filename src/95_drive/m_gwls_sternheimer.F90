@@ -49,7 +49,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      cleanupvalencewavefunctions,close_timing_log

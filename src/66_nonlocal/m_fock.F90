@@ -469,7 +469,7 @@ end subroutine fockbz_create
 !!  The current version is restricted to the case nsym=1, nspinor=1 and mkmem/=0.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum
@@ -1150,7 +1150,7 @@ end subroutine fock_init
 !!  May be improved to calculate the star of ikpt. => I think NO finally
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum
@@ -1199,7 +1199,7 @@ end subroutine fock_updateikpt
 !!  none
 !!
 !! PARENTS
-!!      cgwf
+!!      m_cgwf
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum
@@ -1240,7 +1240,7 @@ end subroutine fock_set_ieigen
 !!  fock <type(fock_type)>= all the quantities to calculate Fock exact exchange
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum
@@ -1372,7 +1372,7 @@ end subroutine fock_BZ_destroy
 !!  fockACE <type(fock_ACE_type)>= all the quantities to calculate Fock exact exchange in the ACE context
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum
@@ -1426,7 +1426,7 @@ end subroutine fock_ACE_destroy
 !! TO CHECK == CHANGE IN SOME DEFINTIONS
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum
@@ -1551,7 +1551,7 @@ end subroutine fock_update_exc
 !! May be improved by selecting only the occupied states with the same spin isppol.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum
@@ -2072,7 +2072,7 @@ end subroutine fock_print
 !!  extracting the G-vectors treated by the node.
 !!
 !! PARENTS
-!!      fock_getghc
+!!      m_fock_getghc
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum
@@ -2281,7 +2281,7 @@ end subroutine bare_vqg
 !!   in the order 11, 22, 33, 32, 31, 21 (suggested by Xavier Gonze).
 !!
 !! PARENTS
-!!      fock_getghc
+!!      m_fock_getghc
 !!
 !! CHILDREN
 !!      ptabs_fourdp,timab,xmpi_sum

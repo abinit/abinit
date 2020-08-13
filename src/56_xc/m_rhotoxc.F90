@@ -243,8 +243,8 @@ contains
 !!   for more details about notations please see pdf in /doc/theory/MGGA/
 !!
 !! PARENTS
-!!      calc_vhxc_me,energy,m_kxc,nonlinear,nres2vres,odamix,prcref,prcref_PMA
-!!      respfn,rhotov,scfcv,setvtr,xchybrid_ncpp_cc
+!!      m_dft_energy,m_forstr,m_kxc,m_longwave,m_nonlinear,m_odamix,m_prcref
+!!      m_respfn_driver,m_rhotov,m_scfcv_core,m_setvtr,m_vhxc_me,m_xchybrid
 !!
 !! CHILDREN
 !!      dotprod_vn,drivexc,libxc_functionals_end

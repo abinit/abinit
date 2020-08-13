@@ -83,8 +83,7 @@ CONTAINS !===========================================================
 !!  Ha_or_eV= 1: output in hartrees, 2: output in eV
 !!
 !! PARENTS
-!!      m_paw_ij,m_paw_slater,m_pawdij,m_pawrhoij,pawmkrhoij,pawprt
-!!      setrhoijpbe0,wfd_pawrhoij
+!!      m_paw_correlations,m_paw_ij,m_paw_slater,m_pawdij,m_pawrhoij
 !!
 !! CHILDREN
 !!      wrtout

@@ -72,10 +72,10 @@ contains
 !! grewtn(3,natom)=grads of eew wrt xred(3,natom), hartrees.
 !!
 !! PARENTS
-!!      setvtr
+!!      m_setvtr
 !!
 !! CHILDREN
-!!      matr3inv,spline
+!!      dsyev,matr3inv,timab,wrtout
 !!
 !! SOURCE
 
@@ -399,10 +399,10 @@ end subroutine ewald
 !! tensor in the order 11 22 33 32 31 21.
 !!
 !! PARENTS
-!!      stress
+!!      m_stress
 !!
 !! CHILDREN
-!!      matr3inv,spline
+!!      dsyev,matr3inv,timab,wrtout
 !!
 !! SOURCE
 
@@ -667,10 +667,10 @@ end subroutine ewald2
 !! not perfectly symmetric ....
 !!
 !! PARENTS
-!!      ddb_hybrid,m_dynmat,m_effective_potential,m_ifc
+!!      m_dynmat,m_effective_potential,m_ifc
 !!
 !! CHILDREN
-!!      matr3inv,spline
+!!      dsyev,matr3inv,timab,wrtout
 !!
 !! SOURCE
 

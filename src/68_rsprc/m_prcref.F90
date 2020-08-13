@@ -179,13 +179,10 @@ contains
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
 !!
 !! PARENTS
-!!      newrho
+!!      m_newrho
 !!
 !! CHILDREN
-!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,hartre
-!!      indirect_parallel_fourier,kgindex,mean_fftr,metric,mkcore,mklocl
-!!      moddiel,prcrskerker1,prcrskerker2,rhotoxc,testsusmat,xcart2xred
-!!      xcdata_init,xmpi_sum,zerosym
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -822,13 +819,10 @@ end subroutine prcref
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
 !!
 !! PARENTS
-!!      newvtr
+!!      m_newvtr
 !!
 !! CHILDREN
-!!      atm2fft,dielmt,dieltcel,fourdp,fresid,getph,hartre
-!!      indirect_parallel_fourier,kgindex,mean_fftr,metric,mkcore,mklocl
-!!      moddiel,prcrskerker1,prcrskerker2,rhotoxc,testsusmat,xcart2xred
-!!      xcdata_init,xmpi_sum,zerosym
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -1348,10 +1342,10 @@ end subroutine prcref_PMA
 !! optreal==2 is not compatible with cplex==1
 !!
 !! PARENTS
-!!      dfpt_newvtr,prcref,prcref_PMA
+!!      m_dfpt_scfcv,m_prcref
 !!
 !! CHILDREN
-!!      fourdp,metric,ptabs_fourdp
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -1584,10 +1578,10 @@ end subroutine moddiel
 !! Write equation below (hermitian matrix)
 !!
 !! PARENTS
-!!      prcref,prcref_PMA
+!!      m_prcref
 !!
 !! CHILDREN
-!!      timab,wrtout,zhpev
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -1945,11 +1939,10 @@ end subroutine dielmt
 !! Will not work in the spin-polarized, metallic case.
 !!
 !! PARENTS
-!!      prcref,prcref_PMA
+!!      m_prcref
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,fourdp,init_distribfft_seq,initmpi_seq,timab,wrtout
-!!      zhpev
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -2417,10 +2410,10 @@ end subroutine dieltcel
 !!  needs severe cleaning and this is abuse of modules as common blocks...
 !!
 !! PARENTS
-!!      prcref,prcref_PMA
+!!      m_prcref
 !!
 !! CHILDREN
-!!      cgpr,frskerker1__end,frskerker1__init,laplacian,prc_mem_init
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -2635,10 +2628,10 @@ end subroutine prcrskerker1
 !! NOTES
 !!
 !! PARENTS
-!!      prcref,prcref_PMA
+!!      m_prcref
 !!
 !! CHILDREN
-!!      cgpr,dotprod_vn,frskerker2__end,frskerker2__init,laplacian,ptabs_fourdp
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -2942,10 +2935,10 @@ end subroutine prcrskerker2
 !! and resulting min
 !!
 !! PARENTS
-!!      prcrskerker1,prcrskerker2
+!!      m_prcref
 !!
 !! CHILDREN
-!!      linmin
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -3032,10 +3025,10 @@ end subroutine cgpr
 !! v: the starting and then ending point of the minimization
 !!
 !! PARENTS
-!!      cgpr
+!!      m_prcref
 !!
 !! CHILDREN
-!!      bracketing
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -3090,9 +3083,10 @@ end subroutine linmin
 !! a,x: two members of the bracketing triplet (see b)
 !!
 !! PARENTS
-!!      linmin
+!!      m_prcref
 !!
 !! CHILDREN
+!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 

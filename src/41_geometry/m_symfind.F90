@@ -92,11 +92,11 @@ contains
 !!  be 0 0 0 each for a symmorphic space group)
 !!
 !! PARENTS
-!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_tdep_sym
-!!      m_use_ga,thmeig
+!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
+!!      m_mover_effpot,m_tdep_sym,m_thmeig,m_use_ga
 !!
 !! CHILDREN
-!!      wrtout
+!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -606,10 +606,10 @@ end subroutine symfind
 !! spgroup=symmetry space group
 !!
 !! PARENTS
-!!      ingeo,m_ab7_symmetry,m_tdep_sym,m_use_ga
+!!      m_ab7_symmetry,m_ingeo,m_mover_effpot,m_phonons,m_tdep_sym,m_use_ga
 !!
 !! CHILDREN
-!!      chkprimit,getptgroupma,symbrav,symlatt,symptgroup,symspgr,wrtout
+!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -814,10 +814,10 @@ end subroutine symanal
 !!   Set to (/0,0,0/) if the lattice belongs to the same holohedry as the lattice+atoms (+electric field + ...).
 !!
 !! PARENTS
-!!      m_esymm,symanal
+!!      m_esymm,m_symfind
 !!
 !! CHILDREN
-!!      matr3inv,symlatt,symptgroup,symrelrot
+!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -1156,11 +1156,10 @@ end subroutine symbrav
 !! see symaxes.f and symplanes.f
 !!
 !! PARENTS
-!!      symanal
+!!      m_symfind
 !!
 !! CHILDREN
-!!      spgdata,symcharac,symdet,symlist_bcc,symlist_fcc,symlist_others
-!!      symlist_prim,symrelrot,wrtout,xred2xcart
+!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -1588,8 +1587,8 @@ end subroutine symspgr
 !! center=3        C-face centered
 !!
 !! PARENTS
-!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_tdep_sym
-!!      m_use_ga,symanal,symbrav,thmeig
+!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
+!!      m_mover_effpot,m_symfind,m_tdep_sym,m_thmeig,m_use_ga
 !!
 !! CHILDREN
 !!      holocell,matr3inv,smallprim,symrelrot,wrtout

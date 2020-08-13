@@ -87,10 +87,10 @@ contains
 !!   core-correction, if applicable)
 !!
 !! PARENTS
-!!      dfpt_eltfrxc,dfpt_nselt,dfpt_nstpaw,dfpt_rhotov
+!!      m_dfpt_elt,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      dfpt_mkvxcstrgga,matr3inv,timab
+!!      xcden,xcpot
 !!
 !! SOURCE
 
@@ -333,7 +333,7 @@ end subroutine dfpt_mkvxcstr
 !!       kxc(:,19)=gradz(rho_dn)
 !!
 !! PARENTS
-!!      dfpt_mkvxcstr
+!!      m_dfpt_mkvxcstr
 !!
 !! CHILDREN
 !!      xcden,xcpot

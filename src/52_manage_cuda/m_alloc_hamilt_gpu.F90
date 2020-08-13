@@ -71,7 +71,7 @@ contains
 !!  (no output - only allocation on GPU)
 !!
 !! PARENTS
-!!      gstate,respfn
+!!      m_gstate,m_respfn_driver
 !!
 !! CHILDREN
 !!      free_gpu_fourwf,free_nonlop_gpu
@@ -170,7 +170,7 @@ end subroutine alloc_hamilt_gpu
 !!  (no output - only deallocation on GPU)
 !!
 !! PARENTS
-!!      gstate,respfn
+!!      m_gstate,m_respfn_driver
 !!
 !! CHILDREN
 !!      free_gpu_fourwf,free_nonlop_gpu

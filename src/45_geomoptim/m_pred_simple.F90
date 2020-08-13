@@ -71,9 +71,10 @@ contains
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
+!!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart
 !!
 !! SOURCE
 
@@ -148,7 +149,7 @@ end subroutine pred_simple
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_mover,m_precpred_1geo
 !!
 !! CHILDREN
 !!      bonds_free,dsyev,dsysv,fcart2fred,make_bonds_new,xred2xcart

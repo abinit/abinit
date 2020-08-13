@@ -119,9 +119,10 @@ contains
 !!  2. Fock term has its own legacy cut-off for the moment.
 !!
 !! PARENTS
-!!     atm2fft,mklocl
+!!      m_atm2fft,m_ewald,m_mklocl,m_spacepar
+!!
 !! CHILDREN
-!!     calck0,paw_jbessel,quadrature
+!!      calck0,calck1,caljy0,caljy1,metric,paw_jbessel,quadrature,wrtout
 !!
 !! SOURCE
 

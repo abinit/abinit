@@ -581,9 +581,11 @@ contains  !=====================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph
+!!      m_eph_driver
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3036,6 +3038,8 @@ end function sigmaph_new
 !! PARENTS
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3600,9 +3604,10 @@ end function sigmaph_get_ebands
 !! INPUTS
 !!
 !! PARENTS
-!!      m_sigmaph
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3660,9 +3665,10 @@ end subroutine sigmaph_compare
 !! INPUTS
 !!
 !! PARENTS
-!!      m_sigmaph
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3778,9 +3784,10 @@ end subroutine sigmaph_free
 !!  comm= MPI communicator
 !!
 !! PARENTS
-!!      m_sigmaph
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4039,6 +4046,8 @@ end function sigmaph_skip_phmode
 !!      m_sigmaph
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4241,9 +4250,10 @@ end subroutine sigmaph_setup_qloop
 !!  comm=MPI communicator.
 !!
 !! PARENTS
-!!      m_sigmaph
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4599,9 +4609,10 @@ end subroutine sigmaph_gather_and_write
 !!  unt=Fortran unit number
 !!
 !! PARENTS
-!!      m_sigmaph
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4715,8 +4726,11 @@ end subroutine sigmaph_print
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4869,8 +4883,11 @@ end subroutine sigmaph_get_all_qweights
 !!  Use Verdi's model, group velocities and radial integration.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -5017,8 +5034,11 @@ end subroutine eval_sigfrohl_deltas
 !!  qselect(nqpt)
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 

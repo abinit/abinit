@@ -1,5 +1,5 @@
 site_name: abinit
-site_url: https://docs.abinit.org
+site_url: http://127.0.0.1:8000/
 site_description: Abinit documentation
 site_author: The Abinit group
 docs_dir: doc
@@ -326,7 +326,7 @@ extra_javascript:
 copyright: Copyright &copy; 2020-2021 The Abinit Group
 
 # Google Analytics
-google_analytics: ['UA-116681470-1', 'docs.abinit.org']
+#google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
     version: 9.1.6

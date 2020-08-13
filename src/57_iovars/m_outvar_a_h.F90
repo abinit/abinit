@@ -97,7 +97,7 @@ contains
 !!  computation, so that their values if choice=1 or choice=2 will differ.
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
 !!      prttagm,prttagm_images

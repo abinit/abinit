@@ -240,12 +240,11 @@ contains
 !!     (fine grid) for the computation of total density.
 !!
 !! PARENTS
-!!      afterscfloop,setup_positron
+!!      m_afterscfloop,m_positron
 !!
 !! CHILDREN
-!!      ctocprj,forces,forstrnps,initylmg,metric,nres2vres,pawcprj_alloc
-!!      pawcprj_free,pawcprj_getdim,pawgrnl,stress,timab,wvl_nl_gradient
-!!      xchybrid_ncpp_cc,xred2xcart
+!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
+!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 
@@ -598,13 +597,11 @@ end subroutine forstr
 !!    (hartree/bohr^3)
 !!
 !! PARENTS
-!!      forstr
+!!      m_forstr
 !!
 !! CHILDREN
-!!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
-!!      fock_getghc,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
-!!      meanvalue_g,mkffnl,mkkpg,nonlop,pawcprj_alloc,pawcprj_free,pawcprj_get
-!!      pawcprj_reorder,prep_bandfft_tabs,prep_nonlop,stresssym,timab,xmpi_sum
+!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
+!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 
@@ -1244,7 +1241,7 @@ end subroutine forstrnps
 !! vresid(nfft,nspden)= the output potential residual
 !!
 !! PARENTS
-!!      etotfor,forstr
+!!      m_forstr,m_scfcv_core
 !!
 !! CHILDREN
 !!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
