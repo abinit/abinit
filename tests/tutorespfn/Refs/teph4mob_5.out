@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 13 Aug 2020.
-- ( at 17h23 )
+- ( at 17h45 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_5.in
 - output file    -> teph4mob_5.out
@@ -536,7 +536,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  10657.0    0.000
+   5   3.573    0.000  10657.1    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -661,7 +661,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
            64.00        0.23E+17        0.00E+00           38.24            0.00
-          123.00        0.23E+17        0.00E+00          371.58            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
           182.00        0.23E+17        0.00E+00          470.23            0.00
           241.00        0.23E+17        0.00E+00          469.82            0.00
           300.00        0.23E+17        0.00E+00          411.57            0.00
@@ -671,7 +671,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
            64.00        0.23E+17        0.00E+00           38.24            0.00
-          123.00        0.23E+17        0.00E+00          371.58            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
           182.00        0.23E+17        0.00E+00          470.23            0.00
           241.00        0.23E+17        0.00E+00          469.82            0.00
           300.00        0.23E+17        0.00E+00          411.57            0.00
@@ -681,7 +681,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
            64.00        0.23E+17        0.00E+00           38.24            0.00
-          123.00        0.23E+17        0.00E+00          371.58            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
           182.00        0.23E+17        0.00E+00          470.23            0.00
           241.00        0.23E+17        0.00E+00          469.82            0.00
           300.00        0.23E+17        0.00E+00          411.57            0.00
@@ -941,10 +941,10 @@ P           mkmem         413
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         16.8  wall=         18.3
+- Proc.   0 individual time (sec): cpu=         22.1  wall=         23.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.8  wall=         18.3
++Overall time at end (sec) : cpu=         22.1  wall=         23.7
