@@ -81,8 +81,10 @@ contains
 !!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
 !!
 !! PARENTS
+!!      m_scfcv_core
 !!
 !! CHILDREN
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -322,11 +324,12 @@ end subroutine make_vectornd
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
 !!
 !! PARENTS
-!!      dfpt_rhotov,dfptnl_loop,energy,fock_getghc,m_kxc,nonlinear,nres2vres
-!!      odamix,prcref,prcref_PMA,respfn,rhotov,setup_positron,setvtr,tddft
+!!      m_dfpt_rhotov,m_dft_energy,m_fock_getghc,m_forstr,m_kxc,m_nonlinear
+!!      m_odamix,m_pead_nl_loop,m_positron,m_prcref,m_respfn_driver,m_rhotov
+!!      m_setvtr,m_tddft
 !!
 !! CHILDREN
-!!      fourdp,metric,ptabs_fourdp,timab,zerosym
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -552,10 +555,10 @@ end subroutine hartre
 !!  ar=mean value
 !!
 !! PARENTS
-!!      dfpt_vtowfk,energy,forstrnps,vtowfk
+!!      m_dfpt_vtowfk,m_dft_energy,m_forstr,m_vtowfk
 !!
 !! CHILDREN
-!!      xmpi_sum
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -770,7 +773,7 @@ end subroutine meanvalue_g
 !!  laplacerdfuncg_out TO BE DESCRIBED SB 090901
 !!
 !! PARENTS
-!!      frskerker1,frskerker2,moddiel_csrb,prcrskerker1,prcrskerker2
+!!      m_frskerker1,m_frskerker2,m_prcref
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp
@@ -948,10 +951,10 @@ end subroutine laplacian
 !!  frredgr(nfft,3)= reduced gradient of input function (same units as frin)
 !!
 !! PARENTS
-!!      dfpt_eltfrxc
+!!      m_dfpt_elt
 !!
 !! CHILDREN
-!!      fourdp
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1098,10 +1101,10 @@ end subroutine redgr
 !!   potential in real space,
 !!
 !! PARENTS
-!!      dfpt_nselt,dfpt_nstpaw,dfpt_rhotov
+!!      m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      fourdp,metric,ptabs_fourdp
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1293,11 +1296,11 @@ end subroutine hartrestr
 !! applied on the system, only the total density is generated in G space
 !!
 !! PARENTS
-!!      dfpt_mkrho,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,m_dvdb,mkrho
-!!      suscep_stat,vtorho,vtorhorec,vtorhotf,wfd_mkrho
+!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dvdb,m_mkrho
+!!      m_suscep_stat,m_vtorho,m_vtorhorec,m_vtorhotf,m_wfd
 !!
 !! CHILDREN
-!!      fourdp,matr3inv,ptabs_fourdp,symredcart,timab,xmpi_sum
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1815,10 +1818,10 @@ end subroutine symrhg
 !!  phnons(2,n1*n2*n3,(nspden/nsppol)-3*(nspden/4))=phases associated with nonsymmorphic translations
 !!
 !! PARENTS
-!!      m_ab7_kpoints,setsym,wfd_mkrho
+!!      m_ab7_kpoints,m_spacepar,m_wfd
 !!
 !! CHILDREN
-!!      sort_int,wrtout
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -2203,14 +2206,10 @@ end subroutine irrzg
 !!  rhor1_eq(cplex*nfft,nspden) = symmetric density in real space for equivalent perturbation
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      fourdp
-!!
-!! TODO
-!!  This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
-!!  Moreover one should take linear combinations of symmetrical components
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -2387,10 +2386,11 @@ end subroutine rotate_rho
 !! nsppol and nspden are needed in case of (anti)ferromagnetic symmetry operations
 !!
 !! PARENTS
-!!      dfpt_looppert,gstate,m_dvdb,nonlinear,respfn,scfcv
+!!      m_dfpt_looppert,m_dfpt_lw,m_dvdb,m_gstate,m_longwave,m_nonlinear
+!!      m_respfn_driver,m_scfcv_core
 !!
 !! CHILDREN
-!!      chkgrp,irrzg,mati3inv,symatm,symdet,timab
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 

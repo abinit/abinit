@@ -166,11 +166,10 @@ contains
 !!   (7) Ewald energy.
 !!
 !! PARENTS
-!!      forstr
+!!      m_forstr
 !!
 !! CHILDREN
-!!      atm2fft,ewald2,fourdp,metric,mkcore,mkcore_alt,mklocl_recipspace
-!!      stresssym,strhar,timab,vdw_dftd2,vdw_dftd3,wrtout,zerosym
+!!      metric,ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -734,7 +733,7 @@ end subroutine stress
 !!   in the order 11, 22, 33, 32, 31, 21 (suggested by Xavier Gonze).
 !!
 !! PARENTS
-!!      stress
+!!      m_stress
 !!
 !! CHILDREN
 !!      metric,ptabs_fourdp,timab,xmpi_sum

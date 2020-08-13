@@ -93,11 +93,11 @@ contains
 !!  Bad scaling wrt nkbz. Should try to MPI parallelize or implement more efficient algorithm
 !!
 !! PARENTS
-!!      dfpt_looppert,elphon,ep_setupqpt,get_npert_rbz,getkgrid,harmonic_thermo
-!!      m_bz_mesh,m_ifc,m_sigmaph
+!!      m_bz_mesh,m_dfpt_looppert,m_dfpt_lw,m_dtset,m_elphon,m_harmonic_thermo
+!!      m_ifc,m_kpts,m_tdep_psij,m_unittests
 !!
 !! CHILDREN
-!!      sort_dp,wrtout
+!!      krank%free,wrtout
 !!
 !! SOURCE
 
@@ -431,8 +431,10 @@ end subroutine symkpt
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_kpts,m_lgroup,m_unittests
 !!
 !! CHILDREN
+!!      krank%free,wrtout
 !!
 !! SOURCE
 

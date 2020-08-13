@@ -157,13 +157,10 @@ contains
 !!                                            (cumulative, so input as well as output)
 !!
 !! PARENTS
-!!      dfpt_vtorho
+!!      m_dfpt_vtorho
 !!
 !! CHILDREN
-!!      cg_zcopy,corrmetalwf1,dfpt_accrho,dfpt_cgwf,dotprod_g,getgsc
-!!      matrixelmt_g,meanvalue_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_get,pawcprj_put,rf2_destroy,rf2_init,sqnorm_g,status,timab
-!!      wfk_read_bks,wrtout
+!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
 !!
 !! SOURCE
 
@@ -652,7 +649,7 @@ end subroutine dfpt_vtowfk
 !!                            projected on NL projectors (PAW)
 !!
 !! PARENTS
-!!      dfpt_vtowfk
+!!      m_dfpt_vtowfk
 !!
 !! CHILDREN
 !!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
@@ -791,7 +788,7 @@ end subroutine full_active_wf1
 !!  Was part of dfpt_vtowfk before.
 !!
 !! PARENTS
-!!      dfpt_vtowfk
+!!      m_dfpt_vtowfk
 !!
 !! CHILDREN
 !!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab

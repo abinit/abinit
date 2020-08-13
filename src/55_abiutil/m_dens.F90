@@ -153,7 +153,7 @@ CONTAINS
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      metric,spline,xcart2xred
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -460,9 +460,10 @@ end subroutine dens_hirsh
 !!  nv_constr_dft_r=the constrained potential or density in real space
 !!
 !! PARENTS
+!!      m_dens
 !!
 !! CHILDREN
-!!      metric,ptabs_fourdp,timab,xmpi_sum
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -641,8 +642,10 @@ end subroutine add_atomic_fcts
 !!    Most of the data are simply copied from dtset, but also constrained_dft%intgf2(natom,natom) is computed from the available data.
 !!
 !! PARENTS
+!!      m_scfcv_core,m_setvtr
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -742,8 +745,10 @@ end subroutine constrained_dft_ini
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_scfcv_core,m_setvtr
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -816,8 +821,10 @@ end subroutine constrained_dft_free
 !!    integrated charge or magnetization and the target ones.
 !!
 !! PARENTS
+!!      m_rhotov
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1156,10 +1163,10 @@ end subroutine constrained_dft_free
 !!  nv_constr_dft_r=the constrained potential
 !!
 !! PARENTS
-!!      energy,rhotov,setvtr
+!!      m_dft_energy,m_rhotov,m_setvtr
 !!
 !! CHILDREN
-!!      calcdenmagsph,metric,ptabs_fourdp,timab,xmpi_sum
+!!      xmpi_gather
 !!
 !! NOTES
 !!  based on html notes for the VASP implementation at
@@ -1315,10 +1322,10 @@ end subroutine mag_penalty
 !!  Eexp=???
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      calcdenmagsph,metric,wrtout
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1489,10 +1496,10 @@ end subroutine mag_penalty_e
 !!  Rest is printing 
 !!
 !! PARENTS
-!!      dfpt_scfcv,mag_penalty,mag_constr_e,outscfcv
+!!      m_dens,m_dfpt_scfcv,m_outscfcv
 !!
 !! CHILDREN
-!!      timab,wrtout,xmpi_sum
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1826,10 +1833,10 @@ end subroutine calcdenmagsph
 !!  Printing 
 !!
 !! PARENTS
-!!      dfpt_scfcv,mag_penalty,mag_constr_e,outscfcv
+!!      m_dens,m_dfpt_scfcv,m_outscfcv
 !!
 !! CHILDREN
-!!      timab,wrtout,xmpi_sum
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -2115,8 +2122,10 @@ end subroutine prtdenmagsph
 !! dfsm=derivative of the function with respect to xarg (zero, except in the smearing region).
 !!
 !! PARENTS
+!!      m_dens
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -2179,6 +2188,7 @@ end subroutine radsmear
 !!             the FFT mesh info
 !!
 !! PARENTS
+!!      m_dens
 !!
 !! CHILDREN
 !!      xmpi_gather

@@ -305,7 +305,6 @@ end function args_parser
 !!      m_argparse
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -791,6 +790,7 @@ end function get_arg_list_dp
 !! OUTPUT
 !!
 !! PARENTS
+!!      abitk
 !!
 !! CHILDREN
 !!

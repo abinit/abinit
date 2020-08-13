@@ -111,7 +111,7 @@ contains
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! NOTES
 !!
@@ -131,6 +131,17 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
+!!      cryst%free,cryst%print,cryst_ddb%free,cwtime,cwtime_report,ddb%free
+!!      ddb_from_file,ddb_hdr%free,destroy_mpi_enreg,dtset%free_nkpt_arrays
+!!      dvdb%free,dvdb%interpolate_and_write,dvdb%list_perts,dvdb%open_read
+!!      dvdb%print,dvdb%write_v1qavg,ebands_free,ebands_prtbltztrp,ebands_write
+!!      efmas_ncread,efmasdeg_free_array,efmasval_free_array,eph_gkk
+!!      eph_phgamma,eph_phpi,ephtk_update_ebands,frohlichmodel,ifc%free
+!!      ifc%outphbtrap,ifc%print,ifc%printbxsf,ifc_init,ifc_mkphbs
+!!      init_distribfft_seq,initmpi_seq,mkphdos,ncwrite_v1qnu,pawfgr_destroy
+!!      pawfgr_init,phdos%free,phdos%ncwrite,phdos%print,print_ngfft,pspini
+!!      rta_driver,sigmaph,wfk0_hdr%free,wfk0_hdr%vs_dtset,wfk_read_eigenvalues
+!!      wfq_hdr%free,wrtout,xmpi_bcast
 !!
 !! SOURCE
 

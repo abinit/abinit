@@ -183,10 +183,10 @@ contains
 !!  tetra%vv = tetrahedron volume divided by full BZ volume
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_fstab,m_kpts,m_phonons
-!!      thmeig
+!!      m_ephwg,m_fstab,m_kpts,m_phonons,m_unittests
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -903,8 +903,10 @@ end subroutine htetra_init
 !!  I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
 !!
 !! PARENTS
+!!      m_htetra
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -988,6 +990,7 @@ end subroutine htetra_get_ibz
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -1027,10 +1030,9 @@ end subroutine htetra_print
 !! deallocate tetrahedra pointers if needed
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_epjdos
-!!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -1650,8 +1652,10 @@ end subroutine get_onetetetra_lambinvigneron_imag
 !!    for a given (band, k-point, spin).
 !!
 !! PARENTS
+!!      m_htetra
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -1799,6 +1803,7 @@ end subroutine htetra_get_onewk
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -1965,8 +1970,10 @@ end subroutine htetra_get_delta_mask
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_htetra
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -2151,6 +2158,7 @@ end subroutine htetra_wvals_weights_delta
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 

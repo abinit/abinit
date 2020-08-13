@@ -188,6 +188,7 @@ END FUNCTION lowercase
 !! OUTPUT
 !!
 !! PARENTS
+!!      functionals_pwscf,m_read_upf_pwscf
 !!
 !! CHILDREN
 !!

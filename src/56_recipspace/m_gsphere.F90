@@ -203,7 +203,6 @@ CONTAINS  !=====================================================================
 !!      m_gsphere
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -287,11 +286,10 @@ end subroutine setup_G_rotation
 !!  gvec are supposed to be ordered with increasing norm.
 !!
 !! PARENTS
-!!      gwls_hamiltonian,m_gsphere,mrgscr,setup_bse,setup_bse_interp
-!!      setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_gsphere,m_gwls_hamiltonian,m_screening_driver
+!!      m_sigma_driver,mrgscr
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -485,11 +483,9 @@ end subroutine gsph_init
 !!  The routine will stop if any G-G0 happens to be outside the FFT box.
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
-!!      exc_build_block,exc_build_ham,prep_calc_ucrpa
+!!      m_chi0,m_cohsex,m_exc_build,m_prep_calc_ucrpa,m_sigc,m_sigx
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -577,10 +573,9 @@ end subroutine gsph_fft_tabs
 !!   completetly initialized in output.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -678,10 +673,9 @@ end subroutine gsph_in_fftbox
 !!  Only writing.
 !!
 !! PARENTS
-!!      cchi0q0,gwls_hamiltonian,setup_bse,setup_bse_interp
+!!      m_bethe_salpeter,m_chi0,m_gwls_hamiltonian
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -750,11 +744,10 @@ end subroutine print_gsphere
 !!   Gsph = datatype to be freed
 !!
 !! PARENTS
-!!      bethe_salpeter,cchi0,cchi0q0,gwls_hamiltonian,m_gsphere,mrgscr
-!!      screening,sigma
+!!      m_bethe_salpeter,m_chi0,m_gsphere,m_gwls_hamiltonian,m_screening_driver
+!!      m_sigma_driver,mrgscr
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -992,10 +985,9 @@ end function gsph_gmg_fftidx
 !!               where nbase is the number of irreducible G"s found.
 !!
 !! PARENTS
-!!      m_gsphere,m_io_kss,outkss,setup_sigma
+!!      m_gsphere,m_io_kss,m_sigma_driver
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1269,7 +1261,6 @@ end subroutine merge_and_sort_kg
 !!      m_gsphere
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1413,7 +1404,6 @@ end subroutine getfullg
 !!      m_gsphere,m_skw
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1510,7 +1500,6 @@ end subroutine get_irredg
 !!      m_gsphere
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1611,10 +1600,9 @@ end subroutine merge_kgirr
 !!  nsh=number of shells
 !!
 !! PARENTS
-!!      invars2m,setup_screening,setup_sigma
+!!      m_invars2,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1881,7 +1869,6 @@ end subroutine setshells
 !!      m_wfd
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1959,7 +1946,6 @@ end subroutine kg_map
 !! PARENTS
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -2122,10 +2108,9 @@ end subroutine table_gbig2kg
 !! OUTPUT
 !!
 !! PARENTS
-!!      setup_bse,setup_bse_interp
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -2216,7 +2201,7 @@ end subroutine gsph_extend
 !!  kpgnorm(npw_k)=norms of the k+G vectors
 !!
 !! PARENTS
-!!      m_cut3d,partial_dos_fractions
+!!      m_cut3d,m_epjdos
 !!
 !! CHILDREN
 !!
@@ -2297,7 +2282,7 @@ end subroutine getkpgnorm
 !! tmrev_g(npwdiel)=index list of inverted G vectors (time-reversed)
 !!
 !! PARENTS
-!!      suscep_stat
+!!      m_suscep_stat
 !!
 !! CHILDREN
 !!

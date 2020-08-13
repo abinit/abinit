@@ -21,7 +21,7 @@ options are available as well, mainly for fine-tuning of the build
 parameters and testing purposes.
 
 Full descriptions of all these options can be found in the
-~abinit/doc/config/build-config.ac file. Do not hesitate to ask
+~abinit/doc/build/config-template.ac9 file. Do not hesitate to ask
 questions on https://forum.abinit.org/.
 
 In addition, the permitted GPU-related preprocessiong options are:
@@ -53,8 +53,7 @@ The permitted Cuda-related preprocessing options are :
 
 All high-level routines directly accessing Cuda features have to be put
 in ~abinit/src/52_manage_cuda/, and low-level ones in
-~abinit/shared/common/src/17_gpu_toolbox/. All exceptions have to be approved by
-Xavier Gonze prior to any implementation.
+~abinit/shared/common/src/17_gpu_toolbox/. 
 
 All files belonging to nVidia must *not* be distributed with Abinit.
 Please discuss with Yann Pouillon if you need them inside the Abinit
@@ -63,20 +62,15 @@ source tree during the build.
 In any case, all Cuda-related developments should be done in good
 coordination with:
 
-  * Marco Mancini
   * Marc Torrent
-  * Thierry Deutsch
-  * Damien Caliste
-  * Luigi Genovese
-  * Matthieu Ospici
   * Yann Pouillon
 
 Cuda version
 ============
 To take advantage of the multiple FFT in cuda (FFT in batch), ABINIT
 have to be compiled with a Cuda version>=3.0.
-It is possible to build with previous vesions (>2.1 tested) but you
-make some changes. Contact MMancini.
+It is possible to build with previous versions (>2.1 tested) but you
+make some changes. 
 cuda implementation support devices with capabilty (revision)>1.0
 
 Magma support

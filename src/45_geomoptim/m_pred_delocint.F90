@@ -89,13 +89,10 @@ contains
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      brdene,calc_prim_int,deloc2xcart,fcart2fred,fred2fdeloc,hessupdt
-!!      hist2var,make_prim_internals,metric,var2hist,wrtout,xcart2deloc
-!!      xcart2xred,xfh_recover_deloc,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
-!!      xred2xcart
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -687,10 +684,10 @@ end subroutine pred_delocint
 !! NOTES
 !!
 !! PARENTS
-!!      pred_delocint
+!!      m_pred_delocint
 !!
 !! CHILDREN
-!!      dgemv,wrtout,xcart2deloc
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -863,10 +860,10 @@ end subroutine deloc2xcart
 !! fred(3,natom)=delocalized forces in reduced coordinates
 !!
 !! PARENTS
-!!      pred_delocint,xfh_recover_deloc
+!!      m_pred_delocint
 !!
 !! CHILDREN
-!!      dgemm,dgemv,wrtout
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -942,10 +939,10 @@ end subroutine fred2fdeloc
 !!   wrt cartesians
 !!
 !! PARENTS
-!!      xcart2deloc
+!!      m_pred_delocint
 !!
 !! CHILDREN
-!!      acrossb
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1082,10 +1079,10 @@ end subroutine calc_b_matrix
 !! FUNCTION
 !!
 !! PARENTS
-!!      calc_b_matrix
+!!      m_pred_delocint
 !!
 !! CHILDREN
-!!      acrossb
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1118,10 +1115,10 @@ end subroutine dbond_length_d1
 !! FUNCTION
 !!
 !! PARENTS
-!!      calc_b_matrix
+!!      m_pred_delocint
 !!
 !! CHILDREN
-!!      acrossb
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1184,10 +1181,10 @@ end subroutine dang_d1
 !! FUNCTION
 !!
 !! PARENTS
-!!      calc_b_matrix
+!!      m_pred_delocint
 !!
 !! CHILDREN
-!!      acrossb
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1250,10 +1247,10 @@ end subroutine dang_d2
 !! FUNCTION
 !!
 !! PARENTS
-!!      calc_b_matrix
+!!      m_pred_delocint
 !!
 !! CHILDREN
-!!      acrossb
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1357,10 +1354,10 @@ end subroutine ddihedral_d1
 !! FUNCTION
 !!
 !! PARENTS
-!!      calc_b_matrix
+!!      m_pred_delocint
 !!
 !! CHILDREN
-!!      acrossb
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1512,9 +1509,10 @@ end subroutine ddihedral_d2
 !! NOTES
 !!
 !! PARENTS
-!!      deloc2xcart,pred_delocint,xfh_recover_deloc
+!!      m_pred_delocint
 !!
 !! CHILDREN
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1587,13 +1585,14 @@ end subroutine xcart2deloc
 !! OUTPUT
 !!
 !! PARENTS
-!!      xcart2deloc
+!!      m_pred_delocint
 !!
 !! NOTES
 !!   bt_inv_matrix is inverse transpose of the delocalized
 !!    coordinate B matrix. b_matrix is the primitive internal B matrix
 !!
 !! CHILDREN
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1687,9 +1686,10 @@ end subroutine calc_btinv_matrix
 !! OUTPUT
 !!
 !! PARENTS
-!!      xcart2deloc
+!!      m_pred_delocint
 !!
 !! CHILDREN
+!!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1773,7 +1773,7 @@ end subroutine align_u_matrices
 !! OUTPUT
 !!
 !! PARENTS
-!!      pred_delocint
+!!      m_pred_delocint
 !!
 !! CHILDREN
 !!      fred2fdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart

@@ -129,11 +129,10 @@ contains
 !! as to make the two routine different.
 !!
 !! PARENTS
-!!      forces,prcref,prcref_PMA,respfn,setvtr
+!!      m_forces,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
 !!
 !! CHILDREN
-!!      mklocl_realspace,mklocl_recipspace,mklocl_wavelets,wvl_rho_abi2big
-!!      xred2xcart
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -279,10 +278,10 @@ end subroutine mklocl
 !! as to make the two routine different.
 !!
 !! PARENTS
-!!      dfpt_dyfro,mklocl,stress
+!!      m_mklocl,m_respfn_driver,m_stress
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,timab,wrtout,xmpi_sum
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -741,10 +740,11 @@ end subroutine mklocl_recipspace
 !!    (including the minus sign, forgotten in the paper non-linear..
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_nstdy,dfpt_nstpaw,dfptnl_loop
+!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_pead_nl_loop
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1005,10 +1005,10 @@ end subroutine dfpt_vlocal
 !! * The routine was adapted from mklocl.F90
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_nselt,dfpt_nstpaw
+!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1358,7 +1358,7 @@ end subroutine vlocalstr
 !!    in the matrix element calculation.
 !!
 !! PARENTS
-!!      dfpt_qdrpwf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp,splfit
@@ -1628,7 +1628,7 @@ end subroutine dfpt_vlocaldq
 !!     
 !!
 !! PARENTS
-!!      dfpt_qdrpwf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp,splfit
@@ -1926,11 +1926,9 @@ end subroutine dfpt_vlocaldqdq
 !!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
 !!
 !! PARENTS
-!!
-!!      dfpt_flexowf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!
 !!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE

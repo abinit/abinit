@@ -781,7 +781,7 @@ end subroutine compute_migdal_energy
 !!      m_dmft,m_energy
 !!
 !! CHILDREN
-!!      pawpuenergy,wrtout
+!!      wrtout
 !!
 !! SOURCE
 

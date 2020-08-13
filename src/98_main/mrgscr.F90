@@ -29,16 +29,15 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,cqratio,crystal_free
-!!      crystal_from_hdr,cspint,decompose_epsm1,destroy_mpi_enreg
-!!      em1results_free,em1results_print,find_qmesh,flush_unit,fourdp
-!!      get_ppm_eigenvalues,getem1_from_ppm_one_ggp,getng,gsph_free,gsph_init
-!!      hdr_free,herald,hscr_free,hscr_from_file,hscr_print,init_er_from_file
-!!      initmpi_seq,int2char4,ioscr_qmerge,ioscr_qrecover,ioscr_wmerge
-!!      ioscr_wremove,kmesh_free,kmesh_init,kmesh_print,metric,mkdump_er
-!!      pawrhoij_free,ppm_free,ppm_init,prompt,read_rhor,read_screening
-!!      remove_phase,setup_ppmodel,test_charge,timein,vcoul_free,vcoul_init
-!!      wrtout,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,cqratio,cryst%free,cspint
+!!      decompose_epsm1,destroy_mpi_enreg,em1results_free,em1results_print
+!!      find_qmesh,flush_unit,fourdp,get_ppm_eigenvalues
+!!      getem1_from_ppm_one_ggp,getng,gsph_free,gsph_init,hdr_rhor%free,herald
+!!      hscr_free,hscr_from_file,hscr_print,init_er_from_file,initmpi_seq
+!!      int2char4,ioscr_qmerge,ioscr_qrecover,ioscr_wmerge,ioscr_wremove
+!!      kmesh_free,kmesh_init,kmesh_print,metric,mkdump_er,pawrhoij_free
+!!      ppm_free,ppm_init,prompt,read_rhor,read_screening,remove_phase
+!!      setup_ppmodel,test_charge,timein,vcoul_free,vcoul_init,wrtout,xmpi_init
 !!
 !! SOURCE
 

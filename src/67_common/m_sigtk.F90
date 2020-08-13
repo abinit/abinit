@@ -78,8 +78,12 @@ contains  !=====================================================
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 
@@ -157,8 +161,12 @@ end subroutine sigtk_kcalc_from_nkptgw
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 
@@ -254,8 +262,12 @@ end subroutine sigtk_kcalc_from_qprange
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 
@@ -349,8 +361,12 @@ end subroutine sigtk_kcalc_from_gaps
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 
@@ -558,8 +574,12 @@ end subroutine sigtk_kcalc_from_erange
 !!  comm: MPI communicator.
 !!
 !! PARENTS
+!!      m_wfk_analyze
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 

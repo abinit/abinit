@@ -457,7 +457,7 @@ end subroutine libpaw_spmsg_getcount
 !!  This routine comes directly from the SPECIALMSG_MPISUM routine delivered with ABINIT.
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      flush,flush_
@@ -501,7 +501,7 @@ end subroutine libpaw_spmsg_mpisum
 !! OUTPUT
 !!
 !! PARENTS
-!!      driver,initmpi_world,m_io_redirect,memory_eval,mpi_setup
+!!      m_driver,m_io_redirect,m_memeval,m_mpi_setup,m_mpinfo
 !!
 !! CHILDREN
 !!      flush,flush_
@@ -538,7 +538,7 @@ end subroutine libpaw_write_comm_set
 !! OUTPUT
 !!
 !! PARENTS
-!!      iofn1,m_argparse
+!!      m_argparse,m_dtfil
 !!
 !! CHILDREN
 !!      flush,flush_
@@ -854,6 +854,7 @@ end function libpaw_get_free_unit
 !!  This routine comes directly from the FLUSH_UNIT routine delivered with ABINIT.
 !!
 !! PARENTS
+!!      m_pawrhoij
 !!
 !! CHILDREN
 !!      flush,flush_

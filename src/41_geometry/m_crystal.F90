@@ -290,12 +290,13 @@ CONTAINS  !=====================================================================
 !!  6) Likely I will need also info on the electric field and berryopt
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_ddb
-!!      m_effective_potential,m_effective_potential_file,m_tdep_abitypes,mover
-!!      optic,outscfcv,respfn,vtorho
+!!      m_crystal,m_ddb,m_dfpt_looppert,m_effective_potential
+!!      m_effective_potential_file,m_eig2d,m_gwls_hamiltonian,m_hdr,m_outscfcv
+!!      m_precpred_1geo,m_respfn_driver,m_tdep_abitypes,m_unittests,m_vtorho
+!!      optic
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -501,14 +502,9 @@ end function crystal_without_symmetries
 !!  Destroy the dynamic arrays in a crystal_t data type.
 !!
 !! PARENTS
-!!      anaddb,bethe_salpeter,cut3d,dfpt_looppert,eig2tot,eph,fold2Bloch,gstate
-!!      gwls_hamiltonian,m_ddk,m_dvdb,m_effective_potential
-!!      m_effective_potential_file,m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk
-!!      mlwfovlp_qp,mover,mrgscr,optic,outscfcv,respfn,screening,sigma,vtorho
-!!      wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -565,11 +561,9 @@ end subroutine crystal_free
 !!  Only printing
 !!
 !! PARENTS
-!!      eph,gwls_hamiltonian,m_dvdb,m_gruneisen,setup_bse,setup_screening
-!!      setup_sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -737,10 +731,11 @@ end subroutine crystal_print_abivars
 !! symbols = array with the symbol of each atoms
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_opt_effpot
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -989,10 +984,9 @@ end function symbol_iatom
 !!  has_inversion=True if spatial inversion is present in the point group.
 !!
 !! PARENTS
-!!      m_skw
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1282,9 +1276,10 @@ end function crystal_ncwrite_path
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1420,9 +1415,10 @@ end subroutine prt_cif
 !! NOTES
 !!
 !! PARENTS
-!!      prt_cif
+!!      m_crystal
 !!
 !! CHILDREN
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1498,7 +1494,7 @@ end subroutine symrel2string
 !!   Only files written
 !!
 !! PARENTS
-!!      afterscfloop
+!!      m_afterscfloop
 !!
 !! CHILDREN
 !!      atomdata_from_znucl

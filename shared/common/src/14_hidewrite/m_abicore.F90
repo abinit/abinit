@@ -58,9 +58,9 @@ contains  !=====================================================
 !! strinn=string//nn
 !!
 !! PARENTS
-!!      berryphase_new,d2frnl,dfpt_looppert,dfpt_nstdy,dfpt_nstpaw,dfpt_scfcv
-!!      dfptnl_loop,dtfil_init,intagm,m_gkk,m_ifc,m_io_redirect,mkfilename
-!!      prtocc,prttagm,prttagm_images,uderiv
+!!      m_berryphase_new,m_d2frnl,m_dfpt_looppert,m_dfpt_lw,m_dfpt_nstwf
+!!      m_dfpt_scfcv,m_dfptnl_loop,m_dtfil,m_elpolariz,m_gkk,m_ifc
+!!      m_io_redirect,m_outvar_o_z,m_parser,m_pead_nl_loop
 !!
 !! CHILDREN
 !!

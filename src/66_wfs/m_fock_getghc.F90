@@ -90,12 +90,10 @@ contains
 !!   * all the data for the occupied states (cgocc_bz) are the same as those for the current states (cg)
 !!
 !! PARENTS
-!!      fock2ACE,forstrnps,getghc
+!!      m_fock_getghc,m_forstr,m_getghc
 !!
 !! CHILDREN
-!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_kprime_hamiltonian
-!!      matr3inv,nonlop,pawdijhat,pawmknhat_psipsi,sphereboundary,strfock,timab
-!!      xmpi_sum
+!!      dotprod_g
 !!
 !! SOURCE
 
@@ -803,14 +801,10 @@ end subroutine fock_getghc
 !! if optfor=1, fock%fock_common%forces
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
-!!      dotprod_g,fock_getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free
-!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,timab,xmpi_sum,zpotrf
-!!      ztrtrs
+!!      dotprod_g
 !!
 !! SOURCE
 
@@ -1215,7 +1209,7 @@ end subroutine fock2ACE
 !!   * all the data for the occupied states (cgocc_bz) are the same as those for the current states (cg)
 !!
 !! PARENTS
-!!      getghc
+!!      m_getghc
 !!
 !! CHILDREN
 !!      dotprod_g

@@ -104,10 +104,10 @@ contains
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      cgcprj_cholesky,wf_mixing
+!!      m_cgcprj,m_extraprho,m_scfcv_core
 !!
 !! CHILDREN
-!!      dotprod_g,pawcprj_alloc,pawcprj_free,pawcprj_get,zhpev
+!!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -441,10 +441,10 @@ end subroutine dotprod_set_cgcprj
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      wf_mixing
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      dotprod_g,pawcprj_alloc,pawcprj_free,pawcprj_get
+!!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -675,10 +675,10 @@ end subroutine dotprodm_sumdiag_cgcprj
 !!  cprj(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors
 !!
 !! PARENTS
-!!      cgcprj_cholesky,wf_mixing
+!!      m_cgcprj,m_extraprho,m_scfcv_core
 !!
 !! CHILDREN
-!!      pawcprj_alloc,pawcprj_free,pawcprj_lincom,zgemm
+!!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -804,7 +804,7 @@ end subroutine lincom_cgcprj
 !!  cprj_k(natom,mcprj) <type(pawcprj_type)>= projected input wave functions <Proj_i|Cnk> with NL projectors for the specific k point and spinpol
 !!
 !! PARENTS
-!!      wf_mixing
+!!      m_extraprho,m_scfcv_core
 !!
 !! CHILDREN
 !!      dotprod_set_cgcprj,lincom_cgcprj,zpotrf,ztrsm

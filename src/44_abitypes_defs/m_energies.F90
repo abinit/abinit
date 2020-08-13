@@ -202,8 +202,8 @@ CONTAINS !===========================================================
 !!   energies <type(energies_type)>=values to initialise
 !!
 !! PARENTS
-!!      bethe_salpeter,gstate,m_electronpositron,m_results_gs,scfcv,screening
-!!      setup_positron,sigma
+!!      m_bethe_salpeter,m_electronpositron,m_gstate,m_positron,m_results_gs
+!!      m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -275,7 +275,7 @@ end subroutine energies_init
 !!   energies_out <type(energies_type)>=output values
 !!
 !! PARENTS
-!!      afterscfloop,m_electronpositron,m_results_gs,setup_positron
+!!      m_afterscfloop,m_electronpositron,m_positron,m_results_gs
 !!
 !! CHILDREN
 !!
@@ -480,7 +480,7 @@ end subroutine energies_to_array
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_entropyDMFT,prtene
+!!      m_common,m_entropyDMFT
 !!
 !! CHILDREN
 !!

@@ -346,6 +346,7 @@ end function ephwg_from_ebands
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -608,6 +609,7 @@ end subroutine ephwg_double_grid_setup_kpoint
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -664,6 +666,7 @@ end subroutine ephwg_report_stats
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -761,6 +764,7 @@ end subroutine ephwg_get_deltas
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -843,6 +847,7 @@ end subroutine ephwg_get_deltas_wvals
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -926,6 +931,7 @@ end subroutine ephwg_get_deltas_qibzk
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -1018,6 +1024,7 @@ end subroutine ephwg_get_zinv_weights
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 

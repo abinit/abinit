@@ -448,9 +448,6 @@ end function krank_copy
 !!  krank = object containing ranking and inverse ranking, to be deallocated
 !!
 !! PARENTS
-!!      defs_elphon,get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma
-!!      m_pptools,m_tetrahedron,mkfskgrid,mkqptequiv,order_fs_kpts,outelph
-!!      read_el_veloc
 !!
 !! CHILDREN
 !!

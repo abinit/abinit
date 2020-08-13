@@ -131,10 +131,10 @@ contains
 !!    for a group of valence bands defined by minbd and maxbd.
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,chern_number,getcgqphase,make_grad_berry
+!!      m_berryphase_new,m_cgwf,m_dfpt_looppert,m_orbmag
 !!
 !! CHILDREN
-!!      dzgedi,dzgefa,overlap_g
+!!      wrtout
 !!
 !! SOURCE
 
@@ -667,7 +667,7 @@ end subroutine smatrix
 !!   output of the results
 !!
 !! PARENTS
-!!      berryphase_new,relaxpol
+!!      m_berryphase_new,m_relaxpol
 !!
 !! CHILDREN
 !!      wrtout

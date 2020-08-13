@@ -124,7 +124,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -208,7 +208,7 @@ end subroutine zpad_init
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -271,10 +271,10 @@ end subroutine zpad_free
 !!  See defs_fftdata for a list of allowed sizes of FFT.
 !!
 !! PARENTS
-!!      m_shirley,setup_bse,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -789,11 +789,11 @@ end function fft_check_rotrans
 !!  final results, in particular in the description of degenerate states.
 !!
 !! PARENTS
-!!      bethe_salpeter,calc_sigc_me,calc_sigx_me,cchi0q0_intraband
-!!      classify_bands,cohsex_me,m_dvdb,m_wfd,prep_calc_ucrpa,screening
+!!      m_bethe_salpeter,m_chi0,m_classify_bands,m_cohsex,m_dvdb,m_fft_mesh
+!!      m_prep_calc_ucrpa,m_screening_driver,m_sigc,m_sigx,m_wfd
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -964,7 +964,7 @@ end subroutine denpot_project
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1218,7 +1218,7 @@ end subroutine get_gftt
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1288,7 +1288,7 @@ end subroutine calc_ceigr_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1616,9 +1616,10 @@ end subroutine times_eikr
 !! Simply suppresses the corresponding sine.
 !!
 !! PARENTS
-!!      xcden,xcpot
+!!      m_xctk
 !!
 !! CHILDREN
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1664,7 +1665,7 @@ end subroutine phase
 !! OUTPUT
 !!
 !! PARENTS
-!!      mkcore_paw,mklocl_realspace
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
 !!      xred2xcart

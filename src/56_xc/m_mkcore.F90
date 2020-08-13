@@ -100,8 +100,8 @@ contains
 !! Note that this routine is tightly connected to the dfpt_mkcore.f routine
 !!
 !! PARENTS
-!!      dfpt_dyfro,forces,nonlinear,prcref,prcref_PMA,respfn,setvtr,stress
-!!      xchybrid_ncpp_cc
+!!      m_forces,m_longwave,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
+!!      m_stress,m_xchybrid
 !!
 !! CHILDREN
 !!
@@ -611,7 +611,7 @@ end subroutine mkcore
 !!  Based on mkcore.F90
 !!
 !! PARENTS
-!!      forces,setvtr,stress
+!!      m_forces,m_setvtr,m_stress
 !!
 !! CHILDREN
 !!
@@ -1101,7 +1101,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !!  Determine also whether the index is inside or outside the box for free BC
 !!
 !! PARENTS
-!!      mkcore
+!!      m_mkcore
 !!
 !! CHILDREN
 !!
@@ -1165,8 +1165,8 @@ end subroutine mkcore_alt
 !! Note that this routine is tightly connected to the mkcore.f routine
 !!
 !! PARENTS
-!!      dfpt_dyxc1,dfpt_eltfrxc,dfpt_looppert,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw
-!!      dfptnl_loop
+!!      m_dfpt_elt,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_pead_nl_loop,m_respfn_driver
 !!
 !! CHILDREN
 !!

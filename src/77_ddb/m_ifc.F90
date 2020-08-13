@@ -252,11 +252,10 @@ CONTAINS  !===========================================================
 !!  Deallocate memory for the ifc_type structure
 !!
 !! PARENTS
-!!      anaddb,compute_anharmonics,eph,m_anharmonics_terms
-!!      m_effective_potential,m_effective_potential_file,m_gruneisen
-!!      m_harmonics_terms,m_ifc
+!!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -339,9 +338,11 @@ end subroutine ifc_free
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
 !! PARENTS
-!!      anaddb,eph,m_effective_potential_file,m_gruneisen,m_tdep_abitypes
+!!      anaddb,m_effective_potential_file,m_eph_driver,m_gruneisen,m_ifc
+!!      m_tdep_abitypes
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -732,9 +733,10 @@ end subroutine ifc_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      anaddb,eph,m_effective_potential_file,m_gruneisen,m_tdep_abitypes
+!!      m_generate_training_set
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -836,9 +838,9 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 !!  Only printing
 !!
 !! PARENTS
-!!      anaddb,eph,m_tdep_abitypes
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -929,11 +931,10 @@ end subroutine ifc_print
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
 !! PARENTS
-!!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_gruneisen
-!!      m_ifc,m_phgamma,m_phonons,m_phpi,m_sigmaph,m_tdep_phdos,mka2f,mka2f_tr
-!!      mka2f_tr_lova,mkph_linwid,read_gkk
+!!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1054,6 +1055,7 @@ end subroutine ifc_fourq
 !!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1169,9 +1171,9 @@ end subroutine ifc_get_dwdq
 !! OUTPUT
 !!
 !! PARENTS
-!!      anaddb,m_gruneisen
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1393,6 +1395,7 @@ end subroutine ifc_speedofsound
 !!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1544,6 +1547,7 @@ end subroutine ifc_autocutoff
 !!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1673,9 +1677,9 @@ end subroutine corsifc9
 !!  same stuff. We should make different subroutines, even if it duplicates some code
 !!
 !! PARENTS
-!!      anaddb
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2023,6 +2027,7 @@ end subroutine ifc_write
 !!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2335,6 +2340,7 @@ end subroutine ifc_getiaf
 !!      m_ifc
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2525,9 +2531,9 @@ end subroutine omega_decomp
 !!  only write to file. This routine should be called by a single processor.
 !!
 !! PARENTS
-!!      anaddb,eph
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2637,9 +2643,9 @@ end subroutine ifc_outphbtrap
 !!  Only write to file
 !!
 !! PARENTS
-!!      eph
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -2728,9 +2734,9 @@ end subroutine ifc_printbxsf
 !!  This routine should be called by master node and when ifcflag == 1.
 !!
 !! PARENTS
-!!      m_gruneisen,m_phonons
 !!
 !! CHILDREN
+!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 

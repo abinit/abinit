@@ -115,12 +115,12 @@ contains
 !!  gs1c(2,npw1*nspinor)=<G|S^(1)|C> (S=overlap) on the k+q sphere.
 !!
 !! PARENTS
-!!      dfpt_cgwf,dfpt_nstpaw,dfpt_nstwf,dfpt_wfkfermi,m_gkk,m_phgamma,m_phpi
-!!      m_rf2,m_sigmaph
+!!      m_ddk,m_dfpt_cgwf,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_gkk,m_phgamma
+!!      m_phpi,m_rf2,m_sigmaph
 !!
 !! CHILDREN
-!!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
-!!      mkffnl,mkkin,mkkpg
+!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
+!!      rf_hamkq%load_k
 !!
 !! SOURCE
 
@@ -820,11 +820,12 @@ end subroutine getgh1c
 !!  vlocal1(cplex*n4,n5,n6,nvloc)= RF local potential in real space, on the augmented coarse fft grid
 !!
 !! PARENTS
-!!      dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
+!!      m_dfpt_lwwf,m_dfpt_vtorho,m_dfptnl_pert,m_gkk,m_phgamma,m_phpi
+!!      m_sigmaph
 !!
 !! CHILDREN
-!!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
-!!      mkffnl,mkkin,mkkpg
+!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
+!!      rf_hamkq%load_k
 !!
 !! SOURCE
 
@@ -923,11 +924,11 @@ end subroutine rf_transgrid_and_pack
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
+!!      m_ddk,m_dfpt_lwwf,m_dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
-!!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
-!!      mkffnl,mkkin,mkkpg
+!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
+!!      rf_hamkq%load_k
 !!
 !! SOURCE
 
@@ -1236,10 +1237,11 @@ end subroutine getgh1c_setup
 !!  dcwaveprj(natom,nspinor*optcprj)=change of wavefunction due to change of overlap PROJECTED ON NL-PROJECTORS:
 !!
 !! PARENTS
-!!      dfpt_cgwf,dfpt_nstpaw
+!!      m_dfpt_cgwf,m_dfpt_nstwf
 !!
 !! CHILDREN
-!!      pawcprj_axpby,pawcprj_lincom,projbd
+!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
+!!      rf_hamkq%load_k
 !!
 !! SOURCE
 
@@ -1361,10 +1363,11 @@ end subroutine getdc1
 !!                                  perturbation hamiltonian.
 !!
 !! PARENTS
-!!      dfpt_qdrpwf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      fourwf,nonlopdq
+!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
+!!      rf_hamkq%load_k
 !!
 !! SOURCE
 
@@ -1592,11 +1595,11 @@ end subroutine getgh1dqc
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_qdrpwf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
-!!      mkffnl,mkkin,mkkpg
+!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
+!!      rf_hamkq%load_k
 !!
 !! SOURCE
 

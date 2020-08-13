@@ -145,16 +145,16 @@ contains
 !!    (gradients of rhoij for each atom with respect to atomic positions are computed here)
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      appdig,check_degeneracies,dotprod_g
-!!      init_hamiltonian,metric,mkffnl
-!!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
-!!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,pawrhoij_symrhoij
-!!      timab,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
+!!      appdig,check_degeneracies,ddkfiles,dotprod_g,gs_ham%free,gs_ham%load_k
+!!      gs_ham%load_spin,init_hamiltonian,metric,mkffnl,mkkin,mkkpg,nonlop
+!!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawaccrhoij
+!!      pawcprj_alloc,pawcprj_free,pawdij2e1kb,pawdijfr,pawfgrtab_free
+!!      pawfgrtab_init,pawgrnl,pawrhoij_free,pawrhoij_gather,pawrhoij_nullify
+!!      pawrhoij_symrhoij,pawtab_get_lsize,strconv,timab,wfk_open_read,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 

@@ -176,9 +176,9 @@ contains
 !!  Some parts can be rewritten with BLAS1 calls.
 !!
 !! PARENTS
-!!      ctocprj,d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi
-!!      dfptnl_resp,energy,fock2ACE,forstrnps,getgh1c,ks_ddiago,m_io_kss
-!!      m_vkbr,m_wfd,nonlop_test,vtorho
+!!      m_cgprj,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy
+!!      m_fock_getghc,m_forstr,m_getgh1c,m_io_kss,m_ksdiago,m_nonlop_test
+!!      m_orbmag,m_pead_nl_loop,m_vkbr,m_vtorho,m_wfd
 !!
 !! CHILDREN
 !!      mkkin,splfit,timab

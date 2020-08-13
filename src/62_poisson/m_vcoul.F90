@@ -203,11 +203,11 @@ CONTAINS  !=====================================================================
 !!  Vcp=<vcoul_t>=Datatype gathering information on the Coulomb interaction.
 !!
 !! PARENTS
-!!      gwls_hamiltonian,mrgscr,setup_bse,setup_bse_interp,setup_screening
-!!      setup_sigma
+!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
+!!      mrgscr
 !!
 !! CHILDREN
-!!      calck0,paw_jbessel,quadrature
+!!      calck0,quadrature
 !!
 !! SOURCE
 
@@ -1132,7 +1132,7 @@ end subroutine vcoul_init
 !!      m_vcoul
 !!
 !! CHILDREN
-!!      calck0,paw_jbessel,quadrature
+!!      calck0,quadrature
 !!
 !! SOURCE
 
@@ -1298,7 +1298,7 @@ end subroutine vcoul_plot
 !!      m_vcoul
 !!
 !! CHILDREN
-!!      calck0,paw_jbessel,quadrature
+!!      calck0,quadrature
 !!
 !! SOURCE
 
@@ -1434,10 +1434,11 @@ end subroutine vcoul_print
 !!  Vcp<vcoul_t>=the datatype to be destroyed
 !!
 !! PARENTS
-!!      bethe_salpeter,gwls_hamiltonian,mrgscr,screening,setup_sigma,sigma
+!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
+!!      mrgscr
 !!
 !! CHILDREN
-!!      calck0,paw_jbessel,quadrature
+!!      calck0,quadrature
 !!
 !! SOURCE
 

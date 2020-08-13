@@ -73,10 +73,9 @@ CONTAINS  !=====================================================================
 !!  but only in the x-y plane.
 !!
 !! PARENTS
-!!      m_vcoul
+!!      m_barevcoul,m_vcoul
 !!
 !! CHILDREN
-!!      calck0,paw_jbessel,quadrature
 !!
 !! SOURCE
 

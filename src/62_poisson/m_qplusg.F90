@@ -60,7 +60,6 @@ CONTAINS
 !!      m_ppmodel,m_vcoul
 !!
 !! CHILDREN
-!!      calck0,paw_jbessel,quadrature
 !!
 !! SOURCE
 

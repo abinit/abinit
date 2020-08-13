@@ -29,16 +29,17 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      tdep_build_phijnn,tdep_calc_psijtot,tdep_calc_alpha_gamma
-!!      tdep_calc_constraints,tdep_calc_dij,tdep_calc_elastic,tdep_calc_model
-!!      tdep_calc_moorepenrose,tdep_calc_phdos,tdep_calc_phijfcoeff
-!!      tdep_calc_psijfcoeff,tdep_calc_thermo,tdep_destroy_shell
-!!      tdep_destroy_eigen2nd,tdep_init_crystal,tdep_init_ddb
-!!      tdep_init_eigen2nd,tdep_init_ifc,tdep_init_shell2at
-!!      tdep_init_shell3at,tdep_make_latt,tdep_make_qptpath
-!!      tdep_make_sym,tdep_matchideal2average,tdep_print_aknowledgments
-!!      tdep_readecho,tdep_write_gruneisen,tdep_write_dij,tdep_write_yaml
-!!      xmpi_end,xmpi_init
+!!      abimem_init,abinit_doctor,tdep_build_phijnn,tdep_build_pijn
+!!      tdep_calc_alpha_gamma,tdep_calc_constraints,tdep_calc_dij
+!!      tdep_calc_elastic,tdep_calc_model,tdep_calc_moorepenrose
+!!      tdep_calc_phdos,tdep_calc_phijfcoeff,tdep_calc_pijfcoeff
+!!      tdep_calc_psijfcoeff,tdep_calc_psijtot,tdep_calc_thermo
+!!      tdep_check_constraints,tdep_destroy_eigen2nd,tdep_destroy_shell
+!!      tdep_init_crystal,tdep_init_ddb,tdep_init_eigen2nd,tdep_init_ifc
+!!      tdep_init_shell1at,tdep_init_shell2at,tdep_init_shell3at,tdep_make_latt
+!!      tdep_make_qptpath,tdep_make_sym,tdep_matchideal2average
+!!      tdep_print_aknowledgments,tdep_readecho,tdep_write_dij
+!!      tdep_write_gruneisen,tdep_write_yaml,wrtout,xmpi_end,xmpi_init
 !!
 !! SOURCE
 

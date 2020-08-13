@@ -747,6 +747,7 @@ end function abifile_from_fform
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -793,6 +794,7 @@ end subroutine check_fform
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -843,6 +845,7 @@ end subroutine test_abifiles
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -912,10 +915,11 @@ end subroutine hdr_malloc
 !!   it, contain its definite values, except for evolving variables
 !!
 !! PARENTS
-!!      dfpt_looppert,gstate,nonlinear,respfn,setup_bse,setup_screening
-!!      setup_sigma
+!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_lw,m_gstate,m_longwave
+!!      m_nonlinear,m_respfn_driver,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1010,14 +1014,9 @@ end subroutine hdr_init
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      bethe_salpeter,conducti_nc,conducti_paw,conducti_paw_core,cut3d
-!!      dfpt_looppert,dfptnl_loop,elphon,emispec_paw,eph,finddistrproc,gstate
-!!      initaim,inpgkk,inwffil,ioprof,linear_optics_paw,m_bse_io,m_cut3d,m_ddk
-!!      m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfd,m_wfk,macroave
-!!      mrggkk,mrgscr,nonlinear,optic,read_el_veloc,read_gkk,respfn,screening
-!!      sigma,wfk_analyze
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1093,9 +1092,10 @@ end subroutine hdr_free
 !!  The present version deals with versions of the header up to 56.
 !!
 !! PARENTS
-!!      dfpt_looppert,m_io_kss,m_io_screening,m_wfk,optic
+!!      m_ddk,m_dfpt_looppert,m_io_kss,m_io_screening,m_wfd,m_wfk,optic
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1289,9 +1289,10 @@ end function hdr_get_nelect_from_occ
 !!   it, contain its definite values, except for evolving variables
 !!
 !! PARENTS
-!!      m_hdr,m_wfk
+!!      m_hdr,m_sigtk,m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1500,10 +1501,11 @@ end subroutine hdr_init_lowlvl
 !!  fform=Kind of the array in the file (0 signals an error)
 !!
 !! PARENTS
-!!      conducti_paw,conducti_paw_core,cut3d,emispec_paw,finddistrproc,ioprof
-!!      linear_optics_paw,m_ddk,m_ioarr,m_wfd,m_wfk
+!!      abitk,cut3d,ioprof,m_common,m_conducti,m_ioarr,m_mpi_setup,m_paw_optics
+!!      m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1582,9 +1584,9 @@ end subroutine hdr_read_from_fname
 !!  Only writing.
 !!
 !! PARENTS
-!!      m_ioarr,m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1762,6 +1764,7 @@ end subroutine hdr_mpio_skip
 !!      m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1891,6 +1894,7 @@ end subroutine hdr_bsize_frecords
 !! PARENTS
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1999,6 +2003,7 @@ end subroutine hdr_io_wfftype
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2060,9 +2065,10 @@ end subroutine hdr_io_int
 !!   Activate new header, avoid printing tons of lines with occupations.
 !!
 !! PARENTS
-!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_wfd,m_wfk,mrggkk,rchkgsheader
+!!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2232,6 +2238,7 @@ end subroutine hdr_echo
 !! PARENTS
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2282,6 +2289,7 @@ end subroutine hdr_skip_int
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2438,10 +2446,9 @@ end subroutine hdr_skip_wfftype
 !!   it, contain its definite values, except for evolving variables
 !!
 !! PARENTS
-!!      afterscfloop,dfpt_looppert,dfpt_scfcv,gstate,nonlinear,respfn,scfcv
-!!      setup_bse,setup_screening,setup_sigma
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2515,9 +2522,9 @@ end subroutine hdr_update
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      elphon,initaim,m_dvdb,m_hdr,m_io_screening,m_ioarr,m_wfk,optic,read_gkk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2903,10 +2910,11 @@ end function read_first_record
 !! The file is supposed to be open already
 !!
 !! PARENTS
-!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_screening
-!!      m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
+!!      m_bader,m_bse_io,m_cut3d,m_dvdb,m_elphon,m_hdr,m_io_screening,m_ioarr
+!!      m_iogkk,macroave,mrggkk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3027,9 +3035,11 @@ end subroutine hdr_fort_read
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
 !!
 !! PARENTS
-!!      initaim,inwffil,m_ddk,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
+!!      m_bader,m_common,m_dvdb,m_hdr,m_inkpts,m_inwffil,m_io_screening,m_ioarr
+!!      m_wfk,macroave,optic
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3230,9 +3240,9 @@ end subroutine hdr_ncread
 !! The file is supposed to be open already
 !!
 !! PARENTS
-!!      m_bse_io,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,mrggkk,outgkk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3704,6 +3714,7 @@ end function hdr_ncwrite
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3743,6 +3754,7 @@ end subroutine hdr_set_occ
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3850,9 +3862,10 @@ end subroutine hdr_get_occ3d
 !!   (I) the energy cutoff for the double (fine) grid     (tdg)
 !!
 !! PARENTS
-!!      inwffil,m_ddk,m_io_screening,m_ioarr,m_wfk
+!!      m_inwffil,m_io_screening,m_ioarr,m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -4740,10 +4753,9 @@ end function hdr_compare
 !!  Only check
 !!
 !! PARENTS
-!!      eph,setup_bse,setup_screening,setup_sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      wrtout
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -4938,10 +4950,10 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!  ierr=increased by one if values differ
 !!
 !! PARENTS
-!!      hdr_vs_dtset
+!!      m_hdr
 !!
 !! CHILDREN
-!!      wrtout
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 

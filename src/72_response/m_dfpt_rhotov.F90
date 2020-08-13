@@ -108,11 +108,9 @@ contains
 !!    vtrial1(cplex*nfft,nspden)= new value of 1st-order trial potential
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_lw,m_dfpt_scfcv,m_dfptnl_loop
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_v1zeeman,dotprod_vn
-!!      hartre,hartrestr,sqnorm_v,timab
 !!
 !! SOURCE
 
@@ -413,7 +411,7 @@ end subroutine dfpt_rhotov
 !!  For cplex=2, the definition is (V_upup,V_dndn,V_updn,i.V_updn)
 !!
 !! PARENTS
-!!      dfpt_rhotov
+!!      m_dfpt_rhotov
 !!
 !! CHILDREN
 !!

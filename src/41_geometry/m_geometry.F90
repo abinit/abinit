@@ -406,7 +406,7 @@ end function vdotw_rc_vector
 !!   c(3): real(dp) vector = a X b
 !!
 !! PARENTS
-!!      calc_b_matrix,m_abimover,simple_j_dia
+!!      m_abimover,m_pred_delocint,m_symfind
 !!
 !! CHILDREN
 !!
@@ -445,6 +445,7 @@ end subroutine acrossb
 !!   wedge(3,3,3) : 9 basis vectors of rprimd ^ gprimd
 !!
 !! PARENTS
+!!      m_spacepar
 !!
 !! CHILDREN
 !!
@@ -512,6 +513,7 @@ end subroutine wedge_basis
 !!   produv(3) :: real(dp) output vector
 !!
 !! PARENTS
+!!      m_spacepar
 !!
 !! CHILDREN
 !!
@@ -587,6 +589,7 @@ end subroutine wedge_product
 !! The number of lattice vectors R along each direction of the supercell is defined by lmax.
 !!
 !! PARENTS
+!!      m_mlwfovlp
 !!
 !! CHILDREN
 !!
@@ -730,7 +733,7 @@ end subroutine wigner_seitz
 !!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduded coordinates.
 !!
 !! PARENTS
-!!      get_tau_k,m_ddb,m_ifc,mka2f,mkph_linwid,read_gkk
+!!      m_a2ftr,m_ddb,m_elphon,m_ifc,m_iogkk
 !!
 !! CHILDREN
 !!
@@ -814,10 +817,9 @@ end subroutine phdispl_cart2red
 !! symrel1 contains just one of those matrices symrel1(3,3)
 !!
 !! PARENTS
-!!      cg_rotate,m_crystal,wfconv
+!!      m_cgtk,m_crystal,m_inwffil
 !!
 !! CHILDREN
-!!      mati3det,matr3inv
 !!
 !! SOURCE
 
@@ -1046,10 +1048,9 @@ end function spinrot_cmat
 !! axes from their default values to x' and z'.
 !!
 !! PARENTS
-!!      mlwfovlp_ylmfac,mlwfovlp_ylmfar
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1149,7 +1150,7 @@ end subroutine rotmat
 !!  Stops execution with an error message if iatfix breaks symmetry.
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!
@@ -1242,26 +1243,23 @@ end function det3r
 !!  ucvol=unit cell volume ($\textrm{bohr}^{3}$).
 !!
 !! PARENTS
-!!      afterscfloop,bethe_salpeter,chkinp,clnup1,conducti_nc,conducti_paw
-!!      conducti_paw_core,cut3d,d2frnl,dfpt_eltfrhar,dfpt_eltfrkin,dfpt_eltfrxc
-!!      dfpt_looppert,dfpt_newvtr,dfpt_scfcv,dist2,elpolariz,emispec_paw,energy
-!!      extrapwf,fftprof,finddistrproc,forces,forstr,get_npert_rbz,getkgrid
-!!      hartre,hartrestr,ingeo,initaim,initberry,inkpts,inqpt,invacuum,invars2m
-!!      ks_ddiago,linear_optics_paw,m_ab7_symmetry,m_crystal,m_cut3d,m_ddb
-!!      m_dens,m_effective_potential,m_effective_potential_file,m_fft
-!!      m_fft_prof,m_fit_data,m_hamiltonian,m_io_kss,m_ioarr,m_mep,m_pawpwij
-!!      m_screening,m_tdep_latt,m_use_ga,m_vcoul,m_wfk,mag_penalty,mag_constr_e
-!!      memory_eval,mkcore_wvl,mlwfovlp_qp,moddiel,mpi_setup,mrgscr,newrho
-!!      newvtr,nres2vres,odamix,optic,pawgrnl,prcref,prcref_PMA,pred_bfgs
-!!      pred_delocint,pred_isothermal,pred_langevin,pred_lbfgs,pred_nose
-!!      pred_srkna14,pred_verlet,prt_cif,prtefield,prtimg,psolver_rhohxc
-!!      rhotoxc,scfcv,screening,setup1,setup_bse,setup_screening,setup_sigma
-!!      sigma,smallprim,stress,strhar,symmetrize_rprimd,testkgrid,thmeig
-!!      vdw_dftd2,vdw_dftd3,wrt_moldyn_netcdf,wvl_initro,xchybrid_ncpp_cc
-!!      xfpack_vin2x,xfpack_x2vin
+!!      cut3d,fftprof,m_ab7_symmetry,m_afterscfloop,m_bader,m_berryphase_new
+!!      m_bethe_salpeter,m_chkinp,m_common,m_conducti,m_crystal,m_cut3d
+!!      m_cutoff_cylinder,m_d2frnl,m_ddb,m_dens,m_dfpt_elt,m_dfpt_looppert
+!!      m_dfpt_scfcv,m_dft_energy,m_dtset,m_effective_potential
+!!      m_effective_potential_file,m_elpolariz,m_extraprho,m_fft,m_fft_prof
+!!      m_fit_data,m_fit_polynomial_coeff,m_forces,m_forstr,m_geometry,m_gstate
+!!      m_gstateimg,m_gtermcutoff,m_hamiltonian,m_ingeo,m_inkpts,m_invars2
+!!      m_io_kss,m_ioarr,m_kpts,m_ksdiago,m_memeval,m_mep,m_mlwfovlp_qp,m_mover
+!!      m_mpi_setup,m_newrho,m_newvtr,m_odamix,m_orbmag,m_paw_dfpt,m_paw_optics
+!!      m_pawpwij,m_prcref,m_pred_bfgs,m_pred_delocint,m_pred_fire
+!!      m_pred_isothermal,m_pred_langevin,m_pred_nose,m_pred_srkna14
+!!      m_pred_verlet,m_psolver,m_rhotoxc,m_scfcv_core,m_screening
+!!      m_screening_driver,m_sigma_driver,m_spacepar,m_stress,m_tdep_latt
+!!      m_thmeig,m_use_ga,m_vcoul,m_vdw_dftd2,m_vdw_dftd3,m_wfk,m_wvl_rho
+!!      m_xchybrid,m_xfpack,mkcore_wvl,mrgscr,optic
 !!
 !! CHILDREN
-!!      matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -1368,8 +1366,8 @@ end subroutine metric
 !!  rprim(3,3)=dimensionless real space primitive translations
 !!
 !! PARENTS
-!!      gstate,gstateimg,ingeo,m_ddk,m_pimd,m_use_ga,pred_steepdesc
-!!      predict_pimd,wvl_memory,xfpack_vin2x
+!!      m_dvdb,m_gstate,m_gstateimg,m_ingeo,m_memeval,m_pimd,m_pred_steepdesc
+!!      m_predict_pimd,m_use_ga,m_xfpack
 !!
 !! CHILDREN
 !!
@@ -1507,10 +1505,9 @@ end subroutine chkrprimd
 !!              end if
 !!
 !! PARENTS
-!!      driver,mover
+!!      m_driver,m_precpred_1geo
 !!
 !! CHILDREN
-!!      matr3eigval,matr3inv
 !!
 !! SOURCE
 
@@ -1611,12 +1608,12 @@ end subroutine chkdilatmx
 !!              where: rprimd(i,j)=rprim(i,j)*acell(j)
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,dfpt_symph,driver,finddistrproc
-!!      get_npert_rbz,gstateimg,harmonic_thermo,ingeo,invars1,invars2m,m_ddb
-!!      m_ifc,m_results_img,m_use_ga,memory_eval,mpi_setup,outvar_o_z,pred_bfgs
-!!      pred_isothermal,pred_lbfgs,pred_steepdesc,pred_verlet,predict_pimd
-!!      randomcellpos,screening,setup1,setup_bse,setup_screening,setup_sigma
-!!      sigma,thmeig,wvl_setboxgeometry,xfpack_x2vin
+!!      m_abi2big,m_bethe_salpeter,m_common,m_ddb,m_dfpt_looppert,m_driver
+!!      m_dtset,m_geometry,m_gstateimg,m_harmonic_thermo,m_ifc,m_ingeo
+!!      m_invars1,m_invars2,m_memeval,m_mpi_setup,m_outvar_o_z,m_parser
+!!      m_phonons,m_pred_bfgs,m_pred_fire,m_pred_isothermal,m_pred_steepdesc
+!!      m_pred_verlet,m_predict_pimd,m_results_img,m_screening_driver
+!!      m_sigma_driver,m_thmeig,m_use_ga,m_xfpack
 !!
 !! CHILDREN
 !!
@@ -1666,17 +1663,15 @@ end subroutine mkrdim
 !!  xred(3,natom)=dimensionless reduced coordinates of atoms
 !!
 !! PARENTS
-!!      driver,evdw_wannier,ingeo,m_cut3d,m_dens,m_effective_potential
-!!      m_effective_potential_file,m_mep,m_paw_pwaves_lmn,m_pred_lotf
-!!      mkcore_paw,mkcore_wvl,mover_effpot,pawmkaewf,pimd_langevin_npt
-!!      pimd_langevin_nvt,pimd_nosehoover_npt,pimd_nosehoover_nvt,prcref
-!!      prcref_PMA,pred_delocint,pred_diisrelax,pred_isokinetic,pred_isothermal
-!!      pred_langevin,pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc
-!!      pred_velverlet,pred_verlet,relaxpol,wrt_moldyn_netcdf
-!!      wvl_setboxgeometry
+!!      m_abi2big,m_cut3d,m_dens,m_driver,m_dvdb,m_effective_potential
+!!      m_effective_potential_file,m_evdw_wannier,m_generate_training_set
+!!      m_ingeo,m_mep,m_mover,m_mover_effpot,m_parser,m_paw_mkaewf
+!!      m_paw_pwaves_lmn,m_pimd_langevin,m_pimd_nosehoover,m_prcref
+!!      m_pred_delocint,m_pred_diisrelax,m_pred_isokinetic,m_pred_isothermal
+!!      m_pred_langevin,m_pred_lotf,m_pred_moldyn,m_pred_nose,m_pred_srkna14
+!!      m_pred_steepdesc,m_pred_velverlet,m_pred_verlet,m_relaxpol,mkcore_wvl
 !!
 !! CHILDREN
-!!      matr3inv
 !!
 !! SOURCE
 
@@ -1728,21 +1723,19 @@ end subroutine xcart2xred
 !!  xcart(3,natom)=cartesian coordinates of atoms (bohr)
 !!
 !! PARENTS
-!!      afterscfloop,berryphase,berryphase_new,bonds_lgth_angles,constrf,cut3d
-!!      denfgr,driver,evdw_wannier,forstr,ingeo,ionion_realspace,ionion_surface
-!!      m_abihist,m_crystal,m_ddb,m_effective_potential,m_fit_polynomial_coeff
-!!      m_mep,m_pred_lotf,m_results_img,m_tdep_abitypes,make_efg_el
-!!      make_efg_ion,mkcore_paw,mkcore_wvl,mkgrid_fft,mklocl,mklocl_realspace
-!!      mlwfovlp_projpaw,mover_effpot,out1dm,outqmc,outvar_o_z,outxml
-!!      pimd_langevin_npt,pimd_langevin_nvt,pimd_nosehoover_npt
-!!      pimd_nosehoover_nvt,prec_simple,pred_delocint,pred_diisrelax,pred_hmc
-!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_moldyn,pred_nose
-!!      pred_srkna14,pred_steepdesc,pred_velverlet,pred_verlet,prtimg
-!!      prtspgroup,prtxfase,randomcellpos,rhotov,setvtr,spin_current,symspgr
-!!      thmeig,vso_realspace_local,vtorho,wrt_moldyn_netcdf,wvl_denspot_set
-!!      wvl_initro,wvl_memory,wvl_nhatgrid,wvl_projectors_set,wvl_rwwf
-!!      wvl_setboxgeometry,wvl_wfs_set,wvl_wfsinp_reformat,wvl_wfsinp_scratch
-!!      xfh_recover_deloc
+!!      cut3d,m_abi2big,m_abihist,m_afterscfloop,m_berryphase,m_berryphase_new
+!!      m_crystal,m_ddb,m_driver,m_effective_potential,m_evdw_wannier
+!!      m_fft_mesh,m_fit_polynomial_coeff,m_forces,m_forstr,m_geometry
+!!      m_gstateimg,m_ingeo,m_memeval,m_mep,m_mklocl,m_mklocl_realspace
+!!      m_mlwfovlp,m_mover,m_mover_effpot,m_multipoles,m_nucprop,m_outqmc
+!!      m_outvar_o_z,m_outxml,m_paw_mkrho,m_paw_nhat,m_pimd_langevin
+!!      m_pimd_nosehoover,m_pred_delocint,m_pred_diisrelax,m_pred_fire
+!!      m_pred_isokinetic,m_pred_isothermal,m_pred_langevin,m_pred_lotf
+!!      m_pred_moldyn,m_pred_nose,m_pred_simple,m_pred_srkna14,m_pred_steepdesc
+!!      m_pred_velverlet,m_pred_verlet,m_results_img,m_rhotov,m_setvtr
+!!      m_spgdata,m_spin_current,m_symfind,m_tdep_abitypes,m_thmeig,m_vtorho
+!!      m_wvl_denspot,m_wvl_projectors,m_wvl_rho,m_wvl_rwwf,m_wvl_wfs
+!!      m_wvl_wfsinp,mkcore_wvl
 !!
 !! CHILDREN
 !!
@@ -1795,7 +1788,7 @@ end subroutine xred2xcart
 !!    on all atoms is zero (except is a slab is used)
 !!
 !! PARENTS
-!!      forces,m_mep
+!!      m_forces,m_mep
 !!
 !! CHILDREN
 !!
@@ -1864,8 +1857,8 @@ end subroutine fred2fcart
 !!  on all atoms is zero.
 !!
 !! PARENTS
-!!      gstateimg,m_abihist,m_effective_potential,m_mep,mover,prec_simple
-!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet,prtxfase
+!!      m_abihist,m_effective_potential,m_gstateimg,m_mep,m_mover,m_pred_bfgs
+!!      m_pred_delocint,m_pred_fire,m_pred_simple,m_pred_verlet
 !!
 !! CHILDREN
 !!
@@ -1934,10 +1927,9 @@ end subroutine fcart2fred
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -2272,10 +2264,9 @@ end subroutine bonds_lgth_angles
 !! NOTES
 !!
 !! PARENTS
-!!      ingeo
+!!      m_ingeo
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,mkrdim,xred2xcart
 !!
 !! SOURCE
 
@@ -2490,10 +2481,9 @@ end subroutine randomcellpos
 !!  mult(nat) = number of atoms on shell (only the first nsh entries are relevant)
 !!
 !! PARENTS
-!!      pawuj_det
+!!      m_paw_uj
 !!
 !! CHILDREN
-!!      ioniondist,prmat,sort_dp,sort_int,wrtout
 !!
 !! SOURCE
 
@@ -2629,10 +2619,9 @@ end subroutine shellstruct
 !! OUTPUT
 !!
 !! PARENTS
-!!      pawuj_utils,shellstruct
+!!      m_geometry,m_paw_uj
 !!
 !! CHILDREN
-!!      prmat,wrtout
 !!
 !! SOURCE
 
@@ -2878,10 +2867,9 @@ end function dist2
 !!  the pointers should be nullified before entering.
 !!
 !! PARENTS
-!!      m_crystal,m_io_kss,outkss
+!!      m_crystal,m_io_kss
 !!
 !! CHILDREN
-!!      set2unit,symdet,wrtout
 !!
 !! SOURCE
 
@@ -3002,7 +2990,7 @@ end subroutine remove_inversion
 !! When aprim=gprimd and bprim=rprimd, the routine operates in reciprocal space (on a real space symmetry)
 !!
 !! PARENTS
-!!      m_matlu,m_phonons,symrhg
+!!      m_crystal,m_matlu,m_phonons,m_spacepar
 !!
 !! CHILDREN
 !!
@@ -3069,10 +3057,9 @@ end subroutine symredcart
 !! rprimd_symm(3,3)= symmetrized primitive vectors
 !!
 !! PARENTS
-!!      xfpack_vin2x,xfpack_x2vin
+!!      m_xfpack
 !!
 !! CHILDREN
-!!      dgemm,mati3inv,matrginv
 !!
 !! SOURCE
 
@@ -3155,10 +3142,9 @@ end subroutine strainsym
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      dfpt_nselt,dfpt_nstpaw,forstrnps,littlegroup_pert,pawgrnl,stress
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_forstr,m_geometry,m_paw_dfpt,m_stress
 !!
 !! CHILDREN
-!!      matr3inv,strconv
 !!
 !! SOURCE
 
@@ -3270,8 +3256,8 @@ end subroutine stresssym
 !! in cartesian coordinates to reduced coordinates
 !!
 !! PARENTS
-!!      ctocprj,d2frnl,mkcore,mkcore_paw,mkcore_wvl,nonlop_pl,nonlop_ylm
-!!      stresssym
+!!      m_cgprj,m_d2frnl,m_geometry,m_mkcore,m_nonlop_pl,m_nonlop_ylm
+!!      mkcore_wvl
 !!
 !! CHILDREN
 !!
@@ -3374,10 +3360,9 @@ end subroutine strconv
 !!   of real space primitive translations (may be 0)!!
 !!
 !! PARENTS
-!!      dfpt_looppert,get_npert_rbz,m_dvdb,read_gkk
+!!      m_dfpt_looppert,m_dtset,m_dvdb,m_iogkk
 !!
 !! CHILDREN
-!!      stresssym,wrtout
 !!
 !! SOURCE
 
@@ -3558,7 +3543,7 @@ end subroutine littlegroup_pert
 !!  -1 for perturbations that can be found from basis perturbations
 !!
 !! PARENTS
-!!      get_npert_rbz,m_dvdb,respfn
+!!      m_dtset,m_dvdb,m_respfn_driver
 !!
 !! CHILDREN
 !!

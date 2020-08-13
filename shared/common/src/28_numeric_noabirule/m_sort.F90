@@ -63,13 +63,14 @@ CONTAINS  !=====================================================================
 !!      the i-th element of the ouput ordered list had index iperm(i) in the input list.
 !!
 !! PARENTS
-!!      atomden,cpdrv,critics,denfgr,finddistrproc,invacuum,listkk,m_bz_mesh
-!!      m_chi0,m_cut3d,m_exc_diago,m_gsphere,m_ifc,m_io_screening
-!!      m_paw_pwaves_lmn,m_phonons,m_polynomial_coeff,m_screen,m_skw,m_use_ga
-!!      m_vcoul,mkcore,mkcore_inner,mkcore_wvl,mlwfovlp_qp,outscfcv
-!!      partial_dos_fractions,shellstruct,symkpt,tddft,thmeig,wvl_initro
+!!      m_bader,m_bz_mesh,m_chi0tk,m_cut3d,m_ebands,m_epjdos,m_exc_diago
+!!      m_geometry,m_gsphere,m_ifc,m_ingeo,m_io_screening,m_kpts,m_lgroup
+!!      m_mkcore,m_mkrho,m_mlwfovlp_qp,m_mpi_setup,m_outscfcv,m_paw_mkrho
+!!      m_paw_pwaves_lmn,m_phonons,m_polynomial_coeff,m_screen,m_skw,m_sort
+!!      m_symkpt,m_tddft,m_thmeig,m_use_ga,m_vcoul,m_wvl_rho,mkcore_wvl
 !!
 !! CHILDREN
+!!      move_alloc,sort_dp
 !!
 !! SOURCE
 
@@ -179,10 +180,11 @@ end subroutine sort_dp
 !!      the i-th element of the ouput ordered list had index iperm(i) in the input list.
 !!
 !! PARENTS
-!!      getng,getngrec,initmpi_img,invars2,irrzg,m_dvdb,m_hdr,m_nesting,m_wfk
-!!      mkfskgrid,shellstruct
+!!      m_dvdb,m_elphon,m_fftcore,m_geometry,m_hdr,m_invars2,m_mpi_setup
+!!      m_mpinfo,m_nesting,m_rec,m_spacepar,m_wfk
 !!
 !! CHILDREN
+!!      move_alloc,sort_dp
 !!
 !! SOURCE
 
@@ -292,8 +294,10 @@ end subroutine sort_int
 !!  [rmod(n)]= list of sorted |r| values.
 !!
 !! PARENTS
+!!      m_dvdb,m_sigmaph
 !!
 !! CHILDREN
+!!      move_alloc,sort_dp
 !!
 !! SOURCE
 
@@ -359,6 +363,7 @@ end subroutine sort_rpts
 !! PARENTS
 !!
 !! CHILDREN
+!!      move_alloc,sort_dp
 !!
 !! SOURCE
 

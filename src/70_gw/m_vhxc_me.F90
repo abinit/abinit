@@ -118,14 +118,14 @@ contains
 !!  These quantities, as well as the onsite kinetic terms, are stored in Paw_ij%dij0.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,get_auxc_ixc,init_distribfft_seq,initmpi_seq
 !!      libxc_functionals_end,libxc_functionals_init
 !!      libxc_functionals_set_hybridparams,melements_herm,melements_init
 !!      melements_mpisum,mkkin,paw_mknewh0,pawcprj_alloc,pawcprj_free,rhotoxc
-!!      wfd_change_ngfft,wfd_distribute_bbp,wfd_get_cprj,wfd_get_ur,wrtout
+!!      wfd%change_ngfft,wfd%distribute_bbp,wfd%get_cprj,wfd%get_ur,wrtout
 !!      xcdata_init
 !!
 !! SOURCE

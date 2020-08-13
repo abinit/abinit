@@ -213,21 +213,9 @@ contains
 !!     see PRB 78, 035105 (2008), Eq. (42) [[cite:Audouze2008]]
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      appdig,destroy_mpi_enreg
-!!      dfpt_accrho,dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
-!!      dfpt_mkvxcstr,dfpt_sygra,dfpt_vlocal,dotprod_g,dotprod_vn,fftpac
-!!      getcprj,getdc1,getgh1c,hartrestr,init_hamiltonian,init_rf_hamiltonian
-!!      initmpi_seq,initylmg,kpgstr
-!!      mkffnl,mkkin,mkkpg,occeig
-!!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
-!!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawdfptenergy,pawdij2e1kb,pawdijfr,pawmkrho,pawnhatfr,pawrhoij_alloc
-!!      pawrhoij_free,pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,projbd
-!!      stresssym,symrhg,timab,vlocalstr,wfk_close,wfk_open_read,wfk_read_bks
-!!      wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 
@@ -1790,12 +1778,9 @@ end subroutine dfpt_nstpaw
 !!  XG 20141103 The localization tensor cannot be defined in the metallic case. It should not be computed.
 !!
 !! PARENTS
-!!      dfpt_nstdy
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      dotprod_g,gaugetransfo,getgh1c
-!!      init_rf_hamiltonian
-!!      mkffnl,mkkpg,timab,wfk_read_bks
 !!
 !! SOURCE
 
@@ -2214,7 +2199,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !!                             in the diagonal gauge
 !!
 !! PARENTS
-!!      dfpt_nstwf
+!!      m_dfpt_nstwf
 !!
 !! CHILDREN
 !!

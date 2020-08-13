@@ -119,10 +119,10 @@ contains
 !!       $  E_{phys} = E_{free} - encorr*(E_{int}-E_{free}) + O(tsmear^3)  $
 !!
 !! PARENTS
-!!      cchi0q0_intraband,clnup1,conducti_nc,dfpt_looppert,m_ebands,newocc
+!!      m_chi0,m_conducti,m_dfpt_looppert,m_ebands,m_gstate,m_occ
 !!
 !! CHILDREN
-!!      dos_hdr_write,init_occ_ent,splfit,wrtout
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -403,10 +403,10 @@ end subroutine getnel
 !!  occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
 !!
 !! PARENTS
-!!      gstate,m_ebands,respfn,vtorho
+!!      m_ebands,m_gstate,m_respfn_driver,m_vtorho
 !!
 !! CHILDREN
-!!      getnel,timab,wrtout
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -778,10 +778,10 @@ end subroutine newocc
 !!  argout(sizeout)=description
 !!
 !! PARENTS
-!!      getnel
+!!      m_occ
 !!
 !! CHILDREN
-!!      spline
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -1316,9 +1316,10 @@ end subroutine init_occ_ent
 !!  $ rocceig(m,n)=\frac{1}{2}*(occ_{k,q}(m)-occ_k(n))/(eig0_{k,q}(m)-eig0_k(n))$
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho
 !!
 !! CHILDREN
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -1627,10 +1628,10 @@ end function occ_dbe
 !!   Only writing.
 !!
 !! PARENTS
-!!      getnel,m_epjdos
+!!      m_epjdos,m_occ
 !!
 !! CHILDREN
-!!      wrtout
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 

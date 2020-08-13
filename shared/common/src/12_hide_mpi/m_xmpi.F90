@@ -240,7 +240,7 @@ MODULE m_xmpi
    module procedure xmpi_distab_4D
  end interface xmpi_distab
 
-!MPI generic interfaces.
+ ! MPI generic interfaces.
  public :: xmpi_allgather
  public :: xmpi_allgatherv
  public :: xmpi_alltoall
@@ -311,6 +311,21 @@ end interface xmpi_allgather
 
 !----------------------------------------------------------------------
 
+! non-blocking version (requires MPI3)
+! Prototype:
+!
+!   call xmpi_ialltoall(xval, sendsize, recvbuf, recvsize, comm, request)
+!   call xmpi_iallgather(SENDBUF, SENDCOUNT, SENDTYPE, RECVBUF, RECVCOUNT, RECVTYPE, COMM, REQUEST, IERROR)
+!
+! If the MPI library does not provide ialltoall, we call the blocking version and
+! we return xmpi_request_null (see xmpi_iallgather.finc)
+! Client code should always test/wait the request so that code semantics is preserved.
+
+!interface xmpi_iallgather
+!  module procedure xmpi_allgather_dp4d
+!
+!end interface xmpi_iallgather
+
 interface xmpi_allgatherv
   module procedure xmpi_allgatherv_int2d
   module procedure xmpi_allgatherv_int
@@ -361,7 +376,7 @@ end interface xmpi_alltoallv
 ! non-blocking version (requires MPI3)
 ! Prototype:
 !
-!   call xmpi_ialltoallv(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
+!   call xmpi_ialltoallv(xval, sendcnts, sdispls, recvbuf, recvcnts, rdispls, comm, request)
 !
 ! If the MPI library does not provide ialltoallv, we call the blocking version and
 ! we return xmpi_request_null (see xmpi_ialltoallv.finc)
@@ -656,12 +671,12 @@ CONTAINS  !===========================================================
 !!  None
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,dummy_tests
+!!      abinit,abitk,aim,anaddb,atdep,band2eps,conducti,cut3d,dummy_tests
 !!      fftprof,fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk
-!!      mrgscr,multibinit,optic,tdep,ujdet,vdw_kernelgen
+!!      mrgscr,multibinit,optic,testtransposer,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -779,11 +794,12 @@ end function xmpi_get_unit
 !!  None
 !!
 !! PARENTS
-!!      aim,anaddb,band2eps,bsepostproc,conducti,cut3d,eph,fold2Bloch
-!!      lapackprof,macroave,mrggkk,optic,tdep,ujdet,vdw_kernelgen
+!!      aim,atdep,band2eps,conducti,cut3d,fold2Bloch,lapackprof
+!!      m_multibinit_driver,macroave,mrggkk,optic,testtransposer,ujdet
+!!      vdw_kernelgen
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -824,10 +840,10 @@ end subroutine xmpi_end
 !!  [exit_status]=optional, shell return code, default 1
 !!
 !! PARENTS
-!!      initmpi_grid,leave_new,m_initcuda,m_libpaw_tools,m_xmpi,testkgrid
+!!      m_errors,m_initcuda,m_libpaw_tools,m_mpinfo,m_xmpi
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -902,7 +918,7 @@ end subroutine xmpi_abort
 !!      m_xmpi
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -943,10 +959,10 @@ end subroutine sys_exit
 !!  unt=Unit number for formatted output.
 !!
 !! PARENTS
-!!      abinit,leave_new,m_argparse
+!!      abinit,m_argparse,m_errors
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1093,7 +1109,7 @@ end function xmpi_comm_size
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1148,7 +1164,7 @@ end subroutine xmpi_comm_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1198,7 +1214,7 @@ end subroutine xmpi_comm_free_1D
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1251,7 +1267,7 @@ end subroutine xmpi_comm_free_2D
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1304,10 +1320,10 @@ end subroutine xmpi_comm_free_3D
 !!  spaceGroup=MPI group
 !!
 !! PARENTS
-!!      m_wfd,m_xmpi,pawprt
+!!      m_paw_tools,m_wfd,m_xmpi
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1365,7 +1381,7 @@ end subroutine xmpi_group_free
 !!      m_wfd
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1411,7 +1427,7 @@ end subroutine xmpi_group_incl
 !!      m_wfd
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1523,10 +1539,10 @@ end function xmpi_subcomm
 !!  mpierr=error code returned
 !!
 !! PARENTS
-!!      m_wfd,m_xmpi,pawprt
+!!      m_paw_tools,m_wfd,m_xmpi
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1568,9 +1584,10 @@ end subroutine xmpi_comm_group
 !!  output_comm=new splitted communicator
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1614,10 +1631,10 @@ end subroutine xmpi_comm_split
 !!                xmpi_undefined when no correspondence exists
 !!
 !! PARENTS
-!!      m_xmpi,pawprt
+!!      m_paw_tools,m_xmpi
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1669,7 +1686,7 @@ end subroutine xmpi_group_translate_ranks
 !!      m_paral_pert
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1714,17 +1731,19 @@ end subroutine xmpi_comm_translate_ranks
 !!  comm=MPI communicator
 !!
 !! PARENTS
-!!      alloc_hamilt_gpu,atomden,calc_optical_mels,calc_ucrpa,chebfi
-!!      m_datafordmft,denfgr,dfpt_nselt,dfpt_nstpaw,dfpt_scfcv,exc_build_block
-!!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_abihist,m_bse_io
-!!      m_dvdb,m_exc_diago,m_exc_itdiago,m_exc_spectra,m_fit_polynomial_coeff
-!!      m_green,m_haydock,m_hdr,m_io_redirect,m_ioarr,m_iowf,m_plowannier
-!!      m_sigmaph,m_slk,m_wfd,m_wffile,m_wfk,m_xgScalapack,mlwfovlp,mlwfovlp_pw
-!!      mover,mover_effpot,outkss,pawmkaewf,qmc_prep_ctqmc,rf2_init,sigma,tddft
-!!      vtorho,vtorhorec,wfk_analyze
+!!      m_Ctqmcoffdiag,m_abihist,m_alloc_hamilt_gpu,m_bse_io,m_calc_ucrpa
+!!      m_chebfi,m_datafordmft,m_ddk,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dtfil,m_dvdb,m_errors,m_exc_build,m_exc_diago,m_exc_itdiago
+!!      m_exc_spectra,m_fit_polynomial_coeff,m_forctqmc,m_green,m_gstateimg
+!!      m_haydock,m_hdr,m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_ksdiago,m_mkrho
+!!      m_mlwfovlp,m_mover_effpot,m_paw_mkaewf,m_paw_mkrho,m_plowannier
+!!      m_polynomial_coeff,m_precpred_1geo,m_primitive_potential_list
+!!      m_rf2_init,m_sigma_driver,m_sigmaph,m_slk,m_spmat_csr,m_tddft,m_vtorho
+!!      m_vtorhorec,m_wfd,m_wfd_optic,m_wffile,m_wfk,m_wfk_analyze
+!!      testtransposer
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1769,7 +1788,7 @@ end subroutine xmpi_barrier
 !!      m_gpu_detect
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1823,7 +1842,7 @@ end subroutine xmpi_name
 !!      m_paw_an,m_paw_ij,m_pawfgrtab,m_pawrhoij
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1867,11 +1886,11 @@ end subroutine xmpi_iprobe
 !!  mpierr= status error
 !!
 !! PARENTS
-!!      dfpt_scfcv,m_fftw3,m_paw_an,m_paw_ij,m_pawfgrtab,m_pawrhoij,m_sg2002
-!!      mover,scfcv
+!!      m_dfpt_scfcv,m_dvdb,m_fftw3,m_mover,m_paw_an,m_paw_ij,m_paw_occupancies
+!!      m_pawfgrtab,m_pawrhoij,m_scfcv_core,m_sg2002
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1915,10 +1934,10 @@ end subroutine xmpi_wait
 !!  mpierr= status error
 !!
 !! PARENTS
-!!      m_paw_an,m_paw_ij,m_pawfgrtab,m_pawrhoij
+!!      m_xmpi
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1964,6 +1983,7 @@ end subroutine xmpi_waitall_1d
 !! PARENTS
 !!
 !! CHILDREN
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2006,7 +2026,7 @@ end subroutine xmpi_waitall_2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2051,7 +2071,7 @@ end subroutine xmpi_request_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2171,6 +2191,9 @@ end subroutine xmpi_comm_set_errhandler
 !!
 !! PARENTS
 !!
+!! CHILDREN
+!!      xmpi_comm_free
+!!
 !! SOURCE
 
 subroutine xmpi_split_work_i4b(ntasks, comm, my_start, my_stop)
@@ -2220,6 +2243,10 @@ end subroutine xmpi_split_work_i4b
 !!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
 !!
 !! PARENTS
+!!      m_sigmaph
+!!
+!! CHILDREN
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2262,6 +2289,10 @@ end subroutine xmpi_split_block
 !!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
 !!
 !! PARENTS
+!!      m_phgamma,m_sigmaph
+!!
+!! CHILDREN
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2316,6 +2347,10 @@ end subroutine xmpi_split_cyclic
 !!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
 !!
 !! PARENTS
+!!      m_phgamma
+!!
+!! CHILDREN
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2381,10 +2416,10 @@ end subroutine xmpi_split_list
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
 !!
 !! PARENTS
-!!      exc_build_block,m_screening,m_skw,setup_screening
+!!      m_exc_build,m_screening,m_screening_driver,m_skw
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2433,10 +2468,10 @@ end subroutine xmpi_split_work2_i4b
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
 !!
 !! PARENTS
-!!      exc_build_block,m_shirley
+!!      m_exc_build
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2489,7 +2524,7 @@ end subroutine xmpi_split_work2_i8b
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2638,6 +2673,11 @@ end function xmpi_distrib_with_replicas
 !!
 !!  From MPI4 specification, this routine is useless as large-count MPI communications
 !!    can be called with the use of the MPI_count datatype (instead of INTEGER).
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2898,6 +2938,11 @@ end subroutine xmpi_largetype_create
 !!  largetype= (INTEGER) MPI type to release
 !!  largetype_op= (INTEGER) MPI user-defined operation associated to largetype type
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!      xmpi_comm_free
+!!
 !! SOURCE
 
 subroutine xmpi_largetype_free(largetype,largetype_op)
@@ -3000,7 +3045,7 @@ end subroutine xmpi_largetype_free
 !!      m_slk,m_wffile,m_wfk,m_xmpi
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3233,7 +3278,7 @@ end subroutine xmpio_get_info_frm
 !!      m_bse_io,m_exc_diago,m_exc_itdiago,m_hdr,m_io_screening,m_xmpi
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3364,7 +3409,7 @@ end subroutine xmpio_read_frm
 !!      m_ioarr
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3503,7 +3548,7 @@ end subroutine xmpio_write_frm
 !!      m_wfk
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3591,10 +3636,10 @@ end subroutine xmpio_create_fstripes
 !!  mpierr= MPI error code
 !!
 !! PARENTS
-!!      exc_build_block,m_exc_itdiago,m_mpiotk,m_wfk
+!!      m_exc_build,m_exc_itdiago,m_mpiotk,m_wfk
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3684,7 +3729,7 @@ end subroutine xmpio_create_fsubarray_2D
 !!      m_mpiotk
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3786,7 +3831,7 @@ end subroutine xmpio_create_fsubarray_3D
 !!      m_mpiotk
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3897,7 +3942,7 @@ end subroutine xmpio_create_fsubarray_4D
 !!      m_bse_io,m_exc_itdiago,m_slk,m_wfk
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4083,7 +4128,7 @@ end subroutine xmpio_check_frmarkers
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4180,7 +4225,7 @@ end subroutine xmpio_read_int
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4298,10 +4343,10 @@ end function xmpio_max_address
 !!  ierr=A non-zero error code signals failure.
 !!
 !! PARENTS
-!!      exc_build_block,m_exc_itdiago,m_ioarr,m_slk,m_wfk
+!!      m_exc_build,m_exc_itdiago,m_ioarr,m_slk,m_wfk
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4498,10 +4543,10 @@ end subroutine xmpio_write_frmarkers
 !!  File views for C-streams is not optimal since one can use a single slice of contigous data.
 !!
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4655,7 +4700,7 @@ end subroutine xmpio_create_fherm_packed
 !!      m_bse_io
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4787,7 +4832,7 @@ end subroutine xmpio_create_coldistr_from_fpacked
 !!      m_bse_io
 !!
 !! CHILDREN
-!!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
+!!      xmpi_comm_free
 !!
 !! SOURCE
 

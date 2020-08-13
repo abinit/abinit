@@ -94,10 +94,9 @@ contains
 !!   List of empty strings if we are legacy "files file" mode. Allocated here, caller should free memory.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      get_ndevice,intagm
 !!
 !! SOURCE
 
@@ -685,9 +684,9 @@ end subroutine invars0
 !!  mx<ab_dimensions>=datatype storing the maximal dimensions. Partly initialized in input.
 !!
 !! PARENTS
+!!      m_common
 !!
 !! CHILDREN
-!!      indefo1,invars1
 !!
 !! SOURCE
 
@@ -893,7 +892,7 @@ end subroutine invars1m
 !!   some of which are given a default value here.
 !!
 !! PARENTS
-!!      invars1m
+!!      m_invars1
 !!
 !! CHILDREN
 !!
@@ -1101,11 +1100,9 @@ end subroutine indefo1
 !! They should be kept consistent with defaults of the same variables provided to the invars routines.
 !!
 !! PARENTS
-!!      invars1m
+!!      m_invars1
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,chkint_ge,ingeo,inkpts,inqpt,intagm,inupper
-!!      invacuum,mkrdim,wrtout
 !!
 !! SOURCE
 
@@ -2007,7 +2004,7 @@ end subroutine invars1
 !! provided the value does not depend on runtime conditions.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
 !!

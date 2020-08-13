@@ -128,12 +128,10 @@ contains
 !!      has been transfered to its child eltxccore.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      atm2fft,dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxcstr,dotprod_vn,eltxccore
-!!      fourdp,metric,paw_spline,pawpsp_cg,pawrad_free,pawrad_init,pawtab_free
-!!      pawtab_nullify,redgr,timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -705,7 +703,7 @@ end subroutine dfpt_eltfrxc
 !! Note that this routine is related to the mkcore.f routine
 !!
 !! PARENTS
-!!      dfpt_eltfrxc
+!!      m_dfpt_elt
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
@@ -1046,10 +1044,10 @@ end subroutine eltxccore
 !!   to the elastic tensor and internal strain.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1391,10 +1389,10 @@ end subroutine dfpt_eltfrloc
 !!                    elastic tensor
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      d2kindstr2,metric,sphereboundary,timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1577,9 +1575,10 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 !! x = (ecut- unmodified energy)/ecutsm.
 !!
 !! PARENTS
-!!      dfpt_eltfrkin
+!!      m_dfpt_elt
 !!
 !! CHILDREN
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1741,10 +1740,10 @@ end subroutine dfpt_eltfrkin
 !! *based largely on hartre.f
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      metric,ptabs_fourdp,timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1951,10 +1950,10 @@ end subroutine dfpt_eltfrhar
 !! elteew(6+3*natom,6)=2nd derivatives of Ewald energy wrt strain
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,wrtout,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2372,7 +2371,7 @@ end subroutine elt_ewald
 !!    second energy derivative wrt xred(3,natom), Hartrees.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
@@ -2667,7 +2666,7 @@ end subroutine dfpt_ewald
 !!    second energy derivative wrt xred(3,natom), Hartrees.
 !!
 !! PARENTS
-!!      respfn
+!!      m_longwave
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
@@ -3005,7 +3004,7 @@ end subroutine dfpt_ewalddq
 !!    sumed over second atomic sublattice.
 !!
 !! PARENTS
-!!      respfn
+!!      m_longwave
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum

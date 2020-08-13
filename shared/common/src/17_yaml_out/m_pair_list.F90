@@ -184,6 +184,7 @@ end function pair_list_length
 !! PARENTS
 !!
 !! CHILDREN
+!!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
 
@@ -223,8 +224,10 @@ end subroutine pair_list_get
 !!  r <real(kind=c_double)>=
 !!
 !! PARENTS
+!!      m_pair_list
 !!
 !! CHILDREN
+!!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
 
@@ -253,6 +256,7 @@ end subroutine pair_list_look
 !! PARENTS
 !!
 !! CHILDREN
+!!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
     subroutine pair_list_next(pl)
@@ -272,6 +276,7 @@ end subroutine pair_list_look
 !! PARENTS
 !!
 !! CHILDREN
+!!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
 
@@ -303,6 +308,7 @@ end subroutine pair_list_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
 
@@ -348,6 +354,7 @@ end subroutine pair_list_set
 !! PARENTS
 !!
 !! CHILDREN
+!!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
 
@@ -416,6 +423,7 @@ end subroutine pair_list_set_keys
 !! PARENTS
 !!
 !! CHILDREN
+!!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
 
@@ -454,6 +462,7 @@ end subroutine pair_list_set_keys_to_null
 !! PARENTS
 !!
 !! CHILDREN
+!!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
 
@@ -485,6 +494,7 @@ end subroutine pair_list_restart
 !! PARENTS
 !!
 !! CHILDREN
+!!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
 

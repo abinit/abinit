@@ -794,9 +794,9 @@ end function dvdb_new
 !!   comm=MPI communicator
 !!
 !! PARENTS
-!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -883,6 +883,7 @@ end subroutine dvdb_open_read
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -916,9 +917,9 @@ end subroutine dvdb_close
 !! Close the file and release the memory allocated.
 !!
 !! PARENTS
-!!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -985,9 +986,9 @@ end subroutine dvdb_free
 !!  Only printing.
 !!
 !! PARENTS
-!!      eph,m_dvdb,m_sigmaph,mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1340,9 +1341,9 @@ end function dvdb_read_onev1
 !!  v1scf(cplex, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
 !! PARENTS
-!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1460,6 +1461,7 @@ end subroutine dvdb_readsym_allv1
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1697,6 +1699,7 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
  if (my_npert == natom3) qcache%use_3natom_cache = .False.
  ! Disabled as slow FT R --> q seems to be faster.
  qcache%use_3natom_cache = .False.
+ qcache%use_3natom_cache = .True.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then
    ABI_MALLOC(qcache%v1scf_3natom_qibz, (2, nfft, nspden, natom3))
@@ -1738,6 +1741,7 @@ end function qcache_new
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1834,6 +1838,7 @@ end subroutine dvdb_qcache_read
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1919,6 +1924,7 @@ end subroutine dvdb_qcache_update_from_file
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1959,6 +1965,7 @@ end subroutine qcache_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2140,6 +2147,7 @@ end function qcache_make_room
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2384,6 +2392,7 @@ end subroutine v1phq_complete
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2476,6 +2485,7 @@ end subroutine find_symeq
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2631,6 +2641,7 @@ end subroutine v1phq_rotate
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2709,6 +2720,7 @@ end subroutine v1phq_symmetrize
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2843,6 +2855,7 @@ end subroutine rotate_fqg
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3382,9 +3395,10 @@ end subroutine prepare_ftinterp
 !!  ov1r(2*nfft, nspden, my_npert)=Interpolated DFPT potentials at the given q-point (periodic part)
 !!
 !! PARENTS
-!!      m_dvdb,m_phgamma,m_phpi,m_sigmaph
+!!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3590,6 +3604,7 @@ end subroutine dvdb_ftinterp_qpt
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3608,6 +3623,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
 !Local variables-------------------------------
 !scalars
+ integer,save :: enough = 0
  integer :: iq_ibz, itimrev, isym, ierr, imyp, mu, root
  logical :: isirr_q, incache
 !!arrays
@@ -3679,6 +3695,18 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
    ! This is possible only if all procs inside comm_rpt call this routine else deadlock
    ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
    call db%ftinterp_qpt(qbz, nfft, ngfft, v1scf, db%comm_rpt)
+
+   if (db%ft_qcache%use_3natom_cache .and. isirr_q) then
+     enough = enough + 1
+     if (enough < 5) call wrtout(std_out, " Collecting in cache all 3*natom DFPT potentials for q in the IBZ")
+     if (cplex /= db%ft_qcache%stored_iqibz_cplex(2)) then
+       ABI_REMALLOC(db%ft_qcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))
+     end if
+     db%ft_qcache%stored_iqibz_cplex = [iq_ibz, cplex]
+     ! TODO: Non-blocking version
+     call xmpi_allgather(v1scf, cplex*nfft*db%nspden*db%my_npert, db%ft_qcache%v1scf_3natom_qibz, db%comm_pert, ierr)
+   end if
+
    call timab(1809, 2, tsec); return
  end if
 
@@ -3777,6 +3805,7 @@ end subroutine dvdb_get_ftqbz
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3878,6 +3907,7 @@ end subroutine dvdb_ftqcache_build
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3969,6 +3999,7 @@ end subroutine dvdb_ftqcache_update_from_ft
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4314,6 +4345,7 @@ end subroutine dvdb_get_v1scf_rpt
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4430,9 +4462,9 @@ end subroutine dvdb_get_v1scf_qpt
 !!  v1scf(2, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
 !! PARENTS
-!!      m_gkk
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4612,6 +4644,7 @@ end function dvdb_find_qpts
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4664,6 +4697,7 @@ end subroutine dvdb_set_pert_distrib
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4859,9 +4893,9 @@ end function my_hdr_skip
 !!  npert_miss = Number of missing perturbations.
 !!
 !! PARENTS
-!!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5036,6 +5070,7 @@ end subroutine dvdb_list_perts
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5331,6 +5366,7 @@ end function dvdb_check_fform
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5471,6 +5507,7 @@ end subroutine dvdb_test_v1rsym
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5708,9 +5745,9 @@ end subroutine dvdb_test_v1complete
 !!  Only writing.
 !!
 !! PARENTS
-!!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6093,6 +6130,7 @@ end subroutine dvdb_write_v1qavg
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6324,9 +6362,9 @@ end subroutine dvdb_test_ftinterp
 !!  v1r_lr = dipole potential
 !!
 !! PARENTS
-!!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6688,9 +6726,9 @@ end subroutine dvdb_load_efield
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -7134,6 +7172,7 @@ end subroutine dvdb_interpolate_and_write
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 

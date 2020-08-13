@@ -83,10 +83,11 @@ CONTAINS
 !!  vccut(ng,nq)= Fourier components of the effective Coulomb interaction
 !!
 !! PARENTS
-!!      m_vcoul
+!!      m_barevcoul,m_vcoul
 !!
 !! CHILDREN
-!!      calck0,paw_jbessel,quadrature
+!!      calck0,calck1,caljy0,caljy1,metric,paw_jbessel,quadrature,wrtout
+!!      xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 

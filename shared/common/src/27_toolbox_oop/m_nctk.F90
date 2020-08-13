@@ -422,9 +422,10 @@ end function nctk_string_from_occopt
 !!    to handle possible errors in the caller.
 !!
 !! PARENTS
-!!      conducti_nc,optic
+!!      m_conducti,optic
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -530,6 +531,7 @@ end function nctk_try_fort_or_ncfile
 !!      abinit
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -1320,9 +1322,10 @@ end function nctk_def_basedims
 !!  (only writing)
 !!
 !! PARENTS
-!!      m_abihist,m_bse_io,m_effective_potential,write_eig
+!!      m_abihist,m_bse_io,m_effective_potential,m_nctk,m_spin_ncfile
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2377,6 +2380,7 @@ end function nctk_read_datar
 !!      m_nctk
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2458,6 +2462,7 @@ end subroutine collect_datar
 !!      m_nctk
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2526,6 +2531,7 @@ end subroutine distrib_datar
 !!      m_nctk
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2585,6 +2591,7 @@ end subroutine var_from_id
 !! PARENTS
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2632,6 +2639,7 @@ end subroutine var_from_name
 !!      anaddb,m_ifc
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2705,6 +2713,7 @@ end subroutine nctk_defwrite_nonana_terms
 !!      anaddb
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2770,6 +2779,7 @@ end subroutine nctk_defwrite_nonana_raman_terms
 !!      anaddb
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2821,9 +2831,10 @@ end subroutine nctk_defwrite_raman_terms
 !!  Remove
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2880,9 +2891,10 @@ integer :: ncerr, cmode
 !!  (only writing)
 !!
 !! PARENTS
-!!      prttagm,prttagm_images
+!!      m_parser
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2963,7 +2975,7 @@ end subroutine write_var_netcdf
 !!  (only writing)
 !!
 !! PARENTS
-!!      clnup1
+!!      m_gstate
 !!
 !! CHILDREN
 !!      ab_define_var

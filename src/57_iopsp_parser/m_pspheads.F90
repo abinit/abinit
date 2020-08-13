@@ -78,11 +78,10 @@ contains
 !!  ecut_tmp(3,2,npsp)= possible ecut values as read in psp files
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      atomic_info,pawpsxml2ab
-!!      psp_from_data,psxml2abheader,upfheader2abi,wrtout
+!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 
@@ -536,10 +535,10 @@ end subroutine inpspheads
 !!   on all processors at output
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast
+!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 
@@ -707,10 +706,10 @@ end subroutine pspheads_comm
 !! pspheads data structure is filled
 !!
 !! PARENTS
-!!      inpspheads
+!!      m_pspheads,m_pspini
 !!
 !! CHILDREN
-!!      pawpsp_read_header_xml,pawpsp_read_pawheader
+!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 
@@ -794,7 +793,7 @@ end subroutine pawpsxml2ab
 !!  nprojso_l= number of projectors for each channel for SO correction projectors
 !!
 !! PARENTS
-!!      inpspheads
+!!      m_pspheads
 !!
 !! CHILDREN
 !!      set_dft_from_indices,set_dft_from_name
@@ -872,7 +871,7 @@ end subroutine upfheader2abi
 !!   Left without defs_basis or calls to abinit routines ON PURPOSE
 !!
 !! PARENTS
-!!      upf2abinit,upfheader2abi
+!!      m_pspheads,m_upf2abinit
 !!
 !! CHILDREN
 !!      set_dft_from_indices,set_dft_from_name

@@ -129,13 +129,10 @@ contains
 !! MG: I completely agree. Abinit developers must learn that Fortran does not allow for aliasing!
 !!
 !! PARENTS
-!!      invars1
+!!      m_invars1
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,chkorthsy,fillcell,gensymshub,gensymshub4
-!!      gensymspgr,intagm_img,ingeobld,intagm,mati3inv,metric,mkradim,mkrdim
-!!      randomcellpos,symanal,symatm,symfind,symlatt,symmetrize_rprimd
-!!      symmetrize_xred,symrelrot,wrtout,xcart2xred,xred2xcart
+!!      intagm,metric,sort_dp
 !!
 !! SOURCE
 
@@ -1148,10 +1145,10 @@ end subroutine ingeo
 !! xcart(3,natom)=cartesian coordinates of atoms (bohr)
 !!
 !! PARENTS
-!!      ingeo
+!!      m_ingeo
 !!
 !! CHILDREN
-!!      intagm,wrtout
+!!      intagm,metric,sort_dp
 !!
 !! SOURCE
 
@@ -1801,9 +1798,10 @@ end subroutine ingeobld
 !!  xred(3,1:natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      ingeo
+!!      m_ingeo
 !!
 !! CHILDREN
+!!      intagm,metric,sort_dp
 !!
 !! SOURCE
 
@@ -1950,7 +1948,7 @@ end subroutine fillcell
 !! vacuum(3)= for each direction, 0 if no vacuum, 1 if vacuum
 !!
 !! PARENTS
-!!      invars1,invars2
+!!      m_invars1,m_invars2
 !!
 !! CHILDREN
 !!      intagm,metric,sort_dp

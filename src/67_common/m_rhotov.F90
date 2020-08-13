@@ -154,12 +154,12 @@ contains
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      dotprod_vn,hartre,mag_penalty,mean_fftr,psolver_rhohxc,rhohxcpositron
-!!      rhotoxc,sqnorm_v,timab,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init
-!!      xchybrid_ncpp_cc,xred2xcart
+!!      constrained_residual,dotprod_vn,hartre,mag_penalty,mean_fftr
+!!      psolver_rhohxc,rhohxcpositron,rhotoxc,sqnorm_v,timab,wvl_psitohpsi
+!!      wvl_vtrial_abi2big,xcdata_init,xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 

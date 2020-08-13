@@ -181,12 +181,12 @@ contains
 !!    etc...
 !!
 !! PARENTS
-!!      dfpt_dyfro,dfpt_eltfrxc,extraprho,forces,fresidrsp,prcref,prcref_PMA
-!!      respfn,setvtr,stress
+!!      m_dfpt_elt,m_extraprho,m_forces,m_nonlinear,m_prcref,m_respfn_driver
+!!      m_setvtr,m_stress
 !!
 !! CHILDREN
 !!      destroy_distribfft,fourdp,init_distribfft_seq,initmpi_seq
-!!      set_mpi_enreg_fft,timab,unset_mpi_enreg_fft,wrtout,xmpi_sum,zerosym
+!!      set_mpi_enreg_fft,unset_mpi_enreg_fft,zerosym
 !!
 !! SOURCE
 
@@ -993,7 +993,8 @@ end subroutine atm2fft
 !!  - 1st-order PS core density: optn=1, optn2=1
 !!
 !! PARENTS
-!!      dfpt_dyxc1,dfpt_eltfrxc,dfpt_looppert,dfpt_nstpaw,pawgrnl
+!!      m_dfpt_elt,m_dfpt_looppert,m_dfpt_nstwf,m_dfptnl_loop,m_paw_dfpt
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!      destroy_distribfft,fourdp,init_distribfft_seq,initmpi_seq

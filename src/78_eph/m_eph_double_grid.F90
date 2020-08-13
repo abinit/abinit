@@ -466,6 +466,7 @@ end function eph_double_grid_get_index
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_eph_double_grid
 !!
 !! CHILDREN
 !!

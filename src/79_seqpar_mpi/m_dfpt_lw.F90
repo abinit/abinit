@@ -48,7 +48,6 @@ module m_dfpt_lw
  use m_hdr
  use m_io_tools,   only : file_exists
  use m_ioarr,      only : read_rhor, fftdatar_write_from_hdr
- use m_wfk
  use m_rf2,        only : rf2_getidirs
  use m_kg,         only : getcut, getph, getmpw, kpgio
  use m_abicore,    only : appdig
@@ -144,17 +143,10 @@ contains
 !!  the physical observables.
 !!
 !! PARENTS
-!!
-!!  respfn
+!!      m_longwave
 !!
 !! CHILDREN
-!!
-!!  appdig, distrb2, dfpt_qdrpout, dfpt_qdrpwf, dfpt_rhotov, distrb2, dotprod_vn, ebands_init,
-!!  ebands_free, fftdatar_write_from_hdr,
-!!  fourdp, getcut, getmpw, getph, hdr_init, hdr_update, init_hamiltonian,
-!!  initmpi_band, initylmg, inwffil, kpgio, load_spin_hamiltonian,
-!!  hartredq, read_rhor, rf2_getidirs, setsym, symkpt, WffClose,
-!!  wfk_open_read, wrtout, xmpi_sum
+!!      cart39
 !!
 !! SOURCE
 
@@ -163,8 +155,6 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 &          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1112,20 +1102,16 @@ end subroutine dfpt_qdrpole
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  dfpt_qdrpole
+!!      m_dfpt_lw
 !!
 !! CHILDREN
-!!
-!!  cart39
+!!      cart39
 !!
 !! SOURCE
 
 subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
          & nq1grad,nq2grad,pert_atdis,prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, &
          & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1614,16 +1600,10 @@ end subroutine dfpt_qdrpout
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  respfn
+!!      m_longwave
 !!
 !! CHILDREN
-!!  appdig,dfpt_ciflexoout,dfpt_ciflexowf,dfpt_rhotov,distrb2,dotprod_vn,
-!!  ebands_free,ebands_init,fourdp,
-!!  getcut,getmpw,getph,hdr_init,hdr_update,
-!!  initmpi_band,init_hamiltonian,initylmg,inwffil,kpgio
-!!  load_spin_hamiltonian,hartredq,rf2_getidirs,read_rhor,
-!!  setsym,symkpt,WffClose,wfk_open_read,wrtout,xmpi_sum
+!!      cart39
 !!
 !! SOURCE
 
@@ -1632,8 +1612,6 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
 &          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3067,12 +3045,10 @@ end subroutine dfpt_flexo
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  dfpt_flexo
+!!      m_dfpt_lw
 !!
 !! CHILDREN
-!!
-!!  cart39
+!!      cart39
 !!
 !! SOURCE
 
@@ -3080,8 +3056,6 @@ end subroutine dfpt_flexo
     & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
     & elqgradhart,gprimd,kptopt,matom,mpert,nefipert,&
     & nstrpert,nq1grad,pert_efield,pert_strain,prtvol,q1grad,rprimd,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3613,19 +3587,15 @@ end subroutine dfpt_ciflexoout
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  dfpt_flexo
+!!      m_dfpt_lw
 !!
 !! CHILDREN
-!!
-!!  cart39
+!!      cart39
 !!
 !! SOURCE
 
  subroutine dfpt_ddmdqout(ddmdq_flg,ddmdq_qgradhart,ddmdqwf,ddmdqwf_t1,ddmdqwf_t2,ddmdqwf_t3,d3etot, &
  & dyewdq,gprimd,kptopt,matom,mpert,natpert,nq1grad,pert_atdis,prtvol,q1grad,rprimd)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3994,20 +3964,16 @@ end subroutine dfpt_ciflexoout
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  dfpt_flexo
+!!      m_dfpt_lw
 !!
 !! CHILDREN
-!!
-!!  cart39
+!!      cart39
 !!
 !! SOURCE
 
  subroutine dfpt_isdqout(d3etot,dyewdqdq,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
    & isdqwf_t3,isdqwf_t4,isdqwf_t5,kptopt,matom,mpert,natpert, &
    & nstrpert,nq1grad,pert_atdis,pert_strain,prtvol,q1grad,rprimd,ucvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -75,7 +75,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      wvl_wfsinp_disk
+!!      m_wvl_wfsinp
 !!
 !! CHILDREN
 !!      etsf_io_basisdata_put,etsf_io_electrons_put,etsf_io_main_put

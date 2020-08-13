@@ -100,10 +100,12 @@ contains
 !! of their multi-dataset representation.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      invars2,metric,mkrdim,setshells
+!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      libxc_functionals_end,libxc_functionals_get_hybridparams
+!!      libxc_functionals_init,sort_int,timab,wrtout
 !!
 !! SOURCE
 
@@ -221,13 +223,12 @@ end subroutine invars2m
 !! At the input, they already contain a default value.
 !!
 !! PARENTS
-!!      invars2m,m_ab7_invars_f90
+!!      m_invars2
 !!
 !! CHILDREN
-!!      dtset_chkneu,get_auxc_ixc,get_kpt_fullbz,get_xclevel,intagm_img,inkpts
-!!      intagm,invacuum,libxc_functionals_end
-!!      libxc_functionals_get_hybridparams,libxc_functionals_init,matr3inv
-!!      sort_int,timab,wrtout
+!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      libxc_functionals_end,libxc_functionals_get_hybridparams
+!!      libxc_functionals_init,sort_int,timab,wrtout
 !!
 !! SOURCE
 

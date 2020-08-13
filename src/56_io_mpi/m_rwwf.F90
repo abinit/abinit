@@ -127,7 +127,7 @@ contains
 !!  option 3 should be called -3 (reading -> negative option) and others (-1,1) re-shuffled.
 !!
 !! PARENTS
-!!      WffReadEigK,WffReadSkipK,initwf,m_iowf,m_wfk,newkpt,uderiv
+!!      m_elpolariz,m_inwffil,m_iowf,m_rwwf,m_wfk
 !!
 !! CHILDREN
 !!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
@@ -217,10 +217,11 @@ end subroutine rwwf
 !! NOTES
 !!
 !! PARENTS
-!!      initwf,newkpt,wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      rwwf
+!!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
+!!      xderivewrecinit,xderivewrite,xmpi_sum
 !!
 !! SOURCE
 
@@ -305,7 +306,7 @@ end subroutine WffReadSkipK
 !!  WARNING : reading the two first records is also done in the rdnpw routine
 !!
 !! PARENTS
-!!      rwwf
+!!      m_rwwf
 !!
 !! CHILDREN
 !!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
@@ -787,7 +788,7 @@ end subroutine readwf
 !!  WARNING : writing the two first records is also done in the dfpt_vtowfk routine
 !!
 !! PARENTS
-!!      rwwf
+!!      m_rwwf
 !!
 !! CHILDREN
 !!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend

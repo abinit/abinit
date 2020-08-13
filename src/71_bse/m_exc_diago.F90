@@ -84,9 +84,15 @@ contains
 !!  Eigenvalues and eigenvectors are written on file.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -209,6 +215,12 @@ end subroutine exc_diago_driver
 !!      m_exc_diago
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -679,6 +691,12 @@ end subroutine exc_diago_resonant
 !!      m_exc_diago
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -825,6 +843,12 @@ end subroutine exc_print_eig
 !!      m_exc_diago
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -1088,6 +1112,12 @@ end subroutine exc_diago_coupling
 !!      m_exc_diago
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 

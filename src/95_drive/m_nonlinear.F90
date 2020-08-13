@@ -145,14 +145,10 @@ contains
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      d3sym,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
-!!      getkgrid,getshell,hdr_free,hdr_init,hdr_update,initmv,inwffil,kpgio
-!!      mkcore,nlopt,pspini,read_rhor,rhotoxc,setsym,setup1,status
-!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
-!!      symmetrize_xred,sytens,timab,wffclose,wrtout
+!!      kpgio,xmpi_sum
 !!
 !! SOURCE
 
@@ -1366,9 +1362,10 @@ end if
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
+!!      kpgio,xmpi_sum
 !!
 !! SOURCE
 
@@ -1412,9 +1409,10 @@ end if
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
+!!      kpgio,xmpi_sum
 !!
 !! SOURCE
 
@@ -1486,7 +1484,7 @@ end subroutine nonlinear
 !!                           (see initberry.f for more explanations)
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
 !!      kpgio,xmpi_sum
