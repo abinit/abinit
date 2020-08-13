@@ -5486,12 +5486,12 @@ subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
 
 !Local variables-------------------------------
 !scalars
- integer :: natom, natom3, idir, iat, jdir, iat_sym, isym_inv
+ integer :: natom, natom3, idir, iat, jdir, iat_sym !, isym_inv
  real(dp) :: arg
 !arrays
  integer :: r0(3)
- real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom), gamma2(2,3,cryst%natom,3,cryst%natom)
- real(dp) :: symat(3,3), phase(2), dum(0, 0)
+ real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom) !, gamma2(2,3,cryst%natom,3,cryst%natom)
+ real(dp) :: symat(3,3), phase(2) !, dum(0, 0)
 
 !************************************************************************
 
@@ -5586,7 +5586,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  integer :: nqibz, iq_bz, iq_ibz, nqbz, ii, natom, natom3, ierr
  integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol
  real(dp), parameter ::  tol_phfreq_meV = tol3, tol_eigvec = tol6
- real(dp) :: dksqmax, maxerr_phfreq, err_phfreq, err_eigvec, maxerr_eigvec
+ real(dp) :: dksqmax, maxerr_phfreq, err_phfreq maxerr_eigvec ! err_eigvec
  logical :: isirr_q
  character(len=500) :: msg, fmt_freqs, fmt_eigvec
  type(krank_t) :: qrank
@@ -5701,7 +5701,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
    write(std_out, *) "max eig_diff [meV]: ", maxval(work)
    write(std_out, "(a)")" e^H D e (meV**2)"
    d2cart = d2cart * Ha_meV ** 2
-   call print_arr(reshape(cmplx(d2cart(1,:,:), d2cart(2,:,:)), [natom3, natom3]))
+   call print_arr(reshape(cmplx(d2cart(1,:,:), d2cart(2,:,:), kind=dp), [natom3, natom3]))
 
    !err_eigvec = maxval(abs(eigvec_out - eigvec_bz))
    !if (err_eigvec > tol_eigvec) then

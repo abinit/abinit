@@ -4379,20 +4379,20 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 !!!Under development!!!
-Electronic structure calculations for isolated systems, 1D and 2D systems 
+Electronic structure calculations for isolated systems, 1D and 2D systems
 present a slow convergence with respect to the size of the supercell due to the
-long ranged Coulomb interaction and the high degree of non-locality of the 
-operators involved. Thus, restricting the range of the Coulomb interaction, 
-in order to prevent supercell images to interact can significantly speed-up 
+long ranged Coulomb interaction and the high degree of non-locality of the
+operators involved. Thus, restricting the range of the Coulomb interaction,
+in order to prevent supercell images to interact can significantly speed-up
 convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
 [[fock_icutcoul]] defines the particular expression to be used for the Fock
-operator in reciprocal space. The choice of [[fock_icutcoul]] depends on the 
-dimensionality and the character of the XC functional used (or otherwise the 
-presence of the exclusive treatment of the short-range exchange interaction). 
-Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are available 
-options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals. 
+operator in reciprocal space. The choice of [[fock_icutcoul]] depends on the
+dimensionality and the character of the XC functional used (or otherwise the
+presence of the exclusive treatment of the short-range exchange interaction).
+Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are available
+options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals.
 The corresponding influential variables are [[vcutgeo]] and [[rcut]].
 
   * 0 --> sphere (molecules, but also 3D-crystals, see below).
@@ -5815,16 +5815,16 @@ Variable(
     requires="[[optdriver]] in [3,4]",
     added_in_version="v9.1",
     text=r"""
-Many-body calculations for fully periodic systems are problematic due to the 
+Many-body calculations for fully periodic systems are problematic due to the
 presence of the integrable Coulomb singularity at $\mathbf{G}=0$ that hinders
-the convergence with respect to the number of q-points used to sample the 
+the convergence with respect to the number of q-points used to sample the
 Brillouin zone. The convergence can be accelerated by integrating accurately
 the zone in the neighborhood of $\mathbf{G}=0$.
 
 [[gw_icutcoul]] defines the particular expression to be used for such integration.
 It can be used in conjunction with its equivalent for the ground state electronic
 structure cut-off [[icutcoul]].
-  
+
   * 0 --> sphere (molecules, but also 3D-crystals, see below).
   * 1 --> cylinder (nanowires, nanotubes).
   * 2 --> surface.
@@ -6904,11 +6904,11 @@ Variable(
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
     added_in_version="before_v9",
     text=r"""
-Electronic structure calculations for isolated systems, 1D and 2D systems 
+Electronic structure calculations for isolated systems, 1D and 2D systems
 present a slow convergence with respect to the size of the supercell due to the
-long ranged Coulomb interaction and the high degree of non-locality of the 
-operators involved. Thus, restricting the range of the Coulomb interaction, 
-in order to prevent supercell images to interact can significantly speed-up 
+long ranged Coulomb interaction and the high degree of non-locality of the
+operators involved. Thus, restricting the range of the Coulomb interaction,
+in order to prevent supercell images to interact can significantly speed-up
 convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
@@ -16828,7 +16828,7 @@ translations.
 Alternatively to [[rprim]], directions of dimensionless primitive vectors can
 be specified by using the input variable [[angdeg]]. This is especially useful
 for hexagonal lattices (with 120 or 60 degrees angles). Indeed, in order for
-symmetries to be recognized, rprim must be symmetric up to [[tolsym]] (1.0e-5 by default), 
+symmetries to be recognized, rprim must be symmetric up to [[tolsym]] (1.0e-5 by default),
 inducing a specification such as
 
       rprim  0.86602  0.5  0.0
@@ -21736,7 +21736,7 @@ Variable(
     vartype="real",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval=4.0,
+    defaultval=1.1,
     mnemonics="EPH PHonon FACTor for energy WINdow",
     added_in_version="9.2.0",
     text=r"""
