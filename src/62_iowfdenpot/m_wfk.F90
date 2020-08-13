@@ -2167,7 +2167,7 @@ end subroutine wfk_write_band_block
 !!
 !! SOURCE
 
-subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
+subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, occ_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -2212,7 +2212,6 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
  !  end if
  !end if
 
- !
  ! Look before you leap.
  npw_disk = Wfk%Hdr%npwarr(ik_ibz)
  nspinor_disk = Wfk%nspinor
@@ -2247,7 +2246,7 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
  case (IO_MODE_FORTRAN)
 
    ! Rewind the file to have the correct (k,s) block (if needed)
-   call wfk_seek(Wfk,ik_ibz,spin)
+   call wfk_seek(Wfk, ik_ibz, spin)
 
    ! Read the first record: npw, nspinor, nband_disk
    read(Wfk%fh, err=10, iomsg=errmsg) npw_read, nspinor_read, nband_read
@@ -2266,7 +2265,7 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
    end if
 
    ! The third record: eigenvalues and occupation factors.
-   if (Wfk%formeig==0) then
+   if (Wfk%formeig == 0) then
 
      if (present(eig_k) .or. present(occ_k)) then
        ABI_MALLOC(tmp_eigk, (nband_disk))
@@ -2276,7 +2275,6 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
 
        if (present(eig_k)) eig_k = tmp_eigk
        if (present(occ_k)) occ_k = tmp_occk
-
        ABI_FREE(tmp_eigk)
        ABI_FREE(tmp_occk)
 
@@ -2297,13 +2295,14 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
            read(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
          end if
        end do
+
      else
        do band=1,nband_disk
          read(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
        end do
      end if
 
-   else if (Wfk%formeig==1) then
+   else if (Wfk%formeig == 1) then
      ! Read matrix of size (2*nband_k**2)
      npwso = npw_disk*nspinor_disk
      my_bcount = 0

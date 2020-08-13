@@ -528,7 +528,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
+subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut,kg_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -614,8 +614,8 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
    mkmem_=1; mpw_=npw_k; nband_=0; nkpt_=1; npwarr_(1)=npw_k
    optder=0 ! only Ylm(K) are computed.
 
-   call initylmg(Cryst%gprimd,Kdata%kg_k,kpoint,mkmem_,MPI_enreg,Psps%mpsang,mpw_,nband_,nkpt_,&
-    npwarr_,1,optder,Cryst%rprimd,Kdata%ylm,ylmgr_k)
+   call initylmg(Cryst%gprimd, Kdata%kg_k, kpoint, mkmem_, MPI_enreg, Psps%mpsang, mpw_, nband_, nkpt_,&
+    npwarr_, 1, optder, Cryst%rprimd, Kdata%ylm, ylmgr_k)
 
    Kdata%has_ylm = 2
  end if
