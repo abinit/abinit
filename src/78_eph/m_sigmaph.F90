@@ -5586,7 +5586,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  integer :: nqibz, iq_bz, iq_ibz, nqbz, ii, natom, natom3, ierr
  integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol
  real(dp), parameter ::  tol_phfreq_meV = tol3, tol_eigvec = tol6
- real(dp) :: dksqmax, maxerr_phfreq, err_phfreq maxerr_eigvec ! err_eigvec
+ real(dp) :: dksqmax, maxerr_phfreq, err_phfreq, maxerr_eigvec ! err_eigvec
  logical :: isirr_q
  character(len=500) :: msg, fmt_freqs, fmt_eigvec
  type(krank_t) :: qrank
