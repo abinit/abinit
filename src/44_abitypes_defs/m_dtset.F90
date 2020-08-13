@@ -863,7 +863,7 @@ type, public :: dataset_type
  real(dp) :: eph_fsmear = 0.01_dp
  real(dp) :: eph_fsewin = 0.04_dp
  real(dp) :: eph_ecutosc = zero
- real(dp) :: eph_phwinfact = four
+ real(dp) :: eph_phwinfact = 1.1_dp
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  integer :: eph_phrange(2) = 0
 

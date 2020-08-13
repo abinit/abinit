@@ -995,7 +995,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! to reduce the number of calls to ifc%fourq
  use_ifc_fourq = dtset%userib == 123
  use_ifc_fourq = .True.
- use_ifc_fourq = .False.
+ !use_ifc_fourq = .False.
  phstore = phstore_new(cryst, ifc, sigma%nqibz, sigma%qibz, use_ifc_fourq, sigma%pert_comm%value)
  call cwtime_report(" phonons in the q-IBZ", cpu_ks, wall_ks, gflops_ks)
 

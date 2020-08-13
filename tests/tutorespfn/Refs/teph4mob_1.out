@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  3 Aug 2020.
-- ( at 03h56 )
+.Starting date : Thu 13 Aug 2020.
+- ( at 17h20 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_1.in
 - output file    -> teph4mob_1.out
@@ -5717,10 +5717,10 @@ P          mk1mem10       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        127.1  wall=        134.3
+- Proc.   0 individual time (sec): cpu=        134.2  wall=        140.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and 215 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        127.1  wall=        134.3
+.Delivered 379 WARNINGs and 215 COMMENTs to log file.
++Overall time at end (sec) : cpu=        134.2  wall=        140.8

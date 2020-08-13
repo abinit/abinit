@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  3 Aug 2020.
-- ( at 00h28 )
+.Starting date : Thu 13 Aug 2020.
+- ( at 17h23 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
@@ -208,16 +208,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
         boxcutmin      1.10000000E+00
         ddb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
-    eph_phwinfact1     4.00000000E+00
-    eph_phwinfact2     4.00000000E+00
-    eph_phwinfact3     4.00000000E+00
-    eph_phwinfact4     4.00000000E+00
-    eph_phwinfact5     4.00000000E+00
+    eph_phwinfact1     1.10000000E+00
+    eph_phwinfact2     1.10000000E+00
+    eph_phwinfact3     1.10000000E+00
+    eph_phwinfact4     1.10000000E+00
+    eph_phwinfact5     1.10000000E+00
     eph_phwinfact6     3.90000000E+00
-    eph_phwinfact7     4.00000000E+00
-    eph_phwinfact8     4.00000000E+00
-    eph_phwinfact9     4.00000000E+00
-    eph_phwinfact10    4.00000000E+00
+    eph_phwinfact7     1.10000000E+00
+    eph_phwinfact8     1.10000000E+00
+    eph_phwinfact9     1.10000000E+00
+    eph_phwinfact10    1.10000000E+00
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -1793,9 +1793,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   2  -0.193    0.001    241.9    0.000
-   3  -0.193    0.001    241.9    0.000
-   4  -0.193    0.001    241.9    0.000
+   2  -0.193    0.001    247.1    0.000
+   3  -0.193    0.001    247.1    0.000
+   4  -0.193    0.001    247.1    0.000
    5   8.342    0.000 999999.0    8.536
  
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
@@ -1803,13 +1803,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
 ============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.415    0.147      2.2    0.000
-   4  -0.415    0.147      2.2    0.000
+   3  -0.415    0.140      2.4    0.000
+   4  -0.415    0.140      2.4    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.415    0.181      1.8    0.000
-   4  -0.415    0.181      1.8    0.000
+   3  -0.415    0.166      2.0    0.000
+   4  -0.415    0.166      2.0    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -2328,16 +2328,16 @@ meta: {optdriver: 7, eph_task: -15, }
         boxcutmin      1.10000000E+00
         ddb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
-    eph_phwinfact1     4.00000000E+00
-    eph_phwinfact2     4.00000000E+00
-    eph_phwinfact3     4.00000000E+00
-    eph_phwinfact4     4.00000000E+00
-    eph_phwinfact5     4.00000000E+00
+    eph_phwinfact1     1.10000000E+00
+    eph_phwinfact2     1.10000000E+00
+    eph_phwinfact3     1.10000000E+00
+    eph_phwinfact4     1.10000000E+00
+    eph_phwinfact5     1.10000000E+00
     eph_phwinfact6     3.90000000E+00
-    eph_phwinfact7     4.00000000E+00
-    eph_phwinfact8     4.00000000E+00
-    eph_phwinfact9     4.00000000E+00
-    eph_phwinfact10    4.00000000E+00
+    eph_phwinfact7     1.10000000E+00
+    eph_phwinfact8     1.10000000E+00
+    eph_phwinfact9     1.10000000E+00
+    eph_phwinfact10    1.10000000E+00
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -2637,10 +2637,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         19.8  wall=         28.0
+- Proc.   0 individual time (sec): cpu=         19.6  wall=         27.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.8  wall=         28.0
+.Delivered  23 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.6  wall=         27.6
