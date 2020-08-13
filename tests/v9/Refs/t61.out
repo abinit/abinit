@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 13 Aug 2020.
-- ( at 17h23 )
+- ( at 17h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t61.in
 - output file    -> t61.out
@@ -706,8 +706,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
 ============================================================================================
 K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.226    0.001    288.3    0.000
-   4  -0.226    0.001    288.3    0.000
+   3  -0.226    0.001    289.5    0.000
+   4  -0.226    0.001    289.5    0.000
 ============================================================================================
 K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1023,10 +1023,10 @@ P           mkmem3         29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         25.6  wall=         29.0
+- Proc.   0 individual time (sec): cpu=         20.0  wall=         25.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.6  wall=         29.0
++Overall time at end (sec) : cpu=         20.0  wall=         25.5
