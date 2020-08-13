@@ -1,6 +1,6 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
 INSTALL_gpu.md
-INSTALL_MacOSX.md
+INSTALL_MacOS.md
 INSTALL_Ubuntu.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md

@@ -1,9 +1,9 @@
 # Installation notes for ABINIT
 
-This page provides an introduction to the operations needed to install the
-ABINIT package and to generate the executables. 
-It indicates also how to test whether the installation was successfull.
-Finally, it gives complements for the developers.
+This page provides an introduction to the installation of the
+ABINIT package and compilation of the executables. 
+It indicates also how to test whether the installation/compilation was successfull.
+Finally, it gives related complements for the developers.
 
 <!--
 See a recent version of the [new user's guide](..),
@@ -17,8 +17,8 @@ Simply contact the ABINIT group <https://forum.abinit.org/>
 
 ## Overview
 
-For the vast majority of people willing to use ABINIT (simple users -not developers- with Unix/Linux or MacOS under terminal mode), 
-the installation steps are:
+For the vast majority of people willing to use ABINIT (simple users -not developers-, with Unix/Linux or MacOS under terminal mode), 
+the installation/compilation steps are:
 
   1. Prerequisite : you need a Fortran compiler, a C compiler, the Python interpreter (>2.7.5), 
      some mandatory libraries (Linalg, FFT, NetCDF, HDF5, LibXC), 
@@ -26,11 +26,11 @@ the installation steps are:
      So, know how to invoke these prerequisites, install the libraries if not available immediately with your OS, and know the location of libraries. 
      The libraries can be installed with the help of the "fallback" procedure. See below for more info on this step.
   2. Get the [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz) 
-     from the abinit Web site, then change the current directory to the top of the directory in which you have unfolded (gunzip/tar -xvf) the package.
+     from the abinit Web site.
      [More information](#how-to-get-a-version-of-abinit) ...
   3. Prepare a file name "hostname".ac9, that contains the information about libraries and compilation options. 
      This is not mandatory, as ABINIT will try to detect the place where these are, but the detection procedure can fail.
-     See below for more information, as well as in [this section](#how-to-make-the-hostnameac9-file) ...
+     See below for more information, as well as in [this section](#how-to-write-the-hostnameac9-file) ...
   4. Issue "configure -q" or "./configure -q" (or first create a tmp directory, then "cd tmp", then "../configure -q").
      [More information](https://wiki.abinit.org/doku.php?id=build:configure) ...
   5. Issue "make" (or "make -j<n>" for compiling with <n> processors on a SMP machine, e.g. "make -j4" for four processors). Might take dozen of minutes.
@@ -42,7 +42,8 @@ So, we provide a [Compilation tutorial](tutorial/compilation), covering differen
 Moreover, there are also Web pages that focus specifically on [MacOS](INSTALL_MacOS) users and [Ubuntu](INSTALL_Ubuntu) users. 
 The two latter Web pages also show how to short-circuit the above-mentioned steps using homebrew or MacPorts (for MacOS) or apt (for Ubuntu). 
 For step 3, examples of configuration files to configure and compile Abinit on clusters are available
-in the |abiconfig| package on github (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters))
+in the |abiconfig| package on github 
+(specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)),
 while the configuration files
 used for our buildbot testfarm are available in the [autoconf_examples section](developers/autoconf_examples/). 
 The [ABINIT Wiki](https://wiki.abinit.org) also has a **build abinit** section, that might prove very useful. In particular,
@@ -159,7 +160,7 @@ Also,
 
 will install abinit in the /usr/local directory.
 
-## How to make the "hostname".ac9 file ?
+## How to write the "hostname".ac9 file ?
 
 Let's come back to the case where the build system needs some more
 information. This information should be stored in a file named "hostname".ac9,
@@ -170,7 +171,10 @@ while only the first word of the returned chain of character is needed, e.g. abi
 
 There is a template for such "hostname".ac9 file, located in ~abinit/doc/config/. Its name
 is config-template.ac9. Examples of such files, that have been used for testing
-the package, can be found in ~abinit/doc/build/config-examples/. 
+the package, can be found in ~abinit/doc/build/config-examples/,
+or equivalently in the [autoconf_examples section](developers/autoconf_examples/),
+or on github, abiconfig project,
+[directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)). 
 
 Most of the examples provided in the ~abinit/doc/build/config-examples/
 directory contain about five definitions: F90 and C locations, F90 and C
