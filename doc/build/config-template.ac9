@@ -2,12 +2,12 @@
 # Generic config file for ABINIT (documented template)
 #
 # After editing this file to suit your needs, you may save it as
-# "~/.abinit/build/<hostname>.ac" to keep these parameters as per-user
+# "~/.abinit/build/<hostname>.ac9" to keep these parameters as per-user
 # defaults. Just replace "<hostname>" by the name of your machine,
 # excluding the domain name.
 #
 # Example: if your machine is called "myhost.mydomain", you will save
-#          this file as "~/.abinit/build/myhost.ac".
+#          this file as "~/.abinit/build/myhost.ac9".
 #
 # You may put this file at the top level of an ABINIT source tree as well,
 # in which case its definitions will apply to this particular tree only. In
@@ -15,7 +15,7 @@
 # directory, in which case it will replace any other config file.
 #
 # Hint: If you do not know the name of your machine, just type "hostname"
-#       in a terminal.
+#       in a terminal, or "hostname -s" to obtain the name without domain name.
 #
 
 #
@@ -775,6 +775,8 @@
 #     exclusive
 #
 
+# The following lines relate to a generic FFT library (e.g. they are used for dfti) 
+
 # Install prefix for the FFT library
 #
 #with_fft="/usr/local"
@@ -805,6 +807,8 @@
 
                        # ------------------------------ #
 
+# The following lines relate specifically to the FFTW3 library 
+
 # Install prefix for the FFTW3 library
 #
 #with_fftw3="/usr/local"
@@ -830,6 +834,8 @@
 #FFTW3_LIBS="-L/usr/local/lib/fftw -lfftw3"
 
                        # ------------------------------ #
+
+# The following lines relate specifically to the PFFT library 
 
 # Install prefix for the PFFT library
 #
