@@ -24,21 +24,22 @@ the installation steps are:
      some mandatory libraries (Linalg, NetCDF, LibXC), 
      possibly some recommended libraries (MPI) and other optional libraries (Wannier90, ...). 
      So, know how to invoke these prerequisites, install the libraries if not available immediately with your OS, and know the location of libraries. 
-     The libraries can be installed with the help of the "fallback" procedure.
+     The libraries can be installed with the help of the "fallback" procedure. See below for more info on this step.
   2. Get the [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz) 
      from the abinit Web site, then change the current directory to the top of the directory in which you have unfolded (gunzip/tar -xvf) the package.
      [More information](#how-to-get-a-version-of-abinit) ...
-  3. Prepare a file name <hostname>.ac9, that contains the information about libraries and compilation options. 
+  3. Prepare a file name "hostname".ac9, that contains the information about libraries and compilation options. 
      This is not mandatory, as ABINIT will try to detect the place where these are, but the detection procedure can fail.
+     See below for more information, as well as in [this section](#how-to-make-the-hostnameac9-file) ...
   4. Issue "configure -q" or "./configure -q" (or first create a tmp directory, then "cd tmp", then "../configure -q").
      [More information](#https://wiki.abinit.org/doku.php?id=build:configure) ...
   5. Issue "make" (or "make -j<n>" for compiling with <n> processors on a SMP machine, e.g. "make -j4" for four processors). Might take dozen of minutes.
      [More information](#how-to-make-the-executables) ...
   6. Issue (optionally) "make install".
 
-Still, the details of step 1 and 3 might vary a lot depending on the operating system.
+The details of step 1 and 3 might vary a lot depending on the operating system.
 So, we provide a [Compilation tutorial](tutorial/compilation), covering different installation environments and scenario.
-Moreover, there are also Web pages that focus specifically on [MacOSX](INSTALL_MACOSX) users and [Ubuntu](INSTALL_Ubuntu) users. 
+Moreover, there are also Web pages that focus specifically on [MacOSX](INSTALL_MacOSX) users and [Ubuntu](INSTALL_Ubuntu) users. 
 They also show how to short-circuit the above-mentioned steps using homebrew or MacPorts (for MacOSX) or apt (for Ubuntu). 
 For step 3, examples of configuration files to configure and compile Abinit on clusters are available
 in the |abiconfig| package on github while the configuration files
@@ -132,7 +133,7 @@ Well, it might also be that only one additional information is needed, in which 
 might work. In both cases, let's explain a bit what is done, and the further possibilities.
 
 The 'configure' step produces the set of Makefile files (among other things),
-taking into account information about your machine and the hostname.ac9 file.
+taking into account information about your machine and the "hostname".ac9 file.
 It takes three minute long, or less. The 'make' step compiles everything,
 according to the Makefile files produced in the prior step. The time to make
 everything is highly dependent on the compiler and platform. On a 2.8 GHz
@@ -157,10 +158,12 @@ Also,
 
 will install abinit in the /usr/local directory.
 
+## How to make the "hostname".ac9 file ?
+
 Let's come back to the case where the build system needs some more
-information. This information should be stored in a file named hostname.ac9,
-where "hostname" is the result of executing the command `hostname` on your
-machine, e.g. abiref.pcpm.ucl.ac.be or my_machine ... , and taking the first
+information. This information should be stored in a file named "hostname".ac9,
+where "hostname" is the result of (i) executing the command `hostname` on your
+machine, e.g. abiref.pcpm.ucl.ac.be or my_machine ... , and (ii) taking the first
 word of the returned chain of character, e.g. abiref or my_machine ...
 
 There is a template for such a file, located in ~abinit/doc/config/. Its name
