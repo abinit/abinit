@@ -3631,12 +3631,14 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
 
  if (db%ft_qcache%use_3natom_cache .and. db%ft_qcache%stored_iqibz_cplex(1) == iq_ibz .and. .not. isirr_q) then
+
    ! All 3 natom potentials for qibz are in cache. Symmetrize to get Sq without MPI communication.
    db%ft_qcache%stats(2) = db%ft_qcache%stats(2) + 1
    cplex = db%ft_qcache%stored_iqibz_cplex(2)
    ABI_MALLOC(work2, (cplex, nfft, db%nspden, db%natom3))
    call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
      db%nspden, db%nsppol, db%mpi_enreg, db%ft_qcache%v1scf_3natom_qibz, work2, db%comm_pert)
+
    ! Extract my data from work2
    ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
    do imyp=1,db%my_npert
@@ -3715,7 +3717,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
        call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
 
-       ! Store all 3 natom potentials for q in IBZ in cache.
+       ! Now Store all 3 natom potentials for q in IBZ in cache.
        if (db%ft_qcache%use_3natom_cache .and. db%ft_qcache%stored_iqibz_cplex(1) /= iq_ibz) then
          if (cplex /= db%ft_qcache%stored_iqibz_cplex(2)) then
            ABI_REMALLOC(db%ft_qcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))

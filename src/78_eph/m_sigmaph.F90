@@ -718,7 +718,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
- real(dp),allocatable :: delta_e_minus_emkq(:)
+ real(dp),allocatable :: delta_e_minus_emkq(:), gkq_allgather(:,:,:)
  !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
  real(dp) :: ylmgr_dum(1,1,1)
  logical,allocatable :: osc_mask(:)
@@ -1253,6 +1253,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Allocate eph matrix elements.
      ABI_MALLOC(gkq_atm, (2, nbcalc_ks, natom3))
      ABI_MALLOC(gkq_nu, (2, nbcalc_ks, natom3))
+     ABI_MALLOC(gkq_allgather, (2, nbcalc_ks * natom3, 2))
 
      ! Allocate arrays for Debye-Waller
      if (.not. sigma%imag_only) then
@@ -1711,12 +1712,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Get gkk(kcalc, q, idir_ipert) (atom representation)
          ! No need to handle istwf_kq because it's always 1.
-         gkq_atm = zero
+         gkq_atm = zero; cnt = 0
          do imyp=1,my_npert
            ipc = sigma%my_pinfo(3, imyp)
-           ! Calculate <u_(band,k+q)^(0)|H_(k+q,k)^(1)|u_(band,k)^(0)> for this pert (NC psps) istwf_k always 1 ...
+           ! Calculate <u_(band,k+q)^(0)|H_(k+q,k)^(1)|u_(band,k)^(0)> for this pert (NC psps) istwf_k always 1
            do ib_k=1,nbcalc_ks
              gkq_atm(:, ib_k, ipc) = cg_zdotc(npw_kq*nspinor, bra_kq, h1kets_kq(:,:,imyp,ib_k))
+             cnt = cnt + 1
+             gkq_allgather(:,cnt, 1) = gkq_atm(:, ib_k, ipc)
            end do
            !call cg_zgemv("C", npw_kq*nspinor, nbcalc_ks, h1kets_kq(:,:,:,imyp), bra_kq, gkq_atm(:,:,ipc))
          end do
@@ -1724,8 +1727,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          !call cg_zgemm("H", "N", npw_kq*nspinor, ii, ii, h1kets_kq, bra_kq, gkq_atm)
          !call cg_zgemm("H", "N", npw_kq*nspinor, ii, ii, bra_kq, h1kets_kq, gkq_atm)
 
-         ! Get gkk(kcalc, q, nu)
-         if (sigma%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, sigma%pert_comm%value, ierr)
+         ! Get gkk(kcalc, q, nu) in the phonon representation.
+         if (sigma%pert_comm%nproc > 1) then
+           ! TODO: Use allgather instead of a naive xmpi_sum for efficiency reasons.
+           !call xmpi_sum(gkq_atm, sigma%pert_comm%value, ierr)
+
+           call xmpi_allgather(gkq_allgather(:,:,1), 2 * nbcalc_ks * my_npert, gkq_allgather(:,:,2), &
+                               sigma%pert_comm%value, ierr)
+           do cnt=1,nbcalc_ks*natom3
+             ipc  = 1 + (cnt - 1) / nbcalc_ks
+             ib_k  = 1 + mod(cnt - 1, nbcalc_ks)
+             gkq_atm(:, ib_k, ipc)= gkq_allgather(:, cnt, 2)
+           end  do
+         end if
+
          call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
          ! Save data for Debye-Waller computation that will be performed outside the q-loop.
@@ -2088,6 +2103,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_FREE(kets_k)
      ABI_FREE(gkq_atm)
      ABI_FREE(gkq_nu)
+     ABI_FREE(gkq_allgather)
 
      if (osc_ecut /= zero) then
        ABI_FREE(ur_k)
@@ -5869,7 +5885,7 @@ end subroutine phstore_free
 !! phstore_async_rotate
 !!
 !! FUNCTION
-!!  Beging non-blocking collective MPI communication  to obtain phonon frequencies and eigenvectors
+!!  Beging non-blocking collective MPI communication to obtain phonon frequencies and eigenvectors
 !!  in the BZ from data in the IBZ.
 !!
 !! INPUTS
