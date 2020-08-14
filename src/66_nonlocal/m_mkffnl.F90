@@ -223,7 +223,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
 ! *************************************************************************
 
  ! Keep track of time spent in mkffnl
- call timab(16,1,tsec)
+ call timab(16, 1, tsec)
 
  nprocs = 1; my_rank = 0
  if (present(comm)) then
@@ -399,7 +399,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
 
        if (testnl) then
          cnt = cnt + 1
-         if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
+         if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism (optional)
          !
          ! Store form factors (from ffspl)
          ! -------------------------------
@@ -675,7 +675,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
 
  if (nprocs > 1) call xmpi_sum(ffnl, comm, ierr)
 
- call timab(16,2,tsec)
+ call timab(16, 2, tsec)
 
 end subroutine mkffnl
 !!***

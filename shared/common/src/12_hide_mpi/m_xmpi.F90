@@ -242,6 +242,7 @@ MODULE m_xmpi
 
  ! MPI generic interfaces.
  public :: xmpi_allgather
+ public :: xmpi_iallgather
  public :: xmpi_allgatherv
  public :: xmpi_alltoall
  public :: xmpi_ialltoall
@@ -314,17 +315,15 @@ end interface xmpi_allgather
 ! non-blocking version (requires MPI3)
 ! Prototype:
 !
-!   call xmpi_ialltoall(xval, sendsize, recvbuf, recvsize, comm, request)
 !   call xmpi_iallgather(SENDBUF, SENDCOUNT, SENDTYPE, RECVBUF, RECVCOUNT, RECVTYPE, COMM, REQUEST, IERROR)
 !
 ! If the MPI library does not provide ialltoall, we call the blocking version and
 ! we return xmpi_request_null (see xmpi_iallgather.finc)
 ! Client code should always test/wait the request so that code semantics is preserved.
 
-!interface xmpi_iallgather
-!  module procedure xmpi_allgather_dp4d
-!
-!end interface xmpi_iallgather
+interface xmpi_iallgather
+  module procedure xmpi_iallgather_dp4d
+end interface xmpi_iallgather
 
 interface xmpi_allgatherv
   module procedure xmpi_allgatherv_int2d
@@ -1894,11 +1893,11 @@ end subroutine xmpi_iprobe
 !!
 !! SOURCE
 
-subroutine xmpi_wait(request,mpierr)
+subroutine xmpi_wait(request, mpierr)
 
 !Arguments-------------------------
- integer,intent(out) :: mpierr
  integer,intent(inout) :: request
+ integer,intent(out) :: mpierr
 
 !Local variables-------------------
 #ifdef HAVE_MPI
@@ -2973,48 +2972,28 @@ end subroutine xmpi_largetype_free
 
 ! Include files providing wrappers for some of the most commonly used MPI primitives.
 
+#include "xmpi_iallgather.finc"
 #include "xmpi_allgather.finc"
-
 #include "xmpi_allgatherv.finc"
-
 #include "xmpi_alltoall.finc"
-
 #include "xmpi_ialltoall.finc"
-
 #include "xmpi_alltoallv.finc"
-
 #include "xmpi_ialltoallv.finc"
-
 #include "xmpi_bcast.finc"
-
 #include "xmpi_ibcast.finc"
-
 #include "xmpi_exch.finc"
-
 #include "xmpi_gather.finc"
-
 #include "xmpi_gatherv.finc"
-
 #include "xmpi_max.finc"
-
 #include "xmpi_min.finc"
-
 #include "xmpi_recv.finc"
-
 #include "xmpi_irecv.finc"
-
 #include "xmpi_scatterv.finc"
-
 #include "xmpi_send.finc"
-
 #include "xmpi_isend.finc"
-
 #include "xmpi_sum_master.finc"
-
 #include "xmpi_sum.finc"
-
 #include "xmpi_isum.finc"
-
 #include "xmpi_land_lor.finc"
 
 !------------------------------------------------------------------------------------

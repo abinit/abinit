@@ -396,7 +396,7 @@ subroutine xmpi_allgather_dp3d(xval,nelem,recvbuf,comm,ier)
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:)
  integer ,intent(in) :: nelem,comm
- integer ,intent(out)   :: ier
+ integer ,intent(out) :: ier
 
 ! *************************************************************************
  ier=0

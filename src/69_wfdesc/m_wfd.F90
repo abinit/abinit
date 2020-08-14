@@ -39,7 +39,7 @@ module m_wfd
  use defs_datatypes,   only : pseudopotential_type, ebands_t
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
- use m_time,           only : cwtime, cwtime_report
+ use m_time,           only : cwtime, cwtime_report, timab
  use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa
  use m_io_tools,       only : get_unit, iomode_from_fname, iomode2str, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks, bool2index
@@ -4719,6 +4719,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 !arrays
  integer,allocatable :: gf2wfd(:), kg_k(:,:), all_countks(:,:)
  integer :: work_ngfft(18),gmax_wfd(3),gmax_disk(3),gmax(3)
+ real(dp) :: tsec(2)
  real(dp),allocatable :: eig_k(:), cg_k(:,:), out_cg(:,:), work(:,:,:,:)
  logical,allocatable :: my_readmask(:,:,:)
  character(len=6) :: tag_spin(2)
@@ -4726,6 +4727,9 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 !************************************************************************
 
  DBG_ENTER("COLL")
+
+ ! Keep track of time spent in wfd_read_wfk
+ call timab(300, 1, tsec)
 
  if (any(iomode == [IO_MODE_NETCDF, IO_MODE_FORTRAN_MASTER])) then
    MSG_ERROR(sjoin("Unsupported value for iomode: ",itoa(iomode)))
@@ -4999,6 +5003,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  !call wfd%update_bkstab()
 
  call cwtime_report(" WFK IO", cpu, wall, gflops, end_str=ch10)
+ call timab(300, 2, tsec)
 
  !call wfd%test_ortho(cryst, pawtab)
 

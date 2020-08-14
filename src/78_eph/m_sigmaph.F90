@@ -875,10 +875,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
 
  ! This table is needed when computing the imaginary part:
- ! k+q states outside energy window are not read hence their contribution won't be included.
+ ! k+q states outside the energy window are not read hence their contribution won't be included.
  ! Error is small provided calculation is close to convergence.
  ! To reduce the error one should increase the value of phwinfact
- ! TODO: 2) Store min/max energy difference
  ABI_MALLOC(ihave_ikibz_spin, (nkpt, nsppol))
  ihave_ikibz_spin = .False.
  do spin=1,sigma%nsppol
@@ -923,8 +922,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (osc_ecut > zero) then
    call wrtout(std_out, sjoin("Computing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
    ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
- end if
- if (osc_ecut < zero) then
+ else if (osc_ecut < zero) then
    call wrtout(std_out, sjoin("Including G vectors inside a sphere with ecut.", ftoa(osc_ecut)))
  end if
 
@@ -1278,9 +1276,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_MALLOC(kets_k, (2, npw_k*nspinor, nbcalc_ks))
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
      if (osc_ecut /= zero) then
-       ABI_MALLOC(ur_k, (wfd%nfft*wfd%nspinor, nbcalc_ks))
-       ABI_MALLOC(ur_kq, (wfd%nfft*wfd%nspinor))
-       ABI_MALLOC(work_ur, (wfd%nfft*wfd%nspinor))
+       ABI_MALLOC(ur_k, (wfd%nfft*nspinor, nbcalc_ks))
+       ABI_MALLOC(ur_kq, (wfd%nfft*nspinor))
+       ABI_MALLOC(work_ur, (wfd%nfft*nspinor))
        ABI_MALLOC(gkq2_lr, (sigma%eph_doublegrid%ndiv, nbcalc_ks, sigma%my_npert))
      end if
 
@@ -1325,7 +1323,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
        kq_ibz = ebands%kptns(:, ikq_ibz)
        nband_kq = ebands%nband(ikq_ibz + (spin-1) * ebands%nkpt)
-       if (.not. ihave_ikibz_spin(ikq_ibz, spin)) then
+
+       ! This can happen if we have loaded the wavefunctions inside the energy range.
+       if (sigma%imag_only .and. .not. ihave_ikibz_spin(ikq_ibz, spin)) then
          ignore_kq = ignore_kq + 1; cycle
        end if
 
@@ -1350,18 +1350,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !call timab(1901, 1, tsec)
 
        call phstore%async_rotate(cryst, ifc, iq_ibz, sigma%qibz(:, iq_ibz), qpt, isym_q, trev_q)
-
        !call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%pert_comm%value)
-
-       !phfrq = phfreqs_qibz(:, iq_ibz)
-       !if (isirr_q) then
-       !  call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, pheigvec_qibz(:,:,:,iq_ibz), displ_cart)
-       !  call phdispl_cart2red(natom, cryst%gprimd, displ_cart, displ_red)
-       !else
-       !  call pheigvec_rotate(cryst, sigma%qibz(:, iq_ibz), qpt, isym_q, trev_q, pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
-       !  call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, displ_cart)
-       !  call phdispl_cart2red(natom, cryst%gprimd, displ_cart, displ_red)
-       !end if
 
        ! Double grid stuff
        if (sigma%use_doublegrid) then
@@ -1420,8 +1409,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call kgindex(osc_indpw, osc_gvecq, osc_mask, wfd%mpi_enreg, ngfft, osc_npw)
          ABI_FREE(osc_mask)
 
-         ABI_MALLOC(workq_ug, (npw_kq*wfd%nspinor))
-         ABI_MALLOC(osc_ks, (osc_npw*wfd%nspinor, nbcalc_ks))
+         ABI_MALLOC(workq_ug, (npw_kq*nspinor))
+         ABI_MALLOC(osc_ks, (osc_npw*nspinor, nbcalc_ks))
        end if
 
        ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
@@ -1745,13 +1734,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
-         ! Save data for Debye-Waller computation that will be performed outside the q-loop.
+         ! Save e-ph matrix elements for Debye-Waller computation that will be performed outside the q-loop.
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
          if (is_qzero .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
 
          if (osc_ecut > zero) then
            workq_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwpc)
-           call fft_ug(npw_kq, wfd%nfft, wfd%nspinor, ndat1, wfd%mgfft, wfd%ngfft, &
+           call fft_ug(npw_kq, wfd%nfft, nspinor, ndat1, wfd%mgfft, wfd%ngfft, &
                        istwf_kq, kg_kq, gbound_kq, workq_ug, ur_kq)
 
            ! We need <k+q| e^{iq+G}|k> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take CC.
@@ -1803,7 +1792,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            else
 
              ! Need to compute vkq here if kq is slightly outside the Sigma_erange window.
-             vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
+             vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, nspinor, bra_kq, cwaveprj0)
 
              ! Get the velocity in the IBZ and save it vcar_ibz so that we don't need
              ! to recompute it in the next iterations over k.
@@ -1852,7 +1841,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                ! EPH strength with delta(en - emkq)
                rfact = gaussian(eig0nk - eig0mkq, dtset%tsmear)
                sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 1) + &
-                    rfact * (gkq_nu(1,ib_k,nu) ** 2 + gkq_nu(2,ib_k,nu) ** 2)
+                    rfact * (gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2)
 
                ! Treat Fan term.
                if (ediff > wqnu) then
@@ -1863,7 +1852,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  rfact = real(one/(ediff + sigma%ieta))
                end if
 
-               gf_val = gkq_nu(1,ib_k,nu) ** 2 + gkq_nu(2,ib_k,nu) ** 2
+               gf_val = gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2
                if (sigma%frohl_model == 1 .and. is_qzero .and. ibsum_kq == band_ks) then
                  gf_val = frohl_sphcorr(nu) * (four_pi / three * q0rad ** 3)
                end if
@@ -1913,7 +1902,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                      ! Phonon frequency
                      iq_ibz_fine = sigma%eph_doublegrid%mapping(6, jj)
-                     wqnu = sigma%ephwg%phfrq_ibz(iq_ibz_fine,nu)
+                     wqnu = sigma%ephwg%phfrq_ibz(iq_ibz_fine, nu)
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
 
                      cfact = cfact + &
@@ -1969,9 +1958,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
-                     if (osc_ecut /= 0) then
-                       gkq2_pf = gkq2_pf + weight_q * gkq2_lr(jj,ib_k,imyp)
-                     end if
+                     if (osc_ecut /= zero) gkq2_pf = gkq2_pf + weight_q * gkq2_lr(jj,ib_k,imyp)
 
                      if (sigma%imag_only) then
                        ! Note pi factor from Sokhotski-Plemelj theorem.
