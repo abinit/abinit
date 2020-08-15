@@ -131,7 +131,7 @@ module m_dvdb
    logical :: use_3natom_cache = .False.
     ! True if v1scf_3natom_qibz cache is used.
 
-   integer :: v1scf_3natom_request
+   integer :: v1scf_3natom_request = xmpi_request_null
     ! Reques for v1scf_3natom_qibz iallgather
 
    integer :: stats(4)
@@ -1952,9 +1952,9 @@ subroutine qcache_free(qcache)
  end if
  ABI_SFREE(qcache%count_qused)
  ABI_SFREE(qcache%itreatq)
- ABI_SFREE(qcache%v1scf_3natom_qibz)
 
  if (qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(qcache%v1scf_3natom_request, ierr)
+ ABI_SFREE(qcache%v1scf_3natom_qibz)
 
 end subroutine qcache_free
 !!***
@@ -3788,7 +3788,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
  if (db%ft_qcache%use_3natom_cache .and. db%ft_qcache%stored_iqibz_cplex(1) == iq_ibz .and. .not. isirr_q) then
 
-   ! All 3 natom potentials for qibz are in cache. Symmetrize to get Sq without MPI communication.
+   ! All 3 natom potentials for qibz are in cache. Symmetrize to get Sq for my_npert perturbations
    db%ft_qcache%stats(2) = db%ft_qcache%stats(2) + 1
    cplex = db%ft_qcache%stored_iqibz_cplex(2)
 

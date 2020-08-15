@@ -2084,6 +2084,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Print cache stats.
      if (sigma%use_ftinterp) then
        call dvdb%ft_qcache%report_stats()
+       if (dvdb%ft_qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(dvdb%ft_qcache%v1scf_3natom_request, ierr)
      else
        call dvdb%qcache%report_stats()
      end if
