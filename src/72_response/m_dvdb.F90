@@ -1940,7 +1940,7 @@ subroutine qcache_free(qcache)
 
 !Local variables-------------------------------
 !scalars
- integer :: iq
+ integer :: iq, ierr
 
 ! *************************************************************************
 
@@ -1953,6 +1953,8 @@ subroutine qcache_free(qcache)
  ABI_SFREE(qcache%count_qused)
  ABI_SFREE(qcache%itreatq)
  ABI_SFREE(qcache%v1scf_3natom_qibz)
+
+ if (qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(qcache%v1scf_3natom_request, ierr)
 
 end subroutine qcache_free
 !!***
@@ -2888,7 +2890,7 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
  ABI_CHECK(nfftot == nfft, "FFT parallelism not supported")
  id1 = n1/2+2; id2 = n2/2+2; id3=n3/2+2
 
- ABI_CHECK(any(itirev == [1,2]), "Wrong itirev")
+ ABI_CHECK(any(itirev == [1, 2]), "Wrong itirev")
  tsign = 3-2*itirev; has_phase = any(abs(tnon) > tol12)
 
  !outfg = zero

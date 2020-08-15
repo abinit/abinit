@@ -440,7 +440,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(292)='rwwf%newkpt(RF)                 '
 
  ! wfd
- names(300)='wfd_read_wfk                    '
+ names(300)='wfd_read_wfk                    '; basic(300) = 1
 
  names(301)='screening                       '
  names(302)='screening(init1)                '
