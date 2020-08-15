@@ -98,6 +98,8 @@ contains
 !!
 !! OUTPUT
 !!  ffnl(npw,dimffnl,lmnmax,ntypat)=described below
+!! [request]=Used in conjunction with [comm] to perform non-blocking xmpi_isum_ip. Client code must
+!!  wait on request before using ffnl. If not present, blocking API is used.
 !!
 !! NOTES
 !!  Uses spline fit ffspl provided by Numerical Recipes spline subroutine.
@@ -188,20 +190,21 @@ contains
 subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, indlmn, &
                    kg, kpg, kpt, lmnmax, lnmax, mpsang, mqgrid, nkpg, npw, ntypat, pspso, &
                    qgrid, rmet, usepaw, useylm, ylm, ylm_gr, &
-                   comm) ! optional
+                   comm, request) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dimekb,dimffnl,ider,idir,lmnmax,lnmax,mpsang,mqgrid,nkpg
  integer,intent(in) :: npw,ntypat,usepaw,useylm
  integer,optional,intent(in) :: comm
+ integer,optional,intent(out):: request
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg(3,npw),pspso(ntypat)
  real(dp),intent(in) :: ekb(dimekb,ntypat*(1-usepaw))
  real(dp),intent(in) :: ffspl(mqgrid,2,lnmax,ntypat),gmet(3,3),gprimd(3,3)
  real(dp),intent(in) :: kpg(npw,nkpg),kpt(3),qgrid(mqgrid),rmet(3,3)
  real(dp),intent(in) :: ylm(:,:),ylm_gr(:,:,:)
- real(dp),intent(out) :: ffnl(npw,dimffnl,lmnmax,ntypat)
+ real(dp) ABI_ASYNC, intent(out) :: ffnl(npw,dimffnl,lmnmax,ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -673,7 +676,14 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  ABI_SFREE(dffnl_tmp)
  ABI_SFREE(d2ffnl_tmp)
 
- if (nprocs > 1) call xmpi_sum(ffnl, comm, ierr)
+ if (nprocs > 1) then
+   ! Blocking/non-blocking depending on the presence of request.
+   if (present(request)) then
+     call xmpi_isum_ip(ffnl, comm, request, ierr)
+   else
+     call xmpi_sum(ffnl, comm, ierr)
+   end if
+ end if
 
  call timab(16, 2, tsec)
 

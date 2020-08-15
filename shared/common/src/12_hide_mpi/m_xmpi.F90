@@ -263,6 +263,7 @@ MODULE m_xmpi
  public :: xmpi_sum_master
  public :: xmpi_sum
  public :: xmpi_isum
+ public :: xmpi_isum_ip
  public :: xmpi_land              ! allreduce with MPI_LAND
  public :: xmpi_lor               ! allreduce with MPI_LOR
 
@@ -634,11 +635,17 @@ interface xmpi_sum
 end interface xmpi_sum
 !!***
 
+! Non-blocking version
 interface xmpi_isum
   module procedure xmpi_isum_int0d
 end interface xmpi_isum
 !!***
 
+! Non-blocking in-place version
+interface xmpi_isum_ip
+  module procedure xmpi_isum_ip_dp4d
+end interface xmpi_isum_ip
+!!***
 
 interface xmpi_land
   module procedure xmpi_land_log0d

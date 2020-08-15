@@ -1019,6 +1019,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1901)='sigph_qloop_preamble'; basic(1901) = 1
  !names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
  names(1903)='sigph_bsum'; basic(1903) = 1
+ names(1904)='sigph_bsum_1'; basic(1904) = 1
+ names(1905)='sigph_bsum_2'; basic(1905) = 1
+ names(1906)='sigph_bsum_3'; basic(1906) = 1
+ names(1907)='sigph_bsum_4'; basic(1907) = 1
 
  !names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
  !names(1905)='splfit'; basic(1905) = 1
