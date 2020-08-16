@@ -1146,7 +1146,7 @@ end function wfk_compare
 !!
 !! SOURCE
 
-subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
+subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, occ_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -3156,7 +3156,7 @@ subroutine wfk_seek(Wfk,ik_ibz,spin)
    end if
 
    call mvrecord(Wfk%fh, (recn_wanted - recn_fpt) ,ierr)
-   ABI_CHECK(ierr==0,"error in mvrecord")
+   ABI_CHECK(ierr == 0, "error in mvrecord")
 
    Wfk%f90_fptr = [ik_ibz, spin, REC_NPW]
 

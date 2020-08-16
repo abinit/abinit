@@ -930,7 +930,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", msg=" Computing v_nk matrix elements for all states in Sigma_nk...")
  ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
  ABI_CALLOC(sigma%vcar_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
- !sigma%vcar_calc = -10
 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
  !if (my_rank == master) call ddkop%print(std_out)
@@ -5853,8 +5852,9 @@ type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, com
  my_q1 = new%qibz_start(new%my_rank)
  my_q2 = new%qibz_stop(new%my_rank)
 
- call wrtout(std_out, " Computing phonon frequencies and eigenvectors in the IBZ.", pre_newlines=1)
- write(msg, "(a,f8.1,a)")&
+ call wrtout(std_out, " Computing all phonon frequencies and eigenvectors in the IBZ.", pre_newlines=1)
+ call wrtout(std_out, sjoin("Number of IBZ q-point stored by this rank inside pert_comm:", itoa(my_q2 - my_q1 + 1)))
+ write(msg, "(a,f8.1,a)") &
    " Memory required by pheigvec_qibz: ", 2 * natom3**2 * (my_q2 - my_q1 + 1) * dp * b2Mb, " [Mb] <<< MEM"
  call wrtout(std_out, msg)
 

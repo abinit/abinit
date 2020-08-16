@@ -4756,7 +4756,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
  ! Each node will read the waves whose status if (WFD_ALLOCATED|WFD_STORED).
  ! all_countks is a global array used to skip (ik_ibz, spin) if all MPI procs do not need bands for this (k, s)
- ABI_MALLOC(my_readmask,(mband_disk, Wfd%nkibz, Wfd%nsppol))
+ ABI_MALLOC(my_readmask, (mband_disk, Wfd%nkibz, Wfd%nsppol))
  my_readmask=.FALSE.
  ABI_MALLOC(all_countks, (wfd%nkibz, wfd%nsppol))
  all_countks = 0; enough = 0
@@ -4812,7 +4812,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
       ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
-      call wfk%read_band_block([1,nband_wfd] , ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
+      call wfk%read_band_block([1, nband_wfd], ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
 
       if (wfd%prtvol > 0 .and. Wfd%my_rank==Wfd%master) then
         if (Wfd%nsppol==2) then
@@ -4876,11 +4876,11 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       if (all_countks(ik_ibz, spin) == 0) cycle
       call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
       !write(std_out,*)"about to read ik_ibz: ",ik_ibz,", spin: ",spin
+
       npw_disk   = Hdr%npwarr(ik_ibz)
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
       istwfk_disk = hdr%istwfk(ik_ibz)
       change_gsphere = istwfk_disk /= wfd%istwfk(ik_ibz)
-
       nband_wfd  = Wfd%nband(ik_ibz,spin)
 
       if (nband_wfd > nband_disk) then
@@ -4889,13 +4889,20 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
         MSG_ERROR(msg)
       end if
 
-      ABI_MALLOC(eig_k,((2*nband_disk)**formeig0*nband_disk))
-      ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
+      ABI_MALLOC(eig_k, ((2*nband_disk)**formeig0*nband_disk))
+      ABI_MALLOC(kg_k, (3,optkg1*npw_disk))
 
       mcg = npw_disk*Wfd%nspinor*COUNT(my_readmask(:,ik_ibz,spin))
-      ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
+      ABI_MALLOC_OR_DIE(cg_k, (2, mcg), ierr)
 
-      call wfk%read_bmask(my_readmask(:,ik_ibz,spin),ik_ibz,spin,sc_mode,kg_k=kg_k,cg_k=cg_k,eig_k=eig_k)
+      call wfk%read_bmask(my_readmask(:,ik_ibz, spin), ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
+
+      !if (my_rank == master)
+      !call wfk%read_band_block([1, nband_wfd], ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
+      !end if
+      !call xmpi_bcast(kg_k)
+      !call xmpi_bcast(eig_k)
+      !call xmpi_bcast(cg_k)
 
       if (Wfd%my_rank == Wfd%master .and. wfd%prtvol > 0) then
         if (Wfd%nsppol==2) then
@@ -4908,7 +4915,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ! Table with the correspondence btw the k-centered sphere of the WFK file
       ! and the one used in Wfd (possibly smaller due to ecutwfn).
       ! TODO: Here I should treat the case in which istwfk in wfd differs from the one on disk.
-      ABI_MALLOC(gf2wfd,(npw_disk))
+      ABI_MALLOC(gf2wfd, (npw_disk))
       if (any(my_readmask(:,ik_ibz,spin))) then
         call kg_map(wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, npw_disk, kg_k, gf2wfd, nmiss)
       end if
