@@ -258,7 +258,7 @@ appropriate library to be installed in order to work properly.
 
 For further information on these internal tests, see the ~abinit/tests/built-in/README file.
 
-You might now read the [new user's guide](guide/new_user.md), in
+You might now read the [new user's guide](..), in
 order to learn how to use the code, and then to follow the four basic
 tutorials, see the [entry page for the tutorials](tutorial/index.md).
 This is useful if you consider that the installation has been successful. Or

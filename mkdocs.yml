@@ -36,6 +36,7 @@ pages:
         - HowTo: installation.md
         - MacOS: INSTALL_MacOS.md
         - Ubuntu: INSTALL_Ubuntu.md
+        - CentOS: INSTALL_CentOS.md
         - GPUs: INSTALL_gpu.md
 
 - Topics:
