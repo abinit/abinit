@@ -779,6 +779,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! after the diago, they will be sorted starting from the most negative
            call xheev('V','L',npwc,ac_epsm1cqwz2(:,:,iiw),epsm1_ev)
            neig(iiw) = neig(1)
+           if (any(epsm1_ev(:)>0.0_dp)) then  !FBFB
+              write(msg,'(a,es14.6)') "an eigenvalue is positive:", MAXVAL(epsm1_ev(:))
+              call wrtout(std_out,msg,'PERS')
+              MSG_ERROR("epsm1-1 is not negative-definite!")
+           end if
            do ilwrk=1,neig(iiw)
              ac_epsm1cqwz2(:,ilwrk,iiw) = ac_epsm1cqwz2(:,ilwrk,iiw) * SQRT( -epsm1_ev(ilwrk) )
            end do
