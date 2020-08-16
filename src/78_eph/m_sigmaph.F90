@@ -1692,7 +1692,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end if
          end if
 
-         ! Symmetrize wavefunctions in BZ from IBZ (if needed). Be careful with time-reversal symmetry.
+         ! Symmetrize k+q wavefunctions in hthe BZ from IBZ (if needed).
+         ! Be careful with time-reversal symmetry.
          if (isirr_kq) then
            ! Copy u_kq(G)
            call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1740,11 +1741,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end if
 
          call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
+
+         ! bsum_2 and bsum_3 are hotspots.
          call timab(1905, 2, tsec)
          call timab(1906, 1, tsec)
 
          ! Save e-ph matrix elements for Debye-Waller computation that will be performed outside the q-loop.
-         ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
+         ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
          if (is_qzero .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
 
          if (osc_ecut > zero) then
@@ -1860,7 +1863,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                else
                  ! Non adiabatic regime --> Add complex shift.
                  ! Note however that the expression for this flavor of Eliashberg function relies on adiabaticity.
-                 rfact = real(one/(ediff + sigma%ieta))
+                 rfact = real(one / (ediff + sigma%ieta))
                end if
 
                gf_val = gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2

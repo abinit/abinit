@@ -1702,7 +1702,7 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
  if (my_npert == natom3) qcache%use_3natom_cache = .False.
  ! Disabled as slow FT R --> q seems to be faster.
  qcache%use_3natom_cache = .False.
- qcache%use_3natom_cache = .True.
+ !qcache%use_3natom_cache = .True.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then
    ABI_MALLOC(qcache%v1scf_3natom_qibz, (2, nfft, nspden, natom3))
@@ -3792,24 +3792,10 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
    db%ft_qcache%stats(2) = db%ft_qcache%stats(2) + 1
    cplex = db%ft_qcache%stored_iqibz_cplex(2)
 
-#if 0
-   ABI_MALLOC(work2, (cplex, nfft, db%nspden, db%natom3))
-   call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
-                     db%nspden, db%mpi_enreg, db%ft_qcache%v1scf_3natom_qibz, work2, db%comm_pert)
-
-   ! Extract my data from work2
-   ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
-   do imyp=1,db%my_npert
-     v1scf(:,:,:,imyp) = work2(:,:,:,db%my_pinfo(3, imyp))
-   end do
-   ABI_FREE(work2)
-#else
    ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
    call v1phq_rotate_myperts(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
                              db%nspden, db%mpi_enreg, db%my_npert, db%my_pinfo, &
                              db%ft_qcache%v1scf_3natom_qibz, v1scf)
-#endif
-
    call timab(1809, 2, tsec); return
  end if
 

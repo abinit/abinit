@@ -790,13 +790,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (any(dt%sigma_erange > zero) .and. dt%gw_qprange /= 0) then
      MSG_ERROR_NOSTOP("sigma_erange and gw_qprange are mutually exclusive", ierr)
    end if
+   if (any(dt%sigma_erange < zero) .and. any(dt%sigma_erange > zero)) then
+     MSG_ERROR_NOSTOP("Found negative sigma_erange entry (metals) with another positive entry (semiconductors)!", ierr)
+   end if
 
 !  effmass_free
    if(abs(dt%effmass_free-one)>tol8.and.(dt%ixc/=31.and.dt%ixc/=35).and.mgga==1)then
      write(msg, '(5a)' )&
-&     'A modified electronic effective mass is not useable with a meta-GGA XC functional!',ch10,&
-&     'Except with some fake metaGGAs (ixc=31 or ixc=35).',ch10,&
-&     'effmass should be included in kinetic energy density (tau).'
+      'A modified electronic effective mass is not useable with a meta-GGA XC functional!',ch10,&
+      'Except with some fake metaGGAs (ixc=31 or ixc=35).',ch10,&
+      'effmass should be included in kinetic energy density (tau).'
      MSG_ERROR_NOSTOP(msg, ierr)
    end if
 
@@ -850,7 +853,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'enable_mpi_io',xmpi_mpiio,1,(/1/),iout)
    end if
 
-   !  eph variables
+   ! eph variables
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &

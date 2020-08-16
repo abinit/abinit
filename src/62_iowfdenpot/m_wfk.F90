@@ -2864,7 +2864,6 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
  call cwtime(cpu, wall, gflops, "start")
  my_rank = xmpi_comm_rank(comm)
  iomode = iomode_from_fname(fname)
- !iomode = IO_MODE_FORTRAN
 
  call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname, ", with iomode:", iomode2str(iomode)))
 
@@ -2872,22 +2871,22 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
    ! Open the file.
    sc_mode = xmpio_single
    funt = get_unit()
-   call wfk_open_read(Wfk,fname,formeig0,iomode,funt,xmpi_comm_self,Hdr_out=Hdr_out)
+   call wfk_open_read(Wfk, fname, formeig0, iomode, funt, xmpi_comm_self, Hdr_out=Hdr_out)
 
    ! Read the eigenvalues and optionally the occupation factors.
-   ABI_MALLOC(eigen, (Wfk%mband,Wfk%nkpt,Wfk%nsppol))
+   ABI_MALLOC(eigen, (Wfk%mband, Wfk%nkpt, Wfk%nsppol))
    eigen = HUGE(zero)
    if (present(occ)) then
-     ABI_MALLOC(occ, (Wfk%mband,Wfk%nkpt,Wfk%nsppol))
+     ABI_MALLOC(occ, (Wfk%mband, Wfk%nkpt, Wfk%nsppol))
      occ = HUGE(zero)
    end if
 
    do spin=1,Wfk%nsppol
      do ik_ibz=1,Wfk%nkpt
        if (present(occ)) then
-         call wfk%read_eigk(ik_ibz,spin,sc_mode,eigen(:,ik_ibz,spin),occ_k=occ(:,ik_ibz,spin))
+         call wfk%read_eigk(ik_ibz, spin, sc_mode, eigen(:,ik_ibz,spin), occ_k=occ(:,ik_ibz,spin))
        else
-         call wfk%read_eigk(ik_ibz,spin,sc_mode,eigen(:,ik_ibz,spin))
+         call wfk%read_eigk(ik_ibz, spin, sc_mode, eigen(:,ik_ibz,spin))
        end if
      end do
    end do
@@ -2901,13 +2900,13 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
    call Hdr_out%bcast(master, my_rank, comm)
    mband = MAXVAL(Hdr_out%nband)
    if (my_rank/=master) then
-     ABI_MALLOC(eigen, (mband,Hdr_out%nkpt,Hdr_out%nsppol))
+     ABI_MALLOC(eigen, (mband, Hdr_out%nkpt, Hdr_out%nsppol))
      if (present(occ)) then
-       ABI_MALLOC(occ, (mband,Hdr_out%nkpt,Hdr_out%nsppol))
+       ABI_MALLOC(occ, (mband, Hdr_out%nkpt, Hdr_out%nsppol))
      end if
    end if
-   call xmpi_bcast(eigen,master,comm,ierr)
-   if (present(occ)) call xmpi_bcast(occ,master,comm,ierr)
+   call xmpi_bcast(eigen, master, comm, ierr)
+   if (present(occ)) call xmpi_bcast(occ, master, comm, ierr)
  end if
 
  call cwtime_report(" wfk_read_eigenvalues", cpu, wall, gflops)

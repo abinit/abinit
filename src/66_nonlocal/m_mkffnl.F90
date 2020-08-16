@@ -683,6 +683,8 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
    else
      call xmpi_sum(ffnl, comm, ierr)
    end if
+ else
+   if (present(request)) request = xmpi_request_null
  end if
 
  call timab(16, 2, tsec)

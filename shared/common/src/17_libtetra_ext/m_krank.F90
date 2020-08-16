@@ -575,7 +575,8 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  logical :: my_use_symrec
 !arrays
  integer :: dkint(3), my_symmat(3, 3, nsym)
- integer,allocatable :: rank2info(:,:)
+ integer,allocatable :: rank2ikpt(:)
+ integer(i1b),allocatable :: rank2symtime(:)
  real(dp) :: kpt1a(3), dk(3)
 
 ! *************************************************************************
@@ -592,8 +593,10 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
    end do
  end if
 
- ABI_MALLOC(rank2info, (2, self%min_rank:self%max_rank))
- rank2info = -1
+ ! Use 1 byte to save memory
+ ABI_MALLOC(rank2symtime, (self%min_rank:self%max_rank))
+ ABI_MALLOC(rank2ikpt, (self%min_rank:self%max_rank))
+ rank2ikpt = -1
 
  do ikpt1=1,self%npoints
 
@@ -604,9 +607,9 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 
        kpt1a = (1 - 2*itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
        irank = self%get_rank(kpt1a)
-       if (rank2info(1, irank) == -1) then
-         rank2info(1, irank) = ikpt1
-         rank2info(2, irank) = isym + itimrev * nsym
+       if (rank2ikpt(irank) == -1) then
+         rank2ikpt(irank) = ikpt1
+         rank2symtime(irank) = isym + itimrev * nsym
        end if
      end do
    end do
@@ -616,8 +619,8 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  dksqmax = zero
  do ikpt2=1,nkpt2
    irank = self%get_rank(kptns2(:, ikpt2))
-   ikpt1 = rank2info(1, irank)
-   ii = rank2info(2, irank)
+   ikpt1 = rank2ikpt(irank)
+   ii = int(rank2symtime(irank))
    isym = 1 + mod(ii - 1, nsym)
    itimrev = (ii - 1) / nsym
    indkk(1, ikpt2) = ikpt1
@@ -635,7 +638,8 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
                  two * (gmet(2,1)*dk(2)*dk(1) + gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1)))
  end do
 
- ABI_FREE(rank2info)
+ ABI_FREE(rank2ikpt)
+ ABI_FREE(rank2symtime)
 
 end subroutine krank_get_mapping
 !!***
