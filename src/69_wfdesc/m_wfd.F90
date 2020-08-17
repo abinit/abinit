@@ -35,12 +35,13 @@ module m_wfd
  use m_hdr
  use m_distribfft
  use iso_c_binding
+ use m_cgtools
 
  use defs_datatypes,   only : pseudopotential_type, ebands_t
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report, timab
- use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa
+ use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno
  use m_io_tools,       only : get_unit, iomode_from_fname, iomode2str, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks, bool2index
  use m_hide_blas,      only : xcopy, xdotc
@@ -4707,10 +4708,10 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 !scalars
  integer,parameter :: formeig0 = 0, optkg1 = 1, method = 2
  integer :: wfk_unt,npw_disk,nmiss,ig,sc_mode,ii, enough
- integer :: comm,master,my_rank,spin,ik_ibz,fform,ierr ! ,igp
+ integer :: io_comm,master,my_rank,spin,ik_ibz,fform,ierr ! ,igp
  integer :: mcg,nband_wfd,nband_disk,band,mband_disk,bcount,istwfk_disk
- integer :: spinor,cg_spad,gw_spad,icg,igw,cg_bpad,ib, ik, is
- logical :: change_gsphere
+ integer :: spinor,cg_spad,gw_spad,icg,igw,cg_bpad, allcg_bpad, ib, ik, is
+ logical :: change_gsphere, master_only, iread
  real(dp) :: cpu, wall, gflops, cpu_ks, wall_ks, gflops_ks
  character(len=500) :: msg
  type(Wfk_t) :: Wfk
@@ -4720,7 +4721,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  integer,allocatable :: gf2wfd(:), kg_k(:,:), all_countks(:,:)
  integer :: work_ngfft(18),gmax_wfd(3),gmax_disk(3),gmax(3)
  real(dp) :: tsec(2)
- real(dp),allocatable :: eig_k(:), cg_k(:,:), out_cg(:,:), work(:,:,:,:)
+ real(dp),allocatable :: eig_k(:), cg_k(:,:), out_cg(:,:), work(:,:,:,:), allcg_k(:,:)
  logical,allocatable :: my_readmask(:,:,:)
  character(len=6) :: tag_spin(2)
 
@@ -4732,21 +4733,28 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  call timab(300, 1, tsec)
 
  if (any(iomode == [IO_MODE_NETCDF, IO_MODE_FORTRAN_MASTER])) then
-   MSG_ERROR(sjoin("Unsupported value for iomode: ",itoa(iomode)))
+   MSG_ERROR(sjoin("Unsupported value for iomode: ", itoa(iomode)))
  end if
 
- sc_mode = xmpio_collective
- comm = Wfd%comm; my_rank = Wfd%my_rank; master = Wfd%master
+ my_rank = Wfd%my_rank; master = Wfd%master
+ io_comm = wfd%comm; sc_mode = xmpio_collective; master_only = .False.; iread = .True.
+ !if (iomode == IO_MODE_FORTRAN) then
+   io_comm = xmpi_comm_self; sc_mode = xmpio_single; master_only = .True.; iread = my_rank == wfd%master
+ !end if
 
- tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
- call wrtout(std_out, sjoin(" wfd_read_wfk: reading", wfk_fname, "with iomode:", iomode2str(iomode)), &
-             do_flush=.True., pre_newlines=2)
+ call wrtout(std_out, sjoin(" wfd_read_wfk: reading", wfk_fname, &
+             "with iomode:", iomode2str(iomode), "master_only:", yesno(master_only)), do_flush=.True., pre_newlines=2)
 
- wfk_unt = get_unit()
- call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,wfk_unt,Wfd%comm,Hdr_out=Hdr)
+ if (iread) then
+   wfk_unt = get_unit()
+   call wfk_open_read(Wfk, wfk_fname, formeig0, iomode, wfk_unt, io_comm, Hdr_out=Hdr)
+ end if
+
+ if (master_only) call hdr%bcast(wfd%master, wfd%my_rank, wfd%comm)
  if (present(out_hdr)) call hdr_copy(hdr, out_hdr)
+ write(std_out, *)"After hdr_copy."
 
- ! TODO: Perform consistency check btw Hdr and Wfd.
+ ! TODO: Perform more consistency check btw Hdr and Wfd.
  ! Output the header of the GS wavefunction file.
  fform = 0
  if (wfd%prtvol /= 0 .and. wfd%my_rank == 0) call hdr%echo(fform, 4, unit=std_out)
@@ -4757,14 +4765,14 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  ! Each node will read the waves whose status if (WFD_ALLOCATED|WFD_STORED).
  ! all_countks is a global array used to skip (ik_ibz, spin) if all MPI procs do not need bands for this (k, s)
  ABI_MALLOC(my_readmask, (mband_disk, Wfd%nkibz, Wfd%nsppol))
- my_readmask=.FALSE.
+ my_readmask = .False.
  ABI_MALLOC(all_countks, (wfd%nkibz, wfd%nsppol))
  all_countks = 0; enough = 0
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
      do band=1,Wfd%nband(ik_ibz,spin)
        if (wfd%ihave_ug(band, ik_ibz, spin)) then
-         my_readmask(band, ik_ibz, spin) = .TRUE.
+         my_readmask(band, ik_ibz, spin) = .True.
          all_countks(ik_ibz, spin) = 1
          if (wfd%ihave_ug(band, ik_ibz, spin, how="Stored")) then
            enough = enough + 1
@@ -4784,6 +4792,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  do spin=1,wfd%nsppol
    call wrtout(std_out, sjoin(" For spin:", itoa(spin), ", will read:", itoa(count(all_countks(:, spin) /= 0)), " k-points."))
  end do
+ tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
 
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
  call cwtime(cpu, wall, gflops, "start")
@@ -4875,7 +4884,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
     do ik_ibz=1,Wfd%nkibz
       if (all_countks(ik_ibz, spin) == 0) cycle
       call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
-      !write(std_out,*)"about to read ik_ibz: ",ik_ibz,", spin: ",spin
+      !write(std_out,*)" About to read ik_ibz: ",ik_ibz,", spin: ",spin
 
       npw_disk   = Hdr%npwarr(ik_ibz)
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
@@ -4889,20 +4898,38 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
         MSG_ERROR(msg)
       end if
 
+      ! Allocate full array for eigenvalues and G-vectors.
       ABI_MALLOC(eig_k, ((2*nband_disk)**formeig0*nband_disk))
       ABI_MALLOC(kg_k, (3,optkg1*npw_disk))
 
-      mcg = npw_disk*Wfd%nspinor*COUNT(my_readmask(:,ik_ibz,spin))
+      ! Allocate array to store my wavefunctions and read data
+      mcg = npw_disk * wfd%nspinor * count(my_readmask(:, ik_ibz, spin))
       ABI_MALLOC_OR_DIE(cg_k, (2, mcg), ierr)
 
-      call wfk%read_bmask(my_readmask(:,ik_ibz, spin), ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
+      if (.not. master_only) then
+        call wfk%read_bmask(my_readmask(:,ik_ibz, spin), ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
+      else
+        ! Master read full set of bands and broadcast data, then each proc extract its own set of wavefunctions.
+        ABI_MALLOC_OR_DIE(allcg_k, (2, npw_disk*wfd%nspinor*nband_wfd), ierr)
+        if (my_rank == master) then
+          call wfk%read_band_block([1, nband_wfd], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=allcg_k, eig_k=eig_k)
+        end if
+        call xmpi_bcast(kg_k, wfd%master, wfd%comm, ierr)
+        call xmpi_bcast(eig_k, wfd%master, wfd%comm, ierr)
+        call xmpi_bcast(allcg_k, wfd%master, wfd%comm, ierr)
 
-      !if (my_rank == master)
-      !call wfk%read_band_block([1, nband_wfd], ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
-      !end if
-      !call xmpi_bcast(kg_k)
-      !call xmpi_bcast(eig_k)
-      !call xmpi_bcast(cg_k)
+        bcount = 0
+        do band=1,wfd%nband(ik_ibz, spin)
+          if (my_readmask(band, ik_ibz, spin)) then
+            bcount = bcount + 1
+            cg_bpad    = npw_disk * wfd%nspinor * (bcount-1)
+            allcg_bpad = npw_disk * wfd%nspinor * (band - 1)
+            !cg_k(:, cg_bpad+1:) = allcg_k(:,
+            call cg_zcopy(npw_disk * wfd%nspinor, allcg_k(:, allcg_bpad+1), cg_k(:, cg_bpad+1))
+          end if
+        end do
+        ABI_FREE(allcg_k)
+      end if
 
       if (Wfd%my_rank == Wfd%master .and. wfd%prtvol > 0) then
         if (Wfd%nsppol==2) then
@@ -4941,7 +4968,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ! Conversion of the basis set.
       bcount = 0
       do band=1,Wfd%nband(ik_ibz,spin)
-        if (my_readmask(band,ik_ibz,spin)) then
+        if (my_readmask(band, ik_ibz, spin)) then
 
           ib = wfd%bks2wfd(1, band, ik_ibz, spin)
           ik = wfd%bks2wfd(2, band, ik_ibz, spin)
@@ -4952,7 +4979,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
           wave%ug = czero
 
           bcount = bcount + 1
-          cg_bpad=npw_disk*Wfd%nspinor*(bcount-1)
+          cg_bpad = npw_disk*Wfd%nspinor*(bcount-1)
 
           if (change_gsphere) then
             ! Different istwfk storage.
@@ -5011,8 +5038,6 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
  call cwtime_report(" WFK IO", cpu, wall, gflops, end_str=ch10)
  call timab(300, 2, tsec)
-
- !call wfd%test_ortho(cryst, pawtab)
 
  DBG_EXIT("COLL")
 
