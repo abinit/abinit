@@ -16,8 +16,6 @@
 !!
 !! SOURCE
 
-!!***
-
 !!****f* ABINIT/xmpi_iallgather_dp4d
 !! NAME
 !!  xmpi_iallgather_dp4d

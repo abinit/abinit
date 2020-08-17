@@ -1698,11 +1698,10 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
 
  ! Allocate cache with all the 3*natom perturbations.
  ! Disable it no parallelism over perturbations.
- qcache%use_3natom_cache = .True.
- if (my_npert == natom3) qcache%use_3natom_cache = .False.
  ! Disabled as slow FT R --> q seems to be faster.
  qcache%use_3natom_cache = .False.
- !qcache%use_3natom_cache = .True.
+ qcache%use_3natom_cache = .True.
+ if (my_npert == natom3) qcache%use_3natom_cache = .False.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then
    ABI_MALLOC(qcache%v1scf_3natom_qibz, (2, nfft, nspden, natom3))
@@ -2666,7 +2665,7 @@ subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex
 !scalars
  integer,parameter :: tim_fourdp0 = 0
  integer,save :: enough = 0
- integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,ierr,imyp
+ integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,imyp !ierr,
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
  logical :: fourdp_done(3*cryst%natom)

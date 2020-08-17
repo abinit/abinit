@@ -4707,10 +4707,11 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: formeig0 = 0, optkg1 = 1, method = 2
- integer :: wfk_unt,npw_disk,nmiss,ig,sc_mode,ii, enough
+ integer :: wfk_unt,npw_disk,nmiss,ig,sc_mode,ii
  integer :: io_comm,master,my_rank,spin,ik_ibz,fform,ierr ! ,igp
  integer :: mcg,nband_wfd,nband_disk,band,mband_disk,bcount,istwfk_disk
  integer :: spinor,cg_spad,gw_spad,icg,igw,cg_bpad, allcg_bpad, ib, ik, is
+ integer :: my_bmin, my_bmax, bmin, bmax
  logical :: change_gsphere, master_only, iread
  real(dp) :: cpu, wall, gflops, cpu_ks, wall_ks, gflops_ks
  character(len=500) :: msg
@@ -4736,14 +4737,20 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
    MSG_ERROR(sjoin("Unsupported value for iomode: ", itoa(iomode)))
  end if
 
+ ! IO_MODE_FORTRAN --> only master reads and broadcasts data.
+ ! IO_MODE_MPI --> all procs read with collective operations.
  my_rank = Wfd%my_rank; master = Wfd%master
  io_comm = wfd%comm; sc_mode = xmpio_collective; master_only = .False.; iread = .True.
  !if (iomode == IO_MODE_FORTRAN) then
    io_comm = xmpi_comm_self; sc_mode = xmpio_single; master_only = .True.; iread = my_rank == wfd%master
  !end if
 
- call wrtout(std_out, sjoin(" wfd_read_wfk: reading", wfk_fname, &
-             "with iomode:", iomode2str(iomode), "master_only:", yesno(master_only)), do_flush=.True., pre_newlines=2)
+ call wrtout(std_out, sjoin( &
+   " wfd_read_wfk: Reading", wfk_fname, ch10, &
+    " with iomode:", iomode2str(iomode), "master_only:", yesno(master_only)), pre_newlines=2)
+ call wrtout(std_out, sjoin( &
+    " If MPI-IO is too slow, use the command line option `abinit --enforce-fortran-io ...`", ch10, &
+    " to make the master rank read data with Fortran-IO and then broadcast (requires more memory)"), do_flush=.True.)
 
  if (iread) then
    wfk_unt = get_unit()
@@ -4752,7 +4759,6 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
  if (master_only) call hdr%bcast(wfd%master, wfd%my_rank, wfd%comm)
  if (present(out_hdr)) call hdr_copy(hdr, out_hdr)
- write(std_out, *)"After hdr_copy."
 
  ! TODO: Perform more consistency check btw Hdr and Wfd.
  ! Output the header of the GS wavefunction file.
@@ -4766,19 +4772,19 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  ! all_countks is a global array used to skip (ik_ibz, spin) if all MPI procs do not need bands for this (k, s)
  ABI_MALLOC(my_readmask, (mband_disk, Wfd%nkibz, Wfd%nsppol))
  my_readmask = .False.
- ABI_MALLOC(all_countks, (wfd%nkibz, wfd%nsppol))
- all_countks = 0; enough = 0
+ my_bmin = huge(1); my_bmax = -huge(1)
+ ABI_ICALLOC(all_countks, (wfd%nkibz, wfd%nsppol))
+
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
      do band=1,Wfd%nband(ik_ibz,spin)
        if (wfd%ihave_ug(band, ik_ibz, spin)) then
+         my_bmin = min(my_bmin, band)
+         my_bmax = max(my_bmax, band)
          my_readmask(band, ik_ibz, spin) = .True.
          all_countks(ik_ibz, spin) = 1
          if (wfd%ihave_ug(band, ik_ibz, spin, how="Stored")) then
-           enough = enough + 1
-           if (enough < 30) then
-             MSG_WARNING("Wavefunction is already stored!")
-           end if
+           MSG_ERROR("Wavefunction is already stored!")
          end if
        end if
      end do
@@ -4786,15 +4792,18 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  end do
 
  ! All procs must agree when skipping (k, s) states
+ ! We also need bmin/bmax for master_only option.
  call xmpi_sum(all_countks, wfd%comm, ierr)
+ call xmpi_min(my_bmin, bmin, wfd%comm, ierr)
+ call xmpi_max(my_bmax, bmax, wfd%comm, ierr)
 
  call wrtout(std_out, sjoin(" About to read: ",itoa(count(my_readmask)), " (b, k, s) states in total."))
  do spin=1,wfd%nsppol
    call wrtout(std_out, sjoin(" For spin:", itoa(spin), ", will read:", itoa(count(all_countks(:, spin) /= 0)), " k-points."))
  end do
  tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
-
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
+
  call cwtime(cpu, wall, gflops, "start")
 
  if (method == 1) then
@@ -4810,7 +4819,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       nband_wfd  = Wfd%nband(ik_ibz,spin)
       if (nband_wfd > nband_disk) then
         write(msg,'(a,2(i0,1x))')&
-         " nband_wfd to be read cannot be greater than nband_disk while: ",nband_wfd,nband_disk
+         " nband_wfd to be read cannot be greater than nband_disk while: ",nband_wfd, nband_disk
         MSG_ERROR(msg)
       end if
 
@@ -4907,24 +4916,25 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_MALLOC_OR_DIE(cg_k, (2, mcg), ierr)
 
       if (.not. master_only) then
+        ! All procs read.
         call wfk%read_bmask(my_readmask(:,ik_ibz, spin), ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
+
       else
         ! Master read full set of bands and broadcast data, then each proc extract its own set of wavefunctions.
-        ABI_MALLOC_OR_DIE(allcg_k, (2, npw_disk*wfd%nspinor*nband_wfd), ierr)
+        ABI_MALLOC_OR_DIE(allcg_k, (2, npw_disk*wfd%nspinor*(bmax-bmin+1)), ierr)
         if (my_rank == master) then
-          call wfk%read_band_block([1, nband_wfd], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=allcg_k, eig_k=eig_k)
+          call wfk%read_band_block([bmin, bmax], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=allcg_k, eig_k=eig_k)
         end if
         call xmpi_bcast(kg_k, wfd%master, wfd%comm, ierr)
         call xmpi_bcast(eig_k, wfd%master, wfd%comm, ierr)
         call xmpi_bcast(allcg_k, wfd%master, wfd%comm, ierr)
 
         bcount = 0
-        do band=1,wfd%nband(ik_ibz, spin)
+        do band=bmin,bmax
           if (my_readmask(band, ik_ibz, spin)) then
             bcount = bcount + 1
             cg_bpad    = npw_disk * wfd%nspinor * (bcount-1)
-            allcg_bpad = npw_disk * wfd%nspinor * (band - 1)
-            !cg_k(:, cg_bpad+1:) = allcg_k(:,
+            allcg_bpad = npw_disk * wfd%nspinor * (band - bmin)
             call cg_zcopy(npw_disk * wfd%nspinor, allcg_k(:, allcg_bpad+1), cg_k(:, cg_bpad+1))
           end if
         end do

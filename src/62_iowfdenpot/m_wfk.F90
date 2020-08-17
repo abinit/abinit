@@ -2854,7 +2854,7 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0,formeig0=0
+ integer,parameter :: master = 0, formeig0 = 0
  integer :: ik_ibz,spin,my_rank,ierr,iomode,funt,sc_mode,mband
  real(dp) :: cpu, wall, gflops
  type(wfk_t) :: Wfk

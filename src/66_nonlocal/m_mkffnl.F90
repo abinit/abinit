@@ -197,14 +197,18 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  integer,intent(in) :: dimekb,dimffnl,ider,idir,lmnmax,lnmax,mpsang,mqgrid,nkpg
  integer,intent(in) :: npw,ntypat,usepaw,useylm
  integer,optional,intent(in) :: comm
- integer,optional,intent(out):: request
+ integer ABI_ASYNC, optional,intent(out):: request
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg(3,npw),pspso(ntypat)
  real(dp),intent(in) :: ekb(dimekb,ntypat*(1-usepaw))
  real(dp),intent(in) :: ffspl(mqgrid,2,lnmax,ntypat),gmet(3,3),gprimd(3,3)
  real(dp),intent(in) :: kpg(npw,nkpg),kpt(3),qgrid(mqgrid),rmet(3,3)
  real(dp),intent(in) :: ylm(:,:),ylm_gr(:,:,:)
- real(dp) ABI_ASYNC, intent(out) :: ffnl(npw,dimffnl,lmnmax,ntypat)
+ real(dp),intent(out) :: ffnl(npw,dimffnl,lmnmax,ntypat)
+ ! MG: Should be ABI_ASYNC due to optional non-Blocking API but NAG complains
+ ! Error: m_d2frnl.F90, line 600: Array section FFNL_STR(:,:,:,:,MU) supplied for dummy FFNL (no. 4) of MKFFNL,
+ ! the dummy is ASYNCHRONOUS but not assumed-shape
+ ! so we declare request as ASYNCHRONOUS
 
 !Local variables-------------------------------
 !scalars

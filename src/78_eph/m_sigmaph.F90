@@ -997,7 +997,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  use_ifc_fourq = .True.
  use_ifc_fourq = .False.
  phstore = phstore_new(cryst, ifc, sigma%nqibz, sigma%qibz, use_ifc_fourq, sigma%pert_comm%value)
- call cwtime_report(" phonons in the q-IBZ", cpu_ks, wall_ks, gflops_ks)
+ call cwtime_report(" phonons in the IBZ", cpu_ks, wall_ks, gflops_ks)
 
  ! Radius of sphere with volume equivalent to the micro zone.
  q0rad = two_pi * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
@@ -5853,7 +5853,7 @@ type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, com
  my_q2 = new%qibz_stop(new%my_rank)
 
  call wrtout(std_out, " Computing all phonon frequencies and eigenvectors in the IBZ.", pre_newlines=1)
- call wrtout(std_out, sjoin("Number of IBZ q-point stored by this rank inside pert_comm:", itoa(my_q2 - my_q1 + 1)))
+ call wrtout(std_out, sjoin(" Number of IBZ q-point stored by this rank inside pert_comm:", itoa(my_q2 - my_q1 + 1)))
  write(msg, "(a,f8.1,a)") &
    " Memory required by pheigvec_qibz: ", 2 * natom3**2 * (my_q2 - my_q1 + 1) * dp * b2Mb, " [Mb] <<< MEM"
  call wrtout(std_out, msg)
