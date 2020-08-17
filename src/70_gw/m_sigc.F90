@@ -256,6 +256,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(esymm_t),pointer :: QP_sym(:)
  integer :: ilwrk
  integer :: neig(Er%nomega_i)
+ integer :: neigmax
  real(gwp) :: epsm1_ev(Sigp%npwc)
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:)
  complex(gwpc),allocatable :: rhotw_epsm1_rhotw(:,:,:)
@@ -306,9 +307,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  if ( Dtset%gwaclowrank > 0 ) then
    ! Today we use the same number of eigenvectors irrespective to iw'
    ! Tomorrow we might optimize this further
-   neig(:) = MIN(Dtset%gwaclowrank,Sigp%npwc)
+   neigmax = MIN(Dtset%gwaclowrank,Sigp%npwc)
  else
-   neig(:) = Sigp%npwc
+   neigmax = Sigp%npwc
  endif 
 
  ABI_MALLOC(w_maxval,(minbnd:maxbnd))
@@ -354,7 +355,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  if (mod10==SIG_GW_AC) then
    write(msg,'(3a,i6,a,i6)') ' Using a low-rank formula for AC',&
-&           ch10,' Number of epsm1 eigenvectors retained: ',neig(1),' over ',Sigp%npwc
+&           ch10,' Number of epsm1 eigenvectors retained: ',neigmax,' over ',Sigp%npwc
    call wrtout(std_out,msg,'COLL')
  endif
 
@@ -778,12 +779,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! (epsm1-1) has negative eigenvalues
            ! after the diago, they will be sorted starting from the most negative
            call xheev('V','L',npwc,ac_epsm1cqwz2(:,:,iiw),epsm1_ev)
-           neig(iiw) = neig(1)
-           if (any(epsm1_ev(:)>0.0_dp)) then  !FBFB
-              write(msg,'(a,es14.6)') "an eigenvalue is positive:", MAXVAL(epsm1_ev(:))
-              call wrtout(std_out,msg,'PERS')
-              MSG_ERROR("epsm1-1 is not negative-definite!")
-           end if
+
+           ! Eliminate the spurious positive eigenvalues that may occur in harsh conditions
+           neig(iiw) = MIN(COUNT(epsm1_ev(:)<-1.0e-10_dp),neigmax)
+
            do ilwrk=1,neig(iiw)
              ac_epsm1cqwz2(:,ilwrk,iiw) = ac_epsm1cqwz2(:,ilwrk,iiw) * SQRT( -epsm1_ev(ilwrk) )
            end do
