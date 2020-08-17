@@ -1,10 +1,10 @@
---- 
-authors: J-M Beuken 
---- 
+---
+authors: J-M Beuken
+---
 
 # How to install ABINIT v9 on CentOS
 
-This step-by-step recipe describes how to build ABINIT on Fedora/RHEL/CentOS *nix distributions. 
+This step-by-step recipe describes how to build ABINIT on Fedora/RHEL/CentOS *nix distributions.
  
 Explicit testing was done with __CentOS 8.2__
 
@@ -48,13 +48,13 @@ for __a simple parallel ABINIT__ compilation ( mandatory libraries, MPICH, fftw3
 
 1. __compiler__<br />
     `sudo dnf install gcc-gfortran`
-    
+
 2. __MPI libraries__ - choice for MPICH<br />
     `sudo dnf install mpich mpich-devel`
-    
+
 3. __linear algebra library__ - choice for OpenBLAS<br />
     `sudo dnf install openblas`
-    
+
 4. __mandatory libraries__ - choice for hdf5 parallel version<br />
     `sudo dnf install hdf5-mpich hdf5-mpich-devel`<br />
     `sudo dnf install netcdf-mpich-devel netcdf-fortran-mpich-devel`<br />
@@ -62,13 +62,14 @@ for __a simple parallel ABINIT__ compilation ( mandatory libraries, MPICH, fftw3
 
 5. __fftw3__<br />
     `sudo dnf install fftw fftw-devel`
-    
+
 6. __python interpreter__<br />
     `sudo dnf install python3`
 
-__!!! Important :__ 
-    
-To check if the MPICH package is functional, you can execute the following command :
+__!!! Important :__
+
+Before continuing, it is important to test if your development environment is properly configured.<br />
+For example, to check if the MPICH package is functional, you can execute the following command :
 
     mpif90 --version
 
@@ -85,39 +86,39 @@ the output is
 
     /usr/lib64/mpich/bin/mpif90
 
- __As the MPICH wrappers are not installed in a standard location, we must update the $PATH variable :__
+ __The $PATH variable need to be updated__ :
 
      export PATH=/usr/lib64/mpich/bin:$PATH
-     
+
      mpif90 --version
-     
+
      GNU Fortran (GCC) 8.3.1 20191121 (Red Hat 8.3.1-5)
      /usr/lib64/mpich/bin/mpif90
 
-    
+
 ## Compiling, testing and installing ABINIT
 
 __Download ABINIT__.<br />
 For normal users, it is advised to get the newest version from our [website](https://www.abinit.org/packages) (replace 9.0.4 by the newest version available).
 
-    wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz     
-    tar xzf abinit-9.0.4.tar.gz     
+    wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
+    tar xzf abinit-9.0.4.tar.gz
     cd abinit-9.0.4
-    
+
 __Create a working directory__:
 
     mkdir build && cd build
 
 __To configure__:
 
-    ../configure -q --with-config-file='my_config_file.ac' 
+    ../configure -q --with-config-file='my_config_file.ac'
 
 where `my_config_file.ac` is either a self made config file.<br />
-More on the configure options is presented in [next section](#the-config-file). 
+More on the configure options is presented in [next section](#the-config-file).
 
 __Compile with__:
 
-    make -j 4   
+    make -j 4
 
 __!!! Tip :__
 
@@ -127,7 +128,7 @@ __Testing with__:
 
     cd tests
     ./runtests.py fast -j 4
-    
+
 __!!! Important :__
 
 The end of the test output __must__ be something like :
@@ -138,12 +139,12 @@ The end of the test output __must__ be something like :
     Completed in 9.95 [s]. Average time for test=2.52 [s], stdev=2.94 [s]
     Summary: failed=0, succeeded=11, passed=0, skipped=0, disabled=0
 
-otherwise there's a __problem__ with the compilation : see [Troubleshooting](#troubleshooting)  
+otherwise there's a __problem__ with the compilation : see [Troubleshooting](#troubleshooting)
 
-__Install__ (optional):     
+__Install__ (optional):
 
     make install
-   
+
 ### The config file
 
 The configure command takes as input some variables and flags.<br />
@@ -152,7 +153,7 @@ For example :
     ../configure --with-mpi="yes"
 
 tells ABINIT to enable MPI support.<br />
-Any variable or flag can be found by typing : 
+Any variable or flag can be found by typing :
 
     ../configure --help
 
@@ -165,7 +166,7 @@ When a lot of options are used, it is advised to use a config file.<br />
 __!!! Important !!!__
 
     The name of the options in the `.ac` files is in normalized form that is
-    the initial `--` is removed from the option name and all the other `-` characters in the string 
+    the initial `--` is removed from the option name and all the other `-` characters in the string
     are replaced by an underscore `_`.
     Following these simple rules, the  *configure* option `--with-mpi` becomes `with_mpi` in the ac file.
 
@@ -173,24 +174,24 @@ __!!! Important !!!__
 
     # installation location
     prefix=$HOME/local
-    
+
     # MPI settings
-    with_mpi="/usr/lib64/mpich"
-	enable_mpi_io="yes"
+    with_mpi="yes"
+    enable_mpi_io="yes"
 
-	# linear algebra settings
-	with_linalg_flavor="openblas"
-	LINALG_LIBS="-L/usr/lib64 -lopenblas"
+    # linear algebra settings
+    with_linalg_flavor="openblas"
+    LINALG_LIBS="-L/usr/lib64 -lopenblas"
 
-	# mandatory libraries
-	with_hdf5="yes"
-	with_netcdf="yes"
-	with_netcdf_fortran="yes"
-	with_libxc="yes"
-	
-	# FFT flavor
-	with_fft_flavor="fftw3"
-	FFTW3_LIBS="-L/usr/lib64 -lfftw3 -lfftw3f"
+    # mandatory libraries
+    with_hdf5="yes"
+    with_netcdf="yes"
+    with_netcdf_fortran="yes"
+    with_libxc="yes"
+
+    # FFT flavor
+    with_fft_flavor="fftw3"
+    FFTW3_LIBS="-L/usr/lib64 -lfftw3 -lfftw3f"
 
     # Enable Netcdf mode in Abinit (use netcdf as default I/O library)
     enable_netcdf_default="yes"
@@ -198,10 +199,10 @@ __!!! Important !!!__
 
 ## To go further
 
-- compiling optional librairies with fallback project : Wannier90, libPSML/XMLF90, ...
+- compiling optional librairies with fallback project : Wannier90, libPSML/XMLF90,...
 - enabling OpenMP
 - using libxml2
-- 
+-
 
 __-----------------------------------------------------------------------------------------__
 
@@ -226,8 +227,8 @@ We will build ABINIT with the following components :
 
 #### Getting sources of ABINIT
 
-    wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz     
-    tar xzf abinit-9.0.4.tar.gz     
+    wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
+    tar xzf abinit-9.0.4.tar.gz
     cd abinit-9.0.4
     mkdir build && cd build
     export PATH=/usr/lib64/mpich/bin:$PATH
@@ -237,24 +238,24 @@ We will build ABINIT with the following components :
 
     # installation location
     prefix=$HOME/local
-    
+
     # MPI settings
-    with_mpi="/usr/lib64/mpich"
-	enable_mpi_io="yes"
+    with_mpi="yes"
+    enable_mpi_io="yes"
 
-	# linear algebra settings
-	with_linalg_flavor="openblas"
-	LINALG_LIBS="-L/usr/lib64 -lopenblas"
+    # linear algebra settings
+    with_linalg_flavor="openblas"
+    LINALG_LIBS="-L/usr/lib64 -lopenblas"
 
-	# mandatory libraries
-	with_hdf5="yes"
-	with_netcdf="yes"
-	with_netcdf_fortran="yes"
-	with_libxc="yes"
-	
-	# FFT flavor
-	with_fft_flavor="fftw3"
-	FFTW3_LIBS="-L/usr/lib64 -lfftw3 -lfftw3f"
+    # mandatory libraries
+    with_hdf5="yes"
+    with_netcdf="yes"
+    with_netcdf_fortran="yes"
+    with_libxc="yes"
+
+    # FFT flavor
+    with_fft_flavor="fftw3"
+    FFTW3_LIBS="-L/usr/lib64 -lfftw3 -lfftw3f"
 
     # Enable Netcdf mode in Abinit (use netcdf as default I/O library)
     enable_netcdf_default="yes"
@@ -267,8 +268,9 @@ We will build ABINIT with the following components :
 #### Testing ABINIT
 
     cd tests
+    export OPENBLAS_NUM_THREADS=1
     ./runtest.py fast -j 8 --no-logo
-    
+
 #### Installing ABINIT
 
     make install
@@ -293,8 +295,8 @@ We will build ABINIT with the following components :
 
 #### Getting sources of ABINIT
 
-    wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz     
-    tar xzf abinit-9.0.4.tar.gz     
+    wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
+    tar xzf abinit-9.0.4.tar.gz
     cd abinit-9.0.4
     mkdir build && cd build
     export PATH=/usr/lib64/mpich/bin:$PATH
@@ -304,26 +306,26 @@ We will build ABINIT with the following components :
 
     # installation location
     prefix=$HOME/local
-    
-    # MPI settings
-    with_mpi="/usr/lib64/mpich"
-	enable_mpi_io="yes"
 
-	# linear algebra settings
-	with_linalg_flavor="mkl"
+    # MPI settings
+    with_mpi="yes"
+    enable_mpi_io="yes"
+
+    # linear algebra settings
+    with_linalg_flavor="mkl"
     LINALG_CPPFLAGS="-I${MKLROOT}/include"
     LINALG_FCFLAGS="-I${MKLROOT}/include"
     LINALG_LIBS="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
-	# mandatory libraries
-	with_hdf5="yes"
-	with_netcdf="yes"
-	with_netcdf_fortran="yes"
-	with_libxc="yes"
-	
-	# FFT flavor
-	with_fft_flavor="dfti"
-	FFT_FCFLAGS="-I${MKLROOT}/include"
+    # mandatory libraries
+    with_hdf5="yes"
+    with_netcdf="yes"
+    with_netcdf_fortran="yes"
+    with_libxc="yes"
+
+    # FFT flavor
+    with_fft_flavor="dfti"
+    FFT_FCFLAGS="-I${MKLROOT}/include"
 
     # Enable Netcdf mode in Abinit (use netcdf as default I/O library)
     enable_netcdf_default="yes"
@@ -336,8 +338,9 @@ We will build ABINIT with the following components :
 #### Testing ABINIT
 
     cd tests
+    export MKL_NUM_THREADS=1
     ./runtest.py fast -j 8 --no-logo
-    
+
 #### Installing ABINIT
 
     make install
@@ -345,5 +348,5 @@ We will build ABINIT with the following components :
 __-----------------------------------------------------------------------------------------__
 
 ## Troubleshooting
-- 
+
 

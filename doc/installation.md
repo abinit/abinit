@@ -66,7 +66,7 @@ developers.
 In what follows, _x.y.z_ represents the ABINIT version.
 
 In order to get the ABINIT package, you have first to download the file
-**abinit-_x.y.z_.ta.gz** from the 
+**abinit-_x.y.z_.tar.gz** from the 
 [packages page](https://www.abinit.org/packages) of the ABINIT Web site, then issue:
 
     gunzip abinit-x.y.z.tar.gz | tar -xvf -
