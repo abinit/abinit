@@ -13,11 +13,11 @@ Both of them can be found either on the Web, or in the doc subdirectory of the p
 -->
 
 Any comment or suggestion to improve the procedure or this page will be welcome! 
-Simply contact the ABINIT group <https://abinit.abinit.org/contact_info>
+Simply contact the ABINIT group <https://www.abinit.org/contact_info>
 
 ## Overview
 
-For the vast majority of people willing to use ABINIT (simple users -not developers-, with Unix/Linux or macOS under terminal mode), 
+For the vast majority of people willing to use ABINIT (simple users -not developers-), with Unix/Linux or macOS under terminal mode), 
 the installation/compilation steps are:
 
   1. Prerequisite : you need a Fortran compiler, a C compiler, a Python interpreter (>2.7.5), 
@@ -125,7 +125,7 @@ slowly, or with downgraded capabilities.
 Supposing that you are in the lucky case where the build system is able to
 find all the information, then the build of ABINIT is very simple. Issue:
 
-  * "configure -q" or "./configure -q" (or first create a tmp directory, then "cd tmp", then "../configure -q").
+  *  "./configure -q" (or first create a tmp directory, then "cd tmp", then "../configure -q").
   * "make" (or "make -j<n>" for compiling with <n> processors on a SMP machine, e.g. "make -j4" for four processors). Might take two minutes.
   * (optionally) make install
 

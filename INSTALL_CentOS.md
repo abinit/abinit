@@ -17,7 +17,7 @@ Explicit testing was done with __CentOS 8.2__
    Possible options:       
      - gfortran, the GNU compiler. ([https://gcc.gnu.org/](https://gcc.gnu.org/))
      - ifort, the intel compiler. This is a commercial compiler, slightly more complicated to use but more optimized for intel architecture.
-2.  __Python interpreter__ (**v3.8 recommended**)
+2.  __A Python interpreter__ (**v3.8 recommended**)
 3.  __A MPI library__ (If you want to benefit from parallelism; **recommended**).<br />
    Possible options:
      - Open MPI  ([http://www.open-mpi.org](http://www.open-mpi.org))
@@ -139,13 +139,13 @@ The end of the test output __must__ be something like :
     Completed in 9.95 [s]. Average time for test=2.52 [s], stdev=2.94 [s]
     Summary: failed=0, succeeded=11, passed=0, skipped=0, disabled=0
 
-otherwise there's a __problem__ with the compilation : see [Troubleshooting](#troubleshooting)
+otherwise there is a __problem__ with the compilation : see [Troubleshooting](#troubleshooting)
 
 __Install__ (optional):
 
     make install
 
-### The config file
+## The config file
 
 The configure command takes as input some variables and flags.<br />
 For example :
@@ -158,7 +158,7 @@ Any variable or flag can be found by typing :
     ../configure --help
 
 Most options are detected automatically by ABINIT.<br />
-For example, with the option `--with-mpi="yes"`, ABINIT will try to use the parallel fortran compiler (mpifort) <br />
+For example, with the option `--with-mpi="yes"`, ABINIT will try to use the parallel fortran compiler (mpifort)
 and detect directories with useful library and header files for MPI support.<br />
 
 When a lot of options are used, it is advised to use a config file.<br />
@@ -166,9 +166,10 @@ When a lot of options are used, it is advised to use a config file.<br />
 __!!! Important !!!__
 
     The name of the options in the `.ac` files is in normalized form that is
-    the initial `--` is removed from the option name and all the other `-` characters in the string
-    are replaced by an underscore `_`.
-    Following these simple rules, the  *configure* option `--with-mpi` becomes `with_mpi` in the ac file.
+    the initial `--` is removed from the option name and all the other `-` characters
+    in the string are replaced by an underscore `_`.
+    Following these simple rules, the configure option `--with-mpi` becomes `with_mpi`
+    in the ac file.
 
  The `.ac` file for __our simple parallel ABINIT__ using OpenBLAS can be written as :
 
@@ -202,30 +203,32 @@ __!!! Important !!!__
 - compiling optional librairies with fallback project : Wannier90, libPSML/XMLF90,...
 - enabling OpenMP
 - using libxml2
--
 
-__-----------------------------------------------------------------------------------------__
+
+__-------------------------------------------------------------------------------------------------__
+
 
 ## Quick Guide for the Impatient
 
 We will build ABINIT with the following components :
+
 - GNU compilers
 - MPICH
 - OpenBLAS
 - FFTW3
 
-#### Installing needed packages
+### Installing needed packages
 
-    `sudo dnf install gcc-gfortran`
-    `sudo dnf install mpich mpich-devel`
-    `sudo dnf install openblas`
-    `sudo dnf install hdf5-mpich hdf5-mpich-devel`
-    `sudo dnf install netcdf-mpich-devel netcdf-fortran-mpich-devel`
-    `sudo dnf install libxc libxc-devel`
-    `sudo dnf install fftw fftw-devel`
-    `sudo dnf install python3`
+    sudo dnf install gcc-gfortran
+    sudo dnf install mpich mpich-devel
+    sudo dnf install openblas
+    sudo dnf install hdf5-mpich hdf5-mpich-devel
+    sudo dnf install netcdf-mpich-devel netcdf-fortran-mpich-devel
+    sudo dnf install libxc libxc-devel
+    sudo dnf install fftw fftw-devel
+    sudo dnf install python3
 
-#### Getting sources of ABINIT
+### Getting sources of ABINIT
 
     wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
     tar xzf abinit-9.0.4.tar.gz
@@ -233,8 +236,9 @@ We will build ABINIT with the following components :
     mkdir build && cd build
     export PATH=/usr/lib64/mpich/bin:$PATH
 
-#### Creating a config file
- Edit a `config.ac` file  :
+### Creating a config file
+
+Edit a `config.ac` file  :
 
     # installation location
     prefix=$HOME/local
@@ -260,40 +264,43 @@ We will build ABINIT with the following components :
     # Enable Netcdf mode in Abinit (use netcdf as default I/O library)
     enable_netcdf_default="yes"
 
-#### Compiling ABINIT
+### Compiling ABINIT
 
      ../configure -q --with-config-file='config.ac'
      make -j 8
 
-#### Testing ABINIT
+### Testing ABINIT
 
     cd tests
     export OPENBLAS_NUM_THREADS=1
     ./runtest.py fast -j 8 --no-logo
 
-#### Installing ABINIT
+### Installing ABINIT
 
     make install
 
-__-----------------------------------------------------------------------------------------__
+
+__-------------------------------------------------------------------------------------------------__
+
 
 ## Quick Guide for the Impatient (MKL version)
 
 We will build ABINIT with the following components :
+
 - GNU compilers
 - MPICH
 - MKL
 
-#### Installing needed packages
+### Installing needed packages
 
-    `sudo dnf install gcc-gfortran`
-    `sudo dnf install mpich mpich-devel`
-    `sudo dnf install hdf5-mpich hdf5-mpich-devel`
-    `sudo dnf install netcdf-mpich-devel netcdf-fortran-mpich-devel`
-    `sudo dnf install libxc libxc-devel`
-    `sudo dnf install python3`
+    sudo dnf install gcc-gfortran
+    sudo dnf install mpich mpich-devel
+    sudo dnf install hdf5-mpich hdf5-mpich-devel
+    sudo dnf install netcdf-mpich-devel netcdf-fortran-mpich-devel
+    sudo dnf install libxc libxc-devel
+    sudo dnf install python3
 
-#### Getting sources of ABINIT
+### Getting sources of ABINIT
 
     wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
     tar xzf abinit-9.0.4.tar.gz
@@ -301,7 +308,8 @@ We will build ABINIT with the following components :
     mkdir build && cd build
     export PATH=/usr/lib64/mpich/bin:$PATH
 
-#### Creating a config file
+### Creating a config file
+
  Edit a `config.ac` file  :
 
     # installation location
@@ -330,23 +338,26 @@ We will build ABINIT with the following components :
     # Enable Netcdf mode in Abinit (use netcdf as default I/O library)
     enable_netcdf_default="yes"
 
-#### Compiling ABINIT
+### Compiling ABINIT
 
      ../configure -q --with-config-file='config.ac'
      make -j 8
 
-#### Testing ABINIT
+### Testing ABINIT
 
     cd tests
     export MKL_NUM_THREADS=1
     ./runtest.py fast -j 8 --no-logo
 
-#### Installing ABINIT
+### Installing ABINIT
 
     make install
 
-__-----------------------------------------------------------------------------------------__
+
+__-------------------------------------------------------------------------------------------------__
+
 
 ## Troubleshooting
 
+-   
 
