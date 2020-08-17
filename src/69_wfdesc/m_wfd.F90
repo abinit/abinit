@@ -4746,11 +4746,13 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  !end if
 
  call wrtout(std_out, sjoin( &
-   " wfd_read_wfk: Reading", wfk_fname, ch10, &
-    " with iomode:", iomode2str(iomode), "master_only:", yesno(master_only)), pre_newlines=2)
- call wrtout(std_out, sjoin( &
-    " If MPI-IO is too slow, use the command line option `abinit --enforce-fortran-io ...`", ch10, &
-    " to make the master rank read data with Fortran-IO and then broadcast (requires more memory)"), do_flush=.True.)
+   " wfd_read_wfk: Reading file:", wfk_fname, &
+   " with iomode:", iomode2str(iomode),", master_only:", yesno(master_only)), pre_newlines=2)
+ if (iomode == IO_MODE_MPI) then
+   call wrtout(std_out, sjoin( &
+     " If MPI-IO is too slow, use the command line option `abinit --enforce-fortran-io ...`", ch10, &
+     " to make the master prc read data with Fortran-IO and then broadcast (requires more memory)"), do_flush=.True.)
+ end if
 
  if (iread) then
    wfk_unt = get_unit()

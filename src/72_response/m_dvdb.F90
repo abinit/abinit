@@ -1700,7 +1700,7 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
  ! Disable it no parallelism over perturbations.
  ! Disabled as slow FT R --> q seems to be faster.
  qcache%use_3natom_cache = .False.
- qcache%use_3natom_cache = .True.
+ !qcache%use_3natom_cache = .True.
  if (my_npert == natom3) qcache%use_3natom_cache = .False.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then

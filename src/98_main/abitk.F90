@@ -48,7 +48,7 @@ program abitk
 
  use defs_datatypes,   only : ebands_t
  use m_fstrings,       only : sjoin, strcat, basename, itoa
- use m_io_tools,       only : open_file
+ use m_io_tools,       only : open_file, enforce_fortran_io
  use m_specialmsg,     only : herald
  use m_symtk,          only : matr3inv
  use m_numeric_tools,  only : arth
@@ -127,37 +127,12 @@ program abitk
    if (arg == "--version") then
      write(std_out,"(a)") trim(abinit_version); goto 100
 
+   else if (arg == "--enforce-fortran-io") then
+      call enforce_fortran_io(.True.)
+
    else if (arg == "-h" .or. arg == "--help") then
      ! Document the options.
-     write(std_out,"(a)")" --version              Show version number and exit."
-     write(std_out,"(a)")" -h, --help             Show this help and exit."
-     write(std_out,"(a)")" -v                     Increase verbosity level"
-
-     write(std_out,"(2a)")ch10,"=== HEADER ==="
-     write(std_out,"(a)")"hdr_print FILE [--prtvol 0]  Print ABINIT header."
-
-     write(std_out,"(2a)")ch10,"=== KPOINTS ==="
-     write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
-
-     write(std_out,"(2a)")ch10,"=== CRYSTAL ==="
-     write(std_out,"(a)")"crystal_print FILE                   Print info on crystalline structure."
-     write(std_out,"(a)")"from_poscar POSCAR_FILE              Read POSCAR file, print abinit variables."
-
-     write(std_out,"(2a)")ch10,"=== ELECTRONS ==="
-     write(std_out,"(a)")"ebands_print FILE                    Print info on electron band structure."
-     write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with electron bands."
-     write(std_out,"(a)")"ebands_gnuplot FILE                  Produce GNUPLOT file with electron bands."
-     write(std_out,"(a)")"ebands_edos FILE --intmeth, --step, --broad  Compute electron DOS."
-     write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
-     !write(std_out,"(a)")"ebands_mu_t FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
-     write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
-     !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
-     !write(std_out,"(a)")"skw_path FILE                       Interpolate band structure along a k-path."
-     write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK        Use e_nk from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
-
-     write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
-     write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
-     write(std_out,"(a)")"kptrank_unit_tests                    Run unit tests for kptrank routines."
+     call abitk_show_help()
      goto 100
    end if
  end do
@@ -452,7 +427,8 @@ program abitk
    call kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
  case default
-   MSG_ERROR(sjoin("Unknown command:", command))
+   call abitk_show_help()
+   MSG_ERROR(sjoin("Invalid command:", command))
  end select
 
  ! Deallocate memory to make memcheck happy.
@@ -477,6 +453,58 @@ program abitk
  100 call xmpi_end()
 
 contains
+!!***
+
+!!****f* abitk/abitk_show_help()
+!! NAME
+!! abitk_show_help()
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      abitk
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine abitk_show_help()
+
+  write(std_out,"(a)")" --version              Show version number and exit."
+  write(std_out,"(a)")" -h, --help             Show this help and exit."
+  write(std_out,"(a)")" -v                     Increase verbosity level"
+
+  write(std_out,"(2a)")ch10,"=== HEADER ==="
+  write(std_out,"(a)")"hdr_print FILE [--prtvol 0]  Print ABINIT header."
+
+  write(std_out,"(2a)")ch10,"=== KPOINTS ==="
+  write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
+
+  write(std_out,"(2a)")ch10,"=== CRYSTAL ==="
+  write(std_out,"(a)")"crystal_print FILE                   Print info on crystalline structure."
+  write(std_out,"(a)")"from_poscar POSCAR_FILE              Read POSCAR file, print abinit variables."
+
+  write(std_out,"(2a)")ch10,"=== ELECTRONS ==="
+  write(std_out,"(a)")"ebands_print FILE                    Print info on electron band structure."
+  write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with electron bands."
+  write(std_out,"(a)")"ebands_gnuplot FILE                  Produce GNUPLOT file with electron bands."
+  write(std_out,"(a)")"ebands_edos FILE --intmeth, --step, --broad  Compute electron DOS."
+  write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
+  !write(std_out,"(a)")"ebands_mu_t FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
+  write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
+  !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
+  !write(std_out,"(a)")"skw_path FILE                       Interpolate band structure along a k-path."
+  write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK        Use e_nk from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
+
+  write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
+  write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
+  write(std_out,"(a)")"kptrank_unit_tests                    Run unit tests for kptrank routines."
+
+end subroutine abitk_show_help
 !!***
 
 !!****f* abitk/get_path_ebands_cryst
