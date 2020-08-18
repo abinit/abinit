@@ -1008,8 +1008,11 @@ if (sigma%mrta == 0) then
        vcar_ibz(:, band_ks, ik_ibz, spin) = vk
        if (ikcalc /= -1) then
          bstart_ks = sigma%bstart_ks(ikcalc, spin)
-         ib_k = band_ks - bstart_ks + 1
-         sigma%vcar_calc(:, ib_k, ikcalc, spin) = vk
+         bstop = bstart_ks + sigma%nbcalc_ks(ikcalc, spin) - 1
+         if (band_ks >= bstart_ks .and. band_ks <= bstop) then
+           ib_k = band_ks - bstart_ks + 1
+           sigma%vcar_calc(:, ib_k, ikcalc, spin) = vk
+         end if
        end if
      end do
    end do
