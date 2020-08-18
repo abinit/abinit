@@ -460,13 +460,13 @@ contains
 !! abitk_show_help()
 !!
 !! FUNCTION
+!!  Show command line help
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
 !! PARENTS
-!!      abitk
 !!
 !! CHILDREN
 !!
