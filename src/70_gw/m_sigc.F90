@@ -767,6 +767,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! Important to set to zero here for all procs since we're going to use a dirty reduction later 
          ! The reduction 'xmpi_sum' does not induce a significant performance loss in the tested systems
          ac_epsm1cqwz2(:,:,:) = czero_gw
+         neig(:) = 0
          do iiw=1,Er%nomega_i
            ! Use the available MPI tasks to parallelize over iw'
            if ( Dtset%gwpara == 2 .and. MODULO(iiw-1,Wfd%nproc) /= Wfd%my_rank ) CYCLE
@@ -789,6 +790,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          end do
          if ( Dtset%gwpara == 2 ) then
            call xmpi_sum(ac_epsm1cqwz2, Wfd%comm, ierr)
+           call xmpi_sum(neig, Wfd%comm, ierr)
          endif
          call timab(444,2,tsec) ! ac_lrk_diag
 
