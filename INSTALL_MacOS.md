@@ -8,16 +8,16 @@ This file describes how to install ABINIT on macOS :
 
  - Using the Homebrew package manager
  - Using the MacPorts package manager
- - Compiling from source 
+ - Compiling from source
 
 ## Using [homebrew](http://brew.sh)
 
-Tested with macOS  v10.12 (Sierra), 10.13 (High Sierra), 10.14 (Mojave), 10.15 (Catalina)
+Tested with macOS 10.13 (High Sierra), 10.14 (Mojave), 10.15 (Catalina)<br />
 A Homebrew official formula for ABINIT is available on [ABINIT github repository](https://github.com/abinit).
 
 ### Prerequesites
 
-1. Homebrew installed (see: <http://brew.sh/#install>)
+- Homebrew installed (see: <http://brew.sh/#install>)
 
 ### Installing ABINIT
 
@@ -39,13 +39,13 @@ Note:
 
 * The following options are available for ABINIT formula:
 
-      - --with-testsuite    --> Run full test suite (time consuming)
-      - --without-check     --> Skip build-time tests (not recommended)
-      - --without-openmp    --> Disable openMP multithreading
-      - --without-netcdf    --> Build without netcdf support
-      - --without-libxc     --> Build without libXC support
-      - --without-fftw      --> Build without fftw support
-      - --without-scalapack --> Build without scalapack support
+      --with-testsuite    --> Run full test suite (time consuming)
+      --without-check     --> Skip build-time tests (not recommended)
+      --without-openmp    --> Disable openMP multithreading
+      --without-netcdf    --> Build without netcdf support
+      --without-libxc     --> Build without libXC support
+      --without-fftw      --> Build without fftw support
+      --without-scalapack --> Build without scalapack support
 
 ## Using [macports](http://www.macports.org)
 
@@ -90,7 +90,7 @@ Installing a multi-threaded (openMP) version of ABINIT:
 
      sudo port install abinit @X.Y.Z +threads
 
-It is possible to mix all previous variants: 
+It is possible to mix all previous variants:
 
     sudo port install abinit @X.Y.Z +fftw3+threads+scalapack
 
@@ -121,16 +121,15 @@ Other options available by typing:
       - NetCDF (Network Common Data Form) ([https://www.unidata.ucar.edu/software/netcdf/](https://www.unidata.ucar.edu/software/netcdf/))
       - libXC (library of exchange-correlation functionals) ([https://tddft.org/programs/libxc/download/](https://tddft.org/programs/libxc/download/))
 
-
 5. A MPI library installed  (If you want to benefit from parallelism; recommended).
    Possible options:
 
       - mpich from [http://www.mpich.org](http://www.mpich.org), or via a package manager
       - open mpi from [http://www.open-mpi.org](http://www.open-mpi.org), or via a package manager
 
-6. A Linear Algebra library installed.
+6. A Linear Algebra library installed.<br />
   By default the `accelerate` Framework is installed on macOS
-  and ABINIT build system should find it.
+  and ABINIT build system should find it.<br />
   But you might want to install a parallel library: `scalapack`, `atlas`, `mkl`, ...
 
 ### Installing ABINIT
@@ -164,4 +163,5 @@ Install (optional):
 
 ## Comments
 
-To benefit from the optional "fallbacks" (`Wannier90`, `libPSML`, ...), consult the [abinit-fallbacks Project](https://gitlab.abinit.org/buildbot/abinit-fallbacks) 
+To benefit from the optional "fallbacks" (`Wannier90`, `libPSML`, ...),<br />
+consult the [abinit-fallbacks Project](https://gitlab.abinit.org/buildbot/abinit-fallbacks)
