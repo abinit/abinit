@@ -706,7 +706,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
- integer,allocatable :: ibzspin_2ikcalc(:,:), have_vcar_ibz(:,:,:)
+ integer,allocatable :: ibzspin_2ikcalc(:,:) !, have_vcar_ibz(:,:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(3), vkq(3), vkq_ibz(3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
@@ -939,6 +939,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
  ! All sigma_nk states are available on each node so parallelization is easy.
+if (sigma%mrta == 0) then
  cnt = 0
  do spin=1,nsppol
    do ikcalc=1,sigma%nkcalc
@@ -960,48 +961,53 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do
  call xmpi_sum(sigma%vcar_calc, comm, ierr)
 
- if (sigma%mrta > 0) then
+ else
+
+ !if (sigma%mrta > 0) then
    ! Allocate arrays in the IBZ to store vk so that we avoid recomputing vkq as everything can be
    ! reconstructed by symmetry. Note that %vcar_calc may not be enough if there's a m-nband outside
    ! the energy window. This is the reason why use these additional datastructures to push new data at runtime.
-   ABI_ICALLOC(have_vcar_ibz, (sigma%bsum_start:sigma%bsum_stop, nkpt, nsppol))
+   !ABI_ICALLOC(have_vcar_ibz, (sigma%bsum_start:sigma%bsum_stop, nkpt, nsppol))
    ABI_CALLOC(vcar_ibz, (3, sigma%bsum_start:sigma%bsum_stop, nkpt, nsppol))
+
    ! Fill vcar_ibz from sigma%vcar_calc
-   vcar_ibz = huge(one)
-   do spin=1,nsppol
-     do ikcalc=1,sigma%nkcalc
-        bstart_ks = sigma%bstart_ks(ikcalc, spin)
-        ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
-         do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
-           band_ks = ib_k + bstart_ks - 1
-           vcar_ibz(:, band_ks, ik_ibz, spin) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
-           have_vcar_ibz(band_ks, ik_ibz, spin) = 1
-        end do
-     end do
-   end do
+   !vcar_ibz = huge(one)
+   !do spin=1,nsppol
+   !  do ikcalc=1,sigma%nkcalc
+   !     bstart_ks = sigma%bstart_ks(ikcalc, spin)
+   !     ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
+   !      do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
+   !        band_ks = ib_k + bstart_ks - 1
+   !        vcar_ibz(:, band_ks, ik_ibz, spin) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
+   !        have_vcar_ibz(band_ks, ik_ibz, spin) = 1
+   !     end do
+   !  end do
+   !end do
 
- end if
+ !end if
 
-#if 0
  cnt = 0
  do spin=1,nsppol
    do ik_ibz=1,ebands%nkpt
      kk = ebands%kptns(:, ik_ibz)
      npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+     !write(std_out, *)"npw_k: ", npw_k
+     !write(std_out, *)"ihave_ikibz_spin:", ihave_ikibz_spin(ik_ibz, spin)
      ikcalc = ibzspin_2ikcalc(ik_ibz, spin)
+     if (.not. ihave_ikibz_spin(ik_ibz, spin)) cycle
      if (npw_k == 1) cycle
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
 
      call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
 
      do band_ks=sigma%bsum_start,sigma%bsum_stop
+       if (.not. wfd%ihave_ug(band_ks, ik_ibz, spin)) cycle
        call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
        vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
        vcar_ibz(:, band_ks, ik_ibz, spin) = vk
        if (ikcalc /= -1) then
          bstart_ks = sigma%bstart_ks(ikcalc, spin)
-         !band_ks = ib_k + bstart_ks - 1
          ib_k = band_ks - bstart_ks + 1
          sigma%vcar_calc(:, ib_k, ikcalc, spin) = vk
        end if
@@ -1010,7 +1016,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do
  call xmpi_sum(sigma%vcar_calc, comm, ierr)
  call xmpi_sum(vcar_ibz, comm, ierr)
-#endif
+endif
 
  ! Write v_nk to disk.
 #ifdef HAVE_NETCDF
@@ -1020,7 +1026,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 #endif
 
  ABI_FREE(cgwork)
- if (sigma%mrta == 0) call ddkop%free()
+ !if (sigma%mrta == 0) call ddkop%free()
+ call ddkop%free()
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
 
  ! Precompute phonon frequencies and eigenvectors in the IBZ.
@@ -1704,11 +1711,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Prepare DDK operator only if (k+q) is not alreay computed via nkcalc
        ! that is if the k+q is slightly outside the sigma_erange window.
-       if (sigma%mrta > 0) then
-         if (any(have_vcar_ibz(sigma%my_bsum_start:sigma%my_bsum_stop, ikq_ibz, spin) == 0)) then
-           call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
-         end if
-       end if
+       !if (sigma%mrta > 0) then
+       !  if (any(have_vcar_ibz(sigma%my_bsum_start:sigma%my_bsum_stop, ikq_ibz, spin) == 0)) then
+       !    call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
+       !  end if
+       !end if
 
        ! ================
        ! Sum over m bands
@@ -1818,7 +1825,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ! Compute vkq
            !vkq_ikcalc = 0
-           if (have_vcar_ibz(ibsum_kq, ikq_ibz, spin) == 1) then
+           !if (have_vcar_ibz(ibsum_kq, ikq_ibz, spin) == 1) then
              vkq = vcar_ibz(:, ibsum_kq, ikq_ibz, spin)
              if (.not. isirr_kq) then
                ! If k+q is not in the IBZ, we need to recostruct the value by symmetry using v(Sq) = S v(q).
@@ -1830,18 +1837,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end if
              !vkq_ibz = vkq
 
-           else
+           !else
 
-             ! Need to compute vkq here if kq is slightly outside the Sigma_erange window.
-             vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, nspinor, bra_kq, cwaveprj0)
+           !  ! Need to compute vkq here if kq is slightly outside the Sigma_erange window.
+           !  vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, nspinor, bra_kq, cwaveprj0)
 
-             ! Get the velocity in the IBZ and save it vcar_ibz so that we don't need
-             ! to recompute it in the next iterations over k.
-             vkq_ibz = matmul(cryst%symrel_cart(:,:,isym_kq), vkq)
-             if (trev_kq /= 0) vkq_ibz = -vkq_ibz
-             vcar_ibz(:, ibsum_kq, ikq_ibz, spin) = vkq_ibz
-             have_vcar_ibz(ibsum_kq, ikq_ibz, spin) = 1
-           end if
+           !  ! Get the velocity in the IBZ and save it vcar_ibz so that we don't need
+           !  ! to recompute it in the next iterations over k.
+           !  vkq_ibz = matmul(cryst%symrel_cart(:,:,isym_kq), vkq)
+           !  if (trev_kq /= 0) vkq_ibz = -vkq_ibz
+           !  vcar_ibz(:, ibsum_kq, ikq_ibz, spin) = vkq_ibz
+           !  have_vcar_ibz(ibsum_kq, ikq_ibz, spin) = 1
+           !end if
 
            ! Debugging section
            !if (vkq_ikcalc /= 0) then
@@ -2397,7 +2404,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(osc_gbound_q)
  ABI_FREE(ibzspin_2ikcalc)
  ABI_SFREE(vcar_ibz)
- ABI_SFREE(have_vcar_ibz)
+ !ABI_SFREE(have_vcar_ibz)
 
  call gs_hamkq%free()
  call wfd%free()
@@ -2405,7 +2412,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(cwaveprj0)
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
- call ddkop%free()
+ !call ddkop%free()
  call phstore%free()
  call sigma%free()
 
