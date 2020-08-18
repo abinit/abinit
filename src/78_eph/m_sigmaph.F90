@@ -708,7 +708,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
  integer,allocatable :: ibzspin_2ikcalc(:,:) !, have_vcar_ibz(:,:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
- real(dp) :: vk(3), vkq(3), vkq_ibz(3), tsec(2), eminmax(2)
+ real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2) !vkq_ibz(3),
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp) :: gdw2, gdw2_stern, rtmp
@@ -1870,7 +1870,7 @@ endif
            do ib_k=1,nbcalc_ks
              vk = sigma%vcar_calc(:, ib_k, ikcalc, spin)
              vkk_norm = sqrt(dot_product(vk, vk))
-             alpha_mrta(ib_k) = zero
+             alpha_mrta(ib_k) = one ! zero
              if (vkk_norm > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vkk_norm ** 2
            end do
          end if
@@ -4005,7 +4005,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%a2f_emesh)
  ABI_SFREE(self%a2few)
 
- ! types.
+ ! datatypes.
  if (allocated(self%degtab)) then
    do jj=1,size(self%degtab, dim=2)
      do ii=1,size(self%degtab, dim=1)
