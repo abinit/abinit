@@ -235,7 +235,8 @@ CONTAINS
 !!                               Initialized in output
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,paw_qpscgw,respfn,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_respfn_driver
+!!      m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -403,8 +404,8 @@ end subroutine paw_an_init
 !!  All associated pointers in Paw_an(:) are deallocated
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,m_paral_pert,m_paw_an,respfn,scfcv,screening
-!!      sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_paral_pert
+!!      m_paw_an,m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -498,8 +499,8 @@ end subroutine paw_an_free
 !!                               Nullified in output
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,m_paw_an,paw_qpscgw,respfn,scfcv,screening
-!!      sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_paw_an
+!!      m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -1807,7 +1808,7 @@ end subroutine paw_an_redistribute
 !!  Paw_an<type(Paw_an_type)>=paw_an datastructure
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_scfcv,scfcv
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_scfcv_core
 !!
 !! CHILDREN
 !!

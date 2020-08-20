@@ -7,7 +7,7 @@ authors: XG
 ## Overview of the ABINIT tutorials.
 
 These tutorials are aimed at teaching the use of ABINIT, in the
-UNIX/Linux OS and its variants (MacOSX, AIX ...).
+UNIX/Linux OS and its variants (MacOS, AIX ...).
 They might be used for other operating systems, but the commands have to be adapted.
 
 At present, nearly forty tutorials are available. Each of them is at most

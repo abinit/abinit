@@ -100,7 +100,7 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!
@@ -199,7 +199,7 @@ end subroutine data4entropyDMFT_init
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!
@@ -405,7 +405,7 @@ end subroutine data4entropyDMFT_setDc
 !! NOTES
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!

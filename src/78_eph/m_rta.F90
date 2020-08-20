@@ -227,6 +227,11 @@ contains  !=====================================================
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
 !!
+!! PARENTS
+!!      m_eph_driver
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
@@ -622,6 +627,10 @@ end function rta_new
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! comm=MPI communicator.
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1030,6 +1039,10 @@ end subroutine rta_compute
 !! dtset<dataset_type>=All input variables for this dataset.
 !! comm=MPI communicator.
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine rta_compute_mobility(self, cryst, dtset, comm)
@@ -1163,6 +1176,11 @@ end subroutine rta_compute_mobility
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ncid=Netcdf file handle.
 !!
+!! PARENTS
+!!      m_rta
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine rta_ncwrite(self, cryst, dtset, ncid)
@@ -1278,6 +1296,10 @@ end subroutine rta_ncwrite
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=variables related to files.
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1438,6 +1460,10 @@ end subroutine rta_write_tensor
 !!
 !! INPUTS
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine rta_free(self)
@@ -1487,6 +1513,10 @@ end subroutine rta_free
 !! FUNCTION
 !!
 !! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!
 !! SOURCE
 

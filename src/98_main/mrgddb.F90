@@ -34,7 +34,7 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_hdr_free
+!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_hdr%free
 !!      ddb_hdr_open_read,get_command_argument,herald,mblktyp1,mblktyp5,timein
 !!      wrtout,xmpi_init
 !!

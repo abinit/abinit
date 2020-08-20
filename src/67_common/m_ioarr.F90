@@ -128,7 +128,7 @@ CONTAINS  !=====================================================================
 !!  pawrhoij(my_natom*usepaw) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!
 !! PARENTS
-!!      gstate,outscfcv
+!!      m_gstate,m_outscfcv
 !!
 !! CHILDREN
 !!
@@ -685,7 +685,7 @@ end subroutine ioarr
 !!   fform i.e. the integer specification for data type is automatically initialized from varname.
 !!
 !! PARENTS
-!!      cut3d,m_ioarr,outscfcv,sigma
+!!      cut3d,m_ioarr,m_outscfcv,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -891,7 +891,7 @@ end subroutine fftdatar_write
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_scfcv,scfcv
+!!      m_dfpt_scfcv,m_scfcv_core
 !!
 !! CHILDREN
 !!
@@ -990,8 +990,9 @@ end subroutine fftdatar_write_from_hdr
 !!   All the processors inside comm and comm_atom should call this routine.
 !!
 !! PARENTS
-!!      dfpt_looppert,dfptnl_loop,gstate,mrgscr,nonlinear,respfn,setup_positron
-!!      sigma
+!!      m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_dvdb,m_gstate,m_longwave
+!!      m_nonlinear,m_pead_nl_loop,m_positron,m_respfn_driver,m_sigma_driver
+!!      m_sigmaph,mrgscr
 !!
 !! CHILDREN
 !!

@@ -413,7 +413,7 @@ CONTAINS  !=====================================================================
 !!  new_do_write_status=new value for do_write_status
 !!
 !! PARENTS
-!!      iofn1,m_argparse
+!!      m_argparse,m_dtfil
 !!
 !! CHILDREN
 !!
@@ -451,10 +451,10 @@ CONTAINS  !=====================================================================
 !!  new_io_comm=new value for IO MPI communicator
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,driver
-!!      dummy_tests,fftprof,fold2Bloch,initmpi_world,ioprof,lapackprof
-!!      m_io_redirect,macroave,memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr
-!!      multibinit,optic,ujdet,vdw_kernelgen
+!!      abinit,abitk,aim,anaddb,band2eps,conducti,cut3d,dummy_tests,fftprof
+!!      fold2Bloch,ioprof,lapackprof,m_driver,m_io_redirect,m_memeval
+!!      m_mpi_setup,m_mpinfo,macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit
+!!      optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!
@@ -491,7 +491,7 @@ CONTAINS  !=====================================================================
 !!   Only printing.
 !!
 !! PARENTS
-!!      abinit,leave_new,m_argparse
+!!      abinit,m_argparse,m_errors
 !!
 !! CHILDREN
 !!

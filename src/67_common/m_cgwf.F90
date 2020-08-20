@@ -140,14 +140,11 @@ contains
 !!     is compatible with wfoptalg=2 or 3 (use of shifted square  Hamiltonian) - to be verified
 !!
 !! PARENTS
-!!      vtowfk
+!!      m_vtowfk
 !!
 !! CHILDREN
-!!      cg_precon,cg_zaxpy,cg_zcopy,cg_zscal,dotprod_g,etheta,fock_set_ieigen
-!!      getcprj,getghc,linemin,make_grad_berry,mksubham,pawcprj_alloc
-!!      pawcprj_copy,pawcprj_free,pawcprj_get,pawcprj_mpi_allgather,pawcprj_put
-!!      pawcprj_symkn,projbd,smatrix,smatrix_k_paw,sqnorm_g,timab,wrtout
-!!      xmpi_allgather
+!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
+!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 
@@ -1379,10 +1376,11 @@ end subroutine cgwf
 !! abinit routine does the same)
 !!
 !! PARENTS
-!!      cgwf
+!!      m_cgwf
 !!
 !! CHILDREN
-!!      etheta,rhophi,wrtout
+!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
+!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 
@@ -1693,10 +1691,11 @@ end subroutine linemin
 !! e1 = derivative of the energy with respect to theta
 !!
 !! PARENTS
-!!      cgwf,linemin
+!!      m_cgwf
 !!
 !! CHILDREN
-!!      rhophi
+!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
+!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 
@@ -1821,9 +1820,11 @@ end subroutine etheta
 !!   expressed in the WFs subspace
 !!
 !! PARENTS
-!!      cgwf
+!!      m_cgwf
 !!
 !! CHILDREN
+!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
+!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 
@@ -2054,7 +2055,7 @@ end subroutine mksubham
 !! NOTES
 !!
 !! PARENTS
-!!      cgwf
+!!      m_cgwf
 !!
 !! CHILDREN
 !!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get

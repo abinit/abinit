@@ -87,10 +87,11 @@ contains
 !!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      first_orthon,wrtout,wvl_occ_abi2big,wvl_read
+!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -234,14 +235,11 @@ end subroutine wvl_wfsinp_disk
 !! NOTES
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
-!!      copy_old_wavefunctions,deallocate_wfd,first_orthon
-!!      local_potential_dimensions,nullify_gaussian_basis,psolver_kernel
-!!      reformatmywaves,wrtout,wvl_denspot_free,wvl_denspot_set
-!!      wvl_projectors_free,wvl_projectors_set,wvl_setboxgeometry,wvl_setngfft
-!!      wvl_wfs_free,wvl_wfs_lr_copy,wvl_wfs_set,xred2xcart
+!!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -445,7 +443,7 @@ end subroutine wvl_wfsinp_reformat
 !!  wvl <type(wvl_data)>=wavefunctions & projectors informations for wavelets.
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
 !!      input_wf_diag,mklocl_wavelets,wrtout,wvl_occ_abi2big,wvl_occopt_abi2big

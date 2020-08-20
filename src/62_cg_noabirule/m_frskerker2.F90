@@ -69,7 +69,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      prcrskerker2
+!!      m_prcref
 !!
 !! CHILDREN
 !!      laplacian
@@ -122,7 +122,7 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 !! OUTPUT
 !!
 !! PARENTS
-!!      prcrskerker2
+!!      m_prcref
 !!
 !! CHILDREN
 !!      laplacian

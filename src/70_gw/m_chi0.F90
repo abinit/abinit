@@ -166,19 +166,16 @@ contains
 !!  Check npwepG0 before Switching on umklapp
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
-!!      accumulate_chi0_q0,accumulate_chi0sumrule,accumulate_sfchi0_q0
-!!      approxdelta,calc_wfwfg,chi0_bbp_mask,completechi0_deltapart,cwtime
-!!      flush_unit,get_bz_item,get_gftt,gsph_fft_tabs,gsph_free,gsph_in_fftbox
-!!      hilbert_transform,hilbert_transform_headwings,littlegroup_print
-!!      make_transitions,paw_cross_ihr_comm,paw_cross_rho_tw_g,paw_rho_tw_g
-!!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawhur_free
-!!      pawhur_init,pawpwij_free,pawpwij_init,print_gsphere,read_plowannier
-!!      rho_tw_g,setup_spectral,symmetrize_afm_chi0,vkbr_free,vkbr_init
-!!      wfd_change_ngfft,wfd_distribute_bbp,wfd_get_cprj,wfd_get_ur
-!!      wfd_paw_get_aeur,wrtout,xmpi_sum
+!!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs,kmesh_free,kmesh_init
+!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
+!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
+!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,vkbr_free,vkbr_init
+!!      wfd%change_ngfft,wfd%distribute_bands,wfd%get_cprj,wfd%get_ur,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1157,17 +1154,16 @@ end subroutine cchi0q0
 !!   each frequeny defined by Ep%omega and Ep%nomega
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
-!!      accumulate_chi0sumrule,approxdelta,assemblychi0_sym,assemblychi0sf
-!!      calc_wfwfg,chi0_bbp_mask,completechi0_deltapart,cwtime,flush_unit
-!!      get_bz_diff,get_bz_item,get_gftt,gsph_fft_tabs,gsph_free,gsph_in_fftbox
-!!      hilbert_transform,littlegroup_print,make_transitions,paw_cross_rho_tw_g
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_free,pawpwij_free
-!!      pawpwij_init,read_plowannier,rho_tw_g,setup_spectral
-!!      symmetrize_afm_chi0,timab,wfd_change_ngfft,wfd_distribute_kb_kpbp
-!!      wfd_get_cprj,wfd_get_ur,wfd_paw_get_aeur,wrtout,xmpi_sum
+!!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs,kmesh_free,kmesh_init
+!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
+!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
+!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,vkbr_free,vkbr_init
+!!      wfd%change_ngfft,wfd%distribute_bands,wfd%get_cprj,wfd%get_ur,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2032,7 +2028,7 @@ end subroutine cchi0
 !!  Check npwepG0 before Switching on umklapp
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!      assemblychi0_sym,get_bz_item,getnel,gsph_fft_tabs,kmesh_free,kmesh_init
@@ -2040,7 +2036,7 @@ end subroutine cchi0
 !!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
 !!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
 !!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,vkbr_free,vkbr_init
-!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_cprj,wfd_get_ur,wrtout
+!!      wfd%change_ngfft,wfd%distribute_bands,wfd%get_cprj,wfd%get_ur,wrtout
 !!      xmpi_sum
 !!
 !! SOURCE

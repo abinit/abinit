@@ -38,7 +38,7 @@ zcut               0.15 eV # complex shift to avoid divergences in the continued
 
 ecutwfn 8.0               # Cutoff for the wavefunction.
 inclvkb 2
-icutcoul 3                # Legacy value
+gw_icutcoul 3                # Legacy value
 
 # VARIABLES COMMON TO THE DIFFERENT DATASETS
 

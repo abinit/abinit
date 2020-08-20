@@ -95,7 +95,7 @@ contains  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph
+!!      m_eph_driver
 !!
 !! NOTES
 !!
@@ -625,8 +625,10 @@ end subroutine eph_gkk
 !!  Only writing
 !!
 !! PARENTS
+!!      m_eph_driver
 !!
 !! CHILDREN
+!!      get_kg
 !!
 !! SOURCE
 
@@ -861,8 +863,10 @@ end subroutine ncwrite_v1qnu
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_gkk
 !!
 !! CHILDREN
+!!      get_kg
 !!
 !! SOURCE
 

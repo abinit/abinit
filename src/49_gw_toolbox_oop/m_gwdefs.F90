@@ -407,7 +407,7 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -449,7 +449,7 @@ end subroutine em1params_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_gwdefs,setup_sigma
+!!      m_gwdefs,m_sigma_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -497,7 +497,7 @@ end subroutine sigijtab_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      sigijtab_free

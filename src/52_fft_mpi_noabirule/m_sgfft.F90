@@ -85,7 +85,7 @@ CONTAINS  !====================================================================
 !!  ncache of SG (that was the maximum number of COMPLEX*16 in the cache)
 !!
 !! PARENTS
-!!      ccfft,m_sgfft
+!!      m_fft,m_sgfft
 !!
 !! CHILDREN
 !!      sg_fft_cc
@@ -266,7 +266,7 @@ end subroutine fft_cc_one_nothreadsafe
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
 !!
 !! PARENTS
-!!      fourdp
+!!      m_fft
 !!
 !! CHILDREN
 !!      sg_fft_cc
@@ -605,7 +605,7 @@ end subroutine sg_fft_rc
 !!  XG: the signification of mg is changed with respect to fft3dp !!!
 !!
 !! PARENTS
-!!      fourwf,m_fft
+!!      m_fft
 !!
 !! CHILDREN
 !!      sg_fft_cc
@@ -3914,7 +3914,7 @@ end subroutine sg_ctrig
 !!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
 !!
 !! PARENTS
-!!      fourwf
+!!      m_fft
 !!
 !! CHILDREN
 !!      sg_fft_cc
@@ -4983,7 +4983,7 @@ end subroutine fftrisc_one_nothreadsafe
 !! Complete input and output list.
 !!
 !! PARENTS
-!!      fourwf
+!!      m_fft
 !!
 !! CHILDREN
 !!      sg_fft_cc

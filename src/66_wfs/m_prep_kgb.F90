@@ -91,11 +91,9 @@ contains
 !!  cwaveprj(natom,my_nspinor*bandpp)= wave functions at k projected with nl projectors
 !!
 !! PARENTS
-!!      chebfi,lobpcgwf,m_lobpcgwf,mkresi
+!!      m_chebfi,m_dft_energy,m_lobpcgwf,m_lobpcgwf_old
 !!
 !! CHILDREN
-!!      dcopy,multithreaded_getghc,prep_index_wavef_bandpp,prep_sort_wavef_spin
-!!      prep_wavef_sym_do,prep_wavef_sym_undo,timab,xmpi_alltoallv
 !!
 !! SOURCE
 
@@ -594,11 +592,9 @@ end subroutine prep_getghc
 !! (if useylm=0, should have cpopt=-1)
 !!
 !! PARENTS
-!!      energy,forstrnps,m_invovl,m_lobpcgwf,vtowfk
+!!      m_dft_energy,m_forstr,m_invovl,m_lobpcgwf,m_vtowfk
 !!
 !! CHILDREN
-!!      dcopy,nonlop,prep_index_wavef_bandpp,prep_sort_wavef_spin,timab
-!!      xmpi_allgather,xmpi_alltoallv
 !!
 !! NOTES
 !!  cprj (as well as cg) is distributed over band processors.
@@ -902,11 +898,9 @@ end subroutine prep_nonlop
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      mkrho,posdoppler,vtowfk
+!!      m_mkrho,m_positron,m_vtowfk
 !!
 !! CHILDREN
-!!      fourwf,gpu_fourwf,prep_index_wavef_bandpp,prep_wavef_sym_do
-!!      prep_wavef_sym_undo,timab,xmpi_alltoallv,xmpi_sum
 !!
 !! SOURCE
 
@@ -1396,10 +1390,9 @@ end subroutine prep_fourwf
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      prep_fourwf,prep_getghc
+!!      m_prep_kgb
 !!
 !! CHILDREN
-!!      xmpi_alltoallv
 !!
 !! SOURCE
 
@@ -1663,10 +1656,9 @@ end subroutine prep_wavef_sym_do
 !!                        ( for of the processor + to send to other processors band)
 !!
 !! PARENTS
-!!      prep_fourwf,prep_getghc
+!!      m_prep_kgb
 !!
 !! CHILDREN
-!!      xmpi_alltoallv
 !!
 !! SOURCE
 
@@ -1888,7 +1880,7 @@ end subroutine prep_wavef_sym_undo
 !!  index_wavef_band = position of the sorted values
 !!
 !! PARENTS
-!!      chebfi,prep_fourwf,prep_getghc,prep_nonlop
+!!      m_chebfi,m_prep_kgb
 !!
 !! CHILDREN
 !!
@@ -1975,7 +1967,7 @@ end subroutine prep_index_wavef_bandpp
 !!  index_wavef(:)=array containing the sorted indexes (pointer, allocated in this routine)
 !!
 !! PARENTS
-!!      prep_getghc,prep_nonlop
+!!      m_prep_kgb
 !!
 !! CHILDREN
 !!

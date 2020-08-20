@@ -126,7 +126,7 @@ contains
 !! the acoustic sum rule.
 !!
 !! PARENTS
-!!      dfpt_gatherdy,m_ddb,m_effective_potential_file
+!!      m_ddb,m_effective_potential_file,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -292,7 +292,8 @@ end subroutine asria_calc
 !! d2cart=matrix of second derivatives of total energy, in cartesian coordinates
 !!
 !! PARENTS
-!!      ddb_elast,ddb_internalstr,dfpt_gatherdy,m_ddb,thmeig
+!!      m_ddb,m_ddb_elast,m_ddb_flexo,m_ddb_internalstr,m_respfn_driver
+!!      m_thmeig
 !!
 !! CHILDREN
 !!
@@ -716,7 +717,7 @@ end subroutine asrprs
 !!    all in cartesian coordinates
 !!
 !! PARENTS
-!!      dfpt_gatherdy,m_ddb
+!!      m_ddb,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -863,7 +864,7 @@ end subroutine cart29
 !!  vec2(3)=output vector, in cartesian coordinates
 !!
 !! PARENTS
-!!      dfpt_gatherdy,m_ddb,m_dynmat
+!!      m_ddb,m_ddb_flexo,m_dfpt_lw,m_dynmat,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -962,7 +963,7 @@ end subroutine cart39
 !!    second-derivative matrix in reduced coordinates
 !!
 !! PARENTS
-!!      ddb_interpolate
+!!      m_ddb_interpolate
 !!
 !! CHILDREN
 !!
@@ -1109,7 +1110,7 @@ end subroutine d2cart_to_red
 !!  eventually send a warning message
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -1203,7 +1204,7 @@ end subroutine chkph3
 !!       coordinates
 !!
 !! PARENTS
-!!      dfpt_gatherdy,m_ddb
+!!      m_ddb,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -1464,7 +1465,7 @@ end subroutine chneu9
 !!   the problem lies likely in the use of the indsym array.
 !!
 !! PARENTS
-!!      completeperts,m_ddb,respfn
+!!      m_ddb,m_iogkk,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -1925,7 +1926,7 @@ end subroutine d2sym3
 !!   dyew matrix
 !!
 !! PARENTS
-!!      m_dynmat,m_ifc,respfn
+!!      m_dynmat,m_ifc,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -1999,7 +2000,7 @@ end subroutine q0dy3_apply
 !!   dyew matrix
 !!
 !! PARENTS
-!!      ddb_hybrid,m_ifc,respfn
+!!      m_ifc,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -2088,7 +2089,7 @@ end subroutine q0dy3_calc
 !! A full description of the equations should be included
 !!
 !! PARENTS
-!!      m_dynmat,m_phgamma,relaxpol
+!!      m_dynmat,m_phgamma,m_relaxpol
 !!
 !! CHILDREN
 !!
@@ -2293,7 +2294,7 @@ end subroutine symdyma
 !! This routine should once be merged with sygrad...
 !!
 !! PARENTS
-!!      dfpt_nstdy,dfpt_nstpaw
+!!      m_dfpt_nstwf,m_dfpt_scfcv
 !!
 !! CHILDREN
 !!
@@ -2425,7 +2426,7 @@ end subroutine dfpt_sygra
 !! Note the use of "symrec" in the symmetrization expression above.
 !!
 !! PARENTS
-!!      dfpt_dyfro
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -2577,7 +2578,7 @@ end subroutine dfpt_sydy
 !!  d2cart(2,3,mpert,3,mpert) without the wings
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -2647,7 +2648,7 @@ end subroutine wings3
 !! List of ouput should be included.
 !!
 !! PARENTS
-!!      ddb_hybrid,m_ifc,m_tdep_abitypes
+!!      m_ifc,m_phgamma,m_tdep_abitypes
 !!
 !! CHILDREN
 !!
@@ -2757,7 +2758,7 @@ end subroutine asrif9
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
 !!
 !! PARENTS
-!!      m_ifc
+!!      m_dvdb
 !!
 !! CHILDREN
 !!
@@ -2907,7 +2908,7 @@ end subroutine get_bigbox_and_weights
 !!  for the deallocation.
 !!
 !! PARENTS
-!!      m_ifc
+!!      m_dynmat,m_ifc
 !!
 !! CHILDREN
 !!
@@ -3158,7 +3159,7 @@ end subroutine bigbx9
 !! trans(3,natom) = Atomic translations : xred = rcan + trans
 !!
 !! PARENTS
-!!      m_ifc
+!!      m_dvdb,m_ifc
 !!
 !! CHILDREN
 !!
@@ -3368,7 +3369,7 @@ end subroutine canat9
 !! rcart(3)=cartesian coordinate of the atom indexed by index.
 !!
 !! PARENTS
-!!      ddb_hybrid,m_ifc
+!!      m_ifc
 !!
 !! CHILDREN
 !!
@@ -4010,7 +4011,7 @@ end subroutine ifclo9
 !! ngqpt(6)= can be modified
 !!
 !! PARENTS
-!!      m_ifc
+!!      m_dynmat,m_ifc
 !!
 !! CHILDREN
 !!
@@ -4410,7 +4411,7 @@ end subroutine wght9
 !!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
 !! PARENTS
-!!      m_ddb,nonlinear
+!!      m_ddb,m_nonlinear
 !!
 !! CHILDREN
 !!
@@ -4618,7 +4619,7 @@ end subroutine d3sym
 !!      -2   ->   element is zero by symmetry
 !!
 !! PARENTS
-!!      m_ddb,nonlinear,respfn
+!!      m_ddb,m_nonlinear,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -5117,7 +5118,7 @@ end subroutine nanal9
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
 !!
 !! PARENTS
-!!      anaddb,ddb_interpolate,m_effective_potential_file,m_ifc,m_phonons
+!!      anaddb,m_ddb_interpolate,m_effective_potential_file,m_ifc,m_phonons
 !!
 !! CHILDREN
 !!
@@ -5267,7 +5268,8 @@ end subroutine gtdyn9
 !!   2) In case of q=Gamma, only the real part is used.
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_ifc,m_phonons,respfn,thmeig
+!!      anaddb,m_ddb,m_effective_potential_file,m_ifc,m_phonons,m_respfn_driver
+!!      m_thmeig
 !!
 !! CHILDREN
 !!
@@ -5534,10 +5536,9 @@ end subroutine dfpt_phfrq
 !! called by one processor only
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential_file,m_ifc,m_phonons,respfn
+!!      anaddb,m_effective_potential_file,m_ifc,m_phonons,m_respfn_driver
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -5836,8 +5837,7 @@ end subroutine massmult_and_breaksym
 !!  = gamma matrices in real space stored in file unit_gkk_rpt
 !!
 !! PARENTS
-!!      elphon,get_tau_k,integrate_gamma_alt,m_phgamma,mka2f,mka2f_tr
-!!      mka2f_tr_lova,mkph_linwid
+!!      m_a2ftr,m_elphon,m_phgamma
 !!
 !! CHILDREN
 !!
@@ -5949,8 +5949,7 @@ end subroutine ftgam
 !! coskr, sinkr = cosine and sine of phase factors for given r and q points
 !!
 !! PARENTS
-!!      elphon,get_tau_k,integrate_gamma_alt,m_phgamma,mka2f,mka2f_tr
-!!      mka2f_tr_lova,mkph_linwid
+!!      m_a2ftr,m_elphon,m_phgamma
 !!
 !! CHILDREN
 !!

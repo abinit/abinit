@@ -164,11 +164,11 @@ _ WF disk file :      0.253 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
             gwmem3         11
             gwmem4         11
             gwmem5          0
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
+        gw_icutcoul5          3
            jdtset        1    2    3    4    5
               kpt     -2.50000000E-01  5.00000000E-01  0.00000000E+00
                       -2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -1230,11 +1230,11 @@ data: !SigmaeeData |
             gwmem3         11
             gwmem4         11
             gwmem5          0
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
+        gw_icutcoul5          3
            jdtset        1    2    3    4    5
               kpt     -2.50000000E-01  5.00000000E-01  0.00000000E+00
                       -2.50000000E-01  0.00000000E+00  0.00000000E+00

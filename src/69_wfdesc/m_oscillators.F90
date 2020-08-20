@@ -90,8 +90,7 @@ CONTAINS
 !! rhotwg(npwvec)=density of a pair of states, in reciprocal space
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
-!!      exc_build_block,exc_build_ham,m_fft_prof,prep_calc_ucrpa
+!!      m_chi0,m_cohsex,m_exc_build,m_fft_prof,m_prep_calc_ucrpa,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!
@@ -569,7 +568,7 @@ end subroutine gw_box2gsph
 !! OUTPUT
 !!
 !! PARENTS
-!!      calc_sigc_me,cchi0,cchi0q0,cohsex_me
+!!      m_chi0,m_cohsex,m_sigc
 !!
 !! CHILDREN
 !!

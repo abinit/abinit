@@ -93,9 +93,9 @@ contains
 !! $Yr_{l-m}(%theta ,%phi)=(Im{Y_{l-m}}-(-1)^m Im{Y_{lm}})/sqrt{2}
 !!
 !! PARENTS
-!!      debug_tools,dfpt_looppert,dfpt_nstpaw,dfptnl_loop,forstr,gstate
-!!      ks_ddiago,m_cut3d,m_pawpwij,m_shirley,m_wfd,mover,nonlop_test
-!!      partial_dos_fractions,respfn,scfcv
+!!      m_cut3d,m_ddk,m_dfpt_looppert,m_dfpt_lw,m_dfpt_nstwf,m_dfptnl_pert
+!!      m_epjdos,m_forstr,m_gstate,m_ksdiago,m_mover,m_nonlop_test,m_orbmag
+!!      m_pawpwij,m_pead_nl_loop,m_respfn_driver,m_scfcv_core,m_wfd
 !!
 !! CHILDREN
 !!      plm_coeff

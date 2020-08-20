@@ -15,7 +15,6 @@ dtion = 10
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_hosts = nag@abiref
 #%% exclude_builders = .*_nag_7.0_.*
 #%% system_xml = t83.nc
 #%% exec_args = --F03

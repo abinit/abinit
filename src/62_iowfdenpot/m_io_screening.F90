@@ -162,8 +162,8 @@ MODULE m_io_screening
   integer :: awtr
   ! Input variable (time-reversal symmetry in RPA expression)
 
-  integer :: icutcoul
-  ! Input variable (Coulomb cutoff)
+  integer :: icsing
+  ! Input variable (Coulomb singularity treatment)
 
   integer :: gwcomp
   ! Input variable (GW compensation energy technique)
@@ -298,7 +298,7 @@ end function ncname_from_id
 !!  fform=Kind of the array in the file (0 signals an error)
 !!
 !! PARENTS
-!!      m_io_screening,m_screen,m_screening,mrgscr,setup_bse
+!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -401,7 +401,7 @@ end subroutine hscr_from_file
 !! no check is done, it is up to the developer.
 !!
 !! PARENTS
-!!      m_io_screening,m_screening,screening
+!!      m_io_screening,m_screening,m_screening_driver
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -457,7 +457,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
            hscr%id, hscr%ikxc, hscr%inclvkb, hscr%headform, hscr%fform, hscr%gwcalctyp,&
            hscr%nI, hscr%nJ, hscr%nqibz, hscr%nqlwl, hscr%nomega, hscr%nbnds_used,&
            hscr%npwe, hscr%npwwfn_used, hscr%spmeth, hscr%test_type, hscr%tordering,&
-           hscr%awtr, hscr%icutcoul, hscr%gwgamma, hscr%vcutgeo(1:3)
+           hscr%awtr, hscr%icsing, hscr%gwgamma, hscr%vcutgeo(1:3)
 
          ! Read real scalars
          read(unt, err=10, iomsg=errmsg)&
@@ -517,7 +517,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
          NCF_CHECK(nf90_get_var(ncid, vid("test_type"), hscr%test_type))
          NCF_CHECK(nf90_get_var(ncid, vid("tordering"), hscr%tordering))
          NCF_CHECK(nf90_get_var(ncid, vid("awtr"), hscr%awtr))
-         NCF_CHECK(nf90_get_var(ncid, vid("icutcoul"), hscr%icutcoul))
+         NCF_CHECK(nf90_get_var(ncid, vid("gw_icutcoul"), hscr%icsing))
          NCF_CHECK(nf90_get_var(ncid, vid("gwcomp"), hscr%gwcomp))
          NCF_CHECK(nf90_get_var(ncid, vid("gwgamma"), hscr%gwgamma))
          NCF_CHECK(nf90_get_var(ncid, vid("mbpt_sciss"), hscr%mbpt_sciss))
@@ -564,7 +564,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
        hscr%id, hscr%ikxc, hscr%inclvkb, hscr%headform, hscr%fform, hscr%gwcalctyp,&
        hscr%nI, hscr%nJ, hscr%nqibz, hscr%nqlwl, hscr%nomega, hscr%nbnds_used,&
        hscr%npwe, hscr%npwwfn_used, hscr%spmeth, hscr%test_type, hscr%tordering,&
-       hscr%awtr, hscr%icutcoul, hscr%gwgamma, hscr%vcutgeo(1:3)
+       hscr%awtr, hscr%icsing, hscr%gwgamma, hscr%vcutgeo(1:3)
 
      ! Write real scalars
      write(unt, err=10, iomsg=errmsg)&
@@ -643,11 +643,11 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 
      ncerr = nctk_defnwrite_ivars(ncid, [character(len=nctk_slen) :: &
        "id", "ikxc", "inclvkb", "headform", "fform", "gwcalctyp", &
-       "nbands_used", "npwwfn_used", "spmeth", "test_type", "tordering", "awtr", "icutcoul", &
+       "nbands_used", "npwwfn_used", "spmeth", "test_type", "tordering", "awtr", "gw_icutcoul", &
        "gwcomp", "gwgamma" &
       ],&
       [ hscr%id, hscr%ikxc, hscr%inclvkb, hscr%headform, hscr%fform, hscr%gwcalctyp, &
-       hscr%nbnds_used, hscr%npwwfn_used, hscr%spmeth, hscr%test_type, hscr%tordering, hscr%awtr, hscr%icutcoul, &
+       hscr%nbnds_used, hscr%npwwfn_used, hscr%spmeth, hscr%test_type, hscr%tordering, hscr%awtr, hscr%icsing, &
        hscr%gwcomp, hscr%gwgamma &
      ])
      NCF_CHECK(ncerr)
@@ -716,7 +716,7 @@ end subroutine hscr_io
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_io_screening,m_screen,m_screening,mrgscr,setup_bse
+!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -916,7 +916,7 @@ type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,torder
 
 ! HSCR_NEW
  hscr%awtr = dtset%awtr
- hscr%icutcoul = dtset%icutcoul
+ hscr%icsing = dtset%gw_icutcoul
  hscr%vcutgeo = dtset%vcutgeo
  hscr%gwcomp = dtset%gwcomp
  hscr%gwgamma = dtset%gwgamma
@@ -955,7 +955,7 @@ end function hscr_new
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      m_io_screening,setup_bse
+!!      m_bethe_salpeter,m_io_screening
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -1018,7 +1018,7 @@ subroutine hscr_bcast(hscr,master,my_rank,comm)
 
 ! HSCR_NEW
  call xmpi_bcast(hscr%awtr, master, comm, ierr)
- call xmpi_bcast(hscr%icutcoul, master, comm, ierr)
+ call xmpi_bcast(hscr%icsing, master, comm, ierr)
  call xmpi_bcast(hscr%vcutgeo, master, comm, ierr)
  call xmpi_bcast(hscr%gwcomp, master, comm, ierr)
  call xmpi_bcast(hscr%gwgamma, master, comm, ierr)
@@ -1082,7 +1082,8 @@ end subroutine hscr_malloc
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      m_io_screening,m_screen,m_screening,mrgscr,screening,setup_bse
+!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,m_screening_driver
+!!      mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -1181,7 +1182,7 @@ subroutine hscr_copy(Hscr_in,Hscr_cp)
 
 ! HSCR_NEW
  hscr_cp%awtr      =  hscr_in%awtr
- hscr_cp%icutcoul  =  hscr_in%icutcoul
+ hscr_cp%icsing    =  hscr_in%icsing
  hscr_cp%vcutgeo   =  hscr_in%vcutgeo
  hscr_cp%gwcomp    =  hscr_in%gwcomp
  hscr_cp%gwgamma   =  hscr_in%gwgamma
@@ -1366,7 +1367,7 @@ end subroutine hscr_merge
 !!  (only writing on file)
 !!
 !! PARENTS
-!!      m_io_screening,m_screening,screening
+!!      m_io_screening,m_screening,m_screening_driver
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -1474,7 +1475,7 @@ end subroutine write_screening
 !!    will be truncated. If nomegaA > Hscr%nomega an error will occur
 !!
 !! PARENTS
-!!      calc_ucrpa,m_io_screening,m_screen,m_screening,mrgscr
+!!      m_calc_ucrpa,m_io_screening,m_screen,m_screening,mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout

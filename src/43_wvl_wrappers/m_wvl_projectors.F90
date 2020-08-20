@@ -72,10 +72,10 @@ contains
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
-!!      createprojectorsarrays,wrtout,wvl_timing,xred2xcart
+!!      free_dft_psp_projectors
 !!
 !! SOURCE
 
@@ -175,7 +175,7 @@ end subroutine wvl_projectors_set
 !!  proj <type(wvl_projectors_type)>=projectors informations in a wavelet basis.
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!      free_dft_psp_projectors

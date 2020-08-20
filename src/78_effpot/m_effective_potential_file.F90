@@ -231,7 +231,7 @@ CONTAINS  !=====================================================================
 !! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential
 !!
 !! PARENTS
-!!      compute_anharmonics,multibinit
+!!      m_compute_anharmonics,m_multibinit_driver
 !!
 !! CHILDREN
 !!
@@ -448,7 +448,7 @@ end subroutine effective_potential_file_read
 !!             41 ASCII file with history of MD or snapshot
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,m_mover_effpot,m_multibinit_driver
 !!
 !! CHILDREN
 !!
@@ -572,7 +572,7 @@ end subroutine effective_potential_file_getType
 !! nrpt  = number of rpt points
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
 !!
@@ -3314,7 +3314,7 @@ end subroutine coeffs_xml2effpot
 !! hist<type(abihist)> = datatype with the  history of the MD
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,m_multibinit_driver
 !!
 !! CHILDREN
 !!
@@ -3427,7 +3427,8 @@ end subroutine effective_potential_file_readMDfile
 !! hist<type(abihist)> = The history of the MD
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff,multibinit
+!!      m_fit_polynomial_coeff,m_mover,m_mover_effpot,m_multibinit_driver
+!!      m_opt_effpot
 !!
 !! CHILDREN
 !!

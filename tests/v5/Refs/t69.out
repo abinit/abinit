@@ -190,12 +190,12 @@ _ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
          gwencomp4     1.2000000000E+00 Hartree
          gwencomp5     1.2000000000E+00 Hartree
          gwencomp6     1.2000000000E+00 Hartree
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
+        gw_icutcoul5          6
+        gw_icutcoul6          3
            istwfk        1    0    1    0    0    0    1    0
               ixc           7
            jdtset        1    2    3    4    5    6
@@ -1710,12 +1710,12 @@ data: !SigmaeeData |
          gwencomp4     1.2000000000E+00 Hartree
          gwencomp5     1.2000000000E+00 Hartree
          gwencomp6     1.2000000000E+00 Hartree
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
+       gw_icutcoul1          6
+       gw_icutcoul2          6
+       gw_icutcoul3          3
+       gw_icutcoul4          3
+       gw_icutcoul5          6
+       gw_icutcoul6          3
            istwfk        1    0    1    0    0    0    1    0
               ixc           7
            jdtset        1    2    3    4    5    6

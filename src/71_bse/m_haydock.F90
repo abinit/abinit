@@ -96,7 +96,7 @@ CONTAINS  !=====================================================================
 !!  The imaginary part of the macroscopic dielectric function is written on the external file _EXC_MDF
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!

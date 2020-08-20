@@ -131,7 +131,7 @@ contains
 !!  WARNING: option=4 not yet implemented.
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
 !!      invcb
