@@ -1,34 +1,34 @@
 # Installation notes for ABINIT
 
 This page provides an introduction to the installation of the
-ABINIT package and compilation of the executables. 
+ABINIT package and compilation of the executables.
 It indicates also how to test whether the installation/compilation was successfull.
 Finally, it gives related complements for the developers.
 
 <!--
 See a recent version of the [new user's guide](..),
-for an introduction to the abinit package. 
-See a recent version of the [[help:abinit]] file for learning how to use the code. 
+for an introduction to the abinit package.
+See a recent version of the [[help:abinit]] file for learning how to use the code.
 Both of them can be found either on the Web, or in the doc subdirectory of the package.
 -->
 
-Any comment or suggestion to improve the procedure or this page will be welcome! 
+Any comment or suggestion to improve the procedure or this page will be welcome!
 Simply contact the ABINIT group <https://forum.abinit.org/>
 
 ## Overview
 
-For the vast majority of people willing to use ABINIT (simple users -not developers-, with Unix/Linux or MacOS under terminal mode), 
+For the vast majority of people willing to use ABINIT (simple users -not developers-, with Unix/Linux or MacOS under terminal mode),
 the installation/compilation steps are:
 
-  1. Prerequisite : you need a Fortran compiler, a C compiler, the Python interpreter (>2.7.5), 
-     some mandatory libraries (Linalg, FFT, NetCDF, HDF5, LibXC), 
-     possibly some recommended libraries (MPI) and other optional libraries (Wannier90, ...). 
-     So, know how to invoke these prerequisites, install the libraries if not available immediately with your OS, and know the location of libraries. 
+  1. Prerequisite : you need a Fortran compiler, a C compiler, the Python interpreter (>2.7.5),
+     some mandatory libraries (Linalg, FFT, NetCDF, HDF5, LibXC),
+     possibly some recommended libraries (MPI) and other optional libraries (Wannier90, ...).
+     So, know how to invoke these prerequisites, install the libraries if not available immediately with your OS, and know the location of libraries.
      The libraries can be installed with the help of the "fallback" procedure. See below for more info on this step.
-  2. Get the [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz) 
+  2. Get the [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz)
      from the abinit Web site.
      [More information](#how-to-get-a-version-of-abinit) ...
-  3. Prepare a file name "hostname".ac9, that contains the information about libraries and compilation options. 
+  3. Prepare a file name "hostname".ac9, that contains the information about libraries and compilation options.
      This is not mandatory, as ABINIT will try to detect the place where these are, but the detection procedure can fail.
      See below for more information, as well as in [this section](#how-to-write-the-hostnameac9-file) ...
   4. Issue "configure -q" or "./configure -q" (or first create a tmp directory, then "cd tmp", then "../configure -q").
@@ -39,15 +39,15 @@ the installation/compilation steps are:
 
 The details of step 1 and 3 might vary a lot depending on the operating system.
 So, we provide a [Compilation tutorial](tutorial/compilation), covering different installation environments and scenario.
-Moreover, there are also Web pages that focus specifically on [MacOS](INSTALL_MacOS) users and [Ubuntu](INSTALL_Ubuntu) users. 
-The two latter Web pages also show how to short-circuit the above-mentioned steps using homebrew or MacPorts (for MacOS) or apt (for Ubuntu). 
+Moreover, there are also Web pages that focus specifically on [MacOS](INSTALL_MacOS) users and [Ubuntu](INSTALL_Ubuntu) users.
+The two latter Web pages also show how to short-circuit the above-mentioned steps using homebrew or MacPorts (for MacOS) or apt (for Ubuntu).
 For step 3, examples of configuration files to configure and compile Abinit on clusters are available
-in the |abiconfig| package on github 
+in the |abiconfig| package on github
 (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)),
 while the configuration files
-used for our buildbot testfarm are available in the [autoconf_examples section](developers/autoconf_examples/). 
+used for our buildbot testfarm are available in the [autoconf_examples section](developers/autoconf_examples/).
 The [ABINIT Wiki](https://wiki.abinit.org) also has a **build abinit** section, that might prove very useful. In particular,
-the current documentation of the fallback procedure is available 
+the current documentation of the fallback procedure is available
 [here](https://wiki.abinit.org/doku.php?id=build:fallbacks), as well as [information on the configure](https://wiki.abinit.org/doku.php?id=build:configure).
 
 If you succeeded to make the executables, but would like to check whether
@@ -62,18 +62,18 @@ you downloaded ABINIT from Gitlab or GitHub anyhow, then go to the section [For 
 You have a F90 compiler under UNIX/Linux or MacOS X and you want simply to
 **compile the source files**, and, from time to time, **modify and/or add a
 new file**. This is the case of most users, system managers, and also many
-developers. 
+developers.
 In what follows, _x.y.z_ represents the ABINIT version.
 
 In order to get the ABINIT package, you have first to download the file
-**abinit-_x.y.z_.tar.gz** from the 
+**abinit-_x.y.z_.tar.gz** from the
 [packages page](https://www.abinit.org/packages) of the ABINIT Web site, then issue:
 
     gunzip abinit-_x.y.z_.tar.gz | tar -xvf -
 
-That's it. 
+That's it.
 <br>
-Alternatively, you might also use 
+Alternatively, you might also use
 
     wget https://www.abinit.org/sites/default/files/packages/abinit-_x.y.z_.tar.gz
     tar xzf abinit-_x.y.z-.tar.gz
@@ -82,7 +82,7 @@ If correctly done, a main directory, denoted ~abinit in the present document
 (usually, its real name will be **abinit-_x.y.z_**) and a whole set of
 subdirectories should have been created, including:.
 
-  * the sources of the abinit code (also, the files needed for the fallbacks), 
+  * the sources of the abinit code (also, the files needed for the fallbacks),
     in the directories "src" and "fallbacks";
   * the documentation, in the directory "doc";
   * the complete set of tests, and the pseudopotentials needed for the tests, in the directory "tests";
@@ -105,7 +105,7 @@ installed on your machine, or if you do not have an access to the internet, you 
 The Web site <https://www.abinit.org> contains many other things, including links to the forum,
 the mailing list, the ABINIT events ...
 
-## How to make the executables? 
+## How to make the executables?
 
 We now suppose that you have a F90 compiler and you want to compile the source files.
 
@@ -130,7 +130,7 @@ find all the information, then the build of ABINIT is very simple. Issue:
 Well, it might also be that only one additional information is needed, in which case something like:
 
     configure -q FC=gcc
-    make 
+    make
 
 might work. In both cases, let's explain a bit what is done, and the further possibilities.
 
@@ -146,16 +146,16 @@ The executables will be located in the subdirectory ~abinit/src/98_main, if
 you have chosen to issue ./configure in the ~abinit directory. If you have
 issued ./configure in another directory, it will be placed accordingly.
 
-The 'make' command can also be used by mentioning one or more targets. 
+The 'make' command can also be used by mentioning one or more targets.
 It is possible to compile only one of the executable, just after the configure
 step by typing:
-  
+
     make name_of_the_binary
 
 (where name_of_the_binary can be abinit, cut3d, anaddb, ...).
 
 Also,
-    
+
     make install
 
 will install abinit in the /usr/local directory.
@@ -165,8 +165,8 @@ will install abinit in the /usr/local directory.
 Let's come back to the case where the build system needs some more
 information. This information should be stored in a file named "hostname".ac9,
 where "hostname" is the result of executing the command `hostname -s` on your
-machine. Note that the command `hostname` will return the fully qualified domain name (FQDN), 
-e.g. abiref.pcpm.ucl.ac.be, 
+machine. Note that the command `hostname` will return the fully qualified domain name (FQDN),
+e.g. abiref.pcpm.ucl.ac.be,
 while only the first word of the returned chain of character is needed, e.g. abiref .
 
 There is a template for such "hostname".ac9 file, located in ~abinit/doc/config/. Its name
@@ -174,7 +174,7 @@ is config-template.ac9. Examples of such files, that have been used for testing
 the package, can be found in ~abinit/doc/build/config-examples/,
 or equivalently in the [autoconf_examples section](developers/autoconf_examples/),
 or on github, abiconfig project,
-[directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)). 
+[directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)).
 
 Most of the examples provided in the ~abinit/doc/build/config-examples/
 directory contain about five definitions: F90 and C locations, F90 and C
@@ -222,7 +222,7 @@ executable is located in ~abinit/src/98_main (the standard location after
 issuing "make").
 
 You can begin with the test "fast". Simply issue the command:
-    
+
     make test_fast
 
 It will run during a few seconds. It should print:
@@ -246,7 +246,7 @@ In addition to this small message, you can have access to all generated files,
 that are located inside the tests/built-in/Input subdirectory.
 
 Supposing test "fast" was OK, then you might issue the command:
-    
+
     make tests_in
 
 The test "fast" will be done once more, followed by the other internal tests.
@@ -268,11 +268,11 @@ tests, as well as the other tests.
 The workhorse script to run the tests is called runtests.py . It is very
 flexible. A reasonable set of tests (those contained in the fast and v"x"
 directories), can be run automatically by issue inside the ~abinit/tests directory the command:
-    
+
     ./runtests.py
 
 or e.g.
-    
+
     ./runtests.py -j4
 
 (if you have 4 cores on your computer)
@@ -315,7 +315,7 @@ the output files to be analyzed, the admitted tolerances with respect to
 reference output files, the author of the test, and a brief description of the test.
 
 To run only the tests in this directory, simply issue, in the ~abinit/tests/ directory:
-    
+
     ./runtests.py fast
 
 It will create a directory named Test_suite. All the results will be in that
@@ -358,7 +358,7 @@ If for one test case, the two files differ by the number of lines, the
 this problem will be seen at the level of 'command signs' appearing sometimes
 in the first column of the output files, so a typical error message
 (announcing something went wrong) will be:
-    
+
     Case_1
     22
     The diff analysis cannot be pursued: the command sign differ.
@@ -375,7 +375,7 @@ differences in:
   * the overall execution time (this is ALWAYS printed, even without differences).
 
 So, a successful execution of one test case may be announced as follows in the fldiff.report file:
-    
+
     Case_1
     2
     <  Version 8.0.6  of ABINIT
@@ -387,7 +387,7 @@ So, a successful execution of one test case may be announced as follows in the f
     < +overall time at end (sec): cpu=          7.1  wall=          8.0
     > +Overall time at end (sec): cpu=          7.3  wall=          8.0
     Summary Case_1: no significant difference has been found
-    
+
 
 The fldiff.report file will have one such section for each test_case that was
 run. It begins with the number of the test case, then includes a few blocks of
@@ -417,7 +417,7 @@ procedure only compares to recent runs of the ABINIT code. As for the 'fast'
 test cases, the fldiff.report and report files are also available. 64 MB of
 memory should be enough for these tests.
 
-**4) tests/v3, tests/v4, tests/v5, tests/v6, tests/v67mbpt, tests/v7, tests/v8, tests/v9, tests/bigdft, 
+**4) tests/v3, tests/v4, tests/v5, tests/v6, tests/v67mbpt, tests/v7, tests/v8, tests/v9, tests/bigdft,
     tests/etsf_io, tests/libxc, tests/wannier90**
 
 These directories contain tests built in the same spirit as those in the
@@ -451,8 +451,8 @@ ABINIT distribution.
 ### Git, autotools and makemake.
 
 If you want to have a full handle on the package (compilation, modification of files, writing
-of scripts, you need additional prerequisites, the 
-(free) software applications git, automake, autoconf, libtools. 
+of scripts, you need additional prerequisites, the
+(free) software applications git, automake, autoconf, libtools.
 
 More explicitly, you need minimally (version numbers can  be upgraded)
 
@@ -510,7 +510,7 @@ as described in section 2.
 ### To generate the source package.
 
 If you want to produce the source package abinit-_x.y.z_.tar.gz, after having compiled and tested ABINIT, issue:
-    
+
     make dist
 
 in ~abinit/.

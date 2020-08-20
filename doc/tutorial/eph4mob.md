@@ -66,7 +66,7 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
     grain boundary scattering etc.
     These effects may be relevant depending on the system and/or the temperature under investigation
     but they are not treated in this tutorial as here we mainly focus on room temperature and non-degenerate 
-    semiconductors, conditions in in which e-ph scattering is one of the most important contributions.
+    semiconductors, conditions in which e-ph scattering is one of the most important contributions.
 
 The generalized transport coefficients are given by [[cite:Madsen2018]]
 
@@ -164,7 +164,6 @@ cp ../teph4mob_1.in .
 
 {% dialog tests/tutorespfn/Input/teph4mob_1.in %}
 
-
 <!--
 !!! important
 
@@ -200,7 +199,7 @@ For more details about this first step, please refer to the first and second tut
     as well and the static dielectric tensor $\ee^\infty$.
     These quantities are then used to treat the long-range (LR) part of the dynamical matrix in
     the Fourier interpolation of the phonon frequencies.
-    As discussed in the EPH introduction. these quantities are also needed for the Fourier 
+    As discussed in the EPH introduction, these quantities are also needed for the Fourier 
     interpolation of the DFPT potentials.
 
 <!--
@@ -321,6 +320,12 @@ Copy the file in the *Work_eph4mob* directory, and run ABINIT:
 abinit teph4mob_4.in > teph4mob_4.log 2> err &
 ```
 
+!!! important
+
+    In the last part of the tutorial, we explain how to avoid the NSCF computation 
+    for all the $\kk$-points in the IBZ and produce a partial WFK file containing only the 
+    wavevectors relevant for transport properties.
+
 ## Calculation of the mobility
 
 The computation of the mobility requires different convergence studies.
@@ -359,11 +364,11 @@ Let's discuss the meaning of the e-ph variables in more details:
 * [[optdriver]] 7 is required to activate the EPH driver
 
 * [[eph_task]] -4 tells ABINIT that we only need the imaginary part
-  of the e-ph self-energy at the KS energy, which directly gives the quasi-particle lifetimes.
+  of the e-ph self-energy at the KS energy, which directly gives the quasi-particle lifetimes due to e-ph scattering.
 
-* The homogeneous mesh corresponding to the WFK file is specified by [[ngkpt]] 24 24 24.
+* The homogeneous $\kk$-mesh corresponding to the WFK file is specified by [[ngkpt]] 24 24 24.
   The code will stop with an error if [[ngkpt]] is not the same as the one corresponding to the 
-  dense WFK file.
+  dense WFK file. At present, multiple shifts ([[nshiftk]] > 1) are not supported.
 
 * [[occopt]] 3 is required to correctly compute the
   location of the Fermi level using the Fermi-Dirac occupation function as we are dealing with the
@@ -440,7 +445,7 @@ Hopefully, in the next version this parameter will be automatically computed by 
 
 We can now examine the log file in detail.
 After the standard output of the input variables, the code reports the different parameters 
-used for the treatment of the long-range behaviour of the DFPT potentials: 
+used for the treatment of the long-range part of the DFPT potentials: 
 the Born effective charges, the dielectric constant, and the quadrupolar tensor.
 Make sure to have all of them in order to have an
 accurate interpolation of the scattering potentials, see discussion in [[cite:Brunin2020]].
@@ -456,8 +461,9 @@ accurate interpolation of the scattering potentials, see discussion in [[cite:Br
     Have quadrupoles: no
     ```
 
-The code then outputs different quantities. The first one is the location of the Fermi level
-that will be used to compute the lifetimes. You can check that it is far enough from the band
+The code then outputs different quantities. 
+The first one is the location of the Fermi level that will be used to compute the lifetimes. 
+You can check that it is far enough from the band
 edges so that the computed mobility can be considered as intrinsic.
 
 ```sh
@@ -532,7 +538,7 @@ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
 ```
 
 The temperature is first given then the electron and hole densities followed by electron and hole mobilities.
-In this computation, we consider only electrons and this explains why the values for holes are zero.
+In this example, we consider only electrons and this explains why the values for holes are zero.
 Note that the transport driver is automatically executed after the EPH run.
 
 You can run the transport driver in standalone mode by setting [[eph_task]] 7, 
@@ -540,7 +546,7 @@ provided you already have the lifetimes in an external SIGEPH.nc file that be sp
 This task is relatively fast even in serial execution although some parts 
 (in particular the computation of DOS-like quantities) can benefit from MPI.
 
-Now that you know how to obtain the mobility in a semiconductor for given k- and q-meshes,
+Now that you know how to obtain the mobility in a semiconductor for given $\kk$- and $\qq$-meshes,
 we can give more details about convergence and additional tricks that can be used
 to decrease the computational cost.
 
@@ -584,6 +590,8 @@ If a finer mesh was used, the number of $\kk$-points would have increased in a m
 <!-- 
 TODO: Discuss how to dope the system! 
 Other quantities (Seebeck etc may have a different convergence behaviour
+In principle, one can run a single calculation with relatively large sigma_erange and then decrease 
+the window in the RTA part. This trick however is not yet implemented.
 -->
 
 ### Convergence w.r.t. the k- and q-meshes
@@ -596,7 +604,7 @@ In this case, [[ngkpt]] = [[eph_ngqpt_fine]], but the use of [[sigma_ngkpt]]
 allows to downsample the $\kk$-mesh used for the integration and it should be set to half
 the values of [[ngkpt]].
 Possible exceptions are systems with very small effective masses (e.g. GaAs) in which
-a very dense $\kk$-sampling is needed to sample the electron (hole) pocket.
+a very dense $\kk$-sampling is needed to sample the electron (hole) pockets.
 In this case, using the same sampling for electrons and phonons may be enough to converge.
 
 The previous computations used 24×24×24 $\kk$- and $\qq$-meshes. This is far from convergence.
@@ -683,6 +691,17 @@ However, we found that there is very little use to go beyond a mesh three times 
 Using a 72×72×72 fine mesh for the energies gives a mobility of 149.87 cm$^2$/V/s,
 and a 96×96×96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rather limited.
 
+!!! important
+
+    As a rule of thumb, consider to use the DG method for systems in which the tetrahedron filter 
+    is not able to reduce the number of $\qq$-points in the integrals below 5% for a significant fraction
+    of the $\kk$-points in the [[sigma_erange]] energy window.
+    This may happen if there are multiple equivalent pockets and thus many intra-valley scattering channels 
+    to be considered.
+    In this case the computation of $\tau_\nk$ may require several minutes (2-10) per $kk$-point and calculations 
+    performed with the same $\kk$- and $\qq$-mesh starts to be expensive when the BZ sampling gets denser.
+
+
 ### In-place restart
 
 All the results of the calculation are stored in a single SIGEPH.nc file
@@ -706,7 +725,8 @@ and a *RTA.nc* file with the final results is produced.
 There are however cases in which one would like to compute mobilities from an already existing
 SIGEPH.nc file without performing a full self-energy calculation from scratch.
 In this case, one can use [[eph_task]] 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
-The advanced input variable [[transport_ngkpt]] can be use to downsample the $\kk$-mesh used to evaluate the mobility integral.
+The advanced input variable [[transport_ngkpt]] can be use to downsample 
+the $\kk$-mesh used to evaluate the mobility integral.
 
 ### MPI parallelism and memory requirements
 
@@ -742,10 +762,12 @@ This problems should show up for very dense $\kk$/$\qq$ meshes.
 As a rule of thumb, calculations with meshes denser than e.g 200x200x200 start to be very memory demanding
 and become much slower because several algorithms and tables related to the BZ sampling will start to dominate.
 
+<!--
 The code uses an internal cache to store the DFPT potentials in the dense IBZ.
 The size of the cache is defined by [[dvdb_qcache_mb]] whose default value is 1024 Mb.
 The size of this buffer decreases with the number of MPI processese used for the qpt-level.
 You can save some space by decreasing this value at the price of a global slow down of the calculation.
+-->
 
 The code allocates a relatively small buffer to store the Bloch states involved in transport but unfortunately
 the $\kk$-points are not easy to distribute with MPI.

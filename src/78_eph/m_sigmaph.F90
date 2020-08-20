@@ -1411,14 +1411,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          endif
        end if
 
-       ! Get npw_kq, kg_kq for k+q. Be careful with time-reversal symmetry and istwf_kq
+       ! Get npw_kq, kg_kq for k+q.
        if (isirr_kq) then
          ! Copy u_kq(G)
          istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
          ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
          kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
        else
-         ! Will Reconstruct u_kq(G) from the IBZ image.
+         ! Reconstruct u_kq(G) from the IBZ image.
          istwf_kq = 1
          call get_kg(kq, istwf_kq, ecut, cryst%gmet, npw_kq, gtmp)
          ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
@@ -1637,7 +1637,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(vlocal1)
        ABI_FREE(v1scf)
 
-       ! Wait from phonon frequencies and displacements in reduced coordinates for this q-point in the BZ.
+       ! Wait from phonon frequencies and displacements inside pert_comm
        call phstore%wait(cryst, phfrq, displ_cart,  displ_red)
 
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
@@ -1721,8 +1721,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end if
          end if
 
-         ! Symmetrize k+q wavefunctions in hthe BZ from IBZ (if needed).
-         ! Be careful with time-reversal symmetry.
+         ! Symmetrize k+q wavefunctions in the BZ from IBZ (if needed).
          if (isirr_kq) then
            ! Copy u_kq(G)
            call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1812,13 +1811,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          weight_q = sigma%wtq_k(iq_ibz_k)
 
          if (sigma%mrta > 0) then
-
-          ! Compute v_kq
-          ! If k+q is not in the IBZ, we need to recostruct the value by symmetry using v(Sq) = S v(q).
-          ! Use transpose(R) because we are using the tables for the wavefunctions
-          ! In this case listkk has been called with symrec and use_symrec=False
-          ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
-
+           ! Compute v_kq
+           ! If k+q is not in the IBZ, we need to recostruct the value by symmetry using v(Sq) = S v(q).
+           ! Use transpose(R) because we are using the tables for the wavefunctions
+           ! In this case listkk has been called with symrec and use_symrec=False
+           ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
            vkq = vcar_ibz(:, ibsum_kq, ikq_ibz, spin)
            if (.not. isirr_kq) then
              vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
@@ -1842,7 +1839,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Ignore unstable modes or modes that should be skipped.
            wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu)) cycle
 
-           ! For each band in Sigma_{bk}
+           ! For each band in Sigma_{nk}
            do ib_k=1,nbcalc_ks
              band_ks = ib_k + bstart_ks - 1
              eig0nk = ebands%eig(band_ks, ik_ibz, spin)
@@ -5989,8 +5986,9 @@ subroutine phstore_wait(self, cryst, phfrq, displ_cart, displ_red)
 !Arguments ------------------------------------
  class(phstore_t),intent(inout) :: self
  type(crystal_t),intent(in) :: cryst
- real(dp),intent(out) :: phfrq(self%natom3)
- real(dp),intent(out) :: displ_cart(2, 3, self%natom, self%natom3), displ_red(2, 3, self%natom, self%natom3)
+ real(dp) ABI_ASYNC, intent(out) :: phfrq(self%natom3)
+ real(dp) ABI_ASYNC, intent(out) :: displ_cart(2, 3, self%natom, self%natom3)
+ real(dp),intent(out) :: displ_red(2, 3, self%natom, self%natom3)
 
 !Local variables ------------------------------
 !scalars

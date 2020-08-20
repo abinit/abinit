@@ -4,7 +4,7 @@ authors: MG, GB
 
 # An overview of the EPH code
 
-This page provides a quick introduction to the new EPH driver integrated with the ABINIT executable.
+This page provides a quick introduction to the new electron-phonon driver integrated with the ABINIT executable.
 We discuss important technical details related to the implementation and the associated input variables.
 The drawbacks/advantages with respect to the implementation available in ANADDB are also discussed.
 
@@ -43,7 +43,7 @@ while Bloch states are computed non-self-consistently on arbitrarily dense $\kk$
 As a net result, the three problems (electrons, phonons and electron-phonon) are now
 **partly decoupled** and can be converged separately.
 Keep in mind, however, that the fact that one can easily densify the $\qq$-sampling in the EPH code does not
-mean one can use under-converged values for the GS/DFPT part.
+mean that one can use under-converged values for the GS/DFPT part.
 Indeed, the quality of the ingredients used for the interpolation depends on the initial $\kk$- and $\qq$-meshes
 and this is the reason why we said that the three problems are partly decoupled.
 The take-home message is that one should always converge carefully both electronic and vibrational properties
@@ -69,7 +69,7 @@ As usual, the partial DDB files are merged with **mrgddb**.
 The EPH driver (blue box) receives in input the total DDB and the DVDB as well as a GS WFK file that is usually
 produced with a different $\kk$-mesh (in some cases, even with a different number of bands
 when high-energy empty states are needed).
-These ingredients are then used to compute the EPH matrix elements and the associated physical properties.
+These ingredients are then used to compute e-ph matrix elements and the associated physical properties.
 <!--
 The $\kk$-mesh in the WFK file must be commensurate with the $\qq$-mesh in the DVDB file
 -->
@@ -91,6 +91,7 @@ The following physical properties can be computed:
     * Phonon linewidths induced by e-ph coupling
     * Eliashberg function
     * Superconducting properties within the isotropic Migdal-Eliashberg formalism
+
 <!--
     * transport properties in metals with the LOVA approximation.
 -->
@@ -136,12 +137,12 @@ The use of the different sub-drivers is discussed in more detail in the speciali
 
 ## Phonon bands and DOS with EPH
 
-Since phonon frequencies and displacements are needed for e-ph calculations, it is not surprising to see
+Since phonon frequencies and displacements are needed for e-ph calculations, it is not surprising
 that some of the ANADDB features related to the treatment of the dynamical matrix
 are integrated in the EPH code as well.
 In many cases, EPH uses the same name as in ANADDB especially for important variables
 such as [[dipdip]], [[asr]], and [[chneut]].
-There are however some differences with respect to the ANADDB interface.
+There are however some differences with respect to the ANADDB input file.
 More specifically, in EPH the name of the DDB file is specified by
 [[getddb_filepath]] whereas the $\qq$-mesh associated to the DDB file is given by [[ddb_ngqpt]].
 <!-- list of IBZ $\qq$-points for which the DFPT calculations have been performed -->
@@ -610,6 +611,8 @@ especially in the region around the band edge for semiconductors or around the F
 Small deviations between SKW and ab-initio bands can always be accounted for by increasing the value
 of [[sigma_erange]] used for generaring the KERANGE.nc file.
 
+<!--
 TODO: Recheck the code, perhaps I can use the ab-initio band edge if its greater/smaller than the SKW one.
 The most important thing is that SKW reproduces the position of the band edges as these values are then used
 that the position of the SKW band edge is consistent
+-->

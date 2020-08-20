@@ -21,7 +21,7 @@ This lesson should take about 1.5 hour.
 ## Formalism
 
 The electron-phonon self-energy, $\Sigma^{\text{e-ph}}$, describes the renormalization of the
-charged quasi-particle excitation due to the interaction with phonons.
+charged quasi-particle excitations due to the interaction with phonons.
 This term should be added to the electron-electron (e-e) self-energy $\Sigma^{\text{e-e}}$
 that encodes many-body effects induced by the Coulomb interaction beyond the Hartree potential.
 The e-e contribution can be estimated using, for instance, the $GW$ approximation but
@@ -70,8 +70,7 @@ is a positive real infinitesimal.
     At the level of the implementation, the infinitesimal $\eta$ is replaced by a (small)
     finite value given by the [[zcut]] variable that should be subject to convergence studies.
     More specifically, one should monitor the convergence of the physical properties of interest
-    as a function of [[zcut]] and $\qq$-point sampling similarly to what is done
-    in metals for [[tsmear]] and [[ngkpt]].
+    as a function of [[zcut]] and $\qq$-point sampling similarly to what is done in metals for [[tsmear]] and [[ngkpt]].
     Note also that [[zcut]] should be of the same order as the phonon frequency so around 0.01, 0.001 eV.
 
 The **static DW term** involves the second order derivative of the KS potential with respect to the nuclear displacements.
@@ -144,8 +143,7 @@ of the self-energy evaluated at the bare KS eigenvalue:
 
 $$ \ee^\QP_\nk = \ee_\nk + \Re\, \Sigma_\nk^{\text{e-ph}}(\ee_\nk). $$
 
-This approach is equivalent to a (thermal average of) 
-standard time-dependent Rayleigh-Schrodinger perturbation theory.
+This approach is equivalent to a (thermal average of) standard time-dependent Rayleigh-Schrodinger perturbation theory.
 In the linearized QP equation, on the contrary, the self-energy is Taylor-expanded around
 the KS eigenvalue and the QP correction is obtained using
 
@@ -230,15 +228,15 @@ A typical workflow for ZPR calculations requires the following steps:
 
 4. **Merge the partial DDB and POT files** with *mrgddb* and *mrgdvdb*, respectively
 
-5. **Start from the full DDB file, the DVDB file and the WFK file** obtained in step #3 to perform ZPR calculations
-   with [[eph_task]] 4.
+5. **Start from the full DDB file, the DVDB file and the WFK file** obtained in step #3 
+   to perform ZPR calculations with [[eph_task]] 4.
 
 ## Getting started
 
 In this tutorial, we prefer to focus on the usage of the EPH code hence
 we will be using **pre-computed DDB and DFPT POT files** to bypass the DFPT part.
 We also provide a **precomputed DEN.nc file** that can be used to perform the NSCF calculations required
-to generate the WKF file and the file with GS KS potential required for the Sternheimer equation.
+to generate the WKF file as well as the file with GS KS potential required for the Sternheimer equation.
 
 If git is installed on your machine, one can easily fetch the entire repository with:
 
@@ -418,8 +416,7 @@ In the output file produced by mrgdv
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_2.stdout %}
 
-there is a section for each $\qq$-point with the list of atomic perturbations 
-that have been included in the database.
+there is a section for each $\qq$-point with the list of atomic perturbations that have been included in the database.
 
 ```md
  qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -463,7 +460,7 @@ We use [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[ir
 
 Note that in all the input files of the tutorial, we will be using the new [[structure]] 
 variable (added in v9) to initialize the unit cell from an external input file so that 
-we don't need to repeat this part over and over again in the input file.
+we don't need to repeat this part over and over again in the input files.
 
 ```sh
  structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
@@ -520,7 +517,7 @@ Note the use of [[nbdbuf]].
 ## Our first ZPR calculation
 
 For our first ZPR calculation, we use a very minimalistic input file that allows us
-to discuss the most important input variables and the info reported in the main output file.
+to discuss the most important input variables and the organization of the main output file.
 
 First of all, run the code using:
 
@@ -563,9 +560,9 @@ getwfk_filepath "teph4zpr_3o_WFK"  # 4x4x4 k-mesh with 70 bands
 The mesh for electrons ([[ngkpt]], [[nshiftk]] and [[shiftk]]) is the one used to generate the input WFK file.
 [[ddb_ngqpt]] is set to 4x4x4 as this is the $\qq$-mesh we used in the DFPT part to generate the DDB and DVDB file.
 but the integration in $\qq$-space is performed with the [[eph_ngqpt_fine]] mesh.
-As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically activate the interpolation of the DFPT potentials
-as discussed in [introduction page for the EPH code](eph_intro).
-The $\qq$-space integration is defined by [[eph_intmeth]] [[zcut]]
+As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically activate 
+the interpolation of the DFPT potentials as discussed in [introduction page for the EPH code](eph_intro).
+The $\qq$-space integration is defined by [[eph_intmeth]] and [[zcut]]
 
 We can now have a look at the main output file.
 
@@ -748,7 +745,7 @@ grep OTMS teph4zpr_6.out
 abicomp.py sigeph teph4zpr_6o_DS*_SIGEPH.nc -e
 ```
 
-Now the convergence is much better and the ZPR valu is converged with 1 meV for nband ??
+Now the convergence is much better and the ZPR is converged with 1 meV for nband ??
 This is the value one should obtain when summing all the bands up to [[mpw]]
 
 Exercise:
@@ -761,7 +758,7 @@ Exercise:
 !!! important
 
     The big advange of the Sternheimer method is that we don't need to compute WFK files with many
-    empty bands to converge the self-energy.
+    empty bands in order to converge the self-energy.
     This means that one can use the computing power to densify the $\kk$-mesh while keeping the number of
     empty states at a reasonable level.
     Producing a WFK file with 1000 bands and a $100^3$ $\kk$-mesh is indeed way more expensive than
@@ -770,7 +767,7 @@ Exercise:
     Note however that the cost of the Sternheimer method quickly increases with [[nband]]
     due to the orthogonalization process. This means that a ZPR calculation with 300 bands (occ + empty)
     **without** the Sternheimer method is much faster than the same computation done with [[eph_stern]] 1.
-    As a matter of fact, one uses the Sternheimer method so that we don't need 300 bands to convergence the results.
+    As a matter of fact, we use the Sternheimer method so that we don't need 300 bands to convergence the results.
 
 ## Convergence of the ZPR wrt the q-mesh
 
