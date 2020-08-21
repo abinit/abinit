@@ -259,7 +259,7 @@ contains
     integer, intent(in) ::j
     real(dp), intent(in) :: x(self%ncol)
     real(dp), intent(out) :: y
-    integer :: i, irow, i1, i2 
+    integer :: i,  i1, i2 
     y=0.0_dp
     i1=self%row_shift(j)
     i2=self%row_shift(j+1)-1

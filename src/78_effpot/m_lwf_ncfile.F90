@@ -148,6 +148,7 @@ contains
     class(lwf_ncfile_t), intent(inout) :: self
     type(lwf_hist_t),intent(in) :: hist
     integer :: ncerr
+    ABI_UNUSED(hist)
 
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
@@ -190,7 +191,6 @@ contains
     itime = self%itime
 
 #if defined HAVE_NETCDF
-    print *, "ITIME:",  self%itime
     !if(self%write_traj ==1) then
     !print *, "Write one step of netcdf."
     ncerr=nf90_put_var(self%ncid, self%lwf_id, hist%current_lwf, &
