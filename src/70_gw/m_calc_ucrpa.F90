@@ -83,11 +83,10 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      affichage,checkk,cpu_time,get_bz_item,read_screening,wrtout
-!!      xmpi_barrier,xmpi_sum
+!!      print_orbitals,wrtout
 !!
 !! SOURCE
 

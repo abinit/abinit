@@ -100,10 +100,12 @@ contains
 !! of their multi-dataset representation.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      invars2,metric,mkrdim,setshells
+!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      libxc_functionals_end,libxc_functionals_get_hybridparams
+!!      libxc_functionals_init,sort_int,timab,wrtout
 !!
 !! SOURCE
 
@@ -221,13 +223,12 @@ end subroutine invars2m
 !! At the input, they already contain a default value.
 !!
 !! PARENTS
-!!      invars2m,m_ab7_invars_f90
+!!      m_invars2
 !!
 !! CHILDREN
-!!      dtset_chkneu,get_auxc_ixc,get_kpt_fullbz,get_xclevel,intagm_img,inkpts
-!!      intagm,invacuum,libxc_functionals_end
-!!      libxc_functionals_get_hybridparams,libxc_functionals_init,matr3inv
-!!      sort_int,timab,wrtout
+!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      libxc_functionals_end,libxc_functionals_get_hybridparams
+!!      libxc_functionals_init,sort_int,timab,wrtout
 !!
 !! SOURCE
 
@@ -376,6 +377,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwaclowrank',tread,'INT')
+ if(tread==1) dtset%gwaclowrank=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwcalctyp',tread,'INT')
  if(tread==1) dtset%gwcalctyp=intarr(1)
 
@@ -502,6 +506,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_invalid_freq',tread,'INT')
  if(tread==1) dtset%gw_invalid_freq=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_icutcoul',tread,'INT')
+ if(tread==1) dtset%gw_icutcoul=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_qprange',tread,'INT')
  if(tread==1) dtset%gw_qprange=intarr(1)
@@ -1437,7 +1444,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%ph_nqshift=intarr(1)
 
  if (dtset%ph_nqshift > 0) then
-   ! Read ph_qshift for phonons default is [0,0,0]
+   ! Read ph_qshift for phonons, default is [0,0,0]
    ABI_CALLOC(dtset%ph_qshift, (3, dtset%ph_nqshift))
    if (tread == 1) then
      ABI_CHECK(3 * dtset%ph_nqshift <= marr, "3 * dtset%ph_nqshift > marr!")
@@ -1461,9 +1468,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iboxcut',tread,'INT')
  if(tread==1) dtset%iboxcut=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'icsing',tread,'INT')
- if(tread==1) dtset%icsing=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'icutcoul',tread,'INT')
  if(tread==1) dtset%icutcoul=intarr(1)

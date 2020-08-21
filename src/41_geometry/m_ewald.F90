@@ -30,7 +30,9 @@ module m_ewald
  use m_errors
  use m_splines
  use m_time
+ use m_xmpi
 
+ use m_gtermcutoff,    only : termcutoff
  use m_special_funcs,  only : abi_derfc
  use m_symtk,          only : matr3inv
 
@@ -70,34 +72,36 @@ contains
 !! grewtn(3,natom)=grads of eew wrt xred(3,natom), hartrees.
 !!
 !! PARENTS
-!!      setvtr
+!!      m_setvtr
 !!
 !! CHILDREN
-!!      matr3inv,spline
+!!      dsyev,matr3inv,timab,wrtout
 !!
 !! SOURCE
 
-subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
+subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rmet,rprimd,typat,ucvol,vcutgeo,xred,zion)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,ntypat
- real(dp),intent(in) :: ucvol
+ integer,intent(in) :: icutcoul,natom,nkpt,ntypat
+ real(dp),intent(in) :: gsqcut,rcut,ucvol
  real(dp),intent(out) :: eew
 !arrays
- integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: gmet(3,3),rmet(3,3),xred(3,natom),zion(ntypat)
+ integer,intent(in) :: ngfft(18),typat(natom)
+ real(dp),intent(in) :: gmet(3,3),rmet(3,3),rprimd(3,3),xred(3,natom),vcutgeo(3),zion(ntypat)
  real(dp),intent(out) :: grewtn(3,natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,ib,ig1,ig2,ig3,ir1,ir2,ir3,newg,newr,ng,nr
+ integer  :: ia,ib,ig1,ig2,ig3,ig23,ii,ir1,ir2,ir3,newg,newr,ng,nr
  real(dp) :: arg,c1i,ch,chsq,derfc_arg,direct,drdta1,drdta2,drdta3,eta,fac
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
- real(dp) :: t1,term
+ real(dp) :: t1,term,zcut
  !character(len=500) :: message
+!arrays
+ real(dp),allocatable :: gcutoff(:)
 
 ! *************************************************************************
 
@@ -122,12 +126,23 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 !A bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
- eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+if(icutcoul.eq.1) then
+   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
+ else if (icutcoul.eq.2) then
+   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+   eta=SQRT(8.0_dp/zcut)
+ else
+   eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+ end if
 
 !Conduct reciprocal space summations
  fac=pi**2/eta
  gsum=0._dp
  grewtn(:,:)=0.0_dp
+
+ !Initialize Gcut-off array from m_gtermcutoff
+ !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
 !Sum over G space, done shell after shell until all
 !contributions are too small.
@@ -142,11 +157,10 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 !&       " If you have a metal consider setting dipdip 0.  ng = ", ng
 !      MSG_WARNING(message)
 !   end if
-
+   ii=1
    do ig3=-ng,ng
      do ig2=-ng,ng
        do ig1=-ng,ng
-
 !        Exclude shells previously summed over
          if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng .or. ng==1 ) then
 
@@ -163,9 +177,22 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
              if (arg <= -minexparg ) then
 !              When any term contributes then include next shell
                newg=1
-               term=exp(-arg)/gsq
+
+               if((abs(ig1).lt.ngfft(1)).and.&
+                 &(abs(ig2).lt.ngfft(2)).and.&
+                 &(abs(ig3).lt.ngfft(3))) then
+                  ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
+                  ii=abs(ig1)+ig23+1
+                  term=exp(-arg)/gsq*gcutoff(ii)
+               else if (icutcoul.ne.3) then
+                  term=zero !exp(-arg)/gsq
+               else
+                  term=exp(-arg)/gsq
+               endif
+
                summr = 0.0_dp
                summi = 0.0_dp
+ 
 
 !              XG 20180531  : the two do-loops on ia should be merged, in order to spare
 !              the waste of computing twice the sin and cos.
@@ -316,10 +343,16 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  end do ! End loop on nr (new shells). Note that there is an exit within the loop
 !
  sumr=0.5_dp*sumr
- fac=pi*ch**2/(2.0_dp*eta*ucvol)
-
+ fac=pi*ch**2.0_dp/(2.0_dp*eta*ucvol)
+ 
 !Finally assemble Ewald energy, eew
- eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+ if(icutcoul.eq.2) then
+   eew=sumg+sumr-chsq*reta/sqrt(pi)
+ else
+   eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+ end if
+
+ ABI_DEALLOCATE(gcutoff) 
 
 !DEBUG
 !write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
@@ -366,10 +399,10 @@ end subroutine ewald
 !! tensor in the order 11 22 33 32 31 21.
 !!
 !! PARENTS
-!!      stress
+!!      m_stress
 !!
 !! CHILDREN
-!!      matr3inv,spline
+!!      dsyev,matr3inv,timab,wrtout
 !!
 !! SOURCE
 
@@ -634,10 +667,10 @@ end subroutine ewald2
 !! not perfectly symmetric ....
 !!
 !! PARENTS
-!!      ddb_hybrid,m_dynmat,m_effective_potential,m_ifc
+!!      m_dynmat,m_effective_potential,m_ifc
 !!
 !! CHILDREN
-!!      matr3inv,spline
+!!      dsyev,matr3inv,timab,wrtout
 !!
 !! SOURCE
 

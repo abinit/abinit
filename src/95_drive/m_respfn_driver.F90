@@ -187,26 +187,11 @@ contains
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      alloc_hamilt_gpu,atm2fft,check_kxc,chkpawovlp,chkph3,crystal_free
-!!      crystal_init,d2frnl,d2sym3,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write
-!!      dealloc_hamilt_gpu,dfpt_dyfro,dfpt_dyout,dfpt_dyxc1,dfpt_eltfrhar
-!!      dfpt_eltfrkin,dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_gatherdy
-!!      dfpt_looppert,dfpt_phfrq,dfpt_prtph,ebands_free,efmasdeg_free_array
-!!      efmasval_free_array,eig2tot,eigen_meandege,elph2_fanddw,elt_ewald
-!!      exit_check,fourdp,getcut,getph,hartre,hdr_free,hdr_init,hdr_update
-!!      initrhoij,initylmg,inwffil,irreducible_set_pert,kpgio,littlegroup_q
-!!      matr3inv,mkcore,mklocl,mkrho,newocc,nhatgrid,outddbnc,paw_an_free
-!!      paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free,paw_ij_init
-!!      paw_ij_nullify,pawdenpot,pawdij,pawexpiqr,pawfgr_destroy,pawfgr_init
-!!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
-!!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
-!!      q0dy3_calc,read_rhor,rhotoxc,setsym,setsym_ylm,setup1,status,symdij
-!!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
-!!      wings3,wrtloctens,wrtout,xcdata_init,xmpi_bcast
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -840,7 +825,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
-&   dtset%qprtrb,dum_rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+&   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
  end if
 
@@ -872,7 +857,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Set up hartree and xc potential. Compute kxc here.
  ABI_ALLOCATE(vhartr,(nfftf))
 
- call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfftf,ngfftf,&
+             &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
 
  option=2 ; nk3xc=1
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
@@ -1000,7 +986,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  Compute the local of the dynamical matrix
 !  dyfrnl has not yet been symmetrized, but will be in the next routine
    call dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrx2,dyfr_cplex,dyfr_nondiag,&
-&   gmet,gprimd,gsqcut,indsym,mgfftf,mpi_enreg,psps%mqgrid_vl,&
+&   dtset,gmet,gprimd,gsqcut,indsym,mgfftf,mpi_enreg,psps%mqgrid_vl,&
 &   natom,nattyp, nfftf,ngfftf,dtset%nspden,dtset%nsym,ntypat,&
 &   psps%n1xccc,n3xccc,psps,pawtab,ph1df,psps%qgrid_vl,&
 &   dtset%qptn,rhog,rprimd,symq,symrec,dtset%typat,ucvol,&
@@ -1869,10 +1855,11 @@ end subroutine respfn
 !!  The localization tensor cannot be defined in the metallic case. It should not be computed.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      wrtout
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2106,9 +2093,11 @@ end subroutine wrtloctens
 !! In consequence, no use of message and wrtout routine.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3415,10 +3404,11 @@ end subroutine dfpt_dyout
 !!  no cartesian coordinates : simply second derivatives)
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      asria_calc,asria_corr,cart29,cart39,chneu9
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3937,15 +3927,16 @@ end subroutine dfpt_gatherdy
 !!                    If PAW,  it depends on two atoms
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      atm2fft,dfpt_sydy,fourdp,mkcore,mklocl_recipspace,timab,zerosym
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
 subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondiag,&
-&  gmet,gprimd,gsqcut,indsym,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
+&  dtset,gmet,gprimd,gsqcut,indsym,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
 &  nfft,ngfft,nspden,nsym,ntypat,n1xccc,n3xccc,psps,pawtab,ph1d,qgrid,&
 &  qphon,rhog,rprimd,symq,symrec,typat,ucvol,usepaw,vlspl,vxc,&
 &  xcccrc,xccc1d,xccc3d,xred)
@@ -3955,15 +3946,17 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  integer,intent(in) :: dyfr_cplex,dyfr_nondiag,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
  integer,intent(in) :: nsym,ntypat,usepaw
  real(dp),intent(in) :: gsqcut,ucvol
+ type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx1(natom),indsym(4,nsym,natom),nattyp(ntypat)
  integer,intent(in) :: ngfft(18),symq(4,2,nsym),symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*natom)
- real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft),rprimd(3,3)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden)
  real(dp),intent(in) :: xccc1d(n1xccc,6,ntypat),xcccrc(ntypat),xred(3,natom)
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(inout) :: dyfrnl(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag),xccc3d(n3xccc)
  real(dp),intent(out) :: dyfrlo(3,3,natom),dyfrwf(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag)
  real(dp),intent(inout) :: dyfrxc(3,3,natom) !vz_i
@@ -4011,8 +4004,8 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    optatm=0;optdyfr=1;optgr=0;optstr=0;optv=1;optn=n3xccc/nfft;optn2=1;opteltfr=0
    call atm2fft(atindx1,dum_atmrho,dum_atmvloc,dyfrxc,dyfrlo,dum_eltfrxc,&
 &   dum_gauss,gmet,gprimd,dum_grn,dum_grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
-&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,qgrid,qprtrb,rhog,&
-&   dum_strn,dum_strv,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb,vlspl)
+&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,qgrid,qprtrb,dtset%rcut,rhog,&
+&   rprimd,dum_strn,dum_strv,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb,vlspl)
    ABI_DEALLOCATE(vxctotg)
    if (n3xccc==0) dyfrxc=zero
  else
@@ -4025,8 +4018,8 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    ABI_ALLOCATE(gr_dum,(3,natom))
    ABI_ALLOCATE(v_dum,(nfft))
    call mklocl_recipspace(dyfrlo_tmp1,eei,gmet,gprimd,&
-&   gr_dum,gsqcut,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-&   ntypat,option,ph1d,qgrid,qprtrb,rhog,ucvol,vlspl,vprtrb,v_dum)
+&   gr_dum,gsqcut,dtset%icutcoul,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,dtset%nkpt,&
+&   ntypat,option,ph1d,qgrid,qprtrb,dtset%rcut,rhog,rprimd,ucvol,dtset%vcutgeo,vlspl,vprtrb,v_dum)
    do iatom=1,natom
 !    Reestablish correct order of atoms
      dyfrlo(1:3,1:3,atindx1(iatom))=dyfrlo_tmp1(1:3,1:3,iatom)
@@ -4151,7 +4144,7 @@ end subroutine dfpt_dyfro
 !!    core-correction (part1) part of the dynamical matrix
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab

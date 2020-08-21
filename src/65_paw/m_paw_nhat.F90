@@ -110,13 +110,12 @@ CONTAINS  !=====================================================================
 !!    pawgrnhat(nfft,ispden,3)=derivatives of nhat on fine rectangular grid (and derivatives)
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,energy,nres2vres,odamix,paw_qpscgw,pawmkrho
-!!      respfn,scfcv,screening,setup_positron,sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_dft_energy,m_forstr
+!!      m_nonlinear,m_odamix,m_paw_mkrho,m_positron,m_respfn_driver
+!!      m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      destroy_distribfft,fourdp,free_my_atmtab,get_my_atmtab
-!!      init_distribfft_seq,initmpi_seq,mean_fftr,pawexpiqr,pawgylm,pawnhatfr
-!!      set_mpi_enreg_fft,timab,unset_mpi_enreg_fft,xmpi_sum,zerosym
+!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
 !!
 !! SOURCE
 
@@ -669,12 +668,10 @@ end subroutine pawmknhat
 !!    grnhat_12(nfft,nspinor**2,3,natom*(ider/3))=derivatives of nhat on fine rectangular grid versus R*exp(iqr)
 !!
 !! PARENTS
-!!      calc_sigx_me,fock_getghc,prep_calc_ucrpa
+!!      m_fock_getghc,m_prep_calc_ucrpa,m_sigx
 !!
 !! CHILDREN
-!!      destroy_distribfft,fourdp,free_my_atmtab,get_my_atmtab
-!!      init_distribfft_seq,initmpi_seq,pawexpiqr,pawgylm,set_mpi_enreg_fft
-!!      timab,unset_mpi_enreg_fft,xmpi_sum,zerosym
+!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
 !!
 !! SOURCE
 
@@ -1081,10 +1078,10 @@ end subroutine pawmknhat_psipsi
 !!                  =Sum_ij,lm[rhoij_ij.q_ij^l . d/dr((g_l(r).Y_lm(r))^(1))]
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_scfcv,pawmknhat
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert,m_paw_nhat
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawgylm
+!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
 !!
 !! SOURCE
 
@@ -1436,12 +1433,10 @@ end subroutine pawnhatfr
 !!                                 is added (in real space)
 !!
 !! PARENTS
-!!      susk,suskmm
+!!      m_suscep_stat
 !!
 !! CHILDREN
-!!      destroy_distribfft,fourwf,free_my_atmtab,get_my_atmtab
-!!      init_distribfft_seq,initmpi_seq,set_mpi_enreg_fft,unset_mpi_enreg_fft
-!!      xmpi_sum
+!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
 !!
 !! SOURCE
 
@@ -1710,11 +1705,12 @@ end subroutine pawsushat
 !!    pawfgrtab(natom)%rfgd(3,nfgd)= coordinates of r-r_atom around each atom
 !!
 !! PARENTS
-!!      afterscfloop,bethe_salpeter,classify_bands,denfgr,exc_plot,m_wfd
-!!      pawmkaewf,respfn,scfcv,screening,sigma,wfk_analyze
+!!      m_afterscfloop,m_bethe_salpeter,m_classify_bands,m_exc_analyze
+!!      m_nonlinear,m_paw_mkaewf,m_paw_mkrho,m_respfn_driver,m_scfcv_core
+!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawgylm,pawrfgd_fft,timab
+!!      pawgylm,pawrfgd_wvl,timab,xred2xcart
 !!
 !! SOURCE
 
@@ -1951,7 +1947,7 @@ end subroutine nhatgrid
 !!   COPY NHATGRID
 !!
 !! PARENTS
-!!      afterscfloop,scfcv
+!!      m_afterscfloop,m_scfcv_core
 !!
 !! CHILDREN
 !!      pawgylm,pawrfgd_wvl,timab,xred2xcart

@@ -126,7 +126,7 @@ CONTAINS  !=====================================================================
 !! initylmr in order to get the angular functions on the grid points.
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
 !!      flush_unit,fourwf,free_my_atmtab,get_my_atmtab,nhatgrid

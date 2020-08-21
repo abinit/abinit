@@ -138,7 +138,7 @@
 #%% [files]
 #%% files_to_test = 
 #%%   tgspw_05.out, tolnlines = 0, tolabs = 0, tolrel = 0
-#%% psp_files = 79au.pspnc
+#%% psp_files = PseudosTM_pwteter/79au.pspnc
 #%% [paral_info]
 #%% nprocs_to_test = 432
 #%% [extra_info]

@@ -179,7 +179,7 @@ xred              # This keyword indicate that the location of the atoms
 ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.pspnc"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

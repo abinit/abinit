@@ -79,7 +79,7 @@ ntypat 1
 znucl 28
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "28ni.pspnc"
+ pseudos "PseudosTM_pwteter/28ni.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

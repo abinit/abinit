@@ -1020,7 +1020,7 @@ end subroutine thmeig
 !!   overcomplete inputs. Eliminate unit_phdos (just filnam) and deltaene (gotten from max-min/nene)
 !!
 !! PARENTS
-!!      thmeig
+!!      m_thmeig
 !!
 !! CHILDREN
 !!
@@ -1112,7 +1112,7 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
 !!  only write
 !!
 !! PARENTS
-!!      thmeig
+!!      m_thmeig
 !!
 !! CHILDREN
 !!

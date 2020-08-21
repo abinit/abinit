@@ -118,7 +118,7 @@ module m_wfd
    integer,allocatable :: gbound(:,:)
    ! gbound(2*mgfft+8,2))
    ! The boundary of the basis sphere of G vectors at a given k point.
-   ! for use in improved zero padding of ffts in 3 dimensions.
+   ! for use in improved zero padding of FFTs in 3 dimensions.
 
    !% real(dp) :: kpoint(3)
 
@@ -522,9 +522,11 @@ CONTAINS  !=====================================================================
 !!  Main creation method for the kdata_t datatype.
 !!
 !! PARENTS
-!!      debug_tools,m_wfd
+!!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -657,6 +659,8 @@ end subroutine kdata_init
 !!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -692,6 +696,8 @@ end subroutine kdata_free_0D
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -727,6 +733,8 @@ end subroutine kdata_free_1D
 !!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -768,6 +776,8 @@ end subroutine copy_kdata_0D
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -831,10 +841,12 @@ end subroutine copy_kdata_1D
 !!    %ur in r-space only if keep_ur.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,m_wfd
-!!      screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_ddk,m_gkk,m_phgamma,m_phpi,m_screening_driver
+!!      m_sigma_driver,m_sigmaph,m_wfk_analyze
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1104,10 +1116,10 @@ end subroutine wfd_init
 !!  Free the memory allocated in the wfd_t data type.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,screening
-!!      sigma,wfk_analyze
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1184,9 +1196,11 @@ end subroutine wfd_free
 !!  Copy a wfd_t data type.
 !!
 !! PARENTS
-!!      screening,sigma
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1475,9 +1489,10 @@ end function wfd_xdotc
 !!  Reinitialize the storage mode of the ur treated by this node.
 !!
 !! PARENTS
-!!      bethe_salpeter,sigma
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1526,9 +1541,10 @@ end subroutine wfd_reset_ur_cprj
 !!  ur(Wfd%nfft*Wfd%nspinor*SIZE(bands))=The wavefunction in real space.
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1577,9 +1593,10 @@ end subroutine wfd_get_many_ur
 !!  cg(npw_k*nspinor)=The wavefunction in real space in the Abinit cg convention.
 !!
 !! PARENTS
-!!      m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1637,11 +1654,10 @@ end subroutine wfd_copy_cg
 !!  ur(Wfd%nfft*Wfd%nspinor)=The wavefunction in real space.
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,calc_vhxc_me,cchi0,cchi0q0,cchi0q0_intraband
-!!      classify_bands,cohsex_me,exc_build_block,exc_build_ham,exc_den
-!!      m_wfd,prep_calc_ucrpa,wfd_mkrho
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1727,10 +1743,10 @@ end subroutine wfd_get_ur
 !!  Only printing
 !!
 !! PARENTS
-!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,screening
-!!      sigma
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1857,9 +1873,10 @@ end subroutine wfd_print
 !!  cwaveprj
 !!
 !! PARENTS
-!!      classify_bands,m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1991,8 +2008,11 @@ end subroutine wfd_ug2cprj
 !!  Wave<wave_t>=The structure fully initialized.
 !!
 !! PARENTS
+!!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2054,9 +2074,10 @@ end subroutine wave_init
 !!  Memory in Wave is deallocated depending on what
 !!
 !! PARENTS
-!!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2239,9 +2260,10 @@ end function wfd_get_wave_ptr
 !!   Wfd<wfd_t>=See above.
 !!
 !! PARENTS
-!!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2343,6 +2365,8 @@ end subroutine wfd_push_ug
 !!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2538,9 +2562,10 @@ end function wfd_ihave_ug
 !!  my_band_list(Wfd%mband)=The first how_manyb values are the bands treated by this node.
 !!
 !! PARENTS
-!!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2588,9 +2613,10 @@ end subroutine wfd_mybands
 !!  Print a table showing the distribution of the wavefunctions.
 !!
 !! PARENTS
-!!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2659,6 +2685,8 @@ end subroutine wfd_show_bkstab
 !!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2712,6 +2740,8 @@ end subroutine wfd_bands_of_rank
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2767,9 +2797,10 @@ end subroutine wfd_get_ug
 !!  Wfd<wfd_t>=See above.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_haydock
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2841,6 +2872,8 @@ end subroutine wfd_wave_free
 !!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2920,9 +2953,10 @@ end subroutine wfd_who_has_ug
 !!  Wfd%bks_tab
 !!
 !! PARENTS
-!!      m_sigma,m_wfd,wfd_mkrho
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3006,9 +3040,10 @@ end subroutine wfd_update_bkstab
 !! FUNCTION
 !!
 !! PARENTS
-!!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3081,9 +3116,10 @@ end subroutine wfd_set_mpicomm
 !!   my_band_list(1:my_nband)=The band indices for this node
 !!
 !! PARENTS
-!!      cchi0q0_intraband,m_sigma,m_wfd,sigma
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3169,9 +3205,10 @@ end subroutine wfd_distribute_bands
 !!   Wfd<wfd_t>=See above.
 !!
 !! PARENTS
-!!      bethe_salpeter,screening,sigma
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 !!
@@ -3355,9 +3392,10 @@ end function wfd_iterator_bks
 !!  bks_distrbk(Wfd%mband,Wfd%nkibz,Wfd%nsppol)=Global table with the rank of the node treating (b,k,s)
 !!
 !! PARENTS
-!!      wfd_pawrhoij
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3438,6 +3476,8 @@ end subroutine wfd_bks_distrb
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3515,9 +3555,10 @@ end subroutine wfd_sanity_check
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3590,9 +3631,10 @@ end subroutine wfd_dump_errinfo
 !!  bbp_distrb(%mband%mband)=The rank of the node that will treat (b,b').
 !!
 !! PARENTS
-!!      calc_optical_mels,calc_vhxc_me,cchi0q0
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3655,9 +3697,10 @@ end subroutine wfd_distribute_bbp
 !!  bbp_distrb(%mband%mband)=The rank of the node that will treat (b,b').
 !!
 !! PARENTS
-!!      cchi0,m_wfd
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3782,11 +3825,10 @@ end subroutine wfd_distribute_kb_kpbp
 !!  Cprj_out(Wfd%natom,Wfd%nspinor) <type(pawcprj_type)>=Unsorted matrix elements.
 !!
 !! PARENTS
-!!      calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_vhxc_me,cchi0,cchi0q0
-!!      cchi0q0_intraband,cohsex_me,debug_tools,exc_build_block,exc_build_ham
-!!      m_wfd,prep_calc_ucrpa,sigma,wfd_pawrhoij,wfd_vnlpsi
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3897,12 +3939,10 @@ end subroutine wfd_get_cprj
 !!  Wfd<wfd_t>=Wavefunction descriptor with new internal tables for FFT defined by new_ngfft.
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,calc_vhxc_me,cchi0,cchi0q0,cchi0q0_intraband
-!!      classify_bands,cohsex_me,exc_build_block,exc_build_ham,exc_plot
-!!      m_bseinterp,m_wfd,prep_calc_ucrpa,screening,sigma,wfd_mkrho
-!!      wfk_analyze
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4006,10 +4046,10 @@ end subroutine wfd_change_ngfft
 !!   Only writing.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,screening
-!!      sigma,wfk_analyze
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4191,9 +4231,10 @@ end subroutine wfd_test_ortho
 !!  [ur_kibz(Wfd%nfft*Wfd%nspinor)]= Optional output: u(r) in the IBZ.
 !!
 !! PARENTS
-!!      debug_tools,exc_plot,m_bseinterp
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4375,6 +4416,8 @@ end subroutine wfd_sym_ur
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4467,6 +4510,8 @@ end subroutine wfd_sym_ug_kg
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4640,10 +4685,10 @@ end subroutine wfd_write_wfk
 !!  Wfd<wfd_t>=All the states owned by this node whose status is (STORED|ALLOCATED) read.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,m_wfd,screening,sigma
-!!      wfk_analyze
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4992,10 +5037,10 @@ end subroutine wfd_read_wfk
 !!      phase factor to account for the wrapping of the real-space point in the first unit cell.
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,classify_bands,m_wfd
-!!      prep_calc_ucrpa,wfk_analyze
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -5129,6 +5174,8 @@ end subroutine wfd_paw_get_aeur
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -5522,9 +5569,10 @@ end subroutine wfd_plot_ur
 !!    The mesh is the usual augmented FFT grid to treat correctly the convolution.
 !!
 !! PARENTS
-!!      bethe_salpeter,screening,sigma
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -5755,9 +5803,11 @@ end subroutine wfd_mkrho
 !! OUTPUT
 !!
 !! PARENTS
-!!      bethe_salpeter,mrgscr,screening,sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -5869,9 +5919,10 @@ end subroutine test_charge
 !!          Sum_{n,k} {occ(n,k)*conjugate[cprj_nk(ii)].cprj_nk(jj)} (non symetrized)
 !!
 !! PARENTS
-!!      paw_qpscgw
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 

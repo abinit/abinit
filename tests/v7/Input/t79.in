@@ -45,7 +45,7 @@ istwfk *1
 
 #For all the dataset
 nsym 0
-icutcoul 6
+gw_icutcoul 6
 symsigma 0
 
 #----------------------------------------------------------------------------

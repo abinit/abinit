@@ -63,9 +63,9 @@ MODULE m_dtset
 !! WARNING: if you modify this datatype, please check whether there might be
 !! creation/destruction/copy routines, declared in another part of ABINIT,
 !! that might need to take into account your modification.
-!
+!!
 !! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
-!
+!!
 !! Since all these input variables are described in the abinit_help.html and
 !! associated html files they are not described in length here ...
 !!
@@ -79,7 +79,7 @@ type, public :: dataset_type
  integer :: adpimd
  integer :: autoparal
  integer :: auxc_ixc
- integer :: awtr
+ integer :: awtr = 1
  integer :: bandpp
  integer :: bdeigrf
  integer :: berryopt
@@ -88,7 +88,7 @@ type, public :: dataset_type
  integer :: brav = 1
  integer :: brvltt
  integer :: bs_nstates
- integer :: bs_hayd_term
+ integer :: bs_hayd_term = 0
  integer :: builtintest
  integer :: cd_full_grid
  integer :: cd_frqim_method
@@ -147,53 +147,57 @@ type, public :: dataset_type
  integer :: efmas_ntheta
  integer :: enunit
  integer :: eph_restart = 0
- integer :: eph_task
+ integer :: eph_task = 1
  integer :: exchn2n3d
  integer :: extrapwf
- integer :: fftgw
+ integer :: fftgw = 21
  integer :: fockoptmix
+ integer :: fock_icutcoul
  integer :: frzfermi
  integer :: ga_algor
  integer :: ga_fitness
  integer :: ga_n_rules
- integer :: getcell
- integer :: getddb
+ integer :: getcell = 0
+ integer :: getddb = 0
  integer :: getdvdb = 0
- integer :: getddk
- integer :: getdelfd
- integer :: getdkdk
- integer :: getdkde
- integer :: getden
- integer :: getefmas
- integer :: getgam_eig2nkq
- integer :: getocc
- integer :: getpawden
- integer :: getqps
- integer :: getscr
- integer :: getsuscep
- integer :: getvel
- integer :: getwfk
- integer :: getwfkfine
- integer :: getwfq
- integer :: getxcart
- integer :: getxred
- integer :: get1den
- integer :: get1wf
- integer :: getbseig
- integer :: getbsreso
- integer :: getbscoup
- integer :: gethaydock
+ integer :: getddk = 0
+ integer :: getdelfd = 0
+ integer :: getdkdk = 0
+ integer :: getdkde = 0
+ integer :: getden = 0
+ integer :: getefmas = 0
+ integer :: getgam_eig2nkq = 0
+ integer :: getocc = 0
+ integer :: getpawden = 0
+ integer :: getqps = 0
+ integer :: getscr = 0
+ integer :: getsuscep = 0
+ integer :: getvel = 0
+ integer :: getwfk = 0
+ integer :: getwfkfine = 0
+ integer :: getwfq = 0
+ integer :: getxcart = 0
+ integer :: getxred = 0
+ integer :: get1den = 0
+ integer :: get1wf = 0
+ integer :: getbseig = 0
+ integer :: getbsreso = 0
+ integer :: getbscoup = 0
+ integer :: gethaydock = 0
  integer :: goprecon
- integer :: gwcalctyp
- integer :: gwcomp
- integer :: gwgamma
- integer :: gwrpacorr
+ integer :: gwaclowrank = 0
+ integer :: gwcalctyp = 0
+ integer :: gwcomp = 0
+ integer :: gwgamma = 0
+ integer :: gwrpacorr = 0
  integer :: gw_customnfreqsp
+ integer :: gw_icutcoul
  integer :: gw_invalid_freq
  integer :: gw_qprange
  integer :: gw_nqlwl
- integer :: gw_nstep
- integer :: gw_sigxcore
+ ! TODO: REMOVE?
+ integer :: gw_nstep = 30
+ integer :: gw_sigxcore = 0
 
  ! GWLS
  integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine
@@ -215,46 +219,45 @@ type, public :: dataset_type
  integer :: gwls_recycle                ! Recycle the sternheimer solutions computed to obtain the static dielectric matrix
                                         ! and add them to the other solutions requested.
                                         ! 0 : don't recycle. 1 : store in RAM. 2 : Store on disk.
- integer :: gw_frqim_inzgrid
- integer :: gw_frqre_inzgrid
- integer :: gw_frqre_tangrid
+ integer :: gw_frqim_inzgrid = 0
+ integer :: gw_frqre_inzgrid = 0
+ integer :: gw_frqre_tangrid = 0
  integer :: gw_sctype
- integer :: gwmem
- integer :: gwpara
+ integer :: gwmem = 11
+ integer :: gwpara = 2
  integer :: hmcsst
  integer :: hmctt
  integer :: iboxcut
  integer :: icoulomb
- integer :: icsing
  integer :: icutcoul
  integer :: ieig2rf
  integer :: imgmov
  integer :: imgwfstor
- integer :: inclvkb
+ integer :: inclvkb = 2
  integer :: intxc
  integer :: ionmov
  integer :: iprcel
  integer :: iprcfc
  integer :: irandom
- integer :: irdddb
+ integer :: irdddb = 0
  integer :: irddvdb = 0
- integer :: irdddk
- integer :: irdden
- integer :: irdefmas
- integer :: irdhaydock
- integer :: irdpawden
- integer :: irdqps
- integer :: irdscr
- integer :: irdsuscep
- integer :: irdvdw
- integer :: irdwfk
- integer :: irdwfkfine
- integer :: irdwfq
- integer :: ird1den
- integer :: ird1wf
- integer :: irdbseig
- integer :: irdbsreso
- integer :: irdbscoup
+ integer :: irdddk = 0
+ integer :: irdden = 0
+ integer :: irdefmas = 0
+ integer :: irdhaydock = 0
+ integer :: irdpawden = 0
+ integer :: irdqps = 0
+ integer :: irdscr = 0
+ integer :: irdsuscep = 0
+ integer :: irdvdw = 0
+ integer :: irdwfk = 0
+ integer :: irdwfkfine = 0
+ integer :: irdwfq = 0
+ integer :: ird1den = 0
+ integer :: ird1wf = 0
+ integer :: irdbseig = 0
+ integer :: irdbsreso = 0
+ integer :: irdbscoup = 0
  integer :: iscf
  integer :: isecur
  integer :: istatimg
@@ -267,8 +270,8 @@ type, public :: dataset_type
  integer :: jdtset !  jdtset contains the current dataset number
  integer :: jellslab
  integer :: kptopt
- integer :: kssform
- integer :: localrdwf
+ integer :: kssform = 1
+ integer :: localrdwf = 1
  integer :: lotf_classic
  integer :: lotf_nitex
  integer :: lotf_nneigx
@@ -277,7 +280,7 @@ type, public :: dataset_type
  integer :: lw_qdrpl
  integer :: magconon
  integer :: maxnsym
- integer :: max_ncpus
+ integer :: max_ncpus = 0
  integer :: mband
  integer :: mep_solver
  integer :: mem_test = 1
@@ -298,7 +301,7 @@ type, public :: dataset_type
  integer :: natsph_extra
  integer :: natvshift
  integer :: nbandhf
- integer :: nbandkss
+ integer :: nbandkss = 0
  integer :: nbdblock
  integer :: nbdbuf
  integer :: nberry
@@ -310,9 +313,9 @@ type, public :: dataset_type
  integer :: neb_algo
  integer :: nfft
  integer :: nfftdg
- integer :: nfreqim
- integer :: nfreqre
- integer :: nfreqsp
+ integer :: nfreqim = -1
+ integer :: nfreqre = -1
+ integer :: nfreqsp = 0
  integer :: nimage
  integer :: nkpt
  integer :: nkptgw
@@ -320,9 +323,9 @@ type, public :: dataset_type
  integer :: nline
  integer :: nnsclo
  integer :: nnsclohf
- integer :: nomegasf
- integer :: nomegasi
- integer :: nomegasrd
+ integer :: nomegasf = 100
+ integer :: nomegasi = 12
+ integer :: nomegasrd = 9
  integer :: nonlinear_info
  integer :: npband
  integer :: npfft
@@ -335,10 +338,10 @@ type, public :: dataset_type
  integer :: npspalch
  integer :: npulayit
  integer :: npvel
- integer :: npweps
- integer :: npwkss
- integer :: npwsigx
- integer :: npwwfn
+ integer :: npweps = 0
+ integer :: npwkss = 0
+ integer :: npwsigx = 0
+ integer :: npwwfn = 0
  integer :: np_slk
  integer :: nqpt
  integer :: nqptdm
@@ -403,60 +406,60 @@ type, public :: dataset_type
  integer :: posdoppler
  integer :: positron
  integer :: posnstep
- integer :: ppmodel
+ integer :: ppmodel = 1
  integer :: prepalw
  integer :: prepanl
- integer :: prepgkk
- integer :: prtbbb
- integer :: prtbltztrp
- integer :: prtcif
+ integer :: prepgkk = 0
+ integer :: prtbbb = 0
+ integer :: prtbltztrp = 0
+ integer :: prtcif = 0
  integer :: prtden
- integer :: prtdensph
- integer :: prtdipole
- integer :: prtdos
- integer :: prtdosm
+ integer :: prtdensph = 1
+ integer :: prtdipole = 0
+ integer :: prtdos = 0
+ integer :: prtdosm = 0
  integer :: prtebands = 1
- integer :: prtefg
- integer :: prtefmas
+ integer :: prtefg = 0
+ integer :: prtefmas = 1
  integer :: prteig
- integer :: prtelf
- integer :: prtfc
- integer :: prtfull1wf
- integer :: prtfsurf
+ integer :: prtelf = 0
+ integer :: prtfc = 0
+ integer :: prtfull1wf = 0
+ integer :: prtfsurf = 0
  integer :: prtgsr = 1
- integer :: prtgden
- integer :: prtgeo
- integer :: prtgkk
- integer :: prtkden
+ integer :: prtgden = 0
+ integer :: prtgeo = 0
+ integer :: prtgkk = 0
+ integer :: prtkden = 0
  integer :: prtkpt
- integer :: prtlden
- integer :: prtnabla
- integer :: prtnest
+ integer :: prtlden = 0
+ integer :: prtnabla = 0
+ integer :: prtnest = 0
  integer :: prtpmp
- integer :: prtposcar
- integer :: prtprocar
- integer :: prtphdos
+ integer :: prtposcar = 0
+ integer :: prtprocar = 0
+ integer :: prtphdos = 1
  integer :: prtphbands = 1
  integer :: prtphsurf = 0
- integer :: prtpot
+ integer :: prtpot = 0
  integer :: prtpsps = 0
- integer :: prtspcur
- integer :: prtstm
- integer :: prtsuscep
- integer :: prtvclmb
- integer :: prtvdw
- integer :: prtvha
- integer :: prtvhxc
- integer :: prtkbff=0
- integer :: prtvol
- integer :: prtvolimg
- integer :: prtvpsp
- integer :: prtvxc
- integer :: prtwant
+ integer :: prtspcur = 0
+ integer :: prtstm = 0
+ integer :: prtsuscep = 0
+ integer :: prtvclmb = 0
+ integer :: prtvdw = 0
+ integer :: prtvha = 0
+ integer :: prtvhxc = 0
+ integer :: prtkbff = 0
+ integer :: prtvol = 0
+ integer :: prtvolimg = 0
+ integer :: prtvpsp = 0
+ integer :: prtvxc = 0
+ integer :: prtwant = 0
  integer :: prtwf
- integer :: prtwf_full
- integer :: prtxml
- integer :: prt1dm
+ integer :: prtwf_full = 0
+ integer :: prtxml = 0
+ integer :: prt1dm = 0
  integer :: ptgroupma
  integer :: qptopt
  integer :: random_atpos
@@ -482,11 +485,11 @@ type, public :: dataset_type
  integer :: spgaxor
  integer :: spgorig
  integer :: spgroup
- integer :: spmeth
+ integer :: spmeth = 0
  integer :: string_algo
- integer :: symmorphi
- integer :: symchi
- integer :: symsigma
+ integer :: symmorphi = 1
+ integer :: symchi = 1
+ integer :: symsigma = 1
  integer :: td_mexcit
  integer :: tfkinfunc
  integer :: tim1rev
@@ -631,17 +634,17 @@ type, public :: dataset_type
  real(dp) :: esmear
  real(dp) :: exchmix
  real(dp) :: fband
- real(dp) :: fermie_nest
+ real(dp) :: fermie_nest = zero
  real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
- real(dp) :: freqremin
- real(dp) :: freqremax
- real(dp) :: freqspmin
- real(dp) :: freqspmax
+ real(dp) :: freqremin = zero
+ real(dp) :: freqremax = zero
+ real(dp) :: freqspmin = zero
+ real(dp) :: freqspmax = zero
  real(dp) :: friction
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
- real(dp) :: gwencomp
+ real(dp) :: gwencomp = 2.0_dp
  real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
  real(dp) :: gw_toldfeig
  real(dp) :: hyb_mixing
@@ -652,14 +655,14 @@ type, public :: dataset_type
  real(dp) :: kptrlen
  real(dp) :: magcon_lambda
  real(dp) :: maxestep
- real(dp) :: mbpt_sciss
- real(dp) :: mdf_epsinf
+ real(dp) :: mbpt_sciss = zero
+ real(dp) :: mdf_epsinf = zero
  real(dp) :: mdwall
  real(dp) :: mep_mxstep
  real(dp) :: nelect
  real(dp) :: noseinert
- real(dp) :: omegasimax
- real(dp) :: omegasrdmax
+ real(dp) :: omegasimax = 50/Ha_eV
+ real(dp) :: omegasrdmax = 1.0_dp/Ha_eV  ! = 1eV
  real(dp) :: pawecutdg
  real(dp) :: pawovlp
  real(dp) :: pawujrad
@@ -667,7 +670,7 @@ type, public :: dataset_type
  real(dp) :: posocc
  real(dp) :: postoldfe
  real(dp) :: postoldff
- real(dp) :: ppmfrq
+ real(dp) :: ppmfrq = zero
  real(dp) :: pw_unbal_thresh
  real(dp) :: ratsm
  real(dp) :: ratsph_extra
@@ -807,44 +810,44 @@ type, public :: dataset_type
  real(dp), allocatable :: ziontypat(:)        ! ziontypat(ntypat)
  real(dp), allocatable :: znucl(:)            ! znucl(npsp)
 
-
 !BEGIN VARIABLES FOR @Bethe-Salpeter
- integer :: bs_algorithm
- integer :: bs_haydock_niter
- integer :: bs_exchange_term
- integer :: bs_coulomb_term
- integer :: bs_calctype
- integer :: bs_coupling
- integer :: bs_interp_mode
- integer :: bs_interp_prep
- integer :: bs_interp_method
- integer :: bs_interp_rl_nb
+ integer :: bs_algorithm = 2
+ integer :: bs_haydock_niter = 100
+ integer :: bs_exchange_term = 1
+ integer :: bs_coulomb_term = 11
+ integer :: bs_calctype = 1
+ integer :: bs_coupling = 0
+ integer :: bs_interp_mode = 0 ! No interpolation
+ integer :: bs_interp_prep = 0 ! Do not prepare interp
+ integer :: bs_interp_method = 1 ! YG interpolation
+ integer :: bs_interp_rl_nb = 1
 
- real(dp) :: bs_interp_m3_width
+ real(dp) :: bs_interp_m3_width = one
 
- integer  :: bs_interp_kmult(3)
- real(dp) :: bs_haydock_tol(2)
+ integer  :: bs_interp_kmult(3) = 0
+ real(dp) :: bs_haydock_tol(2) = [0.02_dp, zero]
 
  integer,allocatable :: bs_loband(:)
 
- real(dp) :: bs_eh_cutoff(2)
- real(dp) :: bs_freq_mesh(3)
+!  Take big absolute value numbers, but the the biggest ones, otherwise overflow can happen
+ real(dp) :: bs_eh_cutoff(2) = [smallest_real*tol6, greatest_real*tol6]
+ real(dp) :: bs_freq_mesh(3) = [zero,zero, 0.01_dp/Ha_eV]
 !END VARIABLES FOR @Bethe-Salpeter.
 
  integer :: gpu_linalg_limit
 
 !EPH variables
 ! ifc variables
- integer :: asr
- integer :: dipdip
- integer :: chneut
- integer :: symdynmat
+ integer :: asr = 1
+ integer :: dipdip = 1
+ integer :: chneut = 1
+ integer :: symdynmat = 1
 
 ! Phonon variables.
- integer :: ph_ndivsm    ! = 20
- integer :: ph_nqpath    ! = 0
- integer :: ph_ngqpt(3)  ! = 0
- integer :: ph_nqshift
+ integer :: ph_ndivsm = 20
+ integer :: ph_nqpath = 0
+ integer :: ph_ngqpt(3) = 20
+ integer :: ph_nqshift = 1
 
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
@@ -852,31 +855,31 @@ type, public :: dataset_type
   ! ph_qpath(3, nqpath)
 
 ! e-ph variables
- real(dp) :: eph_mustar
- integer :: eph_intmeth ! = 2
- real(dp) :: eph_extrael != zero
- real(dp) :: eph_fermie != huge(one)
- integer :: eph_frohlichm != 0
- real(dp) :: eph_fsmear != 0.01
- real(dp) :: eph_fsewin != 0.04
+ real(dp) :: eph_mustar = 0.1_dp
+ integer :: eph_intmeth = 2
+ real(dp) :: eph_extrael = zero
+ real(dp) :: eph_fermie = zero
+ integer :: eph_frohlichm = 0
+ real(dp) :: eph_fsmear = 0.01_dp
+ real(dp) :: eph_fsewin = 0.04_dp
  real(dp) :: eph_ecutosc = zero
  !real(dp) :: eph_alpha_gmin = zero !sqrt(5)
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  integer :: eph_phrange(2) = 0
 
- integer :: eph_ngqpt_fine(3)
+ integer :: eph_ngqpt_fine(3) = 0
  integer :: eph_np_pqbks(5) = 0
 
  integer :: eph_stern = 0
  integer :: eph_transport = 0
  integer :: eph_use_ftinterp = 0
 
- integer :: ph_intmeth
+ integer :: ph_intmeth = 2
  integer :: prteliash = 0
- real(dp) :: ph_wstep
- real(dp) :: ph_smear
- integer :: ddb_ngqpt(3)
- real(dp) :: ddb_shiftq(3)
+ real(dp) :: ph_wstep = 0.1_dp / Ha_meV
+ real(dp) :: ph_smear = 0.00002_dp
+ integer :: ddb_ngqpt(3) = 0
+ real(dp) :: ddb_shiftq(3) = zero
 
  integer :: mixprec = 0
  integer :: symv1scf = 0
@@ -905,7 +908,7 @@ type, public :: dataset_type
  integer :: nkpath = 0
  real(dp) :: einterp(4) = zero
  real(dp),allocatable :: kptbounds(:,:)
- real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
+ real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]
 
  character(len=fnlen) :: getddb_filepath = ABI_NOFILE
  character(len=fnlen) :: getden_filepath = ABI_NOFILE
@@ -992,9 +995,9 @@ CONTAINS  !=====================================================================
 !!   |   will be an output for occopt==1 or 3 ... 8
 !!
 !! PARENTS
-!!      invars2
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -1428,6 +1431,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%fftgw              = dtin%fftgw
  dtout%fockdownsampling   = dtin%fockdownsampling
  dtout%fockoptmix         = dtin%fockoptmix
+ dtout%fock_icutcoul      = dtin%fock_icutcoul
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
  dtout%freqremax          = dtin%freqremax
@@ -1475,6 +1479,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%get1wf             = dtin%get1wf
  dtout%goprecon           = dtin%goprecon
  dtout%gpu_linalg_limit   = dtin%gpu_linalg_limit
+ dtout%gwaclowrank        = dtin%gwaclowrank
  dtout%gwcalctyp          = dtin%gwcalctyp
  dtout%gwcomp             = dtin%gwcomp
  dtout%gwencomp           = dtin%gwencomp
@@ -1483,6 +1488,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
+ dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
  dtout%gw_frqim_inzgrid   = dtin%gw_frqim_inzgrid
@@ -1516,7 +1522,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%hmctt              = dtin%hmctt
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
- dtout%icsing             = dtin%icsing
  dtout%icutcoul           = dtin%icutcoul
  dtout%ieig2rf            = dtin%ieig2rf
  dtout%imgmov             = dtin%imgmov
@@ -2103,10 +2108,10 @@ end function dtset_copy
 !!  dtset <type(dataset_type)>=free all allocated allocatable.
 !!
 !! PARENTS
-!!      chkinp,dfpt_looppert,driver,gwls_hamiltonian,m_ab7_invars_f90,m_io_kss
-!!      mover_effpot
+!!      m_xchybrid
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2214,6 +2219,7 @@ end subroutine dtset_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2260,10 +2266,10 @@ end subroutine dtset_free_nkpt_arrays
 !! miximage(mxnimage,mxnimage)=coefficients of mixing of the images of the old dataset, to initialize the new dataset images
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      wrtout
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2343,11 +2349,9 @@ end subroutine find_getdtset
 !!  nband_rbz= nband in the reduced brillouin zone
 !!
 !! PARENTS
-!!      finddistrproc,initmpi_pert,mpi_setup
 !!
 !! CHILDREN
-!!      irreducible_set_pert,littlegroup_pert,littlegroup_q,mati3inv,metric
-!!      mkrdim,symatm,symkpt,wrtout
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2725,10 +2729,10 @@ end function dtset_testsusmat
 !!   The dataset with number 0 should NOT be modified in the present routine.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      intagm
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -2964,9 +2968,10 @@ end subroutine macroin
 !!   The dataset with number 0 should NOT be modified in the present routine.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -3017,9 +3022,10 @@ end subroutine macroin2
 !! OUTPUT
 !!
 !! PARENTS
-!!      abinit
+!!      abinit,m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
+!!      chkvars_in_string,inupper
 !!
 !! SOURCE
 
@@ -3105,7 +3111,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_EFS'
  list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_nfixcoeff'
  list_vars=trim(list_vars)//' fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
- list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
@@ -3120,10 +3126,11 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
- list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
+ list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
- list_vars=trim(list_vars)//' gw_invalid_freq '
+ list_vars=trim(list_vars)//' gw_invalid_freq'
+ list_vars=trim(list_vars)//' gw_icutcoul'
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
  list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
@@ -3135,7 +3142,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
- list_vars=trim(list_vars)//' iboxcut icoulomb icsing icutcoul ieig2rf'
+ list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irddvdb irdefmas'

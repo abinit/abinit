@@ -182,10 +182,8 @@ contains  !============================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_phgamma
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -246,7 +244,6 @@ end subroutine fstab_free
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -590,7 +587,6 @@ end function fstab_findkg0
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -676,7 +672,6 @@ end subroutine fstab_get_dbldelta_weights
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

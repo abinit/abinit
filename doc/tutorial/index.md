@@ -7,7 +7,7 @@ authors: XG
 ## Overview of the ABINIT tutorials.
 
 These tutorials are aimed at teaching the use of ABINIT, in the
-UNIX/Linux OS and its variants (MacOSX, AIX ...).
+UNIX/Linux OS and its variants (MacOS, AIX ...).
 They might be used for other operating systems, but the commands have to be adapted.
 
 At present, nearly forty tutorials are available. Each of them is at most
@@ -30,7 +30,7 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="70  ,285 ,180 ,310 " href="tddft/index.html" />
 <area shape="rect" coords="70  ,315 ,180 ,335 " href="positron/index.html" />
 <area shape="rect" coords="70  ,345 ,180 ,369 " href="ffield/index.html" />
-<area shape="rect" coords="70  ,370 ,180 ,390 " href="analysis_tools/index.html" />
+<area shape="rect" coords="70  ,370 ,180 ,390 " href="cut3d/index.html" />
 <area shape="rect" coords="70  ,395 ,180 ,420 " href="fold2bloch/index.html" />
 <area shape="rect" coords="70  ,425 ,180 ,445 " href="wannier90/index.html" />
 <area shape="rect" coords="70  ,450 ,180 ,475" href="source_code/index.html" />
@@ -134,7 +134,7 @@ prerequisite than the tutorials 1 to 4, and that you can do in any order (there 
     to obtain the positron lifetime in the perfect material, the lifetime of a positron
     localized in a vacancy, the electron-positron momentum distribution wavefunctions and densities.
 
-  * [The tutorial on Analysis Tools](analysis_tools) deals with the use of the CUT3D utility to analyse wavefunctions and densities.
+  * [The tutorial on cut3d](cut3d) deals with the use of the CUT3D utility to analyse wavefunctions and densities.
 
   * [The tutorial on the fold2bloch postprocessor](fold2bloch) deals with the use of the fold2Bloch utility
     to unfold band structures from supercell calculations.

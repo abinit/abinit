@@ -131,10 +131,11 @@ end function kpts_timrev_from_kptopt
 !!  [bz2ibz(6,nkbz)]=Mapping BZ --> IBZ
 !!
 !! PARENTS
-!!      m_dvdb,m_ebands,m_gruneisen,m_ifc,m_kpts,m_phgamma,m_phonons,m_sigmaph
+!!      abitk,m_dvdb,m_ebands,m_ephwg,m_gruneisen,m_ifc,m_kpts,m_phgamma
+!!      m_phonons,m_sigmaph,m_sigtk,m_unittests
 !!
 !! CHILDREN
-!!      getkgrid,kpts_ibz_from_kptrlatt,listkk
+!!      wrtout
 !!
 !! SOURCE
 
@@ -169,7 +170,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
  ! Copy kptrlatt and shifts because getkgrid can change them
  ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
- ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be between 1 and", itoa(MAX_NSHIFTK)))
+ ABI_CHECK_IRANGE(nshiftk, 1, MAX_NSHIFTK, "Invalid value of nshiftk")
  my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
  my_kptrlatt = kptrlatt
 
@@ -512,11 +513,12 @@ end function symkchk
 !!  the comparison of the squared lengths of the separate vectors.
 !!
 !! PARENTS
-!!      initberry,initorbmag,inwffil,m_dvdb,m_ebands,m_eprenorms,m_exc_diago
-!!      m_fock,m_fstab,m_haydock,m_ifc,m_kpts,m_phgamma,m_sigmaph,mlwfovlp_qp
+!!      m_berryphase_new,m_dvdb,m_ebands,m_eph_double_grid,m_ephwg,m_eprenorms
+!!      m_exc_diago,m_fock,m_fstab,m_haydock,m_inwffil,m_lgroup,m_mlwfovlp_qp
+!!      m_orbmag,m_phgamma,m_rta,m_sigmaph,m_sigtk,m_unittests
 !!
 !! CHILDREN
-!!      sort_dp,timab
+!!      wrtout
 !!
 !! SOURCE
 
@@ -900,11 +902,11 @@ end subroutine listkk
 !! [nkpthf] = number of k points in the full BZ, for the Fock operator.
 !!
 !! PARENTS
-!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
-!!      nonlinear,testkgrid,thmeig
+!!      m_ab7_kpoints,m_bz_mesh,m_elphon,m_getshell,m_inkpts,m_kpts,m_nonlinear
+!!      m_thmeig
 !!
 !! CHILDREN
-!!      mati3inv,matr3inv,metric,smallprim,smpbz,symkpt
+!!      wrtout
 !!
 !! SOURCE
 
@@ -998,11 +1000,10 @@ end subroutine getkgrid
 !! [nkpthf] = number of k points in the full BZ, for the Fock operator.
 !!
 !! PARENTS
-!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
-!!      nonlinear,testkgrid,thmeig
+!!      m_kpts
 !!
 !! CHILDREN
-!!      mati3inv,matr3inv,metric,smallprim,smpbz,symkpt
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1501,10 +1502,9 @@ end subroutine getkgrid_low
 !! TODO: This routine should be removed
 !!
 !! PARENTS
-!!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_kpt_fullbz,get_rank_1kpt,mati3inv,mkkptrank
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1587,10 +1587,10 @@ end subroutine get_full_kgrid
 !!  kpt_fullbz(3,nkpt_fullbz)=kpoints in full brillouin zone
 !!
 !! PARENTS
-!!      get_full_kgrid,invars2
+!!      m_kpts
 !!
 !! CHILDREN
-!!      mati3det,matr3inv,wrap2_pmhalf
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1757,11 +1757,11 @@ end subroutine get_kpt_fullbz
 !!  R.A. Evarestov and V.P. Smirnov, Phys. Stat. Sol. (b) 119, 9 (1983) [[cite:Evarestov1983]]
 !!
 !! PARENTS
-!!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,initorbmag,m_fstab,m_ifc
-!!      m_tdep_abitypes
+!!      m_berryphase_new,m_elphon,m_fstab,m_harmonic_thermo,m_ifc,m_kpts
+!!      m_orbmag,m_tdep_abitypes
 !!
 !! CHILDREN
-!!      matr3inv,wrap2_pmhalf,wrtout
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2319,10 +2319,10 @@ end subroutine smpbz
 !! Note that kptopt is always =1 in this routine.
 !!
 !! PARENTS
-!!      inkpts,m_ab7_kpoints
+!!      m_ab7_kpoints,m_inkpts
 !!
 !! CHILDREN
-!!      getkgrid,abi_abort,matr3inv,metric,smallprim,wrtout,xmpi_abort
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2998,7 +2998,7 @@ end subroutine testkgrid
 !!  Do not use this routine, it is obsolete and should be replaced by make_path in m_bz_mesh.
 !!
 !! PARENTS
-!!      inkpts
+!!      m_inkpts
 !!
 !! CHILDREN
 !!      wrtout

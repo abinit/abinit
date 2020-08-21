@@ -27,6 +27,9 @@ from tests.pymods.termcolor import cprint
 ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
 
+# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
+#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(ABINIT_ROOTDIR, "Psps_for_tests"))
+#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 
 ALL_BINARIES = [
     "abinit",
@@ -286,37 +289,58 @@ def vimt(ctx, tagname):
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
+#@task
+#def gdb(ctx, input_name, exec_name="abinit", run_make=False):
+#    """
+#    Execute `lldb` debugger with the given `input_name`.
+#    """
+#    if run_make: make(ctx)
+#
+#    top = find_top_build_tree(".", with_abinit=True)
+#    binpath = os.path.join(top, "src", "98_main", exec_name)
+#    cprint(f"Using binpath: {binpath}", "green")
+#    cmd = f"gdb {binpath} --one-line 'settings set target.run-args {input_name}'"
+#    cprint(f"Executing gdb command: {cmd}", color="green")
+#    # mpirun -np 2 xterm -e gdb fftprof --command=dbg_file
+#    #cprint("Type run to start lldb debugger", color="green")
+#    #cprint("Then use `bt` to get the backtrace\n\n", color="green")
+#    ctx.run(cmd, pty=True)
+
 
 @task
-def lldb(ctx, input_name, exec_name="abinit"):
+def lldb(ctx, input_name, exec_name="abinit", run_make=False):
     """
     Execute `lldb` debugger with the given `input_name`.
     """
+    if run_make: make(ctx)
+
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
     cprint(f"Using binpath: {binpath}", "green")
     cmd = f"lldb {binpath} --one-line 'settings set target.run-args {input_name}'"
     cprint(f"Executing lldb command: {cmd}", color="green")
-    cprint("Type run to start lldb debugger\n\n", color="green")
+    cprint("Type run to start lldb debugger", color="green")
+    cprint("Then use `bt` to get the backtrace\n\n", color="green")
     ctx.run(cmd, pty=True)
 
 
 @task
-def abinit(ctx, input_name):
+def abinit(ctx, input_name, run_make=False):
     """
     Execute `abinit` with the given `input_name`.
     """
-    _run(ctx, input_name, exec_name="abinit")
+    _run(ctx, input_name, exec_name="abinit", run_make=run_make)
 
 
 @task
-def anaddb(ctx, input_name):
+def anaddb(ctx, input_name, run_make=False):
     """"execute `anaddb` with the given `input_name`."""
-    _run(ctx, input_name, exec_name="anaddb")
+    _run(ctx, input_name, exec_name="anaddb", run_make=run_make)
 
 
-def _run(ctx, input_name, exec_name):
+def _run(ctx, input_name, exec_name, run_make):
     """"Execute `exec_name input_name`"""
+    if run_make: make(ctx)
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
     cprint(f"Using binpath: {binpath}", "green")
@@ -373,7 +397,7 @@ def watchdog(ctx, jobs="auto", sleep_time = 5):
     from watchdog.observers import Observer
     from watchdog.events import PatternMatchingEventHandler
     event_handler = PatternMatchingEventHandler(patterns="*.F90", ignore_patterns="",
-                                                   ignore_directories=False, case_sensitive=True)
+                                                ignore_directories=False, case_sensitive=True)
 
     def on_created(event):
         print(f"hey, {event.src_path} has been created!")

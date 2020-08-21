@@ -107,7 +107,7 @@ CONTAINS  !=====================================================================
 !! * The name of the file wff2 might be the same as that of the file wff1.
 !!
 !! PARENTS
-!!      berryphase_new,dfpt_looppert,gstate
+!!      m_berryphase_new,m_dfpt_looppert,m_gstate
 !!
 !! CHILDREN
 !!      xmpi_sum_master

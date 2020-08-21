@@ -133,7 +133,7 @@
  istwfk *1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "6c.pspnc"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

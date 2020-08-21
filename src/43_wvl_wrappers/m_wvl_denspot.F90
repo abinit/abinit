@@ -64,11 +64,11 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
-!!      allocaterhopot,density_descriptors,dpbox_set
-!!      initialize_dft_local_fields,wrtout,xred2xcart
+!!      deallocate_denspot_distribution,deallocate_rho_descriptors
+!!      denspot_free_history,f_free_ptr
 !!
 !! SOURCE
 
@@ -177,7 +177,7 @@ end subroutine wvl_denspot_set
 !! OUTPUT
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!      deallocate_denspot_distribution,deallocate_rho_descriptors

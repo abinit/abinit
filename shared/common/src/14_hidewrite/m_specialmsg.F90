@@ -31,7 +31,7 @@ module m_specialmsg
  use m_build_info
  use m_xmpi
 
- use m_io_tools,   only : flush_unit, write_lines
+ use m_io_tools,   only : flush_unit, write_lines, is_open
 
  implicit none
 
@@ -79,10 +79,10 @@ CONTAINS  !===========================================================
 !!  (only counters updated)
 !!
 !! PARENTS
-!!      wrtout
+!!      m_specialmsg
 !!
 !! CHILDREN
-!!      xmpi_sum
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -123,7 +123,7 @@ end subroutine specialmsg_setcount
 !!      abinit
 !!
 !! CHILDREN
-!!      xmpi_sum
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -157,10 +157,10 @@ end subroutine specialmsg_getcount
 !!  (only counters updated)
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
-!!      xmpi_sum
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -205,11 +205,11 @@ end subroutine specialmsg_mpisum
 !!  (only writing)
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,bsepostproc,cut3d,fftprof,ioprof,lapackprof,mrgddb
-!!      mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet,vdw_kernelgen
+!!      abinit,aim,anaddb,cut3d,fftprof,ioprof,lapackprof,mrgddb,mrgdv,mrggkk
+!!      mrgscr,multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
-!!      date_and_time,wrtout
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -235,7 +235,7 @@ subroutine herald(code_name,code_version,iout)
 
 !RELEASE TIME FROM ABIRULES
  year_rel=2020
- mm_rel=06
+ mm_rel=07
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -342,6 +342,7 @@ end subroutine herald
 !!  (only writing)
 !!
 !! PARENTS
+!!      m_specialmsg
 !!
 !! CHILDREN
 !!      flush_unit,specialmsg_setcount,write_lines
@@ -368,6 +369,7 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
 
  if (unit == std_out .and. .not. do_write_log) return
  if (unit == dev_null) return
+ !if (.not. is_open(unit)) return
 
  my_mode_paral = "COLL"; if (present(mode_paral)) my_mode_paral = mode_paral
  my_flush = .false.; if (present(do_flush)) my_flush = do_flush
@@ -441,6 +443,7 @@ end subroutine wrtout_unit
 !! PARENTS
 !!
 !! CHILDREN
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -501,7 +504,7 @@ end subroutine wrtout_units
 !!  (only writing)
 !!
 !! PARENTS
-!!      wrtout_unit
+!!      m_specialmsg
 !!
 !! CHILDREN
 !!      flush_unit,specialmsg_setcount,write_lines
@@ -518,7 +521,6 @@ subroutine wrtout_myproc(unit, msg, do_flush) ! optional argument
 
 !Local variables-------------------------------
 !scalars
- integer :: i_one=1
  logical :: print_std_err
 
 !******************************************************************
@@ -542,9 +544,9 @@ subroutine wrtout_myproc(unit, msg, do_flush) ! optional argument
 
  ! Count the number of warnings and comments. Only take into
  ! account unit std_out, in order not to duplicate these numbers.
- if (index(trim(msg), 'WARNING') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_warning=i_one)
- if (index(trim(msg), 'COMMENT') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_comment=i_one)
- if (index(trim(msg), 'Exit') /= 0 ) call specialmsg_setcount(n_add_exit=i_one)
+ if (index(trim(msg), 'WARNING') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_warning=1)
+ if (index(trim(msg), 'COMMENT') /= 0 .and. unit==std_out) call specialmsg_setcount(n_add_comment=1)
+ if (index(trim(msg), 'Exit') /= 0 ) call specialmsg_setcount(n_add_exit=1)
 
  ! Flush unit
  if (present(do_flush)) then

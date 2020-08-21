@@ -73,7 +73,7 @@ CONTAINS !===========================================================
 !!   type  3: g(r)=alpha1.jl(q1.r)+alpha2.jl(q2.r)
 !!
 !! PARENTS
-!!      m_paw_atom,m_pawpsp,pawinit
+!!      m_paw_atom,m_paw_init,m_pawpsp
 !!
 !! CHILDREN
 !!      atompaw_shpfun,atompaw_vhnzc,bound_deriv,paw_spline,paw_splint,simp_gen

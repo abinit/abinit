@@ -54,7 +54,7 @@
                 0.50   0.50   0.00
       bdgw3     4      5
                 4      5
-  icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the SEX corrections
  optdriver4     4
@@ -68,7 +68,7 @@
                 0.50   0.50   0.00
       bdgw4     4      5
                 4      5
-  icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the COHSEX corrections
  optdriver5     4
@@ -82,11 +82,11 @@
                 0.50   0.50   0.00
       bdgw5     4      5
                 4      5
-  icutcoul5     3   # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul5     3   # old deprecated value of icutcoul, only used for legacy
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

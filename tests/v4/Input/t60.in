@@ -50,7 +50,7 @@ nshiftk   1
   znucl   12 13
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "12mg.pspnc, 13al.pspnc"
+ pseudos "PseudosTM_pwteter/12mg.pspnc, PseudosTM_pwteter/13al.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

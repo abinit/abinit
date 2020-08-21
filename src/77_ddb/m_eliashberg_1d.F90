@@ -64,7 +64,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
 !!
@@ -252,7 +252,7 @@ end subroutine eliashberg_1d
 !!   delta_1d = imaginary gap function as a function of frequency changed
 !!
 !! PARENTS
-!!      eliashberg_1d
+!!      m_eliashberg_1d
 !!
 !! CHILDREN
 !!
@@ -369,7 +369,7 @@ end subroutine eli_app_m_1d
 !!   delta_1d = imaginary gap function as a function of frequency
 !!
 !! PARENTS
-!!      eliashberg_1d
+!!      m_eliashberg_1d
 !!
 !! CHILDREN
 !!
@@ -473,7 +473,7 @@ end subroutine eli_diag_m_1d
 !!   lambda_1d = coupling constant as a function of frequency
 !!
 !! PARENTS
-!!      eliashberg_1d
+!!      m_eliashberg_1d
 !!
 !! CHILDREN
 !!
@@ -548,7 +548,6 @@ end subroutine eli_lambda_1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      eli_app_m_1d
 !!
 !! SOURCE
 
@@ -675,7 +674,7 @@ end subroutine eli_m_iter_1d
 !!   z_1d = renormalizing Z as a function of frequency
 !!
 !! PARENTS
-!!      eliashberg_1d
+!!      m_eliashberg_1d
 !!
 !! CHILDREN
 !!

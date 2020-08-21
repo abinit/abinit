@@ -24,6 +24,7 @@
 !! PARENTS
 !!
 !! CHILDREN
+!!      timab,time_accu
 !!
 !! SOURCE
 
@@ -168,8 +169,10 @@ program testTransposer
 !!  (main routine)
 !!
 !! PARENTS
+!!      testtransposer
 !!
 !! CHILDREN
+!!      timab,time_accu
 !!
 !! SOURCE
 
@@ -224,8 +227,10 @@ program testTransposer
 !!  (main routine)
 !!
 !! PARENTS
+!!      testtransposer
 !!
 !! CHILDREN
+!!      timab,time_accu
 !!
 !! SOURCE
 

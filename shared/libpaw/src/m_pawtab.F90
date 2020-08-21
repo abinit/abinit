@@ -1150,7 +1150,7 @@ end subroutine pawtab_set_flags_1D
 !!  Only writing
 !!
 !! PARENTS
-!!      bethe_salpeter,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -1353,8 +1353,9 @@ end subroutine pawtab_print
 !!   l_size_atm(natom)=output array of l_size values (for each atom)
 !!
 !! PARENTS
-!!      bethe_salpeter,classify_bands,d2frnl,denfgr,exc_plot,m_wfd,pawmkaewf
-!!      respfn,scfcv,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_classify_bands,m_d2frnl,m_exc_analyze,m_nonlinear
+!!      m_paw_mkaewf,m_paw_mkrho,m_respfn_driver,m_scfcv_core
+!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
 !!
 !! CHILDREN
 !!

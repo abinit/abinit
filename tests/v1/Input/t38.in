@@ -65,6 +65,6 @@
 #%%   Ytterbium, fcc structure, one atom per primitive cell,
 #%%   similar to test #4 of built-in, except that nstep=1, and
 #%%   the pseudopotential differs :
-#%%   format 5, translated from 70yb.pspnc (format 1).
+#%%   format 5, translated from PseudosTM_pwteter/70yb.pspnc (format 1).
 #%%   The translation slightly changes the result, at the level of 2 microHa.
 #%%<END TEST_INFO>

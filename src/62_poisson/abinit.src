@@ -18,6 +18,10 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
+ "m_barevcoul.F90",
+ "m_cutoff_sphere.F90",
+ "m_cutoff_surface.F90",
+ "m_cutoff_cylinder.F90",
  "m_jellium.F90",
  "m_psolver.F90",
  "m_qplusg.F90",

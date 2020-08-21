@@ -29,7 +29,7 @@ ndtset 6
  gw_freqsp3 -0.5558150504  # These are the frequencies at which the matrix element of the Self-energy is requested.
  gwls_stern_kmax3 8  # This controls the convergence with respect to the size of the dielectric matrix.
  gwls_kmax_complement3 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
- icutcoul3 0               # For molecules, the coulomb potential needs to be spherically truncated.
+ gw_icutcoul3 0              # For molecules, the coulomb potential needs to be spherically truncated.
  rcut3 9.0                 # The spherical truncation has this radius. 
 
  # GWLS calculation for the HOMO, without the dielectric model
@@ -45,7 +45,7 @@ ndtset 6
  gw_freqsp4 -0.5558150504  # These are the frequencies at which the matrix element of the Self-energy is requested.
  gwls_stern_kmax4 8  # This controls the convergence with respect to the size of the dielectric matrix.
  #gwls_kmax_complement4 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
- icutcoul4 0               # For molecules, the coulomb potential needs to be spherically truncated.
+ gw_icutcoul4 0              # For molecules, the coulomb potential needs to be spherically truncated.
  rcut4 9.0                 # The spherical truncation has this radius. 
 
  # GWLS calculation of the static dielectric matrix eigenvalues (both model and exact) 
@@ -59,7 +59,7 @@ ndtset 6
  gwls_band_index5 4        # This is the band for which the matrix element of the Self-energy is requested : <gwls_band_index|\Sigma(gw_freqsp)|gwls_band_index>
  gwls_stern_kmax5 8  # This controls the convergence with respect to the size of the dielectric matrix.
  gwls_kmax_complement5 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
- icutcoul5 0               # For molecules, the coulomb potential needs to be spherically truncated.
+ gw_icutcoul5 0               # For molecules, the coulomb potential needs to be spherically truncated.
  rcut5 9.0                 # The spherical truncation has this radius. 
 
  # GWLS calculation of the HOMO, shifting infinitesimally the poles away from the real axis to help convergence. EXPERIMENTAL
@@ -75,7 +75,7 @@ ndtset 6
  gw_freqsp6 -0.5558150504  # These are the frequencies at which the matrix element of the Self-energy is requested.
  gwls_stern_kmax6 8  # This controls the convergence with respect to the size of the dielectric matrix.
  gwls_kmax_complement6 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
- icutcoul6 0               # For molecules, the coulomb potential needs to be spherically truncated.
+ gw_icutcoul6 0               # For molecules, the coulomb potential needs to be spherically truncated.
  rcut6 9.0                 # The spherical truncation has this radius. 
 
  # These are mostly developer toys, kept to their default value for this test. 
@@ -144,7 +144,7 @@ xcart
  shiftk  0.0 0.0 0.0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspgth, 01h.pspgth"
+ pseudos "PseudosGTH_pwteter/14si.pspgth, PseudosGTH_pwteter/01h.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

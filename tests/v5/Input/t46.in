@@ -41,7 +41,7 @@ ntypat 1
 znucl 82
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "82pb.4.hgh"
+ pseudos "PseudosHGH_pwteter/82pb.4.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

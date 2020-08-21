@@ -38,7 +38,7 @@
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "50sn.psphgh"
+ pseudos "PseudosHGH_pwteter/50sn.4.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -53,7 +53,7 @@
 #%% keywords = NC
 #%% authors = Unknown
 #%% description = 
-#%%   Isolated tin atom, with 50sn.psphgh pseudopotential (Hartwigsen-Goedecker-Hutter), 
+#%%   Isolated tin atom, with PseudosHGH_pwteter/50sn.4.hgh pseudopotential (Hartwigsen-Goedecker-Hutter), 
 #%%   to be compared with the result of test 31. Same geometry, same cut-off.
 #%%   The energy levels (eV) are found at -7.019, -0.131, and -0.085 (two-fold deg)
 #%%   The difference between these energy levels is 6.888 and 0.046.

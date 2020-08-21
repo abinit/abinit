@@ -917,7 +917,7 @@ end function abi_derfc
 !! NOTES
 !!
 !! PARENTS
-!!      pspnl_hgh_rec,pspnl_operat_rec,vso_realspace_local
+!!      m_rec,m_spin_current
 !!
 !! CHILDREN
 !!
@@ -1057,10 +1057,9 @@ end subroutine GAMMA_FUNCTION
 !! use a rational polynomial approximation.
 !!
 !! PARENTS
-!!      m_special_funcs,mlwfovlp_radial,psp1nl
+!!      m_mlwfovlp,m_psp1,m_special_funcs
 !!
 !! CHILDREN
-!!      splint
 !!
 !! SOURCE
 
@@ -1270,7 +1269,7 @@ end subroutine besjm
 !!  sb_out(nm)=values of spherical bessel functions for l=0,nm-1
 !!
 !! PARENTS
-!!      posdoppler,psp8nl,qijb_kk,qmc_prep_ctqmc,smatrix_pawinit
+!!      m_forctqmc,m_paw_overlap,m_positron,m_psptk
 !!
 !! CHILDREN
 !!
@@ -1626,10 +1625,9 @@ end function jlspline_new
 !!  deallocate memory
 !!
 !! PARENTS
-!!      m_cut3d,partial_dos_fractions
+!!      m_cut3d,m_epjdos
 !!
 !! CHILDREN
-!!      splint
 !!
 !! SOURCE
 

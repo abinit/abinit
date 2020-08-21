@@ -28,10 +28,10 @@ ecutwfn 6
 ecuteps 2.1
 
 symmorphi 0
-istwfk *1
-nstep  50      # Maximal number of SCF cycles
-diemac 12.0
-icutcoul 3      # For legacy reasons
+istwfk   *1
+nstep    50      # Maximal number of SCF cycles
+diemac   12.0
+gw_icutcoul 3      # For legacy reasons
 
 # Dataset1: self-consistent calculation
 # Definition of the k-point grid
@@ -165,7 +165,7 @@ nband8   8
 bs_freq_mesh8      0 10.0 0.1 eV
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

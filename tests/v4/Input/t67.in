@@ -61,7 +61,7 @@ nshiftk   1
    znucl  31 33
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "31ga.hgh, 33as.hgh"
+ pseudos "PseudosHGH_pwteter/31ga.3.hgh, PseudosHGH_pwteter/33as.5.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

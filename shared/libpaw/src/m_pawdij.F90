@@ -157,10 +157,11 @@ CONTAINS
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,respfn,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_respfn_driver
+!!      m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1091,10 +1092,10 @@ end subroutine pawdij
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1204,10 +1205,10 @@ end subroutine pawdijhartree
 !!   WARNING: What follows has been tested only for cases where nsppol=1 and 2, nspden=1 and 2 with nspinor=1.
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot
+!!      m_paw_denpot,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1455,7 +1456,7 @@ end subroutine pawdijfock
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1865,7 +1866,7 @@ end subroutine pawdijxc
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2124,10 +2125,10 @@ end subroutine pawdijxcm
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
 !! PARENTS
-!!      fock_getghc,m_pawdij
+!!      m_fock_getghc,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2419,10 +2420,10 @@ end subroutine pawdijhat
 !!
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot
+!!      m_paw_denpot,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2562,10 +2563,10 @@ end subroutine pawdijnd
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot
+!!      m_paw_denpot,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2766,7 +2767,7 @@ end subroutine pawdijso
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2986,10 +2987,10 @@ end subroutine pawdiju
 !!        Im(D_kl^B) =  Im(D_lk^B)  ( using (a) and (c) )
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3213,7 +3214,7 @@ end subroutine pawdiju_euijkl
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3524,10 +3525,10 @@ end subroutine pawdijexxc
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv
+!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4162,10 +4163,10 @@ end subroutine pawdijfr
 !!      vpawu(2*i,:) contains the imaginary part
 !!
 !! PARENTS
-!!      ldau_self,m_pawdij,m_pawhr
+!!      m_dftu_self,m_paw_hr,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4451,10 +4452,10 @@ end subroutine pawdijfr
 !!  paw_ij%vpawx(pawtab%lexexch*2+1,pawtab%lexexch*2+1)=local exact-exchange potential
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot
+!!      m_paw_denpot,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4608,11 +4609,11 @@ end subroutine pawdijfr
 !!  paw_ij(natom)%dij???(cplex_dij*lmn2_size,nspden)=symmetrized dij quantities as output
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,m_pawdij,paw_mknewh0,respfn,scfcv,screening
-!!      sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_paw_denpot
+!!      m_pawdij,m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5354,10 +5355,10 @@ end subroutine symdij
 !!  paw_ij(natom)%dij???(cplex_dij*qphase*lmn2_size,nspden)=symmetrized dij quantities as output
 !!
 !! PARENTS
-!!      paw_mknewh0,screening,sigma
+!!      m_paw_denpot,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5503,7 +5504,7 @@ end subroutine symdij_all
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5661,9 +5662,10 @@ end subroutine pawdij_gather
 !! (Only writing)
 !!
 !! PARENTS
-!!      m_pawdij
+!!      m_paw_tools,m_pawdij
 !!
 !! CHILDREN
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 

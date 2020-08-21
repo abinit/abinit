@@ -49,7 +49,7 @@ diemix 0.5        # function used as the standard preconditioner
                   # in a big box
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "01h.pspgth"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

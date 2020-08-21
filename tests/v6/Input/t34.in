@@ -74,12 +74,11 @@ diemac 12.0       # Although this is not mandatory, it is worth to
 #timopt 1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = nag@abiref
 #%% [files]
 #%% files_to_test = 
 #%%   t34.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  
