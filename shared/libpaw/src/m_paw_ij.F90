@@ -319,8 +319,9 @@ CONTAINS
 !!   according to the input variables.
 !!
 !! PARENTS
-!!      bethe_salpeter,d2frnl,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv,ldau_self
-!!      m_energy,paw_qpscgw,respfn,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_dfptnl_pert,m_nonlinear,m_respfn_driver,m_scfcv_core
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -564,8 +565,9 @@ end subroutine paw_ij_init
 !!  paw_ij(:)<type(paw_ij_type)>=paw arrays given on (i,j) channels
 !!
 !! PARENTS
-!!      bethe_salpeter,d2frnl,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv,ldau_self
-!!      m_energy,m_paral_pert,m_paw_ij,pawprt,respfn,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_dfptnl_pert,m_nonlinear,m_paral_pert,m_paw_ij,m_paw_tools
+!!      m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -672,8 +674,9 @@ end subroutine paw_ij_free
 !!  Paw_ij(:)<type(paw_ij_type)>=PAW arrays given on (i,j) channels.
 !!
 !! PARENTS
-!!      bethe_salpeter,d2frnl,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv,ldau_self
-!!      m_energy,m_paw_ij,paw_qpscgw,pawprt,respfn,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_dfptnl_pert,m_nonlinear,m_paw_ij,m_paw_tools,m_respfn_driver
+!!      m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -978,7 +981,7 @@ end subroutine paw_ij_copy
 !! NOTES
 !!
 !! PARENTS
-!!      m_pawdij,sigma
+!!      m_pawdij,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -1165,9 +1168,9 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 &                   my_prtvol,idum,-1.d0,1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if
 
-     !Dij LDA+U
+     !Dij DFT+U
      if (Paw_ij(iatom)%has_dijU/=0.and.(idij<=2.or.nspden==4).and.my_ipert<=0) then
-       write(msg,'(a)') '   ************* Dij_LDA+U (dijpawu) **********'
+       write(msg,'(a)') '   ************* Dij_DFT+U (dijpawu) **********'
        call wrtout(my_unt,msg,my_mode)
        call get_dij_parts(cplex_dij,qphase,Paw_ij(iatom)%diju)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
@@ -1349,7 +1352,7 @@ end subroutine paw_ij_print
 !!  paw_ij_gathered(:)<type(paw_ij_type)>= output paw_oij datastructure
 !!
 !! PARENTS
-!!      m_paw_ij,outkss,pawprt
+!!      m_io_kss,m_paw_ij,m_paw_tools
 !!
 !! CHILDREN
 !!
@@ -2345,7 +2348,8 @@ end subroutine paw_ij_redistribute
 !!  Paw_ij<type(paw_ij_type)>=paw_ij structure
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstpaw,dfpt_scfcv,scfcv
+!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!

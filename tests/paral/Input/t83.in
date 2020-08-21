@@ -65,7 +65,7 @@ dmftqmc_therm 10000
 #dmftctqmc_gmove 0
 
 
-# == LDA+U
+# == DFT+U
 usepawu     1  #  For density matrix printout.
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 
@@ -74,13 +74,15 @@ upawu2  4.1   eV
 f4of2_sla3    0.0 
 jpawu2  0.5   eV
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%                  t83.out,  tolnlines =0, tolabs =1.1e-16, tolrel = 2.0e-16, fld_options=-medium ;
-#%% psp_files = 23v.paw
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10

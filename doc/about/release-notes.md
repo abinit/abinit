@@ -66,6 +66,8 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
 
 **A.5** The input variable xangst has been disabled. Use xcart instead, and specify the unit, namely Angstrom.
 
+**A.6** The name of the t-DEP main executable has been changed from `tdep" to `atdep`, in line with [[cite:Romero2020]].
+
 * * *
 
 ### **B.** Most noticeable achievements
@@ -121,16 +123,16 @@ For further details about the implementation, please consult this [preprint](htt
 
 By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
 
-<!--
 **B.2** Flexoelectricity and dynamical quadrupoles
 
 A new driver has been included in abinit that allows one to compute 
-4 new spatial dispersion tensors: clamped-ion FxE tensor, dynamic quadrupoles, 
-first moment of IFC matrix and square bracket tensor of Born and Huang. 
+4 spatial dispersion tensorial quantities: the clamped-ion flexoelectric tensor, the dynamical quadrupoles, 
+the first moment of IFC matrix and the first moment of the piezoelectric force response tensor. 
 Precalculation of ground state, first and second (d2_dkdk) order response functions is required. 
 After execution, the driver creates a 3rd order energy derivative database file 
-that will be used by anaddb to compute the lattice-mediated FxE components 
-or to include the dipole-quadrupole and quadrupole-quadrupole electrostatic interactions in the calculation of the dynamical matrix.
+that is used by anaddb to compute the mixed and lattice-mediated flexoelectric tensors 
+or to include the dipole-quadrupole and quadrupole-quadrupole electrostatic interactions 
+in the calculation of the dynamical matrix.
 
 See the complementary description
 in the Sec. V. D of [[cite:Romero2020]], with underlying theory and test calculations
@@ -158,7 +160,7 @@ At the practical level, see [[cite:Romero2020]]:
 >   to improve the prevalent dipole-dipole treatment of the
 >   long-range interactions. The ANADDB routines that carry
 >   out the process of interpolating the dynamical matrix following
->   Ref. 34 have been adapted to incorporate the dipolequadrupole
+>   Ref. 34 have been adapted to incorporate the dipole-quadrupole
 >   and quadrupole-quadrupole electrostatic interactions
 >   derived in Ref. 102. This new functionality results in a
 >   faster convergence of the phonon bands calculation with respect
@@ -169,14 +171,17 @@ At the practical level, see [[cite:Romero2020]]:
 >   norm-conserving pseudopotentials without non-linear core corrections, and the LDA
 >   functional.
 
-A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]].
+A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]],
+as well as a specific topic.
 
-New input variables have been defined: lw_flexo, lwqdvpl, prepalw, and d3e_pert2_strs. 
-At present (v9.0.2) they are not yet documented, although tested in the above-mentioned examples.
-A tutorial should be set up, as well as a specific topic.
+New input variables have been defined: [[lw_flexo]], [[lw_qdrpl]], [[prepalw]], [[flexoflag@anaddb]],
+[[dipquad@anaddb]], [[quadquad@anaddb]]. 
 
-M. Royo, M. Stengel, M. Giantomassi (MR 618).
--->
+This capability is still under development and not completely stable.
+Interested users are strongly recommended to contact Miquel Royo (mroyo@icmab.es)
+or Massimiliano Stengel (mstengel@icmab.es) before start using it.   
+
+By M. Royo, M. Stengel, M. Giantomassi.
 
 
 **B.2** DFT+DMFT
@@ -579,10 +584,10 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - S Sec Second  for the ABINIT input file;
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
-**D.13** TDEP utility:
-added [[guide:tdep|A-TDep user guide]],
-[[topic:Tdep|TDep topic]], and corresponding input variable documentation.
-References: [[pdf:TDEP_Paper|TDEP paper]].
+**D.13** a-TDEP utility:
+added [[guide:a-TDEP|A-TDEP user guide]],
+[[topic:a-TDEP|a-TDEP topic]], and corresponding input variable documentation.
+References: [[pdf:a-TDEP_Paper|a-TDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].
 
 By F. Bottin, J. Bouchet, J. Bieder (MR491,422).
@@ -619,7 +624,7 @@ Upgrade atompaw to 4.1.0.6. Upgrade Libxc to 4+.
 
 By M. Torrent, JM Beuken (MR 532, 470, 465, 441)
 
-**D.21** Write yaml file for fatbands (phonopy format) with TDEP
+**D.21** Write yaml file for fatbands (phonopy format) with a-TDEP
 
 By J. Bieder (MR510)
 
@@ -1058,7 +1063,7 @@ D.8 Continued development of the electron-phonon [[optdriver]] = 7 module of ABI
 D.9 Added netcdf output of phonons for full grid, not just band structure. Only in tetrahedron prtdos 2 case.
     By M. Verstraete
 
-D.10 On-going development: main executable `tdep`, for the TDEP algorithm, by Hellman and coworkers.
+D.10 On-going development: main executable `atdep`, for the TDEP algorithm, by Hellman and coworkers.
      See [[src:98_main/tdep.F90]], as well as directory 80_tdep. 
      No automatic tests provided yet, no documentation as well ...
      By F. Bottin, J. Bouchet, J. Bieder.
@@ -1270,11 +1275,11 @@ D.7 On-going work on the implementation of the TDEP algorithm (temperature depen
 D.8 Replacements of http:// by https:// in many documentation files.
     By J.M. Beuken.
 
-D.9 Test of non-magnetic LDA+U and LDA+U+SO.
+D.9 Test of non-magnetic DFT+U and DFT+U+SO.
     See the new test v5#16
     By M. Torrent.
 
-D.10 Make LDA+U and local EX-exchange compatible with nspden=1/nspinor=2
+D.10 Make DFT+U and local EX-exchange compatible with nspden=1/nspinor=2
      By M. Torrent.
 
 D.11 Test of the Velocity Verlet algorithm ionmov=24

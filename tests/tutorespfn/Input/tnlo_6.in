@@ -89,13 +89,15 @@ xcart3?   -0.0100000000E+00  0.0000000000E+00  0.0000000000E+00
 
 nbdbuf 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tnlo_6.out, tolnlines=  1, tolabs=  1.01e-8, tolrel=  7e-5
-#%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

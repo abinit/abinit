@@ -194,21 +194,23 @@ contains
 !!   name of the variable.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdenmagsph
-!!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
-!!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
+!!      compute_coeff_plowannier,compute_green,crystal%free,crystal_init
+!!      datafordmft,denfgr,destroy_dmft,destroy_green,destroy_oper
+!!      destroy_plowannier,destroy_self,dos%free,dos_calcnwrite,ebands_free
 !!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
-!!      fatbands_ncwrite,fftdatar_write,free_my_atmtab
-!!      get_my_atmtab,init_dmft,init_oper,init_plowannier,ioarr,mag_penalty_e
-!!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
-!!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
-!!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy
-!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,print_plowannier,prt_cif,prtfatbands
-!!      read_atomden,simpson_int,sort_dp,spline,splint,timab,wrtout,xmpi_sum
-!!      xmpi_sum_master
+!!      fatbands_ncwrite,fftdatar_write,free_my_atmtab,get_my_atmtab,init_dmft
+!!      init_green,init_oper,init_plowannier,initialize_self,ioarr
+!!      mag_penalty_e,mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw
+!!      optics_paw_core,optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
+!!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy,pawrhoij_free
+!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,print_green
+!!      print_plowannier,prt_cif,prtdenmagsph,prtfatbands,read_atomden
+!!      results_gs%yaml_write,rw_self,selfreal2imag_self,simpson_int,sort_dp
+!!      spline,splint,timab,wrtout,xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -301,8 +303,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
  logical :: remove_inv
  logical :: paral_atom, paral_fft, my_atmtab_allocated
+ real(dp) :: e_zeeman
  real(dp) :: e_fermie
- type(oper_type) :: lda_occup
+ type(oper_type) :: dft_occup
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands
  type(epjdos_t) :: dos
@@ -941,22 +944,48 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(960,1,tsec)
 
 !Output of integrated density inside atomic spheres
- if (dtset%prtdensph==1.and.dtset%usewvl==0)then
+ if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%zeemanfield)) > tol10) then
    ABI_MALLOC(intgden,(nspden,natom))
    ABI_MALLOC(gr_dum,(3,nspden,natom))
    call calcdenmagsph(gr_dum,mpi_enreg,natom,nfft,ngfft,nspden,&
 &   ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
-   if(all(dtset%constraint_kind(:)==0))then
-     call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-     call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-   else
-     call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%ziontypat)
-     call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%ziontypat)
-   endif
-   if(any(dtset%constraint_kind(:)/=0))then
-     call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,ab_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-     call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-   endif
+!  for rhomag:
+!    in collinear case component 1 is total density and 2 is _magnetization_ up-down
+!    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
+  
+   if (dtset%prtdensph==1.and.dtset%usewvl==0) then
+     if(all(dtset%constraint_kind(:)==0))then
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+     else
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%ziontypat)
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%ziontypat)
+     endif
+     if(any(dtset%constraint_kind(:)/=0))then
+       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,ab_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+     endif
+   end if
+  
+   if (sum(abs(dtset%zeemanfield)) > tol10) then
+     if(nspden==2)then
+       e_zeeman = -half*rhomag(1,2)*dtset%zeemanfield(3)
+       write (message, "(a,E20.10,a)") " Collinear magnetization ", rhomag(1,2), &
+&            " (in # of spins, without 1/2 for magnetic moment) "
+       call wrtout([std_out, ab_out], message)
+     else if(nspden==4)then
+       e_zeeman = -half * (dtset%zeemanfield(1)*rhomag(1,2)& ! x
+&                         +dtset%zeemanfield(2)*rhomag(1,3)& ! y
+&                         +dtset%zeemanfield(3)*rhomag(1,4)) ! z
+       write (message, "(a,3E20.10,a)") " Magnetization vector ", rhomag(1,2:4), &
+&            " (in # of spins, without 1/2 for magnetic moment) "
+       call wrtout([std_out, ab_out], message)
+     end if
+!TODO: this quantity should also be calculated in rhotov, and stored in 
+!    results_gs%energies%e_zeeman, but for the moment it comes out 0
+     write (message, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_zeeman, " Ha" 
+     call wrtout([std_out, ab_out], message)
+   end if
    ABI_SFREE(intgden)
    ABI_SFREE(gr_dum)
  end if
@@ -1087,7 +1116,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan)
    call compute_coeff_plowannier(crystal,cprj,dimcprj,dtset,eigen,e_fermie,&
 &   mpi_enreg,occ,wan,pawtab,psps,usecprj,dtfil%unpaw,pawrad,dtfil)
-   if (me==master) then 
+   if (me==master) then
      call print_plowannier(wan)
    endif
    call destroy_plowannier(wan)
@@ -1105,10 +1134,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute psichi
-     call init_oper(paw_dmft,lda_occup)
+     call init_oper(paw_dmft,dft_occup)
 
      call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie &
-&     ,lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
+&     ,dft_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)
 
@@ -1143,7 +1172,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
        ! selfr does not have any double couting in self%hdc
        ! hdc from self%hdc has been put in real part of self in rw_self.
-       ! For the LDA BS: use opt_self=0 and fermie=fermie_lda
+       ! For the DFT BS: use opt_self=0 and fermie=fermie_dft
 
       ! Compute green  function on real axis
        call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,&
@@ -1168,7 +1197,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call destroy_self(self)
      endif
      call destroy_dmft(paw_dmft)
-     call destroy_oper(lda_occup)
+     call destroy_oper(dft_occup)
    end if
 
    call timab(964,1,tsec) ! outscfcv(outkss)
@@ -1269,7 +1298,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%prtbltztrp == 1 .and. me==master) call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
 
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
- if (nint(dtset%einterp(1)) /= 0) then
+ if (nint(dtset%einterp(1)) /= 0 .and. dtset%kptopt > 0) then
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
  end if
 

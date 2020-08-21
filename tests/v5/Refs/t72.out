@@ -136,10 +136,10 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
            getwfk3          2
            getwfk4          2
            gwcomp           1
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          6
-         icutcoul4          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          6
+        gw_icutcoul4          3
           inclvkb1          2
           inclvkb2          2
           inclvkb3          0
@@ -301,8 +301,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.18671
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/79au.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/79au.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
 -  Troullier-Martins psp for element  Au        Thu Oct 27 17:58:22 EDT 1994
 - 79.00000  11.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -565,8 +565,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/79au.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/79au.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
 -  Troullier-Martins psp for element  Au        Thu Oct 27 17:58:22 EDT 1994
 - 79.00000  11.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -827,7 +827,7 @@ KS_gap     :   12.355
 QP_gap     :   11.187
 Delta_QP_KS:   -1.168
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1 -15.627 -13.591 -20.330   6.992   0.783  -0.276 -13.392   0.199 -15.429
         2  -3.415 -14.128 -14.664   3.686   0.828  -0.208 -11.520   2.608  -0.807
         3  -3.415 -14.128 -14.664   3.686   0.828  -0.208 -11.520   2.608  -0.807
@@ -884,10 +884,10 @@ data: !SigmaeeData |
            getwfk3          2
            getwfk4          2
            gwcomp           1
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          6
-         icutcoul4          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          6
+        gw_icutcoul4          3
           inclvkb1          2
           inclvkb2          2
           inclvkb3          0

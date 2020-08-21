@@ -55,13 +55,15 @@ xred              # This keyword indicate that the location of the atoms
 #Definition of the planewave basis set
 ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/13al.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%   t73.out, tolnlines=  0, tolabs=  0.0e-00, tolrel=  0.0e-00
-#%% psp_files = 13al.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -148,12 +148,11 @@ CONTAINS  !=====================================================================
 !!   They are stored in susmat(:,ipw1,1:2,ipw2,1:2)
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,fftpac,init_distribfft_seq,initmpi_seq,pawcprj_alloc
-!!      pawcprj_free,pawcprj_get,pawcprj_mpi_allgather,pawgylmg,ph1d3d
-!!      sphereboundary,susk,suskmm,symg,symrhg,timab,xmpi_sum,zhpev
+!!      destroy_mpi_enreg,fourwf,init_distribfft_seq,initmpi_seq,pawsushat
+!!      timab
 !!
 !! SOURCE
 
@@ -885,12 +884,11 @@ end subroutine suscep_stat
 !! GZ
 !!
 !! PARENTS
-!!      suscep_stat
+!!      m_suscep_stat
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,fourwf,init_distribfft_seq,initmpi_seq,pawsushat
-!!      sphereboundary,timab,xmpi_allgather,xmpi_allgatherv,xmpi_alltoallv
-!!      xmpi_sum
+!!      timab
 !!
 !! SOURCE
 
@@ -1479,7 +1477,7 @@ end subroutine susk
 !!   the susceptibility (or density-density response) matrix in reciprocal space
 !!
 !! PARENTS
-!!      suscep_stat
+!!      m_suscep_stat
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,fourwf,init_distribfft_seq,initmpi_seq,pawsushat

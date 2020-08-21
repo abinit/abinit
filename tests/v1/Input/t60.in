@@ -70,19 +70,21 @@
  toldff 5.0d-6
  wtk  1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%   t60.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
 #%% description = 
-#%%   Test multi-dataset mode. H2 molecule in a box (psp 1h.pspnc). acell constant, small (7 5 5).
+#%%   Test multi-dataset mode. H2 molecule in a box (psp PseudosTM_pwteter/1h.pspnc). acell constant, small (7 5 5).
 #%%   10 different values of ecut (convergence study). Use getxred=-1.
 #%%<END TEST_INFO>

@@ -104,13 +104,15 @@
 #pawecutdg  120   # This Value allows to recover an excellent acoustic sum rule
  pawecutdg  40
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Eu_GGA_20e_8p_xc0.pawps, O_GGA-rc12_xc0.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t43.out, tolnlines=   26,   tolabs=  1.1e-3,      tolrel= 0.01852, fld_options = -easy
-#%% psp_files = Eu_GGA_20e_8p_xc0.pawps, O_GGA-rc12_xc0.paw 
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

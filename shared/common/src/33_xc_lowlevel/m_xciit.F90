@@ -63,7 +63,7 @@ contains
 !!  [dvxc(npt)]=partial second derivatives of the xc energy
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
 !!

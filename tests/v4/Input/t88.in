@@ -48,7 +48,7 @@
     getwfk3     1
     getscr3     2
      nband3    10
-  icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the dielectric matrix - iteration 2
  optdriver4     3
@@ -68,7 +68,7 @@
     getqps5     3
     getscr5     4
      nband5    10
-  icutcoul5     3   # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul5     3   # old deprecated value of icutcoul, only used for legacy
 
 #Common to all model GW calculations
    rhoqpmix     0.5
@@ -93,13 +93,15 @@
               1 8
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t88.out, tolnlines = 22, tolabs = 5.000e-03, tolrel = 2.000e-01
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

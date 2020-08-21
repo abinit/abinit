@@ -17,11 +17,11 @@
 .Starting date : Mon 24 Feb 2020.
 - ( at 16h16 )
   
->>>  Enter the number of files to merge: 
->>>  Enter the prefix for the final output file: 
->>>  Enter the name for the partial screening file no.   1 
->>>  Enter the name for the partial screening file no.   2 
->>>  Enter the name for the partial screening file no.   3 
+->>  Enter the number of files to merge: 
+->>  Enter the prefix for the final output file: 
+->>  Enter the name for the partial screening file no.   1 
+->>  Enter the name for the partial screening file no.   2 
+->>  Enter the name for the partial screening file no.   3 
  CHI0 file: chi0      , calculated using inclvkb = 2
 
  Identifier                       1

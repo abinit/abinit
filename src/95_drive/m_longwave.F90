@@ -27,7 +27,7 @@
 #include "abi_common.h"
 
 module m_longwave
-    
+
  use defs_basis
 ! use m_profiling_abi
  use m_errors
@@ -53,7 +53,7 @@ module m_longwave
  use m_drivexc,     only : check_kxc
  use m_rhotoxc,     only : rhotoxc
  use m_ioarr,       only : read_rhor
- use m_symtk,       only : matr3inv,symmetrize_xred 
+ use m_symtk,       only : matr3inv,symmetrize_xred
  use m_kg,          only : kpgio
  use m_inwffil,     only : inwffil
  use m_spacepar,    only : setsym
@@ -61,7 +61,7 @@ module m_longwave
  use m_dfpt_lw,     only : dfpt_qdrpole, dfpt_flexo
  use m_fft,         only : fourdp
  use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput
- use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
  use m_dfpt_elt,    only : dfpt_ewalddq, dfpt_ewalddqdq
  use m_mkcore,      only : mkcore
 
@@ -75,7 +75,7 @@ module m_longwave
 
 ! *************************************************************************
 
-contains 
+contains
 !!***
 
 !!****f* ABINIT/longwave
@@ -105,15 +105,20 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!  driver
+!!      m_driver
 !!
 !! CHILDREN
+!!      check_kxc,ddb_hdr%free,ddb_hdr%open_write,ddb_hdr_init,dfpt_ewalddq
+!!      dfpt_ewalddqdq,dfpt_flexo,dfpt_lw_doutput,dfpt_qdrpole,ebands_free
+!!      fourdp,hdr%free,hdr%update,hdr_init,inwffil,kpgio,matr3inv,mkcore,mkrho
+!!      pawfgr_init,pspini,read_rhor,rhotoxc,setsym,setup1,symmetrize_xred
+!!      wffclose,xcdata_init
 !!
 !! SOURCE
 
 subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 &                   pawrad,pawtab,psps,xred)
-    
+
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
@@ -164,7 +169,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer,allocatable :: atindx(:),atindx1(:)
  integer,allocatable :: blkflg(:,:,:,:,:,:)
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
- integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),symrec(:,:,:) 
+ integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),symrec(:,:,:)
 !integer,allocatable :: rfpert(:)
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),doccde(:)
@@ -207,7 +212,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    MSG_BUG(msg)
  end if
 
-!Define some data 
+!Define some data
  ntypat=psps%ntypat
  natom=dtset%natom
  timrev=1
@@ -341,7 +346,7 @@ ecore=zero
  doccde(:)=zero
 
 !Read ground-state charge density from diskfile in case getden /= 0
-!or compute it from wfs that were read previously : rhor 
+!or compute it from wfs that were read previously : rhor
 
  ABI_ALLOCATE(rhog,(2,nfftf))
  ABI_ALLOCATE(rhor,(nfftf,dtset%nspden))
@@ -379,7 +384,7 @@ ecore=zero
 
 !Pseudo core electron density by method 2
 !TODO: The code is not still adapted to consider n3xccc in the long-wave
-!driver. 
+!driver.
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_ALLOCATE(xccc3d,(n3xccc))
  coredens_method=2
@@ -410,7 +415,7 @@ ecore=zero
 ! n3xccc=0
 ! ABI_ALLOCATE(xccc3d,(n3xccc))
  non_magnetic_xc=.false.
- 
+
  enxc=zero; usexcnhat=0
 
  call xcdata_init(xcdata,dtset=dtset)
@@ -418,29 +423,29 @@ ecore=zero
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
-!TODO: This part of the implementation does not work properly to select specific directions 
-!      for each perturbation. This development is temporarily frozen. 
+!TODO: This part of the implementation does not work properly to select specific directions
+!      for each perturbation. This development is temporarily frozen.
 !Initialize the list of perturbations rfpert
 ! mpert=natom+11
 ! ABI_ALLOCATE(rfpert,(mpert))
 ! rfpert(:)=0
 ! rfpert(natom+1)=1
 ! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4 &
-!&.or.dtset%d3e_pert1_phon==1.or.dtset%d3e_pert2_phon==1) then 
+!&.or.dtset%d3e_pert1_phon==1.or.dtset%d3e_pert2_phon==1) then
 !   if (dtset%d3e_pert1_phon==1) rfpert(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
 !   if (dtset%d3e_pert2_phon==1) rfpert(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
 ! end if
 ! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.&
-!& dtset%d3e_pert1_elfd==1) then 
+!& dtset%d3e_pert1_elfd==1) then
 !   rfpert(natom+2)=1
 !   rfpert(natom+10)=1
 !   rfpert(natom+11)=1
 ! end if
-! if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4.or.dtset%d3e_pert2_strs/=0) then 
+! if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4.or.dtset%d3e_pert2_strs/=0) then
 !   if (dtset%d3e_pert2_strs==1.or.dtset%d3e_pert2_strs==3) rfpert(natom+3)=1
 !   if (dtset%d3e_pert2_strs==2.or.dtset%d3e_pert2_strs==3) rfpert(natom+4)=1
 ! endif
-!   
+!
 !!Determine which directions treat for each type of perturbation
 ! ABI_ALLOCATE(pertsy,(3,natom+6))
 ! pertsy(:,:)=0
@@ -449,12 +454,12 @@ ecore=zero
 !   if (rfpert(ipert)==1.and.dtset%d3e_pert1_phon==1) then
 !     do idir=1,3
 !       if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,ipert)=1
-!     end do 
+!     end do
 !   endif
 !   if (rfpert(ipert)==1.and.dtset%d3e_pert2_phon==1) then
 !     do idir=1,3
 !       if (dtset%d3e_pert2_dir(idir)==1) pertsy(idir,ipert)=1
-!     end do 
+!     end do
 !   end if
 ! end do
 ! !ddk
@@ -515,7 +520,7 @@ ecore=zero
 &   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
 &   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &   timrev,ucvol,xred)
- end if 
+ end if
 
 !Calculate the flexoelectric tensor
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
@@ -524,7 +529,7 @@ ecore=zero
 &   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
 &   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &   timrev,ucvol,xred)
- end if 
+ end if
 
 !Open the formatted derivative database file, and write the
 !preliminary information
@@ -533,9 +538,9 @@ ecore=zero
 
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,1,xred=xred,occ=occ)
 
-   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+   call ddb_hdr%open_write(dtfil%fnameabo_ddb, dtfil%unddb)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Call main output routine
    call dfpt_lw_doutput(blkflg,d3etot,mpert,dtset%natom,dtset%ntypat,dtfil%unddb)

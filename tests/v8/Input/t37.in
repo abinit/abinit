@@ -20,7 +20,7 @@
 #   t37omega.dat, tolnlines = 2, tolabs = 2e-5, tolrel = 1.01, fld_options = -medium;
 #%%<BEGIN TEST_INFO>
 #%% [setup]
-#%% executable = tdep
+#%% executable = atdep
 #%% md_hist = t37_HIST.nc
 #%% [files]
 #%% files_to_test = 
@@ -30,8 +30,8 @@
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. Bieder
-#%% keywords = tdep
+#%% keywords = atdep
 #%% description = 
-#%%   test TDEP 
-#%% topics = Tdep
+#%%   test a-TDEP 
+#%% topics = a-TDEP
 #%%<END TEST_INFO>

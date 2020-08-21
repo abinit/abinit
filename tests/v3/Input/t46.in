@@ -58,6 +58,9 @@ nstep 10
 diemac 12.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -65,7 +68,6 @@ diemac 12.0
 #%% files_to_test = 
 #%%   t46.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
 #%%   t46o_DS2_DOS, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

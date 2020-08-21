@@ -47,13 +47,15 @@
   kpt 0 0 0
       0.3  0.3 0.3
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "20ca.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t94.out, tolnlines = 0, tolabs = 2.089e-10, tolrel = 2.000e-02
-#%% psp_files = 20ca.paw
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -22,7 +22,7 @@
 !! m_green.F90
 !! m_hu.F90
 !! m_hubbard_one.F90
-!! m_ldau_self.F90
+!! m_dftu_self.F90
 !! m_matlu.F90
 !! m_oper.F90
 !! m_self.F90

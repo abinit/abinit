@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,17 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 12 Feb 2020.
-- ( at 03h41 )
+.Starting date : Thu 23 Jul 2020.
+- ( at 13h58 )
   
-- input  file    -> tucrpa_2.in
+- input  file    -> /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__beuken/tests/TestBot_MPI24/tutoparal_tucrpa_2_MPI24/tucrpa_2.in
 - output file    -> tucrpa_2_MPI24.out
 - root for input  files -> tucrpa_2_MPI24i
 - root for output files -> tucrpa_2_MPI24o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -77,24 +80,24 @@ Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      14.002 Mbytes of memory.
+P This job should need less than                      13.541 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P            9 blocks of mpw  integer numbers, for      0.026 Mbytes.
 P          560 blocks of mpw  real(dp)  numbers, for      3.256 Mbytes.
 P            8 blocks of nfft (fine grid) real(dp)  numbers, for      1.648 Mbytes.
 P            5 blocks of nfft (coarse grid) real(dp)  numbers, for      0.527 Mbytes.
-P              Additional     integer numbers, for      0.191 Mbytes.
-P              Additional     real(dp)  numbers, for      7.380 Mbytes.
+P              Additional     integer numbers, for      0.178 Mbytes.
+P              Additional     real(dp)  numbers, for      6.934 Mbytes.
 P              With residue estimated to be             0.973 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                13.678 Mbytes.
-P Main chain + nonlop.f + opernl.f     14.002 Mbytes.
-P XC chain                              9.443 Mbytes.
-P mkrho chain                           9.421 Mbytes.
-P fourdp chain                          8.837 Mbytes.
-- parallel k-point chain                9.179 Mbytes.
-P newvtr chain                          8.825 Mbytes.
+P Main chain + fourwf.f                13.218 Mbytes.
+P Main chain + nonlop.f + opernl.f     13.541 Mbytes.
+P XC chain                              8.983 Mbytes.
+P mkrho chain                           8.961 Mbytes.
+P fourdp chain                          8.377 Mbytes.
+- parallel k-point chain                8.719 Mbytes.
+P newvtr chain                          8.365 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -176,7 +179,7 @@ _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -213,7 +216,7 @@ _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     1.19824785E+01 Hartree
           ecutwfn4     1.19824785E+01 Hartree
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     0.00000000E+00 Hartree
         freqremax3     3.67493254E-01 Hartree
@@ -634,7 +637,7 @@ P           mkmem           2
         optforces3          2
         optforces4          2
 -      paral_atom1          1
--      paral_atom2          0
+-      paral_atom2          1
 -      paral_atom3          0
 -      paral_atom4          0
         pawecutdg      2.00000000E+01 Hartree
@@ -765,9 +768,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -785,9 +789,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -805,9 +810,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -864,7 +870,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -6598,7 +6604,7 @@ tolerances: {tolvrs: 1.00E-13, }
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 12  -151.92840909773     2.270E-10 2.432E-09 3.787E-10
+ ETOT 12  -151.92840909773     2.269E-10 2.432E-09 3.787E-10
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -7116,7 +7122,7 @@ tolerances: {tolvrs: 1.00E-13, }
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 13  -151.92840909773    -4.832E-13 4.905E-10 6.158E-11
+ ETOT 13  -151.92840909773    -3.411E-13 4.905E-10 6.158E-11
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -7634,7 +7640,7 @@ tolerances: {tolvrs: 1.00E-13, }
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 14  -151.92840909773    -5.684E-14 8.788E-11 1.573E-11
+ ETOT 14  -151.92840909773    -1.705E-13 8.788E-11 1.573E-11
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -8152,7 +8158,7 @@ tolerances: {tolvrs: 1.00E-13, }
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 15  -151.92840909773     8.527E-14 1.981E-11 2.835E-13
+ ETOT 15  -151.92840909773     3.411E-13 1.981E-11 2.835E-13
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -8670,7 +8676,7 @@ tolerances: {tolvrs: 1.00E-13, }
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 16  -151.92840909773    -2.558E-13 4.088E-12 2.953E-14
+ ETOT 16  -151.92840909773    -2.558E-13 4.088E-12 2.952E-14
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -9191,9 +9197,9 @@ tolerances: {tolvrs: 1.00E-13, }
  At SCF step   16       nres2   =  2.95E-14 < tolvrs=  1.00E-13 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60140977E-13
-  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12337837E-12
-  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07535560E-12
+  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60136482E-13
+  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12338209E-12
+  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07534050E-12
 
 
 --- !ResultsGS
@@ -9206,14 +9212,14 @@ lattice_vectors:
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.8273624E+02
-convergence: {deltae: -2.558E-13, res2:  2.953E-14, residm:  4.088E-12, diffor: null, }
+convergence: {deltae: -2.558E-13, res2:  2.952E-14, residm:  4.088E-12, diffor: null, }
 etotal    :  -1.51928409E+02
 entropy   :   0.00000000E+00
 fermie    :   2.85423679E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.09030263E-03,  -4.07535560E-12,  -1.12337837E-12, ]
-- [ -4.07535560E-12,   2.09030261E-03,  -9.60140977E-13, ]
-- [ -1.12337837E-12,  -9.60140977E-13,   2.09030259E-03, ]
+- [  2.09030263E-03,  -4.07534050E-12,  -1.12338209E-12, ]
+- [ -4.07534050E-12,   2.09030261E-03,  -9.60136482E-13, ]
+- [ -1.12338209E-12,  -9.60136482E-13,   2.09030259E-03, ]
 pressure_GPa:  -6.1499E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  V]
@@ -9222,12 +9228,12 @@ xred      :
 - [  0.0000E+00,   5.0000E-01,   0.0000E+00,  O]
 - [  0.0000E+00,   0.0000E+00,   5.0000E-01,  O]
 cartesian_forces: # hartree/bohr
-- [ -1.72800255E-11,  -2.77020482E-10,  -1.42202650E-10, ]
-- [  3.20797439E-10,   3.13242388E-10,  -2.28534853E-10, ]
-- [  2.62452018E-10,  -1.04287156E-10,  -2.10513224E-10, ]
-- [ -1.17563976E-10,   1.66100730E-10,   1.35753743E-10, ]
-- [ -4.48405456E-10,  -9.80354798E-11,   4.45496984E-10, ]
-force_length_stats: {min:   2.44621789E-10, max:   6.39645191E-10, mean:   4.10324430E-10, }
+- [ -1.72730438E-11,  -2.77009464E-10,  -1.42200146E-10, ]
+- [  3.20784696E-10,   3.13228920E-10,  -2.28534082E-10, ]
+- [  2.62445888E-10,  -1.04281951E-10,  -2.10508918E-10, ]
+- [ -1.17561291E-10,   1.66094556E-10,   1.35752094E-10, ]
+- [ -4.48396249E-10,  -9.80320605E-11,   4.45491052E-10, ]
+force_length_stats: {min:   2.44615391E-10, max:   6.39634082E-10, mean:   4.10313557E-10, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -9242,8 +9248,8 @@ force_length_stats: {min:   2.44621789E-10, max:   6.39645191E-10, mean:   4.103
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      5.992978840243965
- Compensation charge over fine fft grid    =      5.993710080168048
+ Compensation charge over spherical meshes =      5.992978840243969
+ Compensation charge over fine fft grid    =      5.993710080175028
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -9311,7 +9317,7 @@ force_length_stats: {min:   2.44621789E-10, max:   6.39645191E-10, mean:   4.103
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -9332,262 +9338,262 @@ force_length_stats: {min:   2.44621789E-10, max:   6.39645191E-10, mean:   4.103
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   87.346E-16; max=  40.884E-13
-   0.1250  0.1250  0.1250    1  2.61510E-12 kpt; spin; max resid(k); each band:
-  5.04E-21 8.65E-22 9.83E-22 1.05E-21 2.27E-21 5.68E-21 4.32E-21 2.86E-21
-  2.83E-22 6.39E-22 7.44E-22 3.19E-21 1.27E-20 1.80E-20 3.10E-20 3.07E-20
-  1.85E-20 1.48E-21 2.88E-20 4.52E-20 1.48E-20 1.49E-20 1.61E-20 1.50E-20
-  2.68E-20 8.14E-21 1.03E-20 3.20E-21 8.37E-21 7.41E-20 2.71E-20 9.53E-21
-  6.61E-21 8.33E-21 3.50E-21 1.52E-18 5.39E-21 3.74E-21 9.46E-20 1.69E-19
-  2.57E-22 9.55E-21 1.70E-20 2.16E-21 6.38E-21 5.99E-19 7.09E-20 6.47E-18
-  1.28E-12 2.62E-12
-   0.3750  0.1250  0.1250    1  1.30782E-15 kpt; spin; max resid(k); each band:
-  4.64E-21 1.31E-21 1.25E-21 1.39E-21 2.59E-21 3.66E-21 7.74E-22 2.51E-21
-  4.20E-22 5.14E-22 6.52E-22 1.87E-20 2.32E-20 1.51E-20 2.50E-20 1.80E-20
-  1.64E-20 2.57E-20 7.99E-21 1.67E-20 1.51E-20 9.74E-22 5.01E-22 2.65E-20
-  1.98E-20 5.15E-21 1.57E-20 1.20E-21 2.78E-20 1.68E-21 3.47E-21 6.23E-21
-  8.18E-21 6.06E-21 1.50E-20 2.93E-20 1.44E-20 1.04E-20 6.17E-21 1.56E-21
-  1.36E-19 5.56E-21 4.40E-21 8.65E-21 1.10E-19 1.90E-20 5.55E-21 1.26E-20
-  5.12E-19 1.31E-15
-  -0.3750  0.1250  0.1250    1  9.74265E-16 kpt; spin; max resid(k); each band:
-  4.71E-21 1.31E-21 1.19E-21 1.38E-21 2.55E-21 3.69E-21 7.76E-22 2.53E-21
-  4.38E-22 5.45E-22 6.08E-22 9.01E-22 2.38E-20 1.88E-20 2.23E-20 1.73E-20
-  1.54E-20 2.84E-20 7.56E-21 1.43E-20 1.46E-20 8.71E-22 5.30E-22 8.36E-22
-  1.99E-20 5.15E-21 1.10E-21 1.24E-21 2.67E-20 1.73E-21 3.00E-21 6.17E-21
-  8.25E-21 6.06E-21 1.52E-20 2.80E-20 1.42E-20 1.08E-20 6.50E-21 1.51E-21
-  3.65E-19 5.13E-20 4.25E-21 8.69E-21 8.67E-21 1.67E-20 5.38E-21 1.16E-20
-  4.94E-19 9.74E-16
-  -0.1250  0.1250  0.1250    1  4.08839E-12 kpt; spin; max resid(k); each band:
-  8.11E-21 8.84E-22 9.46E-22 1.03E-21 2.16E-21 5.72E-21 4.46E-21 3.01E-21
-  4.25E-22 6.86E-22 6.52E-22 3.47E-21 1.24E-20 2.01E-20 2.87E-20 3.06E-20
-  2.25E-20 1.37E-21 2.82E-20 4.01E-20 1.72E-20 1.47E-20 1.54E-20 1.36E-20
-  2.07E-20 7.77E-21 1.04E-20 3.25E-21 8.00E-21 7.06E-20 3.10E-20 3.78E-21
-  6.06E-21 7.37E-21 3.65E-21 1.64E-18 5.52E-21 3.98E-21 1.01E-19 1.66E-19
-  4.37E-22 7.47E-21 1.65E-20 2.23E-21 3.12E-20 4.51E-19 6.70E-20 6.04E-18
-  4.09E-12 3.12E-12
-   0.1250  0.3750  0.1250    1  7.20120E-16 kpt; spin; max resid(k); each band:
-  3.95E-21 2.22E-21 1.09E-21 1.24E-21 1.92E-22 3.39E-21 3.20E-21 2.43E-21
-  4.50E-22 3.44E-22 9.51E-22 3.20E-20 2.70E-20 1.35E-20 2.57E-20 2.26E-20
-  2.07E-20 2.35E-20 8.25E-21 2.22E-20 1.01E-20 2.57E-20 1.77E-20 1.68E-20
-  1.88E-20 1.42E-20 1.30E-20 6.19E-21 1.53E-20 2.42E-20 3.54E-21 3.36E-20
-  5.99E-21 5.24E-20 6.12E-20 3.12E-20 1.29E-20 1.58E-20 6.54E-21 2.65E-19
-  1.63E-20 6.00E-21 1.18E-21 6.76E-20 3.45E-20 2.18E-20 8.86E-21 2.97E-20
-  2.59E-19 7.20E-16
-   0.3750  0.3750  0.1250    1  1.08973E-17 kpt; spin; max resid(k); each band:
-  2.82E-21 1.52E-21 1.27E-21 1.48E-21 2.47E-22 3.13E-21 3.81E-21 4.17E-21
-  2.35E-22 8.18E-22 7.86E-22 2.82E-20 3.02E-20 1.44E-20 2.04E-20 2.55E-20
-  1.68E-20 1.21E-20 6.35E-21 2.34E-21 1.50E-20 1.48E-20 1.75E-20 2.25E-20
-  1.19E-20 1.42E-20 3.45E-21 1.26E-20 1.92E-21 2.18E-21 2.62E-21 6.15E-21
-  2.75E-21 7.60E-21 5.41E-21 2.27E-21 8.02E-21 1.88E-20 3.56E-20 2.18E-20
-  3.38E-19 2.83E-20 4.68E-21 7.28E-21 2.04E-20 5.51E-20 1.99E-20 1.11E-19
-  9.92E-20 1.09E-17
-  -0.3750  0.3750  0.1250    1  9.99141E-18 kpt; spin; max resid(k); each band:
-  4.37E-21 1.64E-21 1.08E-21 1.44E-21 2.08E-22 3.14E-21 3.81E-21 4.36E-21
-  2.22E-22 9.17E-22 6.98E-22 3.27E-20 2.38E-20 1.44E-20 2.23E-20 2.41E-20
-  2.18E-20 1.12E-20 5.97E-21 2.34E-21 1.63E-20 1.34E-20 1.96E-20 2.24E-20
-  1.19E-20 1.77E-20 1.83E-20 1.22E-20 2.28E-21 1.28E-20 2.55E-21 6.02E-21
-  2.54E-21 7.39E-21 5.52E-21 2.17E-21 3.52E-20 1.79E-21 2.75E-21 3.27E-20
-  2.68E-19 2.30E-21 4.59E-21 8.32E-21 2.23E-20 5.09E-20 1.92E-20 1.12E-19
-  8.08E-20 9.99E-18
-  -0.1250  0.3750  0.1250    1  1.93503E-15 kpt; spin; max resid(k); each band:
-  4.35E-21 2.19E-21 1.08E-21 1.14E-21 2.43E-22 3.37E-21 3.20E-21 2.22E-21
-  4.57E-22 4.01E-22 9.60E-22 3.28E-20 2.71E-20 1.59E-20 2.33E-20 2.18E-20
-  1.84E-20 2.64E-20 8.34E-21 2.02E-20 9.74E-21 2.72E-20 1.82E-20 1.53E-20
-  1.89E-20 1.38E-20 2.66E-21 5.27E-22 1.42E-20 2.22E-20 3.68E-21 3.06E-20
-  5.88E-21 5.05E-20 6.73E-20 3.20E-20 1.29E-20 1.53E-20 6.76E-21 1.17E-20
-  1.09E-19 5.69E-21 1.23E-21 4.46E-21 2.88E-20 1.75E-20 9.18E-21 2.71E-20
-  2.75E-19 1.94E-15
+   0.1250  0.1250  0.1250    1  2.61513E-12 kpt; spin; max resid(k); each band:
+   5.02E-21  8.65E-22  9.83E-22  1.05E-21  2.27E-21  5.67E-21  4.33E-21  2.85E-21
+   2.83E-22  6.39E-22  7.44E-22  3.19E-21  1.27E-20  1.81E-20  3.10E-20  3.07E-20
+   1.85E-20  1.48E-21  2.88E-20  4.52E-20  1.48E-20  1.49E-20  1.61E-20  1.50E-20
+   2.69E-20  8.14E-21  1.03E-20  3.20E-21  8.37E-21  7.41E-20  2.71E-20  9.49E-21
+   6.61E-21  8.33E-21  3.50E-21  1.52E-18  5.39E-21  3.74E-21  9.46E-20  1.69E-19
+   2.57E-22  9.55E-21  1.70E-20  2.16E-21  6.39E-21  6.00E-19  7.09E-20  6.47E-18
+   1.28E-12  2.62E-12
+   0.3750  0.1250  0.1250    1  1.30780E-15 kpt; spin; max resid(k); each band:
+   4.62E-21  1.31E-21  1.25E-21  1.39E-21  2.59E-21  3.66E-21  7.74E-22  2.43E-21
+   4.20E-22  5.14E-22  6.52E-22  1.87E-20  2.32E-20  1.51E-20  2.50E-20  1.80E-20
+   1.64E-20  2.57E-20  7.99E-21  1.67E-20  1.51E-20  9.74E-22  5.01E-22  2.65E-20
+   1.98E-20  5.15E-21  1.57E-20  1.20E-21  2.78E-20  1.68E-21  3.47E-21  6.23E-21
+   8.20E-21  6.06E-21  1.50E-20  2.93E-20  1.44E-20  1.03E-20  6.17E-21  1.56E-21
+   1.36E-19  5.57E-21  4.40E-21  8.65E-21  1.10E-19  1.90E-20  5.55E-21  1.26E-20
+   5.13E-19  1.31E-15
+  -0.3750  0.1250  0.1250    1  9.74274E-16 kpt; spin; max resid(k); each band:
+   4.69E-21  1.31E-21  1.20E-21  1.38E-21  2.55E-21  3.70E-21  7.76E-22  2.52E-21
+   4.38E-22  5.45E-22  6.08E-22  8.99E-22  2.38E-20  1.88E-20  2.23E-20  1.73E-20
+   1.54E-20  2.84E-20  7.56E-21  1.43E-20  1.46E-20  8.72E-22  5.30E-22  8.36E-22
+   1.99E-20  5.15E-21  1.10E-21  1.24E-21  2.67E-20  1.73E-21  3.00E-21  6.17E-21
+   8.27E-21  6.06E-21  1.52E-20  2.80E-20  1.42E-20  1.08E-20  6.50E-21  1.51E-21
+   3.65E-19  5.12E-20  4.25E-21  8.69E-21  8.65E-21  1.67E-20  5.38E-21  1.16E-20
+   4.95E-19  9.74E-16
+  -0.1250  0.1250  0.1250    1  4.08837E-12 kpt; spin; max resid(k); each band:
+   8.08E-21  8.84E-22  9.47E-22  1.03E-21  2.16E-21  5.72E-21  4.47E-21  3.01E-21
+   4.25E-22  6.86E-22  6.52E-22  3.47E-21  1.24E-20  2.02E-20  2.87E-20  3.06E-20
+   2.25E-20  1.37E-21  2.82E-20  4.01E-20  1.72E-20  1.47E-20  1.54E-20  1.36E-20
+   2.07E-20  7.77E-21  1.04E-20  3.25E-21  8.00E-21  7.06E-20  3.10E-20  3.76E-21
+   6.06E-21  7.37E-21  3.65E-21  1.64E-18  5.52E-21  3.98E-21  1.01E-19  1.66E-19
+   4.37E-22  7.47E-21  1.65E-20  2.23E-21  3.12E-20  4.52E-19  6.71E-20  6.04E-18
+   4.09E-12  3.12E-12
+   0.1250  0.3750  0.1250    1  7.20152E-16 kpt; spin; max resid(k); each band:
+   3.93E-21  2.23E-21  1.09E-21  1.24E-21  1.92E-22  3.39E-21  3.20E-21  2.44E-21
+   4.50E-22  3.44E-22  9.50E-22  3.19E-20  2.70E-20  1.35E-20  2.57E-20  2.26E-20
+   2.07E-20  2.35E-20  8.25E-21  2.22E-20  1.01E-20  2.57E-20  1.77E-20  1.68E-20
+   1.88E-20  1.41E-20  1.30E-20  6.19E-21  1.53E-20  2.42E-20  3.54E-21  3.36E-20
+   5.99E-21  5.24E-20  6.12E-20  3.12E-20  1.28E-20  1.58E-20  6.54E-21  2.65E-19
+   1.63E-20  6.00E-21  1.18E-21  6.76E-20  3.45E-20  2.18E-20  8.86E-21  2.97E-20
+   2.60E-19  7.20E-16
+   0.3750  0.3750  0.1250    1  1.09010E-17 kpt; spin; max resid(k); each band:
+   2.83E-21  1.52E-21  1.27E-21  1.49E-21  2.47E-22  3.13E-21  3.81E-21  4.16E-21
+   2.35E-22  8.18E-22  7.86E-22  2.81E-20  3.01E-20  1.44E-20  2.04E-20  2.55E-20
+   1.68E-20  1.21E-20  6.35E-21  2.34E-21  1.50E-20  1.48E-20  1.75E-20  2.25E-20
+   1.19E-20  1.42E-20  3.45E-21  1.26E-20  1.92E-21  2.18E-21  2.62E-21  6.16E-21
+   2.75E-21  7.60E-21  5.41E-21  2.27E-21  8.01E-21  1.88E-20  3.56E-20  2.18E-20
+   3.39E-19  2.83E-20  4.68E-21  7.28E-21  2.04E-20  5.51E-20  1.99E-20  1.11E-19
+   9.92E-20  1.09E-17
+  -0.3750  0.3750  0.1250    1  9.99384E-18 kpt; spin; max resid(k); each band:
+   4.36E-21  1.64E-21  1.08E-21  1.44E-21  2.08E-22  3.14E-21  3.81E-21  4.35E-21
+   2.22E-22  9.17E-22  6.98E-22  3.26E-20  2.38E-20  1.44E-20  2.23E-20  2.41E-20
+   2.18E-20  1.12E-20  5.97E-21  2.34E-21  1.63E-20  1.34E-20  1.96E-20  2.24E-20
+   1.19E-20  1.77E-20  1.83E-20  1.22E-20  2.28E-21  1.28E-20  2.55E-21  6.02E-21
+   2.54E-21  7.39E-21  5.52E-21  2.17E-21  3.52E-20  1.79E-21  2.76E-21  3.27E-20
+   2.68E-19  2.30E-21  4.59E-21  8.32E-21  2.23E-20  5.09E-20  1.92E-20  1.12E-19
+   8.09E-20  9.99E-18
+  -0.1250  0.3750  0.1250    1  1.93505E-15 kpt; spin; max resid(k); each band:
+   4.33E-21  2.19E-21  1.08E-21  1.14E-21  2.43E-22  3.37E-21  3.20E-21  2.23E-21
+   4.57E-22  4.01E-22  9.59E-22  3.27E-20  2.71E-20  1.59E-20  2.33E-20  2.18E-20
+   1.84E-20  2.64E-20  8.34E-21  2.02E-20  9.74E-21  2.72E-20  1.82E-20  1.53E-20
+   1.89E-20  1.38E-20  2.66E-21  5.27E-22  1.42E-20  2.22E-20  3.68E-21  3.06E-20
+   5.88E-21  5.05E-20  6.74E-20  3.20E-20  1.29E-20  1.53E-20  6.76E-21  1.17E-20
+   1.09E-19  5.69E-21  1.23E-21  4.46E-21  2.88E-20  1.75E-20  9.18E-21  2.71E-20
+   2.76E-19  1.94E-15
    0.1250 -0.3750  0.1250    1  1.65286E-16 kpt; spin; max resid(k); each band:
-  3.81E-21 2.22E-21 1.04E-21 1.23E-21 2.12E-22 3.37E-21 3.16E-21 2.23E-21
-  4.80E-22 3.99E-22 9.68E-22 3.24E-20 2.72E-20 1.60E-20 2.38E-20 2.20E-20
-  1.87E-20 2.61E-20 8.76E-21 2.03E-20 1.00E-20 2.71E-20 1.85E-20 1.54E-20
-  1.88E-20 1.70E-21 1.55E-20 6.30E-21 1.48E-20 2.29E-20 3.51E-21 3.20E-20
-  6.24E-21 5.16E-20 6.60E-20 3.18E-20 1.26E-20 1.53E-20 6.72E-21 1.18E-20
-  3.69E-19 5.61E-21 1.20E-21 4.43E-21 3.08E-20 1.91E-20 8.96E-21 2.96E-20
-  2.51E-19 1.65E-16
-   0.3750 -0.3750  0.1250    1  1.11836E-17 kpt; spin; max resid(k); each band:
-  4.48E-21 1.64E-21 1.07E-21 1.44E-21 2.06E-22 3.11E-21 3.80E-21 4.35E-21
-  2.20E-22 9.23E-22 6.95E-22 3.27E-20 2.39E-20 1.44E-20 2.24E-20 2.40E-20
-  2.17E-20 1.13E-20 5.92E-21 2.31E-21 1.62E-20 1.34E-20 1.96E-20 2.23E-20
-  1.19E-20 1.77E-20 1.81E-20 1.23E-20 2.29E-21 1.30E-20 2.58E-21 5.99E-21
-  2.61E-21 7.31E-21 5.49E-21 2.24E-21 3.49E-20 1.80E-21 2.76E-21 3.26E-20
-  2.64E-19 2.30E-21 4.57E-21 8.30E-21 2.26E-20 5.11E-20 1.91E-20 1.10E-19
-  8.27E-20 1.12E-17
-  -0.3750 -0.3750  0.1250    1  9.89313E-18 kpt; spin; max resid(k); each band:
-  4.00E-21 1.48E-21 1.27E-21 1.51E-21 2.34E-22 3.14E-21 3.82E-21 4.17E-21
-  2.33E-22 8.22E-22 8.16E-22 2.80E-20 3.04E-20 1.45E-20 2.01E-20 2.55E-20
-  1.63E-20 1.15E-20 6.30E-21 2.34E-21 1.46E-20 1.46E-20 1.75E-20 2.25E-20
-  1.20E-20 1.47E-20 3.51E-21 1.24E-20 1.75E-21 2.16E-21 2.70E-21 6.05E-21
-  2.81E-21 7.51E-21 5.21E-21 1.99E-21 8.34E-21 1.94E-20 3.58E-20 2.28E-20
-  3.30E-19 2.77E-20 4.54E-21 7.09E-21 1.90E-20 5.57E-20 1.90E-20 1.11E-19
-  1.02E-19 9.89E-18
-  -0.1250 -0.3750  0.1250    1  1.46198E-15 kpt; spin; max resid(k); each band:
-  4.33E-21 2.23E-21 1.15E-21 1.16E-21 2.43E-22 3.37E-21 3.18E-21 2.45E-21
-  4.38E-22 3.43E-22 9.64E-22 3.16E-20 2.73E-20 1.33E-20 2.59E-20 2.27E-20
-  2.09E-20 2.33E-20 7.75E-21 2.23E-20 9.78E-21 2.52E-20 1.71E-20 1.70E-20
-  1.88E-20 1.34E-20 1.37E-20 6.48E-21 1.51E-20 2.32E-20 3.41E-21 3.31E-20
-  6.04E-21 5.12E-20 6.05E-20 3.23E-20 1.32E-20 1.60E-20 6.62E-21 1.17E-20
-  1.71E-20 6.14E-21 1.20E-21 6.72E-20 3.43E-20 2.27E-20 9.10E-21 2.91E-20
-  2.84E-19 1.46E-15
+   3.80E-21  2.22E-21  1.04E-21  1.23E-21  2.12E-22  3.37E-21  3.16E-21  2.24E-21
+   4.80E-22  3.99E-22  9.68E-22  3.23E-20  2.72E-20  1.60E-20  2.38E-20  2.20E-20
+   1.87E-20  2.61E-20  8.76E-21  2.03E-20  1.00E-20  2.72E-20  1.85E-20  1.54E-20
+   1.88E-20  1.70E-21  1.55E-20  6.30E-21  1.48E-20  2.29E-20  3.51E-21  3.20E-20
+   6.27E-21  5.16E-20  6.61E-20  3.18E-20  1.26E-20  1.53E-20  6.72E-21  1.18E-20
+   3.70E-19  5.61E-21  1.20E-21  4.43E-21  3.08E-20  1.91E-20  8.96E-21  2.96E-20
+   2.51E-19  1.65E-16
+   0.3750 -0.3750  0.1250    1  1.11869E-17 kpt; spin; max resid(k); each band:
+   4.46E-21  1.64E-21  1.07E-21  1.44E-21  2.06E-22  3.11E-21  3.80E-21  4.34E-21
+   2.20E-22  9.23E-22  6.95E-22  3.26E-20  2.39E-20  1.44E-20  2.24E-20  2.40E-20
+   2.17E-20  1.13E-20  5.92E-21  2.31E-21  1.62E-20  1.34E-20  1.96E-20  2.24E-20
+   1.19E-20  1.77E-20  1.81E-20  1.23E-20  2.29E-21  1.30E-20  2.58E-21  5.99E-21
+   2.61E-21  7.31E-21  5.49E-21  2.24E-21  3.49E-20  1.80E-21  2.76E-21  3.26E-20
+   2.65E-19  2.30E-21  4.57E-21  8.31E-21  2.26E-20  5.12E-20  1.91E-20  1.10E-19
+   8.27E-20  1.12E-17
+  -0.3750 -0.3750  0.1250    1  9.89594E-18 kpt; spin; max resid(k); each band:
+   4.02E-21  1.48E-21  1.27E-21  1.51E-21  2.34E-22  3.14E-21  3.82E-21  4.16E-21
+   2.33E-22  8.22E-22  8.16E-22  2.80E-20  3.04E-20  1.45E-20  2.01E-20  2.55E-20
+   1.63E-20  1.15E-20  6.30E-21  2.34E-21  1.46E-20  1.46E-20  1.75E-20  2.25E-20
+   1.20E-20  1.47E-20  3.51E-21  1.24E-20  1.75E-21  2.16E-21  2.70E-21  6.05E-21
+   2.81E-21  7.51E-21  5.21E-21  1.99E-21  8.33E-21  1.94E-20  3.59E-20  2.28E-20
+   3.30E-19  2.78E-20  4.54E-21  7.10E-21  1.89E-20  5.57E-20  1.90E-20  1.11E-19
+   1.02E-19  9.90E-18
+  -0.1250 -0.3750  0.1250    1  1.46200E-15 kpt; spin; max resid(k); each band:
+   4.31E-21  2.23E-21  1.15E-21  1.16E-21  2.43E-22  3.37E-21  3.18E-21  2.46E-21
+   4.38E-22  3.43E-22  9.64E-22  3.16E-20  2.73E-20  1.33E-20  2.59E-20  2.27E-20
+   2.09E-20  2.33E-20  7.75E-21  2.23E-20  9.79E-21  2.52E-20  1.71E-20  1.70E-20
+   1.88E-20  1.34E-20  1.37E-20  6.48E-21  1.51E-20  2.32E-20  3.41E-21  3.31E-20
+   6.04E-21  5.12E-20  6.05E-20  3.23E-20  1.32E-20  1.60E-20  6.62E-21  1.17E-20
+   1.71E-20  6.14E-21  1.20E-21  6.72E-20  3.43E-20  2.27E-20  9.10E-21  2.91E-20
+   2.84E-19  1.46E-15
    0.1250 -0.1250  0.1250    1  1.04898E-12 kpt; spin; max resid(k); each band:
-  8.04E-21 9.13E-22 9.60E-22 9.98E-22 2.32E-21 5.64E-21 4.30E-21 2.91E-21
-  3.61E-22 7.21E-22 6.51E-22 3.35E-21 1.26E-20 2.00E-20 2.81E-20 3.09E-20
-  2.23E-20 1.38E-21 2.84E-20 4.03E-20 1.61E-20 1.46E-20 1.40E-20 1.38E-20
-  2.05E-20 7.82E-21 1.07E-20 3.23E-21 8.19E-21 7.28E-20 3.06E-20 3.92E-21
-  5.95E-21 7.48E-21 3.61E-21 1.63E-18 5.57E-21 3.73E-21 9.49E-20 1.69E-19
-  2.72E-22 9.08E-21 1.95E-20 2.24E-21 3.08E-20 4.93E-19 6.52E-20 3.46E-18
-  1.05E-12 1.98E-13
-   0.3750 -0.1250  0.1250    1  1.07250E-15 kpt; spin; max resid(k); each band:
-  5.20E-21 1.28E-21 1.28E-21 1.28E-21 2.71E-21 3.69E-21 7.75E-22 2.48E-21
-  4.15E-22 5.79E-22 6.14E-22 9.02E-22 2.36E-20 1.89E-20 2.15E-20 1.70E-20
-  1.60E-20 2.86E-20 7.99E-21 1.45E-20 1.40E-20 8.47E-22 1.01E-20 8.12E-22
-  1.99E-20 5.17E-21 1.07E-21 1.23E-21 2.65E-20 2.27E-20 2.99E-21 6.11E-21
-  7.65E-21 5.86E-21 1.52E-20 2.90E-20 1.49E-20 1.10E-20 6.59E-21 1.59E-21
-  1.13E-19 6.38E-21 4.34E-21 9.41E-21 9.25E-21 1.57E-20 5.73E-21 1.01E-20
-  5.45E-19 1.07E-15
-  -0.3750 -0.1250  0.1250    1  8.70574E-16 kpt; spin; max resid(k); each band:
-  4.41E-21 1.31E-21 1.34E-21 1.30E-21 2.66E-21 3.73E-21 7.75E-22 2.56E-21
-  3.93E-22 5.35E-22 6.41E-22 1.84E-20 2.31E-20 1.50E-20 2.47E-20 1.81E-20
-  1.66E-20 2.53E-20 8.32E-21 1.73E-20 1.43E-20 9.12E-22 5.34E-22 2.64E-20
-  1.98E-20 5.16E-21 1.58E-20 1.22E-21 2.77E-20 1.64E-21 3.43E-21 6.20E-21
-  8.23E-21 5.83E-21 1.51E-20 3.02E-20 1.50E-20 1.03E-20 6.30E-21 1.58E-21
-  1.81E-20 4.98E-21 4.26E-21 8.70E-21 1.08E-19 1.95E-20 5.64E-21 1.19E-20
-  5.68E-19 8.71E-16
+   8.01E-21  9.13E-22  9.61E-22  9.98E-22  2.32E-21  5.64E-21  4.30E-21  2.90E-21
+   3.61E-22  7.21E-22  6.51E-22  3.35E-21  1.27E-20  2.01E-20  2.81E-20  3.09E-20
+   2.23E-20  1.38E-21  2.84E-20  4.03E-20  1.61E-20  1.46E-20  1.40E-20  1.38E-20
+   2.05E-20  7.83E-21  1.07E-20  3.23E-21  8.19E-21  7.28E-20  3.06E-20  3.90E-21
+   5.95E-21  7.47E-21  3.61E-21  1.63E-18  5.58E-21  3.73E-21  9.49E-20  1.69E-19
+   2.72E-22  9.08E-21  1.95E-20  2.24E-21  3.08E-20  4.94E-19  6.53E-20  3.46E-18
+   1.05E-12  1.98E-13
+   0.3750 -0.1250  0.1250    1  1.07256E-15 kpt; spin; max resid(k); each band:
+   5.18E-21  1.29E-21  1.28E-21  1.28E-21  2.71E-21  3.69E-21  7.75E-22  2.48E-21
+   4.15E-22  5.79E-22  6.14E-22  9.00E-22  2.36E-20  1.90E-20  2.15E-20  1.70E-20
+   1.60E-20  2.86E-20  7.99E-21  1.45E-20  1.40E-20  8.47E-22  1.01E-20  8.13E-22
+   1.99E-20  5.17E-21  1.07E-21  1.23E-21  2.65E-20  2.27E-20  2.99E-21  6.11E-21
+   7.65E-21  5.86E-21  1.52E-20  2.90E-20  1.49E-20  1.09E-20  6.59E-21  1.59E-21
+   1.13E-19  6.38E-21  4.34E-21  9.41E-21  9.23E-21  1.57E-20  5.73E-21  1.01E-20
+   5.46E-19  1.07E-15
+  -0.3750 -0.1250  0.1250    1  8.70594E-16 kpt; spin; max resid(k); each band:
+   4.39E-21  1.31E-21  1.34E-21  1.30E-21  2.66E-21  3.73E-21  7.75E-22  2.48E-21
+   3.94E-22  5.35E-22  6.41E-22  1.84E-20  2.31E-20  1.51E-20  2.47E-20  1.81E-20
+   1.66E-20  2.54E-20  8.32E-21  1.74E-20  1.43E-20  9.12E-22  5.34E-22  2.64E-20
+   1.98E-20  5.16E-21  1.58E-20  1.22E-21  2.77E-20  1.64E-21  3.43E-21  6.20E-21
+   8.26E-21  5.83E-21  1.51E-20  3.02E-20  1.50E-20  1.03E-20  6.30E-21  1.58E-21
+   1.81E-20  4.98E-21  4.26E-21  8.69E-21  1.08E-19  1.95E-20  5.64E-21  1.19E-20
+   5.69E-19  8.71E-16
   -0.1250 -0.1250  0.1250    1  1.28016E-12 kpt; spin; max resid(k); each band:
-  4.76E-21 9.03E-22 9.94E-22 9.63E-22 2.24E-21 5.63E-21 4.29E-21 2.97E-21
-  2.85E-22 6.37E-22 7.59E-22 3.13E-21 1.24E-20 1.83E-20 3.13E-20 3.07E-20
-  1.66E-20 1.41E-21 2.89E-20 4.58E-20 1.31E-20 1.50E-20 1.64E-20 1.51E-20
-  2.70E-20 8.30E-21 1.05E-20 3.23E-21 8.59E-21 7.48E-20 2.54E-20 1.05E-20
-  6.87E-21 8.37E-21 3.29E-21 2.98E-20 5.43E-21 3.63E-21 9.04E-20 1.65E-19
-  2.81E-22 9.76E-21 1.62E-20 2.13E-21 3.81E-21 5.97E-19 7.61E-20 7.59E-18
-  1.28E-12 2.91E-13
-   0.1250  0.1250  0.3750    1  1.50995E-15 kpt; spin; max resid(k); each band:
-  5.27E-21 1.76E-21 1.13E-21 1.30E-21 2.35E-21 7.06E-21 1.32E-21 7.26E-21
-  4.88E-22 5.60E-22 1.47E-21 2.92E-20 2.39E-20 1.74E-20 2.46E-20 1.98E-20
-  1.90E-20 2.60E-20 9.16E-21 2.10E-20 1.15E-20 2.04E-20 1.59E-20 2.10E-20
-  2.11E-20 1.69E-20 1.73E-21 7.46E-22 1.67E-20 2.26E-20 4.28E-21 6.21E-21
-  6.08E-21 5.12E-21 1.38E-20 2.16E-20 1.68E-20 1.45E-20 7.52E-21 1.86E-20
-  3.81E-19 5.91E-21 4.81E-21 8.66E-21 2.25E-20 1.52E-20 8.72E-21 1.38E-20
-  4.00E-19 1.51E-15
-   0.3750  0.1250  0.3750    1  3.72312E-18 kpt; spin; max resid(k); each band:
-  3.84E-21 1.32E-21 9.66E-22 1.65E-21 2.69E-21 4.08E-21 1.76E-21 3.39E-21
-  3.28E-22 7.72E-22 8.52E-22 3.09E-20 2.08E-20 1.20E-20 2.70E-20 1.81E-20
-  3.42E-20 1.94E-20 4.61E-21 1.18E-21 1.36E-20 1.33E-20 1.58E-20 3.12E-20
-  8.50E-21 2.21E-20 1.72E-20 1.06E-20 1.68E-21 1.90E-21 3.06E-21 4.04E-21
-  1.70E-21 8.55E-21 6.63E-21 1.64E-21 8.79E-21 1.69E-21 3.54E-21 4.00E-20
-  3.81E-19 2.92E-20 2.20E-21 8.74E-21 2.11E-20 6.19E-20 1.96E-20 1.35E-19
-  2.30E-20 3.72E-18
-  -0.3750  0.1250  0.3750    1  5.54728E-18 kpt; spin; max resid(k); each band:
-  3.59E-21 1.47E-21 9.93E-22 1.67E-21 2.65E-21 4.08E-21 1.83E-21 3.37E-21
-  4.21E-22 7.87E-22 7.62E-22 3.11E-20 2.20E-20 1.19E-20 2.73E-20 1.78E-20
-  3.70E-20 2.56E-20 4.66E-21 1.10E-21 1.55E-20 1.30E-20 1.51E-20 3.15E-20
-  8.44E-21 2.06E-20 1.76E-20 1.13E-20 1.88E-21 3.40E-21 2.84E-21 4.10E-21
-  1.65E-21 8.60E-21 6.26E-21 1.57E-21 3.74E-20 1.59E-21 2.97E-21 4.44E-20
-  5.96E-20 3.81E-20 2.56E-21 9.09E-21 1.82E-20 5.81E-20 2.16E-20 1.40E-19
-  2.75E-20 5.55E-18
-  -0.1250  0.1250  0.3750    1  6.62705E-16 kpt; spin; max resid(k); each band:
-  4.60E-21 1.80E-21 1.21E-21 1.24E-21 2.27E-21 7.06E-21 1.30E-21 7.43E-21
-  6.97E-22 4.01E-22 1.47E-21 2.96E-20 2.67E-20 1.59E-20 2.80E-20 1.82E-20
-  2.00E-20 2.44E-20 1.89E-20 1.98E-20 1.32E-20 2.27E-20 1.41E-20 2.11E-20
-  2.08E-20 1.99E-21 1.36E-20 8.61E-22 1.98E-20 2.46E-21 4.40E-21 3.15E-20
-  7.78E-21 5.52E-20 1.34E-20 2.88E-20 1.53E-20 1.18E-20 6.87E-21 1.23E-20
-  1.42E-19 5.85E-21 4.32E-21 7.70E-21 2.45E-20 1.85E-20 7.93E-21 1.68E-20
-  2.86E-19 6.63E-16
-   0.1250  0.3750  0.3750    1  1.28255E-17 kpt; spin; max resid(k); each band:
-  3.89E-21 1.72E-21 1.36E-21 1.34E-21 2.65E-22 3.30E-21 1.67E-21 3.58E-21
-  2.91E-22 6.01E-21 5.54E-22 3.34E-20 4.44E-20 2.09E-20 1.68E-20 2.18E-20
-  1.33E-20 1.01E-20 4.50E-21 9.03E-22 1.65E-20 1.83E-20 2.53E-20 1.14E-20
-  1.41E-20 1.24E-20 2.98E-21 1.28E-20 1.58E-21 2.47E-21 2.41E-21 6.58E-21
-  5.77E-21 6.65E-21 4.92E-21 1.83E-21 6.41E-20 1.73E-21 2.75E-21 2.47E-20
-  8.47E-20 3.16E-20 1.10E-21 7.73E-21 2.91E-20 5.37E-20 2.09E-20 8.22E-20
-  1.68E-19 1.28E-17
-   0.3750  0.3750  0.3750    1  5.90835E-18 kpt; spin; max resid(k); each band:
-  3.50E-21 1.79E-21 1.99E-21 2.26E-21 2.67E-21 3.01E-21 2.65E-21 2.55E-21
-  5.38E-22 7.34E-22 1.02E-21 9.13E-22 1.78E-20 2.81E-20 2.64E-20 1.78E-20
-  2.49E-20 2.19E-21 1.33E-21 1.15E-21 2.75E-21 1.72E-20 2.11E-20 1.55E-20
-  2.78E-20 1.76E-20 2.46E-21 2.80E-21 4.34E-22 4.11E-22 2.90E-21 3.21E-21
-  4.85E-21 1.12E-21 7.20E-21 4.37E-20 2.41E-20 4.48E-21 1.09E-20 9.11E-21
-  1.46E-21 5.48E-20 1.10E-20 1.34E-20 4.52E-21 4.21E-20 7.01E-20 3.02E-20
-  7.93E-19 5.91E-18
-  -0.3750  0.3750  0.3750    1  7.87232E-18 kpt; spin; max resid(k); each band:
-  3.19E-21 1.99E-21 1.87E-21 2.20E-21 3.17E-22 3.01E-21 2.67E-21 2.42E-21
-  6.57E-22 7.73E-22 9.17E-22 1.23E-21 1.77E-20 2.81E-20 2.49E-20 1.82E-20
-  2.40E-20 2.14E-21 1.37E-21 1.10E-21 2.68E-20 1.69E-20 2.10E-20 1.55E-20
-  2.81E-20 2.02E-20 2.47E-21 2.86E-21 4.24E-22 3.92E-22 2.93E-21 3.37E-21
-  4.34E-21 1.08E-21 7.59E-21 4.35E-20 2.30E-20 4.12E-21 1.06E-20 9.28E-21
-  2.37E-21 5.78E-20 1.08E-20 1.28E-20 5.56E-21 4.18E-20 7.71E-20 3.00E-20
-  7.34E-19 7.87E-18
-  -0.1250  0.3750  0.3750    1  1.56384E-17 kpt; spin; max resid(k); each band:
-  2.64E-21 1.77E-21 1.35E-21 1.35E-21 2.84E-22 3.30E-21 1.64E-21 3.67E-21
-  4.02E-22 6.10E-21 4.73E-22 3.46E-20 4.47E-20 2.08E-20 1.74E-20 2.19E-20
-  1.23E-20 9.68E-21 6.07E-21 8.48E-22 1.77E-20 1.88E-20 2.44E-20 1.12E-20
-  1.40E-20 1.20E-20 2.95E-21 1.16E-20 1.45E-21 2.70E-21 2.31E-21 6.73E-21
-  4.31E-21 6.89E-21 4.75E-21 1.80E-21 7.41E-21 1.64E-21 2.67E-21 2.63E-20
-  8.46E-20 3.15E-20 1.06E-21 8.00E-21 3.17E-20 5.00E-20 2.19E-20 8.87E-20
-  1.78E-19 1.56E-17
-   0.1250 -0.3750  0.3750    1  9.18737E-18 kpt; spin; max resid(k); each band:
-  3.73E-21 1.88E-21 1.38E-21 1.36E-21 2.58E-22 3.30E-21 1.64E-21 3.64E-21
-  4.01E-22 6.04E-21 4.55E-22 3.34E-20 4.61E-20 2.08E-20 1.73E-20 2.17E-20
-  1.18E-20 9.53E-21 6.29E-21 8.46E-22 1.84E-20 1.86E-20 2.37E-20 1.12E-20
-  1.40E-20 1.18E-20 2.92E-21 1.18E-20 1.65E-21 3.17E-21 2.29E-21 6.66E-21
-  4.40E-21 6.88E-21 4.79E-21 1.87E-21 3.52E-20 1.76E-20 2.60E-21 2.80E-20
-  2.36E-19 3.00E-20 1.05E-21 7.85E-21 3.10E-20 5.09E-20 2.21E-20 8.52E-20
-  1.74E-19 9.19E-18
-   0.3750 -0.3750  0.3750    1  3.14571E-14 kpt; spin; max resid(k); each band:
-  3.14E-21 1.99E-21 1.86E-21 2.19E-21 2.86E-22 2.97E-21 2.68E-21 2.45E-21
-  6.36E-22 8.14E-22 9.17E-22 1.10E-21 1.75E-20 2.80E-20 2.51E-20 1.72E-20
-  2.46E-20 2.20E-21 1.33E-21 1.10E-21 2.69E-20 1.69E-20 2.12E-20 1.55E-20
-  2.79E-20 1.97E-20 2.47E-21 2.88E-21 4.31E-22 4.05E-22 3.00E-21 3.30E-21
-  4.55E-21 1.10E-21 7.50E-21 4.48E-20 2.34E-20 3.77E-21 1.09E-20 9.04E-21
-  7.59E-21 5.73E-20 1.02E-20 1.37E-20 5.91E-21 3.96E-20 7.56E-20 3.15E-20
-  4.61E-15 3.15E-14
-  -0.3750 -0.3750  0.3750    1  5.58806E-18 kpt; spin; max resid(k); each band:
-  4.45E-21 1.79E-21 1.98E-21 2.14E-21 2.64E-21 3.02E-21 2.65E-21 2.55E-21
-  5.48E-22 7.14E-22 1.06E-21 7.95E-22 1.76E-20 2.81E-20 2.83E-20 1.71E-20
-  2.48E-20 2.23E-21 1.35E-21 1.12E-21 2.88E-21 1.74E-20 2.17E-20 1.55E-20
-  2.77E-20 1.78E-20 2.44E-21 2.78E-21 4.22E-22 4.18E-22 2.82E-21 3.22E-21
-  5.37E-21 1.11E-21 6.82E-21 4.55E-20 2.47E-20 4.29E-21 1.06E-20 8.64E-21
-  2.30E-21 5.64E-20 1.12E-20 1.42E-20 4.53E-21 4.30E-20 6.02E-20 3.20E-20
-  1.01E-18 5.59E-18
-  -0.1250 -0.3750  0.3750    1  8.23817E-18 kpt; spin; max resid(k); each band:
-  3.31E-21 1.78E-21 1.39E-21 1.38E-21 2.38E-22 3.30E-21 1.62E-21 3.60E-21
-  2.98E-22 5.96E-21 5.57E-22 3.23E-20 4.57E-20 2.09E-20 1.72E-20 2.16E-20
-  1.30E-20 9.78E-21 4.09E-21 9.08E-22 1.65E-20 1.79E-20 2.46E-20 1.14E-20
-  1.41E-20 1.22E-20 3.12E-21 1.20E-20 1.53E-21 2.57E-21 2.44E-21 6.44E-21
-  5.83E-21 5.91E-21 4.91E-21 1.84E-21 6.39E-20 1.69E-21 2.76E-21 2.60E-20
-  2.12E-19 2.86E-20 1.08E-21 7.50E-21 2.43E-20 5.40E-20 2.04E-20 8.00E-20
-  1.94E-19 8.24E-18
-   0.1250 -0.1250  0.3750    1  8.83177E-16 kpt; spin; max resid(k); each band:
-  4.16E-21 1.81E-21 1.22E-21 1.24E-21 2.38E-21 7.04E-21 1.29E-21 7.23E-21
-  7.16E-22 3.98E-22 1.48E-21 2.92E-20 2.66E-20 1.58E-20 2.83E-20 1.84E-20
-  1.99E-20 2.44E-20 1.85E-20 1.98E-20 1.32E-20 2.25E-20 1.38E-20 2.11E-20
-  2.08E-20 1.98E-21 1.35E-20 8.36E-22 1.98E-20 2.51E-21 4.53E-21 3.16E-20
-  7.91E-21 5.49E-20 1.34E-20 2.91E-20 1.54E-20 1.19E-20 6.99E-21 1.24E-20
-  1.45E-19 5.83E-21 4.50E-21 7.91E-21 2.43E-20 1.87E-20 7.97E-21 1.65E-20
-  2.85E-19 8.83E-16
-   0.3750 -0.1250  0.3750    1  3.93722E-18 kpt; spin; max resid(k); each band:
-  2.93E-21 1.37E-21 9.78E-22 1.67E-21 2.45E-22 4.08E-21 1.81E-21 3.31E-21
-  4.16E-22 7.98E-22 7.93E-22 3.16E-20 2.05E-20 1.19E-20 2.76E-20 1.79E-20
-  3.72E-20 2.57E-20 4.69E-21 1.13E-21 1.46E-20 1.35E-20 1.55E-20 3.14E-20
-  8.47E-21 2.14E-20 1.72E-20 1.10E-20 1.72E-21 2.95E-21 2.95E-21 4.09E-21
-  1.71E-21 8.45E-21 6.21E-21 1.61E-21 3.85E-20 1.63E-21 3.28E-21 4.25E-20
-  3.92E-19 2.94E-20 2.49E-21 9.19E-21 1.86E-20 5.54E-20 2.10E-20 1.39E-19
-  2.73E-20 3.94E-18
-  -0.3750 -0.1250  0.3750    1  1.89737E-18 kpt; spin; max resid(k); each band:
-  3.54E-21 1.38E-21 9.83E-22 1.68E-21 2.59E-21 4.08E-21 1.79E-21 3.42E-21
-  3.23E-22 7.66E-22 8.54E-22 3.03E-20 2.24E-20 1.20E-20 2.70E-20 1.80E-20
-  3.60E-20 2.23E-20 4.60E-21 1.14E-21 1.40E-20 1.25E-20 1.54E-20 3.12E-20
-  8.49E-21 2.18E-20 1.79E-20 1.07E-20 1.71E-21 2.18E-21 3.06E-21 3.76E-21
-  1.67E-21 8.67E-21 6.58E-21 1.70E-21 8.81E-21 1.69E-21 3.41E-21 4.38E-20
-  3.85E-19 2.87E-20 2.78E-21 8.38E-21 2.08E-20 6.41E-20 1.86E-20 1.31E-19
-  2.62E-20 1.90E-18
-  -0.1250 -0.1250  0.3750    1  1.05903E-15 kpt; spin; max resid(k); each band:
-  6.97E-21 1.79E-21 1.13E-21 1.31E-21 2.36E-21 7.06E-21 1.33E-21 7.43E-21
-  4.81E-22 5.48E-22 1.47E-21 2.88E-20 2.35E-20 1.73E-20 2.50E-20 2.02E-20
-  2.02E-20 2.36E-20 9.29E-21 2.12E-20 1.16E-20 2.00E-20 1.59E-20 2.11E-20
-  2.10E-20 1.70E-20 1.34E-20 7.29E-22 1.71E-20 2.25E-20 4.10E-21 6.27E-21
-  6.52E-21 4.96E-21 1.39E-20 2.15E-20 1.66E-20 1.36E-20 7.54E-21 1.83E-20
-  1.92E-20 5.54E-21 4.72E-21 8.31E-21 2.29E-20 1.72E-20 8.55E-21 1.44E-20
-  3.99E-19 1.06E-15
+   4.73E-21  9.04E-22  9.94E-22  9.64E-22  2.24E-21  5.63E-21  4.29E-21  2.97E-21
+   2.85E-22  6.37E-22  7.59E-22  3.13E-21  1.24E-20  1.83E-20  3.13E-20  3.07E-20
+   1.66E-20  1.41E-21  2.89E-20  4.58E-20  1.31E-20  1.50E-20  1.64E-20  1.51E-20
+   2.70E-20  8.30E-21  1.05E-20  3.23E-21  8.59E-21  7.48E-20  2.54E-20  1.05E-20
+   6.87E-21  8.37E-21  3.29E-21  2.98E-20  5.43E-21  3.63E-21  9.04E-20  1.65E-19
+   2.81E-22  9.76E-21  1.62E-20  2.13E-21  3.82E-21  5.98E-19  7.62E-20  7.59E-18
+   1.28E-12  2.91E-13
+   0.1250  0.1250  0.3750    1  1.50996E-15 kpt; spin; max resid(k); each band:
+   5.25E-21  1.76E-21  1.13E-21  1.30E-21  2.35E-21  7.06E-21  1.32E-21  7.25E-21
+   4.88E-22  5.60E-22  1.47E-21  2.91E-20  2.39E-20  1.74E-20  2.46E-20  1.98E-20
+   1.90E-20  2.60E-20  9.15E-21  2.10E-20  1.16E-20  2.04E-20  1.59E-20  2.10E-20
+   2.11E-20  1.69E-20  1.73E-21  7.46E-22  1.67E-20  2.26E-20  4.27E-21  6.21E-21
+   6.08E-21  5.13E-21  1.38E-20  2.16E-20  1.68E-20  1.45E-20  7.53E-21  1.86E-20
+   3.81E-19  5.91E-21  4.81E-21  8.66E-21  2.26E-20  1.52E-20  8.72E-21  1.38E-20
+   4.00E-19  1.51E-15
+   0.3750  0.1250  0.3750    1  3.72347E-18 kpt; spin; max resid(k); each band:
+   3.84E-21  1.32E-21  9.66E-22  1.66E-21  2.69E-21  4.07E-21  1.76E-21  3.39E-21
+   3.28E-22  7.72E-22  8.52E-22  3.09E-20  2.07E-20  1.20E-20  2.70E-20  1.81E-20
+   3.42E-20  1.94E-20  4.61E-21  1.18E-21  1.36E-20  1.33E-20  1.58E-20  3.12E-20
+   8.51E-21  2.21E-20  1.72E-20  1.06E-20  1.68E-21  1.90E-21  3.06E-21  4.04E-21
+   1.70E-21  8.55E-21  6.63E-21  1.64E-21  8.79E-21  1.69E-21  3.54E-21  4.00E-20
+   3.81E-19  2.92E-20  2.20E-21  8.74E-21  2.11E-20  6.19E-20  1.96E-20  1.35E-19
+   2.30E-20  3.72E-18
+  -0.3750  0.1250  0.3750    1  5.54853E-18 kpt; spin; max resid(k); each band:
+   3.59E-21  1.47E-21  9.94E-22  1.67E-21  2.65E-21  4.08E-21  1.83E-21  3.37E-21
+   4.21E-22  7.87E-22  7.62E-22  3.11E-20  2.20E-20  1.19E-20  2.73E-20  1.78E-20
+   3.69E-20  2.56E-20  4.66E-21  1.10E-21  1.55E-20  1.30E-20  1.51E-20  3.15E-20
+   8.44E-21  2.06E-20  1.76E-20  1.13E-20  1.88E-21  3.40E-21  2.84E-21  4.10E-21
+   1.65E-21  8.59E-21  6.26E-21  1.57E-21  3.74E-20  1.59E-21  2.97E-21  4.44E-20
+   5.96E-20  3.81E-20  2.56E-21  9.09E-21  1.82E-20  5.81E-20  2.16E-20  1.40E-19
+   2.75E-20  5.55E-18
+  -0.1250  0.1250  0.3750    1  6.62735E-16 kpt; spin; max resid(k); each band:
+   4.57E-21  1.80E-21  1.21E-21  1.24E-21  2.27E-21  7.06E-21  1.30E-21  7.42E-21
+   6.97E-22  4.01E-22  1.47E-21  2.95E-20  2.67E-20  1.59E-20  2.80E-20  1.82E-20
+   2.00E-20  2.44E-20  1.89E-20  1.98E-20  1.32E-20  2.28E-20  1.41E-20  2.11E-20
+   2.08E-20  1.99E-21  1.36E-20  8.61E-22  1.98E-20  2.46E-21  4.40E-21  3.15E-20
+   7.78E-21  5.52E-20  1.34E-20  2.87E-20  1.52E-20  1.17E-20  6.87E-21  1.23E-20
+   1.42E-19  5.85E-21  4.32E-21  7.70E-21  2.45E-20  1.85E-20  7.93E-21  1.68E-20
+   2.86E-19  6.63E-16
+   0.1250  0.3750  0.3750    1  1.28316E-17 kpt; spin; max resid(k); each band:
+   3.89E-21  1.72E-21  1.36E-21  1.34E-21  2.65E-22  3.30E-21  1.67E-21  3.58E-21
+   2.90E-22  6.01E-21  5.54E-22  3.33E-20  4.44E-20  2.09E-20  1.68E-20  2.18E-20
+   1.33E-20  1.01E-20  4.50E-21  9.03E-22  1.65E-20  1.83E-20  2.53E-20  1.14E-20
+   1.41E-20  1.24E-20  2.98E-21  1.28E-20  1.58E-21  2.47E-21  2.41E-21  6.58E-21
+   5.77E-21  6.65E-21  4.92E-21  1.83E-21  6.41E-20  1.73E-21  2.75E-21  2.47E-20
+   8.47E-20  3.16E-20  1.10E-21  7.73E-21  2.91E-20  5.37E-20  2.09E-20  8.22E-20
+   1.68E-19  1.28E-17
+   0.3750  0.3750  0.3750    1  5.90914E-18 kpt; spin; max resid(k); each band:
+   3.49E-21  1.79E-21  1.99E-21  2.26E-21  2.67E-21  3.01E-21  2.65E-21  2.56E-21
+   5.38E-22  7.34E-22  1.02E-21  9.14E-22  1.78E-20  2.81E-20  2.63E-20  1.78E-20
+   2.49E-20  2.19E-21  1.33E-21  1.15E-21  2.75E-21  1.72E-20  2.11E-20  1.55E-20
+   2.78E-20  1.76E-20  2.46E-21  2.80E-21  4.34E-22  4.11E-22  2.90E-21  3.21E-21
+   4.86E-21  1.12E-21  7.20E-21  4.36E-20  2.41E-20  4.48E-21  1.09E-20  9.11E-21
+   1.46E-21  5.47E-20  1.10E-20  1.34E-20  4.52E-21  4.22E-20  7.01E-20  3.02E-20
+   7.93E-19  5.91E-18
+  -0.3750  0.3750  0.3750    1  7.87235E-18 kpt; spin; max resid(k); each band:
+   3.19E-21  1.99E-21  1.87E-21  2.20E-21  3.17E-22  3.01E-21  2.67E-21  2.42E-21
+   6.57E-22  7.73E-22  9.17E-22  1.23E-21  1.77E-20  2.81E-20  2.49E-20  1.82E-20
+   2.40E-20  2.14E-21  1.37E-21  1.10E-21  2.68E-20  1.69E-20  2.10E-20  1.55E-20
+   2.81E-20  2.02E-20  2.47E-21  2.86E-21  4.24E-22  3.91E-22  2.93E-21  3.37E-21
+   4.34E-21  1.08E-21  7.59E-21  4.34E-20  2.30E-20  4.13E-21  1.06E-20  9.27E-21
+   2.37E-21  5.77E-20  1.08E-20  1.28E-20  5.56E-21  4.18E-20  7.72E-20  3.00E-20
+   7.34E-19  7.87E-18
+  -0.1250  0.3750  0.3750    1  1.56480E-17 kpt; spin; max resid(k); each band:
+   2.64E-21  1.78E-21  1.35E-21  1.35E-21  2.84E-22  3.30E-21  1.64E-21  3.67E-21
+   4.02E-22  6.10E-21  4.73E-22  3.45E-20  4.47E-20  2.08E-20  1.74E-20  2.19E-20
+   1.23E-20  9.68E-21  6.08E-21  8.48E-22  1.77E-20  1.88E-20  2.44E-20  1.13E-20
+   1.40E-20  1.20E-20  2.95E-21  1.16E-20  1.45E-21  2.70E-21  2.31E-21  6.73E-21
+   4.31E-21  6.88E-21  4.75E-21  1.80E-21  7.40E-21  1.65E-21  2.66E-21  2.63E-20
+   8.46E-20  3.15E-20  1.06E-21  8.00E-21  3.17E-20  5.00E-20  2.19E-20  8.87E-20
+   1.79E-19  1.56E-17
+   0.1250 -0.3750  0.3750    1  9.18859E-18 kpt; spin; max resid(k); each band:
+   3.74E-21  1.88E-21  1.38E-21  1.36E-21  2.58E-22  3.29E-21  1.64E-21  3.63E-21
+   4.01E-22  6.04E-21  4.55E-22  3.33E-20  4.61E-20  2.08E-20  1.73E-20  2.17E-20
+   1.18E-20  9.53E-21  6.30E-21  8.46E-22  1.84E-20  1.86E-20  2.37E-20  1.12E-20
+   1.40E-20  1.18E-20  2.92E-21  1.18E-20  1.65E-21  3.17E-21  2.29E-21  6.66E-21
+   4.40E-21  6.88E-21  4.79E-21  1.87E-21  3.52E-20  1.76E-20  2.60E-21  2.80E-20
+   2.36E-19  3.00E-20  1.05E-21  7.85E-21  3.10E-20  5.09E-20  2.21E-20  8.52E-20
+   1.74E-19  9.19E-18
+   0.3750 -0.3750  0.3750    1  3.14573E-14 kpt; spin; max resid(k); each band:
+   3.14E-21  1.99E-21  1.86E-21  2.19E-21  2.86E-22  2.97E-21  2.68E-21  2.46E-21
+   6.36E-22  8.14E-22  9.17E-22  1.10E-21  1.75E-20  2.80E-20  2.51E-20  1.72E-20
+   2.46E-20  2.20E-21  1.33E-21  1.10E-21  2.69E-20  1.69E-20  2.12E-20  1.55E-20
+   2.79E-20  1.97E-20  2.47E-21  2.88E-21  4.31E-22  4.05E-22  3.00E-21  3.30E-21
+   4.55E-21  1.10E-21  7.49E-21  4.47E-20  2.34E-20  3.78E-21  1.09E-20  9.04E-21
+   7.59E-21  5.72E-20  1.02E-20  1.37E-20  5.91E-21  3.96E-20  7.57E-20  3.15E-20
+   4.61E-15  3.15E-14
+  -0.3750 -0.3750  0.3750    1  5.58955E-18 kpt; spin; max resid(k); each band:
+   4.44E-21  1.79E-21  1.98E-21  2.14E-21  2.64E-21  3.02E-21  2.65E-21  2.55E-21
+   5.48E-22  7.14E-22  1.06E-21  7.95E-22  1.76E-20  2.81E-20  2.83E-20  1.71E-20
+   2.48E-20  2.23E-21  1.35E-21  1.12E-21  2.88E-21  1.74E-20  2.17E-20  1.55E-20
+   2.77E-20  1.78E-20  2.44E-21  2.78E-21  4.22E-22  4.18E-22  2.82E-21  3.22E-21
+   5.37E-21  1.11E-21  6.82E-21  4.54E-20  2.47E-20  4.29E-21  1.06E-20  8.64E-21
+   2.30E-21  5.63E-20  1.12E-20  1.42E-20  4.53E-21  4.30E-20  6.03E-20  3.20E-20
+   1.01E-18  5.59E-18
+  -0.1250 -0.3750  0.3750    1  8.23932E-18 kpt; spin; max resid(k); each band:
+   3.32E-21  1.78E-21  1.39E-21  1.38E-21  2.38E-22  3.30E-21  1.62E-21  3.59E-21
+   2.98E-22  5.96E-21  5.57E-22  3.22E-20  4.57E-20  2.09E-20  1.72E-20  2.16E-20
+   1.30E-20  9.78E-21  4.08E-21  9.08E-22  1.65E-20  1.79E-20  2.46E-20  1.14E-20
+   1.41E-20  1.22E-20  3.12E-21  1.20E-20  1.54E-21  2.57E-21  2.44E-21  6.44E-21
+   5.83E-21  5.93E-21  4.91E-21  1.84E-21  6.39E-20  1.69E-21  2.76E-21  2.60E-20
+   2.12E-19  2.86E-20  1.08E-21  7.50E-21  2.43E-20  5.40E-20  2.04E-20  8.00E-20
+   1.94E-19  8.24E-18
+   0.1250 -0.1250  0.3750    1  8.83195E-16 kpt; spin; max resid(k); each band:
+   4.14E-21  1.81E-21  1.22E-21  1.24E-21  2.38E-21  7.04E-21  1.29E-21  7.22E-21
+   7.16E-22  3.98E-22  1.48E-21  2.92E-20  2.66E-20  1.58E-20  2.83E-20  1.84E-20
+   1.99E-20  2.44E-20  1.85E-20  1.98E-20  1.32E-20  2.25E-20  1.38E-20  2.11E-20
+   2.08E-20  1.98E-21  1.35E-20  8.36E-22  1.98E-20  2.51E-21  4.53E-21  3.16E-20
+   7.91E-21  5.49E-20  1.34E-20  2.91E-20  1.54E-20  1.18E-20  6.99E-21  1.24E-20
+   1.45E-19  5.83E-21  4.50E-21  7.92E-21  2.43E-20  1.87E-20  7.97E-21  1.65E-20
+   2.85E-19  8.83E-16
+   0.3750 -0.1250  0.3750    1  3.93772E-18 kpt; spin; max resid(k); each band:
+   2.92E-21  1.37E-21  9.79E-22  1.67E-21  2.45E-22  4.07E-21  1.81E-21  3.31E-21
+   4.16E-22  7.98E-22  7.93E-22  3.15E-20  2.05E-20  1.19E-20  2.76E-20  1.79E-20
+   3.71E-20  2.57E-20  4.70E-21  1.13E-21  1.46E-20  1.35E-20  1.55E-20  3.15E-20
+   8.48E-21  2.14E-20  1.72E-20  1.10E-20  1.72E-21  2.95E-21  2.95E-21  4.09E-21
+   1.71E-21  8.45E-21  6.21E-21  1.61E-21  3.85E-20  1.63E-21  3.29E-21  4.25E-20
+   3.92E-19  2.94E-20  2.49E-21  9.19E-21  1.86E-20  5.55E-20  2.10E-20  1.39E-19
+   2.73E-20  3.94E-18
+  -0.3750 -0.1250  0.3750    1  1.89779E-18 kpt; spin; max resid(k); each band:
+   3.55E-21  1.38E-21  9.83E-22  1.68E-21  2.59E-21  4.08E-21  1.79E-21  3.42E-21
+   3.23E-22  7.66E-22  8.54E-22  3.02E-20  2.23E-20  1.20E-20  2.70E-20  1.80E-20
+   3.59E-20  2.23E-20  4.60E-21  1.14E-21  1.40E-20  1.25E-20  1.54E-20  3.12E-20
+   8.49E-21  2.18E-20  1.79E-20  1.07E-20  1.71E-21  2.18E-21  3.06E-21  3.76E-21
+   1.67E-21  8.67E-21  6.58E-21  1.70E-21  8.81E-21  1.69E-21  3.42E-21  4.38E-20
+   3.85E-19  2.87E-20  2.78E-21  8.38E-21  2.08E-20  6.41E-20  1.86E-20  1.31E-19
+   2.62E-20  1.90E-18
+  -0.1250 -0.1250  0.3750    1  1.05904E-15 kpt; spin; max resid(k); each band:
+   6.94E-21  1.79E-21  1.13E-21  1.31E-21  2.36E-21  7.06E-21  1.33E-21  7.42E-21
+   4.81E-22  5.48E-22  1.47E-21  2.87E-20  2.35E-20  1.73E-20  2.50E-20  2.02E-20
+   2.02E-20  2.36E-20  9.29E-21  2.12E-20  1.16E-20  2.00E-20  1.59E-20  2.11E-20
+   2.10E-20  1.70E-20  1.34E-20  7.29E-22  1.71E-20  2.25E-20  4.10E-21  6.27E-21
+   6.55E-21  4.96E-21  1.39E-20  2.15E-20  1.66E-20  1.36E-20  7.55E-21  1.83E-20
+   1.92E-20  5.55E-21  4.72E-21  8.31E-21  2.29E-20  1.73E-20  8.55E-21  1.44E-20
+   3.99E-19  1.06E-15
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -9609,20 +9615,20 @@ force_length_stats: {min:   2.44621789E-10, max:   6.39645191E-10, mean:   4.103
     5      0.00000000000000     0.00000000000000     1.92104556148385
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000001728    -0.00000000027702    -0.00000000014220
-    2      0.00000000032080     0.00000000031324    -0.00000000022853
-    3      0.00000000026245    -0.00000000010429    -0.00000000021051
-    4     -0.00000000011756     0.00000000016610     0.00000000013575
-    5     -0.00000000044841    -0.00000000009804     0.00000000044550
- frms,max,avg= 2.5080922E-10 4.4840546E-10   1.010E-11  3.505E-11  7.811E-12 h/b
+    1     -0.00000000001727    -0.00000000027701    -0.00000000014220
+    2      0.00000000032078     0.00000000031323    -0.00000000022853
+    3      0.00000000026245    -0.00000000010428    -0.00000000021051
+    4     -0.00000000011756     0.00000000016609     0.00000000013575
+    5     -0.00000000044840    -0.00000000009803     0.00000000044549
+ frms,max,avg= 2.5080291E-10 4.4839625E-10   1.010E-11  3.505E-11  7.811E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000088857    -0.00000001424496    -0.00000000731235
-    2      0.00000001649607     0.00000001610757    -0.00000001175173
-    3      0.00000001349582    -0.00000000536266    -0.00000001082502
-    4     -0.00000000604538     0.00000000854124     0.00000000698074
-    5     -0.00000002305793    -0.00000000504119     0.00000002290837
- frms,max,avg= 1.2897128E-08 2.3057934E-08   5.193E-10  1.802E-09  4.017E-10 e/A
+    1     -0.00000000088822    -0.00000001424440    -0.00000000731222
+    2      0.00000001649541     0.00000001610688    -0.00000001175169
+    3      0.00000001349551    -0.00000000536239    -0.00000001082480
+    4     -0.00000000604524     0.00000000854092     0.00000000698065
+    5     -0.00000002305746    -0.00000000504101     0.00000002290807
+ frms,max,avg= 1.2896803E-08 2.3057460E-08   5.193E-10  1.802E-09  4.017E-10 e/A
  length scales=  7.260500000000  7.260500000000  7.260500000000 bohr
               =  3.842091122968  3.842091122968  3.842091122968 angstroms
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
@@ -10150,32 +10156,32 @@ force_length_stats: {min:   2.44621789E-10, max:   6.39645191E-10, mean:   4.103
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.22101101655755E+01
-hartree             :  3.42934572736325E+01
-xc                  : -1.94923345610364E+01
+kinetic             :  4.22101101655712E+01
+hartree             :  3.42934572736328E+01
+xc                  : -1.94923345610373E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
-local_psp           : -1.09494290735322E+02
-spherical_terms     :  8.43864081978105E+00
-internal            : -1.51925010102926E+02
-'-kT*entropy'       : -3.39894393249036E-03
-total_energy        : -1.51928409046858E+02
-total_energy_eV     : -4.13418225781315E+03
+local_psp           : -1.09494290735327E+02
+spherical_terms     :  8.43864081978152E+00
+internal            : -1.51925010102935E+02
+'-kT*entropy'       : -3.39894393249030E-03
+total_energy        : -1.51928409046867E+02
+total_energy_eV     : -4.13418225781340E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.47235864829347E+01
+band_energy         : -1.47235864829215E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
 xc_dc               : -3.05329761331903E+01
-spherical_terms     :  1.21214552787930E+00
-internal            : -1.51925010153802E+02
-'-kT*entropy'       : -3.39894393249036E-03
+spherical_terms     :  1.21214552786640E+00
+internal            : -1.51925010153801E+02
+'-kT*entropy'       : -3.39894393249030E-03
 total_energy_dc     : -1.51928409097734E+02
-total_energy_dc_eV  : -4.13418225919756E+03
+total_energy_dc_eV  : -4.13418225919755E+03
 ...
 
 
@@ -10212,14 +10218,14 @@ total_energy_dc_eV  : -4.13418225919756E+03
     5      -0.000000001109     -0.000000000264      0.000000000863
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60140977E-13
-  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12337837E-12
-  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07535560E-12
+  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60136482E-13
+  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12338209E-12
+  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07534050E-12
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.1499E+01 GPa]
-- sigma(1 1)=  6.14988163E+01  sigma(3 2)= -2.82483181E-08
-- sigma(2 2)=  6.14988156E+01  sigma(3 1)= -3.30509272E-08
-- sigma(3 3)=  6.14988152E+01  sigma(2 1)= -1.19901081E-07
+- sigma(1 1)=  6.14988163E+01  sigma(3 2)= -2.82481858E-08
+- sigma(2 2)=  6.14988156E+01  sigma(3 1)= -3.30510367E-08
+- sigma(3 3)=  6.14988152E+01  sigma(2 1)= -1.19900637E-07
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -10288,7 +10294,6 @@ P newkpt: treating     50 bands with npw=     753 for ikpt=  30 by node   14
 P newkpt: treating     50 bands with npw=     753 for ikpt=  31 by node   15
 P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 
-
  =======================================================================
   == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
      (it is assumed that the wavefunction for the first reference 
@@ -10307,19 +10312,19 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.0038 eV
-     The bare interaction (for a renorm. wfn ) =     22.5848 eV
+     The bare interaction (no renormalization) =     16.3156 eV
+     The bare interaction (for a renorm. wfn ) =     23.0248 eV
  =======================================================================
 
 
 ================================================================================
  prteigrs : about to open file tucrpa_2_MPI24o_DS2_EIG
  Non-SCF case, kpt    1 (  0.12500  0.12500  0.12500), residuals and eigenvalues=
-  2.06E-19  1.40E-19  8.26E-19  8.35E-19  1.46E-19  2.85E-19  9.35E-19  6.78E-19
+  2.06E-19  1.40E-19  8.26E-19  8.35E-19  1.46E-19  2.85E-19  9.36E-19  6.78E-19
   2.96E-19  4.30E-19  2.18E-19  2.60E-19  2.03E-19  2.41E-19  6.71E-19  3.92E-19
   9.55E-19  1.88E-19  2.13E-19  2.30E-19  4.16E-19  7.71E-19  8.11E-19  5.28E-19
   8.70E-19  4.11E-19  1.49E-19  9.86E-19  2.34E-19  7.75E-19  3.44E-19  7.43E-19
-  7.57E-19  2.71E-19  5.57E-19  1.25E-19  8.00E-19  2.29E-19  1.14E-19  3.65E-19
+  7.57E-19  2.71E-19  5.57E-19  1.25E-19  8.00E-19  2.30E-19  1.14E-19  3.65E-19
   6.58E-19  3.55E-19  7.23E-19  7.28E-19  8.56E-19  2.73E-19  4.94E-19  1.59E-08
   2.73E-07  9.33E-06
  -2.1011E+00 -1.1520E+00 -1.1520E+00 -1.1520E+00 -9.6527E-01 -4.2839E-01
@@ -10929,7 +10934,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =      5.992978802998276
+ Compensation charge over spherical meshes =      5.992978803005257
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -10997,7 +11002,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -11103,261 +11108,261 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   45.352E-20; max=  99.932E-20
    0.1250  0.1250  0.1250    1  9.33373E-06 kpt; spin; max resid(k); each band:
-  2.06E-19 1.40E-19 8.26E-19 8.35E-19 1.46E-19 2.85E-19 9.35E-19 6.78E-19
-  2.96E-19 4.30E-19 2.18E-19 2.60E-19 2.03E-19 2.41E-19 6.71E-19 3.92E-19
-  9.55E-19 1.88E-19 2.13E-19 2.30E-19 4.16E-19 7.71E-19 8.11E-19 5.28E-19
-  8.70E-19 4.11E-19 1.49E-19 9.86E-19 2.34E-19 7.75E-19 3.44E-19 7.43E-19
-  7.57E-19 2.71E-19 5.57E-19 1.25E-19 8.00E-19 2.29E-19 1.14E-19 3.65E-19
-  6.58E-19 3.55E-19 7.23E-19 7.28E-19 8.56E-19 2.73E-19 4.94E-19 1.59E-08
-  2.73E-07 9.33E-06
+   2.06E-19  1.40E-19  8.26E-19  8.35E-19  1.46E-19  2.85E-19  9.36E-19  6.78E-19
+   2.96E-19  4.30E-19  2.18E-19  2.60E-19  2.03E-19  2.41E-19  6.71E-19  3.92E-19
+   9.55E-19  1.88E-19  2.13E-19  2.30E-19  4.16E-19  7.71E-19  8.11E-19  5.28E-19
+   8.70E-19  4.11E-19  1.49E-19  9.86E-19  2.34E-19  7.75E-19  3.44E-19  7.43E-19
+   7.57E-19  2.71E-19  5.57E-19  1.25E-19  8.00E-19  2.30E-19  1.14E-19  3.65E-19
+   6.58E-19  3.55E-19  7.23E-19  7.28E-19  8.56E-19  2.73E-19  4.94E-19  1.59E-08
+   2.73E-07  9.33E-06
    0.3750  0.1250  0.1250    1  2.38027E-06 kpt; spin; max resid(k); each band:
-  4.57E-19 1.04E-19 1.65E-19 3.14E-19 4.95E-19 1.86E-19 6.03E-19 1.01E-19
-  2.64E-19 2.17E-19 6.16E-19 8.10E-19 1.89E-19 7.40E-19 4.56E-19 3.16E-19
-  2.40E-19 6.57E-19 2.31E-19 2.53E-19 2.70E-19 5.64E-19 4.86E-19 2.64E-19
-  2.01E-19 5.65E-19 8.00E-19 3.69E-19 5.26E-19 3.68E-19 7.51E-19 1.65E-19
-  4.03E-19 3.78E-19 8.14E-19 9.28E-19 7.63E-19 7.01E-19 6.67E-19 9.76E-20
-  6.38E-19 2.12E-19 3.34E-19 2.68E-19 9.35E-19 9.62E-19 6.44E-19 4.39E-15
-  8.64E-12 2.38E-06
+   4.57E-19  1.04E-19  1.65E-19  3.14E-19  4.95E-19  1.86E-19  6.03E-19  1.01E-19
+   2.64E-19  2.17E-19  6.16E-19  8.10E-19  1.89E-19  7.40E-19  4.56E-19  3.16E-19
+   2.40E-19  6.57E-19  2.31E-19  2.53E-19  2.70E-19  5.64E-19  4.86E-19  2.64E-19
+   2.01E-19  5.65E-19  8.00E-19  3.69E-19  5.26E-19  3.68E-19  7.51E-19  1.65E-19
+   4.03E-19  3.78E-19  8.14E-19  9.28E-19  7.63E-19  7.01E-19  6.67E-19  9.76E-20
+   6.38E-19  2.12E-19  3.34E-19  2.68E-19  9.35E-19  9.62E-19  6.44E-19  4.39E-15
+   8.64E-12  2.38E-06
   -0.3750  0.1250  0.1250    1  1.07380E-06 kpt; spin; max resid(k); each band:
-  4.61E-19 2.73E-19 3.18E-19 2.83E-19 9.81E-19 2.16E-19 9.04E-19 1.50E-19
-  4.86E-19 4.59E-19 8.57E-19 6.02E-19 2.44E-19 2.35E-19 3.94E-19 6.53E-19
-  3.64E-19 9.82E-19 2.54E-19 1.05E-19 1.87E-19 2.71E-19 4.02E-19 2.05E-19
-  6.49E-19 5.46E-19 2.39E-19 2.28E-19 3.12E-19 7.71E-19 4.68E-19 1.77E-19
-  8.20E-19 1.32E-19 8.41E-19 8.22E-19 6.20E-19 2.49E-19 2.17E-19 3.51E-19
-  1.30E-19 2.64E-19 7.82E-19 5.55E-19 6.39E-19 9.78E-19 6.90E-19 6.12E-16
-  2.06E-12 1.07E-06
+   4.61E-19  2.73E-19  3.18E-19  2.83E-19  9.81E-19  2.16E-19  9.04E-19  1.50E-19
+   4.86E-19  4.59E-19  8.57E-19  6.02E-19  2.44E-19  2.35E-19  3.94E-19  6.53E-19
+   3.64E-19  9.82E-19  2.54E-19  1.05E-19  1.87E-19  2.71E-19  4.02E-19  2.05E-19
+   6.49E-19  5.46E-19  2.39E-19  2.28E-19  3.12E-19  7.71E-19  4.68E-19  1.77E-19
+   8.20E-19  1.32E-19  8.41E-19  8.22E-19  6.20E-19  2.49E-19  2.17E-19  3.51E-19
+   1.30E-19  2.64E-19  7.82E-19  5.55E-19  6.39E-19  9.78E-19  6.90E-19  6.12E-16
+   2.06E-12  1.07E-06
   -0.1250  0.1250  0.1250    1  7.30168E-05 kpt; spin; max resid(k); each band:
-  2.23E-19 3.58E-19 1.61E-19 7.66E-19 1.62E-19 3.45E-19 8.14E-20 3.67E-19
-  1.50E-19 4.09E-19 1.11E-19 4.12E-19 3.06E-19 1.93E-19 4.40E-19 6.65E-19
-  4.76E-19 4.20E-19 2.88E-19 3.17E-19 8.93E-19 8.62E-19 7.57E-19 2.93E-19
-  7.51E-19 5.73E-19 7.43E-20 6.95E-19 6.48E-19 3.49E-19 1.04E-19 4.57E-19
-  7.51E-19 1.06E-19 6.92E-19 3.09E-19 2.82E-19 2.97E-19 6.37E-19 3.97E-19
-  6.43E-19 3.27E-19 1.17E-19 4.27E-19 6.23E-19 8.78E-19 7.91E-19 1.39E-08
-  1.15E-07 7.30E-05
+   2.23E-19  3.58E-19  1.61E-19  7.66E-19  1.62E-19  3.45E-19  8.14E-20  3.67E-19
+   1.50E-19  4.09E-19  1.11E-19  4.12E-19  3.06E-19  1.93E-19  4.40E-19  6.65E-19
+   4.76E-19  4.20E-19  2.88E-19  3.17E-19  8.93E-19  8.62E-19  7.57E-19  2.93E-19
+   7.51E-19  5.73E-19  7.43E-20  6.95E-19  6.48E-19  3.49E-19  1.04E-19  4.57E-19
+   7.51E-19  1.06E-19  6.92E-19  3.09E-19  2.82E-19  2.97E-19  6.37E-19  3.97E-19
+   6.43E-19  3.27E-19  1.17E-19  4.27E-19  6.23E-19  8.78E-19  7.91E-19  1.39E-08
+   1.15E-07  7.30E-05
    0.1250  0.3750  0.1250    1  1.23848E-06 kpt; spin; max resid(k); each band:
-  5.00E-19 5.92E-19 2.40E-19 3.36E-19 1.93E-19 2.47E-19 3.19E-19 5.99E-19
-  8.69E-19 5.33E-19 1.23E-19 7.90E-19 7.45E-19 4.24E-19 8.19E-19 2.85E-19
-  2.77E-19 5.54E-19 1.73E-19 5.05E-19 4.22E-19 7.67E-19 9.31E-19 5.93E-19
-  5.86E-19 8.60E-19 7.53E-19 9.11E-20 3.80E-19 7.63E-19 1.27E-19 4.69E-19
-  9.32E-19 1.52E-19 1.20E-19 5.61E-19 3.81E-19 1.51E-19 3.57E-19 4.30E-19
-  3.09E-19 3.95E-19 6.75E-19 2.25E-19 9.69E-19 5.58E-19 4.23E-19 4.10E-15
-  3.32E-11 1.24E-06
+   5.00E-19  5.92E-19  2.40E-19  3.36E-19  1.93E-19  2.47E-19  3.19E-19  5.99E-19
+   8.69E-19  5.33E-19  1.23E-19  7.90E-19  7.45E-19  4.24E-19  8.19E-19  2.85E-19
+   2.77E-19  5.54E-19  1.73E-19  5.05E-19  4.22E-19  7.67E-19  9.31E-19  5.93E-19
+   5.86E-19  8.60E-19  7.53E-19  9.11E-20  3.80E-19  7.63E-19  1.27E-19  4.69E-19
+   9.32E-19  1.52E-19  1.20E-19  5.61E-19  3.81E-19  1.51E-19  3.57E-19  4.30E-19
+   3.09E-19  3.95E-19  6.75E-19  2.25E-19  9.69E-19  5.58E-19  4.23E-19  4.10E-15
+   3.32E-11  1.24E-06
    0.3750  0.3750  0.1250    1  3.16750E-07 kpt; spin; max resid(k); each band:
-  2.70E-19 3.12E-19 1.57E-19 4.10E-19 2.62E-19 1.80E-19 9.81E-19 2.46E-19
-  9.22E-19 3.25E-19 1.99E-19 2.60E-19 9.61E-19 2.61E-19 1.29E-19 5.04E-19
-  6.90E-19 1.96E-19 2.25E-19 4.28E-19 4.00E-19 5.02E-19 3.54E-19 3.64E-19
-  1.67E-19 9.57E-19 4.08E-19 1.48E-19 5.88E-19 8.76E-19 7.49E-19 6.44E-19
-  3.17E-19 6.77E-19 2.41E-19 7.17E-19 1.50E-19 9.12E-19 3.10E-19 5.47E-19
-  2.85E-19 5.51E-19 7.57E-19 8.30E-19 3.24E-19 3.22E-19 1.81E-17 1.16E-13
-  4.20E-11 3.17E-07
+   2.70E-19  3.12E-19  1.57E-19  4.10E-19  2.62E-19  1.80E-19  9.81E-19  2.46E-19
+   9.22E-19  3.25E-19  1.99E-19  2.60E-19  9.61E-19  2.61E-19  1.29E-19  5.04E-19
+   6.90E-19  1.96E-19  2.25E-19  4.28E-19  4.00E-19  5.02E-19  3.54E-19  3.64E-19
+   1.67E-19  9.57E-19  4.08E-19  1.48E-19  5.88E-19  8.76E-19  7.49E-19  6.44E-19
+   3.17E-19  6.77E-19  2.41E-19  7.17E-19  1.50E-19  9.12E-19  3.10E-19  5.47E-19
+   2.85E-19  5.51E-19  7.57E-19  8.30E-19  3.24E-19  3.22E-19  1.81E-17  1.16E-13
+   4.20E-11  3.17E-07
   -0.3750  0.3750  0.1250    1  3.88057E-07 kpt; spin; max resid(k); each band:
-  4.50E-19 3.10E-19 3.29E-19 5.96E-19 6.29E-19 1.11E-19 6.42E-19 8.35E-19
-  6.88E-19 5.34E-19 8.65E-19 5.65E-19 2.32E-19 2.49E-19 1.85E-19 3.84E-19
-  9.89E-19 9.14E-19 3.21E-19 4.05E-19 3.52E-19 8.64E-19 5.13E-19 4.60E-19
-  5.84E-19 1.87E-19 2.38E-19 4.15E-19 9.86E-20 1.78E-19 2.94E-19 9.86E-19
-  3.80E-19 2.44E-19 2.08E-19 1.77E-19 3.46E-19 8.07E-20 3.40E-19 8.51E-19
-  3.64E-19 3.95E-19 2.58E-19 8.72E-19 9.12E-19 5.75E-19 4.45E-17 2.99E-13
-  7.76E-12 3.88E-07
+   4.50E-19  3.10E-19  3.29E-19  5.96E-19  6.29E-19  1.11E-19  6.42E-19  8.35E-19
+   6.88E-19  5.34E-19  8.65E-19  5.65E-19  2.32E-19  2.49E-19  1.85E-19  3.84E-19
+   9.89E-19  9.14E-19  3.21E-19  4.05E-19  3.52E-19  8.64E-19  5.13E-19  4.60E-19
+   5.84E-19  1.87E-19  2.38E-19  4.15E-19  9.86E-20  1.78E-19  2.94E-19  9.86E-19
+   3.80E-19  2.44E-19  2.08E-19  1.77E-19  3.46E-19  8.07E-20  3.40E-19  8.51E-19
+   3.64E-19  3.95E-19  2.58E-19  8.72E-19  9.12E-19  5.75E-19  4.45E-17  2.99E-13
+   7.76E-12  3.88E-07
   -0.1250  0.3750  0.1250    1  2.80678E-06 kpt; spin; max resid(k); each band:
-  9.02E-19 4.11E-19 3.10E-19 1.52E-19 2.09E-19 6.06E-19 2.67E-19 7.13E-19
-  3.16E-19 7.59E-19 4.97E-19 3.60E-19 2.52E-19 2.00E-19 3.58E-19 6.94E-19
-  2.10E-19 2.96E-19 1.41E-19 1.66E-19 2.15E-19 4.70E-19 2.33E-19 6.05E-19
-  3.51E-19 2.39E-19 1.91E-19 1.97E-19 2.10E-19 3.80E-19 3.28E-19 1.01E-19
-  9.94E-19 2.15E-19 2.45E-19 2.22E-19 6.51E-19 1.66E-19 2.67E-19 5.28E-19
-  9.12E-19 8.96E-19 5.32E-19 9.18E-19 3.83E-19 5.08E-19 2.92E-19 1.11E-15
-  2.17E-11 2.81E-06
+   9.02E-19  4.11E-19  3.10E-19  1.52E-19  2.09E-19  6.06E-19  2.67E-19  7.13E-19
+   3.16E-19  7.59E-19  4.97E-19  3.60E-19  2.52E-19  2.00E-19  3.58E-19  6.94E-19
+   2.10E-19  2.96E-19  1.41E-19  1.66E-19  2.15E-19  4.70E-19  2.33E-19  6.05E-19
+   3.51E-19  2.39E-19  1.91E-19  1.97E-19  2.10E-19  3.80E-19  3.28E-19  1.01E-19
+   9.94E-19  2.15E-19  2.45E-19  2.22E-19  6.51E-19  1.66E-19  2.67E-19  5.28E-19
+   9.12E-19  8.96E-19  5.32E-19  9.18E-19  3.83E-19  5.08E-19  2.92E-19  1.11E-15
+   2.17E-11  2.81E-06
    0.1250 -0.3750  0.1250    1  2.87205E-06 kpt; spin; max resid(k); each band:
-  2.36E-19 2.82E-19 4.20E-19 4.07E-19 4.80E-19 4.90E-19 1.13E-19 5.50E-19
-  7.94E-19 6.55E-19 4.65E-19 1.81E-19 2.77E-19 5.02E-19 7.65E-19 5.16E-19
-  4.60E-19 5.43E-19 3.50E-19 6.43E-19 5.21E-19 4.23E-19 1.96E-19 2.33E-19
-  7.28E-19 2.61E-19 3.73E-19 8.41E-20 3.46E-19 2.07E-19 6.20E-19 1.39E-19
-  3.58E-19 7.37E-20 7.15E-19 6.21E-19 3.30E-19 9.63E-19 3.32E-19 2.86E-19
-  3.63E-19 5.41E-19 8.68E-19 4.28E-19 6.49E-19 3.61E-19 9.61E-19 4.98E-15
-  4.82E-11 2.87E-06
+   2.36E-19  2.82E-19  4.20E-19  4.07E-19  4.80E-19  4.90E-19  1.13E-19  5.50E-19
+   7.94E-19  6.55E-19  4.65E-19  1.81E-19  2.77E-19  5.02E-19  7.65E-19  5.16E-19
+   4.60E-19  5.43E-19  3.50E-19  6.43E-19  5.21E-19  4.23E-19  1.96E-19  2.33E-19
+   7.28E-19  2.61E-19  3.73E-19  8.41E-20  3.46E-19  2.07E-19  6.20E-19  1.39E-19
+   3.58E-19  7.37E-20  7.15E-19  6.21E-19  3.30E-19  9.63E-19  3.32E-19  2.86E-19
+   3.63E-19  5.41E-19  8.68E-19  4.28E-19  6.49E-19  3.61E-19  9.61E-19  4.98E-15
+   4.82E-11  2.87E-06
    0.3750 -0.3750  0.1250    1  8.42422E-07 kpt; spin; max resid(k); each band:
-  7.47E-19 5.40E-19 6.82E-19 1.79E-19 2.41E-19 3.05E-19 5.06E-19 9.33E-20
-  3.09E-19 5.65E-19 5.25E-19 1.79E-19 7.78E-19 4.35E-19 4.38E-19 2.19E-19
-  4.76E-19 5.54E-19 4.68E-19 2.64E-19 8.35E-19 2.41E-19 6.23E-19 4.82E-19
-  3.18E-19 4.49E-19 3.61E-19 2.01E-19 3.34E-19 1.83E-19 4.66E-19 3.16E-19
-  7.75E-19 6.15E-19 1.18E-19 2.14E-19 5.88E-19 5.12E-19 2.12E-19 9.27E-19
-  7.38E-19 5.45E-19 1.46E-19 4.29E-19 7.41E-19 3.53E-19 1.51E-16 8.55E-13
-  1.27E-10 8.42E-07
+   7.47E-19  5.40E-19  6.82E-19  1.79E-19  2.41E-19  3.05E-19  5.06E-19  9.33E-20
+   3.09E-19  5.65E-19  5.25E-19  1.79E-19  7.78E-19  4.35E-19  4.38E-19  2.19E-19
+   4.76E-19  5.54E-19  4.68E-19  2.64E-19  8.35E-19  2.41E-19  6.23E-19  4.82E-19
+   3.18E-19  4.49E-19  3.61E-19  2.01E-19  3.34E-19  1.83E-19  4.66E-19  3.16E-19
+   7.75E-19  6.15E-19  1.18E-19  2.14E-19  5.88E-19  5.12E-19  2.12E-19  9.27E-19
+   7.38E-19  5.45E-19  1.46E-19  4.29E-19  7.41E-19  3.53E-19  1.51E-16  8.55E-13
+   1.27E-10  8.42E-07
   -0.3750 -0.3750  0.1250    1  2.77911E-07 kpt; spin; max resid(k); each band:
-  5.40E-19 1.95E-19 1.73E-19 2.21E-19 6.31E-19 8.71E-20 2.19E-19 2.35E-19
-  1.48E-19 5.29E-19 5.86E-19 5.86E-19 1.81E-19 2.22E-19 1.93E-19 1.58E-19
-  2.45E-19 2.50E-19 6.19E-19 1.78E-19 4.91E-19 3.59E-19 2.45E-19 5.52E-19
-  3.01E-19 4.41E-19 4.00E-19 2.24E-19 2.95E-19 5.82E-19 5.87E-19 5.51E-19
-  3.33E-19 1.16E-19 6.48E-19 1.42E-19 4.25E-19 2.95E-19 6.18E-19 2.47E-19
-  5.11E-19 2.94E-19 3.94E-19 6.02E-19 7.79E-19 4.53E-19 7.38E-17 4.83E-13
-  4.75E-11 2.78E-07
+   5.40E-19  1.95E-19  1.73E-19  2.21E-19  6.31E-19  8.71E-20  2.19E-19  2.35E-19
+   1.48E-19  5.29E-19  5.86E-19  5.86E-19  1.81E-19  2.22E-19  1.93E-19  1.58E-19
+   2.45E-19  2.50E-19  6.19E-19  1.78E-19  4.91E-19  3.59E-19  2.45E-19  5.52E-19
+   3.01E-19  4.41E-19  4.00E-19  2.24E-19  2.95E-19  5.82E-19  5.87E-19  5.51E-19
+   3.33E-19  1.16E-19  6.48E-19  1.42E-19  4.25E-19  2.95E-19  6.18E-19  2.47E-19
+   5.11E-19  2.94E-19  3.94E-19  6.02E-19  7.79E-19  4.53E-19  7.38E-17  4.83E-13
+   4.75E-11  2.78E-07
   -0.1250 -0.3750  0.1250    1  1.10303E-06 kpt; spin; max resid(k); each band:
-  4.28E-19 9.21E-19 9.22E-19 7.01E-19 9.58E-19 9.73E-19 4.07E-19 5.07E-19
-  3.73E-19 1.05E-19 1.73E-19 4.60E-19 3.42E-19 9.21E-19 9.00E-19 6.49E-20
-  3.13E-19 2.70E-19 2.19E-19 7.57E-19 1.67E-19 9.11E-20 1.31E-19 6.83E-20
-  1.76E-19 9.01E-20 2.08E-19 3.74E-19 2.86E-19 1.11E-19 1.59E-19 8.13E-20
-  5.61E-19 2.17E-19 8.72E-19 4.18E-19 3.95E-19 2.52E-19 3.60E-19 2.76E-19
-  5.12E-19 2.43E-19 3.74E-19 2.08E-19 8.72E-19 6.24E-19 7.96E-19 6.41E-15
-  3.20E-11 1.10E-06
+   4.28E-19  9.21E-19  9.22E-19  7.01E-19  9.58E-19  9.73E-19  4.07E-19  5.07E-19
+   3.73E-19  1.05E-19  1.73E-19  4.60E-19  3.42E-19  9.21E-19  9.00E-19  6.49E-20
+   3.13E-19  2.70E-19  2.19E-19  7.57E-19  1.67E-19  9.11E-20  1.31E-19  6.83E-20
+   1.76E-19  9.01E-20  2.08E-19  3.74E-19  2.86E-19  1.11E-19  1.59E-19  8.13E-20
+   5.61E-19  2.17E-19  8.72E-19  4.18E-19  3.95E-19  2.52E-19  3.60E-19  2.76E-19
+   5.12E-19  2.43E-19  3.74E-19  2.08E-19  8.72E-19  6.24E-19  7.96E-19  6.41E-15
+   3.20E-11  1.10E-06
    0.1250 -0.1250  0.1250    1  1.32025E-04 kpt; spin; max resid(k); each band:
-  5.00E-19 8.44E-20 4.16E-19 2.39E-19 4.05E-19 3.82E-19 2.57E-19 8.08E-19
-  6.68E-19 2.20E-19 1.45E-19 7.10E-19 2.33E-19 1.16E-19 1.71E-19 1.40E-19
-  2.32E-19 2.69E-19 1.74E-19 2.34E-19 8.01E-19 6.62E-19 4.80E-19 8.58E-19
-  7.75E-19 2.94E-19 3.67E-19 4.30E-19 7.22E-19 2.49E-19 7.44E-19 2.41E-19
-  4.63E-19 2.68E-19 7.84E-19 1.75E-19 7.82E-19 2.29E-19 2.55E-19 1.39E-19
-  4.75E-19 3.65E-19 6.18E-19 6.64E-19 5.54E-19 3.97E-19 3.97E-19 4.12E-08
-  6.87E-08 1.32E-04
+   5.00E-19  8.44E-20  4.16E-19  2.39E-19  4.05E-19  3.82E-19  2.57E-19  8.08E-19
+   6.68E-19  2.20E-19  1.45E-19  7.10E-19  2.33E-19  1.16E-19  1.71E-19  1.40E-19
+   2.32E-19  2.69E-19  1.74E-19  2.34E-19  8.01E-19  6.62E-19  4.80E-19  8.58E-19
+   7.75E-19  2.94E-19  3.67E-19  4.30E-19  7.22E-19  2.49E-19  7.44E-19  2.41E-19
+   4.63E-19  2.68E-19  7.84E-19  1.75E-19  7.82E-19  2.29E-19  2.55E-19  1.39E-19
+   4.75E-19  3.65E-19  6.18E-19  6.64E-19  5.54E-19  3.97E-19  3.97E-19  4.12E-08
+   6.87E-08  1.32E-04
    0.3750 -0.1250  0.1250    1  1.41655E-06 kpt; spin; max resid(k); each band:
-  2.87E-19 9.68E-19 1.78E-19 3.27E-19 2.05E-19 8.91E-20 3.86E-19 5.93E-19
-  3.24E-19 4.91E-19 5.00E-19 5.75E-19 1.90E-19 4.09E-19 9.74E-19 5.55E-19
-  8.54E-19 8.44E-19 4.43E-19 9.60E-19 7.38E-19 5.21E-19 3.35E-19 6.36E-19
-  2.26E-19 7.03E-19 4.91E-19 3.23E-19 2.09E-19 3.21E-19 3.18E-19 1.75E-19
-  8.69E-19 1.40E-19 9.64E-19 1.47E-19 3.46E-19 7.74E-19 2.28E-19 5.35E-19
-  1.70E-19 2.67E-19 5.11E-19 2.72E-19 7.02E-19 5.29E-19 5.72E-19 1.60E-15
-  2.01E-11 1.42E-06
+   2.87E-19  9.68E-19  1.78E-19  3.27E-19  2.05E-19  8.91E-20  3.86E-19  5.93E-19
+   3.24E-19  4.91E-19  5.00E-19  5.75E-19  1.90E-19  4.09E-19  9.74E-19  5.55E-19
+   8.54E-19  8.44E-19  4.43E-19  9.60E-19  7.38E-19  5.21E-19  3.35E-19  6.36E-19
+   2.26E-19  7.03E-19  4.91E-19  3.23E-19  2.09E-19  3.21E-19  3.18E-19  1.75E-19
+   8.69E-19  1.40E-19  9.64E-19  1.47E-19  3.46E-19  7.74E-19  2.28E-19  5.35E-19
+   1.70E-19  2.67E-19  5.11E-19  2.72E-19  7.02E-19  5.29E-19  5.72E-19  1.60E-15
+   2.01E-11  1.42E-06
   -0.3750 -0.1250  0.1250    1  3.38712E-06 kpt; spin; max resid(k); each band:
-  3.62E-19 8.52E-19 2.73E-19 9.41E-19 4.82E-19 8.84E-19 2.86E-19 1.79E-19
-  3.85E-19 5.26E-19 8.44E-19 4.45E-19 8.08E-19 5.18E-19 5.15E-19 6.59E-19
-  4.80E-19 7.70E-19 3.13E-19 3.04E-19 3.51E-19 7.48E-19 3.19E-19 1.98E-19
-  3.25E-19 3.87E-20 5.69E-19 6.52E-19 2.53E-19 2.32E-19 9.20E-19 2.11E-19
-  6.13E-19 3.72E-19 6.72E-19 1.28E-19 3.17E-19 1.01E-19 5.63E-19 4.24E-19
-  1.36E-19 6.63E-19 8.30E-19 1.73E-19 6.14E-19 4.83E-19 7.74E-19 1.23E-15
-  5.01E-11 3.39E-06
+   3.62E-19  8.52E-19  2.73E-19  9.41E-19  4.82E-19  8.84E-19  2.86E-19  1.79E-19
+   3.85E-19  5.26E-19  8.44E-19  4.45E-19  8.08E-19  5.18E-19  5.15E-19  6.59E-19
+   4.80E-19  7.70E-19  3.13E-19  3.04E-19  3.51E-19  7.48E-19  3.19E-19  1.98E-19
+   3.25E-19  3.87E-20  5.69E-19  6.52E-19  2.53E-19  2.32E-19  9.20E-19  2.11E-19
+   6.13E-19  3.72E-19  6.72E-19  1.28E-19  3.17E-19  1.01E-19  5.63E-19  4.24E-19
+   1.36E-19  6.63E-19  8.30E-19  1.73E-19  6.14E-19  4.83E-19  7.74E-19  1.23E-15
+   5.01E-11  3.39E-06
   -0.1250 -0.1250  0.1250    1  2.27924E-06 kpt; spin; max resid(k); each band:
-  2.33E-19 1.05E-19 3.08E-19 6.63E-19 2.30E-19 1.21E-19 2.34E-19 3.16E-19
-  5.23E-19 8.46E-19 5.22E-19 8.48E-19 8.68E-19 3.35E-19 2.02E-19 2.39E-19
-  9.36E-19 8.65E-19 8.75E-19 1.83E-19 5.07E-19 3.88E-19 7.84E-19 3.07E-19
-  4.04E-19 1.50E-19 6.66E-19 1.59E-19 9.66E-19 3.75E-19 1.52E-19 3.00E-19
-  3.19E-19 4.84E-19 4.32E-19 3.15E-19 3.57E-19 3.45E-19 6.27E-19 9.86E-19
-  7.21E-19 7.03E-19 8.74E-19 2.30E-19 6.90E-19 7.06E-19 5.17E-19 1.63E-08
-  1.11E-06 2.28E-06
+   2.33E-19  1.05E-19  3.08E-19  6.63E-19  2.30E-19  1.21E-19  2.34E-19  3.16E-19
+   5.23E-19  8.46E-19  5.22E-19  8.48E-19  8.68E-19  3.35E-19  2.02E-19  2.39E-19
+   9.36E-19  8.65E-19  8.75E-19  1.83E-19  5.07E-19  3.88E-19  7.84E-19  3.07E-19
+   4.04E-19  1.50E-19  6.66E-19  1.59E-19  9.66E-19  3.75E-19  1.52E-19  3.00E-19
+   3.19E-19  4.84E-19  4.32E-19  3.15E-19  3.57E-19  3.45E-19  6.27E-19  9.86E-19
+   7.21E-19  7.03E-19  8.74E-19  2.30E-19  6.90E-19  7.06E-19  5.17E-19  1.63E-08
+   1.11E-06  2.28E-06
    0.1250  0.1250  0.3750    1  5.89679E-07 kpt; spin; max resid(k); each band:
-  4.80E-19 7.06E-19 8.23E-19 4.83E-19 4.08E-19 8.98E-19 2.10E-19 2.07E-19
-  7.20E-19 3.14E-19 1.04E-19 1.54E-19 2.93E-19 7.55E-19 1.45E-19 1.66E-19
-  1.65E-19 2.60E-19 1.07E-19 1.08E-19 4.70E-19 5.25E-19 4.92E-19 1.87E-19
-  1.62E-19 2.56E-19 7.17E-19 3.71E-19 1.75E-19 2.14E-19 2.38E-19 3.12E-19
-  4.72E-19 4.01E-19 1.38E-19 3.74E-19 4.52E-19 7.13E-19 5.72E-19 2.55E-19
-  1.13E-19 3.67E-19 6.99E-19 5.35E-19 4.12E-19 6.96E-19 4.85E-19 1.61E-15
-  3.31E-11 5.90E-07
+   4.80E-19  7.06E-19  8.23E-19  4.83E-19  4.08E-19  8.98E-19  2.10E-19  2.07E-19
+   7.20E-19  3.14E-19  1.04E-19  1.54E-19  2.93E-19  7.55E-19  1.45E-19  1.66E-19
+   1.65E-19  2.60E-19  1.07E-19  1.08E-19  4.70E-19  5.25E-19  4.92E-19  1.87E-19
+   1.62E-19  2.56E-19  7.17E-19  3.71E-19  1.75E-19  2.14E-19  2.38E-19  3.12E-19
+   4.72E-19  4.01E-19  1.38E-19  3.74E-19  4.52E-19  7.13E-19  5.72E-19  2.55E-19
+   1.13E-19  3.67E-19  6.99E-19  5.35E-19  4.12E-19  6.96E-19  4.85E-19  1.61E-15
+   3.31E-11  5.90E-07
    0.3750  0.1250  0.3750    1  1.67181E-06 kpt; spin; max resid(k); each band:
-  4.51E-19 6.32E-19 8.16E-19 5.46E-19 6.44E-19 9.43E-19 1.01E-19 1.77E-19
-  7.59E-19 5.08E-19 3.89E-19 9.85E-19 1.75E-19 2.03E-19 3.01E-19 5.09E-19
-  8.46E-19 4.48E-19 8.99E-19 5.28E-19 2.10E-19 8.99E-19 2.77E-19 6.13E-19
-  8.42E-19 3.31E-19 3.13E-19 2.35E-19 3.01E-19 3.97E-19 1.14E-19 8.03E-19
-  6.18E-20 2.24E-19 7.06E-19 3.98E-19 3.52E-19 1.06E-19 1.36E-19 9.32E-19
-  5.46E-19 8.86E-19 8.66E-19 8.61E-19 2.61E-19 8.05E-19 4.81E-17 1.40E-12
-  6.36E-11 1.67E-06
+   4.51E-19  6.32E-19  8.16E-19  5.46E-19  6.44E-19  9.43E-19  1.01E-19  1.77E-19
+   7.59E-19  5.08E-19  3.89E-19  9.85E-19  1.75E-19  2.03E-19  3.01E-19  5.09E-19
+   8.46E-19  4.48E-19  8.99E-19  5.28E-19  2.10E-19  8.99E-19  2.77E-19  6.13E-19
+   8.42E-19  3.31E-19  3.13E-19  2.35E-19  3.01E-19  3.97E-19  1.14E-19  8.03E-19
+   6.18E-20  2.24E-19  7.06E-19  3.98E-19  3.52E-19  1.06E-19  1.36E-19  9.32E-19
+   5.46E-19  8.86E-19  8.66E-19  8.61E-19  2.61E-19  8.05E-19  4.81E-17  1.40E-12
+   6.36E-11  1.67E-06
   -0.3750  0.1250  0.3750    1  1.87126E-07 kpt; spin; max resid(k); each band:
-  2.14E-19 8.47E-19 2.40E-19 2.64E-19 1.84E-19 3.93E-19 7.48E-19 1.19E-19
-  2.13E-19 7.76E-19 2.82E-19 3.43E-19 7.51E-19 4.14E-19 8.56E-19 3.19E-19
-  9.51E-19 3.05E-19 6.31E-19 4.19E-19 5.40E-19 5.19E-19 9.37E-19 7.16E-19
-  5.66E-19 6.21E-19 2.55E-19 4.31E-19 3.00E-19 2.02E-19 1.79E-19 4.66E-19
-  4.03E-19 1.28E-19 2.55E-19 7.96E-19 8.41E-19 5.56E-19 1.74E-19 2.55E-19
-  2.38E-19 5.73E-19 2.94E-19 3.99E-19 5.38E-19 4.06E-19 3.54E-18 1.05E-13
-  1.71E-11 1.87E-07
+   2.14E-19  8.47E-19  2.40E-19  2.64E-19  1.84E-19  3.93E-19  7.48E-19  1.19E-19
+   2.13E-19  7.76E-19  2.82E-19  3.43E-19  7.51E-19  4.14E-19  8.56E-19  3.19E-19
+   9.51E-19  3.05E-19  6.31E-19  4.19E-19  5.40E-19  5.19E-19  9.37E-19  7.16E-19
+   5.66E-19  6.21E-19  2.55E-19  4.31E-19  3.00E-19  2.02E-19  1.79E-19  4.66E-19
+   4.03E-19  1.28E-19  2.55E-19  7.96E-19  8.41E-19  5.56E-19  1.74E-19  2.55E-19
+   2.38E-19  5.73E-19  2.94E-19  3.99E-19  5.38E-19  4.06E-19  3.54E-18  1.05E-13
+   1.71E-11  1.87E-07
   -0.1250  0.1250  0.3750    1  4.41511E-06 kpt; spin; max resid(k); each band:
-  1.98E-19 3.66E-19 5.36E-19 6.77E-19 3.15E-19 5.56E-19 6.39E-19 3.40E-19
-  4.26E-19 3.16E-19 3.76E-19 3.92E-19 6.44E-19 2.84E-19 2.99E-19 2.76E-19
-  5.20E-19 2.67E-19 7.33E-19 8.33E-19 7.72E-19 2.50E-19 6.62E-19 7.92E-19
-  9.97E-19 3.23E-19 9.81E-19 2.31E-19 2.97E-19 8.33E-19 3.24E-19 4.36E-19
-  4.39E-19 8.04E-19 1.50E-19 3.83E-19 9.34E-19 1.00E-19 9.27E-19 6.95E-19
-  7.79E-19 9.11E-19 8.74E-19 7.34E-19 3.94E-19 6.62E-19 9.28E-19 1.95E-14
-  1.29E-11 4.42E-06
+   1.98E-19  3.66E-19  5.36E-19  6.77E-19  3.15E-19  5.56E-19  6.39E-19  3.40E-19
+   4.26E-19  3.16E-19  3.76E-19  3.92E-19  6.44E-19  2.84E-19  2.99E-19  2.76E-19
+   5.20E-19  2.67E-19  7.33E-19  8.33E-19  7.72E-19  2.50E-19  6.62E-19  7.92E-19
+   9.97E-19  3.23E-19  9.81E-19  2.31E-19  2.97E-19  8.33E-19  3.24E-19  4.36E-19
+   4.39E-19  8.04E-19  1.50E-19  3.83E-19  9.34E-19  1.00E-19  9.27E-19  6.95E-19
+   7.79E-19  9.11E-19  8.74E-19  7.34E-19  3.94E-19  6.62E-19  9.28E-19  1.95E-14
+   1.29E-11  4.42E-06
    0.1250  0.3750  0.3750    1  1.99033E-07 kpt; spin; max resid(k); each band:
-  9.74E-19 4.04E-19 2.50E-19 4.52E-19 3.71E-19 9.05E-19 3.72E-19 9.85E-19
-  1.05E-19 5.08E-19 8.56E-19 8.55E-20 3.05E-19 6.94E-19 1.26E-19 4.71E-19
-  2.32E-19 8.46E-19 2.23E-19 4.45E-19 1.38E-19 3.47E-19 5.75E-20 7.22E-20
-  1.52E-19 6.01E-19 6.72E-19 4.55E-19 6.05E-19 2.83E-19 4.37E-20 9.97E-19
-  2.06E-19 1.97E-19 2.34E-19 5.86E-19 6.39E-19 8.53E-19 3.45E-19 4.99E-19
-  4.52E-19 5.16E-19 7.12E-19 4.28E-19 8.63E-19 4.60E-19 2.71E-16 2.09E-13
-  2.63E-11 1.99E-07
+   9.74E-19  4.04E-19  2.50E-19  4.52E-19  3.71E-19  9.05E-19  3.72E-19  9.85E-19
+   1.05E-19  5.08E-19  8.56E-19  8.55E-20  3.05E-19  6.94E-19  1.26E-19  4.71E-19
+   2.32E-19  8.46E-19  2.23E-19  4.45E-19  1.38E-19  3.47E-19  5.75E-20  7.22E-20
+   1.52E-19  6.01E-19  6.72E-19  4.55E-19  6.05E-19  2.83E-19  4.37E-20  9.97E-19
+   2.06E-19  1.97E-19  2.34E-19  5.86E-19  6.39E-19  8.53E-19  3.45E-19  4.99E-19
+   4.52E-19  5.16E-19  7.12E-19  4.28E-19  8.63E-19  4.60E-19  2.71E-16  2.09E-13
+   2.63E-11  1.99E-07
    0.3750  0.3750  0.3750    1  3.60702E-08 kpt; spin; max resid(k); each band:
-  3.13E-19 4.87E-19 5.01E-19 5.58E-19 7.63E-20 8.29E-19 8.97E-19 1.88E-19
-  9.05E-19 8.75E-19 5.73E-19 7.91E-19 9.64E-19 4.61E-19 1.72E-19 7.70E-19
-  2.22E-19 2.81E-19 1.11E-19 1.60E-19 2.81E-19 5.32E-19 9.00E-19 1.87E-19
-  3.44E-19 9.01E-19 9.99E-19 1.97E-19 8.97E-19 2.26E-19 7.45E-19 4.21E-19
-  2.52E-19 7.02E-19 3.94E-19 2.92E-19 8.76E-19 1.87E-19 4.90E-19 2.60E-19
-  3.70E-19 8.54E-19 9.16E-19 3.41E-19 8.53E-19 6.54E-19 1.06E-17 7.76E-12
-  6.51E-09 3.61E-08
+   3.13E-19  4.87E-19  5.01E-19  5.58E-19  7.63E-20  8.29E-19  8.97E-19  1.88E-19
+   9.05E-19  8.75E-19  5.73E-19  7.91E-19  9.64E-19  4.61E-19  1.72E-19  7.70E-19
+   2.22E-19  2.81E-19  1.11E-19  1.60E-19  2.81E-19  5.32E-19  9.00E-19  1.87E-19
+   3.44E-19  9.01E-19  9.99E-19  1.97E-19  8.97E-19  2.26E-19  7.45E-19  4.21E-19
+   2.52E-19  7.02E-19  3.94E-19  2.92E-19  8.76E-19  1.87E-19  4.90E-19  2.60E-19
+   3.70E-19  8.54E-19  9.16E-19  3.41E-19  8.53E-19  6.54E-19  1.06E-17  7.76E-12
+   6.51E-09  3.61E-08
   -0.3750  0.3750  0.3750    1  9.38771E-08 kpt; spin; max resid(k); each band:
-  5.51E-19 4.41E-19 2.54E-19 5.61E-19 7.08E-19 2.59E-19 8.21E-19 7.87E-19
-  1.30E-19 2.52E-19 1.10E-19 9.23E-19 4.87E-19 2.29E-19 8.34E-20 5.22E-19
-  1.18E-19 5.99E-19 1.88E-19 5.91E-19 1.24E-19 6.66E-19 1.38E-19 7.19E-20
-  2.68E-19 1.13E-19 8.37E-20 7.88E-19 2.81E-19 5.85E-19 2.08E-19 2.33E-19
-  5.05E-19 5.23E-19 4.13E-19 1.91E-19 1.63E-19 2.07E-19 4.14E-19 7.39E-19
-  6.60E-19 5.58E-19 6.39E-19 8.01E-19 4.61E-19 4.52E-19 5.74E-16 4.26E-12
-  1.54E-08 9.39E-08
+   5.51E-19  4.41E-19  2.54E-19  5.61E-19  7.08E-19  2.59E-19  8.21E-19  7.87E-19
+   1.30E-19  2.52E-19  1.10E-19  9.23E-19  4.87E-19  2.29E-19  8.34E-20  5.22E-19
+   1.18E-19  5.99E-19  1.88E-19  5.91E-19  1.24E-19  6.66E-19  1.38E-19  7.19E-20
+   2.68E-19  1.13E-19  8.37E-20  7.88E-19  2.81E-19  5.85E-19  2.08E-19  2.33E-19
+   5.05E-19  5.23E-19  4.13E-19  1.91E-19  1.63E-19  2.07E-19  4.14E-19  7.39E-19
+   6.60E-19  5.58E-19  6.39E-19  8.01E-19  4.61E-19  4.52E-19  5.74E-16  4.26E-12
+   1.54E-08  9.39E-08
   -0.1250  0.3750  0.3750    1  2.28225E-06 kpt; spin; max resid(k); each band:
-  2.88E-19 8.70E-19 6.98E-19 9.10E-20 2.11E-19 2.24E-19 3.53E-19 9.55E-19
-  1.73E-19 6.10E-19 2.53E-19 7.87E-19 2.13E-19 1.80E-19 4.73E-19 4.95E-19
-  1.93E-19 5.30E-19 1.72E-19 1.52E-19 2.73E-19 8.66E-19 5.74E-19 3.97E-19
-  3.28E-19 4.33E-19 5.11E-19 3.22E-19 3.70E-19 5.82E-19 8.17E-19 1.41E-19
-  3.52E-19 6.17E-19 3.37E-19 8.25E-19 6.20E-19 3.24E-19 2.36E-19 1.02E-19
-  3.02E-19 6.65E-19 9.28E-19 3.91E-19 3.40E-19 7.41E-19 2.30E-17 1.14E-13
-  3.20E-11 2.28E-06
+   2.88E-19  8.70E-19  6.98E-19  9.10E-20  2.11E-19  2.24E-19  3.53E-19  9.55E-19
+   1.73E-19  6.10E-19  2.53E-19  7.87E-19  2.13E-19  1.80E-19  4.73E-19  4.95E-19
+   1.93E-19  5.30E-19  1.72E-19  1.52E-19  2.73E-19  8.66E-19  5.74E-19  3.97E-19
+   3.28E-19  4.33E-19  5.11E-19  3.22E-19  3.70E-19  5.82E-19  8.17E-19  1.41E-19
+   3.52E-19  6.17E-19  3.37E-19  8.25E-19  6.20E-19  3.24E-19  2.36E-19  1.02E-19
+   3.02E-19  6.65E-19  9.28E-19  3.91E-19  3.40E-19  7.41E-19  2.30E-17  1.14E-13
+   3.20E-11  2.28E-06
    0.1250 -0.3750  0.3750    1  1.64258E-07 kpt; spin; max resid(k); each band:
-  5.75E-19 3.96E-19 6.21E-19 2.84E-19 6.49E-19 9.74E-19 4.55E-19 1.48E-19
-  9.74E-19 4.88E-19 6.33E-19 3.68E-19 2.34E-19 2.35E-19 6.01E-19 1.92E-19
-  2.44E-19 2.68E-19 8.15E-19 8.71E-19 6.00E-19 2.46E-19 2.68E-19 4.44E-19
-  5.68E-19 4.31E-20 2.84E-19 4.65E-19 4.25E-19 5.65E-19 4.19E-19 7.28E-19
-  5.95E-19 8.00E-19 9.26E-19 9.52E-19 5.27E-19 1.65E-19 1.70E-19 9.12E-19
-  2.87E-19 4.28E-19 2.43E-19 3.47E-19 1.95E-19 3.61E-19 9.97E-18 9.12E-14
-  4.34E-11 1.64E-07
+   5.75E-19  3.96E-19  6.21E-19  2.84E-19  6.49E-19  9.74E-19  4.55E-19  1.48E-19
+   9.74E-19  4.88E-19  6.33E-19  3.68E-19  2.34E-19  2.35E-19  6.01E-19  1.92E-19
+   2.44E-19  2.68E-19  8.15E-19  8.71E-19  6.00E-19  2.46E-19  2.68E-19  4.44E-19
+   5.68E-19  4.31E-20  2.84E-19  4.65E-19  4.25E-19  5.65E-19  4.19E-19  7.28E-19
+   5.95E-19  8.00E-19  9.26E-19  9.52E-19  5.27E-19  1.65E-19  1.70E-19  9.12E-19
+   2.87E-19  4.28E-19  2.43E-19  3.47E-19  1.95E-19  3.61E-19  9.97E-18  9.12E-14
+   4.34E-11  1.64E-07
    0.3750 -0.3750  0.3750    1  1.61905E-06 kpt; spin; max resid(k); each band:
-  5.35E-19 5.73E-19 9.75E-19 5.41E-19 1.75E-19 2.83E-19 9.09E-19 9.29E-19
-  6.19E-19 3.23E-19 3.07E-19 7.52E-19 4.14E-19 9.92E-19 3.36E-19 3.38E-19
-  4.25E-19 6.95E-19 7.59E-19 3.14E-19 6.61E-19 7.39E-19 3.46E-19 8.26E-19
-  6.83E-19 1.60E-19 6.29E-19 2.37E-19 5.46E-19 3.89E-19 2.23E-19 1.20E-19
-  4.54E-19 2.39E-19 3.42E-19 7.73E-19 8.97E-19 3.98E-19 1.86E-19 4.50E-19
-  8.06E-19 5.45E-19 9.33E-19 4.89E-19 7.43E-19 3.99E-19 1.16E-15 3.12E-11
-  2.74E-07 1.62E-06
+   5.35E-19  5.73E-19  9.75E-19  5.41E-19  1.75E-19  2.83E-19  9.09E-19  9.29E-19
+   6.19E-19  3.23E-19  3.07E-19  7.52E-19  4.14E-19  9.92E-19  3.36E-19  3.38E-19
+   4.25E-19  6.95E-19  7.59E-19  3.14E-19  6.61E-19  7.39E-19  3.46E-19  8.26E-19
+   6.83E-19  1.60E-19  6.29E-19  2.37E-19  5.46E-19  3.89E-19  2.23E-19  1.20E-19
+   4.54E-19  2.39E-19  3.42E-19  7.73E-19  8.97E-19  3.98E-19  1.86E-19  4.50E-19
+   8.06E-19  5.45E-19  9.33E-19  4.89E-19  7.43E-19  3.99E-19  1.16E-15  3.12E-11
+   2.74E-07  1.62E-06
   -0.3750 -0.3750  0.3750    1  5.08322E-08 kpt; spin; max resid(k); each band:
-  4.44E-19 4.22E-19 4.58E-19 9.56E-19 2.40E-19 9.00E-19 1.03E-19 1.47E-19
-  4.61E-19 2.13E-19 2.34E-19 1.44E-19 4.49E-19 1.53E-19 9.95E-19 1.69E-19
-  4.83E-19 2.57E-19 7.68E-19 8.35E-19 6.23E-19 2.76E-19 1.99E-19 9.76E-19
-  3.21E-19 8.59E-19 3.11E-19 7.88E-19 3.94E-19 9.99E-19 7.47E-19 4.75E-19
-  5.76E-19 9.25E-19 5.35E-19 1.78E-19 9.62E-19 8.38E-19 9.01E-19 1.19E-19
-  5.16E-19 8.45E-19 5.19E-19 6.69E-19 5.32E-19 5.90E-19 6.75E-17 4.04E-12
-  3.09E-08 5.08E-08
+   4.44E-19  4.22E-19  4.58E-19  9.56E-19  2.40E-19  9.00E-19  1.03E-19  1.47E-19
+   4.61E-19  2.13E-19  2.34E-19  1.44E-19  4.49E-19  1.53E-19  9.95E-19  1.69E-19
+   4.83E-19  2.57E-19  7.68E-19  8.35E-19  6.23E-19  2.76E-19  1.99E-19  9.76E-19
+   3.21E-19  8.59E-19  3.11E-19  7.88E-19  3.94E-19  9.99E-19  7.47E-19  4.75E-19
+   5.76E-19  9.25E-19  5.35E-19  1.78E-19  9.62E-19  8.38E-19  9.01E-19  1.19E-19
+   5.16E-19  8.45E-19  5.19E-19  6.69E-19  5.32E-19  5.90E-19  6.75E-17  4.04E-12
+   3.09E-08  5.08E-08
   -0.1250 -0.3750  0.3750    1  1.60153E-08 kpt; spin; max resid(k); each band:
-  1.91E-19 3.22E-19 2.09E-19 4.62E-19 8.17E-19 5.19E-19 1.33E-19 2.59E-19
-  5.23E-19 3.60E-19 7.01E-19 1.85E-19 3.32E-19 2.32E-19 1.95E-19 2.47E-19
-  1.90E-19 5.35E-19 2.90E-19 4.70E-19 2.18E-19 3.26E-19 2.10E-19 3.52E-19
-  3.59E-19 6.36E-19 2.47E-19 5.98E-19 7.45E-19 2.46E-19 8.88E-19 7.07E-19
-  9.66E-20 7.77E-19 1.90E-19 2.29E-19 4.36E-19 2.58E-19 4.39E-19 5.59E-19
-  1.81E-19 5.52E-19 6.61E-19 4.13E-19 6.90E-19 3.24E-19 3.50E-19 4.07E-15
-  4.04E-12 1.60E-08
+   1.91E-19  3.22E-19  2.09E-19  4.62E-19  8.17E-19  5.19E-19  1.33E-19  2.59E-19
+   5.23E-19  3.60E-19  7.01E-19  1.85E-19  3.32E-19  2.32E-19  1.95E-19  2.47E-19
+   1.90E-19  5.35E-19  2.90E-19  4.70E-19  2.18E-19  3.26E-19  2.10E-19  3.52E-19
+   3.59E-19  6.36E-19  2.47E-19  5.98E-19  7.45E-19  2.46E-19  8.88E-19  7.07E-19
+   9.66E-20  7.77E-19  1.90E-19  2.29E-19  4.36E-19  2.58E-19  4.39E-19  5.59E-19
+   1.81E-19  5.52E-19  6.61E-19  4.13E-19  6.90E-19  3.24E-19  3.50E-19  4.07E-15
+   4.04E-12  1.60E-08
    0.1250 -0.1250  0.3750    1  1.97194E-05 kpt; spin; max resid(k); each band:
-  2.63E-19 2.57E-19 2.25E-19 3.67E-19 3.31E-19 6.51E-19 4.43E-19 4.24E-19
-  9.08E-19 5.20E-19 2.56E-19 4.26E-19 1.72E-19 2.23E-19 3.59E-19 2.31E-19
-  4.02E-19 7.25E-19 3.18E-19 2.46E-19 8.03E-20 1.05E-19 1.96E-19 5.84E-19
-  1.09E-19 1.52E-19 7.49E-20 7.79E-19 5.54E-19 1.67E-19 3.20E-19 6.96E-20
-  7.85E-19 6.99E-20 2.60E-19 2.53E-19 6.18E-19 8.48E-19 7.22E-19 2.35E-19
-  5.14E-19 4.06E-19 8.43E-19 3.00E-19 6.84E-19 8.54E-19 3.93E-19 3.31E-14
-  1.11E-10 1.97E-05
+   2.63E-19  2.57E-19  2.25E-19  3.67E-19  3.31E-19  6.51E-19  4.43E-19  4.24E-19
+   9.08E-19  5.20E-19  2.56E-19  4.26E-19  1.72E-19  2.23E-19  3.59E-19  2.31E-19
+   4.02E-19  7.25E-19  3.18E-19  2.46E-19  8.03E-20  1.05E-19  1.96E-19  5.84E-19
+   1.09E-19  1.52E-19  7.49E-20  7.79E-19  5.54E-19  1.67E-19  3.20E-19  6.96E-20
+   7.85E-19  6.99E-20  2.60E-19  2.53E-19  6.18E-19  8.48E-19  7.22E-19  2.35E-19
+   5.14E-19  4.06E-19  8.43E-19  3.00E-19  6.84E-19  8.54E-19  3.93E-19  3.31E-14
+   1.11E-10  1.97E-05
    0.3750 -0.1250  0.3750    1  6.19856E-07 kpt; spin; max resid(k); each band:
-  1.40E-19 1.62E-19 3.33E-19 3.11E-19 1.93E-19 5.21E-19 3.27E-19 5.09E-19
-  7.25E-19 1.29E-19 5.00E-19 7.81E-19 4.21E-19 6.06E-19 8.66E-19 8.82E-19
-  8.62E-19 4.16E-19 1.04E-19 7.08E-19 5.08E-19 6.26E-19 8.10E-20 2.08E-19
-  1.54E-19 3.41E-19 2.64E-19 6.62E-19 8.28E-20 8.49E-20 6.05E-19 8.75E-19
-  5.44E-19 6.80E-19 6.26E-19 7.69E-19 8.73E-19 3.56E-19 5.30E-19 3.45E-19
-  3.34E-19 1.99E-19 6.22E-19 5.07E-19 2.53E-19 9.92E-19 8.86E-17 1.88E-12
-  1.89E-10 6.20E-07
+   1.40E-19  1.62E-19  3.33E-19  3.11E-19  1.93E-19  5.21E-19  3.27E-19  5.09E-19
+   7.25E-19  1.29E-19  5.00E-19  7.81E-19  4.21E-19  6.06E-19  8.66E-19  8.82E-19
+   8.62E-19  4.16E-19  1.04E-19  7.08E-19  5.08E-19  6.26E-19  8.10E-20  2.08E-19
+   1.54E-19  3.41E-19  2.64E-19  6.62E-19  8.28E-20  8.49E-20  6.05E-19  8.75E-19
+   5.44E-19  6.80E-19  6.26E-19  7.69E-19  8.73E-19  3.56E-19  5.30E-19  3.45E-19
+   3.34E-19  1.99E-19  6.22E-19  5.07E-19  2.53E-19  9.92E-19  8.86E-17  1.88E-12
+   1.89E-10  6.20E-07
   -0.3750 -0.1250  0.3750    1  1.98639E-07 kpt; spin; max resid(k); each band:
-  9.73E-19 7.86E-20 8.41E-19 7.19E-20 3.65E-19 5.80E-19 7.50E-19 6.99E-19
-  5.74E-19 4.16E-19 5.25E-19 1.63E-19 7.60E-19 4.34E-19 2.91E-19 2.94E-19
-  6.57E-19 1.48E-19 6.17E-19 4.64E-19 2.53E-19 3.11E-19 6.18E-19 1.99E-19
-  2.66E-19 3.80E-19 5.94E-19 2.87E-19 8.40E-19 5.05E-19 2.39E-19 4.23E-19
-  6.20E-19 2.81E-19 1.53E-19 5.16E-19 1.10E-19 2.47E-19 2.59E-19 4.31E-19
-  3.62E-19 6.84E-19 5.72E-19 5.45E-19 7.85E-19 9.07E-19 3.76E-17 1.80E-13
-  4.52E-11 1.99E-07
+   9.73E-19  7.86E-20  8.41E-19  7.19E-20  3.65E-19  5.80E-19  7.50E-19  6.99E-19
+   5.74E-19  4.16E-19  5.25E-19  1.63E-19  7.60E-19  4.34E-19  2.91E-19  2.94E-19
+   6.57E-19  1.48E-19  6.17E-19  4.64E-19  2.53E-19  3.11E-19  6.18E-19  1.99E-19
+   2.66E-19  3.80E-19  5.94E-19  2.87E-19  8.40E-19  5.05E-19  2.39E-19  4.23E-19
+   6.20E-19  2.81E-19  1.53E-19  5.16E-19  1.10E-19  2.47E-19  2.59E-19  4.31E-19
+   3.62E-19  6.84E-19  5.72E-19  5.45E-19  7.85E-19  9.07E-19  3.76E-17  1.80E-13
+   4.52E-11  1.99E-07
   -0.1250 -0.1250  0.3750    1  4.30336E-05 kpt; spin; max resid(k); each band:
-  4.85E-19 2.11E-19 2.28E-19 6.96E-19 3.63E-19 1.85E-19 6.04E-19 8.70E-19
-  2.76E-19 2.36E-19 1.46E-19 4.85E-19 2.76E-19 3.93E-19 6.68E-19 8.55E-20
-  1.60E-19 3.23E-19 9.37E-19 8.48E-19 6.84E-19 9.02E-19 6.32E-19 2.15E-19
-  5.11E-19 8.53E-20 5.85E-19 2.22E-19 5.25E-19 3.52E-19 2.50E-19 1.92E-19
-  1.33E-19 2.08E-19 1.05E-19 1.45E-19 6.78E-19 1.30E-19 8.84E-20 2.18E-19
-  8.51E-19 3.51E-19 3.06E-19 2.80E-19 1.70E-19 4.68E-19 9.56E-19 9.23E-15
-  2.74E-10 4.30E-05
+   4.85E-19  2.11E-19  2.28E-19  6.96E-19  3.63E-19  1.85E-19  6.04E-19  8.70E-19
+   2.76E-19  2.36E-19  1.46E-19  4.85E-19  2.76E-19  3.93E-19  6.68E-19  8.55E-20
+   1.60E-19  3.23E-19  9.37E-19  8.48E-19  6.84E-19  9.02E-19  6.32E-19  2.15E-19
+   5.11E-19  8.53E-20  5.85E-19  2.22E-19  5.25E-19  3.52E-19  2.50E-19  1.92E-19
+   1.33E-19  2.08E-19  1.05E-19  1.45E-19  6.78E-19  1.30E-19  8.84E-20  2.18E-19
+   8.51E-19  3.51E-19  3.06E-19  2.80E-19  1.70E-19  4.68E-19  9.56E-19  9.23E-15
+   2.74E-10  4.30E-05
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -11670,9 +11675,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -11690,9 +11696,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -11710,9 +11717,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -11824,7 +11832,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -11875,7 +11883,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    2
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -11926,7 +11934,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -11973,7 +11981,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -12008,8 +12016,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      5.992978802998276
- Compensation charge over fine fft grid    =      5.993710080168048
+ Compensation charge over spherical meshes =      5.992978803005257
+ Compensation charge over fine fft grid    =      5.993710080175028
 
 
  Total number of electrons per unit cell =   41.0000 (Spherical mesh),   41.0007 (FFT mesh)
@@ -12041,9 +12049,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   -0.00000   0.00000  -0.30103   0.00000   0.00000   0.87372   0.00000   0.00000
    0.00000   0.00000   0.00000  -0.30242   0.00000   0.00000   0.88079   0.00000
   -0.00000   0.00000   0.00000   0.00000  -0.30103   0.00000   0.00000   0.87372
-   0.00000  -0.00000   0.87372   0.00000   0.00000   0.11627  -0.00000   0.00000
-   0.00000  -0.00000   0.00000   0.88079   0.00000  -0.00000   0.08201   0.00000
-   0.00000  -0.00000   0.00000   0.00000   0.87372   0.00000   0.00000   0.11627
+   0.00000  -0.00000   0.87372   0.00000   0.00000   0.11627   0.00000   0.00000
+   0.00000  -0.00000   0.00000   0.88079   0.00000   0.00000   0.08201  -0.00000
+   0.00000  -0.00000   0.00000   0.00000   0.87372   0.00000  -0.00000   0.11627
 
 
  Augmentation waves occupancies Rhoij:
@@ -12084,7 +12092,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -12134,10 +12142,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
-       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
+        0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
 
     2   0.000 -26.907  -5.713  -0.338  -0.337  -0.342  -0.343  -7.557  -8.328
-        0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   5.1787
@@ -12166,7 +12174,7 @@ Reading of the Wannier weights from data.plowann
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -4.785 -29.210  -9.319  -0.981  -1.233  -0.985  -1.235  -9.512  -8.589
-       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     43.80  [%]
 
@@ -12177,10 +12185,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.474   0.099  -0.177  -2.348  -2.348  -2.347  -2.348  -0.049   0.317
-        0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2   0.099 -25.389  -4.773  -0.305  -0.305  -0.306  -0.315  -5.832  -7.672
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     52.79  [%]
 
@@ -12194,7 +12202,7 @@ Reading of the Wannier weights from data.plowann
        -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -3.065 -24.978  -7.306  -1.151  -1.021  -1.151  -1.028  -5.021  -6.966
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     40.87  [%]
 
@@ -12208,7 +12216,7 @@ Reading of the Wannier weights from data.plowann
        -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2   0.486 -22.218  -2.371  -0.048  -0.048  -0.044  -0.062  -3.860  -5.753
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     44.04  [%]
 
@@ -12219,10 +12227,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.201  -3.839  -4.786  -4.784  -3.835  -4.784  -3.835  -1.118  -1.052
-       -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
+        0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
 
     2  -3.839 -28.383  -9.318  -1.228  -1.253  -1.230  -1.258  -7.111  -8.935
-       -0.000  -0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000
+       -0.000   0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     43.81  [%]
 
@@ -12233,10 +12241,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -4.316  -4.315  -2.677  -2.039  -2.676  -2.037  -1.148  -1.148
-       -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
+        0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -4.316 -30.403 -10.178  -1.165  -1.348  -1.169  -1.352  -9.046  -9.735
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    7 :     47.00  [%]
 
@@ -12250,7 +12258,7 @@ Reading of the Wannier weights from data.plowann
        -0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
 
     2  -2.348 -28.882  -8.184  -0.305   0.074  -1.401  -1.403  -6.623  -7.443
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    8 :     52.73  [%]
 
@@ -12289,9 +12297,9 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.898  -5.426  -8.240  -5.421  -8.240 -10.067  -8.263  -1.594  -1.060
-        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
-    2  -5.426 -26.472 -11.087  -0.790  -1.069  -3.022  -2.545  -3.641  -4.829
+    2  -5.426 -26.472 -11.087  -0.790  -1.069  -3.022  -2.545  -3.640  -4.829
        -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   11 :     39.48  [%]
@@ -12303,10 +12311,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -1.434  -2.874  -5.257  -6.483  -7.336  -7.338  -0.388   0.240
-        0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -1.434 -23.757  -5.085  -0.019   0.041  -1.122  -1.141  -3.438  -5.095
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   12 :     42.22  [%]
 
@@ -12334,7 +12342,7 @@ Reading of the Wannier weights from data.plowann
        -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
 
     2  -2.677 -27.272  -7.283  -0.037   0.438  -1.173  -1.170  -6.871  -6.243
-        0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   14 :     47.01  [%]
 
@@ -12362,7 +12370,7 @@ Reading of the Wannier weights from data.plowann
         0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
 
     2  -5.963 -31.658 -12.391  -0.047   0.467  -3.304  -3.307  -5.423  -6.185
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   16 :     44.03  [%]
 
@@ -12373,7 +12381,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.201  -4.784  -3.833  -3.838  -4.785  -4.785  -3.838  -1.118  -1.387
-        0.000   0.000   0.000   0.000   0.000  -0.000   0.000  -0.000   0.000
+       -0.000   0.000   0.000   0.000   0.000  -0.000   0.000  -0.000   0.000
 
     2  -4.784 -29.208  -9.318  -1.226  -0.984  -0.987  -1.233  -7.824  -7.054
        -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12387,7 +12395,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -5.258  -6.483  -1.434  -2.874  -7.337  -7.337  -0.388   0.263
-       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
+        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2  -5.258 -29.324 -11.557  -0.019   0.240  -3.091  -3.102  -4.197  -5.627
        -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12460,7 +12468,7 @@ Reading of the Wannier weights from data.plowann
         0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2  -2.676 -27.272  -7.284  -1.165  -1.170   0.435  -0.039  -8.868  -7.947
-        0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   23 :     47.01  [%]
 
@@ -12471,7 +12479,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -1.436  -2.874  -7.334  -7.336  -6.484  -5.258  -1.084  -0.964
-       -0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
 
     2  -1.436 -23.759  -5.084  -1.122  -1.132   0.042  -0.030  -4.619  -6.665
        -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12499,10 +12507,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.474  -2.348  -2.347  -2.348  -2.347  -0.177   0.099  -1.349  -1.349
-        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+       -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -2.348 -28.882  -8.186  -1.393  -1.400   0.071  -0.311  -8.441  -9.185
-       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   26 :     52.73  [%]
 
@@ -12527,10 +12535,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.899  -5.420  -8.242 -10.061  -8.268  -5.429  -8.240  -2.815  -3.411
-       -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+        0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2  -5.420 -26.464 -11.098  -3.013  -2.535  -0.792  -1.072  -6.028  -8.298
-        0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000
+        0.000   0.000  -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   28 :     39.48  [%]
 
@@ -12541,10 +12549,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.999  -6.508  -7.964  -7.964  -6.517  -3.062  -5.032  -3.221  -3.636
-        0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
 
     2  -6.508 -30.032 -12.795  -3.145  -2.825  -1.018  -1.090  -8.139 -10.114
-        0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
+        0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   29 :     40.86  [%]
 
@@ -12583,7 +12591,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -31.663  -6.989 -10.330  -7.000 -10.328  -6.987 -10.333  -3.068  -2.963
-        0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000
 
     2  -6.989 -27.095 -13.315  -2.198  -2.955  -2.181  -2.971  -4.581  -5.807
        -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000
@@ -12596,11 +12604,11 @@ Reading of the Wannier weights from data.plowann
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -27.182  -9.339  -9.345  -4.270  -6.724  -4.266  -6.724  -2.864  -2.862
+    1 -27.182  -9.339  -9.345  -4.270  -6.724  -4.265  -6.724  -2.864  -2.862
        -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000
 
     2  -9.339 -33.266 -15.462  -2.863  -3.293  -2.857  -3.292  -7.228  -7.730
-       -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   33 :     40.36  [%]
 
@@ -12614,7 +12622,7 @@ Reading of the Wannier weights from data.plowann
         0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000
 
     2  -6.485 -31.054 -11.560  -3.281  -3.293   0.036   0.667 -10.326  -9.160
-       -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
+       -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   34 :     42.23  [%]
 
@@ -12625,7 +12633,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -27.180  -4.260  -6.726  -9.337  -9.346  -4.265  -6.726  -2.852  -3.288
-        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2  -4.260 -25.745  -9.704  -2.855  -2.859   0.159   0.183  -5.670  -7.910
        -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
@@ -12680,9 +12688,10 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -12700,9 +12709,10 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -12720,9 +12730,10 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -12834,7 +12845,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -12855,8 +12866,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.0038 eV
-     The bare interaction (for a renorm. wfn ) =     22.5848 eV
+     The bare interaction (no renormalization) =     16.3156 eV
+     The bare interaction (for a renorm. wfn ) =     23.0248 eV
  =======================================================================
 
  ==================================== 
@@ -12885,7 +12896,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    2
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -12936,7 +12947,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -12983,7 +12994,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -13012,8 +13023,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      5.992978802998276
- Compensation charge over fine fft grid    =      5.993710080168048
+ Compensation charge over spherical meshes =      5.992978803005257
+ Compensation charge over fine fft grid    =      5.993710080175028
 
 
  Total number of electrons per unit cell =   41.0000 (Spherical mesh),   41.0007 (FFT mesh)
@@ -13045,9 +13056,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   -0.00000   0.00000  -0.30103   0.00000   0.00000   0.87372   0.00000   0.00000
    0.00000   0.00000   0.00000  -0.30242   0.00000   0.00000   0.88079   0.00000
   -0.00000   0.00000   0.00000   0.00000  -0.30103   0.00000   0.00000   0.87372
-   0.00000  -0.00000   0.87372   0.00000   0.00000   0.11627  -0.00000   0.00000
-   0.00000  -0.00000   0.00000   0.88079   0.00000  -0.00000   0.08201   0.00000
-   0.00000  -0.00000   0.00000   0.00000   0.87372   0.00000   0.00000   0.11627
+   0.00000  -0.00000   0.87372   0.00000   0.00000   0.11627   0.00000   0.00000
+   0.00000  -0.00000   0.00000   0.88079   0.00000   0.00000   0.08201  -0.00000
+   0.00000  -0.00000   0.00000   0.00000   0.87372   0.00000  -0.00000   0.11627
 
 
  Augmentation waves occupancies Rhoij:
@@ -13088,7 +13099,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -13203,7 +13214,7 @@ Reading of the Wannier weights from data.plowann
    4  2.432  2.432  2.809  3.434  2.495
    5  2.966  2.495  2.430  2.495  3.641
 
-  Hubbard cRPA interaction for w =  1, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    2.7546   -0.0000
+  Hubbard cRPA interaction for w =  1, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    2.7546    0.0000
 
   (Hubbard cRPA interaction for w =   1, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.5167   -0.0000)
 
@@ -13215,7 +13226,7 @@ Reading of the Wannier weights from data.plowann
    4  0.435  0.436  0.378  3.434  0.446
    5  0.247  0.442  0.444  0.446  3.641
 
-   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997    0.0000
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997   -0.0000
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
@@ -13234,7 +13245,7 @@ Reading of the Wannier weights from data.plowann
             Average U and J as a function of frequency
    -------------------------------------------------------------
          omega           U(omega)            J(omega)
-        0.000      2.7546   -0.0000      0.5997    0.0000
+        0.000      2.7546    0.0000      0.5997   -0.0000
    -------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -13275,11 +13286,11 @@ Reading of the Wannier weights from data.plowann
            etotal1    -1.5192840910E+02
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
-            fcart1    -1.7280025505E-11 -2.7702048207E-10 -1.4220264993E-10
-                       3.2079743914E-10  3.1324238759E-10 -2.2853485321E-10
-                       2.6245201812E-10 -1.0428715562E-10 -2.1051322393E-10
-                      -1.1756397576E-10  1.6610072988E-10  1.3575374334E-10
-                      -4.4840545600E-10 -9.8035479786E-11  4.4549698374E-10
+            fcart1    -1.7273043756E-11 -2.7700946411E-10 -1.4220014580E-10
+                       3.2078469599E-10  3.1322891976E-10 -2.2853408161E-10
+                       2.6244588787E-10 -1.0428195078E-10 -2.1050891848E-10
+                      -1.1756129120E-10  1.6609455561E-10  1.3575209383E-10
+                      -4.4839624890E-10 -9.8032060484E-11  4.4549105207E-10
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -13290,7 +13301,7 @@ Reading of the Wannier weights from data.plowann
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqremax1     0.00000000E+00 Hartree
         freqremax2     0.00000000E+00 Hartree
         freqremax3     3.67493254E-01 Hartree
@@ -14287,7 +14298,7 @@ P           mkmem           2
         optforces3          2
         optforces4          2
 -      paral_atom1          1
--      paral_atom2          0
+-      paral_atom2          1
 -      paral_atom3          0
 -      paral_atom4          0
         pawecutdg      2.00000000E+01 Hartree
@@ -14332,7 +14343,7 @@ P           mkmem           2
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
            strten1     2.0903026309E-03  2.0903026065E-03  2.0903025948E-03
-                      -9.6014097687E-13 -1.1233783727E-12 -4.0753555995E-12
+                      -9.6013648231E-13 -1.1233820928E-12 -4.0753405032E-12
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -14410,9 +14421,9 @@ P           mkmem           2
 - Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2014
 -
-- [2] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [2] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
@@ -14426,7 +14437,7 @@ P           mkmem           2
 - Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [6] The Abinit project: Impact, environment and recent developments.
+- [5] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -14443,7 +14454,7 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [7] Recent developments in the ABINIT software package.
+- [6] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -14461,7 +14472,7 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [8] ABINIT: First-principles approach of materials and nanosystem properties.
+- [7] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -14474,10 +14485,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        463.0  wall=        466.8
+- Proc.   0 individual time (sec): cpu=        448.4  wall=        450.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=      10472.7  wall=      10495.9
++Overall time at end (sec) : cpu=      10763.7  wall=      10790.5

@@ -113,8 +113,10 @@ CONTAINS
 !! Should be executed by one processor only.
 !!
 !! PARENTS
+!!      m_scup_dataset
 !!
 !! CHILDREN
+!!      scup_kpath%print
 !!
 !! SOURCE
 
@@ -169,9 +171,10 @@ end subroutine  scup_dtset_init
 !!  scup_dtset <type(scup_dtset_type)> = scup_dataset structure
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_dataset
 !!
 !! CHILDREN
+!!      scup_kpath%print
 !!
 !! SOURCE
 
@@ -216,9 +219,10 @@ end subroutine scup_dtset_free
 !! Should be executed by one processor only.
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_dataset
 !!
 !! CHILDREN
+!!      scup_kpath%print
 !!
 !! SOURCE
 
@@ -299,9 +303,10 @@ end subroutine outvars_scup
 !! Should be executed by one processor only.
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_dataset
 !!
 !! CHILDREN
+!!      scup_kpath%print
 !!
 !! SOURCE
 
@@ -756,11 +761,10 @@ end subroutine scup_kpath_new
 !! Should be executed by one processor only.
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver
 !!
 !! CHILDREN
-!!  
-!!  m_bz_mesh/kpath_printing 
+!!      scup_kpath%print
 !!
 !! SOURCE
 

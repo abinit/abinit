@@ -51,13 +51,15 @@
  wtk 4*0.25
  znucl  14
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.Hamann_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable =  abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t04.out, tolnlines = 4, tolabs = 8.100e-10, tolrel = 2.0100e-01
-#%% psp_files = 14si.Hamann_mod
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

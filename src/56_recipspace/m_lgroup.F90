@@ -251,7 +251,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 
  do ik_ibz=1,new%nibz
    ik_bz = ibz2bz(ik_ibz)
-   new%ibz(:,ik_ibz) = kbz(:, ik_bz)
+   new%ibz(:, ik_ibz) = kbz(:, ik_bz)
  end do
 
  ! TODO: Activate this part so that we can cache the q-point in the IBZ.
@@ -479,7 +479,6 @@ end subroutine lgroup_print
 !!  Free memory
 !!
 !! PARENTS
-!!      m_sigmaph
 !!
 !! CHILDREN
 !!

@@ -425,7 +425,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
  end if
 
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
 
  write(message,'(a,a)')ch10,' thmeig : list of q wavevectors, with integration weights '
@@ -451,8 +451,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
 !!Prepare the reading of the EIG2 files
  call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
-
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
 !iqpt2 will be the index of the q point bloks inside the EIG2 file
  iqpt2=0
@@ -526,7 +525,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
      close(ddbun)
 
      call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
-     call ddb_hdr_free(ddb_hdr)
+     call ddb_hdr%free()
 
 !    And examine again the EIG2 file. Still, not beyond the previously examined value.
      found=0
@@ -1021,7 +1020,7 @@ end subroutine thmeig
 !!   overcomplete inputs. Eliminate unit_phdos (just filnam) and deltaene (gotten from max-min/nene)
 !!
 !! PARENTS
-!!      thmeig
+!!      m_thmeig
 !!
 !! CHILDREN
 !!
@@ -1113,7 +1112,7 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
 !!  only write
 !!
 !! PARENTS
-!!      thmeig
+!!      m_thmeig
 !!
 !! CHILDREN
 !!

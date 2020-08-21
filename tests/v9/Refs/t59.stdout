@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of MRGDV 
+.Version 9.1.5 of MRGDV 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,19 +14,19 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 21h35 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h51 )
   
->>> Enter name of output file: 
->>> Enter total number of DFPT POT files: 
->>> Enter name of POT file 1 : 
->>> Enter name of POT file 2 : 
->>> Enter name of POT file 3 : 
->>> Enter name of POT file 4 : 
->>> Enter name of POT file 5 : 
->>> Enter name of POT file 6 : 
->>> Enter name of POT file 7 : 
->>> Enter name of POT file 8 : 
+->> Enter name of output file: 
+->> Enter total number of DFPT POT files: 
+->> Enter name of POT file 1 : 
+->> Enter name of POT file 2 : 
+->> Enter name of POT file 3 : 
+->> Enter name of POT file 4 : 
+->> Enter name of POT file 5 : 
+->> Enter name of POT file 6 : 
+->> Enter name of POT file 7 : 
+->> Enter name of POT file 8 : 
 - Reading header of file [1]: t57o_DS4_POT1
 - Merging file [1]: t57o_DS4_POT1
 - Reading header of file [2]: t57o_DS4_POT4
@@ -43,9 +43,9 @@
 - Merging file [7]: t57o_DS6_POT1
 - Reading header of file [8]: t57o_DS6_POT4
 - Merging file [8]: t57o_DS6_POT4
-Merged successfully 8 files
+ Merged successfully 8 files
 - Analyzing DVDB file: t59o_DVDB ...
-- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s]
+- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
  DVDB version: 2
  File path: t59o_DVDB
@@ -62,9 +62,9 @@ Merged successfully 8 files
  Have Born effective charges: no
  Have quadrupoles: no
  Have electric field: no
- Treatment of long-range part in V1scf: 1
- qdamp:  -1.0
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ Treatment of long-range part in V1scf (add_lr): 1
+ Damping factor for Gaussian filter (qdamp):   0.1
+ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
@@ -73,7 +73,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
@@ -82,7 +82,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
@@ -91,5 +91,5 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-All the independent perturbations are available
+ All the independent perturbations are available
  Done

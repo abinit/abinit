@@ -51,13 +51,15 @@ toldfe 1.0d-6     # This value is way too large for most realistic studies of ma
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%    tbase4_4.out, tolnlines=  7, tolabs=  2.008e-10, tolrel=  4.000e-06
-#%% psp_files =  13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

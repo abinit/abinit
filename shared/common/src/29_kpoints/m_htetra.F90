@@ -4,12 +4,8 @@
 !! m_htetra
 !!
 !! FUNCTION
-!!  module for tetrahedron interpolation of DOS and similar quantities
-!!  depends on m_kpt_rank.
+!!  Module for tetrahedron integration of DOS and similar quantities
 !!  Uses some functions from a previous implementation by MJV
-!!  The new implementation if based on spglib and kpclib by Atsushi Togo
-!!  after a discussion with in on the APS 2019 where he provided
-!!  details of his implementation.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2010-2020 ABINIT group (HM,MJV)
@@ -18,7 +14,7 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
-!!  1) Test carefully the case of degenerate tethraedron
+!!  1) Test more carefully the case of degenerate tethraedron
 !!  2) Add options to get only delta and/or theta ?
 !!
 !! PARENTS
@@ -41,7 +37,7 @@ module m_htetra
  use m_xmpi
  use m_errors
 
- use m_fstrings,        only : sjoin, itoa
+ use m_fstrings,        only : sjoin, itoa, ftoa
  use m_numeric_tools,   only : linspace
  use m_simtet,          only : sim0onei, SIM0TWOI
 
@@ -99,12 +95,15 @@ type, public :: htetra_t
   ! Number of ibz tetrahedron
 
   integer,allocatable :: tetra_total(:)
+  ! (%nbkibz)
   ! Equivalent tetrahedra per kpoint (number of irred tetra times multiplicity)
 
   integer,allocatable :: tetra_count(:)
+  ! (%nbkibz)
   ! Inequivalent tetrahedra per kpoint (number of irred tetra)
 
   integer,allocatable :: ibz_multiplicity(:)
+  ! (%nbkibz)
   ! Multiplicity of each k-point
 
   real(dp)  :: vv
@@ -184,10 +183,10 @@ contains
 !!  tetra%vv = tetrahedron volume divided by full BZ volume
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_fstab,m_kpts,m_phonons
-!!      thmeig
+!!      m_ephwg,m_fstab,m_kpts,m_phonons,m_unittests
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -225,6 +224,13 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  ! Use the shifts from kpclib developed by Atsushi Togo
  ! This part is produced by a python script
+ ! This implementation is based on spglib and kpclib by Atsushi Togo
+ ! after a discussion with in on the APS 2019 where he provided
+ ! details of his implementation.
+ ! Note that we don't use it in production as we found that is approach, although faster than the original
+ ! one proposed by Blochl (and implemented by MJV) does not preserve symmetries that is calculations done on the full BZ
+ ! and the IBZ do not produced the same result. The diff, however, decreases if the sampling is densified.
+
  tetra_shifts(:, 1, 1,1) = [  0,  0,  0]
  tetra_shifts(:, 2, 1,1) = [  1,  0,  0]
  tetra_shifts(:, 3, 1,1) = [  1,  1,  0]
@@ -696,6 +702,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    ABI_CALLOC(tetra%unique_tetra(ihash)%indexes,(0:4,TETRA_SIZE))
  end do
  tetra%opt = 2; if (present(opt)) tetra%opt = opt
+
  select case(tetra%opt)
  case(1)
    ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
@@ -755,6 +762,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
      ikibz = bz2ibz(ikbz)
      tetra%ibz_multiplicity(ikibz) = tetra%ibz_multiplicity(ikibz) + 1
    end do
+
  case(2)
    min_idiag = 1
    ! For each k-point in the BZ generate the 6 tetrahedra that tesselate a microzone
@@ -826,7 +834,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    ! Allocate array with right size
    ABI_MALLOC(indexes,(0:4,ntetra))
    indexes = tetra%unique_tetra(ihash)%indexes(:,:ntetra)
-   ABI_MOVE_ALLOC(indexes,tetra%unique_tetra(ihash)%indexes)
+   ABI_MOVE_ALLOC(indexes, tetra%unique_tetra(ihash)%indexes)
  end do
 
  ! Sum the multiplicity
@@ -891,47 +899,55 @@ end subroutine htetra_init
 !! htetra_init_mapping_ibz
 !!
 !! FUNCTION
-!!  The mapping to th IBZ is has its own allocation routine.
+!!  The mapping to the IBZ has its own allocation routine.
 !!  I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
 !!
 !! PARENTS
+!!      m_htetra
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
 subroutine htetra_init_mapping_ibz(tetra)
+
  class(htetra_t),intent(inout) :: tetra
  integer :: ikibz, itetra, isummit, ihash, ntetra
  integer :: tetra_count(tetra%nkibz),tetra_mibz(0:4)
+
+ real(dp) :: mem_mb
 
  ! Only execute the following if not yet alocated
  if (allocated(tetra%ibz)) return
 
  ! Allocate IBZ to tetrahedron mapping
- ABI_MALLOC(tetra%ibz,(tetra%nkibz))
+ ABI_MALLOC(tetra%ibz, (tetra%nkibz))
+ mem_mb = ABI_MEM_MB(tetra%ibz)
  do ikibz=1,tetra%nkibz
-   ABI_MALLOC(tetra%ibz(ikibz)%indexes,(2,tetra%tetra_count(ikibz)))
+   ABI_MALLOC(tetra%ibz(ikibz)%indexes, (2, tetra%tetra_count(ikibz)))
+   mem_mb = mem_mb + 2 * tetra%tetra_count(ikibz) * 4 * b2Mb
  end do
+
+ call wrtout(std_out, sjoin(" Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " (Mb) <<< MEM"))
 
  ! Create mapping from IBZ to unique tetrahedra
  tetra_count = 0
  do ihash=1,tetra%nbuckets
-   ntetra = size(tetra%unique_tetra(ihash)%indexes,2)
+   ntetra = size(tetra%unique_tetra(ihash)%indexes, dim=2)
    do itetra=1,ntetra
      tetra_mibz = tetra%unique_tetra(ihash)%indexes(:,itetra)
      do isummit=1,4
        ikibz = tetra_mibz(isummit)
        tetra_count(ikibz) = tetra_count(ikibz) + 1
-       tetra%ibz(ikibz)%indexes(1,tetra_count(ikibz)) = ihash
-       tetra%ibz(ikibz)%indexes(2,tetra_count(ikibz)) = itetra
+       tetra%ibz(ikibz)%indexes(1, tetra_count(ikibz)) = ihash
+       tetra%ibz(ikibz)%indexes(2, tetra_count(ikibz)) = itetra
      end do
    end do
  end do
 
 end subroutine htetra_init_mapping_ibz
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -948,7 +964,8 @@ end subroutine htetra_init_mapping_ibz
 !!
 !! SOURCE
 
-pure subroutine htetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
+pure subroutine htetra_get_ibz(tetra, ikibz, itetra, tetra_mibz)
+
  class(htetra_t), intent(in) :: tetra
  integer,intent(in) :: ikibz, itetra
  integer,intent(out) :: tetra_mibz(0:4)
@@ -957,6 +974,7 @@ pure subroutine htetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
  ihash  = tetra%ibz(ikibz)%indexes(1,itetra)
  jtetra = tetra%ibz(ikibz)%indexes(2,itetra)
  tetra_mibz = tetra%unique_tetra(ihash)%indexes(:,jtetra)
+
 end subroutine htetra_get_ibz
 !!***
 
@@ -972,25 +990,32 @@ end subroutine htetra_get_ibz
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
-subroutine htetra_print(self)
+subroutine htetra_print(self, unit)
 
  class(htetra_t), intent(in) :: self
+ integer,intent(in) :: unit
+
  real(dp) :: total_size, unique_tetra_size, ibz_pointer_size
+
+ if (unit == dev_null) return
 
  unique_tetra_size = self%nunique_tetra*5*four/1024/1024
  total_size        = unique_tetra_size
- write(std_out,'(a,i12)')     'unique_tetra      ', self%nunique_tetra
- write(std_out,'(a,f12.1,a)') 'unique_tetra_size ', unique_tetra_size, ' [Mb]'
+ !write(unit,'(a,i0)')     ' htetra unique_tetra:', self%nunique_tetra
+ !write(unit,'(a,f12.1,a)') ' htetra unique_tetra_size ', unique_tetra_size, ' [Mb] <<< MEM'
  if (allocated(self%ibz)) then
-   ibz_pointer_size  = self%nibz_tetra*2*four/1024/1024
-   write(std_out,'(a,i12)')     'ibz_tetra         ', self%nibz_tetra
-   write(std_out,'(a,f12.1,a)') 'ibz_tetra_size    ', ibz_pointer_size, ' [Mb]'
+   ibz_pointer_size  = self%nibz_tetra*2*four / 1024 ** 2
+   write(unit,'(a,i0)')     ' ibz_tetra: ', self%nibz_tetra
+   write(unit,'(a,f12.1,a)') ' ibz_tetra_size: ', ibz_pointer_size, ' [Mb] <<< MEM'
    total_size = total_size + ibz_pointer_size
  end if
- write(std_out,'(a,f12.1,a)') 'total size        ', total_size, ' [Mb]'
+ ! integer arrays
+ total_size = total_size + 3 * (self%nkibz * 4) / 1024**2
+ write(unit,'(a,f12.1,a)') ' htetra total size:', total_size, ' [Mb] <<< MEM'
 
 end subroutine htetra_print
 !!***
@@ -1005,10 +1030,9 @@ end subroutine htetra_print
 !! deallocate tetrahedra pointers if needed
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_epjdos
-!!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -1054,7 +1078,7 @@ end subroutine htetra_free
 !!
 !! SOURCE
 
-pure subroutine get_onetetra_blochl(eig,energies,nene,bcorr,tweight,dweight)
+pure subroutine get_onetetra_blochl(eig, energies, nene, bcorr, tweight, dweight)
 
 !Arguments ------------------------------------
 !scalars
@@ -1430,6 +1454,7 @@ end subroutine get_ontetra_lambinvigneron
 !! SOURCE
 
 pure subroutine get_ontetetra_lambinvigneron_imag(eig,energies,nene,wt)
+
  ! dispersion values at the corners of the tetrahedron
  real(dp), intent(in), dimension(4) :: eig
  ! number of energies
@@ -1553,8 +1578,10 @@ end subroutine get_ontetetra_lambinvigneron_imag
 !!    for a given (band, k-point, spin).
 !!
 !! PARENTS
+!!      m_htetra
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -1633,6 +1660,7 @@ end subroutine htetra_get_onewk_wvals
 !! FUNCTION
 !! Calculate integration weights and their derivatives for a single k-point in the IBZ.
 !! Same as above but different calling arguments.
+!! IBZ Weights are not included
 !! HM: The above is prefered but I keep this one to ease the transition
 !!
 !! INPUTS
@@ -1645,8 +1673,7 @@ end subroutine htetra_get_onewk_wvals
 !!
 !! SOURCE
 
-subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nw,nkibz,eig_ibz,&
-                           enemin,enemax,max_occ,weights)
+subroutine htetra_get_onewk(tetra, ik_ibz, bcorr, nw, nkibz, eig_ibz, enemin, enemax, max_occ, weights)
 
 !Arguments ------------------------------------
 !scalars
@@ -1664,7 +1691,7 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nw,nkibz,eig_ibz,&
 ! *********************************************************************
 
  weights = zero
- wvals = linspace(enemin,enemax,nw)
+ wvals = linspace(enemin, enemax, nw)
  call htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkibz, eig_ibz, weights)
 
 end subroutine htetra_get_onewk
@@ -1701,6 +1728,7 @@ end subroutine htetra_get_onewk
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -1779,7 +1807,8 @@ end subroutine htetra_get_onewk_wvals_zinv
 !!  Get a mask for the kpoints where the delta is finite
 !!
 
-subroutine htetra_get_delta_mask(tetra,eig_ibz,wvals,nw,nkpt,kmask,comm)
+subroutine htetra_get_delta_mask(tetra, eig_ibz, wvals, nw, nkpt, kmask, comm)
+
 !Arguments
  integer,intent(in) :: nw,nkpt,comm
  class(htetra_t), intent(in) :: tetra
@@ -1840,6 +1869,7 @@ end subroutine htetra_get_delta_mask
 !! FUNCTION
 !!   Emulates the behaviour of the previous tetrahedron implementation but
 !!   taking a list of energies as input.
+!!
 !!   HM: I find that in many routines its better to change the implementation
 !!   and accumulate the tetrahedron weights in the same way as the
 !!   gaussian smearing weights using htetra_get_onewk_wvals. However this requires
@@ -1848,17 +1878,23 @@ end subroutine htetra_get_delta_mask
 !!   Looping over tetrahedra (i.e. using tetra_blochl_weights) is currently faster
 !!   than looping over k-points.
 !!
+!!   MG: Note, however, that tetra_blochl_weights requires more memory as
+!!       one has to allocate dweight(nw,nkpt),tweight(nw,nkpt) and the size of the arrays increases
+!!       quickly with the k-mesh and the number of frequencies (propto mband)
+!!
 !! INPUTS
 !!
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_htetra
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
-subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,dweight,comm)
+subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, tweight, dweight, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1977,10 +2013,10 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
 
  ! For each bucket of tetrahedra
  do ihash=1,tetra%nbuckets
-   if (mod(ihash,nprocs) /= my_rank) cycle
+   if (mod(ihash, nprocs) /= my_rank) cycle
 
    ! For each tetrahedron
-   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
    do itetra=1,tetra_count
 
      ! Get mapping of each summit to eig_ibz
@@ -2013,10 +2049,10 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
  select case(tetra%opt)
  case(1)
    do ik_ibz=1,tetra%nkibz
-     dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%tetra_total(ik_ibz)/tetra%nkbz
+     dweight(:,ik_ibz) = dweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%tetra_total(ik_ibz) / tetra%nkbz
    end do
  case(2)
-   dweight = dweight*tetra%vv/4.0_dp
+   dweight = dweight * tetra%vv / 4.0_dp
  end select
 
  call xmpi_sum(dweight, comm, ierr)
@@ -2032,6 +2068,7 @@ end subroutine htetra_wvals_weights_delta
 !!
 !! FUNCTION
 !!   Emulates the behaviour of the previous tetrahedron implementation.
+!!   IBZ weights are included.
 !!
 !! INPUTS
 !!
@@ -2040,6 +2077,7 @@ end subroutine htetra_wvals_weights_delta
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
 !!
 !! SOURCE
 
@@ -2060,7 +2098,7 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 
 ! *********************************************************************
 
- wvals = linspace(enemin,enemax,nw)
+ wvals = linspace(enemin, enemax, nw)
  call htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,bcorr,tweight,dweight,comm)
 
 end subroutine htetra_blochl_weights
@@ -2116,12 +2154,12 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
    if (mod(ihash,nprocs) /= my_rank) cycle
 
    ! For each tetrahedron that belongs to this k-point
-   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
    do itetra=1,tetra_count
 
      ! Get mapping of each summit to eig_ibz
      do isummit=1,4
-       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit, itetra)
        eig(isummit) = eig_ibz(ind_ibz(isummit))
      end do
 
@@ -2139,7 +2177,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
          call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
        end select
 
-       ! Acumulate the contributions
+       ! Accumulate contributions
        do isummit=1,4
          ik_ibz = ind_ibz(isummit)
          cweight(iz,ik_ibz) = cweight(iz,ik_ibz) + cw(isummit)*multiplicity*max_occ
@@ -2193,7 +2231,7 @@ end subroutine htetra_weights_wvals_zinv
 !!
 !! SOURCE
 
-pure subroutine sort_4tetra(list,perm)
+pure subroutine sort_4tetra(list, perm)
 
  integer,  intent(inout) :: perm(4)
  real(dp), intent(inout) :: list(4)

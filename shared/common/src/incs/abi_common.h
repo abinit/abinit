@@ -77,14 +77,35 @@
  * MSG_  macros for logging.
 */
 
-#define ABI_CHECK(expr, str) if (.not.(expr)) call assert(.FALSE., str _FILE_LINE_ARGS_)
+/* Stop execution with message `msg` if not expr */
+#define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
+
+/* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
+#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+
+/* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
+#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+
+/* Stop execution with message `msg` if int1 > int2 */
+#define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+
+/* Stop execution with message `msg` if int1 < int2 */
+#define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+
+/* Stop execution with message `msg` if int not in [start, stop] */
+#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) MSG_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
+
+#define ABI_CHECK_NOSTOP(expr, msg, ierr) \
+   if (.not. (expr)) then NEWLINE ierr=ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
+
+/* Stop execution with message if MPI call returned error exit code */
 #define ABI_CHECK_MPI(ierr, msg) call check_mpi_ierr(ierr, msg _FILE_LINE_ARGS_)
 
 /* This macro is used in low-level MPI wrappers to return mpierr to the caller
  * so that one can locate the problematic call. Use it wisely since it may cause memory leaks.
- * #define ABI_HANDLE_MPIERR(mpierr) ABI_CHECK_MPI(mpierr,"ABI_HANDLE: Fatal error")
+ * #define ABI_HANDLE_MPIERR(mpierr) ABI_CHECK_MPI(mpierr, "ABI_HANDLE: Fatal error")
  */
-#define ABI_HANDLE_MPIERR(mpierr) if (mpierr/=MPI_SUCCESS) RETURN
+#define ABI_HANDLE_MPIERR(mpierr) if (mpierr /= MPI_SUCCESS) RETURN
 
 /* Macros for memory checking and profiling
  * TODO
@@ -105,8 +126,10 @@
  *  ABI_MALLOC_SCALAR
  *  ABI_FREE_SCALAR
  *
- #define HAVE_MEM_PROFILING
 */
+
+#define ABI_MEM_BITS(arr) product(int(shape(arr), kind=8)) * storage_size(arr, kind=8)
+#define ABI_MEM_MB(arr) ABI_MEM_BITS(arr) / (8.0_dp * 1024 ** 2)
 
 #ifdef HAVE_MEM_PROFILING
 
@@ -118,15 +141,14 @@
 
  Both loc and storage_size are polymorphic so one can use it with intrinsic types as well 
  as user-defined datatypes. scalar types require a special treatment (MALLOC_SCALAR, FREE_SCALAR)
- because shape == 0 thus it's not possible to discern with _MEM between zero-sized arrays and scalar
+ because shape == 0 thus it's not possible to discern with ABI_MEM between zero-sized arrays and scalar
 */
 #  define _LOC(x)  int(loc(x), kind=8) 
-#  define _MEM(arr) product(int(shape(arr), kind=8)) * storage_size(arr, kind=8)
 
 /* and now the debugging macros */
 #  define ABI_ALLOCATE(ARR, SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
 
 #  define ABI_MALLOC_SCALAR(scalar) \
    allocate(scalar) NEWLINE \
@@ -137,35 +159,34 @@
    deallocate(scalar)
 
 #  define ABI_DEALLOCATE(ARR) \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__,  __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__,  __LINE__) NEWLINE \
    deallocate(ARR) 
 
 #  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
 
 #  define ABI_DATATYPE_ALLOCATE(ARR,SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
 
 #  define ABI_DATATYPE_DEALLOCATE(ARR)  \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__, __LINE__) NEWLINE \
    deallocate(ARR) 
 
 #  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__) NEWLINE \
    ABI_CHECK(ierr == 0, "out-of-memory")
 
 #  define ABI_MOVE_ALLOC(from, to) \
-   call abimem_record(0, QUOTE(from), _LOC(from), "D", -_MEM(from),  __FILE__, __LINE__) NEWLINE \
-   if (allocated(to)) call abimem_record(0, QUOTE(to), _LOC(to), "D", -_MEM(to),  __FILE__, __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(from), _LOC(from), "D", -ABI_MEM_BITS(from),  __FILE__, __LINE__) NEWLINE \
+   if (allocated(to)) call abimem_record(0, QUOTE(to), _LOC(to), "D", - ABI_MEM_BITS(to),  __FILE__, __LINE__) NEWLINE \
    call move_alloc(from, to) NEWLINE \
-   call abimem_record(0, QUOTE(to), _LOC(to), "A", _MEM(to),  __FILE__, __LINE__)
+   call abimem_record(0, QUOTE(to), _LOC(to), "A", ABI_MEM_BITS(to),  __FILE__, __LINE__)
 
 
-/* Allocate a polymophic scalar 
- * allocate(datatype:: scalar) */
+/* Allocate a polymophic scalar that is: allocate(datatype:: scalar) */
 #  define ABI_DATATYPE_ALLOCATE_SCALAR(type, scalar)                    \
   allocate(type::scalar) NEWLINE                                        \
     call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
@@ -173,8 +194,6 @@
 #  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)                        \
   call abimem_record(0, QUOTE(scalar), _LOC(scalar), "D", -storage_size(scalar, kind=8), __FILE__, __LINE__) NEWLINE \
     deallocate(scalar) 
-
-
 
 #else
 /* macros used in production */
@@ -210,9 +229,6 @@
 #define ABI_FREE(ARR) ABI_DEALLOCATE(ARR)
 
 #define ABI_STAT_MALLOC(ARR,SIZE,ierr) ABI_STAT_ALLOCATE(ARR,SIZE,ierr)
-
-#define ABI_DT_MALLOC(ARR,SIZE)  ABI_DATATYPE_ALLOCATE(ARR,SIZE)
-#define ABI_DT_FREE(ARR)         ABI_DATATYPE_DEALLOCATE(ARR)
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
  * or allocate arrays before calling MOVE_ALLOC.
@@ -375,7 +391,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #endif
 
 /* DFTI macros (should be declared in m_dfti but build-sys tests complain */
-#define DFTI_CHECK(status) if (status/=0) call dfti_check_status(status _FILE_LINE_ARGS_)
+#define DFTI_CHECK(status) if (status /= 0) call dfti_check_status(status _FILE_LINE_ARGS_)
 
 
 /* Macros used in the GW code */

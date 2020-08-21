@@ -1,5 +1,5 @@
 
-.Version 9.0.2 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 20 Mar 2020.
-- ( at 07h53 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 02h51 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v8_t57/t57.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t57/t57.in
 - output file    -> t57.out
 - root for input  files -> t57i
 - root for output files -> t57o
@@ -153,12 +153,6 @@ _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         ddb_ngqpt5       0    0    0
         ddb_ngqpt6       1    1    1
            diemac      6.00000000E+00
-       dvdb_ngqpt1       0    0    0
-       dvdb_ngqpt2       0    0    0
-       dvdb_ngqpt3       0    0    0
-       dvdb_ngqpt4       0    0    0
-       dvdb_ngqpt5       0    0    0
-       dvdb_ngqpt6       1    1    1
              ecut      3.00000000E+01 Hartree
     eph_frohlichm1          0
     eph_frohlichm2          0
@@ -472,8 +466,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -487,8 +481,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1525,8 +1519,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1540,8 +1534,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1998,7 +1992,7 @@ meta: {optdriver: 7, eph_task: 6, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t57o_DS3_DDB
 - Cannot find quadrupole tensor in DDB file: t57o_DS3_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        1
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2006,8 +2000,8 @@ Values initialized with zeros
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2021,8 +2015,8 @@ Values initialized with zeros
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2090,12 +2084,6 @@ Values initialized with zeros
         ddb_ngqpt5       0    0    0
         ddb_ngqpt6       1    1    1
            diemac      6.00000000E+00
-       dvdb_ngqpt1       0    0    0
-       dvdb_ngqpt2       0    0    0
-       dvdb_ngqpt3       0    0    0
-       dvdb_ngqpt4       0    0    0
-       dvdb_ngqpt5       0    0    0
-       dvdb_ngqpt6       1    1    1
              ecut      3.00000000E+01 Hartree
     eph_frohlichm1          0
     eph_frohlichm2          0
@@ -2416,10 +2404,10 @@ P          mk1mem6          2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         44.4  wall=         47.0
+- Proc.   0 individual time (sec): cpu=         42.5  wall=         45.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  24 WARNINGs and  62 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         44.4  wall=         47.0
++Overall time at end (sec) : cpu=         42.5  wall=         45.4

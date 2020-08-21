@@ -53,7 +53,6 @@ module m_mover
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
- use m_dtfil,              only : dtfil_init_time
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_precpred_1geo,      only : precpred_1geo
@@ -186,20 +185,10 @@ contains
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      gstate,mover_effpot
+!!      m_gstate,m_mover_effpot
 !!
 !! CHILDREN
-!!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare_and_copy
-!!      abihist_free,abihist_init,abimover_fin,abimover_ini
-!!      chkdilatmx,crystal_init,dtfil_init_time
-!!      effective_potential_evaluate,erlxconv,fcart2fred,fconv,hist2var
-!!      initylmg,matr3inv,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
-!!      pred_diisrelax,pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin
-!!      pred_lbfgs,pred_lotf,pred_moldyn,pred_nose,pred_simple,pred_srkna14
-!!      pred_steepdesc,pred_velverlet,pred_verlet,prtxfase,read_md_hist
-!!      scfcv_run,status,symmetrize_xred,var2hist,vel2hist,write_md_hist
-!!      wrt_moldyn_netcdf,wrtout,wvl_mkrho,wvl_wfsinp_reformat,xfh_update
-!!      xmpi_barrier,xmpi_isum,xmpi_wait
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -360,10 +349,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      call abihist_free(hist_prev)
    end if
 !  If restarxf specifies to start to the last iteration
-   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then 
+     if(present(effective_potential))then
+       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+       xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
+       hist%ihist = 1 
+     end if
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
-     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     !xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
      call abihist_free(hist_prev)
    end if
 
@@ -543,7 +537,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
-
+     
      call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
 &     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
 
@@ -621,7 +615,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !          (done in pred_montecarlo)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
-               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
+               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
                hist%ihist = 1
              end if
@@ -776,6 +770,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if(specs%isFconv)then
        if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5).or.mod(itime,2)==1)then
          if (scfcv_args%dtset%tolmxf/=0)then
+
            call fconv(hist%fcart(:,:,hist%ihist),&
 &           scfcv_args%dtset%iatfix, &
 &           iexit,itime,&
@@ -1028,10 +1023,10 @@ contains
 !!  at output : iexit=  0 if not below tolerance, 1 if below tolerance
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
-!!      wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1146,10 +1141,10 @@ end subroutine fconv
 !!  argout(sizeout)=description
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
-!!      wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1242,10 +1237,10 @@ end subroutine mover
 !!  (only writing)
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
-!!      gettag,wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1506,10 +1501,10 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !!  tag = The string to put for each atom
 !!
 !! PARENTS
-!!      prtxfase
+!!      m_mover
 !!
 !! CHILDREN
-!!      gettag,wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1564,10 +1559,10 @@ subroutine gettag(atlist,index,natom,prtallatoms,tag)
 !!  tag = The string to put for aech atom
 !!
 !! PARENTS
-!!      prtxfase
+!!      m_mover
 !!
 !! CHILDREN
-!!      gettag,wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1647,7 +1642,7 @@ end subroutine prtxfase
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
 !!      metric,wrtout,xcart2xred,xred2xcart

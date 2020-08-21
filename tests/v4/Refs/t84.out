@@ -144,10 +144,10 @@ _ WF disk file :      0.734 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
         gwcalctyp3          0
         gwcalctyp4          2
 -          gwpara           1
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
            istwfk        1    0    1    0    0    0    1    0
            jdtset        1    2    3    4
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -345,8 +345,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -534,8 +534,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1444,7 +1444,7 @@ KS_gap     :    2.521
 QP_gap     :    3.097
 Delta_QP_KS:    0.576
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   5.850 -11.213 -12.500   1.516   0.778  -0.285 -11.035   0.177   6.027
         5   8.371 -10.021  -5.651  -3.401   0.777  -0.287  -9.268   0.753   9.124
 ...
@@ -1458,7 +1458,7 @@ KS_gap     :    3.519
 QP_gap     :    4.143
 Delta_QP_KS:    0.624
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   2.939 -10.534 -12.918   2.471   0.757  -0.322 -10.469   0.066   3.004
         5   6.458  -9.062  -5.077  -3.115   0.793  -0.261  -8.372   0.690   7.148
 ...
@@ -1589,7 +1589,7 @@ KS_gap     :    2.521
 QP_gap     :    3.119
 Delta_QP_KS:    0.598
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   5.850 -11.213 -12.500   1.484   0.786  -0.272 -11.059   0.154   6.004
         4   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
         5   8.371 -10.021  -5.651  -3.417   0.789  -0.268  -9.269   0.752   9.123
@@ -1605,7 +1605,7 @@ KS_gap     :    3.519
 QP_gap     :    4.175
 Delta_QP_KS:    0.656
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   2.939 -10.534 -12.918   2.417   0.782  -0.279 -10.508   0.026   2.965
         4   0.000   0.000   0.000   0.034   0.000   0.000   0.027   0.027   0.027
         5   6.458  -9.062  -5.077  -3.135   0.802  -0.247  -8.380   0.682   7.140
@@ -1672,10 +1672,10 @@ data: !SigmaeeData |
         gwcalctyp3          0
         gwcalctyp4          2
 -          gwpara           1
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
            istwfk        1    0    1    0    0    0    1    0
            jdtset        1    2    3    4
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00

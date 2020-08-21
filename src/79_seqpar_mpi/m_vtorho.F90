@@ -253,10 +253,10 @@ contains
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! NOTES
 !!  Be careful to the meaning of nfft (size of FFT grids):
@@ -360,7 +360,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
- real(dp) :: dmft_ldaocc
+ real(dp) :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
  character(len=500) :: message
@@ -381,7 +381,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
- type(oper_type) :: lda_occup
+ type(oper_type) :: dft_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
 
  type(crystal_t) :: cryst_struc
@@ -1222,7 +1222,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(990,2,tsec)
 
 !    !=========  DMFT call begin ============================================
-     dmft_ldaocc=0
+     dmft_dftocc=0
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
        call timab(991,1,tsec)
 
@@ -1231,7 +1231,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      ==  0 to a dmft calculation and do not use lda occupations
 !      ==  1 to a lda calculation with the dmft loop
-       if(dtset%dmftcheck==-1) dmft_ldaocc=1
+       if(dtset%dmftcheck==-1) dmft_dftocc=1
 
 !      ==  initialise occnd
        paw_dmft%occnd=zero
@@ -1247,7 +1247,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end do
 
 
-       if(dmft_ldaocc==0) then
+       if(dmft_dftocc==0) then
          if(dtset%occopt/=3) then
            MSG_ERROR('occopt should be equal to 3 in dmft')
          end if
@@ -1286,7 +1286,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            MSG_WARNING(message)
          end if
 
-!        ==  allocate paw_dmft%psichi and paw_dmft%eigen_lda
+!        ==  allocate paw_dmft%psichi and paw_dmft%eigen_dft
          call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,&
 &         dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
          call print_dmft(paw_dmft,dtset%pawprtvol)
@@ -1301,11 +1301,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !        ==  compute psichi
          call xmpi_barrier(spaceComm_distrb)
-         call init_oper(paw_dmft,lda_occup)
+         call init_oper(paw_dmft,dft_occup)
          call flush_unit(std_out)
          call timab(620,1,tsec)
          call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,&
-&         lda_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
+&         dft_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
 &         dtset%nkpt,my_nspinor,dtset%nsppol,occ,&
 &         paw_dmft,paw_ij,pawang,pawtab,psps,usecprj_local,dtfil%unpaw)
          call timab(620,2,tsec)
@@ -1315,7 +1315,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)
 
-         call dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,dtset%pawprtvol)
+         call dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,dtset%pawprtvol)
          edmft=paw_dmft%edmft
          energies%e_paw=energies%e_paw+edmft
          energies%e_pawdc=energies%e_pawdc+edmft
@@ -1358,8 +1358,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !        ==  destroy crystal_t cryst_struc
          call cryst_struc%free()
-         call destroy_oper(lda_occup)
-       end if ! dmft_ldaocc
+         call destroy_oper(dft_occup)
+       end if ! dmft_dftocc
        call timab(991,2,tsec)
 
      end if ! usedmft
@@ -1405,7 +1405,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !          dmft
            if(paw_dmft%use_dmft>=1.and.dtset%nbandkss==0) then
              if(paw_dmft%band_in(iband)) then
-               if( paw_dmft%use_dmft == 1 .and. dmft_ldaocc == 1 ) then ! test of the code
+               if( paw_dmft%use_dmft == 1 .and. dmft_dftocc == 1 ) then ! test of the code
                  paw_dmft%occnd(1,iband,iband,ikpt,isppol)=occ(bdtot_index)
                end if
                locc_test = abs(paw_dmft%occnd(1,iband,iband,ikpt,isppol))+&
@@ -1887,10 +1887,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !! OUTPUT
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -1989,10 +1989,10 @@ subroutine wvl_nscf_loop()
 !!  argout(sizeout)=description
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2080,10 +2080,10 @@ subroutine wvl_nscf_loop_bigdft()
 !!  e_eigenvalues= eigenvalues energy
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2138,10 +2138,10 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2190,10 +2190,10 @@ subroutine wvl_occ()
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2242,10 +2242,10 @@ subroutine wvl_occ_bigdft()
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2337,7 +2337,7 @@ end subroutine vtorho
 !! NOTES
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      timab,xmpi_recv,xmpi_send

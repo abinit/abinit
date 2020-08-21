@@ -1,12 +1,16 @@
 # C atom
 
-ndtset 4
+ndtset 5
+
+#1st dataset: generate GGA-PBE wave functions
+ixc1 -101130   nstep1 1   prtwf1 1   getwfk1 0   xc_denpos1 1.0d-14   
+getwfk 1
 
 #mGGA : different exchanges + PW92 LDA correlation
-ixc1 -12207
-ixc2 -12208
-ixc3 -12209
-ixc4 -12208
+ixc2 -12207
+ixc3 -12208
+ixc4 -12209
+ixc5 -12208
 
 xc_tb09_c4 1.58 #to fix the c parameter of the TB09 XC functional
 
@@ -17,9 +21,9 @@ ecut  20
 diemac 1.0d0
 diemix 0.7d0
 
- nstep  10
- nstep2 15
- nstep4 15
+nstep  10
+nstep2 15
+nstep4 15
 
 xc_denpos 1.0d-7
 
@@ -41,13 +45,15 @@ rprim 0.5 0.5 0.0
       0.0 0.5 0.5
       0.5 0.0 0.5
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6-C.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t13.out, tolnlines = 2, tolabs = 1.1e-6, tolrel = 2.0e-4, fld_options = -medium
-#%% psp_files = 6-C.fhi
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
@@ -56,6 +62,7 @@ rprim 0.5 0.5 0.0
 #%% description = 
 #%%   Isolated Carbon atom
 #%%   Test the mGGA functionals generating directly XC potentials.
+#%%   To make the test more poratble, we generate GGA-PBE wave functions as starting point.
 #%%   Similar to test 08, but with smaller acell and ecut.
 #%%   Without the use of a "large" xc_denpos, Tran-Blaha is hard to converge. Hypothesis : there is a strong non-linear
 #%%   region, preventing the Anderson method to work effectively.

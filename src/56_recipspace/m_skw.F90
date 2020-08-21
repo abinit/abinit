@@ -415,7 +415,6 @@ end function skw_new
 !!  only writing
 !!
 !! PARENTS
-!!      m_skw
 !!
 !! CHILDREN
 !!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
@@ -540,7 +539,6 @@ end function skw_ncwrite
 !!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
 !!
 !! PARENTS
-!!      m_ebands,m_ifc,m_skw
 !!
 !! CHILDREN
 !!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
@@ -744,7 +742,6 @@ end subroutine skw_eval_fft
 !!  Free memory
 !!
 !! PARENTS
-!!      m_ebands,m_ifc
 !!
 !! CHILDREN
 !!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum

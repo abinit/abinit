@@ -20,9 +20,9 @@
 !!
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,delete_file
-!!      get_command_argument,hdr_echo,hdr_free,hdr_read_from_fname,herald
-!!      wfk_check_wfkfile,wfk_close,wfk_create_wfkfile,wfk_nc2fort
-!!      wfk_open_read,wfk_print,wfk_prof,wrtout,xmpi_init
+!!      get_command_argument,hdr%echo,hdr%free,hdr_read_from_fname,herald
+!!      wfk%close,wfk%print,wfk_check_wfkfile,wfk_create_wfkfile,wfk_nc2fort
+!!      wfk_open_read,wfk_prof,wrtout,xmpi_init
 !!
 !! SOURCE
 
@@ -185,7 +185,7 @@ program ioprof
            CYCLE
          end if
 
-         ABI_DT_MALLOC(Kvars, (hdr%nkpt))
+         ABI_MALLOC(Kvars, (hdr%nkpt))
 
          if (my_rank == master) then
            call wrtout(ount,"Calling wfk_create_wfkfile","COLL")
@@ -231,7 +231,7 @@ program ioprof
            end if
          end if
 
-         ABI_DT_FREE(Kvars)
+         ABI_FREE(Kvars)
        end do ! iomode
      end do ! formeig
 

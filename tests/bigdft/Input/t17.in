@@ -65,6 +65,9 @@ irdwfk 1     # Restart from wavefunctions
 iomode 3  # ETSF IO access
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/06c.pspgth, PseudosGTH_pwteter/08o.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -73,7 +76,6 @@ iomode 3  # ETSF IO access
 #%% input_prefix = t16o 
 #%% [files]
 #%% files_to_test = t17.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
-#%% psp_files=06c.pspgth, 08o.pspgth 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

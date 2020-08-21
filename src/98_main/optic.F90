@@ -60,13 +60,13 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,cryst%free,crystal_init
 !!      ebands_copy,ebands_free,ebands_init,ebands_update_occ,eprenorms_bcast
-!!      eprenorms_free,eprenorms_from_epnc,flush_unit,hdr_bcast,hdr_copy
-!!      hdr_free,herald,int2char4,linelop,linopt,mati3inv,matr3inv,metric
-!!      nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart,pmat_renorm,renorm_bst
-!!      sym2cart,timein,wfk_close,wfk_open_read,wfk_read_eigk,wrtout,xmpi_bcast
-!!      xmpi_end,xmpi_init,xmpi_sum
+!!      eprenorms_free,eprenorms_from_epnc,flush_unit,hdr%bcast,hdr%free
+!!      hdr_copy,hdr_ddk,hdr_ncread,herald,int2char4,linelop,linopt,mati3inv
+!!      matr3inv,metric,nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart
+!!      pmat_renorm,renorm_bst,sym2cart,timein,wfk0%close,wfk0%read_eigk
+!!      wfk_open_read,wfks,wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -110,14 +110,14 @@ program optic
 
 !Local variables-------------------------------
  integer,parameter :: formeig0=0,formeig1=1,tim_rwwf=0,master=0
- integer :: finunt,ep_ntemp,itemp
+ integer :: fform,finunt,ep_ntemp,itemp
  integer :: bantot,bdtot0_index,bdtot_index
  integer :: headform,ierr,ii,jj,ikpt,isym
  integer :: isppol,mband,nomega,natom,nband1,nsym
  integer :: nkpt,nspinor,nsppol,ntypat
  integer :: occopt,nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
  integer :: linel1,linel2,linel3,nonlin1,nonlin2,nonlin3
- integer :: iomode,comm,nproc,my_rank, optic_ncid
+ integer :: iomode0,comm,nproc,my_rank, optic_ncid
 #ifdef HAVE_NETCDF
  integer :: ncid, varid, ncerr
 #endif
@@ -135,7 +135,9 @@ program optic
  type(ebands_t) :: ks_ebands, eph_ebands
  type(crystal_t) :: cryst
  type(eprenorms_t) :: Epren
+ type(wfk_t) :: wfk0
 !arrays
+ integer :: iomode_ddk(3)
  integer,allocatable :: istwfk(:), npwarr(:), nband(:), symrel(:,:,:), symrec(:,:,:)
  real(dp) :: tsec(2), gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
  real(dp),allocatable :: symcart(:,:,:), kpt(:,:),wmesh(:)
@@ -144,7 +146,7 @@ program optic
  real(dp),allocatable :: occ(:),wtk(:),eigtmp(:)
  real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
- logical :: use_ncddk(0:3)
+ logical :: use_ncevk(0:3)
  character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile
  character(len=fnlen) :: infiles(0:3)
 ! for the moment this is imposed by the format in linopt.f and nlinopt.f
@@ -154,7 +156,7 @@ program optic
  character(len=24) :: start_datetime
  character(len=500) :: msg
  character(len=fnlen) :: ep_nc_fname
- type(wfk_t) :: wfk0
+ type(hdr_type) :: hdr_ddk(3)
  type(wfk_t) :: wfks(0:3)
 
  ! Input file
@@ -192,22 +194,22 @@ program optic
    !Read data file name
    write(std_out,'(a)')' Please, give the name of the data file ...'
    read(5, '(a)')filnam
-   write(std_out,'(a)')' The name of the data file is :',filnam
+   write(std_out,'(a,a,1x,a,a)')' The name of the data file is :',ch10,trim(filnam),ch10
    write(std_out,'(a)')' Please, give the name of the output file ...'
    read(5, '(a)')filnam_out
-   write(std_out,'(a)')' The name of the output file is :',filnam_out
+   write(std_out,'(a,a,1x,a,a)')' The name of the output file is :',ch10,trim(filnam_out),ch10
    write(std_out,'(a)')' Please, give the root name for the (non)linear optical data output file ...'
    read(5, '(a)')prefix
-   write(std_out,'(a)')' The root name of the output files is :',trim(prefix)
+   write(std_out,'(a,a,1x,a)')' The root name of the output files is :',ch10,trim(prefix)
 
    ! Read data file
    if (open_file(filnam,msg,newunit=finunt,form='formatted') /= 0) then
      MSG_ERROR(msg)
    end if
 
-   write(msg,'(3a)') "From version 7.11.4, optic uses namelists as input.",ch10,&
-     "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
-   MSG_COMMENT(msg)
+!   write(msg,'(3a)') "From version 7.11.4, optic uses namelists as input.",ch10,&
+!     "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
+!   MSG_COMMENT(msg)
 
    ! Setup some default values:
    broadening = 1e-3_dp ! Ha
@@ -238,44 +240,96 @@ program optic
      MSG_ERROR("nonlin2_comp must be specified when num_nonlin2_comp > 0")
    end if
 
-   ! Open the Wavefunction files
+   ! Open GS wavefunction file
    ! Note: Cannot use MPI-IO here because of prtwf=3.
    ! If prtwf==3, the DDK file does not contain the wavefunctions but
    ! this info is not reported in the header and the offsets in wfk_compute_offsets
    ! are always computed assuming the presence of the cg
-
-   ! TODO: one should perform basic consistency tests for the GS WFK and the EVK files, e.g.
-   ! k-points and their order, spins, number of bands could differ in the four files.
-   ! Note indeed that we are assuming the same numer of bands in all the files.
-   call nctk_fort_or_ncfile(wfkfile, iomode, msg)
+   call nctk_fort_or_ncfile(wfkfile, iomode0, msg)
    if (len_trim(msg) /= 0) MSG_ERROR(msg)
-   if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
-   call wfk_open_read(wfk0,wfkfile,formeig0,iomode,get_unit(),xmpi_comm_self)
+   if (iomode0 == IO_MODE_MPI) iomode0 = IO_MODE_FORTRAN
+   call wfk_open_read(wfk0,wfkfile,formeig0,iomode0,get_unit(),xmpi_comm_self)
    ! Get header from the gs file
    call hdr_copy(wfk0%hdr, hdr)
 
-   ! Read ddk here from WFK files or afterwards from EVK.nc
-   use_ncddk = .False.
+   ! Identify the type of RF Wavefunction files
+   use_ncevk = .False.
    do ii=1,3
-     use_ncddk(ii) = endswith(infiles(ii), "_EVK.nc")
-     if (.not. use_ncddk(ii)) then
-       call nctk_fort_or_ncfile(infiles(ii), iomode, msg)
-       if (len_trim(msg) /= 0) MSG_ERROR(msg)
-       if (iomode == IO_MODE_MPI) iomode = IO_MODE_FORTRAN
-       call wfk_open_read(wfks(ii), infiles(ii), formeig1, iomode, get_unit(), xmpi_comm_self)
+     use_ncevk(ii) = endswith(infiles(ii), "_EVK.nc")
+   end do
+
+   ! Read ddk here from WFK files or from EVK.nc (only the header in the latter case)
+   do ii=1,3
+
+     call nctk_fort_or_ncfile(infiles(ii), iomode_ddk(ii), msg)
+     if (len_trim(msg) /= 0) MSG_ERROR(msg)
+     if (iomode_ddk(ii) == IO_MODE_MPI) iomode_ddk(ii) = IO_MODE_FORTRAN
+
+     if (.not. use_ncevk(ii)) then
+       call wfk_open_read(wfks(ii), infiles(ii), formeig1, iomode_ddk(ii), get_unit(), xmpi_comm_self)
+       call hdr_copy(wfks(ii)%hdr,hdr_ddk(ii))
+     else
+
+#ifdef HAVE_NETCDF
+       NCF_CHECK(nctk_open_read(ncid, infiles(ii), xmpi_comm_self))
+       call hdr_ncread(hdr_ddk(ii),ncid, fform)
+       ABI_CHECK(fform /= 0, sjoin("Error while reading:", infiles(ii)))
+
+       NCF_CHECK(nf90_close(ncid))
+#else
+       MSG_ERROR("Netcdf not available!")
+#endif
+
      end if
    end do
 
-   ! Consistency check
-   do ii=1,2
-     if (.not. use_ncddk(ii) .and. .not. use_ncddk(ii+1)) then
+!   if(any(iomode_ddk(:)/=iomode0))then
+!     write(msg, "(5a)")&
+!&      ' The ground-state and ddk files should have the same format,',ch10,&
+!&      ' either FORTRAN binary or NetCDF, which is not the case.',ch10,&
+!&      ' Action : see input variable iomode.'
+!     MSG_ERROR(msg)
+!   endif
+
+   ! Perform basic consistency tests for the GS WFK and the DDK files, e.g.
+   ! k-points and their order, spins, number of bands could differ in the four files.
+   ! Note indeed that we must have the same quantities in all the files.
+
+   if (.not. use_ncevk(1)) then
+
+     write(msg, "(12a)")ch10,&
+&      ' Check the consistency of the wavefunction files (esp. k point and number of bands). ',ch10,&
+&      ' Will compare, pairwise ( 1/2, 2/3, 3/4 ), the four following files :',ch10,&
+&      trim(wfkfile),ch10,trim(infiles(1)),ch10,trim(infiles(2)),ch10,trim(infiles(3))
+     call wrtout(std_out,msg,'COLL')
+
+!DEBUG
+!  stop
+!ENDDEBUG
+
+     if (hdr%compare(hdr_ddk(1)) /= 0) then
+       write(msg, "(3a)")" Ground-state wavefunction file and ddkfile ",trim(infiles(1))," are not consistent. See above messages."
+       MSG_ERROR(msg)
+     end if
+     do ii=1,2
        if (wfks(ii)%compare(wfks(ii+1)) /= 0) then
-         write(msg, "(2(a,i0,a))")"evkfile", ii," and evkfile ",ii+1, ", are not consistent. see above messages"
+         write(msg, "(2(a,i0,a))")" ddkfile", ii," and ddkfile ",ii+1, ", are not consistent. See above messages"
          MSG_ERROR(msg)
        end if
-     end if
-   end do
+     enddo
+   endif
 
+!DEBUG
+!  stop
+!ENDDEBUG
+
+
+   ! TODO: one should perform basic consistency tests for the EVK files, e.g.
+   ! k-points and their order, spins, number of bands could differ in the four files.
+   ! Note indeed that we are assuming the same numer of bands in all the files.
+
+
+   !Handle electron-phonon file
    ep_nc_fname = 'test_EP.nc'; if (do_temperature) ep_nc_fname = epfile
    do_ep_renorm = file_exists(ep_nc_fname)
    ep_ntemp = 1
@@ -405,7 +459,7 @@ program optic
    ABI_ALLOCATE(eig0tmp,(mband))
 
    do ii=1,3
-     if (.not. use_ncddk(ii)) cycle
+     if (.not. use_ncevk(ii)) cycle
 #ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(ncid, infiles(ii), xmpi_comm_self))
      varid = nctk_idname(ncid, "h1_matrix_elements")
@@ -431,7 +485,7 @@ program optic
 
        ! Read DDK matrix elements from WFK
        do ii=1,3
-         if (.not. use_ncddk(ii)) then
+         if (.not. use_ncevk(ii)) then
            call wfks(ii)%read_eigk(ikpt, isppol, xmpio_single, eigtmp)
            if (ii == 1) eigen11(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
            if (ii == 2) eigen12(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
@@ -446,7 +500,7 @@ program optic
 
    call wfk0%close()
    do ii=1,3
-     if (.not. use_ncddk(ii)) call wfks(ii)%close()
+     if (.not. use_ncevk(ii)) call wfks(ii)%close()
    end do
 
    ABI_DEALLOCATE(eigtmp)
@@ -645,6 +699,14 @@ program optic
  call pmat2cart(eigen11,eigen12,eigen13,mband,nkpt,nsppol,pmat,rprimd)
  call pmat_renorm(fermie, eigen0, mband, nkpt, nsppol, pmat, scissor)
 
+
+!---------------------------------------------------------------------------------
+! Perform calculations
+!---------------------------------------------------------------------------------
+
+! XG_2020_05_25 : All these subroutines should be rationalized. There are numerous
+! similar sections, e.g. at the level of the checking, and set up ...
+
 !IN CALLED ROUTINE
 !call linopt(nspin,,nkpt,wkpt,nsymcrys,symcrys,nstval,occv,evalv,efermi,pmat,v1,v2,nmesh,de,scissor,brod)
 !
@@ -718,7 +780,7 @@ program optic
 &   linel1,linel2,linel3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
 
- ! onlinear electro-optical susceptibility for semiconductors
+ ! nonlinear electro-optical susceptibility for semiconductors
  call wrtout(std_out," optic : Call nonlinopt","COLL")
  do ii=1,num_nonlin2_comp
    nonlin1 = int( nonlin2_comp(ii)/100.0_dp)
@@ -734,6 +796,8 @@ program optic
    call nonlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
 &   nonlin1,nonlin2,nonlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
+
+!---------------------------------------------------------------------------------
 
  ABI_DEALLOCATE(nband)
  ABI_DEALLOCATE(occ)
@@ -752,6 +816,9 @@ program optic
  ABI_DEALLOCATE(pmat)
 
  call hdr%free()
+ call hdr_ddk(1)%free()
+ call hdr_ddk(2)%free()
+ call hdr_ddk(3)%free()
  call ebands_free(ks_ebands)
  call cryst%free()
 

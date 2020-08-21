@@ -25,6 +25,7 @@
    nshiftk      1
     shiftk      0.00   0.00   0.00
     enunit      2
+ gw_icutcoul      6 # To preserve the results of older tests: current default gw_icutcoul=3
 
     ndtset      7
     gwpara      1
@@ -45,8 +46,8 @@
     getwfk3     2
 
      nband3    10
-    ecutwfn3     1.49923969E+00 Hartree
-      awtr3       0       # Note : the default awtr 1 is better
+    ecutwfn3    1.49923969E+00 Hartree
+      awtr3     0  # Note : the default awtr 1 is better
 
 # Calculation of the model GW corrections - iteration 1
  optdriver4     4
@@ -55,7 +56,7 @@
     getscr4     3
      nband4    10
    ecutwfn4     1.49923969E+00 Hartree
-  icutcoul4     3            # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul4     3  # old deprecated value of icutcoul, only used for legacy
 
 
 # Calculation of the dielectric matrix - iteration 2
@@ -77,7 +78,7 @@
     getscr6     5
      nband6    10
    ecutwfn6     1.49923969E+00 Hartree
-  icutcoul6     3            # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul6     3  # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the quasiparticle Wannier functions
 
@@ -128,6 +129,9 @@
               1 8
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -135,7 +139,6 @@
 #%% files_to_test = 
 #%%   t03.out, tolnlines = 27, tolabs = 7.0e-03, tolrel = 1.05e-00
 #%% extra_inputs = t03o_DS7_w90.win
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

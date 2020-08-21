@@ -233,8 +233,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10421
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/22ti.12.hgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/22ti.12.hgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/22ti.12.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/22ti.12.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ti,  from PRB58, 3641 (1998)
 - 22.00000  12.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -259,8 +259,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -0.006464
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/8o.6.hgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/8o.6.hgh
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for O,  from PRB58, 3641 (1998)
 -  8.00000   6.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -491,8 +491,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/22ti.12.hgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/22ti.12.hgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/22ti.12.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/22ti.12.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ti,  from PRB58, 3641 (1998)
 - 22.00000  12.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -517,8 +517,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
              2   -0.006464
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/8o.6.hgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/8o.6.hgh
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for O,  from PRB58, 3641 (1998)
 -  8.00000   6.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -867,7 +867,7 @@ KS_gap     :    0.968
 QP_gap     :    2.034
 Delta_QP_KS:    1.066
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
        23   4.820 -17.670 -21.808   4.518   0.865  -0.157 -17.342   0.329   5.149
        24   4.820 -17.670 -21.808   4.518   0.865  -0.157 -17.342   0.329   5.149
        25   5.788 -10.645  -5.853  -3.203   0.877  -0.140  -9.251   1.395   7.183

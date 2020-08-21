@@ -202,13 +202,13 @@ _ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
            getwfk5          1
            getwfk6          1
            getwfk7          1
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
-         icutcoul7          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
+        gw_icutcoul5          6
+        gw_icutcoul6          3
+        gw_icutcoul7          3
             intxc           1
            jdtset        1    2    3    4    5    6    7
               kpt     -2.50000000E-01  5.00000000E-01  0.00000000E+00
@@ -418,8 +418,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -433,8 +433,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -619,8 +619,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -634,8 +634,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -972,7 +972,7 @@ KS_gap     :    5.765
 QP_gap     :    6.643
 Delta_QP_KS:    0.878
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   9.060 -13.750 -16.111   3.722   0.810  -0.235 -12.647   1.102  10.163
         5  14.825 -11.403  -5.970  -3.070   0.838  -0.193  -9.422   1.981  16.806
 ...
@@ -1101,7 +1101,7 @@ KS_gap     :    5.765
 QP_gap     :    6.753
 Delta_QP_KS:    0.988
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   9.060 -13.750 -16.111   3.754   0.811  -0.233 -12.620   1.130  10.190
         5  14.825 -11.403  -5.970  -3.102   0.840  -0.191  -9.285   2.118  16.943
 ...
@@ -1463,7 +1463,7 @@ KS_gap     :    5.765
 QP_gap     :    6.760
 Delta_QP_KS:    0.996
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   9.060 -13.750 -16.111   3.638   0.821  -0.217 -12.701   1.049  10.109
         5  14.825 -11.403  -5.970  -3.022   0.848  -0.179  -9.358   2.045  16.870
 ...
@@ -1592,7 +1592,7 @@ KS_gap     :    5.765
 QP_gap     :    6.862
 Delta_QP_KS:    1.098
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   9.060 -13.750 -16.111   3.668   0.823  -0.216 -12.674   1.075  10.136
         5  14.825 -11.403  -5.970  -3.052   0.850  -0.177  -9.230   2.173  16.998
 ...
@@ -1673,13 +1673,13 @@ data: !SigmaeeData |
            getwfk5          1
            getwfk6          1
            getwfk7          1
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
-         icutcoul7          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
+        gw_icutcoul5          6
+        gw_icutcoul6          3
+        gw_icutcoul7          3
             intxc           1
            jdtset        1    2    3    4    5    6    7
               kpt     -2.50000000E-01  5.00000000E-01  0.00000000E+00

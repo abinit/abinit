@@ -2,13 +2,24 @@
 !! NAME
 !!
 !! FUNCTION
-!!  Computation of phonon linewidths, isotropic superconducting properties and transport in metals with the LOVA.
+!!  Computation of phonon linewidths, isotropic superconducting properties
+!!  and transport in metals withing the LOVA approximation to the linearized Boltzmann equation.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! TODO
+!!  1) Implement restart capabilities (eph_restart)
+!!  2) Sum over the IBZ(q) on the FS instead of full BZ
+!!  3) Gaussian adaptive smearing for double delta (tetra version from libtetrabz really slow!)
+!!  4) Automatic detections of energy window, improve filtering techniques.
+!!  5) Interface with KERANGE trick
+!!  6) More examples and tutorials (using precomputed Netcd files)
+!!  7) SKW interpolation for ph linewidths and/or linear interpolation (I don't trust plain Fourier interpolation).
+!!  8) Perform more benchmarks with dense meshes to detect hotspots and memory bottlenecks
 !!
 !! PARENTS
 !!
@@ -66,7 +77,7 @@ module m_phgamma
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_bz_mesh,        only : kpath_t, kpath_new
  use m_special_funcs,  only : fermi_dirac
- use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk, kpts_timrev_from_kptopt
  use defs_elphon,      only : complete_gamma !, complete_gamma_tr
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
@@ -475,6 +486,8 @@ contains  !=====================================================
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -526,8 +539,11 @@ end subroutine phgamma_free
 !! gams<phgamma_t>
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -626,8 +642,11 @@ end subroutine phgamma_init
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -719,8 +738,11 @@ end subroutine phgamma_ncwrite
 !! cryst<crystal_t>=Crystalline structure.
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -799,6 +821,8 @@ end subroutine tgamma_symm
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -903,6 +927,8 @@ end subroutine phgamma_eval_qibz
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1012,6 +1038,8 @@ end subroutine phgamma_interp
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1136,8 +1164,11 @@ end subroutine phgamma_interp_setup
 !!  lambda_out_ph(gams%natom3)=Phonon linewidths.
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1357,8 +1388,11 @@ end subroutine phgamma_vv_interp
 !!  gams<phgamma_t>= gams%vals_in_rpt, etc... depending on action.
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1485,6 +1519,8 @@ end subroutine phgamma_vv_interp_setup
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1673,6 +1709,8 @@ end subroutine phgamma_linwid
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1727,8 +1765,11 @@ end subroutine a2fw_free
 !!  a2f<a2fw_t>=Structure storing the Eliashberg function a2F(w).
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2058,7 +2099,11 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
        call wrtout(ount, msg)
      end if
 
-     write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling.'
+     if (do_qintp) then
+       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (interpolated).'
+     else
+       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (coarse grid).'
+     endif
      write(ount,'(a,es16.6)')' isotropic lambda = ',lambda_iso
      write(ount,'(a,es16.6,a,es16.6,a)' )' omegalog  = ',omega_log,' (Ha) ', omega_log * Ha_K, ' (Kelvin) '
      write(ount,'(a,es16.6,a,es16.6,a)')' MacMillan Tc = ',tc_macmill,' (Ha) ', tc_macmill * Ha_K, ' (Kelvin) '
@@ -2412,6 +2457,8 @@ end function a2fw_lambda_wij
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2557,8 +2604,11 @@ end subroutine a2fw_write
 !!  Output is written to file. This routine should be called by one MPI proc.
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2669,6 +2719,8 @@ end subroutine a2fw_ee_write
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2882,6 +2934,8 @@ end subroutine a2fw_solve_gap
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2940,8 +2994,11 @@ end subroutine a2fw_tr_free
 !!  a2f_tr<a2fw_tr_t>=Structure storing the Eliashberg transport function a2F_tr(w).
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3232,7 +3289,11 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
 
    ! TODO: make output only for irred values xx yy zz and top half of matrix
    if (my_rank == master) then
-     write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions '
+     if (do_qintp) then
+       write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions (interpolated) '
+     else
+       write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions (coarse grid) '
+     endif
      write(ount,'(a,3(3es10.3,2x))') ' lambda = ',lambda_iso
      write(ount,'(a,3(3es10.3,2x),a)' )' omegalog  = ',omega_log,' (Ha) '
      write(ount,'(a,3(3es10.3,2x),a)' )'             ',omega_log*Ha_K, ' (Kelvin) '
@@ -3276,6 +3337,8 @@ end subroutine a2fw_tr_init
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3454,9 +3517,11 @@ end subroutine a2fw_tr_write
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph
+!!      m_eph_driver
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3496,7 +3561,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q, ltetra
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
- integer :: jene, iene, comm_rpt, method, nesting
+ integer :: jene, iene, comm_rpt, nesting
  integer :: my_npert, imyp, imyq
 #ifdef HAVE_NETCDF
  integer :: ncerr
@@ -3522,7 +3587,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
  integer :: indkk_kq(1,6)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:)
- integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
+ integer,allocatable :: my_pinfo(:,:), pert_table(:,:) !, qibz_done(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2)
  real(dp) :: wminmax(2), n0(ebands%nsppol)
  real(dp) :: resvv_in(2,9), resvv_out(2,9), phfrq(3*cryst%natom)
@@ -3575,7 +3640,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
 
  ! Compute electron DOS.
- edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
+ edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
  edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
@@ -3589,7 +3654,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call edos%write(path)
  end if
 
- ! Find Fermi surface k points
+ ! Find Fermi surface k-points
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset, comm)
@@ -3702,6 +3767,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call xmpi_split_cyclic(gams%nqibz, qpt_comm%value, gams%my_nqibz, gams%my_iqibz)
  ABI_CHECK(gams%my_nqibz > 0, sjoin("nqibz (", itoa(gams%nqibz), ") < qpt_comm_nproc (", itoa(qpt_comm%nproc), ")"))
 
+ !ABI_CALLOC(qibz_done, (gams%nqibz))
+
  path = strcat(dtfil%filnam_ds(4), "_A2F.nc")
  ncid = nctk_noid
 #ifdef HAVE_NETCDF
@@ -3732,6 +3799,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      nctkarr_t("ph_ngqpt", "int", "three"), &
      nctkarr_t('qibz', "dp", "number_of_reduced_dimensions, nqibz"), &
      nctkarr_t('wtq', "dp", "nqibz"), &
+     !nctkarr_t('qibz_done', "int", "nqibz"), &
      nctkarr_t('phfreq_qibz', "dp", "natom3, nqibz"), &
      nctkarr_t('phdispl_cart_qibz', "dp", "two, natom3, natom3, nqibz"), &
      nctkarr_t('phgamma_qibz', "dp", "natom3, nqibz, number_of_spins"), &
@@ -3755,6 +3823,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), gams%qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wtq'), gams%wtq))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), qibz_done))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gamma_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
@@ -3764,7 +3833,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  !call xmpi_barrier(comm)
 
- ! Now reopen the file inside ncwrite_comm to perform pararallel-IO (required for q-point parallelism).
+ ! Now reopen the file inside ncwrite_comm to perform parallel-IO (required for q-point parallelism).
  !if (self%ncwrite_comm%value /= xmpi_comm_null) then
  !  NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
  !  NCF_CHECK(nctk_set_datamode(self%ncid))
@@ -3807,8 +3876,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ! Prepare Fourier interpolation of DFPT potentials.
    comm_rpt = xmpi_comm_self
    !comm_rpt = bqs_comm%value
-   method = dtset%userid
-   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
  end if
 
  ! Initialize the wave function descriptor.
@@ -3961,6 +4029,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Loop over my q-point in the IBZ.
  do imyq=1,gams%my_nqibz
    iq_ibz = gams%my_iqibz(imyq)
+
+   ! Check if this (kpoint, spin) was already calculated
+   !if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
+
    call cwtime(cpu_q, wall_q, gflops_q, "start")
 
    qpt = gams%qibz(:, iq_ibz)
@@ -4184,6 +4256,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
        !call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
+       ! Compute group velocities if we are in transport mode or adaptive gaussian or
+       ! tetrahedron with libtetrabz returning nesting condition.
        need_velocities = dtset%eph_transport > 0 .or. fs%eph_fsmear < zero .or. nesting /= 0
 
        if (need_velocities) then
@@ -4370,6 +4444,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_FREE(tgam)
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
+ !ABI_FREE(qibz_done)
 
  if (dtset%eph_transport > 0) then
    ABI_FREE(tgamvv_in)
@@ -4510,8 +4585,11 @@ end subroutine eph_phgamma
 !! FUNCTION
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4529,7 +4607,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: enough = 50
+ integer,parameter :: enough = 5
  integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ikq_ibz, ikq_fs, ik_fs, i1, i2, i3, nkfs_q, nene
  integer :: ib1, ib2 ! band_k, band_kq
  real(dp),parameter :: max_occ1 = one
@@ -4557,6 +4635,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  end if
 
  if (fs%eph_intmeth == 1 .or. nesting == 1) then
+   ! Gaussian method
    ! Distribute k-points within the FS window inside comm.
    ! 1) Select k-points such that k+q is stil inside the FS window
    ! 2) Distribute effective k-points assuming all procs in comm have all FS k-points (no filtering)
@@ -4588,8 +4667,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  nkbz = product(nge(1:3))
 
  ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
- !timrev = 0; if (use_tr) timrev=1
- ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
+ ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
+                       time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
 
  nb = fs%maxnb
  ABI_MALLOC(kbz, (3, nkbz))
@@ -4780,11 +4859,11 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
 
  ! 1 is low, 2 is high, 3 is for the workspace
  ewins(1) = half * eV_Ha; elows(1) = ebands%fermie - ewins(1); ehighs(1) = ebands%fermie + ewins(1)
- call get_bands_from_erange(ebands, elows(1), ehighs(1), bstarts(1), bstops(1))
+ call ebands_get_bands_from_erange(ebands, elows(1), ehighs(1), bstarts(1), bstops(1))
  call calc_dbldelta(cryst, ebands, ltetra, bstarts(1), bstops(1), nqibz, qibz, wtqs(:,:,1), comm)
 
  ewins(2) = five * eV_Ha; elows(2) = ebands%fermie - ewins(2); ehighs(2) = ebands%fermie + ewins(2)
- call get_bands_from_erange(ebands, elows(2), ehighs(2), bstarts(2), bstops(2))
+ call ebands_get_bands_from_erange(ebands, elows(2), ehighs(2), bstarts(2), bstops(2))
  call calc_dbldelta(cryst, ebands, ltetra, bstarts(2), bstops(2), nqibz, qibz, wtqs(:,:,2), comm)
 
  if (abs(sum(abs(wtqs(:,:,1)) - sum(abs(wtqs(:,:,2))))) / sum(abs(wtqs(:,:,2))) < tol2) then
@@ -4795,7 +4874,7 @@ subroutine find_ewin(nqibz, qibz, cryst, ebands, ltetra, fs_ewin, comm)
 
  do
    ewins(3) = (ewins(1) + ewins(2)) / two; elows(3) = ebands%fermie - ewins(3); ehighs(3) = ebands%fermie + ewins(3)
-   call get_bands_from_erange(ebands, elows(3), ehighs(3), bstarts(3), bstops(3))
+   call ebands_get_bands_from_erange(ebands, elows(3), ehighs(3), bstarts(3), bstops(3))
    call calc_dbldelta(cryst, ebands, ltetra, bstarts(3), bstops(3), nqibz, qibz, wtqs(:,:,3), comm)
 
    do ii=1,3
@@ -4856,8 +4935,11 @@ end subroutine find_ewin
 !! FUNCTION
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4901,8 +4983,8 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
  nkbz = product(nge(1:3))
 
  ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
- !timrev = 0; if (use_tr) timrev=1
- ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
+ ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
+                       time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
 
  nb = bstop - bstart + 1
  ABI_MALLOC(kbz, (3, nkbz))

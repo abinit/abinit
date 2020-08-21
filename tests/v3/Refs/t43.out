@@ -185,8 +185,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -359,8 +359,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.82645
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -531,8 +531,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.68596
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -706,11 +706,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   Note that boxcut < 1.5; this usually means
   that the forces are being fairly strongly affected by  the smallness of the fft box.
   Be sure to test with larger ngfft(1:3) values.
+  This situation might happen when optimizing the cell parameters.
+  Your starting geometry might be crazy.			
+  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

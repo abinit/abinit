@@ -1,0 +1,60 @@
+##############################################################################
+#Test for multibinit. Impose atom constraines for relaxation
+##############################################################################
+
+#---------------------------------------------------------------
+#Print the model into XML file:
+#---------------------------------------------------------------
+prt_model = 0
+
+
+ngqpt =  2 2 2    # Mesh of Q-points in the DDB (by default == 1 1 1)
+dipdip  = 1 #(Default is 1)recompute the dipole-dipole interaction.
+
+dynamics = 2     # Molecular dynamic flag:
+                 #   0 = default, do nothing,
+                 #  12 = NVT simulation,
+                 #  13 = NPT simulation.
+ncell = 2 2 1  # Size of the supercell for the simulation
+ntime  = 20     # Number of step in the simulation.
+nctime = 1        # NetCdf TIME between output of molecular dynamics informations (default = 1)
+temperature = 300  # Temperature of the simulation (default = 325K).
+dtion =  40     # Delta Time for IONs. Default is 100 , one atomic time unit is 2.418884e-17 seconds.
+strtarget = 3*0 3*0 # Target the stress tensor (in GPA)
+restartxf = -3   # RESTART from (X,F) history, see:
+                  # http://www.abinit.org/doc/helpfiles/for-v7.10/input_variables/varrlx.html#restartxf
+                  # In case of multibinit the best case are (need _HIST file): 
+                  # restartxf = -1 load all the previous time steps
+                  # restartxf = -3 just load the last step of the previous dymanics
+
+optcell =  2  # Relaxation of the cell (0 nothing,1 only acell (uniform), 2 acell+rprim)
+
+natfix = 1 
+iatfix = 16 
+natfixx 2 
+iatfixx = 3 4 
+natfixy = 1
+iatfixy = 5 
+natfixz = 3
+iatfixz = 6 9 10 
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% input_ddb = t102.ddb
+#%% coeff_xml = t102_coeffs.xml
+#%% [shell]
+#%% pre_commands = 
+#%%   iw_cp p4mbm.nc t102.out_HIST.nc
+#%% [files]
+#%% files_to_test = 
+#%%   t102.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -hard;
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. M. Schmitt
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%         Impose a few random constraines to relaxation with broyden and effective potential
+#%% topics = LatticeModel,DynamicsMultibinit
+#%%<END TEST_INFO>

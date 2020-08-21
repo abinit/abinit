@@ -88,8 +88,10 @@
 #DATASET 17  Get PBE. Fool LibXC by imposing to HSE06 a very short range screening
 # So, gives the same as dataset 8 or 9. DOES NOT WORK, although the difference is at the level of 1.0d-4 !
  ixc17  -428                              # This should be HSE06
- hyb_range_fock17 100.0                   # But these lines redefine the parameters to the PBE within tolerance
+ hyb_range_fock17 5.0                     # But these lines redefine the parameters to the PBE within tolerance
                                           # (the screening is complete at a very small distance already
+                                          # We should use hyb_range_fock=100.,
+                                          #   but calculation doesnt converge with libXC5
 
 
 #Play a bit with HSE03
@@ -176,13 +178,15 @@ xred              # This keyword indicate that the location of the atoms
 #Definition of the planewave basis set
 ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%   t74.out, tolnlines=  12, tolabs= 0.005, tolrel=  0.0003, fld_options = -easy
-#%% psp_files = 13al.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -55,13 +55,15 @@
  toldfe  1.0d-10
  wtk 16*1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/12mg.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%  t81.out, tolnlines = 0, tolabs = 1.050e-11, tolrel = 2.000e-10
-#%% psp_files = 12mg.pspnc
 #%% [paral_info]
 #%% max_nprocs = 16
 #%% [extra_info]

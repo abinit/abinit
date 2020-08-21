@@ -1,2 +1,0 @@
-Type "make -f build-docs.mk" to create the PDF documents from the LaTeX
-source files found in this directory.

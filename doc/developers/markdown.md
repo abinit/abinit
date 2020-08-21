@@ -200,6 +200,17 @@ The caption can contain Latex equations as well as [Abinit wikilinks](#wikilinks
     [here](https://mor10.com/html-basics-hyperlink-syntax-absolute-relative-and-root-relative/).
 -->
 
+If you need to customize the height and width of the image, use
+
+```md
+![](../tutorial/eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
+```
+
+![](../tutorial/eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
+
+Note that this is not standard markdown but an extension provided by 
+[Attribute Lists extension](https://python-markdown.github.io/extensions/attr_list/)
+that adds a syntax to define attributes on the various HTML elements in markdown’s output.
 
 ### Pdf Files
 
@@ -324,8 +335,8 @@ Examples:
 | `[[test:libxc_41]]` | [[test:libxc_41]]
 | `[[tests/tutorial/Refs/tbase1_1.out]]` |  [[tests/tutorial/Refs/tbase1_1.out]]
 | `[[~abinit/tests/tutorial/Refs/tbase1_1.out]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
-| `[[~abinit/tests/Psps_for_tests/6c.lda.atompaw]]` | [[~abinit/tests/Psps_for_tests/6c.lda.atompaw]]
-| `[[tests/Psps_for_tests/6c.lda.atompaw]]` | [[tests/Psps_for_tests/6c.lda.atompaw]]
+| `[[~abinit/tests/Psps_for_tests/6c_lda.paw]]` | [[~abinit/tests/Psps_for_tests/6c_lda.paw]]
+| `[[tests/Psps_for_tests/6c_lda.paw]]` | [[tests/Psps_for_tests/6c_lda.paw]]
 
 The input variables for anaddb, optic and aim will be recognized if they are used with
 the namespaces `anaddb`, `optic` and `aim`.

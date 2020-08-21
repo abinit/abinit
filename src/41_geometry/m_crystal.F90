@@ -191,6 +191,9 @@ MODULE m_crystal
    procedure :: ncwrite_path => crystal_ncwrite_path
    ! Dump the object to netcdf file.
 
+   !procedure :: ncread => crystal_ncread
+   ! TODO: Should add routine to read crystal from structure without hdr
+
    procedure :: isymmorphic
    ! True if space group is symmorphic.
 
@@ -223,6 +226,12 @@ MODULE m_crystal
 
    procedure :: print => crystal_print
    ! Print dimensions and basic info stored in the object
+
+   procedure :: symmetrize_cart_vec3 => crystal_symmetrize_cart_vec3
+   ! Symmetrize a 3d cartesian vector
+
+   procedure :: symmetrize_cart_tens33 => crystal_symmetrize_cart_tens33
+   ! Symmetrize a cartesian 3x3 tensor
 
  end type crystal_t
 
@@ -278,12 +287,13 @@ CONTAINS  !=====================================================================
 !!  6) Likely I will need also info on the electric field and berryopt
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_ddb
-!!      m_effective_potential,m_effective_potential_file,m_tdep_abitypes,mover
-!!      optic,outscfcv,respfn,vtorho
+!!      m_crystal,m_ddb,m_dfpt_looppert,m_effective_potential
+!!      m_effective_potential_file,m_eig2d,m_gwls_hamiltonian,m_hdr,m_outscfcv
+!!      m_precpred_1geo,m_respfn_driver,m_tdep_abitypes,m_unittests,m_vtorho
+!!      optic
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -494,14 +504,9 @@ end function crystal_without_symmetries
 !!  Destroy the dynamic arrays in a crystal_t data type.
 !!
 !! PARENTS
-!!      anaddb,bethe_salpeter,cut3d,dfpt_looppert,eig2tot,eph,fold2Bloch,gstate
-!!      gwls_hamiltonian,m_ddk,m_dvdb,m_effective_potential
-!!      m_effective_potential_file,m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk
-!!      mlwfovlp_qp,mover,mrgscr,optic,outscfcv,respfn,screening,sigma,vtorho
-!!      wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -558,11 +563,9 @@ end subroutine crystal_free
 !!  Only printing
 !!
 !! PARENTS
-!!      eph,gwls_hamiltonian,m_dvdb,m_gruneisen,setup_bse,setup_screening
-!!      setup_sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -576,7 +579,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  class(crystal_t),intent(in) :: Cryst
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol,nu,iatom
+ integer :: my_unt,my_prtvol,nu,iatom, isym, ii, nsym
  character(len=4) :: my_mode
  character(len=500) :: msg
 ! *********************************************************************
@@ -617,9 +620,25 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  if (my_prtvol > 0) then
    call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
    if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
+
+   ! Print indsym using the same format as in symatm
+   nsym = cryst%nsym
+   do iatom=1,cryst%natom
+     write(msg, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
+     call wrtout(std_out, msg)
+     do ii=1,(nsym-1)/24+1
+       if (cryst%natom<100) then
+         write(msg, '(1x,24i3)' ) (cryst%indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+       else
+         write(msg, '(1x,24i6)' ) (cryst%indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+       end if
+       call wrtout(std_out, msg)
+     end do
+   end do
+
  end if
 
- call wrtout(my_unt,"Reduced atomic positions [iatom, xred, symbol]:",my_mode)
+ call wrtout(my_unt, " Reduced atomic positions [iatom, xred, symbol]:", my_mode)
  do iatom=1,cryst%natom
    write(msg,"(i5,a,2x,3f11.7,2x,a)")iatom,")",cryst%xred(:,iatom),symbol_type(cryst,cryst%typat(iatom))
    call wrtout(my_unt,msg,my_mode)
@@ -649,10 +668,11 @@ end subroutine crystal_print
 !! symbols = array with the symbol of each atoms
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_opt_effpot
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -901,10 +921,9 @@ end function symbol_iatom
 !!  has_inversion=True if spatial inversion is present in the point group.
 !!
 !! PARENTS
-!!      m_skw
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1195,9 +1214,10 @@ end function crystal_ncwrite_path
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1333,9 +1353,10 @@ end subroutine prt_cif
 !! NOTES
 !!
 !! PARENTS
-!!      prt_cif
+!!      m_crystal
 !!
 !! CHILDREN
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1411,7 +1432,7 @@ end subroutine symrel2string
 !!   Only files written
 !!
 !! PARENTS
-!!      afterscfloop
+!!      m_afterscfloop
 !!
 !! CHILDREN
 !!      atomdata_from_znucl
@@ -1517,6 +1538,80 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  close (iout)
 
 end subroutine prtposcar
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_symmetrize_cart_vec3
+!! NAME
+!!  crystal_symmetrize_cart_vec3
+!!
+!! FUNCTION
+!!  Symmetrize a cartesian vector.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function crystal_symmetrize_cart_vec3(cryst, v) result(vsum)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: v(3)
+ real(dp) :: vsum(3)
+
+!Local variables-------------------------------
+ integer :: isym
+ real(dp) :: vsym(3)
+
+ !symmetrize
+ vsum = zero
+ do isym=1, cryst%nsym
+   vsym = matmul( (cryst%symrel_cart(:,:,isym)), v)
+   vsum = vsum + vsym
+ end do
+ vsum = vsum / cryst%nsym
+
+end function crystal_symmetrize_cart_vec3
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_symmetrize_cart_tens33
+!! NAME
+!!  crystal_symmetrize_cart_tens33
+!!
+!! FUNCTION
+!!  Symmetrize a cartesian 3x3 tensor
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function crystal_symmetrize_cart_tens33(cryst, t) result(tsum)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: t(3,3)
+ real(dp) :: tsum(3,3)
+
+!Local variables-------------------------------
+ integer :: isym
+ real(dp) :: tsym(3,3)
+
+ !symmetrize
+ tsum = zero
+ do isym=1, cryst%nsym
+   tsym = matmul( (cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))) )
+   tsum = tsum + tsym
+ end do
+ tsum = tsum / cryst%nsym
+
+end function crystal_symmetrize_cart_tens33
 !!***
 
 END MODULE m_crystal

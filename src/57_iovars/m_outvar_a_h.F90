@@ -97,7 +97,7 @@ contains
 !!  computation, so that their values if choice=1 or choice=2 will differ.
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
 !!      prttagm,prttagm_images
@@ -323,6 +323,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%boxcutmin
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'boxcutmin','DPR',0)
+
+ intarr(1,:)=dtsets(:)%brav
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'brav','INT',0)
 
  intarr(1,:)=dtsets(:)%bs_algorithm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'bs_algorithm','INT',0)
@@ -669,13 +672,14 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dvdb_add_lr
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_add_lr','INT',0)
 
- do idtset=0,ndtset_alloc
-   intarr(1:3,idtset)=dtsets(idtset)%dvdb_ngqpt
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'dvdb_ngqpt','INT',0)
-
  dprarr(1,:)=dtsets(:)%dvdb_qcache_mb
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_qcache_mb','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%dvdb_qdamp
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_qdamp','DPR',0)
+
+ intarr(1,:)=dtsets(:)%dvdb_rspace_cell
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_rspace_cell','INT',0)
 
 !dynimage
  intarr(1:marr,0)=1                 ! default value
@@ -934,6 +938,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(3,:)=dtsets(:)%fockdownsampling(3)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
 
+ intarr(1,:)=dtsets(:)%fock_icutcoul
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fock_icsing','INT',0)
+
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)
 
@@ -945,11 +952,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%freqspmax
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqspmax','ENE',0)
-
- do ii=1,4
-   dprarr(ii,:)=dtsets(:)%frohl_params(ii)
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,4,narrm,ncid,ndtset_alloc,'frohl_params','DPR',0)
 
  dprarr(1,:)=dtsets(:)%freqspmin
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqspmin','ENE',0)
@@ -1181,6 +1183,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    end if
  endif
 
+ intarr(1,:)=dtsets(:)%gwaclowrank
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwaclowrank','INT',0)
+
  intarr(1,:)=dtsets(:)%gwcalctyp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcalctyp','INT',0)
 
@@ -1232,6 +1237,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gw_frqre_tangrid
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_frqre_tangrid','INT',0)
 
+
  intarr(1,:)=dtsets(:)%gw_invalid_freq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_invalid_freq','INT',0)
 
@@ -1267,9 +1273,11 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gw_sctype
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_sctype','INT',0)
 
-
  intarr(1,:)=dtsets(:)%gw_sigxcore
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_sigxcore','INT',0)
+
+ intarr(1,:)=dtsets(:)%gw_icutcoul
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icutcoul','INT',0)
 
  dprarr(1,:)=dtsets(:)%gw_toldfeig
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_toldfeig','ENE',0)

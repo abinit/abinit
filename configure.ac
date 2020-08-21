@@ -38,7 +38,7 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.1.2],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[9.1.6],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -655,7 +655,8 @@ ABI_MSG_SECTION([Initialization of optional features])
 
 # Init HDF5
 #SD_HDF5_INIT([optional fail no-fortran])
-SD_HDF5_INIT([optional warn no-fortran])
+#SD_HDF5_INIT([optional warn no-fortran])
+SD_HDF5_INIT([mandatory warn no-fortran])
 
 # Init FFTW3
 SD_FFTW3_INIT([optional skip])
@@ -773,24 +774,57 @@ fi
 # HDF5 library support
 SD_HDF5_DETECT
 
-# Parallel NetCDF requires a few conditions to work
-if test "${abi_netcdf_mpi_enable}" = "yes"; then
-  if test "${sd_mpi_ok}" != "yes"; then
-    AC_MSG_ERROR([parallel NetCDF requested but MPI is not available])
-  fi
-  if test "${abi_mpi_io_enable}" != "yes"; then
-    AC_MSG_ERROR([parallel NetCDF requested but MPI I/O is disabled])
-  fi
-  if test "${sd_hdf5_mpi_ok}" != "yes"; then
-    AC_MSG_ERROR([parallel NetCDF requested but parallel HDF5 is not available])
-  fi
-fi
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([dumping HDF5 parameters for diagnostics])
+AC_MSG_NOTICE([---------------------------------------])
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([   * sd_hdf5_enable = ${sd_hdf5_enable}])
+AC_MSG_NOTICE([   * sd_hdf5_status = ${sd_hdf5_status}])
+AC_MSG_NOTICE([   * sd_hdf5_h5cc = ${sd_hdf5_h5cc}])
+AC_MSG_NOTICE([   * sd_hdf5_has_mpi = ${sd_hdf5_has_mpi}])
+AC_MSG_NOTICE([])
+
+## Parallel NetCDF requires a few conditions to work
+# TODO abi_netcdf_mpi_enable not defined
+#if test "${abi_netcdf_mpi_enable}" = "yes"; then
+#  if test "${sd_mpi_ok}" != "yes"; then
+#    AC_MSG_ERROR([parallel NetCDF requested but MPI is not available])
+#  fi
+#  if test "${abi_mpi_io_enable}" != "yes"; then
+#    AC_MSG_ERROR([parallel NetCDF requested but MPI I/O is disabled])
+#  fi
+#  if test "${sd_hdf5_mpi_ok}" != "yes"; then
+#    AC_MSG_ERROR([parallel NetCDF requested but parallel HDF5 is not available])
+#  fi
+#fi
 
 # NetCDF library support (must be done after HDF5)
 SD_NETCDF_DETECT
 
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([dumping NetCDF parameters for diagnostics])
+AC_MSG_NOTICE([-----------------------------------------])
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([   * sd_netcdf_ok = ${sd_netcdf_ok}])
+AC_MSG_NOTICE([   * sd_netcdf_mpi_ok = ${sd_netcdf_mpi_ok}])
+AC_MSG_NOTICE([   * sd_netcdf_enable = ${sd_netcdf_enable}])
+AC_MSG_NOTICE([   * sd_netcdf_prefix = ${sd_netcdf_prefix}])
+AC_MSG_NOTICE([])
+
+
 # NetCDF library support (must be done after HDF5)
 SD_NETCDF_FORTRAN_DETECT
+
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([dumping NetCDFF parameters for diagnostics])
+AC_MSG_NOTICE([------------------------------------------])
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([   * sd_netcdf_fortran_ok = ${sd_netcdf_fortran_ok}])
+AC_MSG_NOTICE([   * sd_netcdf_fortran_mpi_ok = ${sd_netcdf_fortran_mpi_ok}])
+AC_MSG_NOTICE([   * sd_netcdf_fortran_enable = ${sd_netcdf_fortran_enable}])
+AC_MSG_NOTICE([   * sd_netcdf_fortran_prefix = ${sd_netcdf_fortran_prefix}])
+AC_MSG_NOTICE([])
+
 
 # XMLF90 library support
 SD_XMLF90_DETECT
@@ -1022,8 +1056,7 @@ if test ! -z "${status}" -o ! -z "${mandatory}"; then
 fi
 
 # Always generate a build script for required fallbacks
-AC_OUTPUT([fallbacks/build-abinit-fallbacks.sh])
-chmod +x fallbacks/build-abinit-fallbacks.sh
+AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])

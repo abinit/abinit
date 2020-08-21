@@ -134,10 +134,10 @@ _ WF disk file :      1.146 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk2          0
            getwfk3         -1
            getwfk4          2
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          6
-         icutcoul4          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          6
+        gw_icutcoul4          3
           inclvkb           0
              iscf1          7
              iscf2         -2
@@ -364,8 +364,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.500   => boxcut(ratio)=   2.16822
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -682,8 +682,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1028,7 +1028,7 @@ KS_gap     :    2.523
 QP_gap     :    2.840
 Delta_QP_KS:    0.317
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.851 -11.214 -11.949   1.411   0.789  -0.267 -10.680   0.534   6.385
         3   5.851 -11.214 -11.949   1.411   0.789  -0.267 -10.680   0.534   6.385
         4   5.851 -11.214 -11.949   1.411   0.789  -0.267 -10.680   0.534   6.385
@@ -1084,10 +1084,10 @@ data: !SigmaeeData |
            getwfk2          0
            getwfk3         -1
            getwfk4          2
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          6
-         icutcoul4          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          6
+        gw_icutcoul4          3
           inclvkb           0
              iscf1          7
              iscf2         -2

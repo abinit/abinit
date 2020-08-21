@@ -4,7 +4,7 @@
 # =======================================
 
 #Datasets: etotal vs acell
-ndtset 7   acell: 3*3.52 angstrom  acell+ 3*0.005 angstrom
+ndtset 7   acell: 3*3.515 angstrom  acell+ 3*0.005 angstrom
 
 #Cell and atoms definition
  acell 3*3.567 angstrom
@@ -17,9 +17,9 @@ ndtset 7   acell: 3*3.52 angstrom  acell+ 3*0.005 angstrom
  znucl 6  nband 6
 
 #Basis definitions
- ecut 12.
+ ecut 20.
  ecutsm 0.5
- pawecutdg 24.
+ pawecutdg 50.
 
 #SCF cycle parameters
  tolvrs 1.0d-10
@@ -39,14 +39,17 @@ ndtset 7   acell: 3*3.52 angstrom  acell+ 3*0.005 angstrom
  prtwf 1 prtden 0 prteig 0
  getwfk -1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "C.LDA_PW-JTH.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw1_5.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
-#%% psp_files =  6c.lda.atompaw 
+#%%   tpaw1_5.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%% output_file = "tpaw1_5.abo"
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

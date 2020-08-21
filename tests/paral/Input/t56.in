@@ -51,11 +51,13 @@
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4
 #%% max_nprocs = 4

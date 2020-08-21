@@ -120,16 +120,17 @@ nband  11
 #Definition of the SCF procedure
 nstep 100              # Maximal number of SCF cycles
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "32ge_lda.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-##%% exclude_hosts = nag@abiref
 #%% [shell] 
 #%% post_commands = 
 #%% [files]
 #%% files_to_test = 
 #%%   t80.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
-#%% psp_files = 32ge_lda.fhi
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -239,14 +239,10 @@ contains
 !!   the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
 !!
 !! PARENTS
-!!      m_shirley,outkss
+!!      m_io_kss
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,fftpac,getcprj,getghc
-!!      init_distribfft_seq,init_hamiltonian,initmpi_seq,initylmg,kpgsph
-!!      load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg
-!!      pawcprj_alloc,pawcprj_free,pawcprj_reorder,transgrid,wrtout,xheev
-!!      xheevx,xhegv,xhegvx,xmpi_barrier
+!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
 !!
 !! SOURCE
 
@@ -530,7 +526,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  ABI_STAT_MALLOC(gtg_mat,(cplex_ghg,npw_k*nspinor,npw_k*nspinor*Psps%usepaw), ierr)
  ABI_CHECK(ierr==0, msg)
 
- ABI_DT_MALLOC(Cwaveprj,(natom,nspinor*(1+cpopt)*gs_hamk%usepaw))
+ ABI_MALLOC(Cwaveprj,(natom,nspinor*(1+cpopt)*gs_hamk%usepaw))
  if (cpopt==0) then  ! Cwaveprj is ordered, see nonlop_ylm.
    call pawcprj_alloc(Cwaveprj,0,gs_hamk%dimcprj)
  end if
@@ -567,7 +563,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  if (Psps%usepaw==1.and.cpopt==0) then
    call pawcprj_free(Cwaveprj)
  end if
- ABI_DT_FREE(Cwaveprj)
+ ABI_FREE(Cwaveprj)
 !
 !===========================================
 !=== Diagonalization of <G|H|G''> matrix ===
@@ -582,11 +578,9 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  if (do_full_diago) then ! * Complete diagonalization
 
    write(msg,'(2a,3es16.8,3x,3a,i5)')ch10,&
-&   ' Begin complete diagonalization for kpt= ',kpoint(:),stag(isppol),ch10,&
-&   ' - Size of mat.=',npw_k*nspinor
-   if (prtvol>0) then
-     call wrtout(std_out,msg,'PERS')
-   end if
+   ' Begin complete diagonalization for kpt= ',kpoint(:),stag(isppol),ch10,&
+   ' - Size of mat.=',npw_k*nspinor
+   if (prtvol>0) call wrtout(std_out,msg,'PERS')
 
    if (Psps%usepaw==0) then
      call xheev(  jobz,"Upper",cplex_ghg,npw_k*nspinor,ghg_mat,eig_ene)
@@ -626,7 +620,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  if (Psps%usepaw==1) then
 
    iorder_cprj=1 !  Ordered (order does change wrt input file); will be changed later
-   ABI_DT_MALLOC(Cprj_k,(natom,nspinor*onband_diago))
+   ABI_MALLOC(Cprj_k,(natom,nspinor*onband_diago))
    call pawcprj_alloc(Cprj_k,0,gs_hamk%dimcprj)
 
    idir=0; cprj_choice=1  ! Only projected wave functions.
@@ -691,7 +685,7 @@ end subroutine ksdiago
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_shirley,outkss
+!!      m_io_kss
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout

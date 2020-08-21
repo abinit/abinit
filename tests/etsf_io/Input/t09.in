@@ -47,13 +47,15 @@
 # Output wavefunction to an ETSF file
   pawprtwf 1 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "20ca.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t09.out, tolnlines = 0, tolabs = 2.000e-10, tolrel = 5.000e-10, fld_options =  -medium
-#%% psp_files = 20ca.paw 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

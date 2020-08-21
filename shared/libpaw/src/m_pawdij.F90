@@ -55,11 +55,11 @@ MODULE m_pawdij
  public :: pawdijhat        ! Dij^hat (compensation charge contribution)
  public :: pawdijnd         ! Dij nuclear dipole
  public :: pawdijso         ! Dij spin-orbit
- public :: pawdiju          ! Dij LDA+U
- public :: pawdiju_euijkl   ! Dij LDA+U, using pawrhoij instead of occupancies
+ public :: pawdiju          ! Dij DFT+U
+ public :: pawdiju_euijkl   ! Dij DFT+U, using pawrhoij instead of occupancies
  public :: pawdijexxc       ! Dij local exact-exchange
  public :: pawdijfr         ! 1st-order frozen Dij
- public :: pawpupot         ! On-site LDA+U potential
+ public :: pawpupot         ! On-site DFT+U potential
  public :: pawxpot          ! On-site local exact-exchange potential
  public :: symdij           ! Symmetrize total Dij or one part of it
  public :: symdij_all       ! Symmetrize all contributions to Dij
@@ -86,7 +86,7 @@ CONTAINS
 !! Within standard PAW formalism, Dij can be decomposd as follows:
 !!      Dij = Dij_atomic + Dij_Hartree + Dij_XC + Dij^hat
 !! In case of additional approximations, several other terms can appear:
-!!      Dij_LDA+U, Dij_spin-orbit, Dij_local-exact-exchange, Dij_Fock...
+!!      Dij_DFT+U, Dij_spin-orbit, Dij_local-exact-exchange, Dij_Fock...
 !!
 !! INPUTS
 !!  cplex=1 if no phase is applied (GS), 2 if a exp(-iqr) phase is applied (Response Function at q<>0)
@@ -157,10 +157,11 @@ CONTAINS
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,respfn,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_respfn_driver
+!!      m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -397,7 +398,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    dijso_available=(pawspnorb>0.and.ipert<=0.and.ipositron/=1)
    dijso_prereq=(paw_ij(iatom)%has_dijso==2.or.&
 &               (paw_an(iatom)%has_vhartree>0.and.paw_an(iatom)%has_vxc>0))
-!  DijU: not available for positron; only for LDA+U
+!  DijU: not available for positron; only for DFT+U
    dijU_available=(pawtab(itypat)%usepawu/=0.and.ipositron/=1)
    dijU_prereq=(paw_ij(iatom)%has_dijU==2.or.paw_ij(iatom)%has_pawu_occ>0.or. &
 &              (paw_ij(iatom)%has_dijU>0))
@@ -836,7 +837,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    end if
 
 !  ------------------------------------------------------------------------
-!  ----------- Add Dij_{LDA+U} to Dij
+!  ----------- Add Dij_{DFT+U} to Dij
 !  ------------------------------------------------------------------------
 
    if ((dijU_need.or.dij_need).and.dijU_available) then
@@ -853,7 +854,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        else
          lpawu=pawtab(itypat)%lpawu
          LIBPAW_POINTER_ALLOCATE(vpawu,(cplex_dij,lpawu*2+1,lpawu*2+1,ndij))
-         if (usepawu>=10) vpawu=zero ! if dmft, do not apply U in LDA+U
+         if (usepawu>=10) vpawu=zero ! if dmft, do not apply U in DFT+U
          if (usepawu< 10) then
            call pawpupot(cplex_dij,ndij,paw_ij(iatom)%noccmmp,paw_ij(iatom)%nocctot,&
 &                        pawprtvol,pawtab(itypat),vpawu)
@@ -1091,10 +1092,10 @@ end subroutine pawdij
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1204,10 +1205,10 @@ end subroutine pawdijhartree
 !!   WARNING: What follows has been tested only for cases where nsppol=1 and 2, nspden=1 and 2 with nspinor=1.
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot
+!!      m_paw_denpot,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1455,7 +1456,7 @@ end subroutine pawdijfock
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1865,7 +1866,7 @@ end subroutine pawdijxc
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2124,10 +2125,10 @@ end subroutine pawdijxcm
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
 !! PARENTS
-!!      fock_getghc,m_pawdij
+!!      m_fock_getghc,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2419,10 +2420,10 @@ end subroutine pawdijhat
 !!
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot
+!!      m_paw_denpot,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2562,10 +2563,10 @@ end subroutine pawdijnd
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot
+!!      m_paw_denpot,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2734,7 +2735,7 @@ end subroutine pawdijso
 !! pawdiju
 !!
 !! FUNCTION
-!! Compute the LDA+U contribution to the PAW pseudopotential strength Dij,
+!! Compute the DFT+U contribution to the PAW pseudopotential strength Dij,
 !! (for one atom only):
 !!   Dijpawu^{\sigma}_{mi,ni,mj,nj}=
 !!     \sum_{m,m'} [vpawu^{\sigma}_{m,m'}*phiphjint_{ni,nj}^{m,m'}]=
@@ -2746,7 +2747,7 @@ end subroutine pawdijso
 !!  ndij= number of spin components
 !!  nsppol=number of independent spin WF components
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
-!!  vpawu(cplex_dij,lpawu*2+1,lpawu*2+1,ndij)=moments of LDA+U potential for current atom
+!!  vpawu(cplex_dij,lpawu*2+1,lpawu*2+1,ndij)=moments of DFT+U potential for current atom
 !!  --- Optional arguments ---
 !!    atvshift(natvshift,nsppol)=potential energy shift for lm channel & spin (current atom)
 !!    fatvshift=factor that multiplies atvshift
@@ -2766,7 +2767,7 @@ end subroutine pawdijso
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2860,7 +2861,7 @@ subroutine pawdiju(dijpawu,cplex_dij,qphase,ndij,nsppol,pawtab,vpawu,&
            in2=pawtab%klmntomn(4,klmn)
            icount=in1+(in2*(in2-1))/2
            if (pawtab%ij_proj<icount)  then
-             msg='LDA+U: Problem while computing dijexxc !'
+             msg='DFT+U: Problem while computing dijexxc !'
              MSG_BUG(msg)
            end if
 
@@ -2917,7 +2918,7 @@ end subroutine pawdiju
 !! pawdiju_euijkl
 !!
 !! FUNCTION
-!! Compute the LDA+U contribution to the PAW pseudopotential strength Dij (for one atom only).
+!! Compute the DFT+U contribution to the PAW pseudopotential strength Dij (for one atom only).
 !! Alternative to pawdiju using the following property:
 !!     D_ij^pawu^{\sigma}_{mi,ni,mj,nj}=\sum_{k,l} [rho^{\sigma}_kl*e^U_ijkl]
 !! The routine structure is very similar to the one of pawdijhartree.
@@ -2986,10 +2987,10 @@ end subroutine pawdiju
 !!        Im(D_kl^B) =  Im(D_lk^B)  ( using (a) and (c) )
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3213,7 +3214,7 @@ end subroutine pawdiju_euijkl
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3524,10 +3525,10 @@ end subroutine pawdijexxc
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv
+!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4142,10 +4143,10 @@ end subroutine pawdijfr
 !! pawpupot
 !!
 !! FUNCTION
-!! Compute the PAW LDA+U on-site potential
+!! Compute the PAW DFT+U on-site potential
 !!
 !! INPUTS
-!!  cplex_dij=2 if LDA+U pot. is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
+!!  cplex_dij=2 if DFT+U pot. is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
 !!  ndij=number of spin components for Dij
 !!  pawprtvol=control print volume and debugging output for PAW
 !!  noccmmp(cplex_dij,2*lpawu+1,2*lpawu+1,ndij)=density matrix in the augm. region
@@ -4162,10 +4163,10 @@ end subroutine pawdijfr
 !!      vpawu(2*i,:) contains the imaginary part
 !!
 !! PARENTS
-!!      ldau_self,m_pawdij,m_pawhr
+!!      m_dftu_self,m_paw_hr,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4228,7 +4229,7 @@ end subroutine pawdijfr
  end if
 
 !=====================================================
-!Compute LDA+U Potential on the basis of projectors
+!Compute DFT+U Potential on the basis of projectors
 !cf PRB 52 5467 (1995) [[cite:Liechenstein1995]]
 !-----------------------------------------------------
 
@@ -4451,10 +4452,10 @@ end subroutine pawdijfr
 !!  paw_ij%vpawx(pawtab%lexexch*2+1,pawtab%lexexch*2+1)=local exact-exchange potential
 !!
 !! PARENTS
-!!      m_pawdij,pawdenpot
+!!      m_paw_denpot,m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4608,11 +4609,11 @@ end subroutine pawdijfr
 !!  paw_ij(natom)%dij???(cplex_dij*lmn2_size,nspden)=symmetrized dij quantities as output
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,m_pawdij,paw_mknewh0,respfn,scfcv,screening
-!!      sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_paw_denpot
+!!      m_pawdij,m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5354,10 +5355,10 @@ end subroutine symdij
 !!  paw_ij(natom)%dij???(cplex_dij*qphase*lmn2_size,nspden)=symmetrized dij quantities as output
 !!
 !! PARENTS
-!!      paw_mknewh0,screening,sigma
+!!      m_paw_denpot,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5503,7 +5504,7 @@ end subroutine symdij_all
 !!      m_pawdij
 !!
 !! CHILDREN
-!!      xmpi_allgather,xmpi_allgatherv
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5661,9 +5662,10 @@ end subroutine pawdij_gather
 !! (Only writing)
 !!
 !! PARENTS
-!!      m_pawdij
+!!      m_paw_tools,m_pawdij
 !!
 !! CHILDREN
+!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 

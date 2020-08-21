@@ -164,8 +164,9 @@ module m_dtfil
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'PAWDEN'
    ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'PAWDEN'
 
-! character(len=fnlen) :: filpsp(ntypat)
-   ! the filenames of the pseudopotential files, from the standard input.
+  character(len=fnlen) :: filsigephin
+   ! Filename used to read SIGEPH file.
+   ! Initialize via getsigeph_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -426,10 +427,11 @@ contains
 !! in order to output the status of the computation.
 !!
 !! PARENTS
-!!      driver,gstateimg
+!!      m_driver,m_gstateimg
 !!
 !! CHILDREN
-!!      appdig,int2char4,mkfilename
+!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
+!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -602,6 +604,13 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
                   getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
+
+ ! According to getsigeph_filepath, build _SIGEPH file name
+ stringfile='_SIGEPH.nc'; stringvar='sigeph'
+ call mkfilename(filnam, dtfil%filsigephin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                  getpath=dtset%getsigeph_filepath)
+ ! If getsigeph_filepath is not used, will read the output as assumed in the transport driver when called after sigeph
+ if (will_read == 0) dtfil%filsigephin = strcat(filnam_ds(4), "_SIGEPH.nc")
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
@@ -953,10 +962,11 @@ end subroutine dtfil_init
 !!  (part of which were initialized previously)
 !!
 !! PARENTS
-!!      gstate,mover
+!!      m_gstate,m_mover
 !!
 !! CHILDREN
-!!      fappnd
+!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
+!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1056,9 +1066,11 @@ end subroutine dtfil_init_time
 !! filapp= filename with appended string
 !!
 !! PARENTS
-!!      dtfil_init_time
+!!      m_dtfil
 !!
 !! CHILDREN
+!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
+!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1142,9 +1154,11 @@ end subroutine fappnd
 !! dtfil=<type datafiles_type>= only getxxx_from_image flags are modified
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
+!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
+!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1250,10 +1264,11 @@ end subroutine dtfil_init_img
 !! will_read=1 if the file must be read ; 0 otherwise (ird and get were zero)
 !!
 !! PARENTS
-!!      dtfil_init,finddistrproc
+!!      m_dtfil,m_mpi_setup
 !!
 !! CHILDREN
-!!      appdig,wrtout
+!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
+!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1391,11 +1406,12 @@ end subroutine mkfilename
 !! and returns new name in redefined filnam if new file already exists.
 !!
 !! PARENTS
-!!      anaddb,iofn1,m_effective_potential,m_polynomial_coeff,m_vcoul
+!!      anaddb,m_dtfil,m_effective_potential,m_polynomial_coeff,m_vcoul
 !!      multibinit,ujdet
 !!
 !! CHILDREN
-!!      clib_rename,int2char4
+!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
+!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1529,8 +1545,8 @@ end subroutine isfile
 !!      abinit
 !!
 !! CHILDREN
-!!      abi_log_status_state,int2char4,isfile,libpaw_log_flag_set,xmpi_barrier
-!!      xmpi_bcast
+!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
+!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1677,13 +1693,14 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
      fname = basename(input_path)
      i1 = index(fname, ".")
-     if (i1 /= 0) then
+     !if (i1 /= 0) then
+     if (i1 > 1) then
        ! file ext is present --> use prefix to initialize filnam
        i2 = index(input_path, ".", back=.True.)
        filnam(2) = input_path(:i2) // "abo"
-       filnam(3) = fname(:i1) // "i"
-       filnam(4) = fname(:i1) // "o"
-       filnam(5) = fname(:i1) // "t"
+       filnam(3) = fname(:i1-1) // "i"
+       filnam(4) = fname(:i1-1) // "o"
+       filnam(5) = fname(:i1-1) // "t"
      end if
 
      ! Read the file, stringify it and return the number of datasets.

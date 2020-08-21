@@ -103,7 +103,6 @@ type, public :: ephwg_t
   ! Number of points in IBZ(k) i.e. the irreducible wedge
   ! defined by the operations of the little group of k.
 
-  integer :: frohl_model
   ! Integer controling whether to compute and store the electron-phonon matrix elements
   ! computed from generalized Frohlich model
   ! C. Verdi and F. Giustino, Phys. Rev. Lett. 115, 176401 (2015).
@@ -214,14 +213,13 @@ contains
 !! SOURCE
 
 type(ephwg_t) function ephwg_new( &
-&  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, frohl_model, comm) result(new)
+&  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt, nshiftk, nkibz, bstart, nbcount, nsppol, comm
  type(crystal_t),target,intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
- integer,intent(in) :: frohl_model
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
  real(dp),intent(in) :: shiftk(3, nshiftk), kibz(3, nkibz)
@@ -249,7 +247,6 @@ type(ephwg_t) function ephwg_new( &
  new%timrev = kpts_timrev_from_kptopt(new%kptopt)
  new%nibz = nkibz
  new%cryst => cryst
- new%frohl_model = frohl_model
  call alloc_copy(kibz, new%ibz)
 
  call cwtime(cpu, wall, gflops, "start")
@@ -295,7 +292,7 @@ end function ephwg_new
 !! FUNCTION
 !!  Convenience constructor to initialize the object from an ebands_t object
 
-type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, frohl_model, comm) result(new)
+type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -303,7 +300,6 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, fr
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  type(ebands_t),intent(in) :: ebands
- integer,intent(in) :: frohl_model
 
 !Local variables-------------------------------
  real(dp),allocatable :: eig_ibz(:, :, :)
@@ -312,7 +308,7 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, fr
 
  if (bstart == 1 .and. nbcount == ebands%mband) then
    new = ephwg_new(cryst, ifc, bstart, nbcount, ebands%kptopt, ebands%kptrlatt, ebands%nshiftk, ebands%shiftk, ebands%nkpt, &
-      ebands%kptns, ebands%nsppol, ebands%eig, frohl_model, comm)
+      ebands%kptns, ebands%nsppol, ebands%eig, comm)
  else
    ABI_CHECK(inrange(bstart, [1, ebands%mband]), "Wrong bstart")
    ABI_CHECK(inrange(bstart + nbcount - 1, [1, ebands%mband]), "Wrong nbcount")
@@ -320,7 +316,7 @@ type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, fr
    ABI_MALLOC(eig_ibz, (nbcount, ebands%nkpt, ebands%nsppol))
    eig_ibz = ebands%eig(bstart:bstart+nbcount-1, : , :)
    new = ephwg_new(cryst, ifc, bstart, nbcount, ebands%kptopt, ebands%kptrlatt, ebands%nshiftk, ebands%shiftk, ebands%nkpt, &
-      ebands%kptns, ebands%nsppol, eig_ibz, frohl_model, comm)
+      ebands%kptns, ebands%nsppol, eig_ibz, comm)
    ABI_FREE(eig_ibz)
  end if
 
@@ -344,10 +340,11 @@ end function ephwg_from_ebands
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
-subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
+subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
 !Arguments ------------------------------------
 !scalars
@@ -440,6 +437,8 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
                   self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
  !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
+
+ if (xmpi_comm_rank(comm) == 0) call self%tetra_k%print(std_out)
  ABI_FREE(indkk)
 
  call cwtime_report(" init_tetra", cpu, wall, gflops)
@@ -502,8 +501,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  self%nq_k = self%lgk%nibz
 
  ! get dg%bz --> self%lgrp%ibz
- ABI_SFREE(eph_doublegrid%bz2lgkibz)
- ABI_MALLOC(eph_doublegrid%bz2lgkibz,(eph_doublegrid%dense_nbz))
+ ABI_REMALLOC(eph_doublegrid%bz2lgkibz, (eph_doublegrid%dense_nbz))
 
  ! Old version using all crystal symmetries
  !call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
@@ -521,8 +519,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  enddo
 
  ! get self%lgrp%ibz --> dg%bz --> self%ibz
- ABI_SFREE(self%lgk2ibz)
- ABI_MALLOC(self%lgk2ibz, (self%nq_k))
+ ABI_REMALLOC(self%lgk2ibz, (self%nq_k))
  do ii=1,self%nq_k
    ik_idx = lgkibz2bz(ii)
    self%lgk2ibz(ii) = eph_doublegrid%bz2ibz_dense(ik_idx)
@@ -551,8 +548,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  ABI_FREE(bz2lgkibzkq)
 
  ! get self%lgrp%ibz (k+q) --> dg%bz --> self%ibz
- ABI_SFREE(self%kq2ibz)
- ABI_MALLOC(self%kq2ibz, (self%nq_k))
+ ABI_REMALLOC(self%kq2ibz, (self%nq_k))
  do ii=1,self%nq_k
    ik_idx = lgkibz2bz(ii)
    self%kq2ibz(ii) = eph_doublegrid%bz2ibz_dense(ik_idx)
@@ -565,7 +561,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  end do
 
  ! get self%bz --> dg%bz --> self%lgrp%ibz
- ABI_MALLOC(bz2lgkibz,(self%nbz))
+ ABI_MALLOC(bz2lgkibz, (self%nbz))
 
  do ii=1,self%nbz
     ! get self%bz --> dg%bz
@@ -602,6 +598,7 @@ end subroutine ephwg_double_grid_setup_kpoint
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -626,7 +623,7 @@ subroutine ephwg_report_stats(self)
  ! eigenvalues
  mem_tot = mem_tot + self%nibz * self%nbcount * self%nsppol * dp
 
- write(std_out,"(a,f8.1,a)") " Memory allocated for ephwg:", mem_tot * b2Mb, " [Mb] <<< MEM"
+ write(std_out,"(a,f8.1,a)") " Memory allocated for ephwg weights:", mem_tot * b2Mb, " [Mb] <<< MEM"
 
 end subroutine ephwg_report_stats
 !!***
@@ -658,6 +655,7 @@ end subroutine ephwg_report_stats
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -679,11 +677,15 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
  real(dp),parameter :: max_occ1 = one
  real(dp) :: omega_step
 !arrays
- real(dp) :: thetaw(nene, self%nq_k), wme0(nene), pme_k(self%nq_k, 2)
+ real(dp) :: wme0(nene)
+ real(dp),allocatable :: thetaw(:,:), pme_k(:,:)
 
 !----------------------------------------------------------------------
 
  ib = band - self%bstart + 1
+
+ ABI_MALLOC(thetaw, (nene, self%nq_k))
+ ABI_MALLOC(pme_k, (self%nq_k, 2))
 
  ! Fill array for e_{k+q, b} +- w_{q,nu)
  do iq=1,self%nq_k
@@ -718,6 +720,9 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
      bcorr, thetaw, deltaw_pm(:,:,2), comm)
  end if
 
+ ABI_FREE(thetaw)
+ ABI_FREE(pme_k)
+
 end subroutine ephwg_get_deltas
 !!***
 
@@ -748,6 +753,7 @@ end subroutine ephwg_get_deltas
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -765,25 +771,26 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
 
 !Local variables-------------------------------
 !scalars
- integer :: iq,iq_ibz,ikpq_ibz,ib
- integer :: nprocs, my_rank
  real(dp),parameter :: max_occ1 = one
+ integer :: iq, iq_ibz, ikpq_ibz, ib, nprocs, my_rank
  real(dp) :: wme0(neig)
 !arrays
- real(dp) :: pme_k(self%nq_k,2)
+ real(dp),allocatable :: pme_k(:,:)
 
 !----------------------------------------------------------------------
 
- ib = band - self%bstart + 1
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ ib = band - self%bstart + 1
  deltaw_pm = zero
+
+ ABI_MALLOC(pme_k, (self%nq_k, 2))
 
  ! Fill array for e_{k+q, b} +- w_{q,nu)
  do iq=1,self%nq_k
    iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
    ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
-   pme_k(iq,1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
-   pme_k(iq,2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
+   pme_k(iq, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
+   pme_k(iq, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
  ! Compute the tetrahedron or gaussian weights
@@ -796,9 +803,11 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
      deltaw_pm(:,iq_ibz,2) = gaussian(wme0, broad) * self%lgk%weights(iq_ibz)
    end do
  else
-   call self%tetra_k%wvals_weights_delta(pme_k(:,1),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,1),comm)
-   call self%tetra_k%wvals_weights_delta(pme_k(:,2),neig,eig,max_occ1,self%nq_k,bcorr,deltaw_pm(:,:,2),comm)
+   call self%tetra_k%wvals_weights_delta(pme_k(:, 1), neig, eig, max_occ1, self%nq_k, bcorr, deltaw_pm(:,:,1), comm)
+   call self%tetra_k%wvals_weights_delta(pme_k(:, 2), neig, eig, max_occ1, self%nq_k, bcorr, deltaw_pm(:,:,2), comm)
  end if
+
+ ABI_FREE(pme_k)
 
 end subroutine ephwg_get_deltas_wvals
 !!***
@@ -827,6 +836,7 @@ end subroutine ephwg_get_deltas_wvals
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -846,9 +856,11 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
  integer :: iq, iq_ibz, ie, ii
  real(dp),parameter :: max_occ1 = one
 !arrays
- real(dp) :: eigen_in(self%nq_k)
+ real(dp),allocatable :: eigen_in(:)
 
 !----------------------------------------------------------------------
+
+ ABI_MALLOC(eigen_in, (self%nq_k))
 
  ! Fill eigen_in
  do iq=1,self%nq_k
@@ -868,6 +880,8 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
     end do
    end if
  end if
+
+ ABI_FREE(eigen_in)
 
 end subroutine ephwg_get_deltas_qibzk
 !!***
@@ -902,6 +916,7 @@ end subroutine ephwg_get_deltas_qibzk
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 
@@ -920,7 +935,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 !scalars
  integer,parameter :: master=0
  integer :: iq_ibz,ikpq_ibz,ib,ii,iq,nprocs, my_rank, ierr
- real(dp),parameter :: max_occ1=one
+ real(dp),parameter :: max_occ1 = one
  logical :: use_bzsum_
 !arrays
  real(dp),allocatable :: pme_k(:,:)
@@ -943,7 +958,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  end do
 
  cweights = zero
- ABI_MALLOC(cweights_tmp,(nz,self%nq_k))
+ ABI_MALLOC(cweights_tmp, (nz, self%nq_k))
  do ib=1,nbcalc
    do ii=1,2
      call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:,ib), &
@@ -996,6 +1011,7 @@ end subroutine ephwg_get_zinv_weights
 !! PARENTS
 !!
 !! CHILDREN
+!!      self%lgk%free,self%tetra_k%free
 !!
 !! SOURCE
 

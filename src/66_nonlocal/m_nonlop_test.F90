@@ -83,11 +83,11 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      afterscfloop
+!!      m_afterscfloop
 !!
 !! CHILDREN
-!!      dotprod_g,init_hamiltonian,initylmg
-!!      load_k_hamiltonian,load_spin_hamiltonian,mkffnl,mkkpg,nonlop
+!!      dotprod_g,gs_hamk%free,gs_hamk%load_k,gs_hamk%load_spin
+!!      init_hamiltonian,initylmg,mkffnl,mkkpg,nonlop
 !!
 !! SOURCE
 

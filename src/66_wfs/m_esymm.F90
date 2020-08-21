@@ -246,7 +246,7 @@ CONTAINS  !=====================================================================
 !!   kpt_in is non-symmorphic namely thers is at lest a symmetry operation with non-zero tnons.
 !!
 !! PARENTS
-!!      classify_bands
+!!      m_classify_bands
 !!
 !! CHILDREN
 !!      xgeev,xginv,zpotrf,ztrsm
@@ -653,7 +653,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    if (esymm%has_chtabs) then
      ! Multiply the point group irreps by e^{-ik.\tau} to have the irreps of the little group.
      ! Store the results in esymm%Ref_irreps so that one can classify the states afterwards.
-     ABI_DT_MALLOC(esymm%Ref_irreps,(esymm%nclass))
+     ABI_MALLOC(esymm%Ref_irreps,(esymm%nclass))
      ABI_MALLOC(phase_mkt,(esymm%nsym_gk))
 
      do isym_gk=1,esymm%nsym_gk
@@ -783,10 +783,10 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
  nacc_deg=0
  ABI_MALLOC(esymm%degs_dim,(esymm%ndegs))
- ABI_DT_MALLOC(esymm%Calc_irreps,(esymm%ndegs))
+ ABI_MALLOC(esymm%Calc_irreps,(esymm%ndegs))
 
  if (esymm%can_use_tr)  then
-   ABI_DT_MALLOC(esymm%trCalc_irreps,(esymm%ndegs))
+   ABI_MALLOC(esymm%trCalc_irreps,(esymm%ndegs))
  end if
 
  do idg=1,esymm%ndegs
@@ -835,7 +835,7 @@ end subroutine esymm_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      classify_bands
+!!      m_classify_bands
 !!
 !! CHILDREN
 !!      xgeev,xginv,zpotrf,ztrsm
@@ -982,7 +982,7 @@ subroutine esymm_free_0D(esymm)
    do ii=LBOUND(esymm%irrep2b,DIM=1),UBOUND(esymm%irrep2b,DIM=1)
      ABI_FREE(esymm%irrep2b(ii)%value)
    end do
-   ABI_DT_FREE(esymm%irrep2b)
+   ABI_FREE(esymm%irrep2b)
  end if
 
  if (allocated(esymm%Calc_irreps)) call irrep_free(esymm%Calc_irreps)
@@ -1040,7 +1040,7 @@ end subroutine esymm_free_2D
 !! OUTPUT
 !!
 !! PARENTS
-!!      classify_bands
+!!      m_classify_bands
 !!
 !! CHILDREN
 !!      xgeev,xginv,zpotrf,ztrsm
@@ -1177,7 +1177,7 @@ subroutine esymm_finalize(esymm,prtvol)
  end if
  !
  ! %irrep2b(0)) gives the indeces of the states that have not been classified.
- ABI_DT_MALLOC(esymm%irrep2b,(0:esymm%nclass))
+ ABI_MALLOC(esymm%irrep2b,(0:esymm%nclass))
 
  !write(std_out,*)"b2irrep",esymm%b2irrep
 
@@ -1342,7 +1342,7 @@ end function which_irrep
 !!  esymm<esymm_t>
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me
+!!      m_cohsex,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!      xgeev,xginv,zpotrf,ztrsm

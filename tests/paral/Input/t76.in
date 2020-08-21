@@ -88,6 +88,9 @@ istwfk *1
 nstep  50      # Maximal number of SCF cycles
 diemac 12.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -95,7 +98,6 @@ diemac 12.0
 #%% nprocs_to_test = 1, 2, 4
 #%% max_nprocs = 10
 #%% [files]
-#%% psp_files = 14si.pspnc 
 #%% [NCPU_1]
 #%% files_to_test = 
 #%%    t76_MPI1.out,   tolnlines = 10 , tolabs = 1.1e-2, tolrel = 4.0e-2;

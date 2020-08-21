@@ -87,7 +87,7 @@ MODULE m_oper
   integer :: has_opermatlu
 
   character(len=12) :: whichoper
-  ! describe the type of operator computed (LDA, DMFT, KS..)
+  ! describe the type of operator computed (DFT, DMFT, KS..)
 
 !  ! Polarisation
   type(matlu_type), allocatable :: matlu(:)
@@ -120,8 +120,8 @@ CONTAINS  !=====================================================================
 !! oper  = operator of type oper_type
 !!
 !! PARENTS
-!!      hubbard_one,hybridization_asymptotic_coefficient,m_green,m_self
-!!      outscfcv,psichi_renormalization,qmc_prep_ctqmc,vtorho
+!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv,m_self
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      prod_matlu
@@ -220,8 +220,8 @@ end subroutine init_oper
 !! OUTPUT
 !!
 !! PARENTS
-!!      hubbard_one,hybridization_asymptotic_coefficient,m_green,m_self
-!!      outscfcv,psichi_renormalization,qmc_prep_ctqmc,vtorho
+!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv,m_self
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      prod_matlu
@@ -275,7 +275,7 @@ end subroutine destroy_oper
 !! OUTPUT
 !!
 !! PARENTS
-!!      hybridization_asymptotic_coefficient,m_green
+!!      m_datafordmft,m_green
 !!
 !! CHILDREN
 !!      prod_matlu
@@ -380,8 +380,8 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
    iband1=1
    iband2=oper%mbandc
 !   do ib=1,oper%mbandc
-!     if(-(paw_dmft%eigen_lda(1,1,ib)+paw_dmft%fermie).ge.0.3) iband1=ib
-!     if( (paw_dmft%eigen_lda(1,1,ib)-paw_dmft%fermie).le.0.3) iband2=ib
+!     if(-(paw_dmft%eigen_dft(1,1,ib)+paw_dmft%fermie).ge.0.3) iband1=ib
+!     if( (paw_dmft%eigen_dft(1,1,ib)-paw_dmft%fermie).le.0.3) iband2=ib
 !   enddo
 
    ximag=.false.
@@ -411,11 +411,11 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
            if(option<5) then
              if(abs(aimag(oper%ks(isppol,ikpt,ib,ib))).ge.tol10) then
                write(message, '(a,i4,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",ib,&
-&               paw_dmft%eigen_lda(isppol,ikpt,ib),oper%ks(isppol,ikpt,ib,ib)
+&               paw_dmft%eigen_dft(isppol,ikpt,ib),oper%ks(isppol,ikpt,ib,ib)
                call wrtout(std_out,message,'COLL')
              else
                write(message, '(a,i4,e14.5,3x,e14.5)') "   -iband--",ib,&
-&               paw_dmft%eigen_lda(isppol,ikpt,ib),real(oper%ks(isppol,ikpt,ib,ib))
+&               paw_dmft%eigen_dft(isppol,ikpt,ib),real(oper%ks(isppol,ikpt,ib,ib))
                call wrtout(std_out,message,'COLL')
              endif
            endif
@@ -481,7 +481,7 @@ end subroutine print_oper
 !!  oper <type(oper_type)>= operator inverted
 !!
 !! PARENTS
-!!      dyson,m_green,qmc_prep_ctqmc
+!!      m_dmft,m_forctqmc,m_green
 !!
 !! CHILDREN
 !!      prod_matlu
@@ -568,8 +568,7 @@ end subroutine inverse_oper
 !! OUTPUT
 !!
 !! PARENTS
-!!      compute_levels,hybridization_asymptotic_coefficient,m_green
-!!      psichi_renormalization
+!!      m_datafordmft,m_green
 !!
 !! CHILDREN
 !!      prod_matlu
@@ -798,7 +797,7 @@ end subroutine upfold_oper
 !! OUTPUT
 !!
 !! PARENTS
-!!      psichi_renormalization
+!!      m_datafordmft
 !!
 !! CHILDREN
 !!      prod_matlu
@@ -884,7 +883,7 @@ end subroutine identity_oper
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,psichi_renormalization
+!!      m_datafordmft,m_dmft
 !!
 !! CHILDREN
 !!      prod_matlu
@@ -956,7 +955,7 @@ end subroutine diff_oper
 !! OUTPUT
 !!
 !! PARENTS
-!!      impurity_solve,m_green
+!!      m_dmft,m_green
 !!
 !! CHILDREN
 !!      prod_matlu
@@ -1023,7 +1022,7 @@ end subroutine trace_oper
 !! OUTPUT
 !!
 !! PARENTS
-!!      hybridization_asymptotic_coefficient
+!!      m_datafordmft
 !!
 !! CHILDREN
 !!      prod_matlu

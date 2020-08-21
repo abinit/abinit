@@ -47,6 +47,8 @@ MODULE m_fft_mesh
  public :: check_rot_fft       ! Test whether the mesh is compatible with the rotational part of the space group.
  public :: fft_check_rotrans   ! Test whether the mesh is compatible with the symmetries of the space group.
  public :: rotate_fft_mesh     ! Calculate the FFT index of the rotated mesh.
+ public :: denpot_project      ! Compute n(r) + n( $R^{-1}(r-\tau)$ in) / 2
+                               ! Mainly used with R = inversion to select the even/odd part under inversion
  public :: cigfft              ! Calculate the FFT index of G-G0.
  public :: ig2gfft             ! Returns the component of a G in the FFT Box from its sequential index.
  public :: g2ifft              ! Returns the index of the G in the FFT box from its reduced coordinates.
@@ -57,7 +59,7 @@ MODULE m_fft_mesh
  public :: times_eigr          ! Multiply an array on the real-space mesh by e^{iG0.r}
  public :: times_eikr          ! Multiply an array on the real-space mesh by e^{ik.r}
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
- public :: mkgrid_fft          !  It sets the grid of fft (or real space) points to be treated.
+ public :: mkgrid_fft          ! Sets the grid of fft (or real space) points to be treated.
 
  interface calc_ceigr
    module procedure calc_ceigr_spc
@@ -122,7 +124,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -206,7 +208,7 @@ end subroutine zpad_init
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -218,13 +220,8 @@ subroutine zpad_free(zpad)
 
 ! *************************************************************************
 
- if (allocated(zpad%zplane)) then
-   ABI_FREE(zpad%zplane)
- end if
-
- if (allocated(zpad%linex2ifft_yz)) then
-   ABI_FREE(zpad%linex2ifft_yz)
- end if
+ ABI_SFREE(zpad%zplane)
+ ABI_SFREE(zpad%linex2ifft_yz)
 
 end subroutine zpad_free
 !!***
@@ -274,10 +271,10 @@ end subroutine zpad_free
 !!  See defs_fftdata for a list of allowed sizes of FFT.
 !!
 !! PARENTS
-!!      m_shirley,setup_bse,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -792,11 +789,11 @@ end function fft_check_rotrans
 !!  final results, in particular in the description of degenerate states.
 !!
 !! PARENTS
-!!      bethe_salpeter,calc_sigc_me,calc_sigx_me,cchi0q0_intraband
-!!      classify_bands,cohsex_me,m_dvdb,m_wfd,prep_calc_ucrpa,screening
+!!      m_bethe_salpeter,m_chi0,m_classify_bands,m_cohsex,m_dvdb,m_fft_mesh
+!!      m_prep_calc_ucrpa,m_screening_driver,m_sigc,m_sigx,m_wfd
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -878,6 +875,73 @@ end subroutine rotate_fft_mesh
 
 !----------------------------------------------------------------------
 
+!!****f* m_numeric_tools/denpot_project
+!! NAME
+!!
+!! FUNCTION
+!!  Compute n(r) + n( $R^{-1}(r-\tau)$ in) / 2
+!!  Mainly used with R = inversion to select the even/odd part under inversion
+!!
+!! INPUTS
+!!  cplex=1 for real, 2 for complex data.
+!!  ngfft(3)=Mesh divisions of input array
+!!  nspden=Number of density components.
+!!  in_rhor(cplex * nfftot * nspden)=Input array
+!!  one_symrel(3,3)= R operation
+!!  tau(3)=Fractional translation.
+!!
+!! OUTPUT
+!!  out_rhor(cplex * nfftot * nspden)=Output array
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine denpot_project(cplex,  ngfft, nspden, in_rhor, one_symrel, one_tnons, out_rhor)
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: cplex, nspden
+!arrays
+ integer,intent(in) :: ngfft(18), one_symrel(3,3)
+ real(dp),intent(in) :: in_rhor(cplex, product(ngfft(1:3)), nspden)
+ real(dp),intent(in) :: one_tnons(3)
+ real(dp),intent(out) :: out_rhor(cplex, product(ngfft(1:3)), nspden)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer,parameter :: nsym1 = 1, isgn = 1
+ integer :: ispden, ii, ifft, ifft_rot, nfft
+ logical :: preserve
+!arrays
+ integer,allocatable :: irottb(:)
+
+! *************************************************************************
+
+ nfft = product(ngfft(1:3))
+ ABI_MALLOC(irottb, (nfft))
+
+ call rotate_fft_mesh(nsym1, one_symrel, one_tnons, ngfft, irottb, preserve)
+ ABI_CHECK(preserve, "FFT mesh is not compatible with {R, tau}")
+
+ do ispden=1,nspden
+   do ifft=1,nfft
+     ifft_rot = irottb(ifft)
+     do ii=1,cplex
+       out_rhor(cplex, ifft, ispden) = (in_rhor(cplex, ifft, ispden) + isgn * in_rhor(cplex, ifft_rot, ispden)) * half
+     end do
+   end do
+ end do
+
+ ABI_FREE(irottb)
+
+end subroutine denpot_project
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_fft_mesh/cigfft
 !! NAME
 !! cigfft
@@ -900,7 +964,7 @@ end subroutine rotate_fft_mesh
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1154,7 +1218,7 @@ end subroutine get_gftt
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1224,7 +1288,7 @@ end subroutine calc_ceigr_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1552,9 +1616,10 @@ end subroutine times_eikr
 !! Simply suppresses the corresponding sine.
 !!
 !! PARENTS
-!!      xcden,xcpot
+!!      m_xctk
 !!
 !! CHILDREN
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1593,14 +1658,14 @@ end subroutine phase
 !!  mkgrid_fft
 !!
 !! FUNCTION
-!!  It sets the grid of fft (or real space) points to be treated.
+!!  Sets the grid of fft (or real space) points to be treated.
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
 !! PARENTS
-!!      mkcore_paw,mklocl_realspace
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
 !!      xred2xcart

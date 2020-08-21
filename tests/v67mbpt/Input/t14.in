@@ -35,7 +35,7 @@ pawecutdg 30.0
 nstep 50                   # Maximum number of SCF cycles
 
 
-icutcoul 3      # For legacy reasons
+gw_icutcoul 3      # For legacy reasons
 
 # Step 1: determine the ground state
 nband1  10                    # Number of bands
@@ -125,6 +125,9 @@ timopt -1
 ## bs_loband6         2
 ## bs_freq_mesh6      0 10.0 0.1 eV
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "li.PBE.atompaw.paw, F.noRSO.rc1.4.pawps"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -134,7 +137,6 @@ timopt -1
 #%%   t14o_DS4_EXC_MDF     ,tolnlines = 74, tolabs = 3.0e-2, tolrel = 5.0e-1, fld_options =  -ridiculous;
 #%%   t14o_DS4_GW_NLF_MDF  ,tolnlines = 74, tolabs = 3.0e-2, tolrel = 5.0e-1, fld_options =  -ridiculous;
 #%%   t14o_DS4_RPA_NLF_MDF ,tolnlines = 74, tolabs = 3.0e-2, tolrel = 5.0e-1, fld_options =  -ridiculous
-#%% psp_files = li.PBE.atompaw.paw, F.noRSO.rc1.4.pawps 
 #%% [paral_info]
 #%% max_nprocs = 3
 #%% [extra_info]

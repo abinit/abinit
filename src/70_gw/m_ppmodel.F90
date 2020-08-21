@@ -219,7 +219,7 @@ CONTAINS  !=====================================================================
 !! * Notice that eig is used only if PPm%model==3
 !!
 !! PARENTS
-!!      calc_sigc_me,m_ppmodel
+!!      m_ppmodel,m_sigc
 !!
 !! CHILDREN
 !!
@@ -370,7 +370,7 @@ end subroutine ppm_nullify
 !!  PPm<ppmodel_t>=All dynamic memory is released.
 !!
 !! PARENTS
-!!      m_screen,mrgscr,sigma
+!!      m_screen,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -432,21 +432,21 @@ subroutine ppm_free(PPm)
    do iq_ibz=1,dim_q
      call array_free(PPm%bigomegatwsq(iq_ibz))
    end do
-   ABI_DT_FREE(PPm%bigomegatwsq)
+   ABI_FREE(PPm%bigomegatwsq)
  end if
  !
  if (allocated(PPm%omegatw)) then
    do iq_ibz=1,dim_q
      call array_free(PPm%omegatw(iq_ibz))
    end do
-   ABI_DT_FREE(PPm%omegatw)
+   ABI_FREE(PPm%omegatw)
  end if
  !
  if (allocated(PPm%eigpot)) then
    do iq_ibz=1,dim_q
      call array_free(PPm%eigpot(iq_ibz))
    end do
-   ABI_DT_FREE(PPm%eigpot)
+   ABI_FREE(PPm%eigpot)
  end if
 #endif
 
@@ -557,7 +557,7 @@ end subroutine ppm_table_free
 !!   proper dimensions according to the plasmon-pole model.
 !!
 !! PARENTS
-!!      m_screen,mrgscr,sigma
+!!      m_screen,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -605,9 +605,9 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
  ! Full q-mesh is stored or out-of-memory solution.
  dim_q=PPm%nqibz; if (PPm%mqmem==0) dim_q=1
 
- ABI_DT_MALLOC(PPm%bigomegatwsq, (dim_q))
- ABI_DT_MALLOC(PPm%omegatw,(dim_q))
- ABI_DT_MALLOC(PPm%eigpot,(dim_q))
+ ABI_MALLOC(PPm%bigomegatwsq, (dim_q))
+ ABI_MALLOC(PPm%omegatw,(dim_q))
+ ABI_MALLOC(PPm%eigpot,(dim_q))
 
  SELECT CASE (PPm%model)
 
@@ -699,7 +699,7 @@ end subroutine ppm_init
 !! * TODO: rhor_tot should be replaced by rhog_tot
 !!
 !! PARENTS
-!!      calc_sigc_me,mrgscr,sigma
+!!      m_sigc,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -2181,7 +2181,7 @@ end subroutine cqratio
 !!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
 !!
 !! PARENTS
-!!      calc_sigc_me
+!!      m_sigc
 !!
 !! CHILDREN
 !!

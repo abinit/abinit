@@ -73,13 +73,13 @@ contains
 !!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) !*ndat),
 !!
 !! PARENTS
-!!      m_phgamma,m_sigmaph,m_wfk
+!!      m_sigmaph,m_wfd,m_wfk
 !!
 !! NOTES
 !!  Inspired to wfconv.
 !!
 !! CHILDREN
-!!      getph,getspinrot,mati3inv,ph1d3d,sphere
+!!      sphere
 !!
 !! SOURCE
 
@@ -236,8 +236,10 @@ end subroutine cgtk_rotate
 !!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) = Workspace array
 !!
 !! PARENTS
+!!      m_wfd
 !!
 !! CHILDREN
+!!      sphere
 !!
 !! SOURCE
 
@@ -268,6 +270,7 @@ subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, 
  do idat=1,ndat
    ! Insert cg1 in work array taking into account istwf1 (intent in)
    call sphere(cg1(:,:,idat),1,npw1,work,n1,n2,n3,n4,n5,n6,kg1,istwf1,tobox,me_g0,no_shift,identity_3d,one)
+
    ! Extract cg2 from work array taking into account istwf2
    call sphere(cg2(:,:,idat),1,npw2,work,n1,n2,n3,n4,n5,n6,kg2,istwf2,tosph,me_g0,no_shift,identity_3d,one)
  end do

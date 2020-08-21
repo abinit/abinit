@@ -348,7 +348,7 @@ end subroutine build_processor_scalapack
 !!  processor= descriptor of a processor
 !!
 !! PARENTS
-!!      m_abi_linalg,m_abilasi,m_exc_diago
+!!      m_abi_linalg,m_exc_diago,m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -399,7 +399,7 @@ end subroutine init_scalapack
 !!  processor= descriptor of a processor
 !!
 !! PARENTS
-!!      m_abi_linalg,m_abilasi,m_exc_diago
+!!      m_abi_linalg,m_exc_diago,m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -439,7 +439,7 @@ end subroutine end_scalapack
 !!  matrix= the matrix to process
 !!
 !! PARENTS
-!!      m_abilasi,m_exc_diago,m_slk,rayleigh_ritz
+!!      m_exc_diago,m_hide_lapack,m_rayleigh_ritz,m_slk
 !!
 !! CHILDREN
 !!
@@ -531,7 +531,7 @@ end subroutine init_matrix_scalapack
 !!  Destroys a matrix descriptor for ScaLAPACK.
 !!
 !! PARENTS
-!!      m_abilasi,m_exc_diago,m_slk
+!!      m_exc_diago,m_hide_lapack,m_slk
 !!
 !! CHILDREN
 !!
@@ -1415,7 +1415,7 @@ end subroutine matrix_to_reference
 !!    %buffer_cplx=Local buffer containg the value this node is dealing with.
 !!
 !! PARENTS
-!!      m_abilasi
+!!      m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -1503,7 +1503,7 @@ end subroutine slk_matrix_from_global_dpc_2D
 !!    %buffer_cplx=Local buffer containg the value this node is dealing with.
 !!
 !! PARENTS
-!!      m_abilasi
+!!      m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -1595,7 +1595,7 @@ end subroutine slk_matrix_from_global_dpc_1Dp
 !!  Note that the remaing entries not treated by this node are not changed.
 !!
 !! PARENTS
-!!      m_abilasi
+!!      m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -2045,7 +2045,7 @@ end subroutine compute_eigen_problem
 !!  eigen= eigenvalues of the matrix
 !!
 !! PARENTS
-!!      m_slk,rayleigh_ritz
+!!      m_rayleigh_ritz,m_slk
 !!
 !! CHILDREN
 !!
@@ -2655,7 +2655,7 @@ end subroutine compute_eigen2
 !!  If JOBZ="V", the local buffer Slk_vec%buffer_cplx will contain part of the distributed eigenvectors.
 !!
 !! PARENTS
-!!      m_abilasi,m_exc_diago
+!!      m_exc_diago,m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -2797,7 +2797,7 @@ end subroutine slk_pzheev
 !!    %buffer_cplx is destroyed when the routine returns
 !!
 !! PARENTS
-!!      m_abilasi,m_exc_diago
+!!      m_exc_diago,m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -3301,7 +3301,7 @@ end subroutine slk_pzhegvx
 !!    the matrix inverted and distributed among the nodes.
 !!
 !! PARENTS
-!!      m_abilasi,m_exc_diago
+!!      m_exc_diago,m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -3402,7 +3402,7 @@ end subroutine slk_zinvert
 !!    On exit, the local pieces of the upper or lower triangle of the (Hermitian) inverse of sub( A )
 !!
 !! PARENTS
-!!      m_abilasi
+!!      m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -3697,6 +3697,21 @@ end subroutine slk_write
 !!
 !! TODO
 !!  * Generalize the implementation adding the reading of the real buffer.
+!!
+!!  This routine is not portable as this kind of access pattern is not supported by all MPI implementations
+!!  E.g. with MPICH we have
+!!
+!! --- !ERROR
+!! src_file: m_slk.F90
+!! src_line: 3780
+!! mpi_rank: 1
+!! message: |
+!!     SET_VIEW
+!!     Other I/O error , error stack:
+!!     ADIO_Set_view(48):  **iobadoverlap displacements of filetype must be in a monotonically nondecreasing order
+!! ...
+!!
+!! FIXME: This routine should be removed and replaced by hdf5 + mpi-io
 !!
 !! PARENTS
 !!      m_exc_diago

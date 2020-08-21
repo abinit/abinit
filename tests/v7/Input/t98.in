@@ -100,13 +100,15 @@ diemac 3
 vdw_xc 7  # Activate DFT-D3(BJ)
 vdw_tol 1d-10 # Tolerance on the pair-wise term
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "18ar.revpbe"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t98.out, tolnlines = 8, tolabs = 1.0e-05, tolrel = 1.0e-06, fld_options = -easy
-#%% psp_files = 18ar.revpbe
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

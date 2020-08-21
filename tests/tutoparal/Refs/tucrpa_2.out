@@ -22,9 +22,9 @@
 - root for input  files -> tucrpa_I
 - root for output files -> tucrpa_O
 
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/V.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -727,9 +727,9 @@ P           mkmem           1
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -747,9 +747,9 @@ P           mkmem           1
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -767,9 +767,9 @@ P           mkmem           1
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -826,7 +826,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -9232,7 +9232,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -10896,7 +10896,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -11490,9 +11490,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -11510,9 +11510,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -11530,9 +11530,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -11644,7 +11644,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -11694,7 +11694,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    2
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -11742,7 +11742,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -11786,7 +11786,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -11895,7 +11895,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -12500,9 +12500,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/V.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/V.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -12520,9 +12520,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Sr.LDA_PW-JTH.xml
+- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -12540,9 +12540,9 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/O.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/O.LDA_PW-JTH.xml
+- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -12654,7 +12654,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -12704,7 +12704,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    2
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -12752,7 +12752,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -12796,7 +12796,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -12899,7 +12899,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -14167,9 +14167,9 @@ P           mkmem           1
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2008
 -
-- [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [3] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment : LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment : DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.

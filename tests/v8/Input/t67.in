@@ -45,6 +45,9 @@
 
   tolvrs    1.0d-17
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -52,7 +55,6 @@
 #%% [files]
 #%% files_to_test =
 #%%   t67.out, tolnlines = 4, tolabs = 0.002, tolrel = 0.002, fld_options=-easy
-#%% psp_files = 26fe.pspnc
 #%% [shell]
 #%% post_commands = ww_mv t67o_WFK t68i_WFK
 #%% [paral_info]

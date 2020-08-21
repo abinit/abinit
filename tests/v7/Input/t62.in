@@ -56,12 +56,14 @@
   pawmixdg 1
   pawecutdg 15
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al.LDA"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t62.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files=Al.LDA
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -75,13 +75,15 @@ nstep 15          # Maximal number of SCF cycles
 #Various entries
 prtden 0          # Do not print density
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t46.out, tolnlines = 14, tolabs = 2.000e-09, tolrel = 1.000e-06, fld_options = -medium
-#%% psp_files = 13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

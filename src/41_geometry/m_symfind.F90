@@ -92,11 +92,11 @@ contains
 !!  be 0 0 0 each for a symmorphic space group)
 !!
 !! PARENTS
-!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_tdep_sym
-!!      m_use_ga,thmeig
+!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
+!!      m_mover_effpot,m_tdep_sym,m_thmeig,m_use_ga
 !!
 !! CHILDREN
-!!      wrtout
+!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -606,10 +606,10 @@ end subroutine symfind
 !! spgroup=symmetry space group
 !!
 !! PARENTS
-!!      ingeo,m_ab7_symmetry,m_tdep_sym,m_use_ga
+!!      m_ab7_symmetry,m_ingeo,m_mover_effpot,m_phonons,m_tdep_sym,m_use_ga
 !!
 !! CHILDREN
-!!      chkprimit,getptgroupma,symbrav,symlatt,symptgroup,symspgr,wrtout
+!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -620,7 +620,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
  integer,intent(in) :: chkprim,msym,nsym
  integer,intent(out) :: ptgroupma,spgroup
  real(dp),intent(in) :: tolsym
- logical,optional :: verbose
+ logical,optional,intent(in) :: verbose
 !arrays
  integer,intent(out) :: bravais(11)
  integer,intent(in) :: symafm(msym),symrel(3,3,msym)
@@ -630,7 +630,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
 !Local variables-------------------------------
 !scalars
- integer, parameter :: maxsym=192 
+ integer, parameter :: maxsym=192
 ! In this routine, maxsym is used either to determine the ptsymrel from the rprimd (routine symlatt),
 ! so, it might be up to 192 = 4*48 for FCC, and also to define the maximum number of symmetry operation labels,
 ! but only in case the cell is primitive, which gives the same upper bound. Thus in this routine, msym might
@@ -779,6 +779,10 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
  end if
 
+!DEBUG
+!write(std_out,'(a)') ' symanal : exit '
+!ENDDEBUG
+
 end subroutine symanal
 !!***
 
@@ -810,10 +814,10 @@ end subroutine symanal
 !!   Set to (/0,0,0/) if the lattice belongs to the same holohedry as the lattice+atoms (+electric field + ...).
 !!
 !! PARENTS
-!!      m_esymm,symanal
+!!      m_esymm,m_symfind
 !!
 !! CHILDREN
-!!      matr3inv,symlatt,symptgroup,symrelrot
+!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -1097,6 +1101,10 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
    end if
  end if
 
+!DEBUG
+!write(std_out,'(a)')' symbrav : exit '
+!ENDDEBUG
+
 end subroutine symbrav
 !!***
 
@@ -1108,7 +1116,7 @@ end subroutine symbrav
 !! Find the type of each symmetry operation (calling symcharac):
 !!   proper symmetries 1,2,2_1,3,3_1,3_2,4,4_1,4_2,4_3,6,6_1,...6_5
 !!   improper symmetries -1,m,a,b,c,d,n,g,-3,-4,-6 ,
-!! Then, build an array with the number of such operations. 
+!! Then, build an array with the number of such operations.
 !! Then, call symlist to identify the space group.
 !!
 !! INPUTS
@@ -1148,11 +1156,10 @@ end subroutine symbrav
 !! see symaxes.f and symplanes.f
 !!
 !! PARENTS
-!!      symanal
+!!      m_symfind
 !!
 !! CHILDREN
-!!      spgdata,symcharac,symdet,symlist_bcc,symlist_fcc,symlist_others
-!!      symlist_prim,symrelrot,wrtout,xred2xcart
+!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -1277,7 +1284,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 
 !  Note : nsymconv might be bigger than 192, but only for non-primitive cells, in which case labels will not be echoed anywhere.
 !  192 is the fixed dimension of labels, so this avoids possible memory problems.
-   call symcharac(center, determinant(isym), iholohedry, isym, labels(mod(isym-1,192)+1), &   
+   call symcharac(center, determinant(isym), iholohedry, isym, labels(mod(isym-1,192)+1), &
    symrelconv(:,:,isym), tnonsconv(:,isym), t_axes(isym))
    if (t_axes(isym) == -1) then
      write(message, '(a,a,i3,a,3(a,3i4,a),a,3es22.12,a,a,3es22.12)' )ch10,&
@@ -1580,8 +1587,8 @@ end subroutine symspgr
 !! center=3        C-face centered
 !!
 !! PARENTS
-!!      ingeo,inqpt,m_ab7_symmetry,m_effective_potential_file,m_tdep_sym
-!!      m_use_ga,symanal,symbrav,thmeig
+!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
+!!      m_mover_effpot,m_symfind,m_tdep_sym,m_thmeig,m_use_ga
 !!
 !! CHILDREN
 !!      holocell,matr3inv,smallprim,symrelrot,wrtout
@@ -1616,6 +1623,10 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  real(dp) :: minim(3,3),scprods(3,3),vecta(3),vectb(3),vectc(3),vin1(3),vin2(3),vext(3)
 
 !**************************************************************************
+
+!DEBUG
+!write(std_out,'(a)') ' symlatt : enter '
+!ENDDEBUG
 
  identity(:,:)=0 ; identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
  nvecta(1)=2 ; nvectb(1)=3
@@ -2467,10 +2478,10 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  do ii=1,3
    do jj=1,3
      val=coord(ii,jj)*fact
-     if(abs(val-nint(val))>fact*tolsym)then
+     if(abs(val-nint(val))>fact*two*tolsym)then
        write(message,'(4a,a,3es18.10,a,a,3es18.10,a,a,3es18.10,a,a,i4)')&
 &       'One of the coordinates of rprimd in axes is non-integer,',ch10,&
-&       'or non-half-integer (if centering).',ch10,&
+&       'or non-half-integer (if centering), within 2*tolsym.',ch10,&
 &       'coord=',coord(:,1),ch10,&
 &       '      ',coord(:,2),ch10,&
 &       '      ',coord(:,3),ch10,&
@@ -2554,6 +2565,10 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !Transform symmetry matrices in the system defined by rprimd
  call symrelrot(nptsym,axes,rprimd,ptsymrel,tolsym)
+
+!DEBUG
+!write(std_out,'(a)') ' symlatt : exit '
+!ENDDEBUG
 
 end subroutine symlatt
 !!***

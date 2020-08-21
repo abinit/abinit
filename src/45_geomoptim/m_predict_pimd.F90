@@ -96,7 +96,7 @@ contains
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
-!!      predictimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      gather_array_img,mkradim,mkrdim,pimd_langevin_npt,pimd_langevin_nvt

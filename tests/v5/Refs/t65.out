@@ -196,12 +196,12 @@ _ WF disk file :      0.310 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
             gwmem4          1
             gwmem5          0
             gwmem6          0
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
+        gw_icutcoul5          6
+        gw_icutcoul6          3
            istwfk        1    0    1    0    0    0    1    0
               ixc           7
            jdtset        1    2    3    4    5    6
@@ -343,8 +343,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.00791
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -361,8 +361,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -560,8 +560,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -578,8 +578,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -973,7 +973,7 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   9.463 -14.569 -16.758   2.695   0.812  -0.231 -14.158   0.411   9.874
 ...
 
@@ -986,7 +986,7 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         5  10.466 -10.773  -6.317  -3.307   0.831  -0.204  -9.819   0.954  11.421
 ...
 
@@ -1116,7 +1116,7 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   9.463 -14.569 -16.758   2.226   0.812  -0.231 -14.539   0.030   9.493
 ...
 
@@ -1129,7 +1129,7 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         5  10.466 -10.773  -6.317  -3.559   0.831  -0.204 -10.028   0.745  11.211
 ...
 
@@ -1546,7 +1546,7 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   9.463 -14.569 -16.758   1.890   0.813  -0.230 -14.813  -0.243   9.220
 ...
 
@@ -1559,7 +1559,7 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         5  10.466 -10.773  -6.317  -3.873   0.831  -0.204 -10.289   0.484  10.951
 ...
 
@@ -1647,12 +1647,12 @@ data: !SigmaeeData |
             gwmem4          1
             gwmem5          0
             gwmem6          0
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
+        gw_icutcoul5          6
+        gw_icutcoul6          3
            istwfk        1    0    1    0    0    0    1    0
               ixc           7
            jdtset        1    2    3    4    5    6

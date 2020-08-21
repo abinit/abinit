@@ -168,12 +168,12 @@ contains
 !! NOT OUTPUT NOW !
 !!
 !! PARENTS
-!!      dfpt_looppert,dfptnl_loop,gstate,nonlinear,respfn
+!!      m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_gstate,m_longwave,m_nonlinear
+!!      m_pead_nl_loop,m_respfn_driver
 !!
 !! CHILDREN
-!!      copy_mpi_enreg,destroy_mpi_enreg,hdr_check,hdr_free,hdr_io,hdr_ncread
-!!      kpgio,listkk,matr3inv,newkpt,pawrhoij_copy,timab,wffopen,wfsinp,wrtout
-!!      wvl_wfsinp_disk,wvl_wfsinp_scratch
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1103,11 +1103,11 @@ end subroutine inwffil
 !! THE DESCRIPTION IS TO BE COMPLETELY REVISED, AS THIS ONE COMES FROM inwffil.f
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      initwf,mpi_bcast,mpi_recv,mpi_send,pareigocc,timab,wfconv,wffreadskipk
-!!      wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1276,7 +1276,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
      npw0_k=npwarr0(ikpt0)
      if(ikpt0<=nkpt_eff)then
        write(message,'(a,a,2i4)')ch10,' wfsinp: inside loop, init ikpt0,isppol0=',ikpt0,isppol0
-       call wrtout(std_out,message,'PERS')
+       call wrtout(std_out,message)
      end if
 
 !    Must know whether this k point is needed, and in which
@@ -1376,9 +1376,9 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
          if(ikpt<=nkpt_eff)then
            write(message,'(a,i6,a,i8,a,i4,a,i4)') &
 &           ' wfsinp: treating ',nband_k,' bands with npw=',npw_k,' for ikpt=',ikpt,' by node ',me
-           call wrtout(std_out,message,'PERS')
+           call wrtout(std_out,message)
          else if(ikpt==nkpt_eff+1)then
-           call wrtout(std_out,' wfsinp: prtvol=0 or 1, do not print more k-points.','PERS')
+           call wrtout(std_out,' wfsinp: prtvol=0 or 1, do not print more k-points.')
          end if
 
        end if
@@ -1626,7 +1626,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 
              if(ikpt_trial/=0 .and. ikpt_trial<=nkpt_eff)then
                write(message,'(2a,2i5)')ch10,' wfsinp: transfer to ikpt_trial,isppol_trial=',ikpt_trial,isppol_trial
-               call wrtout(std_out,message,'PERS')
+               call wrtout(std_out,message)
              end if
 
              if(ikpt_trial/=0)then
@@ -1829,11 +1829,11 @@ end subroutine wfsinp
 !! ikptsp_old=number of the previous spin-k point, or 0 if first call of present file
 !!
 !! PARENTS
-!!      wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      rwwf,timab,wffreadskipk,wfk_close,wfk_open_read,wfk_read_band_block
-!!      wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1915,9 +1915,9 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 
  if (ikpt<=nkpt_max) then
    write(msg,'(3(a,i0))')' initwf: disk file gives npw= ',npw,' nband= ',nband_disk,' for kpt number= ',ikpt
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
  else if (ikpt==nkpt_max+1) then
-   call wrtout(std_out,' initwf: the number of similar message is sufficient... stop printing them','PERS')
+   call wrtout(std_out,' initwf: the number of similar message is sufficient... stop printing them')
  end if
 
 !Check the number of bands on disk file against desired number. These are not required to agree)
@@ -1931,7 +1931,7 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 
  if (ikpt<=nkpt_max) then
    write(msg,'(a,i0,a)')' initwf: ',nband_disk,' bands have been initialized from disk'
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
  end if
 
  ikptsp_old=ikpt+(spin-1)*nkpt
@@ -2062,10 +2062,11 @@ end subroutine initwf
 !! * In the present status of this routine, occ is not output.
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      pareigocc,prmat,randac,rdnpw,rwwf,timab,wfconv,wffreadskipk,wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2295,14 +2296,14 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
      if(restart==2)then
        if(ikpt2<=nkpt_eff)then
          write(message,'(a,i4,i8,a,i4,i8)')'- newkpt: read input wf with ikpt,npw=',ikpt1,npw1,', make ikpt,npw=',ikpt2,npw2
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out,message)
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
-           call wrtout(iout,message,'PERS')
+           call wrtout(iout,message)
          end if
        else if(ikpt2==nkpt_eff+1)then
-         call wrtout(std_out, '- newkpt: prtvol=0 or 1, do not print more k-points.', 'PERS')
+         call wrtout(std_out, '- newkpt: prtvol=0 or 1, do not print more k-points.')
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
-           call wrtout(iout,message,'PERS')
+           call wrtout(iout,message)
          end if
        end if
      end if
@@ -2316,7 +2317,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
      if ( nbd2/nspinor2 > nbd1/nspinor1 .and. fill==0) then
        if(ikpt2<=nkpt_eff)then
          write(message, '(a,i8,a,i8,a,i8)' )' newkpt: nband2=',nbd2,' < nband1=',nbd1,' => reset nband2 to ',nbd1
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out,message)
        end if
        nbd2=nbd1
      end if
@@ -2331,7 +2332,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
          ' newkpt: about to call randac',ch10,&
          '  for ikpt1=',ikpt1,', ikpt2=',ikpt2,ch10,&
          '  and isppol1=',isppol1,', isppol2=',isppol2
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out,message)
        end if
 
        !call randac(debug,headform1,ikptsp_prev,ikpt1,isppol1,nband1,nkpt1,nsppol1,wffinp)
@@ -2393,7 +2394,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
          write(message,'(a,i5,a,a,i5,a,i5,a)' ) &
 &         ' newkpt: about to call rwwf with ikpt1=',ikpt1,ch10,&
 &         ' and nband(ikpt1)=',nband1(ikpt1),' nbd2=',nbd2,'.'
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out,message)
        end if
 
        if(mpi_enreg1%paralbd==0)tim_rwwf=21
@@ -2656,7 +2657,7 @@ end subroutine newkpt
 !! When the two nspinor differ, one must have nbd1/nspinor1<nbd2/nspinor2
 !!
 !! PARENTS
-!!      newkpt,wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
 !!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
@@ -2888,7 +2889,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 &       '         ',gmet1(1:3,2),ch10,&
 &       '         ',gmet1(1:3,3),ch10,&
 &       '  ngfft=',ngfft_now(1:3),' giving npw1=',npw1,'.'
-       call wrtout(std_out,message,'PERS')
+       call wrtout(std_out,message)
      end if
      ikpt10 = ikpt1
      istwf10_k=istwf1_k
@@ -3216,7 +3217,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
      if(ikpt2<=nkpt_max)then
        write(message,'(3(a,i6))')' wfconv:',nbremn,' bands initialized randomly with npw=',npw2,', for ikpt=',ikpt2
-       call wrtout(std_out,message,'PERS')
+       call wrtout(std_out,message)
      end if
 
    else if(formeig==1)then
@@ -3236,8 +3237,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
      if(ikpt2<=nkpt_max)then
        nbremn=nbd2-nbd1
-       write(message,'(a,i6,a,i7,a,i4)')' wfconv:',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
-       call wrtout(std_out,message,'PERS')
+       write(message,'(3(a,i0))')' wfconv:',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
+       call wrtout(std_out,message)
      end if
 
    end if ! End of initialisation to 0

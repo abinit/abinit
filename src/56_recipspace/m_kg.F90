@@ -97,11 +97,10 @@ contains
 !! ecut (currently in hartree) is proportional to gcut(sphere)**2.
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_scfcv,m_pawfgr,nonlinear,respfn,scfcv,setup1
-!!      setup_positron
+!!      m_common,m_dfpt_looppert,m_dfpt_lw,m_dfpt_scfcv,m_nonlinear,m_pawfgr
+!!      m_positron,m_respfn_driver,m_scfcv_core
 !!
 !! CHILDREN
-!!      bound,wrtout
 !!
 !! SOURCE
 
@@ -120,7 +119,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 !scalars
  integer :: plane
  real(dp) :: boxsq,cutrad,ecut_pw,effcut,largesq,sphsq
- character(len=500) :: message
+ character(len=1000) :: message
 !arrays
  integer :: gbound(3)
 
@@ -169,12 +168,15 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      call wrtout(std_out,message,'COLL')
 
      if (boxcut<1.0_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,f12.6)' )&
+       write(message, '(9a,f12.6,6a)' )&
 &       '  Choice of acell, ngfft, and ecut',ch10,&
 &       '  ===> basis sphere extends BEYOND fft box !',ch10,&
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
-&       '  Actio: try larger ngfft or smaller ecut.',ch10,&
-&       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8
+&       '  Action: try larger ngfft or smaller ecut.',ch10,&
+&       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8,ch10,&
+&       '  This situation might happen when optimizing the cell parameters.',ch10,&
+&       '  Your starting geometry might be crazy.',ch10,&
+&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
        if(iout/=std_out) call wrtout(iout,message,'COLL')
        MSG_ERROR(message)
      end if
@@ -191,11 +193,14 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      end if
 
      if (boxcut<1.5_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,a)' ) ch10,&
+       write(message, '(15a)' ) ch10,&
 &       ' getcut : WARNING -',ch10,&
 &       '  Note that boxcut < 1.5; this usually means',ch10,&
 &       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
-&       '  Be sure to test with larger ngfft(1:3) values.',ch10
+&       '  Be sure to test with larger ngfft(1:3) values.',ch10,&
+&       '  This situation might happen when optimizing the cell parameters.',ch10,&
+&       '  Your starting geometry might be crazy.',ch10,&
+&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
        if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
@@ -230,10 +235,9 @@ end subroutine getcut
 !!  (for one processor of the WF group)
 !!
 !! PARENTS
-!!      dfpt_looppert,memory_eval,mpi_setup,scfcv
+!!      m_dfpt_looppert,m_dfpt_lw,m_memeval,m_mpi_setup,m_scfcv_core
 !!
 !! CHILDREN
-!!      kpgsph,wrtout
 !!
 !! SOURCE
 
@@ -332,8 +336,8 @@ end subroutine getmpw
 !! by one part over 1.0e12 of the metric tensor elements (1,1) and (3,3)
 !!
 !! PARENTS
-!!      calc_vhxc_me,d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_rhofermi,energy
-!!      getgh1c,ks_ddiago,m_io_kss,m_vkbr,mkffnl,vtorho
+!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy,m_getgh1c
+!!      m_io_kss,m_ksdiago,m_mkffnl,m_orbmag,m_vhxc_me,m_vkbr,m_vtorho
 !!
 !! CHILDREN
 !!
@@ -486,11 +490,10 @@ end subroutine mkkin
 !! and spin-down bands must be equal at each k points
 !!
 !! PARENTS
-!!      dfpt_looppert,dfptff_initberry,gstate,initmv,inwffil,m_cut3d,nonlinear
-!!      respfn,scfcv
+!!      m_cut3d,m_dfpt_fef,m_dfpt_looppert,m_dfpt_lw,m_gstate,m_inwffil
+!!      m_longwave,m_nonlinear,m_respfn_driver,m_scfcv_core
 !!
 !! CHILDREN
-!!      kpgsph,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -634,8 +637,8 @@ end subroutine kpgio
 !!   and for atoms in the range iatom to jatom with respect to ph1d
 !!
 !! PARENTS
-!!      cg_rotate,ctocprj,getcprj,m_cut3d,m_epjdos,m_fock,m_hamiltonian,m_wfd
-!!      nonlop_pl,nonlop_ylm,partial_dos_fractions,suscep_stat,wfconv
+!!      m_cgprj,m_cgtk,m_cut3d,m_epjdos,m_fock,m_hamiltonian,m_inwffil
+!!      m_nonlop_pl,m_nonlop_ylm,m_orbmag,m_suscep_stat,m_wfd
 !!
 !! CHILDREN
 !!
@@ -734,10 +737,11 @@ end subroutine ph1d3d
 !!   Real and imag given in usual Fortran convention.
 !!
 !! PARENTS
-!!      afterscfloop,bethe_salpeter,cg_rotate,dfpt_looppert,dfptnl_loop
-!!      extrapwf,gstate,m_cut3d,m_fock,m_gkk,m_hamiltonian,m_phgamma,m_phpi
-!!      m_sigmaph,m_wfd,partial_dos_fractions,prcref,prcref_PMA,respfn,scfcv
-!!      screening,sigma,update_e_field_vars,wfconv
+!!      m_afterscfloop,m_berryphase_new,m_bethe_salpeter,m_cgtk,m_cut3d
+!!      m_dfpt_looppert,m_dfpt_lw,m_epjdos,m_extraprho,m_fock,m_gkk,m_gstate
+!!      m_hamiltonian,m_inwffil,m_nonlinear,m_orbmag,m_pead_nl_loop,m_phgamma
+!!      m_phpi,m_prcref,m_respfn_driver,m_scfcv_core,m_screening_driver
+!!      m_sigma_driver,m_sigmaph,m_wfd
 !!
 !! CHILDREN
 !!
@@ -829,7 +833,7 @@ end subroutine getph
 !!  Src_6response/kpg3.f
 !!
 !! PARENTS
-!!      dfpt_nsteltwf,dfpt_nstpaw,dfpt_rhofermi,getgh1c
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_getgh1c
 !!
 !! CHILDREN
 !!
@@ -939,10 +943,9 @@ end subroutine kpgstr
 !!    kpg(npw,4:9)= [(k+G)_a].[(k+G)_b] quantities
 !!
 !! PARENTS
-!!      ctocprj,d2frnl,debug_tools,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi
-!!      dfptnl_resp,fock2ACE,forstrnps,getcprj,getgh1c,ks_ddiago,m_io_kss
-!!      m_shirley,m_wfd,nonlop_test,nonlop_ylm,prep_bandfft_tabs,vtorho
-!!      wfd_vnlpsi
+!!      m_bandfft_kpt,m_cgprj,m_d2frnl,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfptnl_pert,m_fock_getghc,m_forstr,m_getgh1c,m_io_kss,m_ksdiago
+!!      m_nonlop_test,m_nonlop_ylm,m_orbmag,m_pead_nl_loop,m_vtorho,m_wfd
 !!
 !! CHILDREN
 !!
@@ -1046,10 +1049,9 @@ end subroutine mkkpg
 !! NOTES
 !!
 !! PARENTS
-!!      chern_number
+!!      m_orbmag
 !!
 !! CHILDREN
-!!      kpgsph
 !!
 !! SOURCE
 
@@ -1190,7 +1192,7 @@ end subroutine mkpwind_k
 !!  kpg(npw,3)= (k+G) components
 !!
 !! PARENTS
-!!  nonlop_ylm  
+!!      m_nonlop_ylm
 !!
 !! CHILDREN
 !!
@@ -1297,7 +1299,7 @@ end subroutine mkkpgcart
 !!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
 !!
 !! PARENTS
-!!      getgh1dqc_setup
+!!      m_getgh1c
 !!
 !! CHILDREN
 !!

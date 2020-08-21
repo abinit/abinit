@@ -178,7 +178,7 @@ CONTAINS  !===========================================================
 !!      m_argparse
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -210,10 +210,9 @@ end subroutine fft_allow_ialltoall
 !! INPUTS
 !!
 !! PARENTS
-!!      debug_tools
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -251,10 +250,10 @@ end subroutine fftbox_plan3
 !!  See fftbox_plan3_t
 !!
 !! PARENTS
-!!      m_fft,m_fft_prof,m_oscillators,m_pawpwij,m_shirley
+!!      m_fft,m_fft_prof,m_oscillators,m_pawpwij
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -296,7 +295,7 @@ end subroutine fftbox_plan3_many
 !!      m_fft
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -348,7 +347,7 @@ end subroutine fftbox_plan3_init
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -390,7 +389,7 @@ end subroutine fftbox_execute_ip_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -431,7 +430,7 @@ end subroutine fftbox_execute_ip_dpc
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -473,7 +472,7 @@ end subroutine fftbox_execute_op_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -524,7 +523,7 @@ end subroutine fftbox_execute_op_dpc
 !!      m_fft
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -576,7 +575,7 @@ end subroutine fft_ug_dp
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -626,7 +625,7 @@ end subroutine fft_ug_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -682,7 +681,7 @@ end subroutine fft_ug_dpc
 !!      m_fft
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -740,7 +739,7 @@ end subroutine fft_ur_dp
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -795,7 +794,7 @@ end subroutine fft_ur_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -845,7 +844,7 @@ end subroutine fft_ur_dpc
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -942,7 +941,7 @@ end subroutine fftpad_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1051,7 +1050,7 @@ end subroutine fftpad_dpc
 !! PARENTS
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1110,7 +1109,7 @@ end subroutine fft_poisson
 !!      fftprof
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -2262,15 +2261,13 @@ end function fftu_mpi_utests
 !!   modification of the different wrappers used for specialized FFTs such as FFTW3 and MKL-DFTI
 !!
 !! PARENTS
-!!      dfpt_accrho,dfpt_mkrho,dfptnl_resp,fock_getghc,getgh1c,getghc
-!!      gwls_hamiltonian,m_cut3d,m_epjdos,m_fft_prof,m_fock,mkrho,mlwfovlp
-!!      pawmkaewf,pawsushat,posdoppler,prep_fourwf,spin_current,susk,suskmm
-!!      tddft,vtowfk
+!!      m_cut3d,m_dfpt_mkrho,m_epjdos,m_fft_prof,m_fock,m_fock_getghc,m_getgh1c
+!!      m_getghc,m_gwls_hamiltonian,m_mkrho,m_mlwfovlp,m_orbmag,m_paw_mkaewf
+!!      m_paw_nhat,m_pead_nl_loop,m_positron,m_prep_kgb,m_spin_current
+!!      m_suscep_stat,m_tddft,m_vtowfk
 !!
 !! CHILDREN
-!!      ccfft,cg_addtorho,cg_box2gsph,dcopy,dfti_seqfourwf,fftw3_seqfourwf
-!!      fourwf_mpi,gpu_fourwf,ptabs_fourwf,sg_fftpad,sg_fftrisc,sg_fftrisc_2
-!!      sphere,sphere_fft,timab,xmpi_sum
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -2840,9 +2837,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        end if ! fftalga
      end if ! if option==2 or 3
 
-     if (allocated(work1))  then
-       ABI_FREE(work1)
-     end if
+     ABI_SFREE(work1)
    end if
 
    ! Here, call more specialized 3-dimensional fft
@@ -2862,13 +2857,8 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft)
    end if
 
-   if (allocated(work4))  then
-     ABI_FREE(work4)
-   end if
-   if (allocated(work2))  then
-     ABI_FREE(work2)
-   end if
-
+   ABI_SFREE(work4)
+   ABI_SFREE(work2)
  end select
 
 ! Accumulate timing
@@ -2912,20 +2902,18 @@ end subroutine fourwf
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
 !!
 !! PARENTS
-!!      atm2fft,bethe_salpeter,calc_smeared_density,dfpt_atm2fft,dfpt_dyfro
-!!      dfpt_eltfrxc,dfpt_looppert,dfpt_newvtr,dfpt_scfcv,dfpt_vlocal
-!!      dfptnl_loop,dieltcel,energy,fock_getghc,forces,fourdp_6d,fresidrsp
-!!      green_kernel,gstate,hartre,hartrestr,initro,jellium,laplacian,m_dvdb
-!!      m_electronpositron,m_epjdos,m_fft_prof,m_hidecudarec,m_kxc,m_ppmodel
-!!      m_screening,make_efg_el,mklocl_realspace,mklocl_recipspace,moddiel
-!!      moddiel_csrb,mrgscr,newrho,newvtr,nonlinear,nres2vres,odamix,pawmknhat
-!!      pawmknhat_psipsi,pawmkrho,posdoppler,prcref,prcref_PMA,recursion
-!!      recursion_nl,redgr,respfn,rotate_rho,scfcv,screening,setup_positron
-!!      sigma,stress,symrhg,tddft,transgrid,vlocalstr,xcden,xcpot
+!!      m_atm2fft,m_bethe_salpeter,m_dfpt_elt,m_dfpt_looppert,m_dfpt_lw
+!!      m_dfpt_scfcv,m_dfptnl_loop,m_dft_energy,m_dvdb,m_electronpositron
+!!      m_epjdos,m_fft,m_fft_prof,m_fock_getghc,m_forces,m_forstr
+!!      m_fourier_interpol,m_gstate,m_hidecudarec,m_jellium,m_kxc,m_longwave
+!!      m_mklocl,m_mklocl_realspace,m_mkrho,m_newrho,m_newvtr,m_nonlinear
+!!      m_nucprop,m_odamix,m_paw_mkrho,m_paw_nhat,m_pead_nl_loop,m_positron
+!!      m_ppmodel,m_prcref,m_respfn_driver,m_scfcv_core,m_screening
+!!      m_screening_driver,m_sigma_driver,m_spacepar,m_stress,m_tddft
+!!      m_vtorhorec,m_xctk,mrgscr
 !!
 !! CHILDREN
-!!      ccfft,dfti_seqfourdp,fftw3_mpifourdp,fftw3_seqfourdp,fourdp_mpi
-!!      ptabs_fourdp,sg2002_back,sg2002_forw,sg2002_mpifourdp,sg_fft_rc,timab
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -3324,10 +3312,10 @@ end subroutine fourdp
 !! activated, one uses the fft routine from S. Goedecker.
 !!
 !! PARENTS
-!!      fourdp,fourwf
+!!      m_fft
 !!
 !! CHILDREN
-!!      sg2002_back,sg2002_forw,sg_fft_cc
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -3432,10 +3420,10 @@ end subroutine ccfft
 !!  Write simplified API for sequential version.
 !!
 !! PARENTS
-!!      fourdp
+!!      m_fft
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -3565,10 +3553,10 @@ end subroutine fourdp_mpi
 !!                no use of fofgin and npwin.
 !!
 !! PARENTS
-!!      fourwf,m_fft
+!!      m_fft
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -4030,7 +4018,7 @@ end subroutine fourwf_mpi
 !!      m_fft
 !!
 !! CHILDREN
-!!      fourwf_mpi
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -4101,10 +4089,11 @@ end subroutine fftmpi_u
 !!  array(cplex,n1*n2*n3)=complex array to be symetrized
 !!
 !! PARENTS
-!!      atm2fft,dfpt_atm2fft,dfpt_dyfro,forces,hartre,initro,m_fock,pawmknhat
-!!      pawmknhat_psipsi,prcref,prcref_PMA,stress,transgrid
+!!      m_atm2fft,m_fock,m_forces,m_fourier_interpol,m_mkrho,m_paw_nhat
+!!      m_prcref,m_respfn_driver,m_spacepar,m_stress
 !!
 !! CHILDREN
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -4285,7 +4274,7 @@ end subroutine zerosym
 !!      m_kxc
 !!
 !! CHILDREN
-!!      fourdp
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -4411,12 +4400,12 @@ end subroutine fourdp_6d
 !!  option=11 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 imag part
 !!
 !! PARENTS
-!!      dfpt_mkrho,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,dfptnl_resp,energy
-!!      fock_getghc,getgh1c,gwls_hamiltonian,ks_ddiago,m_epjdos,m_io_kss,mkrho
-!!      suscep_stat,vtorho
+!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dft_energy
+!!      m_epjdos,m_fock_getghc,m_getgh1c,m_gwls_hamiltonian,m_io_kss,m_ksdiago
+!!      m_mkrho,m_orbmag,m_pead_nl_loop,m_suscep_stat,m_vtorho
 !!
 !! CHILDREN
-!!      ptabs_fourdp
+!!      mpi_alltoall,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -4555,7 +4544,7 @@ end subroutine fftpac
 !!  A lot of things to improve.
 !!
 !! PARENTS
-!!      prcref,prcref_PMA,transgrid
+!!      m_fourier_interpol,m_prcref
 !!
 !! CHILDREN
 !!      mpi_alltoall,ptabs_fourdp

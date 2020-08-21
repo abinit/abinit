@@ -193,11 +193,10 @@ CONTAINS  !=====================================================================
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb,eph,m_tdep_phdos
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -322,11 +321,10 @@ end subroutine phdos_print
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -428,9 +426,10 @@ end subroutine phdos_print_debye
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb,eph
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -540,9 +539,10 @@ end subroutine phdos_print_thermo
 !! PHdos= container object for phonon DOS
 !!
 !! PARENTS
-!!      anaddb,eph
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -581,8 +581,11 @@ end subroutine phdos_free
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -675,9 +678,11 @@ end subroutine phdos_init
 !!   In output: min and max frequency obtained after interpolating the IFCs on the dense q-mesh dos_ngqpt
 !!
 !! PARENTS
-!!      anaddb,eph,m_tdep_phdos
+!!      anaddb,m_eph_driver,m_tdep_phdos
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1188,6 +1193,8 @@ end subroutine mkphdos
 !!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1302,8 +1309,9 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
      sigma = sqrt( (bose_einstein(phfrq_allq(imode), temperature) + half)/phfrq_allq(imode) )
 
      ! add displacement for this mode to supercell positions eq 5 of Zacharias
-     freeze_displ = modesign * sigma
-     call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
+       freeze_displ = modesign * sigma
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
+
    end do !itemper
 
    ! this is the prescription: flip sign for each successive mode in full
@@ -1359,8 +1367,11 @@ end subroutine zacharias_supercell_make
 !! NOTES
 !!
 !! PARENTS
+!!      m_generate_training_set
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1552,9 +1563,11 @@ end subroutine thermal_supercell_make
 !! NOTES
 !!
 !! PARENTS
-!!      anaddb
+!!      anaddb,m_generate_training_set
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1594,6 +1607,8 @@ end subroutine thermal_supercell_free
 !!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1640,9 +1655,10 @@ end subroutine zacharias_supercell_print
 !! NOTES
 !!
 !! PARENTS
-!!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1692,9 +1708,10 @@ end subroutine thermal_supercell_print
 !!  Frequencies are in eV, DOS are in states/eV.
 !!
 !! PARENTS
-!!      anaddb,eph
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1784,6 +1801,8 @@ end subroutine phdos_ncwrite
 !!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2086,6 +2105,8 @@ end subroutine mkphbs
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2153,6 +2174,8 @@ end subroutine phdos_calc_vsound
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2215,9 +2238,10 @@ end subroutine phdos_print_vsound
 !!   to file only
 !!
 !! PARENTS
-!!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2379,6 +2403,8 @@ end subroutine phdos_print_msqd
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2459,6 +2485,8 @@ end subroutine phonons_ncwrite
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2559,6 +2587,8 @@ end subroutine phonons_write_phfrq
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2686,6 +2716,8 @@ end subroutine phonons_write_xmgrace
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2809,9 +2841,11 @@ end subroutine phonons_write_gnuplot
 !!  Only writing.
 !!
 !! PARENTS
-!!      eph
+!!      m_eph_driver
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2963,10 +2997,11 @@ end subroutine ifc_mkphbs
 !! OUTPUT
 !!
 !! PARENTS
-!!      anaddb,m_phonons
+!!      m_phonons
 !!
 !! CHILDREN
-!!      matr3inv,mkrdim,wrtout
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 

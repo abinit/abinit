@@ -65,9 +65,9 @@ contains
 !! mlwfovlp_qp
 !!
 !! FUNCTION
-!! Routine which computes replaces LDA wave functions and eigenvalues with
+!! Routine which computes replaces DFT wave functions and eigenvalues with
 !! GW quasiparticle ones using previously computed qp wave functions in
-!! LDA bloch function representation for Wannier code (www.wannier.org f90 version).
+!! DFT bloch function representation for Wannier code (www.wannier.org f90 version).
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -98,18 +98,16 @@ contains
 !!  Number of bands for wannier calculation must be identical to number used
 !!   for gw calculation.  Bands not wanted for wannier calculation must be
 !!   excluded in exclude_band statement in wannier90.win file.
-!!  Full plane-wave basis for LDA wavefunctions must be used in GW calculation,
+!!  Full plane-wave basis for DFT wavefunctions must be used in GW calculation,
 !!   or inaccuracies may result.
 !!  This is at best a beta version of this code, with little consistency
 !!   checking, so the user must be very careful or the results may be invalid.
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      crystal_free,crystal_from_hdr,destroy_mpi_enreg,ebands_free,ebands_init
-!!      initmpi_seq,kmesh_free,kmesh_init,listkk,metric,pawcprj_getdim,rdgw
-!!      rdqps,sort_dp,update_cprj,wrtout,zgemm
+!!      pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
@@ -139,7 +137,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  integer :: iband,icg,icg_shift,ii,ipw,isppol,my_nspinor,nband_k,ord_iband
  integer :: nfftot,ikpt,irzkpt,npw_k,ikg
  integer :: nscf,nbsc,itimrev,band_index,nkibz,nkbz
- integer :: gw_timrev,input !,jb_idx,ib_idx,ijpack, jband,
+ integer :: input !,jb_idx,ib_idx,ijpack, jband,
  integer :: nprocs,ios
  real(dp) :: TOL_SORT=tol12
  real(dp) :: dksqmax,ucvol !ortho_err,
@@ -159,7 +157,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  real(dp),allocatable :: kibz(:,:),wtk_ibz(:)
  real(dp),allocatable :: doccde_ibz(:),occfact_ibz(:),eigen_ibz(:)
  real(dp),allocatable ::  igwene(:,:,:)
- complex(dpc),allocatable :: m_lda_to_qp(:,:,:,:),m_lda_to_qp_BZ(:,:,:,:) !,ortho(:)
+ complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:),m_ks_to_qp_BZ(:,:,:,:) !,ortho(:)
  complex(dpc),allocatable :: m_tmp(:,:),cg_k(:,:),cg_qpk(:,:)
  type(Pawrhoij_type),allocatable :: prev_Pawrhoij(:)
  !type(pawcprj_type),pointer :: Cp1(:,:),Cp2(:,:)
@@ -172,7 +170,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  write(msg,'(17a)')ch10,&
   ' mlwfovlp_qp: WARNING',ch10,&
-  '  The input *_WFK file of LDA wavefunctions to be  converted',ch10,&
+  '  The input *_WFK file of DFT wavefunctions to be  converted',ch10,&
   '  to GW quasiparticle wavefunctions MUST have been written in',ch10,&
   '  the run that produced the GW *_KSS file using kssform 3,',ch10,&
   '  the ONLY value of kssform permitted for GW Wannier functions.',ch10,&
@@ -222,8 +220,8 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  ! on ab_out thus we should be consistent. Ideally Cryst should be
  ! one of the basic abinit objects and it should be passed to this routine.
 
- gw_timrev=1; if (timrev==1) gw_timrev=2 !different conventions are used in GW and abinit!!
- cryst = hdr%get_crystal(gw_timrev)
+ !different conventions are used in GW and abinit!!
+ cryst = hdr%get_crystal(gw_timrev=timrev+1)
  call kmesh_init(Kibz_mesh,Cryst,nkibz,kibz,Dtset%kptopt)
  wtk_ibz=Kibz_mesh%wt
  call cryst%free()
@@ -293,10 +291,10 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  ! * Initialize QP amplitudes with KS, QP_bst% presently contains KS energies.
  ! * If file not found return, everything has been already initialized with KS values
  !   Here qp_rhor is not needed thus dimrho=0
- ABI_MALLOC(m_lda_to_qp,(mband,mband,dtset%nkptgw,nsppol))
- m_lda_to_qp=czero
+ ABI_MALLOC(m_ks_to_qp,(mband,mband,dtset%nkptgw,nsppol))
+ m_ks_to_qp=czero
  do iband=1,mband
-   m_lda_to_qp(iband,iband,:,:)=cone
+   m_ks_to_qp(iband,iband,:,:)=cone
  end do
 
  ! Fake MPI_type for rdqps
@@ -316,17 +314,17 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  if (.not.g0w0_exists) then ! read QPS file (default behavior).
    input = from_QPS_FILE
-   ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Dtset%usepaw))
+   ABI_MALLOC(prev_Pawrhoij,(Cryst%natom*Dtset%usepaw))
    ABI_MALLOC(qp_rhor,(nfftot,nspden*dimrho))
 
    call rdqps(QP_bst,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,dimrho,nscf,&
-    nfftot,my_ngfft,ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,qp_rhor,prev_Pawrhoij)
+    nfftot,my_ngfft,ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_ks_to_qp,qp_rhor,prev_Pawrhoij)
 
    ABI_FREE(qp_rhor)
-   ABI_DT_FREE(prev_Pawrhoij)
+   ABI_FREE(prev_Pawrhoij)
 
  else
-   ! Read GW file (m_lda_to_qp has been already set to 1, no extrapolation is performed)
+   ! Read GW file (m_ks_to_qp has been already set to 1, no extrapolation is performed)
    MSG_WARNING(' READING GW CORRECTIONS FROM FILE g0w0 !')
    input = from_GW_FILE
    ABI_MALLOC(igwene,(QP_bst%mband,QP_bst%nkpt,QP_bst%nsppol))
@@ -369,9 +367,9 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
     ! If time reversal is used for relating ikpt to irzkpt, then multiply by
     ! the complex conjugate of the lda-to-qp transformation matrix
     if (itimrev==0) then
-      m_tmp(:,:)=m_lda_to_qp(:,:,irzkpt,isppol)
+      m_tmp(:,:)=m_ks_to_qp(:,:,irzkpt,isppol)
     else if (itimrev==1) then
-      m_tmp(:,:)=conjg(m_lda_to_qp(:,:,irzkpt,isppol))
+      m_tmp(:,:)=conjg(m_ks_to_qp(:,:,irzkpt,isppol))
     else
       write(msg,'(2(a,i0))')'Invalid indkk(ikpt,6) ',itimrev,'from routine listkk for k-point ',ikpt
       MSG_BUG(msg)
@@ -475,7 +473,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  ABI_FREE(m_tmp)
 
  ! === If PAW, update projections in BZ ===
- ! * Since I am lazy and here I do not care about memory, I just reconstruct m_lda_to_qp in the BZ.
+ ! * Since I am lazy and here I do not care about memory, I just reconstruct m_ks_to_qp in the BZ.
  ! * update_cprj will take care of updating the PAW projections to get <p_lmn|QP_{nks]>
  !   This allows some CPU saving, no need to call ctocprj.
  ! FIXME this part should be tested, automatic test to be provided
@@ -484,16 +482,16 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
    call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,ntypat,Dtset%typat,pawtab,'R')
 
    nkbz=nkpt
-   ABI_MALLOC(m_lda_to_qp_BZ,(mband,mband,nkbz,nsppol))
+   ABI_MALLOC(m_ks_to_qp_BZ,(mband,mband,nkbz,nsppol))
    do isppol=1,nsppol
      do ikbz=1,nkbz
        ikibz  =indkk(ikibz+(sppoldbl-1)*(isppol-1)*nkbz,1)
        itimrev=indkk(ikibz+(sppoldbl-1)*(isppol-1)*nkbz,6)
        select case (itimrev)
        case (0)
-         m_lda_to_qp_BZ(:,:,ikbz,isppol)=m_lda_to_qp(:,:,ikibz,isppol)
+         m_ks_to_qp_BZ(:,:,ikbz,isppol)=m_ks_to_qp(:,:,ikibz,isppol)
        case (1)
-         m_lda_to_qp_BZ(:,:,ikbz,isppol)=CONJG(m_lda_to_qp(:,:,ikibz,isppol))
+         m_ks_to_qp_BZ(:,:,ikbz,isppol)=CONJG(m_ks_to_qp(:,:,ikibz,isppol))
        case default
          write(msg,'(a,i3)')"Wrong itimrev= ",itimrev
          MSG_BUG(msg)
@@ -501,9 +499,9 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
      end do
    end do
 
-   call update_cprj(natom,nkbz,mband,nsppol,my_nspinor,m_lda_to_qp_BZ,dimlmn,Cprj_BZ)
+   call update_cprj(natom,nkbz,mband,nsppol,my_nspinor,m_ks_to_qp_BZ,dimlmn,Cprj_BZ)
    ABI_FREE(dimlmn)
-   ABI_FREE(m_lda_to_qp_BZ)
+   ABI_FREE(m_ks_to_qp_BZ)
  end if !PAW
 
  write(msg,'(6a)')ch10,&
@@ -513,7 +511,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
- ABI_FREE(m_lda_to_qp)
+ ABI_FREE(m_ks_to_qp)
  call ebands_free(QP_bst)
  call destroy_mpi_enreg(MPI_enreg_seq)
 
@@ -534,7 +532,7 @@ end subroutine mlwfovlp_qp
 !!  nkibz=number of k-points
 !!  nsppol=number of spin
 !!  nbnds=number of bands in the present GW calculation
-!!  m_lda_to_qp(nbnds,nbnds,nkibz,nsppol)= expansion of the QP amplitudes in terms of KS wavefunctions
+!!  m_ks_to_qp(nbnds,nbnds,nkibz,nsppol)= expansion of the QP amplitudes in terms of KS wavefunctions
 !!  natom=number of atomd in unit cell
 !!
 !! OUTPUT
@@ -546,7 +544,7 @@ end subroutine mlwfovlp_qp
 !! To be moved to cprj_utils, although here we use complex variables.
 !!
 !! PARENTS
-!!      mlwfovlp_qp
+!!      m_mlwfovlp_qp
 !!
 !! CHILDREN
 !!      pawcprj_alloc,pawcprj_free
@@ -554,14 +552,14 @@ end subroutine mlwfovlp_qp
 !! SOURCE
 !!
 
-subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_lda_to_qp,dimlmn,Cprj_ibz)
+subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_ks_to_qp,dimlmn,Cprj_ibz)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nbnds,nkibz,nsppol,nspinor
 !arrays
  integer,intent(in) :: dimlmn(natom)
- complex(dpc),intent(in) :: m_lda_to_qp(nbnds,nbnds,nkibz,nsppol)
+ complex(dpc),intent(in) :: m_ks_to_qp(nbnds,nbnds,nkibz,nsppol)
  type(pawcprj_type),intent(inout) :: Cprj_ibz(natom,nspinor*nbnds*nkibz*nsppol)
 
 !Local variables-------------------------------
@@ -604,8 +602,8 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_lda_to_qp,dimlmn,Cprj_
       end do
     end do
 
-    umat(1,:,:)=TRANSPOSE( REAL (m_lda_to_qp(:,:,ik,is)) )
-    umat(2,:,:)=TRANSPOSE( AIMAG(m_lda_to_qp(:,:,ik,is)) )
+    umat(1,:,:)=TRANSPOSE( REAL (m_ks_to_qp(:,:,ik,is)) )
+    umat(2,:,:)=TRANSPOSE( AIMAG(m_ks_to_qp(:,:,ik,is)) )
 
     do iat=1,natom
       nlmn=dimlmn(iat)

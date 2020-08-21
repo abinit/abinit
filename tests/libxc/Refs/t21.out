@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h41 )
+.Starting date : Tue 28 Apr 2020.
+- ( at 02h05 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t21/t21.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/TestBot_MPI1/libxc_t21/t21.in
 - output file    -> t21.out
 - root for input  files -> t21i
 - root for output files -> t21o
@@ -465,23 +465,6 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
 
 
- DATASET   34 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
-================================================================================
- Values of the parameters that define the memory need for DATASET 34.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
-     lnmax =       6     mgfft =      30  mpssoang =       3    mqgrid =    3001
-     natom =       1  nloc_mem =       1    nspden =       2   nspinor =       1
-    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       2   xclevel =       2
--    mband =           4        mffmem =           1         mkmem =           1
-       mpw =         752          nfft =       27000          nkpt =           1
-================================================================================
-P This job should need less than                      14.531 Mbytes of memory.
-  Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
-================================================================================
-
-
  DATASET   35 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 35.
@@ -644,7 +627,6 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
               ixc31   -106152
               ixc32   -106153
               ixc33   -106159
-              ixc34   -106200
               ixc35       -93
               ixc36       -94
               ixc37       -95
@@ -654,13 +636,13 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
               ixc46      -196
            jdtset        1    2    3    4    5    6    7   10   11   12
                         13   14   15   16   17   22   23   24   25   26
-                        28   29   30   31   32   33   34   35   36   37
-                        38   44   45   46
+                        28   29   30   31   32   33   35   36   37   38
+                        44   45   46
            kptopt           0
 P           mkmem           1
             natom           1
             nband           4       4
-           ndtset          34
+           ndtset          33
             ngfft          30      30      30
              nkpt           1
             nline           1
@@ -759,8 +741,6 @@ P           mkmem           1
 
  chkinp: Checking input parameters for consistency, jdtset=  33.
 
- chkinp: Checking input parameters for consistency, jdtset=  34.
-
  chkinp: Checking input parameters for consistency, jdtset=  35.
 
  chkinp: Checking input parameters for consistency, jdtset=  36.
@@ -799,8 +779,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -967,8 +947,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1134,8 +1114,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1301,8 +1281,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1468,8 +1448,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1635,8 +1615,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1802,8 +1782,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1969,8 +1949,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2136,8 +2116,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2303,8 +2283,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2470,8 +2450,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2637,8 +2617,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2804,8 +2784,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2971,8 +2951,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3138,8 +3118,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3310,8 +3290,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3477,8 +3457,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3644,8 +3624,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3811,8 +3791,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3978,8 +3958,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4145,8 +4125,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4312,8 +4292,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4479,8 +4459,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4646,8 +4626,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4813,8 +4793,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4980,8 +4960,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5124,173 +5104,6 @@ band_energy         : -8.73112204187142E-01
 - sigma(3 3)=  8.27194910E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
-== DATASET 34 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
-
---- !DatasetInfo
-iteration_state: {dtset: 34, }
-dimensions: {natom: 1, nkpt: 1, mband: 4, nsppol: 2, nspinor: 1, nspden: 2, mpw: 752, }
-cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
-electrons: {nelect:   5.00000000E+00, charge:   0.00000000E+00, occopt:   2.00000000E+00, tsmear:   1.00000000E-02, }
-meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
-...
-
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)= 10.0000000  0.0000000  0.0000000  G(1)=  0.1000000  0.0000000  0.0000000
- R(2)=  0.0000000 10.0000000  0.0000000  G(2)=  0.0000000  0.1000000  0.0000000
- R(3)=  0.0000000  0.0000000 10.0000000  G(3)=  0.0000000  0.0000000  0.1000000
- Unit cell volume ucvol=  1.0000000E+03 bohr^3
- Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
-
- getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  30  30  30
-         ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
-- 83.00000   5.00000    980509                znucl, zion, pspdat
-    3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- rloc=   0.6050000
- cc1 =   6.6794370; cc2 =   0.0000000; cc3 =   0.0000000; cc4 =   0.0000000
- rrs =   0.6788580; h11s=   1.3776340; h22s=  -0.5136970; h33s=  -0.4710280
- rrp =   0.7986730; h11p=   0.6555780; h22p=  -0.4029320; h33p=   0.0000000
-                    k11p=   0.3053140; k22p=  -0.0231340; k33p=   0.0000000
- rrd =   0.9346830; h11d=   0.3784760; h22d=   0.0000000; h33d=   0.0000000
-                    k11d=   0.0292170; k22d=   0.0000000; k33d=   0.0000000
--  Local part computed in reciprocal space.
-
- pspatm : COMMENT -
-  the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
-  However, this does not influence the results obtained hereafter.
-  pspatm : epsatm=   34.79471556
-         --- l  ekb(1:nproj) -->
-             0   -0.901401   -0.217891    1.555038
-             1   -0.989901    1.571994
-             2    3.344673
- pspatm: atomic psp has been read  and splines computed
-
---------------------------------------------------------------------------------
-
-_setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
-
-================================================================================
-
---- !BeginCycle
-iteration_state: {dtset: 34, }
-solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-14, }
-...
-
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0237605320830    -5.024E+00 1.639E-01 2.861E+06
-
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.78743055E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.78743055E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.78743055E-04  sigma(2 1)=  0.00000000E+00
-
-
- scprqt:  WARNING -
-  nstep=    1 was not enough SCF cycles to converge;
-  maximum residual=  1.639E-01 exceeds tolwfr=  1.000E-14
-
-
---- !ResultsGS
-iteration_state: {dtset: 34, }
-comment   : Summary of ground state results
-lattice_vectors:
-- [ 10.0000000,   0.0000000,   0.0000000, ]
-- [  0.0000000,  10.0000000,   0.0000000, ]
-- [  0.0000000,   0.0000000,  10.0000000, ]
-lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
-lattice_volume:   1.0000000E+03
-convergence: {deltae: -5.024E+00, res2:  2.861E+06, residm:  1.639E-01, diffor: null, }
-etotal    :  -5.02376053E+00
-entropy   :   0.00000000E+00
-fermie    :   1.57459537E-01
-cartesian_stress_tensor: # hartree/bohr^3
-- [  2.78743055E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   2.78743055E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   2.78743055E-04, ]
-pressure_GPa:  -8.2009E+00
-xred      :
-- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Bi]
-cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
-...
-
- Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
- Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.644826     0.407923      1.052750     0.236903
- ---------------------------------------------------------------------
-  Sum:              0.644826     0.407923      1.052750     0.236903
- Total magnetization (from the atomic spheres):             0.236903
- Total magnetization (exact up - dn):                       3.000000
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   11.097E-02; max=  16.391E-02
- reduced coordinates (array xred) for    1 atoms
-       0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-
- cartesian coordinates (angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-
- cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
-
- cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
- length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
- Fermi (or HOMO) energy (hartree) =   0.15746   Average Vxc (hartree)=  -0.15938
- Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
- kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.43280   -0.06018   -0.04471    0.15746
- Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
- kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.43280   -0.06018   -0.04471    0.15746
-
---- !EnergyTerms
-iteration_state     : {dtset: 34, }
-comment             : Components of total free energy in Hartree
-kinetic             :  1.29523687874012E+00
-hartree             :  5.83617562845700E-01
-xc                  : -1.04702754327810E+00
-Ewald energy        : -3.54662184935089E+00
-psp_core            :  1.73973577808835E-01
-local_psp           : -2.57076860609158E+00
-non_local_psp       :  8.78294472429018E-02
-total_energy        : -5.02376053208302E+00
-total_energy_eV     : -1.36703476259229E+02
-band_energy         : -8.13026138939315E-01
-...
-
-
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.78743055E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.78743055E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.78743055E-04  sigma(2 1)=  0.00000000E+00
-
--Cartesian components of stress tensor (GPa)         [Pressure= -8.2009E+00 GPa]
-- sigma(1 1)=  8.20090243E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  8.20090243E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  8.20090243E+00  sigma(2 1)=  0.00000000E+00
-
-================================================================================
 == DATASET 35 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
@@ -5314,8 +5127,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5481,8 +5294,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5648,8 +5461,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5815,8 +5628,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5982,8 +5795,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6149,8 +5962,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6316,8 +6129,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6494,7 +6307,6 @@ band_energy         : -1.73297624361970E+00
            etotal31   -5.0924134799E+00
            etotal32   -5.0672766452E+00
            etotal33   -5.0805389671E+00
-           etotal34   -5.0237605321E+00
            etotal35   -5.0243536134E+00
            etotal36   -3.1700978903E+00
            etotal37   -5.1794111313E+00
@@ -6528,7 +6340,6 @@ band_energy         : -1.73297624361970E+00
             fcart31   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart32   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart33   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart34   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart35   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart36   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart37   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -6564,7 +6375,6 @@ band_energy         : -1.73297624361970E+00
               ixc31   -106152
               ixc32   -106153
               ixc33   -106159
-              ixc34   -106200
               ixc35       -93
               ixc36       -94
               ixc37       -95
@@ -6574,13 +6384,13 @@ band_energy         : -1.73297624361970E+00
               ixc46      -196
            jdtset        1    2    3    4    5    6    7   10   11   12
                         13   14   15   16   17   22   23   24   25   26
-                        28   29   30   31   32   33   34   35   36   37
-                        38   44   45   46
+                        28   29   30   31   32   33   35   36   37   38
+                        44   45   46
            kptopt           0
 P           mkmem           1
             natom           1
             nband           4       4
-           ndtset          34
+           ndtset          33
             ngfft          30      30      30
              nkpt           1
             nline           1
@@ -6648,8 +6458,6 @@ P           mkmem           1
            strten32    2.8687397487E-04  2.8687397487E-04  2.8687397487E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten33    2.8115788259E-04  2.8115788259E-04  2.8115788259E-04
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten34    2.7874305497E-04  2.7874305497E-04  2.7874305497E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten35    3.0226595969E-04  3.0226595969E-04  3.0226595969E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -6784,10 +6592,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.9  wall=          9.9
+- Proc.   0 individual time (sec): cpu=         20.3  wall=         35.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  76 WARNINGs and  68 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.9  wall=          9.9
+.Delivered  74 WARNINGs and  66 COMMENTs to log file.
++Overall time at end (sec) : cpu=         20.3  wall=         35.4

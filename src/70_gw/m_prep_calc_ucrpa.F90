@@ -55,7 +55,7 @@ MODULE m_prep_calc_ucrpa
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
  use m_paw_nhat,      only : pawmknhat_psipsi
  use m_paw_sym,       only : paw_symcprj
- use m_wfd,           only : wfd_t
+ use m_wfd,           only : wfd_t, wave_t
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_failed
  use m_read_plowannier, only : read_plowannier
@@ -151,14 +151,14 @@ contains
 !!     based on group theory, and it might lead to spurious results in case of accidental degeneracies.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      findqg0,flush_unit,get_bz_item,gsph_fft_tabs,paw_cross_rho_tw_g
 !!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
 !!      pawmknhat_psipsi,pawpwij_free,pawpwij_init,read_plowannier,rho_tw_g
-!!      rotate_fft_mesh,timab,wfd_change_ngfft,wfd_get_cprj,wfd_get_ur
-!!      wfd_paw_get_aeur,wrtout
+!!      rotate_fft_mesh,timab,wfd%change_ngfft,wfd%get_cprj,wfd%get_ur
+!!      wfdf%paw_get_aeur,wrtout
 !!
 !! SOURCE
 
@@ -169,9 +169,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
 #ifndef HAVE_CRPA_OPTIM
 #ifdef FC_INTEL
-#if  __INTEL_COMPILER<=1700
+#warning "optimization of m_prec_calc_ucrpa is deactivated on intel fortran"
 !DEC$ NOOPTIMIZE
-#endif
 #endif
 #endif
 
@@ -218,6 +217,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt,eikr
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
+ type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
  integer :: g0(3),spinor_padx(2,4)
  integer,pointer :: igfftxg0(:),igfftfxg0(:)
@@ -284,7 +284,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  dumint=0
  luwindow=.true.
 ! write(6,*) "cc",allocated(coeffW_BZ)
- if (plowan_compute <10)then 
+ if (plowan_compute <10)then
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
      & nspinor,nsppol,pawang,prtvol,dumint)
    if(lcor/=lpawu) then
@@ -547,8 +547,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
-!           write(6,*) "has_cprj",Wfd%Wave(jb,jk_ibz,spin)%has_cprj
-           Wfd%Wave(jb,jk_ibz,spin)%has_cprj=1
        call wfd%get_cprj(jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
        call paw_symcprj(jk_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
        call pawcprj_copy(Cprj_ksum,Cprj_kgw(:,ibsp:ibsp+(nspinor-1)))
@@ -620,7 +618,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
       if (.NOT.has_IBZ_item(Qmesh,qbz,iq_ibz_dump,g0_dump)) then
         cycle
       end if
-      
+
       write(msg,'(2(a,i4),a,i3)')' prep_calc_ucrpa : ik_bz ',ik_bz,'/',Kmesh%nbz,' done'
       call wrtout(std_out,msg,'PERS')
 !      write(6,*) "kkk1p",ik_bz,jk_bz,iq_ibz
@@ -698,8 +696,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
        call wfd%get_ur(ib_sum,ik_ibz,spin,wfr_sum)
 !       write(6,'(a,3i4)')"indforwfd2" ,ib_sum,ik_ibz,spin
-!       write(6,*) wfd_ihave_ug(Wfd,ib_sum,ik_ibz,spin,"Stored"),Wfd%Wave(ib_sum,ik_ibz,spin)%has_ug
-!       write(6,*) wfd_ihave_ur(Wfd,ib_sum,ik_ibz,spin,"Stored"),Wfd%Wave(ib_sum,ik_ibz,spin)%has_ur
+!       write(6,*) wfd_ihave_ug(Wfd,ib_sum,ik_ibz,spin,"Stored")
+!       write(6,*) wfd_ihave_ur(Wfd,ib_sum,ik_ibz,spin,"Stored")
 
        if (Psps%usepaw==1) then ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
@@ -818,8 +816,10 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
              if (ib_sum==jb) rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
            else
              ! TODO Recheck this!
-             cg_sum  => Wfd%Wave(ib,ik_ibz,spin)%ug
-             cg_jb   => Wfd%Wave(jb,jk_ibz,spin)%ug
+             ABI_CHECK(wfd%get_wave_ptr(ib, ik_ibz, spin, wave_sum, msg) == 0, msg)
+             cg_sum => wave_sum%ug
+             ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
+             cg_jb  => wave_jb%ug
 
              ctmp = xdotc(Wfd%npwarr(ik_ibz)*Wfd%nspinor,cg_sum,1,cg_jb,1)
              ovlp(1) = REAL(ctmp)

@@ -18,12 +18,13 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "m_spgdata.F90",
- "m_spgbuilder.F90",
  "m_ab7_symmetry.F90",
  "m_crystal.F90",
  "m_ewald.F90",
  "m_geometry.F90",
+ "m_gtermcutoff.F90",
+ "m_spgdata.F90",
+ "m_spgbuilder.F90",
  "m_supercell.F90",
  "m_symlist.F90",
  "m_symsg.F90",

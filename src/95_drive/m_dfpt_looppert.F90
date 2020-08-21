@@ -39,6 +39,7 @@ module m_dfpt_loopert
  use m_paral_pert
  use m_nctk
  use m_ddb
+ use m_ddb_hdr
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -48,7 +49,6 @@ module m_dfpt_loopert
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_occ,        only : getnel
- use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
  use m_time,       only : timab
  use m_fstrings,   only : strcat
@@ -191,24 +191,9 @@ contains
 !!  etotal=total energy (sum of 8 contributions) (hartree)
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      appdig,atom_gauss,crystal_free,crystal_init,ctocprj,ddb_free
-!!      ddb_from_file,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfpt_atm2fft
-!!      dfpt_init_mag1,dfpt_mkcore,dfpt_mkrho,dfpt_prtene,dfpt_scfcv
-!!      dfpt_vlocal,disable_timelimit,distrb2,dtset_copy,dtset_free,ebands_free
-!!      ebands_init,efmas_main,efmas_analysis,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
-!!      eigr2d_ncwrite,exit_check,fourdp,getcgqphase,getcut,getmpw,getnel,getph
-!!      gkk_free,gkk_init,gkk_ncwrite,hdr_copy,hdr_free,hdr_init,hdr_update
-!!      initmpi_band,initylmg,inwffil,kpgio,littlegroup_pert,localfilnam
-!!      localrdfile,localredirect,localwrfile,metric,mkrdim,outbsd,outgkk,outwf
-!!      pawang_free,pawang_init,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_getdim,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,prteigrs,put_eneocc_vect,read_rhor,rf2_getidirs
-!!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsym_ylm,status,symkpt
-!!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
-!!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -314,7 +299,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(eigr2d_t)  :: eigr2d,eigi2d
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den,hdr_tmp
- type(ddb_hdr_type) :: ddb_hdr
+ type(ddb_hdr_type) :: ddb_hdr, tmp_ddb_hdr
  type(pawang_type) :: pawang1
  type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
@@ -622,15 +607,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  ABI_ALLOCATE(eigen0_copy,(dtset%mband*nkpt*dtset%nsppol))
  eigen0_copy(:)=zero
 
-! SP : Retreval of the DDB information and computing of effective charge and
-! dielectric tensor
+ ! SP : Retreval of the DDB information and computing of effective charge and
+ ! dielectric tensor
  ABI_ALLOCATE(zeff,(3,3,dtset%natom))
  if (dtset%getddb .ne. 0 .or. dtset%irdddb .ne. 0 ) then
-   filnam = dtfil%filddbsin  !'test_DDB'
+   filnam = dtfil%filddbsin
    ABI_ALLOCATE(dummy,(dtset%natom))
-   call ddb_from_file(ddb,filnam,1,dtset%natom,0,dummy,ddb_crystal,mpi_enreg%comm_world)
-!  Get Dielectric Tensor and Effective Charges
-!  (initialized to one_3D and zero if the derivatives are not available in the DDB file)
+   call ddb_from_file(ddb, filnam, 1, dtset%natom, 0, dummy, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
+   call tmp_ddb_hdr%free()
+   ! Get Dielectric Tensor and Effective Charges
+   ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    iblok = ddb%get_dielt_zeff(ddb_crystal,1,0,0,dielt,zeff)
    call ddb_crystal%free()
    call ddb%free()
@@ -920,7 +906,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (dtset%kptopt==2) timrev_pert=1
        if (dtset%kptopt==3) timrev_pert=0
        timrev_kpt = timrev_pert
-       !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are 
+       !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are
        !implemented in the quadrupole and flexoelectrics routines
        nsym1=1
      end if
@@ -2051,12 +2037,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     occ_rbz,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
    end if
 
+
 #ifdef HAVE_NETCDF
-  ! Output DDK file in netcdf format.
+   ! Output DDK file in netcdf format.
+   ! Can be used by optic instead of the 1WF file that is really huge.
    if (me == master .and. ipert == dtset%natom + 1) then
      fname = strcat(dtfil%filnam_ds(4), "_EVK.nc")
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
-    ! Have to build hdr on k-grid with info about perturbation.
+     ! Have to build hdr on k-grid with info about perturbation.
      call hdr_copy(hdr0, hdr_tmp)
      hdr_tmp%kptopt = dtset%kptopt
      hdr_tmp%pertcase = pertcase
@@ -2312,19 +2300,19 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &         1,xred=xred,occ=occ_pert)
 
-         call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, dtfil%unddb)
+         call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, dtfil%unddb)
 
          call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
 !        print _EIGI2D file for this perturbation
          if(smdelta>0) then
 
            unitout = dtfil%unddb
-           call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
+           call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, unitout)
 
            call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
          end if !smdelta
 
-         call ddb_hdr_free(ddb_hdr)
+         call ddb_hdr%free()
 
 !        Output of the EIGR2D.nc file.
          fname = strcat(dtfil%filnam_ds(4),"_EIGR2D.nc")
@@ -2510,10 +2498,9 @@ end subroutine dfpt_looppert
 !!  phasecg = phase of different wavefunction products <k,n | k+q,n'>
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      smatrix,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2719,10 +2706,9 @@ end subroutine getcgqphase
 !! all energies in Hartree
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3027,7 +3013,7 @@ end subroutine dfpt_prtene
 !!  eigenresp_mean(mband*nkpt*nsppol)= eigenresp, averaged over degenerate states
 !!
 !! PARENTS
-!!      dfpt_looppert,respfn
+!!      m_dfpt_looppert,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -3126,7 +3112,7 @@ end subroutine eigen_meandege
 !!  rhor1(cplex*nfft) = first order density magnetization guess
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!

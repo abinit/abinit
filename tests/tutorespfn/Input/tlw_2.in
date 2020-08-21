@@ -12,12 +12,12 @@ tlw_1o_DS5_DDB
 #%% [files]
 #%% files_to_test =
 #%%   tlw_2.ddb.out, tolnlines=  0, tolabs=  1.143e-09, tolrel=  3.000e-09, fld_options = -medium
-#%% psp_files =  14si.fhi
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
 #%% description =  Input file for mrgddb
+#%% topics = longwave
 #%%<END TEST_INFO>
 

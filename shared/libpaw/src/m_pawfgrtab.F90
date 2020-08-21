@@ -174,8 +174,9 @@ CONTAINS
 !!  Pawfgrtab(natom) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
 !!
 !! PARENTS
-!!      bethe_salpeter,classify_bands,d2frnl,denfgr,exc_plot,m_fock,m_wfd
-!!      pawmkaewf,respfn,scfcv,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_classify_bands,m_d2frnl,m_exc_analyze,m_fock
+!!      m_nonlinear,m_paw_mkaewf,m_paw_mkrho,m_respfn_driver,m_scfcv_core
+!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -264,9 +265,10 @@ end subroutine pawfgrtab_init
 !!  Pawfgrtab(natom) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
 !!
 !! PARENTS
-!!      bethe_salpeter,classify_bands,d2frnl,denfgr,exc_plot,m_fock
-!!      m_paral_pert,m_pawfgrtab,m_wfd,pawgrnl,pawmkaewf,respfn,scfcv,screening
-!!      sigma,wfk_analyze
+!!      m_bethe_salpeter,m_classify_bands,m_d2frnl,m_exc_analyze,m_fock
+!!      m_nonlinear,m_paral_pert,m_paw_dfpt,m_paw_mkaewf,m_paw_mkrho
+!!      m_pawfgrtab,m_respfn_driver,m_scfcv_core,m_screening_driver
+!!      m_sigma_driver,m_wfd,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -337,7 +339,7 @@ end subroutine pawfgrtab_free
 !!  Pawfgrtab(:) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
 !!
 !! PARENTS
-!!      m_fock,m_pawfgrtab,pawgrnl
+!!      m_fock,m_paw_dfpt,m_pawfgrtab
 !!
 !! CHILDREN
 !!
@@ -553,7 +555,7 @@ end subroutine pawfgrtab_copy
 !! (only writing)
 !!
 !! PARENTS
-!!      exc_plot,m_wfd,pawmkaewf,sigma,wfk_analyze
+!!      m_exc_analyze,m_paw_mkaewf,m_sigma_driver,m_wfd,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -660,7 +662,7 @@ end subroutine pawfgrtab_print
 !!  pawfgrtab_gathered : pawfgrtab gathered between comm_atom
 !!
 !! PARENTS
-!!      m_pawfgrtab,pawgrnl
+!!      m_paw_dfpt,m_pawfgrtab
 !!
 !! CHILDREN
 !!

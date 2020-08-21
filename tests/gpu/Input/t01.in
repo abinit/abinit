@@ -53,13 +53,15 @@
 #Miscellaneous
  prtwf 1  prtden 0  prteig 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/31ga.pspnc, PseudosTM_pwteter/33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t01.out, tolnlines = 12, tolabs = 1.0e-6, tolrel = 6.e-5
-#%% psp_files = 31ga.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

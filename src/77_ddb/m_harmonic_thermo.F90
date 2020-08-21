@@ -87,7 +87,7 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      end_sortph,ifc_fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,wrtout
+!!      end_sortph,ifc%fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,wrtout
 !!
 !! SOURCE
 
@@ -789,10 +789,19 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              do iatom=1,natom
                do ij=1,6
                  diffbb=bbij(ij,iatom,itemper)-bij(ij,iatom,itemper)
-                 if (diffbb > 1d-10  .and. diffbb/bij(ij,iatom,itemper) > thmtol) then
-                   write(msg,'(a)' )' harmonic_thermo : Bij changes are larger than thmtol '
-                   call wrtout(std_out,msg,'COLL')
-                   convth=0
+                 !if (diffbb > 1d-10  .and. diffbb/bij(ij,iatom,itemper) > thmtol) then
+                 !  write(msg,'(a)' )' harmonic_thermo : Bij changes are larger than thmtol '
+                 !  call wrtout(std_out,msg,'COLL')
+                 !  convth=0
+                 !end if
+                 if (diffbb > 1d-10) then
+                   if (bij(ij,iatom,itemper) /= zero) then
+                     if (diffbb/bij(ij,iatom,itemper) > thmtol) then
+                       write(msg,'(a)' )' harmonic_thermo : Bij changes are larger than thmtol '
+                       call wrtout(std_out,msg,'COLL')
+                       convth=0
+                     end if
+                   end if
                  end if
                  if(convth==0)exit
                end do

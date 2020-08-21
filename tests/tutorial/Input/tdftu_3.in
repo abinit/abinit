@@ -34,7 +34,7 @@ rprim 0.0 1/2 1/2
 ngkpt 2 2 2
 chksymbreak 0  # The k point grid is not symmetric, but the calculations being for the ground-state, this is not a problem.
 
-# LDA+U
+# DFT+U
 usepawu   1
 lpawu   2 -1
 upawu  8.0 0.0 eV
@@ -57,18 +57,21 @@ dmatpawu
     -0.00001    0.00001    0.00006    0.89677    0.00010
      0.00000   -0.00010    0.00000    0.00010    0.11580
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pbe_standard/Ni.xml, Pseudodojo_paw_pbe_standard/O.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
-#%%   tdftu_3.out, tolnlines=  8, tolabs=  7.001e-02, tolrel=  5.000e-03, fld_options = -easy  
-#%% psp_files = 28ni.paw, 8o.2.paw 
+#%%   tdftu_3.abo, tolnlines=  8, tolabs=  7.001e-02, tolrel=  5.000e-03, fld_options = -easy  
+#%% output_file = "tdftu_3.abo"
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = LDAU, PAW
+#%% keywords = DFTU, PAW
 #%% description = third run of the DFT+U tutorial
 #%%<END TEST_INFO>

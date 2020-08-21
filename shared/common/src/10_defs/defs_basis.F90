@@ -137,6 +137,9 @@ module defs_basis
  real(dp), parameter :: nine=9._dp
  real(dp), parameter :: ten=10._dp
 
+ !real(dp), parameter :: zero_sp=0._sp
+ !real(dp), parameter :: one_sp=1._sp
+
 !Fractionary real constants
  real(dp), parameter :: half=0.50_dp
  real(dp), parameter :: onehalf=1.50_dp
@@ -294,7 +297,7 @@ module defs_basis
  integer, parameter, public :: RUNL_WFK        = 8
  integer, parameter, public :: RUNL_GWLS       = 66
  integer, parameter, public :: RUNL_BSE        = 99 !9
- integer, parameter, public :: RUNL_LONGWAVE   = 10 
+ integer, parameter, public :: RUNL_LONGWAVE   = 10
 
  ! Integer flags defining the task to be performed in wfk_analyze
  integer,public,parameter :: WFK_TASK_NONE      = 0
@@ -410,7 +413,7 @@ CONTAINS  !=====================================================================
 !!  new_do_write_status=new value for do_write_status
 !!
 !! PARENTS
-!!      iofn1,m_argparse
+!!      m_argparse,m_dtfil
 !!
 !! CHILDREN
 !!
@@ -448,10 +451,10 @@ CONTAINS  !=====================================================================
 !!  new_io_comm=new value for IO MPI communicator
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,driver
-!!      dummy_tests,fftprof,fold2Bloch,initmpi_world,ioprof,lapackprof
-!!      m_io_redirect,macroave,memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr
-!!      multibinit,optic,ujdet,vdw_kernelgen
+!!      abinit,abitk,aim,anaddb,band2eps,conducti,cut3d,dummy_tests,fftprof
+!!      fold2Bloch,ioprof,lapackprof,m_driver,m_io_redirect,m_memeval
+!!      m_mpi_setup,m_mpinfo,macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit
+!!      optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!
@@ -488,7 +491,7 @@ CONTAINS  !=====================================================================
 !!   Only printing.
 !!
 !! PARENTS
-!!      abinit,leave_new,m_argparse
+!!      abinit,m_argparse,m_errors
 !!
 !! CHILDREN
 !!
