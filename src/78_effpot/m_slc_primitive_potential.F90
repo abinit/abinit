@@ -538,6 +538,7 @@ contains
       end do
     endif
 
+    call self%oiju%sum_duplicates()
   end subroutine set_oiju
 
   !-------------------------------------
@@ -585,6 +586,8 @@ contains
                                 & jlist(2:4,idx), ulist(2:4,idx), vlist(2:4,idx), vallist(idx))
       end do
     endif
+
+    call self%tijuv%sum_duplicates()
 
   end subroutine set_tijuv
 
@@ -887,9 +890,7 @@ contains
     type(supercell_maker_t),          intent(inout) :: scmaker
         
     integer :: icell, Rj(3), Ru(3), Rv(3), tijuv_ind(7), iRj, iRu, iRv, ii, ij, iu, iv, inz
-    integer :: ngroup
     integer, allocatable :: i_sc(:), j_sc(:), u_sc(:), v_sc(:), Rj_sc(:, :), Ru_sc(:,:), Rv_sc(:,:)
-    integer, allocatable :: i1list(:), ise(:)
     real(dp) :: val_sc(scmaker%ncells)
 
     integer :: master, my_rank, comm, nproc
@@ -899,6 +900,7 @@ contains
 
     if(iam_master) then
       call scpot%tijuv_sc%initialize(mshape=[self%nspin*3, self%nspin*3, self%natom*3, self%natom*3])
+      call scpot%tuvij_sc%initialize(mshape=[self%natom*3, self%natom*3, self%nspin*3, self%nspin*3])
     endif
 
     do inz=1, self%tijuv%nnz
@@ -930,9 +932,8 @@ contains
       ABI_SFREE(Rv_sc)
     end do
     
-    call scpot%tijuv_sc%group_by_1dim(ngroup, i1list, ise)
-    ABI_SFREE(i1list)
-    ABI_SFREE(ise)
+    call scpot%tijuv_sc%group_by_pair()
+    call scpot%tuvij_sc%group_by_pair()
 
   end subroutine set_tijuv_sc
 
