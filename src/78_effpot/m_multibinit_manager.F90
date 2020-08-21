@@ -447,9 +447,7 @@ contains
     call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots)
     ! why do this twice.
     call self%pots%set_supercell(self%supercell)
-    print *, "SET params"
     call self%pots%set_params(self%params)
-    print *, "SET params finished"
   end subroutine fill_supercell
 
   !-------------------------------------------------------------------!
