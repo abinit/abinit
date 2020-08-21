@@ -99,9 +99,10 @@ contains
 !!                 gradients in cartesian coordinates.
 !!
 !! PARENTS
-!!      mklocl
+!!      m_mklocl
 !!
 !! CHILDREN
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -613,9 +614,10 @@ end subroutine mklocl_realspace
 !! OUTPUT
 !!
 !! PARENTS
-!!      mklocl_realspace
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -887,9 +889,10 @@ subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 !! OUTPUT
 !!
 !! PARENTS
-!!      mklocl_realspace
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -996,9 +999,10 @@ end subroutine createIonicPotential_new
 !! OUTPUT
 !!
 !! PARENTS
-!!      mklocl_realspace
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -1197,9 +1201,10 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 !! OUTPUT
 !!
 !! PARENTS
-!!      mklocl_realspace
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -1308,9 +1313,10 @@ end subroutine local_forces_new
 !! OUTPUT
 !!
 !! PARENTS
-!!      mklocl_realspace
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
+!!      calcdvloc_wvl,derf_ab,paw_splint_der
 !!
 !! SOURCE
 
@@ -1371,7 +1377,7 @@ subroutine ind_positions_mklocl(periodic,i,n,j,go)
 !!                 gradients in cartesian coordinates.
 !!
 !! PARENTS
-!!      mklocl,wvl_wfsinp_scratch
+!!      m_mklocl,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!      calcdvloc_wvl,derf_ab,paw_splint_der
@@ -1592,7 +1598,7 @@ end subroutine mklocl_wavelets
 !!  floc(3,natom)=local ionic potential contribution to forces
 !!
 !! PARENTS
-!!      mklocl_wavelets
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
 !!      calcdvloc_wvl,derf_ab,paw_splint_der
@@ -1808,7 +1814,7 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 !! OUTPUT
 !!
 !! PARENTS
-!!      mklocl_wavelets
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
 !!      calcdvloc_wvl,derf_ab,paw_splint_der

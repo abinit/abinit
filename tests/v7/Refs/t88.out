@@ -1,5 +1,5 @@
 
-.Version 9.0.2 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 20 Mar 2020.
-- ( at 07h52 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h50 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t88.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t85-t86-t87-t88-t89/t88.in
 - output file    -> t88.out
 - root for input  files -> t88i
 - root for output files -> t88o
@@ -125,10 +125,10 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
         ddb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
        eph_fsewin      2.93994603E-02 Hartree
-       eph_fsmear1     9.99999978E-03 Hartree
+       eph_fsmear1     1.00000000E-02 Hartree
        eph_fsmear2     7.34986508E-03 Hartree
-       eph_fsmear3     9.99999978E-03 Hartree
-       eph_fsmear4     9.99999978E-03 Hartree
+       eph_fsmear3     1.00000000E-02 Hartree
+       eph_fsmear4     1.00000000E-02 Hartree
        eph_fsmear5    -3.67493254E-02 Hartree
       eph_intmeth1          2
       eph_intmeth2          1
@@ -238,7 +238,6 @@ P           mkmem          29
          ph_ngqpt       16   16   16
         ph_nqpath           3
          ph_smear      3.67493254E-05 Hartree
-         ph_wstep      3.67493254E-06 Hartree
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
@@ -353,9 +352,9 @@ meta: {optdriver: 7, eph_task: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -443,42 +442,10 @@ Values initialized with zeros
 
  Will write phonon FREQS in BoltzTrap format to file t88o_DS1_BTRAP
 - Writing phonon frequencies in Xcrysden format to file: t88o_DS1_PH.bxsf
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-
-All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -602,9 +569,9 @@ meta: {optdriver: 7, eph_task: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -689,38 +656,6 @@ Values initialized with zeros
 
 - Writing phonon DOS to file: t88o_DS2_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS2_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 
@@ -829,9 +764,9 @@ meta: {optdriver: 7, eph_task: 5, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -916,38 +851,6 @@ Values initialized with zeros
 
 - Writing phonon DOS to file: t88o_DS3_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS3_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Interpolation of the electron-phonon coupling potential
@@ -996,9 +899,9 @@ meta: {optdriver: 7, eph_task: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1083,38 +986,6 @@ Values initialized with zeros
 
 - Writing phonon DOS to file: t88o_DS4_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS4_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 
@@ -1350,9 +1221,9 @@ meta: {optdriver: 7, eph_task: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1437,38 +1308,6 @@ Values initialized with zeros
 
 - Writing phonon DOS to file: t88o_DS5_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS5_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 
@@ -1553,10 +1392,10 @@ All the independent perturbations are available
         ddb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
        eph_fsewin      2.93994603E-02 Hartree
-       eph_fsmear1     9.99999978E-03 Hartree
+       eph_fsmear1     1.00000000E-02 Hartree
        eph_fsmear2     7.34986508E-03 Hartree
-       eph_fsmear3     9.99999978E-03 Hartree
-       eph_fsmear4     9.99999978E-03 Hartree
+       eph_fsmear3     1.00000000E-02 Hartree
+       eph_fsmear4     1.00000000E-02 Hartree
        eph_fsmear5    -3.67493254E-02 Hartree
       eph_intmeth1          2
       eph_intmeth2          1
@@ -1644,7 +1483,6 @@ P           mkmem          29
          ph_ngqpt       16   16   16
         ph_nqpath           3
          ph_smear      3.67493254E-05 Hartree
-         ph_wstep      3.67493254E-06 Hartree
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
@@ -1804,10 +1642,10 @@ P           mkmem          29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.3  wall=         13.8
+- Proc.   0 individual time (sec): cpu=         11.5  wall=         13.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.3  wall=         13.8
+.Delivered   7 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.5  wall=         13.5

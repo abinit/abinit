@@ -471,9 +471,11 @@ contains
   !! etot: energy (scalar)
   !!
   !! PARENTS
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, &
        & etot, displacement, strain, lwf, energy_table)
@@ -544,9 +546,11 @@ contains
   !! etot: energy (scalar)
   !!
   !! PARENTS
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine spin_mover_t_run_one_step_dummy(self, effpot, S_in, etot, &
        & displacement, strain, lwf, energy_table)
@@ -723,9 +727,11 @@ contains
   !!
   !!
   !! PARENTS
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine spin_mover_t_run_time(self, calculator, displacement, strain, spin, lwf, energy_table)
 
@@ -900,11 +906,11 @@ contains
   !! OUTPUT
   !!
   !! PARENTS
-  !!
-  !!
+!!
   !! CHILDREN
-  !!
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine  run_MvT(self, pot, ncfile_prefix, displacement, strain, spin, lwf, energy_table)
     class(spin_mover_t), intent(inout) :: self

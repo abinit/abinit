@@ -65,7 +65,7 @@ bs_interp_kmult   2 2 2
 bs_interp_m3_width 1.0 # Size of the M3 interpolation (default is 1)
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

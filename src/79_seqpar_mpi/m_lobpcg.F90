@@ -89,7 +89,7 @@ CONTAINS
 !!  vect(2,npw)=<g|(h-eval)|c_{n,k}>*(polynomial ratio)
 !!
 !! PARENTS
-!!      lobpcgwf
+!!      m_lobpcgwf_old
 !!
 !! CHILDREN
 !!      abi_xcopy,cg_precon_block,cg_zprecon_block,timab

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h48 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h49 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
 - output file    -> t56.out
@@ -341,9 +341,9 @@ meta: {optdriver: 7, eph_task: -4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -356,38 +356,10 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -403,6 +375,7 @@ All the independent perturbations are available
 
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -422,6 +395,7 @@ All the independent perturbations are available
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
@@ -432,6 +406,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -481,17 +456,15 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.266
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 166
+ From emin:  12.8 to emax:  17.3 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.23189641E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   9.14819245E-03
- Total number of electrons at eF:    8.0
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -506,7 +479,7 @@ Cartesian component of SERTA mobility tensor: xx
           300.00        0.14E-13        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -521,7 +494,7 @@ Cartesian component of SERTA mobility tensor: yy
           300.00        0.14E-13        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -538,7 +511,7 @@ Cartesian component of SERTA mobility tensor: zz
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -553,7 +526,7 @@ Cartesian component of MRTA mobility tensor: xx
           300.00        0.14E-13        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -568,7 +541,7 @@ Cartesian component of MRTA mobility tensor: yy
           300.00        0.14E-13        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -626,9 +599,9 @@ meta: {optdriver: 7, eph_task: -4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -641,37 +614,10 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  EPH double grid interpolation: will read energies from: t50o_DS6_WFK
+
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -692,6 +638,7 @@ All the independent perturbations are available
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
@@ -702,6 +649,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -751,17 +699,15 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.739
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 166
+ From emin:  12.8 to emax:  17.3 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.23189641E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   9.14819245E-03
- Total number of electrons at eF:    8.0
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -776,7 +722,7 @@ Cartesian component of SERTA mobility tensor: xx
           300.00        0.12E-05        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -791,7 +737,7 @@ Cartesian component of SERTA mobility tensor: yy
           300.00        0.12E-05        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -808,7 +754,7 @@ Cartesian component of SERTA mobility tensor: zz
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -823,7 +769,7 @@ Cartesian component of MRTA mobility tensor: xx
           300.00        0.12E-05        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -838,7 +784,7 @@ Cartesian component of MRTA mobility tensor: yy
           300.00        0.12E-05        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -901,9 +847,9 @@ meta: {optdriver: 7, eph_task: -4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -916,35 +862,8 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -964,6 +883,7 @@ All the independent perturbations are available
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
@@ -974,6 +894,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -1019,17 +940,15 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   17.595
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 74
+ From emin:  16.5 to emax:  18.5 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.86047941E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   3.98393583E-01
- Total number of electrons at eF:    8.2
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.11E+22        0.00E+00            0.00            0.00
@@ -1044,7 +963,7 @@ Cartesian component of SERTA mobility tensor: xx
           300.00        0.11E+22        0.50E+19            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.11E+22        0.00E+00            0.00            0.00
@@ -1059,7 +978,7 @@ Cartesian component of SERTA mobility tensor: yy
           300.00        0.11E+22        0.50E+19            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.11E+22        0.00E+00            0.00            0.00
@@ -1076,7 +995,7 @@ Cartesian component of SERTA mobility tensor: zz
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.11E+22        0.00E+00            0.00            0.00
@@ -1091,7 +1010,7 @@ Cartesian component of MRTA mobility tensor: xx
           300.00        0.11E+22        0.50E+19            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.11E+22        0.00E+00            0.00            0.00
@@ -1106,7 +1025,7 @@ Cartesian component of MRTA mobility tensor: yy
           300.00        0.11E+22        0.50E+19            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.11E+22        0.00E+00            0.00            0.00
@@ -1171,9 +1090,9 @@ meta: {optdriver: 7, eph_task: -4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1186,37 +1105,10 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  EPH double grid interpolation: will read energies from: t50o_DS6_WFK
+
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -1237,6 +1129,7 @@ All the independent perturbations are available
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
@@ -1247,6 +1140,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -1292,17 +1186,15 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   18.045
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 74
+ From emin:  16.5 to emax:  18.5 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.86047941E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   3.98393583E-01
- Total number of electrons at eF:    8.2
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.17E-42        0.00E+00            0.00            0.00
@@ -1317,7 +1209,7 @@ Cartesian component of SERTA mobility tensor: xx
           300.00        0.14E+16        0.11E+16            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.17E-42        0.00E+00            0.00            0.00
@@ -1332,7 +1224,7 @@ Cartesian component of SERTA mobility tensor: yy
           300.00        0.14E+16        0.11E+16            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.17E-42        0.00E+00            0.00            0.00
@@ -1349,7 +1241,7 @@ Cartesian component of SERTA mobility tensor: zz
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.17E-42        0.00E+00            0.00            0.00
@@ -1364,7 +1256,7 @@ Cartesian component of MRTA mobility tensor: xx
           300.00        0.14E+16        0.11E+16            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.17E-42        0.00E+00            0.00            0.00
@@ -1379,7 +1271,7 @@ Cartesian component of MRTA mobility tensor: yy
           300.00        0.14E+16        0.11E+16            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.17E-42        0.00E+00            0.00            0.00
@@ -1442,9 +1334,9 @@ meta: {optdriver: 7, eph_task: -4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1457,35 +1349,8 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -1505,6 +1370,7 @@ All the independent perturbations are available
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
@@ -1515,6 +1381,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -1557,44 +1424,42 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   17.500
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 74
+ From emin:  16.5 to emax:  18.5 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.86047941E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   3.98393583E-01
- Total number of electrons at eF:    8.2
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
           300.00        0.41E+21        0.14E+20            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
           300.00        0.41E+21        0.14E+20            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
           300.00        0.41E+21        0.14E+20            0.00            0.00
 
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
           300.00        0.41E+21        0.14E+20            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
           300.00        0.41E+21        0.14E+20            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
           300.00        0.41E+21        0.14E+20            0.00            0.00
 
@@ -1882,10 +1747,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         90.9  wall=         91.9
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          4.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         90.9  wall=         91.9
+.Delivered  18 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.8  wall=          4.3

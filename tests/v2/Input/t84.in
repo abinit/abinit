@@ -23,7 +23,7 @@
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "73ta.hgh"
+ pseudos "PseudosHGH_pwteter/73ta.5.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

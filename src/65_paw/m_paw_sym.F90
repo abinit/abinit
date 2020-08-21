@@ -83,8 +83,7 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! 
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
-!!      debug_tools,m_shirley,prep_calc_ucrpa
+!!      m_chi0,m_cohsex,m_prep_calc_ucrpa,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!      get_bz_item,get_ibz_item,pawcprj_copy
@@ -264,7 +263,7 @@ end subroutine paw_symcprj
 !!  Derivatives are not symmetrized.
 !! 
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
 !!      get_bz_item,get_ibz_item,pawcprj_copy

@@ -89,11 +89,11 @@ contains
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      brdene,dgetrf,dgetri,fcart2fred,hessinit,hessupdt,hist2var,metric
-!!      mkrdim,var2hist,xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
+!!      fcart2fred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
+!!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
 
@@ -586,7 +586,7 @@ end subroutine pred_bfgs
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
 !!      fcart2fred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist

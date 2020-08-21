@@ -87,7 +87,7 @@ contains
 !! Response function not coded yet, but part of it are already present
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
 !!      invcb

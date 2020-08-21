@@ -158,7 +158,7 @@ end subroutine outxml_finalise
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      xred2xcart
@@ -272,7 +272,7 @@ end subroutine out_resultsgs_XML
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      xred2xcart

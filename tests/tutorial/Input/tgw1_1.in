@@ -99,14 +99,14 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tgw1_1.out, tolnlines= 7, tolabs=  0.03, tolrel=  1.500e-01
+#%%   tgw1_1.out, tolnlines= 10, tolabs=  0.03, tolrel=  1.500e-01
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

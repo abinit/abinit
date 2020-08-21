@@ -142,12 +142,10 @@ contains
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
-!!      appdig,dfpt_mkcore,dfpt_mkvxc,dfpt_vlocal,pead_nl_mv,pead_nl_resp
-!!      dotprod_vn,fourdp,getph,hartre,initylmg,inwffil,read_rhor,status,timab
-!!      wffclose,wrtout
+!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -444,7 +442,8 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                    end if  ! i2pert <= natom
 
-                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,rho2g1,rprimd,vhartr1)
+                   call hartre(cplex,gsqcut,3,0,mpi_enreg,nfft,dtset%ngfft,dtset%nkpt,&
+                               &dtset%rcut,rho2g1,rprimd,dtset%vcutgeo,vhartr1)
                    option=1 ; nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
                    call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,dtset%ngfft,&
 &                   rho_dum,0,rho_dum,0,nkxc,nmxc,dtset%nspden,n3xccc,option,&
@@ -616,11 +615,10 @@ end subroutine pead_nl_loop
 !!  d3lo(2,3,mpert,3,mpert,3,mpert) = matrix of the 3DTEs
 !!
 !! PARENTS
-!!      pead_nl_loop
+!!      m_pead_nl_loop
 !!
 !! CHILDREN
-!!      dotprod_g,fftpac,fourwf,init_hamiltonian
-!!      mkffnl,mkkpg,nonlop,status,xmpi_sum
+!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -934,10 +932,10 @@ end subroutine pead_nl_resp
 !! 12dir = 1,2,3
 !!
 !! PARENTS
-!!      pead_nl_loop
+!!      m_pead_nl_loop
 !!
 !! CHILDREN
-!!      dzgedi,dzgefa,mpi_recv,mpi_send,status,wrtout,xmpi_sum
+!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 

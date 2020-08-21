@@ -156,27 +156,10 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      ebands_apply_scissors,calc_rpa_functional,cchi0,cchi0q0,chi0_bksmask
-!!      chi0q0_intraband,chi_free,chkpawovlp,coeffs_gausslegint
-!!      destroy_mpi_enreg,ebands_copy,ebands_free,ebands_update_occ
-!!      em1params_free,energies_init,fourdp,get_gftt,getph,gsph_free,hdr_free
-!!      hscr_free,hscr_io,init_distribfft_seq,initmpi_seq,kmesh_free,kxc_ada
-!!      kxc_driver,littlegroup_free,lwl_write,make_epsm1_driver,metric,mkrdim
-!!      nhatgrid,output_chi0sumrule,paw_an_free,paw_an_init,paw_an_nullify
-!!      paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify,paw_pwaves_lmn_free
-!!      paw_pwaves_lmn_init,pawdenpot,pawdij,pawfgr_destroy,pawfgr_init
-!!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawnabla_init,pawprt
-!!      pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy
-!!      pawrhoij_free,pawtab_get_lsize,pawtab_print,print_arr,print_ngfft
-!!      prtrhomxmn,pspini,random_stopping_power,rdgw,rdqps,rotate_fft_mesh
-!!      setsym_ylm,setup_screening,setvtr,spectra_free,spectra_repr
-!!      spectra_write,symdij,symdij_all,test_charge,timab,vcoul_free
-!!      wfd_change_ngfft,wfd_copy,wfd_free,wfd_init,wfd_mkrho,wfd_print
-!!      wfd_read_wfk,wfd_rotate,wfd_test_ortho,write_screening,wrtout
-!!      xmpi_bcast
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1592,10 +1575,10 @@ end subroutine screening
 !!   might be redefined in setshells in order to close the shell.
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
-!!      xmpi_split_work2_i4b
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1908,7 +1891,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ABI_FREE(gvec_kss)
 
  ! FIXME this wont work if nqptdm/=0
- call vcoul_init(Vcp,Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
+ call vcoul_init(Vcp,Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
 &  Ep%qlwl,ngfftf,comm)
 
 #if 0
@@ -2215,10 +2198,10 @@ end subroutine setup_screening
 !! ierr=Exit status.
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
-!!      xmpi_split_work2_i4b
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2351,10 +2334,10 @@ end subroutine chi0_bksmask
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
-!!      get_bz_item,spline,splint,wrtout
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2570,7 +2553,7 @@ end subroutine random_stopping_power
 !! OUTPUT
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master

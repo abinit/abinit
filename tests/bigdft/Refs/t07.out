@@ -119,8 +119,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 0, paral_kgb: 0, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/6c.4.hgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/6c.4.hgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/6c.4.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/6c.4.hgh
 - Hartwigsen-Goedecker-Hutter psp for C,  from PRB58, 3641 (1998)
 -  6.00000   4.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

@@ -153,7 +153,7 @@ CONTAINS
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      metric,spline,xcart2xred
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -460,9 +460,10 @@ end subroutine dens_hirsh
 !!  nv_constr_dft_r=the constrained potential or density in real space
 !!
 !! PARENTS
+!!      m_dens
 !!
 !! CHILDREN
-!!      metric,ptabs_fourdp,timab,xmpi_sum
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -641,8 +642,10 @@ end subroutine add_atomic_fcts
 !!    Most of the data are simply copied from dtset, but also constrained_dft%intgf2(natom,natom) is computed from the available data.
 !!
 !! PARENTS
+!!      m_scfcv_core,m_setvtr
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -742,8 +745,10 @@ end subroutine constrained_dft_ini
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_scfcv_core,m_setvtr
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -816,8 +821,10 @@ end subroutine constrained_dft_free
 !!    integrated charge or magnetization and the target ones.
 !!
 !! PARENTS
+!!      m_rhotov
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1156,10 +1163,10 @@ end subroutine constrained_dft_free
 !!  nv_constr_dft_r=the constrained potential
 !!
 !! PARENTS
-!!      energy,rhotov,setvtr
+!!      m_dft_energy,m_rhotov,m_setvtr
 !!
 !! CHILDREN
-!!      calcdenmagsph,metric,ptabs_fourdp,timab,xmpi_sum
+!!      xmpi_gather
 !!
 !! NOTES
 !!  based on html notes for the VASP implementation at
@@ -1315,10 +1322,10 @@ end subroutine mag_penalty
 !!  Eexp=???
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      calcdenmagsph,metric,wrtout
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1489,10 +1496,10 @@ end subroutine mag_penalty_e
 !!  Rest is printing 
 !!
 !! PARENTS
-!!      dfpt_scfcv,mag_penalty,mag_constr_e,outscfcv
+!!      m_dens,m_dfpt_scfcv,m_outscfcv
 !!
 !! CHILDREN
-!!      timab,wrtout,xmpi_sum
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -1826,10 +1833,10 @@ end subroutine calcdenmagsph
 !!  Printing 
 !!
 !! PARENTS
-!!      dfpt_scfcv,mag_penalty,mag_constr_e,outscfcv
+!!      m_dens,m_dfpt_scfcv,m_outscfcv
 !!
 !! CHILDREN
-!!      timab,wrtout,xmpi_sum
+!!      xmpi_gather
 !!
 !! SOURCE
 
@@ -2097,39 +2104,53 @@ end subroutine prtdenmagsph
 !! radsmear
 !!
 !! FUNCTION
+!! As a function of the argument xarg (a positive number), return a function fsm that is zero
+!! beyond some cut-off value xcut, one for xarg smaller than xcut-xsmear,
+!! and interpolates smoothly between one and zero in the region from xcut-xsmear to xcut.
+!! Also returns the derivative of this function, called dfsm.
+!! The function fsm is twice differentiable at xcut (the first derivative is continuous, not the second),
+!! and three times differentiable at xcut-xsmear (the second derivative is continuous, not the third).
+!! 
 !!
 !! INPUTS
+!! xarg=argument of the function (should be positive)
+!! xcut=largest value for which the function is non-zero
+!! xsmear=defined the smearing region, between xcut-xsmear and xcut
 !!
 !! OUTPUT
+!! fsm=value of the function
+!! dfsm=derivative of the function with respect to xarg (zero, except in the smearing region).
 !!
 !! PARENTS
+!!      m_dens
 !!
 !! CHILDREN
+!!      xmpi_gather
 !!
 !! SOURCE
 
-subroutine radsmear(dfsm,fsm,r2,r2sph,rsm2)
+subroutine radsmear(dfsm,fsm,xarg,xcut,xsmear)
 
 !Arguments ------------------------------------
 !scalars
  real(dp), intent(out) :: dfsm,fsm
- real(dp), intent(in) :: r2, r2sph, rsm2
+ real(dp), intent(in) :: xarg, xcut, xsmear
 
 !Local variables ------------------------------
 !scalars
- real(dp) :: rsm2inv,xx
+ real(dp) :: xsmearinv,xx
 
 !******************************************************************
 
  fsm = zero
  dfsm=zero
- if (r2 < r2sph - rsm2 - tol12) then
+ if (xarg < xcut - xsmear - tol12) then
    fsm = one
- else if (r2 < r2sph - tol12) then
-   rsm2inv=one/rsm2
-   xx = (r2sph - r2) * rsm2inv
+ else if (xarg < xcut - tol12) then
+   xsmearinv=one/xsmear
+   xx = (xcut - xarg) * xsmearinv
    fsm = xx**2*(3+xx*(1+xx*(-6+3*xx)))
-   dfsm = -(xx*(6+xx*(3+xx*(-24+15*xx))))*rsm2inv
+   dfsm = -(xx*(6+xx*(3+xx*(-24+15*xx))))*xsmearinv
  end if
 
 end subroutine radsmear
@@ -2167,6 +2188,7 @@ end subroutine radsmear
 !!             the FFT mesh info
 !!
 !! PARENTS
+!!      m_dens
 !!
 !! CHILDREN
 !!      xmpi_gather

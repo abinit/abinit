@@ -185,12 +185,13 @@ contains
 !!    and that the residual is not a combination of V_res and rhoij_res (pawoptmix=0).
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      ab7_mixing_copy_current_step,ab7_mixing_eval,ab7_mixing_eval_allocate
 !!      ab7_mixing_eval_deallocate,ab7_mixing_use_moving_atoms,fourdp,mean_fftr
-!!      metric,prcref_pma,timab,wvl_prcref,wvl_vtrial_abi2big
+!!      metric,pawrhoij_filter,prcref_pma,timab,wvl_prcref,wvl_vtrial_abi2big
+!!      xcpot
 !!
 !! SOURCE
 
@@ -239,7 +240,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  integer,intent(in) :: ngfft(18),ngfftmix(18)
  real(dp),intent(in) :: dielar(7)
  real(dp),intent(in) :: fcart(3,dtset%natom),grhf(3,dtset%natom)
- real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(in) :: susmat(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)
  real(dp),intent(in) :: vhartr(nfft),vnew_mean(dtset%nspden),vres_mean(dtset%nspden)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden)

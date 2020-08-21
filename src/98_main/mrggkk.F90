@@ -32,9 +32,10 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,destroy_mpi_enreg,flush_unit
-!!      hdr_echo,hdr_fort_read,hdr_fort_write,hdr_free,herald,initmpi_seq
-!!      wfk_close,wfk_open_read,wfk_read_eigk,wrtout,xmpi_end,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,flush_unit,gs_wfk%close
+!!      gs_wfk%hdr%echo,gs_wfk%hdr%fort_write,gs_wfk%read_eigk,hdr%free
+!!      hdr1%echo,hdr1%fort_write,hdr1%free,hdr_fort_read,herald,ph_wfk%close
+!!      ph_wfk%read_eigk,wfk_open_read,wrtout,xmpi_end,xmpi_init
 !!
 !! SOURCE
 

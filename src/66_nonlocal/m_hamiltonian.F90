@@ -538,12 +538,9 @@ CONTAINS  !===========================================================
 !!  Ham<gs_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
-!!      dfptnl_resp,energy,fock2ACE,forstrnps,gwls_hamiltonian,ks_ddiago,m_gkk
-!!      m_io_kss,m_phgamma,m_phpi,m_shirley,m_sigmaph,nonlop_test,vtorho
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -671,12 +668,13 @@ end subroutine destroy_hamiltonian
 !!   * Quantities that do not depend on the k-point or spin are initialized.
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
-!!      dfptnl_resp,energy,fock2ACE,forstrnps,ks_ddiago,m_gkk,m_io_kss
-!!      m_phgamma,m_phpi,m_shirley,m_sigmaph,nonlop_test,vtorho
+!!      m_d2frnl,m_ddk,m_dfpt_lw,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho
+!!      m_dfptnl_loop,m_dft_energy,m_fock_getghc,m_forstr,m_gkk,m_io_kss
+!!      m_ksdiago,m_nonlop_test,m_orbmag,m_pead_nl_loop,m_phgamma,m_phpi
+!!      m_sigmaph,m_vtorho
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -932,12 +930,9 @@ end subroutine init_hamiltonian
 !!    [ham%ph3d_k]=3-dim structure factors, for each atom and plane wave
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfptnl_resp
-!!      energy,fock2ACE,forstrnps,getgh1c,gwls_hamiltonian,ks_ddiago,m_io_kss
-!!      m_shirley,nonlop_test,vtorho,wfd_vnlpsi
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1118,10 +1113,9 @@ end subroutine load_k_hamiltonian
 !!    [ham%ph3d_kp]=3-dim structure factors at k^prime at k, for each atom and plane wave
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,fock_getghc,getgh1c
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1252,10 +1246,10 @@ end subroutine load_kprime_hamiltonian
 !!                                   copies of all data of gs_hamk_in upon exit.
 !!
 !! PARENTS
-!!      gwls_hamiltonian
+!!      m_gwls_hamiltonian
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1430,12 +1424,9 @@ end subroutine copy_hamiltonian
 !!   * Quantities that depend spin are initialized.
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,energy,fock2ACE
-!!      forstrnps,ks_ddiago,m_gkk,m_io_kss,m_phgamma,m_phpi,m_shirley,m_sigmaph
-!!      nonlop_test,vtorho
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1505,11 +1496,9 @@ end subroutine load_spin_hamiltonian
 !!  rf_Ham<rf_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_vtorho,m_gkk,m_phgamma,m_phpi
-!!      m_sigmaph
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1574,11 +1563,11 @@ end subroutine destroy_rf_hamiltonian
 !!   * Quantities that do not depend on the k-point or spin are initialized.
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_vtorho,m_gkk,m_phgamma,m_phpi
-!!      m_sigmaph
+!!      m_ddk,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dfptnl_pert
+!!      m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1725,10 +1714,9 @@ end subroutine init_rf_hamiltonian
 !!   * Quantities that depend on spin are initialized.
 !!
 !! PARENTS
-!!      dfpt_rhofermi,dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1795,10 +1783,9 @@ end subroutine load_spin_rf_hamiltonian
 !!          Quantities at k^prime are set equal to quantities at k.
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,getgh1c
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1858,7 +1845,7 @@ end subroutine load_k_rf_hamiltonian
 !!      m_hamiltonian
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1939,10 +1926,10 @@ end subroutine pawdij2ekb
 !! OUTPUT
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstpaw,m_hamiltonian
+!!      m_d2frnl,m_dfpt_nstwf,m_dfptnl_pert,m_hamiltonian
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
+!!      free_my_atmtab,get_my_atmtab,xmpi_sum
 !!
 !! SOURCE
 

@@ -59,7 +59,7 @@ polcen  1 1 1
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.pspnc, 33as.pspnc"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

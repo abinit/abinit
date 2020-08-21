@@ -40,7 +40,7 @@ tolwfr2    1.0d-9
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "7n.psphgh"
+ pseudos "PseudosHGH_pwteter/7n.5.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

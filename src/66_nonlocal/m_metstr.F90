@@ -118,7 +118,7 @@ contains
 !! $$
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!

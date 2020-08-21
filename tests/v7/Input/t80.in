@@ -126,7 +126,6 @@ nstep 100              # Maximal number of SCF cycles
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-##%% exclude_hosts = nag@abiref
 #%% [shell] 
 #%% post_commands = 
 #%% [files]

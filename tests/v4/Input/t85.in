@@ -59,7 +59,7 @@
                 0.50   0.50   0.00
       bdgw3     1      1
                 1      2
-  icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the GW corrections without PPM
  optdriver4     4
@@ -73,11 +73,11 @@
                 0.50   0.50   0.00
       bdgw4     1      2
                 1      2
-  icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.pspnc"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

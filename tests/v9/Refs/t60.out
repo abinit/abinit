@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h50 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h51 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
@@ -476,7 +476,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -489,34 +489,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
@@ -552,6 +524,7 @@ All the independent perturbations are available
    2.47252491E-01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+
  Number of bands in e-ph self-energy sum: 20
  From bsum_start: 1 to bsum_stop: 20
  Symsigma: 1 Timrev: 1
@@ -572,6 +545,7 @@ All the independent perturbations are available
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 20
 P Number of CPUs for parallelism over perturbations: 1
@@ -582,6 +556,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -722,7 +697,7 @@ meta: {optdriver: 7, eph_task: 5, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -735,34 +710,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Interpolation of the electron-phonon coupling potential
@@ -846,7 +793,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -859,54 +806,8 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 3
  From bsum_start: 2 to bsum_stop: 4
@@ -928,6 +829,7 @@ All the independent perturbations are available
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 4
 P Number of CPUs for parallelism over perturbations: 1
@@ -938,6 +840,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -1079,7 +982,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1092,54 +995,8 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 9
  From bsum_start: 1 to bsum_stop: 9
@@ -1162,6 +1019,7 @@ All the independent perturbations are available
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 9
 P Number of CPUs for parallelism over perturbations: 1
@@ -1172,6 +1030,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -1251,29 +1110,27 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 3768
- From emin: -21.7 to emax:  80.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 314
+ From emin:  -0.2 to emax:   8.3 (eV)
  Number of k-points in the IBZ: 3
- Fermi level:   8.68615077E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   2.20305172E-02
- Total number of electrons at eF:    8.0
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
@@ -1281,19 +1138,19 @@ Cartesian component of SERTA mobility tensor: zz
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
@@ -1376,7 +1233,7 @@ meta: {optdriver: 7, eph_task: -5, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1389,53 +1246,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Interpolation of the electron-phonon coupling potential
@@ -1519,7 +1329,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1532,54 +1342,8 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
@@ -1602,6 +1366,7 @@ All the independent perturbations are available
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    5
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   3    4
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -1612,6 +1377,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -1671,19 +1437,19 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
@@ -1691,19 +1457,19 @@ Cartesian component of SERTA mobility tensor: zz
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
@@ -1787,7 +1553,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1800,35 +1566,8 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
@@ -1851,6 +1590,7 @@ All the independent perturbations are available
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    5
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   3    4
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -1861,6 +1601,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
+
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
  Final results in eV.
@@ -1920,19 +1661,19 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
@@ -1940,19 +1681,19 @@ Cartesian component of SERTA mobility tensor: zz
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
@@ -2036,7 +1777,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2049,35 +1790,8 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 3
  From bsum_start: 2 to bsum_stop: 4
@@ -2099,6 +1813,7 @@ All the independent perturbations are available
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 4
 P Number of CPUs for parallelism over perturbations: 1
@@ -2109,6 +1824,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
  Final results in eV.
@@ -2249,7 +1965,7 @@ meta: {optdriver: 7, eph_task: 15, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2262,34 +1978,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Computing average over the unit cell of the periodic part of the DFPT potentials
@@ -2372,7 +2060,7 @@ meta: {optdriver: 7, eph_task: -15, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2385,34 +2073,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Computing average over the unit cell of the periodic part of the DFPT potentials
@@ -2731,10 +2391,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         29.0  wall=         31.3
+- Proc.   0 individual time (sec): cpu=         18.9  wall=         21.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         29.0  wall=         31.3
+.Delivered  14 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         18.9  wall=         21.4

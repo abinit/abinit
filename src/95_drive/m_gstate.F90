@@ -222,10 +222,11 @@ contains
 !! Not yet possible to use restartxf in parallel when localrdwf==0
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
-!!      wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -1735,10 +1736,11 @@ end subroutine gstate
 !!  start(3,natom)=copy of starting xred
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -1866,10 +1868,11 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  (only print and write to disk)
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      getnel,metric,prteigrs,prtrhomxmn,prtxf,write_eig,wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2058,10 +2061,11 @@ end subroutine clnup1
 !!  (data written to unit iout)
 !!
 !! PARENTS
-!!      clnup1
+!!      m_gstate
 !!
 !! CHILDREN
-!!      matr3inv,wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2224,10 +2228,11 @@ end subroutine prtxf
 !!  (only print)
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2454,10 +2459,11 @@ end subroutine clnup2
 !!                     at output, current xred is transferred to xred_old
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      pawuj_det,pawuj_free,pawuj_ini,scfcv_run
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2583,7 +2589,7 @@ end subroutine pawuj_drive
 !!   rprim and stress
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend

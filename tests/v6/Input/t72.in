@@ -137,7 +137,7 @@ prtnest 1
 fermie_nest 0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "22ti.pspnc, 41nb.pspfhi"
+ pseudos "PseudosTM_pwteter/22ti.pspnc, 41nb.pspfhi"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

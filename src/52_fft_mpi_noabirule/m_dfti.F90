@@ -199,7 +199,7 @@ CONTAINS  !===========================================================
 !! fofr(cplex,ldx*ldy*ldz*ndat)=The FFT of fofg
 !!
 !! PARENTS
-!!      fourdp,m_fft
+!!      m_fft
 !!
 !! CHILDREN
 !!      c_f_pointer
@@ -349,7 +349,7 @@ end subroutine dfti_seqfourdp
 !!                no use of fofgin and npwin.
 !!
 !! PARENTS
-!!      fourwf
+!!      m_fft
 !!
 !! CHILDREN
 !!      c_f_pointer
@@ -1272,6 +1272,7 @@ end subroutine dfti_fftur_dpc
 !!    In output: the Fourier transform in the space specified by isign.
 !!
 !! PARENTS
+!!      m_dfti
 !!
 !! CHILDREN
 !!      c_f_pointer

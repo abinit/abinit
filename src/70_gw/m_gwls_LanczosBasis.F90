@@ -92,7 +92,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      g_to_r,gr_to_g,sqrt_vc_k,wf_block_distribute
@@ -129,7 +129,7 @@ end subroutine setup_Lanczos_basis
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      g_to_r,gr_to_g,sqrt_vc_k,wf_block_distribute
@@ -167,7 +167,7 @@ end subroutine cleanup_Lanczos_basis
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      g_to_r,gr_to_g,sqrt_vc_k,wf_block_distribute

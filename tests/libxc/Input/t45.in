@@ -38,6 +38,7 @@ ecuteps     2
 gwcalctyp   25
 getqps     -1
 ixc_sigma  -428
+gw_icutcoul   6
 
 # Dataset2: Calculation of the 1st HSE06 iteration
 optdriver2  4 
@@ -138,7 +139,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t45.out, tolnlines=15, tolabs= 4.1e-3, tolrel= 3.0e-3, fld_options= -easy
+#%%   t45.out, tolnlines=15, tolabs= 4.1e-3, tolrel= 0.02, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

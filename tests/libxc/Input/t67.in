@@ -39,7 +39,7 @@
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "N.xml"
+ pseudos "Pseudodojo_paw_pbe_standard/N.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

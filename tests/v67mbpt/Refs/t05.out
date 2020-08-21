@@ -100,7 +100,7 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
           gwgamma1          0
           gwgamma2          1
           gwgamma3          0
-         icutcoul           3
+        gw_icutcoul           3
            irdqps1          0
            irdqps2          0
            irdqps3          1
@@ -249,8 +249,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1014,7 +1014,7 @@ data: !SigmaeeData |
           gwgamma1          0
           gwgamma2          1
           gwgamma3          0
-         icutcoul           3
+        gw_icutcoul           3
            irdqps1          0
            irdqps2          0
            irdqps3          1

@@ -57,7 +57,7 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      harmonic_thermo,m_phonons
+!!      m_harmonic_thermo,m_phonons
 !!
 !! CHILDREN
 !!
@@ -109,7 +109,7 @@ end subroutine end_sortph
 !! Called by one processor only
 !!
 !! PARENTS
-!!      harmonic_thermo,m_phonons
+!!      m_harmonic_thermo,m_phonons
 !!
 !! CHILDREN
 !!

@@ -311,9 +311,10 @@ CONTAINS
 !!  elph_ds = elphon datastructure
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
+!!      krank%free,wrtout
 !!
 !! NOTES
 !!
@@ -364,9 +365,10 @@ end subroutine elph_ds_clean
 !!  elph_tr_ds = elphon transport datastructure
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
+!!      krank%free,wrtout
 !!
 !! NOTES
 !!
@@ -427,6 +429,7 @@ end subroutine elph_tr_ds_clean
 !! PARENTS
 !!
 !! CHILDREN
+!!      krank%free,wrtout
 !!
 !! NOTES
 !!
@@ -499,6 +502,7 @@ end subroutine elph_k_copy
 !!      defs_elphon
 !!
 !! CHILDREN
+!!      krank%free,wrtout
 !!
 !! NOTES
 !!
@@ -550,9 +554,10 @@ end subroutine elph_k_destroy
 !!  elph_k = elphon k-points datastructure
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
+!!      krank%free,wrtout
 !!
 !! NOTES
 !!
@@ -624,11 +629,10 @@ end subroutine elph_k_procs
 !!   gam_now = output gamma matrices multiplied by displacement matrices
 !!
 !! PARENTS
-!!      get_tau_k,m_phgamma,mka2f,mka2f_tr,mka2f_tr_lova,mkph_linwid,nmsq_gam
-!!      nmsq_gam_sumfs,nmsq_pure_gkk,nmsq_pure_gkk_sumfs,normsq_gkq
+!!      m_a2ftr,m_elphon,m_iogkk
 !!
 !! CHILDREN
-!!      zgemm
+!!      krank%free,wrtout
 !!
 !! SOURCE
 
@@ -673,10 +677,10 @@ end subroutine gam_mult_displ
 !!    gamma_qpt(2,nbranch**2,nsppol,nqpt_full)
 !!
 !! PARENTS
-!!      elphon,integrate_gamma_alt,m_phgamma
+!!      m_elphon,m_phgamma
 !!
 !! CHILDREN
-!!      zgemm
+!!      krank%free,wrtout
 !!
 !! SOURCE
 
@@ -920,10 +924,10 @@ end subroutine complete_gamma
 !!    gamma_qpt_tr(2,9,nbranch*nbranch,nsppol,nqpt_full)
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      dgemm
+!!      krank%free,wrtout
 !!
 !! SOURCE
 
@@ -1273,10 +1277,10 @@ end subroutine complete_gamma_tr
 !!       FStoqpt = mapping of kpoint pairs (1 irreducible and 1 full) to qpoints
 !!
 !! PARENTS
-!!      elphon,get_tau_k
+!!      m_a2ftr,m_elphon
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank,mkkptrank,wrtout
+!!      krank%free,wrtout
 !!
 !! SOURCE
 

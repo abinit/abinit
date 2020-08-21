@@ -303,6 +303,7 @@ contains
 !! PARENTS
 !!
 !! CHILDREN
+!!      outvars_scup
 !!
 !! SOURCE
 
@@ -506,9 +507,10 @@ end subroutine multibinit_dtset_init
 !!  multibinit_dtset <type(multibinit_dtset_type)> = multibinit_dataset structure
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
+!!      outvars_scup
 !!
 !! SOURCE
 
@@ -607,9 +609,10 @@ end subroutine multibinit_dtset_free
 !! Should be executed by one processor only.
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
+!!      outvars_scup
 !!
 !! SOURCE
 
@@ -2720,9 +2723,10 @@ end subroutine invars10
 !! Should be executed by one processor only.
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
+!!      outvars_scup
 !!
 !! SOURCE
 

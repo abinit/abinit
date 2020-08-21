@@ -109,7 +109,7 @@ contains
 !! the arrays kpt2 and kpt3 are equal.
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
 !!      dgelss,getkgrid,wrtout,xmpi_max

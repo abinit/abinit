@@ -34,7 +34,7 @@ nkptgw3     1
 kptgw3   0.0  0.0  1/4
 bdgw3    24  25
 zcut3     0.1 eV
-icutcoul3  3  # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul3  3  # old deprecated value of icutcoul, only used for legacy
 
 
 #################### COMMON PART #########################
@@ -87,7 +87,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc, 08o_001023.pspfhi"
+ pseudos "PseudosTM_pwteter/14si.pspnc, 08o_001023.pspfhi"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

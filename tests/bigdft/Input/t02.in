@@ -38,7 +38,7 @@
  prtwf  0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "01h.pspgth"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -211,18 +211,10 @@ contains
 !!  For example, the density has already been precomputed, so why to compute it again here ??
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
-!!      dotprod_vn,fftpac,fourdp,gpu_finalize_ffnl_ph3d,gpu_update_ffnl_ph3d
-!!      hartre,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
-!!      mag_penalty,make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi
-!!      mkrho,nonlop,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
-!!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhohxcpositron,rhotoxc,pawrhoij_symrhoij,timab
-!!      transgrid,xcdata_init,xmpi_sum
+!!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab
 !!
 !! SOURCE
 
@@ -363,7 +355,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,rhog,rprimd,vhartr)
+     call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfftf,ngfftf,&
+                 &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
      call xcdata_init(xcdata,dtset=dtset)
      ABI_ALLOCATE(kxc,(1,nkxc))
 !    to be adjusted for the call to rhotoxc
@@ -974,7 +967,7 @@ end subroutine energy
 !!   $= \langle C_n \mid H H \mid C_n \rangle- \langle C_n \mid H \mid C_n \rangle^2 $.
 !!
 !! PARENTS
-!!      energy
+!!      m_dft_energy
 !!
 !! CHILDREN
 !!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab

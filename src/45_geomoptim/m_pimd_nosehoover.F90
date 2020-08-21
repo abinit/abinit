@@ -86,10 +86,13 @@ contains
 !!    at output, values at time t+dt
 !!
 !! PARENTS
-!!      predict_pimd
+!!      m_predict_pimd
 !!
 !! CHILDREN
-!!      pimd_energies,pimd_initvel,pimd_print,pimd_stresses,xcart2xred
+!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
+!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_mass_spring
+!!      pimd_nosehoover_forces,pimd_nosehoover_propagate,pimd_predict_taylor
+!!      pimd_predict_verlet,pimd_print,pimd_stresses,wrtout,xcart2xred
 !!      xred2xcart
 !!
 !! SOURCE
@@ -273,7 +276,7 @@ end subroutine pimd_nosehoover_npt
 !!  Tuckerman, Marx, Klein, Parrinello, J. Chem. Phys. 104, 5579 (1996) [[cite:Tuckerman1996]]
 !!
 !! PARENTS
-!!      predict_pimd
+!!      m_predict_pimd
 !!
 !! CHILDREN
 !!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
