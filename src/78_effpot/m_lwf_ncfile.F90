@@ -166,7 +166,7 @@ contains
     !call ab_define_var(self%ncid, (/ self%ntime /), &
     !     &         self%time_id, NF90_DOUBLE, "time", "time", "s")
     call ab_define_var(self%ncid, (/ self%ntime /), &
-         &         self%etotal_id, NF90_DOUBLE, "etotal", "TOTAL energy", "Joule")
+         &         self%etotal_id, NF90_DOUBLE, "etotal", "TOTAL energy", "Ha")
     !call ab_define_var(self%ncid, (/ self%ntime /), &
     !     &         self%entropy_id, NF90_DOUBLE, "entropy", "Entropy", "Joule/K")
 

@@ -154,7 +154,7 @@
     call effpot%calculate( displacement=displacement, strain=strain, &
          & spin=spin, lwf=self%lwf, lwf_force=self%lwf_force, &
          & energy=self%energy, energy_table=energy_table)
-    print *, "Calculated energy", self%energy
+    !print *, "Calculated energy", self%energy/self%supercell%ncell
     do i = 1, self%nstep
        call self%run_one_mc_step(effpot)
     end do

@@ -185,7 +185,7 @@ contains
 !            & (self%Ek+self%energy)/self%supercell%ncell
 !       call wrtout(std_out,msg,'COLL')
 !       call wrtout(ab_out, msg, 'COLL')
-       write(msg, "(I13, 4X,  ES15.5)")  i, self%energy
+       write(msg, "(I13, 4X,  ES15.5)")  i, self%energy/self%supercell%ncell
        !            & (self%Ek+self%energy)/self%supercell%ncell
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
