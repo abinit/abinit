@@ -1,5 +1,5 @@
 
-.Version 9.1.2 of MULTIBINIT 
+.Version 9.1.6 of MULTIBINIT 
 .(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  4 Apr 2020.
-- ( at 14h24 )
+.Starting date : Fri 21 Aug 2020.
+- ( at 20h42 )
   
 -  nproc =    1
 
@@ -55,7 +55,7 @@
                 spin_sia_add           0
               spin_sia_k1amp    0.00000E+00
               spin_sia_k1dir    0.00000E+00    0.00000E+00    1.00000E+00
-      spin_projection_qpoint    0.00000E+00    0.00000E+00    0.00000E+00
+      spin_projection_qpoint    5.00000E-01    5.00000E-01    5.00000E-01
              spin_init_state           1
         spin_var_temperature           0
       spin_temperature_start        0.00000
@@ -1112,10 +1112,10 @@ Total energy                               5.43036E-01
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=        287.7  wall=        288.0
+- Proc.   0 individual time (sec): cpu=        295.5  wall=        296.9
 
 ================================================================================
 
-+Total cpu time    287.745  and wall time    288.020 sec
++Total cpu time    295.518  and wall time    296.899 sec
 
  multibinit : the run completed succesfully.
