@@ -34,7 +34,6 @@
 
 #include "abi_common.h"
 
-#define HAVE_NETCDF 1
 
 module m_spin_mover
 

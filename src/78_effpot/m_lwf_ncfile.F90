@@ -26,8 +26,6 @@
 
 #include "abi_common.h"
 
-#define HAVE_NETCDF 1
-
 module m_lwf_ncfile
 
   use defs_basis
