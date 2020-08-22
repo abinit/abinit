@@ -1,12 +1,12 @@
 # Crystalline silicon calculation of the GW corrections.
 # Using analytic continuation for Sigma
-# Dataset 1:  ground state calculation and of the WFK file for 16 k-points in IBZ
-# Dataset 2:  calculation of the screening with spectral method (15 real frequencies, 5 purely imaginary)
-# Dataset 3:  calculation of the Self-Energy matrix elements with convolution on the imaginary axis
-#             followed by analytic continuation.
+# Dataset 1:  ground state calculation for 6 k-points in IBZ
+# Dataset 2:  calculation of the screening for imaginary freqs (20 purely imaginary)
+# Dataset 3:  calculation of the Self-Energy matrix elements with Analytic Continuation
+# Dataset 4:  calculation of the Self-Energy matrix elements with Analytic Continuation and low-rank approximation
 #
 
-ndtset      3
+ndtset      4
 gwpara      2
 gwcalctyp   1
 
@@ -38,16 +38,25 @@ nband3       25
 nomegasi3    10        # No. of points for \Sigma(i\omega) sampled along the imaginary axis
 omegasimax3  40.0 eV 
 
+# Calculation of the Self-Energy matrix elements (GW corrections)
+optdriver4    4        # Self-Energy calculation
+getwfk4       1
+getscr4       2
+nband4       25
+nomegasi4    10        # No. of points for \Sigma(i\omega) sampled along the imaginary axis
+omegasimax4  40.0 eV 
 
-nkptgw3  2
-kptgw3
+gwaclowrank4 30        # Triggers the low-rank approximation with 30 eigenvectors (out of nwpeps=59)
+
+
+nkptgw  2
+kptgw
     0.00000000E+00  0.00000000E+00  0.00000000E+00
     5.00000000E-01  5.00000000E-01  0.00000000E+00
 
-bdgw3
+bdgw
     1  7    # Enclose all the degenerate states.
     1  7    # Enclose all the degenerate states.
-
 
 
 # Data common to the three different datasets
@@ -101,4 +110,5 @@ diemac  12.0
 #%%   Silicon
 #%%   One-shot GW with analytic continuation of Sigma(iw)
 #%%   convolution is performed on the imaginary axis = \int dw' G(iw+iw') W(iw')
+#%%   low-rank approximation is used in the last dataset
 #%%<END TEST_INFO>

@@ -55,7 +55,7 @@
 !! SUBROUTINE             cgeru zgeru    ---> XGERU(m,n,alpha,x,incx,y,incy,A,lda)
 !! SUBROUTINE             chbmv zhbmv    ---> XHBMV(uplo,n,k,alpha,A,lda,X,incx,beta,Y,incy)
 !! SUBROUTINE             chemv zhemv    ---> XHEMV(uplo,n,alpha,A,lda,X,incx,beta,Y,incy)
-!! SUBROUTINE             cher  zher     ---> XHER(uplo,n,alpha,x,incx,A,lda)
+!! * SUBROUTINE             cher  zher     ---> XHER(uplo,n,alpha,x,incx,A,lda)
 !! SUBROUTINE             cher2 zher2    ---> XHER2(uplo,n,alpha,x,incx,y,incy,A,lda)
 !! SUBROUTINE             chpr  zhpr     ---> XHPR(uplo,n,alpha,x,incx,AP)
 !! SUBROUTINE             chpr2 zhpr2    ---> XHPR2(uplo,n,alpha,x,incx,y,incy,AP)
@@ -117,6 +117,7 @@ MODULE m_hide_blas
 !BLAS2
  public :: xgemv
  public :: xgerc
+ public :: xher
 
 !BLAS3
  public :: xgemm
@@ -377,7 +378,7 @@ interface xgerc
     use defs_basis
     complex(spc),intent(in) :: alpha
     integer,intent(in) :: incx, incy, lda, m, n
-    complex(spc),intent(inout) ::  a( lda, * )
+    complex(spc),intent(inout) :: a( lda, * )
     complex(spc),intent(in) :: x( * ), y( * )
   end subroutine cgerc
   !
@@ -390,6 +391,30 @@ interface xgerc
   end subroutine zgerc
   !
 end interface xgerc
+
+!-------------------------------------------------------------------------------
+
+interface xher
+  !
+  subroutine cher ( uplo, n, alpha, x, incx, a, lda )
+    use defs_basis
+    character(len=1),intent(in) :: uplo
+    real(spc),intent(in) :: alpha
+    integer,intent(in) :: incx, lda, n
+    complex(spc),intent(inout) :: a( lda, * )
+    complex(spc),intent(in) :: x( * )
+  end subroutine cher
+  !
+  subroutine zher ( uplo, n, alpha, x, incx, a, lda )
+    use defs_basis
+    character(len=1),intent(in) :: uplo
+    real(dpc),intent(in) :: alpha
+    integer,intent(in) :: incx, lda, n
+    complex(dpc),intent(inout) :: a( lda, * )
+    complex(dpc),intent(in) :: x( * )
+  end subroutine zher
+  !
+end interface xher
 
 !-------------------------------------------------------------------------------
 
