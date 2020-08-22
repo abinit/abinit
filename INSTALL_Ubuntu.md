@@ -4,12 +4,16 @@ authors: J. Van Bever
 
 # How to install ABINIT on Ubuntu
 
-This file describes how to install ABINIT on Ubuntu. Other linux based systems are similar, but certainly the typical library structure can differ. Explicit testing was done with Ubuntu 19.10. The options presented here are installation by
+This file describes how to install ABINIT on Ubuntu. 
+The procedure for other Linux-based systems is similar, but the package manager and 
+the location of the libraries may differ. 
+Explicit testing was done with Ubuntu 19.10. 
+This page discusses how to install ABINIT with two different approaches:
 
- - Using apt
+ - Using the apt package manager
  - Compiling from source
 
-Other possibilities (such as installation using anaconda) are not discussed here.
+Other possibilities (such as installation using anaconda) are not discussed.
 
 ## Using apt
 
@@ -17,23 +21,25 @@ To install ABINIT, just type:
 
     sudo apt install abinit
 
-... type your user password and ABINIT should install smoothly with its dependencies.
+then enter your user password and ABINIT should install smoothly with its dependencies.
 
-WARNING!
+!!! warning
 
-* This version of ABINIT is most likely an older one.
+    This version of ABINIT is most likely an older one.
 
 ## Compiling from source under Ubuntu
 
 ### Background (optional section)
 
-The newest release of ABINIT is available at [https://www.abinit.org/packages](https://www.abinit.org/packages). Compilation from source enables one to optimize parallellism, customize linear algebra libraries etc. Any of the prerequired packages are available via apt. Simply type
+The newest release of ABINIT is available at [https://www.abinit.org/packages](https://www.abinit.org/packages). 
+Compilation from source enables one to optimize the build, activate MPI parallelism, customize linear algebra libraries etc. 
+All the required packages are available via apt. Simply type
 
     sudo apt install [package]
 
 If you want to search a package or look for more details about a package, you can use the commands `apt search` and `apt show` respectively.
 
-Packages can contain for example executable files that are placed in a bin folder (e.g. /usr/bin) and their location can be requested via the unix `which` command. For example
+Packages can install executable that are placed in a bin folder (e.g. /usr/bin) and their location can be requested via the unix `which` command. For example
 
     which gfortran
 
@@ -41,14 +47,14 @@ will show the location of the gfortran executable or nothing if the gfortran pac
 
 Other packages of interest are developer libraries (followed by `-dev`). Those contain among others
 
-  - header files (extension `.h`). Those constitute the interface for developpers and are most often put in an include folder (e.g. /usr/include).
+  - header files (extension `.h`). Those constitute the interface for developers and are most often put in an include folder (e.g. /usr/include).
   - library files (extension `.so`). Those provide the actual content of the library and are often put in a lib folder (e.g. /usr/lib).
 
 To obtain the locations of such files, one can use the unix command (from the dpkg package)
 
     dpkg -L [package]
 
-### Prerequesites
+### Prerequisites
 
 The prerequisites are first discussed qualitatively, because the exact installation of these might depend on the exact linux distribution. A possible list (tested for Ubuntu 19.10) is found at the end of this section.
 

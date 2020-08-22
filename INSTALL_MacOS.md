@@ -4,7 +4,7 @@ authors: M. Torrent
 
 # How to install ABINIT on Mac OS
 
-This file describes how to install ABINIT on Mac OS :
+This file describes how to install ABINIT on MacOS:
 
  - Using the Homebrew package manager
  - Using the MacPorts package manager
@@ -12,10 +12,15 @@ This file describes how to install ABINIT on Mac OS :
 
 ## Using [homebrew](http://brew.sh)
 
-Tested with mac OS X v10.12 (Sierra), 10.13 (High Sierra), 10.14 (Mojave)
-A Homebrew official formula for ABINIT is available on [ABINIT github repository](https://github.com/abinit).
+Tested with:
 
-### Prerequesites
+    1. mac OS X v10.12 (Sierra)
+    2. 10.13 (High Sierra)
+    3. 10.14 (Mojave)
+
+A Homebrew official formula for ABINIT is available in this [github repository](https://github.com/abinit/homebrew-tap).
+
+### Prerequisites
 
 1. Homebrew installed (see: <http://brew.sh/#install>)
 
@@ -29,15 +34,15 @@ To install ABINIT just type:
 
     brew install abinit
 
-... and ABINIT should install smoothly with its dependencies.
+and ABINIT should install smoothly with its dependencies.
 
 Note:
 
-* LibXC and netCDF fallbacks (plugins) are used by default.
+* the LibXC and netCDF fallbacks (plugins) are used by default.
   Wannier90 and BigDFT are not available in Homebrew.
   AtomPAW can be installed as a separate package (formula).
 
-* The following options are available for ABINIT formula:
+* The following options are available for the ABINIT formula:
 
       - --with-testsuite    --> Run full test suite (time consuming)
       - --without-check     --> Skip build-time tests (not recommended)
@@ -49,10 +54,10 @@ Note:
 
 ## Using [macports](http://www.macports.org)
 
-ABINIT is available on MacPorts project, not necessarily in its latest version.
+ABINIT is available on the MacPorts project, not necessarily in its latest version.
 Tested with mac OS X v10.8 (Mountain Lion) --> v10.14(Mojave)
 
-### Prerequesites:
+### Prerequisites:
 
 1. MacPorts installed (see <https://www.macports.org/install.php>)
 
@@ -78,15 +83,15 @@ By default, ABINIT is installed with the following plugins/fallbacks:
 
     libXC, Wannier90
 
-Linking ABINIT to FFTW3 library:
+To activate support for the FFTW3 library:
 
      sudo port install abinit @X.Y.Z +fftw3
 
-Linking ABINIT to parallel Linear Algebra ScaLapack:
+To link ABINIT with the parallel Linear Algebra ScaLapack:
 
      sudo port install abinit @X.Y.Z +scalapack
 
-Installing a multi-threaded (openMP) version of ABINIT:
+To install a multi-threaded (openMP) version of ABINIT:
 
      sudo port install abinit @X.Y.Z +threads
 
@@ -94,7 +99,7 @@ It is possible to mix all previous variants:
 
     sudo port install abinit @X.Y.Z +fftw3+threads+scalapack
 
-Other options available by typing:
+Other options available, see:
 
     port info abinit
 
@@ -110,12 +115,13 @@ Other options available by typing:
 
 3. A Fortran compiler installed. Possible options:
 
+      - [gfortran-for-macOS project](https://github.com/fxcoudert/gfortran-for-macOS/releases).
       - gfortran binary from: [http://hpc.sourceforge.net](http://hpc.sourceforge.net)
       - gfortran binary from: [https://gcc.gnu.org/wiki/GFortranBinaries#MacOS](https://gcc.gnu.org/wiki/GFortranBinaries#MacOS)
       - gfortran installed via a package manager (MacPorts, Homebrew, Fink)
       - Intel Fortran compiler
 
-4. A MPI library installed  (If you want to benefit from parallelism; recommended).
+4. A MPI library installed (if you want to benefit from parallelism; recommended).
    Possible options:
 
       - mpich from [http://www.mpich.org](http://www.mpich.org), or via a package manager
@@ -128,7 +134,8 @@ Other options available by typing:
 
 ### Installing ABINIT
 
-Download ABINIT. For normal users it is advised to get the newest version from our website (replace 9.0.4 by the newest version available).
+Download ABINIT. 
+For normal users it is advised to get the newest version from our website (replace 9.0.4 by the newest version available).
 
     wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
     tar xzf abinit-9.0.4.tar.gz

@@ -52,7 +52,7 @@ before moving to EPH computations.
 For further information about the difference between EPH and ANADDB, see also [[cite:Gonze2019]].
 Further details about the EPH implementation are available in [[cite:Brunin2020]].
 
-## Structure of an EPH calculation
+## EPH workflow
 
 A typical EPH workflow with arrows denoting dependencies between the different steps
 is schematically represented in the figure below:
@@ -98,7 +98,7 @@ The following physical properties can be computed:
 
 * Real and imaginary parts of the e-ph self-energy (**eph_task 4**) that gives access to:
 
-    * Zero-point renormalization of the band gap (ZPR)
+    * Zero-point renormalization of the band gap
     * Correction of the QP energies due to e-ph scattering
     * Spectral function $A(\ww)$ and Eliashberg functions
 
@@ -154,8 +154,7 @@ More specifically, in EPH the name of the DDB file is specified by
     In particular, the acoustic sum rule and charge neutrality are always enforced by the EPH code.
     It is responsability of the user to check whether the breaking of these sum rules (always
     present due to numerical inaccuracies) are reasonable.
-    By the same token, make sure that no vibrational instabilty is present in the phonon spectrum before
-    embarking on big EPH calculations.
+    By the same token, make sure that no vibrational instabilty is present before embarking on big EPH calculations.
 
 ### Variables for phonon DOS
 
@@ -169,11 +168,18 @@ the Gaussian smearing (in Hartree units by default).
 The final results are stored in the **PHDOS.nc** file (same format at the one produced by ANADDB).
 The computation of the PHDOS can be disabled by setting [[prtphdos]] = 0 to make the calculation a bit faster.
 
-In many cases, it is enough to add the following set of variables to compute the PHDOS.
+To summarize: to compute the PHDOS with the tetrahedron method and a 40x40x40 $\Gamma$-centered $\qq$-mesh, 
+one should use
 
 ```sh
 prtphdos 1  # 0 to disable this part.
 ph_ngqpt 40 40 40
+```
+
+To visualize the results with |AbiPy|, execute
+
+```sh
+abiopen.py out_PHDOS.nc -e
 ```
 
 ### Variables for phonon band structures
@@ -184,6 +190,8 @@ The [[ph_ndivsm]] variable defines the number of divisions used to sample the sm
 so that the number of points in each segment is proportional to the length.
 The computation of the phonon band structure can be deactivated by setting [[prtphbands]] = 0.
 The final results are stored in the **PHBST.nc** file (same format at the one produced by ANADDB).
+
+A typical section for phonon band structure looks like
 
 ```sh
 prtphbands 1
@@ -218,8 +226,8 @@ The scattering potential can be expressed as:
 where $\Delta_{\qq\nu} v^\KS(\rr)$ is a lattice periodic function [[cite:Giustino2017]].
 Note that ABINIT computes the response to the **atomic perturbation** defined by
 the three variables [[qpt]], [[rfdir]] and [[rfatpol]] when [[rfphon]] is set to 1.
-The connection between the phonon representation and the atomic perturbation employed by ABINIT is given by
-the equation
+The connection between the phonon representation and the atomic perturbation employed by the DFPT code 
+is given by:
 
 \begin{equation}
     \Delta_{\qq\nu} v^\KS(\rr) =
@@ -350,7 +358,7 @@ in semiconductors.
 
 In non-polar materials, the Born effective charges are zero but the scattering potentials are still non-analytic
 due to presence of jump discontinuities.
-As discussed in [[cite:Brunin2020]], the non-analytic behaviour can be fully captured by using:
+As discussed in [[cite:Brunin2020]], the non-analytic behaviour can be fully captured by using the more general expression:
 <!--
 In this case the leading term is associated to the dynamical quadrupoles [[cite:Royo2019]].
 The expression for the LR model including both dipole and quadrupole terms reads:
@@ -388,8 +396,8 @@ The Fourier interpolation implicitly assumes that the signal in $\RR$-space deca
 the quality of the *interpolated* phonon frequencies and of the *interpolated* DFPT potentials,
 between the ab-initio points depends on the spacing of the initial $\qq$-mesh that
 in turns defines the size of the Born-von-Karman supercell.
-In other words, the denser the DFPT mesh, the bigger the real-space supercell and the better the interpolation,
-especially for $\qq$-points far from $\Gamma$.
+In other words, the denser the DFPT mesh, the larger the real-space supercell and the better the interpolation,
+especially for $\qq$-points close to $\Gamma$.
 <!--
 In semiconductors the atomic displacement induces dynamical dipoles and quadrupoles at the level of the density
 that will generate long-range scattering potentials.
@@ -422,8 +430,8 @@ as well as the level of the wall-time.
 To optimize this part, one can decrease the value of [[boxcutmin]]
 to a value smaller than 2 e.g. 1.5 or the more aggressive 1.1 during the EPH calculation.
 Note that one is not obliged to run the GS/DFPT part with the same [[boxcutmin]].
-The EPH code will automatically interpolate the DFPT potentials if the FFT mesh defined in input differs
-from the one found in the DVDB file.
+The EPH code will automatically interpolate the DFPT potentials if the input FFT mesh computed from 
+[[ecut]] and [[boxcutmin]] differs from the one found in the DVDB file.
 <!--
 An exact representation of densities/potentials in $\GG$-space is obtained with [[boxcutmin]] = 2,
 but we found that using a value of 1.1 does not significantly affect the result

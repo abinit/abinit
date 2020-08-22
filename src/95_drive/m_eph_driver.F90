@@ -191,7 +191,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  real(dp),parameter :: k0(3)=zero
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
  real(dp) :: qdrp_cart(3,3,3,dtset%natom)
- real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:), kpt_efmas(:,:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
  type(efmasval_type),allocatable :: efmasval(:,:)
@@ -336,14 +335,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_wfk) then
    ! Construct crystal and ebands from the GS WFK file.
-   call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm)
+   ebands = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
    call wfk0_hdr%vs_dtset(dtset)
 
    cryst = wfk0_hdr%get_crystal()
    call cryst%print(header="crystal structure from WFK file")
-
-   ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
-   ABI_FREE(gs_eigen)
 
    ! Here we change the GS bands (Fermi level, scissors operator ...)
    ! All the modifications to ebands should be done here.
@@ -352,12 +348,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_wfq) then
    ! Read WFQ and construct ebands on the shifted grid.
-   call wfk_read_eigenvalues(wfq_path, gs_eigen, wfq_hdr, comm)
+   ebands_kq = wfk_read_ebands(wfq_path, comm, out_hdr=wfq_hdr)
    ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against dtset.
    !call wfq_hdr%vs_dtset(dtset)
-   ebands_kq = ebands_from_hdr(wfq_hdr, maxval(wfq_hdr%nband), gs_eigen)
    call wfq_hdr%free()
-   ABI_FREE(gs_eigen)
    call ephtk_update_ebands(dtset, ebands_kq, "Ground state energies (K+Q)")
  end if
 
