@@ -146,7 +146,7 @@ contains
     class(lwf_ncfile_t), intent(inout) :: self
     type(lwf_hist_t),intent(in) :: hist
     integer :: ncerr
-    ABI_UNUSED(hist)
+    ABI_UNUSED_A(hist)
 
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)

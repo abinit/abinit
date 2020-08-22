@@ -69,15 +69,15 @@ contains
     integer, intent(in) :: ix
     real(dp), intent(inout) :: dE
     integer :: inz, i, j, oi, oj
-    ABI_UNUSED(inz)
-    ABI_UNUSED(i)
-    ABI_UNUSED(j)
-    ABI_UNUSED(oi)
-    ABI_UNUSED(oj)
-    ABI_UNUSED(coeff)
-    ABI_UNUSED(x)
-    ABI_UNUSED(ix)
-    ABI_UNUSED(dE)
+    ABI_UNUSED_A(inz)
+    ABI_UNUSED_A(i)
+    ABI_UNUSED_A(j)
+    ABI_UNUSED_A(oi)
+    ABI_UNUSED_A(oj)
+    ABI_UNUSED_A(coeff)
+    ABI_UNUSED_A(x)
+    ABI_UNUSED_A(ix)
+    ABI_UNUSED_A(dE)
   end subroutine get_twobody_delta_E
 
 end module m_twobody_interaction
