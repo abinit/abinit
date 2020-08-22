@@ -200,8 +200,8 @@ contains
     class(spin_potential_t), intent(inout) :: self
     real(dp), intent(out) :: Heff(:,:)
     integer :: i
-     do i= self%mps%istart, self%mps%iend
-       Heff(:, i)=Heff(:,i) + self%external_hfield(:, i)
+    do i= self%mps%istart, self%mps%iend
+      Heff(:, i)= self%external_hfield(:, i)
     end do
   end subroutine calc_external_Heff
 
@@ -357,13 +357,14 @@ contains
 
     ! linear terms
     if (self%has_external_hfield) then
+        self%Htmp(:,:)= 0.0_dp
        call self%calc_external_Heff(self%Htmp)
-        do i= self%mps%istart, self%mps%iend
+         do i= self%mps%istart, self%mps%iend
            Heff(:,i)=Heff(:,i)+self%Htmp(:,i)
            do j=1, 3
               etmp=etmp-(self%Htmp(j, i)*S(j,i)*self%ms(i))
            end do
-        enddo
+         enddo
     endif
 
     call xmpi_sum_master(etmp, 0, xmpi_world, ierr )
