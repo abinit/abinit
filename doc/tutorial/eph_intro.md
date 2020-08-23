@@ -484,10 +484,10 @@ There are however physical properties whose computation does not require the kno
 of the KS states for each $\kk$-point in the IBZ.
 For instance, the computation of mobilities in semiconductors require the knowledge of the KS states whose energy
 is slight above (below) the CMB (VBM), let's say ~0.2 eV.
-In metals, only states close the Fermi level are needed to compute superconducting properties with the standard formalism.
+In metals, only states close to the Fermi level are needed to compute superconducting properties with the standard formalism.
 In other words, several EPH calculations in which delta functions are involved require extremely dense BZ meshes
 to converge but as a matter of fact only a **relatively small fraction of the BZ compatible with energy and crystalline-momentum
-convervation is nededed**.
+conservation is nededed**.
 
 At this point a question naturally arises: can we avoid the NSCF computation of $\kk$-points that
 are supposed to give negligible contribution to the final physical results?

@@ -11,7 +11,7 @@ Explicit testing was done with __CentOS 8.2__
 [Quick Guide for the Impatient](#quick-guide-for-the-impatient)<br />
 [Quick Guide for the Impatient (MKL version)](#quick-guide-for-the-impatient-mkl-version)
 
-## Prerequesites
+## Prerequisites
 
 1.  __A fortran compiler__<br />
    Possible options:       
@@ -38,7 +38,7 @@ Explicit testing was done with __CentOS 8.2__
      - Wannier90  ([http://www.wannier.org/](http://www.wannier.org/)) (**recommended**)
      - LibPSML ([https://esl.cecam.org/PSML](https://esl.cecam.org/PSML)) + xmlf90 ([https://gitlab.com/siesta-project/libraries/xmlf90](https://gitlab.com/siesta-project/libraries/xmlf90))
 
-## Installation of tools and librairies
+## Installation of tools and libraries
 
 All mandatory libraries are installed through the DNF package manager.<br />
 Concerning some optional libraries, it will be necessary to compile them from the sources.
@@ -66,19 +66,19 @@ for __a simple parallel ABINIT__ compilation ( mandatory libraries, MPICH, fftw3
 6. __python interpreter__<br />
     `sudo dnf install python3`
 
-__!!! Important :__
+__!!! Important:__
 
 Before continuing, it is important to test if your development environment is properly configured.<br />
-For example, to check if the MPICH package is functional, you can execute the following command :
+For example, to check if the MPICH package is functional, you can execute the following command:
 
     mpif90 --version
 
-If the output is :
+If the output is:
 
     bash: mpif90: command not found...
 
 then, you need to find out where the MPI wrappers are installed...<br />
-When you installed the MPICH package via dnf, all directories can be displayed by using this command :
+When you installed the MPICH package via dnf, all directories can be displayed by using this command:
 
     rpm -ql mpich-devel | grep mpif90
 
@@ -86,7 +86,7 @@ the output is
 
     /usr/lib64/mpich/bin/mpif90
 
- __The $PATH variable need to be updated__ :
+ __The $PATH variable need to be updated__:
 
      export PATH=/usr/lib64/mpich/bin:$PATH
 
@@ -120,7 +120,7 @@ __Compile with__:
 
     make -j 4
 
-__!!! Tip :__
+__!!! Tip:__
 
     '-j 4'  means that 4 cores are used to compile but you can use more
 
@@ -129,9 +129,9 @@ __Testing with__:
     cd tests
     ./runtests.py fast -j 4
 
-__!!! Important :__
+__!!! Important:__
 
-The end of the test output __must__ be something like :
+The end of the test output __must__ be something like:
 
     Suite   failed  passed  succeeded  skipped  disabled  run_etime  tot_etime
     fast         0       0         11        0         0      27.72      27.98
@@ -139,7 +139,7 @@ The end of the test output __must__ be something like :
     Completed in 9.95 [s]. Average time for test=2.52 [s], stdev=2.94 [s]
     Summary: failed=0, succeeded=11, passed=0, skipped=0, disabled=0
 
-otherwise there is a __problem__ with the compilation : see [Troubleshooting](#troubleshooting)
+otherwise there is a __problem__ with the compilation: see [Troubleshooting](#troubleshooting)
 
 __Install__ (optional):
 
@@ -148,12 +148,12 @@ __Install__ (optional):
 ## The config file
 
 The configure command takes as input some variables and flags.<br />
-For example :
+For example:
 
     ../configure --with-mpi="yes"
 
 tells ABINIT to enable MPI support.<br />
-Any variable or flag can be found by typing :
+Any variable or flag can be found by typing:
 
     ../configure --help
 
@@ -171,7 +171,7 @@ __!!! Important !!!__
     Following these simple rules, the configure option `--with-mpi` becomes `with_mpi`
     in the ac file.
 
- The `.ac` file for __our simple parallel ABINIT__ using OpenBLAS can be written as :
+ The `.ac` file for __our simple parallel ABINIT__ using OpenBLAS can be written as:
 
     # installation location
     prefix=$HOME/local
@@ -200,7 +200,7 @@ __!!! Important !!!__
 
 ## To go further
 
-- compiling optional librairies with fallback project : Wannier90, libPSML/XMLF90,...
+- compiling optional libraries with fallback project: Wannier90, libPSML/XMLF90,...
 - enabling OpenMP
 - using libxml2
 
@@ -210,7 +210,7 @@ __------------------------------------------------------------------------------
 
 ## Quick Guide for the Impatient
 
-We will build ABINIT with the following components :
+We will build ABINIT with the following components:
 
 - GNU compilers
 - MPICH
@@ -238,7 +238,7 @@ We will build ABINIT with the following components :
 
 ### Creating a config file
 
-Edit a `config.ac` file  :
+Edit a `config.ac` file:
 
     # installation location
     prefix=$HOME/local
@@ -285,7 +285,7 @@ __------------------------------------------------------------------------------
 
 ## Quick Guide for the Impatient (MKL version)
 
-We will build ABINIT with the following components :
+We will build ABINIT with the following components:
 
 - GNU compilers
 - MPICH
@@ -310,7 +310,7 @@ We will build ABINIT with the following components :
 
 ### Creating a config file
 
- Edit a `config.ac` file  :
+ Edit a `config.ac` file:
 
     # installation location
     prefix=$HOME/local

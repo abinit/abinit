@@ -184,7 +184,7 @@ bdgw   4 5    # [2, nkptgw] arary giving the initial and the last band index
 as the index of the valence band is given by 8 / 2 = 4.
 Obviously this input file will only provide the ZPR of the optical gap as Si has an indirect bandgap.
 
-Alternatively, one can use [[gw_qprange]] or [[sigma_erange]]
+Alternatively, one can use [[gw_qprange]] or [[sigma_erange]].
 Note that [[gw_qprange]] is mainly used to compute all the corrections for the occupied states plus
 some conduction states while [[sigma_erange]] is usually employed for transport calculations with [[eph_task]] = -4.
 
@@ -219,8 +219,8 @@ A typical workflow for ZPR calculations requires the following steps:
    that will be used to perform the Fourier interpolation of the dynamical matrix and of the DFPT potentials.
    In the simplest case, the DFPT part uses the WFK produced in step #1
    provided the $\qq$-mesh is a submesh of the GS $\kk$-mesh.
-   Remember to compute $\epsilon^{\infty}$, $Z^*$ (if polar) and $Q^*$ as these quantities are needed for an accurate
-   interpolation of phonon frequencie and DFPT potentials.
+   Remember to compute $\epsilon^{\infty}$, $Z^*$ (polar materials) and $Q^*$ as these quantities are needed for an accurate
+   interpolation of phonon frequencies and DFPT potentials.
 
 3. **NSCF computation** of a WFK file on a much denser $\kk$-mesh containing the wavevectors
    for which phonon-induced QP corrections are wanted. This calculation will use the DEN file produced in step #1.
@@ -229,7 +229,7 @@ A typical workflow for ZPR calculations requires the following steps:
 
 4. **Merge the partial DDB and POT files** with *mrgddb* and *mrgdvdb*, respectively
 
-5. **Start from the DDB/DVDB files produced in step $4 and the WFK file** obtained in step #3
+5. **Start from the DDB/DVDB files produced in step #4 and the WFK file** obtained in step #3
    to perform ZPR calculations with [[eph_task]] 4.
 
 ## Getting started
@@ -275,11 +275,13 @@ corresponding to a $\Gamma$-centered 6x6x6 mesh.
 This is the |AbiPy| script used to automate the GS + DFPT calculation:
 -->
 
-### How to extract useful info from the output files
+### How to extract useful info from the precomputed output files
 
+<!--
 If what follows, we pretend we know nothing about MgO so that we can explain how to use
 abitk and netcdf files to inspect the results of the previous calculations.
 and use this piece of info to continue our calculations.
+-->
 
 The input file of the GS run is stored in the DEN.nc file (*input_string* netcdf variable).
 One can easily access the value of this variable using the *ncdump* utility and the syntax:
@@ -334,7 +336,7 @@ abitk ebands_gaps flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
 
     In this case, abitk reports the gaps computed from a $\kk$-mesh as the DEN file can only be produced
     by a SCF calculation that requires an BZ-mesh.
-    **The results for MgO are OK simply because the CBM/VBM are at the $\Gamma$ point and this point
+    The results for MgO are OK simply because the CBM/VBM are at the $\Gamma$ point and **this point
     belongs to our $\kk$-mesh**.
     Other systems (e.g. Si) may have the CBM/VBM at wavevectors that are not easily captured with a homogeneous mesh.
     **The most reliable approach to find the location of the CBM/VBM is to perform a band structure calculation
@@ -377,7 +379,7 @@ abitk hdr_print MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
 
 to print the header. Use `--prtvol 1` to output more records.
 
-### Executing mrgddb
+### Executing mrgddb and mrgdv
 
 First of all, let's merge the partial DDB files with
 
@@ -389,9 +391,7 @@ using the following input file:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_1.in %}
 
-that lists the **relative paths** of the different partial DDB files and the syntax:
-
-### Executing mrgdv
+that lists the **relative paths** of the different partial DDB files.
 
 Now we can merge the DFPT potential with the *mrgdv* tool using the following input file:
 
@@ -409,12 +409,12 @@ mrgdvdb < teph4zpr_2.in
     particular $\qq$-point.
 
     ```fortran
-    percase = idir + ipert
+    pertcase = idir + ipert
     ```
 
-    *idir* species the reduced direction ([1, 2, 3])
-    whereas *ipert* specifies the perturbation type (from 1 up to [[natom]] if atomic displacement)
-    All DFPT POT files with 1 <= index <= 3 x [[natom]] correspond to atomic pertubations.
+    wher *idir* species the reduced direction ([1, 2, 3])
+    and *ipert* specifies the perturbation type (from 1 up to [[natom]] if the perturbation is an atomic displacement)
+    All DFPT POT files with 1 <= index <= 3 x [[natom]] therefore correspond to atomic pertubations.
 
 In the output file produced by mrgdv
 
@@ -580,7 +580,7 @@ The mesh for electrons ([[ngkpt]], [[nshiftk]] and [[shiftk]]) is the one used t
 [[ddb_ngqpt]] is set to 4x4x4 as this is the $\qq$-mesh we used in the DFPT part to generate the DDB and DVDB file.
 but the integration in $\qq$-space is performed with the [[eph_ngqpt_fine]] mesh.
 As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically activate
-the interpolation of the DFPT potentials as discussed in [introduction page for the EPH code](eph_intro).
+the interpolation of the DFPT potentials as discussed in the [introduction page for the EPH code](eph_intro).
 The $\qq$-space integration is defined by [[eph_intmeth]] and [[zcut]]
 
 We can now have a look at the main output file.
