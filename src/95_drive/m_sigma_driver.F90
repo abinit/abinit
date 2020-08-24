@@ -67,7 +67,7 @@ module m_sigma_driver
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
                              get_bz_item, has_IBZ_item, find_qmesh
  use m_gsphere,       only : gsphere_t, gsph_init, gsph_free, merge_and_sort_kg, gsph_extend, setshells
- use m_kg,            only : getph
+ use m_kg,            only : getph,getcut
  use m_xcdata,        only : get_xclevel
  use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
@@ -226,9 +226,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- real(dp):: gwalpha,gwbeta,wmin,wmax,eik_new,rcut  ! MRM
- complex(dpc) :: max_degw,cdummy,delta_band_ibik   ! MRM
- logical :: wfknocheck                             ! MRM
+ real(dp):: gwalpha,gwbeta,wmin,wmax,eik_new,rcut,gsqcut,boxcut,ecutf  ! MRM
+ complex(dpc) :: max_degw,cdummy,delta_band_ibik          ! MRM
+ logical :: wfknocheck                                    ! MRM
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname ! MRM
@@ -2577,8 +2577,16 @@ endif
        !
        ! Coulomb <KS_i|Vh[NO]|KS_j>
        !
-       call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog 
-       call hartre(1,gsqcutf_eff,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,gw_rhog,Cryst%rprimd,gw_vhartr) ! Build Vhartree -> gw_vhartr
+       call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog
+       ecutf=dtset%ecut
+       if (psps%usepaw==1) then
+         ecutf=dtset%pawecutdg
+         call wrtout(std_out,ch10//' FFT (fine) grid used in GW update:','COLL')
+       end if
+       call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
+       call hartre(1,gsqcut,dtset%icutcoul,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,dtset%nkpt,dtset%rcut,gw_rhog,&
+       Cryst%rprimd,dtset%vcutgeo,gw_vhartr)                                                            ! Build Vhartree -> gw_vhartr
+
        ABI_MALLOC(tmp_kstab,(2,Wfd%nkibz,Wfd%nsppol))
        tmp_kstab=0
        do spin=1,Sigp%nsppol
