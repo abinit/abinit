@@ -1189,34 +1189,34 @@ Problems can appear at different levels:
 
 * configuration time
 * compilation time
-* runtime when executing the code
+* runtime *i.e.* when running the code
 
-Configuration-time errors are usually due to misconfiguration of your environment, missing dependencies
-or problems in the software stack that will make configure abort.
-Unfortunately, the error message reported by configure is not always self-explanatory.
+**Configuration-time errors** are usually due to misconfiguration of your environment, missing (hard) dependencies
+or problems in the software stack that will make *configure* abort.
+Unfortunately, the error message reported by *configure* is not always self-explanatory.
 To pinpoint the source of the problem you will need inspect *config.log* for possible errors messages,
 especially the error messages associated to the feature/library that triggers the error.
-This is not as easy as it looks since configure sometimes performs multiple tests to detect your architecture
+This is not as easy as it looks since *configure* sometimes performs multiple tests to detect your architecture
 and some of these tests are supposed to fail.
 As a consequence, not all the error messages reported in *config.log* are necessarily relevant.
-Even if you find the test that makes configure abort, the error message may be obscure and difficult to decipher.
+Even if you find the test that makes *configure* abort, the error message may be obscure and difficult to decipher.
 In this case, you can ask for help on the forum but remember to provide enough info on your architecture, the
-compilation options and, most Importantly, a copy of config.log.
+compilation options and, most Importantly, a copy of *config.log*.
+Without this file, indeed, it is almost impossible to understand what's going on.
 
-Compilation-time errors are usually due to syntax errors, portability issues or
+**Compilation-time errors** are usually due to syntax errors, portability issues or
 Fortran constructs that are not supported by your compiler.
 In the first two cases, please report the problem on the forum. In the later case, you will need to use
 a more recent version of the compiler.
-Sometimes the compilation abort with ah "internal compiler error" that should be considered a bug in the compiler
-rather than a problem in the ABINIT source code.
-Decreasing the optimization level for the routine that triggers the error message
+Sometimes the compilation abort with an **internal compiler error** that should be considered 
+a bug in the compiler rather than a problem in the ABINIT source code.
+Decreasing the optimization level when compiling the routine that triggers the error message
 (-O2 or even -O1, -O0 for the most problematic cases) may solve the problem.
 
-Runtime errors are more difficult to fix as they may require the use of a debugger or some basic
+**Runtime errors** are more difficult to fix as they may require the use of a debugger or some basic
 understanding of Linux signals.
-
-If the code raises the SIGILL signal,
-it means that the CPU attempted to execute an instruction it didn't understand.
+If the code raises the **SIGILL** signal, it means that the CPU attempted to execute 
+an instruction it didn't understand.
 Very likely, your executables/libraries have been compiled for the wrong architecture.
 This may happen on clusters when the CPU family available on the frontend differs from the one available on the compute node
 and aggressive optimization options are used (-O3, --march=tune etc).
@@ -1224,10 +1224,19 @@ Removing the optimization options and using the much safer -O2 level may help.
 Alternatively, one can compile the source directly on the compute node or use compilation options
 compatible both with the frontend and the compute node (ask your sysadmin).
 
-Segmentation faults (SIGSEV) are usually due to bugs in the code but they may also be
+Segmentation faults (**SIGSEGV**) are usually due to bugs in the code but they may also be
 triggered by non-portable code or misconfiguration of the software stack.
+When reporting this kind of problem on the forum without, please add an input file that can be used by the developers 
+to reproduce the problem.
+Note also that the problem may not be easy to reproduce on other architectures.
+The ideal solution would be to run the code under the control of the debugger so that it is possible
+use the backtrace to locate the line of code where the segmentation fault occurs.
+Using the debugger in sequential is really simple.
+First of all, make sure that the code has been compiled with the `-g` option.
+One should also avoid debugging code compiled with `-O3` or `-Ofast` as the backtrace may not be 
+reliable.
 
-How to use gdb
+To use the GNU debugger `gdb`, perform the following operations:
 
 <!--
 How to use LLDB
@@ -1255,7 +1264,7 @@ enable_zdot_bugfix="yes"
 On intel-based clusters, we suggest to compile ABINIT with the intel compilers and the MKL library
 in order to achieve better performance.
 The MKL library, indeed, provides highly-optimized implementations for BLAS, LAPACK, FFT, and SCALAPACK
-that can lead to a significant speedup while simplifying considerably the compilation process.
+that can lead to a **significant speedup** while simplifying considerably the compilation process.
 
 In what follows, we assume a cluster in which the sysadmin has already installed all the modules
 (compilers, MPI and libs) required to compile ABINIT.
@@ -1318,36 +1327,41 @@ when we start to trigger **limitations or bottlenecks in the MPI implementation*
 especially at the level of the memory requirements or in terms of parallel scalability.
 These problems are usually observed in large calculations, that is large [[natom]], [[mpw]], [[nband]]).
 As a matter of fact, it does not make any sense to compile ABINIT with OpenMP if your calculations are relatively small.
-ABINIT, indeed, is mainly designed with MPI-parallelism in mind.
+Indeed, ABINIT is mainly designed with MPI-parallelism in mind.
 Calculations with a relatively large number of $\kk$-points will benefit more of MPI than OpenMP,
 especially if the number of MPI processes divides exactly the number of $\kk$-points.
 Even worse, do not compile the code with OpenMP support if you do not plan to use threads because the OpenMP
 version will have an additional overhead due to the creation of the threaded sections.
-Remember also that increasing the number of threads does not necessarily leads to faster calculations.
+Remember also that increasing the number of threads does not necessarily leads to faster calculations 
+and the same is true for MPI.
 There's always an optimal value for the number of threads beyond which the parallel efficiency start to decrease.
 Unfortunately, this value is strongly hardware and software dependent so you will need to benchmark the code
 before running production calculations.
 
-After this necessary preamble, let's discuss how to compute a threaded version.
+After this necessary preamble, let's discuss how to compile a threaded version.
 To activate OpenMP support in the Fortran routines of ABINIT, pass
 
 ```sh
 enable_openmp="yes"
 ```
 
-to the configure script.
+to the configure script via the configuration file.
+This will automatically activate the compilation option needed to enable OpenMP support in the ABINIT source code
+(`-fopenmp` for *gfortran*).
+Note that this option is just part of the story as a significant fraction of the wall-time is spent in external 
+BLAS/FFT routines so do not expect big speedups if you do not use threaded libraries.
 
 If you are building your own software stack for BLAS/LAPACK and FFT, you will need to
-configure/make/make install again to get the threaded version.
+use the configure with the correct options for the OpenMP version and then 
+make/make install again to have the threaded version.
 Also the name of libraries may change.
-FFTW3, for example, ships the OpenMP version in libfftw3_omp
-(see the [official documentation](http://www.fftw.org/fftw3_doc/Installation-and-Supported-Hardware_002fSoftware.html#Installation-and-Supported-Hardware_002fSoftware) so FFTW3_LIBS must be changed accordingly.
+FFTW3, for example, ships the OpenMP version in *libfftw3_omp*
+(see the [official documentation](http://www.fftw.org/fftw3_doc/Installation-and-Supported-Hardware_002fSoftware.html#Installation-and-Supported-Hardware_002fSoftware) hence **FFTW3_LIBS** should be changed accordingly.
 
 Life is much easier if you are using intel MKL because in this case
 it is just a matter of selecting *OpenMP threading* as threading layer
 in the [mkl-link-line-advisor interface](https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor)
-and then pass the link line and the compiler options to the ABINIT build system together with
-`enable_openmp="yes"`.
+and then pass the link line and the compiler options to the ABINIT build system together with `enable_openmp="yes"`.
 
 
 !!! Important
@@ -1355,12 +1369,14 @@ and then pass the link line and the compiler options to the ABINIT build system 
     When using threaded libraries remember to set explicitly the number of threads with e.g.
 
     ```sh
-    export OMP_NUM_THREADS=1
+    export OMP_NUM_THREADS=2
     ```
 
     either in your bash_profile or in the submission script.
     By default, indeed, OpenMP uses all the cores available on the system so it's very easy to overload
     the system especially when one starts to use threads in conjunction with MPI processes.
+
+    To run the TestSuite with threads, use e.g. the `-o2` option of *runtests.py*
 
     We also recommend to increase the limit of the stack size using e.g.
 
