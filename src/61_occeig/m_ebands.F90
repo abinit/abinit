@@ -365,8 +365,10 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
+!!      abitk
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -542,9 +544,9 @@ end function ebands_get_gaps
 !!  Free the memory allocated in gaps_t
 !!
 !! PARENTS
-!!      m_sigmaph,setup_sigma
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -591,9 +593,9 @@ end subroutine gaps_free
 !!  Only writing.
 !!
 !! PARENTS
-!!      m_sigmaph,setup_sigma
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -705,10 +707,11 @@ end subroutine gaps_print
 !!  %entropy and %fermie initialized to zero.
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gstate,m_ebands,mlwfovlp_qp,optic,outscfcv
-!!      setup_bse,setup_bse_interp,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_lw,m_ebands,m_eig2d,m_gstate
+!!      m_mlwfovlp_qp,m_outscfcv,m_screening_driver,m_sigma_driver,optic
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -929,12 +932,14 @@ end function ebands_from_dtset
 !!  Deallocate the dynamic arrays in the ebands_t type.
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,eig2tot,elphon,eph,fold2Bloch,gstate
-!!      m_ebands,m_exc_spectra,m_haydock,m_ioarr,m_iowf,m_shirley,m_sigmaph
-!!      m_wfk,mlwfovlp_qp,nonlinear,optic,outscfcv,respfn,screening,sigma
-!!      wfk_analyze
+!!      abitk,fold2Bloch,m_bethe_salpeter,m_ddk,m_dfpt_looppert,m_dfpt_lw
+!!      m_ebands,m_eig2d,m_elphon,m_eph_double_grid,m_eph_driver,m_exc_spectra
+!!      m_gstate,m_haydock,m_ioarr,m_iowf,m_longwave,m_mlwfovlp_qp,m_nonlinear
+!!      m_outscfcv,m_respfn_driver,m_rta,m_screening_driver,m_sigma_driver
+!!      m_sigmaph,m_sigtk,m_wfk,m_wfk_analyze,optic
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -977,10 +982,11 @@ end subroutine ebands_free
 !!  obands<ebands_t>=The copy.
 !!
 !! PARENTS
-!!      m_exc_spectra,m_haydock,m_sigmaph,optic,screening,setup_bse
-!!      setup_bse_interp,sigma
+!!      m_bethe_salpeter,m_ebands,m_eph_double_grid,m_exc_spectra,m_haydock
+!!      m_screening_driver,m_sigma_driver,m_sigmaph,optic
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1044,6 +1050,12 @@ end subroutine ebands_copy
 !!  Transfer allocate from `from_ebands` to `to_ebands`.
 !!  `from_ebands` is destroyed when the routine returns.
 !!
+!! PARENTS
+!!      m_rta
+!!
+!! CHILDREN
+!!      wrap2_zero_one
+!!
 !! SOURCE
 
 subroutine ebands_move_alloc(from_ebands, to_ebands)
@@ -1081,9 +1093,10 @@ end subroutine ebands_move_alloc
 !!  Only writing
 !!
 !! PARENTS
-!!      eph,setup_bse,setup_bse_interp,wfk_analyze
+!!      abitk,m_bethe_salpeter,m_ephtk,m_sigtk,m_wfk,m_wfk_analyze
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1186,9 +1199,10 @@ end subroutine ebands_print
 !!   number of bands really used for a particular k-point and spin.
 !!
 !! PARENTS
-!!      cchi0q0_intraband,m_ebands,m_ioarr,m_iowf
+!!      m_chi0,m_ebands,m_ioarr,m_iowf
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1250,9 +1264,10 @@ end subroutine unpack_eneocc
 !!   considered at each k-point and spin are copied.
 !!
 !! PARENTS
-!!      cchi0q0_intraband,m_ebands,m_shirley
+!!      m_chi0,m_ebands
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1309,6 +1324,7 @@ end subroutine pack_eneocc
 !!      m_ebands
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1367,9 +1383,10 @@ end subroutine get_eneocc_vect
 !!  ebands<ebands_t>=The object with updated values depending on the value of arr_name
 !!
 !! PARENTS
-!!      dfpt_looppert,m_ebands
+!!      m_dfpt_looppert,m_ebands
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1674,9 +1691,10 @@ end function ebands_vcbm_range_from_gaps
 !!   %fermi_energy
 !!
 !! PARENTS
-!!      screening,setup_bse,setup_bse_interp
+!!      m_bethe_salpeter,m_ephtk,m_screening_driver,m_sigmaph
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1826,9 +1844,10 @@ end function ebands_get_occupied
 !!    Output: All the denerate states are between ibmin and ibmax
 !!
 !! PARENTS
-!!      m_sigmaph,setup_sigma
+!!      m_sigma_driver,m_sigmaph
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1920,6 +1939,7 @@ end subroutine ebands_enclose_degbands
 !! PARENTS
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2199,10 +2219,11 @@ end function ebands_write_bxsf
 !!   %entropy=Set to zero
 !!
 !! PARENTS
-!!      bethe_salpeter,elphon,eph,get_nv_fs_temp,get_tau_k,m_ebands,optic
-!!      screening,setup_bse,setup_bse_interp,setup_sigma,sigma
+!!      abitk,m_a2ftr,m_bethe_salpeter,m_ebands,m_elphon,m_ephtk
+!!      m_screening_driver,m_sigma_driver,m_sigtk,m_wfk,optic
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2364,9 +2385,10 @@ end subroutine ebands_update_occ
 !!  by another call to set_nelect (update_occ is expensive for large k-meshes). Default: True.
 !!
 !! PARENTS
-!!      eph,m_sigmaph
+!!      abitk,m_ebands,m_ephtk,m_sigmaph
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2428,9 +2450,10 @@ end subroutine ebands_set_scheme
 !! Use ebands_set_scheme before calling this routine, if you have a semiconductor.
 !!
 !! PARENTS
-!!      eph
+!!      m_ephtk
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2515,8 +2538,10 @@ end subroutine ebands_set_fermie
 !! Use ebands_set_scheme before calling this routine, if you have a semiconductor.
 !!
 !! PARENTS
+!!      abitk,m_ephtk,m_sigmaph
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2569,8 +2594,10 @@ end subroutine ebands_set_nelect
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_rta,m_sigmaph
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2707,13 +2734,10 @@ end function ebands_calc_nelect
 !!      1.0dp if the gap has been computed.
 !!
 !! PARENTS
-!!      gstate,m_exc_diago,m_sigmaph,setup_bse,setup_bse_interp,setup_sigma
-!!      sigma
-!!
-!! TODO
-!!  Can be replaced by ebands_print_gaps
+!!      m_bethe_salpeter,m_exc_diago,m_gstate,m_sigma_driver
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3246,9 +3270,9 @@ end function ebands_get_edos
 !!  Free the memory allocated in edos_t
 !!
 !! PARENTS
-!!      eph
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3285,9 +3309,9 @@ end subroutine edos_free
 !!  Only writing.
 !!
 !! PARENTS
-!!      eph
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3446,9 +3470,9 @@ end function edos_ncwrite
 !!  Only writing.
 !!
 !! PARENTS
-!!      eph
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3640,6 +3664,7 @@ end function ebands_write_nesting
 !!      m_wfk
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3988,8 +4013,10 @@ end function ebands_chop
 !!  ebands<ebands_t> = Object with input energies sorted in output.
 !!
 !! PARENTS
+!!      m_ebands
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -4933,6 +4960,7 @@ end function jdos_ncwrite
 !! PARENTS
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -4971,9 +4999,10 @@ end subroutine jdos_free
 !!  (only writing, printing)
 !!
 !! PARENTS
-!!      eph,outscfcv
+!!      m_eph_driver,m_outscfcv
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5187,9 +5216,10 @@ end subroutine ebands_prtbltztrp
 !!  (only writing, printing)
 !!
 !! PARENTS
-!!      get_tau_k
+!!      m_a2ftr
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5377,9 +5407,10 @@ end subroutine ebands_prtbltztrp_tau_out
 !!  Only writing.
 !!
 !! PARENTS
-!!      eph,m_ebands,outscfcv
+!!      abitk,m_ebands,m_eph_driver,m_outscfcv
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5439,6 +5470,7 @@ end subroutine ebands_write
 !!      m_ebands
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5569,6 +5601,7 @@ end subroutine ebands_write_xmgrace
 !!      m_ebands
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5700,7 +5733,10 @@ end subroutine ebands_write_gnuplot
 !! OUTPUT
 !!
 !! PARENTS
-!!      outscfcv,sigma
+!!      m_outscfcv,m_sigma_driver,m_wfk_analyze
+!!
+!! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5905,6 +5941,7 @@ end function klinterp_new
 !! PARENTS
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5936,6 +5973,7 @@ end subroutine klinterp_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      wrap2_zero_one
 !!
 !! SOURCE
 

@@ -250,10 +250,10 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -409,10 +409,10 @@ end subroutine write_sigma_header
 !!  (for writing routines, no output) otherwise, should be described
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 !!
@@ -631,7 +631,7 @@ end function gw_spectral_function
 !!      m_sigma
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -783,7 +783,7 @@ end subroutine print_Sigma_perturbative
 !!      m_sigma
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -915,10 +915,10 @@ end subroutine print_Sigma_QPSC
 !!  Write documentation.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1043,10 +1043,10 @@ end subroutine sigma_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1172,7 +1172,7 @@ end function sigma_get_exene
 !! PARENTS
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1566,10 +1566,10 @@ end function sigma_ncwrite
 !!  Wfd%bks_tab
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me
+!!      m_cohsex,m_sigc,m_sigx
 !!
 !! CHILDREN
-!!      findqg0,wfd_distribute_bands,wfd_update_bkstab,xmpi_sum
+!!      findqg0,wfd%distribute_bands,wfd%update_bkstab,xmpi_sum
 !!
 !! SOURCE
 

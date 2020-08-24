@@ -143,15 +143,15 @@ contains
 !!     based on group theory, and it might lead to spurious results in case of accidental degeneracies.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      cwtime,esymm_symmetrize_mels,findqg0,get_bz_item,gsph_fft_tabs
 !!      hermitianize,littlegroup_print,paw_cross_rho_tw_g,paw_rho_tw_g
 !!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawmknhat_psipsi
 !!      pawpwij_free,pawpwij_init,rho_tw_g,rotate_fft_mesh,sigma_distribute_bks
-!!      timab,wfd_change_ngfft,wfd_get_cprj,wfd_get_many_ur,wfd_get_ur
-!!      wfd_paw_get_aeur,wrtout,xmpi_sum
+!!      timab,wfd%change_ngfft,wfd%get_cprj,wfd%get_many_ur,wfd%get_ur
+!!      wfdf%paw_get_aeur,wrtout,xmpi_sum
 !!
 !! SOURCE
 

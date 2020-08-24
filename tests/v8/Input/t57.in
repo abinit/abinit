@@ -130,8 +130,6 @@ nstep 100
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-## Exclude ibm8 because no NetCDF
-#%% exclude_hosts = ibm@ibm8
 #%% [shell]
 #%% post_commands =
 #%% [files]

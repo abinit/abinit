@@ -86,12 +86,10 @@ contains
 !!        3 -> element was read from gkk file
 !!
 !! PARENTS
-!!      get_all_gkq
+!!      m_elphon
 !!
 !! CHILDREN
-!!      completeperts,get_rank,hdr_bcast,hdr_fort_read,hdr_free,ifc_fourq
-!!      littlegroup_pert,littlegroup_q,mati3inv,normsq_gkq,phdispl_cart2red
-!!      prt_gkk_yambo,wrap2_pmhalf,wrtout,xmpi_bcast
+!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -708,10 +706,10 @@ end subroutine read_gkk
 !!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      hdr_fort_write,wrtout
+!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -823,9 +821,10 @@ end subroutine outgkk
 !! NOTES
 !!
 !! PARENTS
-!!      read_gkk
+!!      m_iogkk
 !!
 !! CHILDREN
+!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1014,10 +1013,10 @@ end subroutine prt_gkk_yambo
 !! el_veloc(nkpt_in,nband_in,3)
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank,hdr_free,inpgkk,mkkptrank
+!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1164,10 +1163,10 @@ end subroutine read_el_veloc
 !!  eigen1 = response function 1st order eigenvalue matrix
 !!
 !! PARENTS
-!!      read_el_veloc
+!!      m_iogkk
 !!
 !! CHILDREN
-!!      hdr_fort_read,hdr_free,wrtout
+!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1282,10 +1281,10 @@ end subroutine inpgkk
 !!   gkk_flag = changed on output
 !!
 !! PARENTS
-!!      read_gkk
+!!      m_iogkk
 !!
 !! CHILDREN
-!!      d2sym3
+!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1430,11 +1429,10 @@ end subroutine completeperts
 !!   qdata(elph_ds%nbranch,elph_ds%nsppol,3) = array containing the phonon frequency, the linewidth and $\lambda_{q,\nu}$.
 !!
 !! PARENTS
-!!      read_gkk
+!!      m_iogkk
 !!
 !! CHILDREN
-!!      gam_mult_displ,nmsq_gam,nmsq_gam_sumfs,nmsq_pure_gkk
-!!      nmsq_pure_gkk_sumfs,wrtout,xmpi_sum,zhpev
+!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1640,10 +1638,10 @@ end subroutine normsq_gkq
 !!   accum_mat2 = matrix for accumulating FS average of gamma matrix with good prefactors
 !!
 !! PARENTS
-!!      normsq_gkq
+!!      m_iogkk
 !!
 !! CHILDREN
-!!      gam_mult_displ,zgemm
+!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1791,10 +1789,10 @@ end subroutine nmsq_gam
 !!   accum_mat2 = matrix for accumulating FS average of gamma matrix with good prefactors
 !!
 !! PARENTS
-!!      normsq_gkq
+!!      m_iogkk
 !!
 !! CHILDREN
-!!      gam_mult_displ,zgemm
+!!      gam_mult_displ
 !!
 !! SOURCE
 
@@ -1949,7 +1947,7 @@ end subroutine nmsq_gam_sumFS
 !!   accum_mat2 = complex array whose real part contains the phonon linewidth
 !!
 !! PARENTS
-!!      normsq_gkq
+!!      m_iogkk
 !!
 !! CHILDREN
 !!      gam_mult_displ
@@ -2080,7 +2078,7 @@ end subroutine nmsq_pure_gkk
 !!   accum_mat2 = complex array whose real part contains the phonon linewidth
 !!
 !! PARENTS
-!!      normsq_gkq
+!!      m_iogkk
 !!
 !! CHILDREN
 !!      gam_mult_displ

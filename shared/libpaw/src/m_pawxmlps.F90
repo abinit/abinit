@@ -1050,7 +1050,7 @@ end subroutine paw_end_element1
 !! PARENTS
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 subroutine pawdata_chunk(chunk)
@@ -1130,10 +1130,10 @@ end subroutine pawdata_chunk
 !!  paw_setup<paw_setup_type>=Datatype gathering information on XML paw setup.
 !!
 !! PARENTS
-!!      abinit,inpspheads
+!!      m_pspheads,m_pspini
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1256,10 +1256,9 @@ end subroutine paw_setup_free
 !!  paw_setupout<paw_setup_type>=output paw_setup datastructure
 !!
 !! PARENTS
-!!      inpspheads
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1496,7 +1495,7 @@ end subroutine paw_setup_copy
 !!      m_pawxmlps
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1544,10 +1543,10 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      pawpsxml2ab
+!!      m_pspheads
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1932,10 +1931,10 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      pawpsxml2ab
+!!      m_pspheads
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -2743,10 +2742,10 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      m_pawpsprdpawpsxml_core
+!!      m_pawpsp
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 

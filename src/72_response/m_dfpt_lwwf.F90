@@ -144,14 +144,12 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!
-!!   dfpt_lw
+!!      m_dfpt_lw
 !!
 !! CHILDREN
-!!   
-!! destroy_rf_hamiltonian,dfpt_vlocal,dfpt_vlocaldq,dotprod_g,fourwf,getgh1c,getgh1c_setup,
-!! getgh1dqc,getgh1dqc_setup,init_rf_hamiltonian,load_k_hamiltonian,load_kprime_hamiltonian,
-!! load_spin_rf_hamiltonian,mkkpq,mkffnl,rf_transgrid_and_pack,wfk_read_bks
+!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
+!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
+!!      rf_transgrid_and_pack
 !!
 !! SOURCE
 
@@ -1035,8 +1033,12 @@ end subroutine dfpt_qdrpwf
 !! NOTES
 !!
 !! PARENTS
+!!      m_dfpt_lw
 !!
 !! CHILDREN
+!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
+!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
+!!      rf_transgrid_and_pack
 !!
 !! SOURCE
 
@@ -1926,10 +1928,12 @@ end subroutine dfpt_ciflexowf
 !! NOTES
 !!
 !! PARENTS
-!!
-!!   dfpt_lw
+!!      m_dfpt_lw
 !!
 !! CHILDREN
+!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
+!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
+!!      rf_transgrid_and_pack
 !!
 !! SOURCE
 
@@ -2579,8 +2583,12 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !! NOTES
 !!
 !! PARENTS
+!!      m_dfpt_lw
 !!
 !! CHILDREN
+!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
+!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
+!!      rf_transgrid_and_pack
 !!
 !! SOURCE
 
@@ -3533,10 +3541,12 @@ end subroutine dfpt_isdqwf
 !! NOTES
 !!
 !! PARENTS
-!!
-!!   dfpt_lw
+!!      m_dfpt_lw
 !!
 !! CHILDREN
+!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
+!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
+!!      rf_transgrid_and_pack
 !!
 !! SOURCE
            

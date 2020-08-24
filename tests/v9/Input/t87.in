@@ -33,7 +33,6 @@ slc_coupling = 1010 # Tijuv and Oiju
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF
-#%% exclude_hosts = nag@abiref
 #%% exclude_builders = .*_intel_19.0_.*, .*_nag_7.0_.*
 #%% system_xml = t83.nc
 #%% exec_args = --F03

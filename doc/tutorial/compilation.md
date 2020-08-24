@@ -16,13 +16,13 @@ The changes required for MacOsX are briefly mentioned when needed.
 Windows users should install [cygwin](https://cygwin.com/index.html) that 
 provides a POSIX-compatible environment 
 or, alternatively, use a [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about).
-Note that the procedure descrived in this tutorial has been tested using Linux/MacOsX installations so
+Note that the procedure described in this tutorial has been tested using Linux/MacOsX installations so
 we welcome feedback from Windows users.
 
 !!! important
 
     In the last part of the tutorial, we discuss more advanced topics such as using modules in supercomputing centers, 
-    compiling and linking the with the intel compiler and mkl, activating support for OpenMP threads.
+    compiling and linking with the intel compiler and mkl, activating support for OpenMP threads.
     You may want to jump to this section if you are already familiar with software compilation.
 <!--
     In the last part of the tutorial, we treat more advanced topics related to the usage of modules in supercomputing centers.
@@ -867,7 +867,7 @@ You might then find useful to have a look at the template for the configuration 
 stored in _~abinit/doc/build/config-template.ac9_
 which will provide you with more details on the configuration. 
 Other example of config files in that subdirectory can be used to set up your build more quickly.  
-If you have a configuration file called _~/.abinit/build/hostname.ac_
+If you have a configuration file called _~/.abinit/build/hostname.ac9_
 (with hostname equal to the $HOSTNAME shell variable for your machine) ABINIT's
 configure will load it at runtime.
 
@@ -1082,7 +1082,7 @@ is much more difficult to answer as there are several factors that should be tak
 To keep a long story short, one should use OpenMP threads 
 when one starts to trigger limitations or bottlenecks in the MPI implementation, 
 especially at the level of the memory requirements or of the parallel scalability.
-These problems are usually observed in large calculations that is large [[natom]], [[mpw]], [[nband]])  
+These problems are usually observed in large calculations, that is large [[natom]], [[mpw]], [[nband]])  
 Note that it does not make any sense to compile ABINIT with OpenMP if your calculations are relatively small.
 ABINIT, indeed, is mainly designed with MPI-parallelism in mind.
 Calculations with a relatively large number of $\kk$-points will benefit more of MPI than OpenMP, 

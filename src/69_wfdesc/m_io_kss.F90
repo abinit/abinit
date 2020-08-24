@@ -112,10 +112,10 @@ CONTAINS  !===========================================================
 !!  The KSS Header is written on file.
 !!
 !! PARENTS
-!!      outkss
+!!      m_io_kss
 !!
 !! CHILDREN
-!!      metric,mkffnl,mkkin
+!!      wrtout
 !!
 !! SOURCE
 
@@ -362,7 +362,7 @@ end subroutine write_kss_header
 !!      m_io_kss
 !!
 !! CHILDREN
-!!      metric,mkffnl,mkkin
+!!      wrtout
 !!
 !! SOURCE
 
@@ -487,10 +487,10 @@ end subroutine write_vkb
 !!  Only writing.
 !!
 !! PARENTS
-!!      outkss
+!!      m_io_kss
 !!
 !! CHILDREN
-!!      metric,mkffnl,mkkin
+!!      wrtout
 !!
 !! SOURCE
 
@@ -616,10 +616,10 @@ end subroutine write_kss_wfgk
 !!  2) cg and eig_vec are mutually exclusive. One and only one can be passed to the routine.
 !!
 !! PARENTS
-!!      outkss
+!!      m_io_kss
 !!
 !! CHILDREN
-!!      metric,mkffnl,mkkin
+!!      wrtout
 !!
 !! SOURCE
 
@@ -807,10 +807,10 @@ end subroutine k2gamma_centered
 !!  ierr=Status error
 !!
 !! PARENTS
-!!      gwls_hamiltonian,setup_screening,setup_sigma
+!!      m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      metric,mkffnl,mkkin
+!!      wrtout
 !!
 !! SOURCE
 
@@ -965,10 +965,10 @@ end subroutine make_gvec_kss
 !!  [Electronpositron] <electronpositron_type>=quantities for the electron-positron annihilation.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      metric,mkffnl,mkkin
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1404,7 +1404,7 @@ end subroutine gshgg_mkncwrite
 !!      m_io_kss
 !!
 !! CHILDREN
-!!      metric,mkffnl,mkkin
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1636,7 +1636,7 @@ end subroutine kss_calc_vkb
 !! * ETSF_IO output is tested in tests/etsf_io/t02.
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
 !!      wrtout
@@ -2484,7 +2484,7 @@ contains
 !! This routine is not available for paw calculations
 !!
 !! PARENTS
-!!      outkss
+!!      m_io_kss
 !!
 !! CHILDREN
 !!      wrtout
@@ -2613,7 +2613,7 @@ end subroutine memkss
 !!  Writes on standard output
 !!
 !! PARENTS
-!!      outkss
+!!      m_io_kss
 !!
 !! CHILDREN
 !!      wrtout

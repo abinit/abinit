@@ -38,7 +38,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = ubu_intel_16.0_mpich, ubu_intel_15.0_mpich, abiref_nag_6.2_openmpi
+#%% exclude_builders = ubu_intel_16.0_mpich, ubu_intel_15.0_mpich
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

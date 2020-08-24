@@ -208,7 +208,6 @@ CONTAINS
 !!  prefix: Prefix for output EVK file. Empty if output files are not wanted
 !!
 !! PARENTS
-!!      wfk_analyse
 !!
 !! CHILDREN
 !!

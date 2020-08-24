@@ -247,6 +247,8 @@ end function gruns_new
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -338,6 +340,8 @@ end subroutine gruns_fourq
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -467,6 +471,8 @@ end subroutine gruns_qpath
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -686,6 +692,8 @@ end subroutine gruns_qmesh
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -746,6 +754,8 @@ end subroutine gruns_free
 !!      anaddb
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 

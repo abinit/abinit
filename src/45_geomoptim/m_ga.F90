@@ -83,7 +83,7 @@ CONTAINS !===========================================================
 !!            several parameters for Genetic Algorithm random search.
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!
@@ -129,7 +129,7 @@ end subroutine ga_init
 !!            parameters for Genetic algorithm search.
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!

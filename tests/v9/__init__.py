@@ -28,6 +28,7 @@ inp_files = [
 "t13.in", # metallic iron GGA-PBE PAW nsppol=2
 "t14.in", # optic
 "t15.in", # check slight misalignment of rprim, with large tolsym
+"t16.in", # check slightly incorrect xred, with large tolsym
 # GW/BSE
 "t21.in", # HF exchange checking q->0 terms
 "t22.in", # AC GW

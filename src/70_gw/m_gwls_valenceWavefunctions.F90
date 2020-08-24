@@ -62,7 +62,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_sternheimer
+!!      m_gwls_sternheimer
 !!
 !! CHILDREN
 !!
@@ -137,7 +137,7 @@ end subroutine prepareValenceWavefunctions
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_sternheimer
+!!      m_gwls_sternheimer
 !!
 !! CHILDREN
 !!
@@ -171,7 +171,7 @@ end subroutine cleanupValenceWavefunctions
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_sternheimer
+!!      m_gwls_sternheimer
 !!
 !! CHILDREN
 !!

@@ -80,7 +80,7 @@ contains
 !! Writes the file pwfn.data
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      wrtout,xred2xcart

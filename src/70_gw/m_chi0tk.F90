@@ -107,7 +107,7 @@ CONTAINS  !=====================================================================
 !!  chi0(npwe,npwe,nomega)=independent-particle susceptibility matrix in reciprocal space
 !!
 !! PARENTS
-!!      cchi0,cchi0q0_intraband
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -356,7 +356,7 @@ end subroutine mkrhotwg_sigma
 !!  More CPU demanding but safer in case of a large chi0 matrix. One might loop over G1 and G2 shells ...
 !!
 !! PARENTS
-!!      cchi0,cchi0q0,cchi0q0_intraband
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -638,7 +638,7 @@ end subroutine symmetrize_afm_chi0
 !!     operation in real space. The term involving the fractional translation is zero provided that b /= b'.
 !!
 !! PARENTS
-!!      cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -896,7 +896,7 @@ end subroutine accumulate_chi0_q0
 !!  sf_head(3,3,my_wl:my_wr)=Updated head of the spectral function.
 !!
 !! PARENTS
-!!      cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1134,7 +1134,7 @@ end subroutine accumulate_sfchi0_q0
 !!  Umklapp processes are not yet implemented
 !!
 !! PARENTS
-!!      cchi0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1327,7 +1327,7 @@ end subroutine assemblychi0sf
 !!  iomegar= index in the array omegasf of the first frequency > egwdiff
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1411,7 +1411,7 @@ end subroutine approxdelta
 !! kkweight(nsp,ne)=frequency dependent weights Eq A1 PRB 74, 035101 (2006) [[cite:Shishkin2006]]
 !!
 !! PARENTS
-!!      m_chi0
+!!      m_chi0tk
 !!
 !! CHILDREN
 !!
@@ -1512,7 +1512,7 @@ end subroutine calc_kkweight
 !!  omegasf(nomegasf+1)=frequencies for imaginary part.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1655,7 +1655,7 @@ end subroutine setup_spectral
 !! OUTPUT
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1731,7 +1731,7 @@ end subroutine hilbert_transform
 !! OUTPUT
 !!
 !! PARENTS
-!!      cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1830,7 +1830,7 @@ end subroutine hilbert_transform_headwings
 !!  In output the "delta part" of the completeness correction is added.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1948,7 +1948,7 @@ end subroutine completechi0_deltapart
 !!  otherwise, should be described
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!
@@ -2032,7 +2032,7 @@ end subroutine output_chi0sumrule
 !!  using the symmetry operations of the little group of the external q.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -2127,7 +2127,7 @@ end subroutine accumulate_chi0sumrule
 !! max_rest,min_rest=Maximun and minimum resonant (posite) transition energy treated by this node.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -2276,7 +2276,7 @@ end subroutine make_transitions
 !! OUTPUT
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!

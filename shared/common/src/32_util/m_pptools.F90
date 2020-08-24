@@ -69,7 +69,7 @@ CONTAINS  !===========================================================
 !!  (only writing)
 !!
 !! PARENTS
-!!      chiscwrt,ioniondist,newkpt,pawuj_det,pawuj_red,pawuj_utils,shellstruct
+!!      m_geometry,m_inwffil,m_paw_uj
 !!
 !! CHILDREN
 !!      wrap2_pmhalf
@@ -147,7 +147,7 @@ end subroutine prmat
 !! Only write
 !!
 !! PARENTS
-!!      denfgr,exc_plot,m_kxc,m_nesting,m_wfd,spin_current
+!!      m_exc_analyze,m_kxc,m_nesting,m_paw_mkrho,m_spin_current,m_wfd
 !!
 !! CHILDREN
 !!      wrap2_pmhalf
@@ -803,7 +803,7 @@ end subroutine printbxsf
 !!  BXSF file.
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
 !!      wrap2_pmhalf

@@ -85,12 +85,13 @@ contains
 !! Note use of integer arithmetic.
 !!
 !! PARENTS
-!!      cg_rotate,chkgrp,classify_bands,debug_tools,dfpt_nstdy,get_full_kgrid
-!!      get_npert_rbz,getkgrid,ingeo,m_ab7_symmetry,m_crystal,m_ddb,m_dvdb
-!!      m_dynmat,m_fft_mesh,m_fock,m_ptgroups,m_tdep_sym,matpointsym
-!!      memory_eval,optic,read_gkk,setsym,strainsym,thmeig,wfconv
+!!      m_ab7_symmetry,m_cgtk,m_classify_bands,m_crystal,m_ddb,m_dfpt_scfcv
+!!      m_dtset,m_dvdb,m_dynmat,m_fft_mesh,m_fock,m_geometry,m_ingeo,m_inwffil
+!!      m_iogkk,m_kpts,m_memeval,m_mover_effpot,m_ptgroups,m_spacepar,m_symtk
+!!      m_tdep_sym,m_thmeig,optic
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -152,9 +153,10 @@ end subroutine mati3inv
 !! det = determinant of the matrix
 !!
 !! PARENTS
-!!      get_kpt_fullbz,getspinrot,m_ab7_symmetry,m_anaddb_dataset,symdet
+!!      m_ab7_symmetry,m_anaddb_dataset,m_geometry,m_kpts,m_symtk
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -190,17 +192,17 @@ end subroutine mati3det
 !! Returned array is TRANSPOSE of inverse, as needed to get g from r.
 !!
 !! PARENTS
-!!      berryphase,chkdilatmx,conducti_nc,ddb_hybrid,dfpt_mkvxc,dfpt_mkvxcstr
-!!      dfpt_symph,electrooptic,ep_el_weights,ep_fs_weights,ep_ph_weights
-!!      fock_getghc,get_kpt_fullbz,getkgrid,getspinrot,gstate,harmonic_thermo
-!!      invars2,inwffil,m_cut3d,m_ddb,m_ddk,m_double_grid,m_dynmat
-!!      m_effective_potential,m_esymm,m_ewald,m_fock,m_fstab,m_ifc,m_pimd
-!!      m_psps,m_strain,m_supercell,m_tdep_latt,make_efg_el,make_efg_ion,metric
-!!      mover,optic,outwant,pimd_langevin_npt,prtxf,relaxpol,respfn,smpbz
-!!      stresssym,symbrav,symlatt,symmetrize_rprimd,symrelrot,symrhg,tddft
-!!      testkgrid,thmeig,uderiv,xcart2xred,xfpack_x2vin
+!!      m_berryphase,m_conducti,m_cut3d,m_ddb,m_dfpt_mkvxc,m_dfpt_mkvxcstr
+!!      m_double_grid,m_dvdb,m_dynmat,m_effective_potential,m_elpolariz
+!!      m_epweights,m_esymm,m_ewald,m_fock,m_fock_getghc,m_fstab,m_geometry
+!!      m_gstate,m_harmonic_thermo,m_ifc,m_inwffil,m_kpts,m_longwave,m_mover
+!!      m_mover_effpot,m_nucprop,m_outwant,m_phonons,m_pimd,m_pimd_langevin
+!!      m_psps,m_raman,m_relaxpol,m_respfn_driver,m_scup_dataset,m_spacepar
+!!      m_strain,m_supercell,m_supercell_maker,m_symfind,m_symtk,m_tddft
+!!      m_tdep_latt,m_thmeig,m_xfpack,optic
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -261,10 +263,10 @@ end subroutine matr3inv
 !! determinant(nsym)=determinant of each symmetry operation
 !!
 !! PARENTS
-!!      remove_inversion,setsym,symptgroup,symspgr
+!!      m_geometry,m_spacepar,m_spgdata,m_symfind
 !!
 !! CHILDREN
-!!      mati3det
+!!      wrtout
 !!
 !! SOURCE
 
@@ -318,9 +320,10 @@ end subroutine symdet
 !! SHOULD ALSO CHECK THE tnons !
 !!
 !! PARENTS
-!!      chkinp,gensymspgr,m_bz_mesh,m_esymm,m_sigmaph,setsym
+!!      m_bz_mesh,m_chkinp,m_esymm,m_lgroup,m_spacepar,m_spgbuilder
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -445,9 +448,10 @@ end subroutine chkgrp
 !!  This improved version should replace chkgrp.
 !!
 !! PARENTS
-!!      m_crystal,m_shirley
+!!      m_crystal
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -568,25 +572,28 @@ end subroutine sg_multable
 !! nsym=actual number of symmetries
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !! symrel(3,3,1:nsym)=symmetry operations in real space in terms of primitive translations
+!! tolsym=defines the tolerance on the orthogonality, after multiplication by 2.
 !!
 !! SIDE EFFECTS
 !! iexit= if 0 at input, will do the check, and stop if there is a problem, return 0 if no problem
-!!        if 1 at input, will always input, return 0 if no problem, -1 if there is a problem,
+!!        if 1 at input, will always output, return 0 if no problem, -1 if there is a problem,
 !!                       also, suppresses printing of problem
 !!
 !! PARENTS
-!!      chkinp,ingeo,symmetrize_rprimd
+!!      m_chkinp,m_ingeo,m_symtk
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
-subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
+subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
  integer,intent(inout) :: iexit
+ real(dp),intent(in) :: tolsym
 !arrays
  integer,intent(in) :: symrel(3,3,nsym)
  real(dp),intent(in) :: gprimd(3,3),rmet(3,3),rprimd(3,3)
@@ -594,13 +601,28 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 !Local variables-------------------------------
 !scalars
  integer :: ii,isym,jj
- real(dp),parameter :: tol=2.0d-8
  real(dp) :: residual,rmet2
  character(len=500) :: msg
 !arrays
  real(dp) :: prods(3,3),rmet_sym(3,3),rprimd_sym(3,3)
 
 ! *************************************************************************
+
+!DEBUG
+!write(std_out,'(a)') ' chkorthsy : enter '
+!write(std_out,'(a,i3)') ' nsym=',nsym
+!do isym=1,nsym
+!  write(std_out,'(9i4)')symrel(:,:,isym)
+!enddo
+!write(std_out, '(a)') ' Matrix rprimd :'
+!do ii=1,3
+!  write(std_out, '(3es16.8)')rprimd(:,ii)
+!enddo
+!write(std_out, '(a)') ' Matrix rmet :'
+!do ii=1,3
+!  write(std_out, '(3es16.8)')rmet(:,ii)
+!enddo
+!ENDDEBUG
 
  rmet2=zero
  do ii=1,3
@@ -611,6 +633,10 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 
 !Loop over all symmetry operations
  do isym=1,nsym
+
+!DEBUG
+!write(std_out,'(a,a,i4)') ch10,' Check for isym=',isym
+!ENDDEBUG
 
 !  Compute symmetric of primitive vectors under point symmetry operations
    do ii=1,3
@@ -634,12 +660,33 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
      end do
    end do
 
-   if(sqrt(residual) > tol*sqrt(rmet2))then
+   if(sqrt(residual) > two*tolsym*sqrt(rmet2))then
      if(iexit==0)then
+       write(std_out, '(a)') ' Matrix rprimd :' 
+       do ii=1,3
+         write(std_out, '(3es16.8)')rprimd(:,ii)
+       enddo
+       write(std_out, '(a)') ' Matrix rmet :'
+       do ii=1,3
+         write(std_out, '(3es16.8)')rmet(:,ii)
+       enddo
+       write(std_out, '(a)') ' Matrix rprimd_sym :'
+       do ii=1,3
+         write(std_out, '(3es16.8)')rprimd_sym(:,ii)
+       enddo
+       write(std_out, '(a)') ' Matrix rmet_sym :'
+       do ii=1,3
+         write(std_out, '(3es16.8)')rmet_sym(:,ii)
+       enddo
+       write(std_out, '(a)') ' Matrix rmet_sym-rmet :'
+       do ii=1,3
+         write(std_out, '(3es16.8)')(rmet_sym(:,ii)-rmet(:,ii))
+       enddo
        write(msg, '(a,i0,5a,es12.4,a,es12.4,6a)' )&
         'The symmetry operation number ',isym,' does not preserve',ch10,&
         'vector lengths and angles.',ch10,&
-        'The value of the residual is: ',residual, 'that is greater than threshold:', (tol*sqrt(rmet2))**2,ch10,&
+        'The value of the square root of residual is: ',sqrt(residual),&
+&       '  that is greater than threshold:', two*tolsym*sqrt(rmet2),ch10,&
         'Action: modify rprim, acell and/or symrel so that',ch10,&
         'vector lengths and angles are preserved.',ch10,&
         'Beware, the tolerance on symmetry operations is very small.'
@@ -659,12 +706,12 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
    do ii=1,3
      do jj=1,3
        residual=prods(ii,jj)-anint(prods(ii,jj))
-       if(abs(residual)>tol)then
+       if(abs(residual)>two*tolsym)then
          if(iexit==0)then
            write(msg, '(a,i0,5a,es12.4,a,es12.4,4a)' )&
             'The symmetry operation number ',isym,' generates',ch10,&
             'a different lattice.',ch10,&
-            'The value of the residual is: ',residual, 'that is greater than the threshold:', tol, ch10,&
+            'The value of the residual is: ',residual, 'that is greater than the threshold:', two*tolsym, ch10,&
             'Action: modify rprim, acell and/or symrel so that',ch10,&
             'the lattice is preserved.'
            MSG_ERROR(msg)
@@ -679,6 +726,10 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
  end do ! isym
 
  if(iexit==1)iexit=0
+
+!DEBUG
+!write(std_out,'(a)') ' chkorthsy : exit '
+!ENDDEBUG
 
 end subroutine chkorthsy
 !!***
@@ -702,9 +753,10 @@ end subroutine chkorthsy
 !!  multi=multiplicity of the unit cell
 !!
 !! PARENTS
-!!      symanal
+!!      m_symfind
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -785,10 +837,10 @@ end subroutine chkprimit
 !! of primitive translations rprimd at input and rprimd_new at output
 !!
 !! PARENTS
-!!      ingeo,m_esymm,symbrav,symlatt,symspgr
+!!      m_esymm,m_ingeo,m_symfind
 !!
 !! CHILDREN
-!!      matr3inv
+!!      wrtout
 !!
 !! SOURCE
 
@@ -838,10 +890,10 @@ subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
    do ii=1,3
      do jj=1,3
        val=matr2(ii,jj)
-!      Need to allow for twice tolsym, in case of centered Bravais lattices (but do it for all lattices ...)
-       if(abs(val-nint(val))>two*tolsym)then
+!      Need to allow for four times tolsym, in case of centered Bravais lattices (but do it for all lattices ...)
+       if(abs(val-nint(val))>four*tolsym)then
          write(msg,'(2a,a,i3,a,a,3es14.6,a,a,3es14.6,a,a,3es14.6)')&
-         'One of the components of symrel is non-integer,',ch10,&
+         'One of the components of symrel is non-integer within 4*tolsym,',ch10,&
          '  for isym=',isym,ch10,&
          '  symrel=',matr2(:,1),ch10,&
          '         ',matr2(:,2),ch10,&
@@ -894,11 +946,11 @@ end subroutine symrelrot
 !! Better handling should be provided in further version.
 !!
 !! PARENTS
-!!      get_npert_rbz,m_bz_mesh,m_ddb,m_dvdb,m_dynmat,m_esymm,m_gkk,m_phgamma
-!!      m_sigmaph,memory_eval,read_gkk,respfn
+!!      m_bz_mesh,m_ddb,m_dtset,m_dvdb,m_dynmat,m_esymm,m_gkk,m_iogkk,m_lgroup
+!!      m_memeval,m_nonlinear,m_phgamma,m_respfn_driver
 !!
 !! CHILDREN
-!!      wrap2_pmhalf,wrtout
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1029,10 +1081,10 @@ end subroutine littlegroup_q
 !! mat3(3,3) = matrix to be symmetrized, in cartesian frame
 !!
 !! PARENTS
-!!      make_efg_el,make_efg_ion,make_efg_onsite
+!!      m_nucprop,m_paw_nmr
 !!
 !! CHILDREN
-!!      dgemm,dgemv,mati3inv,matrginv
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1157,9 +1209,10 @@ end subroutine matpointsym
 !!  cell_base(3,3)=basis vectors of the conventional cell  (changed if enforce==1, otherwise unchanged)
 !!
 !! PARENTS
-!!      symlatt,symmetrize_rprimd
+!!      m_symfind,m_symtk
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1175,9 +1228,9 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 
 !Local variables ------------------------------
 !scalars
- integer :: allequal,ii,jj,orth
- real(dp):: aa,reldiff,scprod1
- character(len=500) :: msg
+ integer :: allequal,ii,orth
+ real(dp):: aa,scprod1
+!character(len=500) :: msg
 !arrays
  integer :: ang90(3),equal(3)
  real(dp) :: length(3),metric(3,3),norm(3),rbasis(3,3),rconv(3,3),rconv_new(3,3)
@@ -1205,6 +1258,12 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
  allequal=0
  if(equal(1)==1 .and. equal(2)==1 .and. equal(3)==1) allequal=1
 
+!DEBUG
+!write(std_out, '(a,i4)' )' holocell : iholohedry=',iholohedry
+!write(std_out, '(a,3i4)' )' holocell : ang90=',ang90
+!write(std_out, '(a,3i4)' )' holocell : equal=',equal
+!ENDDEBUG
+
  foundc=0
  if(iholohedry==1)                                      foundc=1
  if(iholohedry==2 .and. ang90(1)+ang90(3)==2 )          foundc=1
@@ -1219,10 +1278,14 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 & (2*metric(1,2)-metric(1,1))<tolsym*metric(1,1) )      foundc=1
  if(iholohedry==7 .and. orth==1 .and. allequal==1)      foundc=1
 
+!DEBUG
+!write(std_out, '(a,i4)' )' holocell : foundc=',foundc
+!ENDDEBUG
+
 !-------------------------------------------------------------------------------------
 !Possibly enforce the holohedry (if it is to be enforced !)
 
- if(foundc==1.and.enforce==1.and.iholohedry/=1)then
+ if(foundc==0.and.enforce==1.and.iholohedry/=1)then
 
 !  Copy the cell_base vectors, and possibly fix the tetragonal axis to be the c-axis
    if(iholohedry==4.and.equal(1)==1)then
@@ -1294,24 +1357,27 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
      rconv_new(:,3)=rconv(:,3)
    end if
 
+!! WRONG TEST
 !  Check whether the modification make sense
-   do ii=1,3
-     do jj=1,3
-       reldiff=(rconv_new(ii,jj)-rconv(ii,jj))/length(jj)
-!      Allow for twice tolsym
-       if(abs(reldiff)>two*tolsym)then
-         write(msg,'(a,6(2a,3es14.6))')&
-&         'Failed rectification of lattice vectors to comply with Bravais lattice identification, modifs are too large',ch10,&
-&         '  rconv    =',rconv(:,1),ch10,&
-&         '            ',rconv(:,2),ch10,&
-&         '            ',rconv(:,3),ch10,&
-&         '  rconv_new=',rconv_new(:,1),ch10,&
-&         '            ',rconv_new(:,2),ch10,&
-&         '            ',rconv_new(:,3)
-         MSG_ERROR_CLASS(msg, "TolSymError")
-       end if
-     end do
-   end do
+!   do ii=1,3
+!     do jj=1,3
+!       reldiff=(rconv_new(ii,jj)-rconv(ii,jj))/length(jj)
+!!      Allow for twice tolsym
+!       if(abs(reldiff)>two*tolsym)then
+!         write(msg,'(a,6(2a,3es14.6))')&
+!!         This is CRAZY : one detects symmetry problems above tolsym, and then requires the lattice vectors
+!!         not to be modify by more than 2 tolsym !!!
+!&         'Failed rectification of lattice vectors to comply with Bravais lattice identification, modifs are too large',ch10,&
+!&         '  rconv    =',rconv(:,1),ch10,&
+!&         '            ',rconv(:,2),ch10,&
+!&         '            ',rconv(:,3),ch10,&
+!&         '  rconv_new=',rconv_new(:,1),ch10,&
+!&         '            ',rconv_new(:,2),ch10,&
+!&         '            ',rconv_new(:,3)
+!         MSG_ERROR_CLASS(msg, "TolSymError")
+!       end if
+!     end do
+!   end do
 
 !  Copy back the cell_base vectors
    if(iholohedry==4.and.equal(1)==1)then
@@ -1351,10 +1417,10 @@ end subroutine holocell
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
 !! PARENTS
-!!      ingeo
+!!      m_ingeo
 !!
 !! CHILDREN
-!!      chkorthsy,holocell,matr3inv,metric
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1371,12 +1437,16 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 !Local variables-------------------------------
 !scalars
  integer :: foundc,iexit,ii,jj
- real(dp):: reldiff
- character(len=500) :: msg
+ real(dp):: rprimd_maxabs
+!character(len=500) :: msg
 !arrays
  real(dp):: aa(3,3),ait(3,3),cell_base(3,3),gprimd(3,3),rmet(3,3),rprimd_new(3,3)
 
 ! *************************************************************************
+
+!DEBUG
+!write(std_out,'(a)') ' symmetrize_rprimd : enter '
+!ENDDEBUG
 
 !Build the conventional cell basis vectors in cartesian coordinates
  aa(:,1)=bravais(3:5)
@@ -1388,32 +1458,57 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
    cell_base(:,ii)=ait(ii,1)*rprimd(:,1)+ait(ii,2)*rprimd(:,2)+ait(ii,3)*rprimd(:,3)
  end do
 
+!DEBUG
+!write(std_out,'(a)') ' before holocell, cell_base ='
+!do ii=1,3
+!  write(std_out,'(3es16.8)') cell_base(:,ii)
+!enddo
+!ENDDEBUG
+
 !Enforce the proper holohedry on the conventional cell vectors.
  call holocell(cell_base,1,foundc,bravais(1),tolsym)
+
+!DEBUG
+!write(std_out,'(a)') ' after holocell, cell_base ='
+!do ii=1,3
+!  write(std_out,'(3es16.8)') cell_base(:,ii)
+!enddo
+!ENDDEBUG
 
 !Reconstruct the dimensional primitive vectors
  do ii=1,3
    rprimd_new(:,ii)=aa(1,ii)*cell_base(:,1)+aa(2,ii)*cell_base(:,2)+aa(3,ii)*cell_base(:,3)
  end do
 
-!Check whether the modification make sense
+!Suppress meaningless values
+ rprimd_maxabs=maxval(abs(rprimd_new))
  do ii=1,3
    do jj=1,3
-     reldiff=(rprimd_new(ii,jj)-rprimd(ii,jj))/sqrt(sum(rprimd(:,jj)**2))
-!    Allow for twice tolsym
-     if(abs(reldiff)>two*tolsym)then
-       write(msg,'(a,6(2a,3es14.6))')&
-&       'Failed rectification of lattice vectors to comply with Bravais lattice identification, modifs are too large',ch10,&
-&       '  rprimd    =',rprimd(:,1),ch10,&
-&       '             ',rprimd(:,2),ch10,&
-&       '             ',rprimd(:,3),ch10,&
-&       '  rprimd_new=',rprimd_new(:,1),ch10,&
-&       '             ',rprimd_new(:,2),ch10,&
-&       '             ',rprimd_new(:,3)
-       MSG_ERROR_CLASS(msg, "TolSymError")
-     end if
-   end do
- end do
+     if(abs(rprimd(ii,jj))<tol12*rprimd_maxabs)rprimd(ii,jj)=zero
+   enddo
+ enddo
+
+!! WRONG TEST
+!Check whether the modification make sense
+! do ii=1,3
+!   do jj=1,3
+!     reldiff=(rprimd_new(ii,jj)-rprimd(ii,jj))/sqrt(sum(rprimd(:,jj)**2))
+!!    Allow for twice tolsym
+!     if(abs(reldiff)>two*tolsym)then
+!       write(msg,'(a,6(2a,3es14.6))')&
+!!!         This is CRAZY : one detects symmetry problems above tolsym, and then requires the lattice vectors
+!!!         not to be modify by more than 2 tolsym !!!
+!&       'Failed rectification of lattice vectors to comply with Bravais lattice identification, modifs are too large',ch10,&
+!&       '  rprimd    =',rprimd(:,1),ch10,&
+!&       '             ',rprimd(:,2),ch10,&
+!&       '             ',rprimd(:,3),ch10,&
+!&       '  rprimd_new=',rprimd_new(:,1),ch10,&
+!&       '             ',rprimd_new(:,2),ch10,&
+!&       '             ',rprimd_new(:,3)
+!       MSG_ERROR_CLASS(msg, "TolSymError")
+!     end if
+!   end do
+! end do
 
  rprimd(:,:)=rprimd_new(:,:)
 
@@ -1421,9 +1516,13 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
  rmet = MATMUL(TRANSPOSE(rprimd), rprimd)
  call matr3inv(rprimd, gprimd)
  !call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- iexit=1
+ iexit=0
 
- call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
+ call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
+
+!DEBUG
+!write(std_out,'(a)') ' symmetrize_rprimd : exit '
+!ENDDEBUG
 
 end subroutine symmetrize_rprimd
 !!***
@@ -1462,9 +1561,10 @@ end subroutine symmetrize_rprimd
 !!    of real space translations
 !!
 !! PARENTS
-!!      ingeo,mover,nonlinear,respfn,scfcv
+!!      m_ingeo,m_longwave,m_mover,m_nonlinear,m_respfn_driver,m_scfcv_core
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1597,9 +1697,10 @@ end subroutine symmetrize_xred
 !! transl(3)=primitive cell translation to make iatom same as tratom (integers)
 !!
 !! PARENTS
-!!      m_polynomial_coeff,symatm
+!!      m_polynomial_coeff,m_symtk
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1622,6 +1723,11 @@ subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
 
 ! *************************************************************************
 
+!DEBUG
+! write(std_out,'(a,a,i4,3f18.12)') ch10,&
+!& ' symchk : enter, trtypat,tratom=',trtypat,tratom
+!ENDDEBUG
+
 !Start testmn out at large value
  testmn=1000000.d0
 
@@ -1643,7 +1749,6 @@ subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
    test1=test1-dble(trans1)
    test2=test2-dble(trans2)
    test3=test3-dble(trans3)
-
    test=abs(test1)+abs(test2)+abs(test3)
    if (test<tol10) then
 !    Note that abs() is not taken here
@@ -1749,11 +1854,12 @@ end subroutine symchk
 !!                      transformation to get back to the original unit cell.
 !!
 !! PARENTS
-!!      get_npert_rbz,ingeo,initberry,initorbmag,m_ab7_symmetry,m_crystal,m_ddb
-!!      m_polynomial_coeff,m_tdep_sym,setsym,thmeig
+!!      m_ab7_symmetry,m_berryphase_new,m_crystal,m_ddb,m_dtset,m_ingeo
+!!      m_mover_effpot,m_orbmag,m_polynomial_coeff,m_spacepar,m_tdep_sym
+!!      m_thmeig
 !!
 !! CHILDREN
-!!      symchk,wrtout
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1779,6 +1885,18 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
  real(dp) :: difmin(3),tratom(3)
 
 ! *************************************************************************
+
+!DEBUG
+!write(std_out,'(a,es12.4)')' symatm : enter, tolsym=',tolsym
+!write(std_out,'(a,es12.4)')' symatm : xred='
+!do ii=1,natom
+!  write(std_out,'(i4,3es18.10)')ii,xred(1:3,ii)
+!enddo
+!write(std_out,'(a,es12.4)')' symatm : isym,symrec,tnons='
+!do isym=1,nsym
+!  write(std_out,'(i6,9i4,3es18.10)')isym,symrec(:,:,isym),tnons(1:3,isym)
+!enddo
+!ENDDEBUG
 
  err=zero
  errout=0
@@ -1806,12 +1924,19 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
      difmax=max(abs(difmin(1)),abs(difmin(2)),abs(difmin(3)))
      err=max(err,difmax)
 
-     if (difmax>tolsym) then ! Print warnings if differences exceed tolerance
-       write(msg, '(3a,i3,a,i6,a,i3,a,a,3es12.4,3a)' )&
-       'Trouble finding symmetrically equivalent atoms',ch10,&
-       'Applying inv of symm number',isym,' to atom number',iatom,'  of typat',typat(iatom),ch10,&
-       'gives tratom=',tratom(1:3),'.',ch10,&
-       'This is further away from every atom in crystal than the allowed tolerance.'
+     if(errout==3)then
+       write(msg, '(a)' )&
+       ' Suppress warning about finding symmetrically equivalent atoms, as mentioned already three times.'
+       MSG_WARNING(msg)
+       errout=errout+1
+     endif
+
+     if (difmax>tolsym .and. errout<3) then ! Print warnings if differences exceed tolerance
+       write(msg, '(3a,i3,a,i6,a,i3,a,a,3f18.12,3a,es12.4)' )&
+       ' Trouble finding symmetrically equivalent atoms',ch10,&
+       ' Applying inv of symm number',isym,' to atom number',iatom,'  of typat',typat(iatom),ch10,&
+       ' gives tratom=',tratom(1:3),'.',ch10,&
+       ' This is further away from every atom in crystal than the allowed tolerance, tolsym=',tolsym
        MSG_WARNING(msg)
 
        write(msg, '(a,3i3,a,a,3i3,a,a,3i3)' ) &
@@ -1819,10 +1944,10 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
        '                                ',symrec(2,1:3,isym),ch10,&
        '                                ',symrec(3,1:3,isym)
        call wrtout(std_out,msg)
-       write(msg, '(a,3f13.7)' )'  and the nonsymmorphic transl. tnons =',(tnons(mu,isym),mu=1,3)
+       write(msg, '(a,3f18.12)' )'  and the nonsymmorphic transl. tnons =',(tnons(mu,isym),mu=1,3)
 
        call wrtout(std_out,msg)
-       write(msg, '(a,1p,3e11.3,a,a,i5)' ) &
+       write(msg, '(a,1p,3es12.4,a,a,i5)' ) &
         '  The nearest coordinate differs by',difmin(1:3),ch10,&
         '  for indsym(nearest atom)=',indsym(4,isym,iatom)
        call wrtout(std_out,msg)
@@ -1830,12 +1955,12 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 !      Use errout to reduce volume of error diagnostic output
        if (errout==0) then
          write(msg,'(6a)') ch10,&
-          '  This indicates that when symatm attempts to find atoms  symmetrically',ch10, &
+          '  This indicates that when symatm attempts to find atoms symmetrically',ch10, &
           '  related to a given atom, the nearest candidate is further away than some',ch10,&
           '  tolerance.  Should check atomic coordinates and symmetry group input data.'
          call wrtout(std_out,msg)
-         errout=1
        end if
+       errout=errout+1
 
      end if !difmax>tol
    end do !iatom
@@ -1863,7 +1988,7 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 
  if (err>tolsym) then
    write(msg, '(1x,a,1p,e14.5,a,e12.4)' )'symatm: maximum (delta t)=',err,' is larger than tol=',tolsym
-   call wrtout(std_out,msg)
+   MSG_WARNING(msg)
  end if
 
 !Stop execution if error is really big
@@ -1899,10 +2024,10 @@ end subroutine symatm
 !! type_axis=an identifier for the type of symmetry
 !!
 !! PARENTS
-!!      m_ab7_symmetry,symspgr
+!!      m_ab7_symmetry,m_symfind
 !!
 !! CHILDREN
-!!      symaxes,symplanes,wrtout
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2161,7 +2286,7 @@ end subroutine symcharac
 !!  and attribute 2 and 2_1 primary axes to the corresponding sets.
 !!
 !! PARENTS
-!!      symcharac
+!!      m_symtk
 !!
 !! CHILDREN
 !!      wrtout
@@ -2419,7 +2544,7 @@ end subroutine symaxes
 !!  to distinguish between primary, secondary or tertiary axes.
 !!
 !! PARENTS
-!!      symcharac
+!!      m_symtk
 !!
 !! CHILDREN
 !!      wrtout
@@ -2728,10 +2853,10 @@ end subroutine symplanes
 !! metmin as argument, but it is more convenient to have it
 !!
 !! PARENTS
-!!      getkgrid,symlatt,testkgrid
+!!      m_kpts,m_symfind
 !!
 !! CHILDREN
-!!      metric
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2949,10 +3074,10 @@ end subroutine smallprim
 !! OUTPUT
 !!
 !! PARENTS
-!!      gensymspgr,hdr_vs_dtset,m_crystal
+!!      m_crystal,m_hdr,m_spgbuilder
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 

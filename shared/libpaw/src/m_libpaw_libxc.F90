@@ -812,6 +812,10 @@ end function libpaw_libxc_fullname
 !! OUTPUT
 !!  xcrefs(:)= references(s) of the functional
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine libpaw_libxc_getrefs(xcrefs,xc_functional)

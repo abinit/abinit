@@ -160,17 +160,9 @@ contains
 !!     averaging the final results over the degenerate subset.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
-!!      calc_coh_comp,calc_sig_ppm,calc_sig_ppm_comp,calc_sigc_cd,calc_wfwfg
-!!      coeffs_gausslegint,cwtime,epsm1_symmetrizer,epsm1_symmetrizer_inplace
-!!      esymm_symmetrize_mels,findqg0,get_bz_item,get_epsm1,get_gftt
-!!      gsph_fft_tabs,littlegroup_print,paw_cross_rho_tw_g,paw_rho_tw_g
-!!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawpwij_free
-!!      pawpwij_init,ppm_get_qbz,rho_tw_g,rotate_fft_mesh,setup_ppmodel
-!!      sigma_distribute_bks,timab,wfd_change_ngfft,wfd_get_cprj
-!!      wfd_get_many_ur,wfd_get_ur,wfd_paw_get_aeur,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -258,6 +250,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(esymm_t),pointer :: QP_sym(:)
  integer :: ilwrk
  integer :: neig(Er%nomega_i)
+ integer :: neigmax
  real(gwp) :: epsm1_ev(Sigp%npwc)
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:)
  complex(gwpc),allocatable :: rhotw_epsm1_rhotw(:,:,:)
@@ -308,9 +301,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  if ( Dtset%gwaclowrank > 0 ) then
    ! Today we use the same number of eigenvectors irrespective to iw'
    ! Tomorrow we might optimize this further
-   neig(:) = MIN(Dtset%gwaclowrank,Sigp%npwc)
+   neigmax = MIN(Dtset%gwaclowrank,Sigp%npwc)
  else
-   neig(:) = Sigp%npwc
+   neigmax = Sigp%npwc
  endif 
 
  ABI_MALLOC(w_maxval,(minbnd:maxbnd))
@@ -363,7 +356,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  if (mod10==SIG_GW_AC) then
    write(msg,'(3a,i6,a,i6)') ' Using a low-rank formula for AC',&
-&           ch10,' Number of epsm1 eigenvectors retained: ',neig(1),' over ',Sigp%npwc
+&           ch10,' Number of epsm1 eigenvectors retained: ',neigmax,' over ',Sigp%npwc
    call wrtout(std_out,msg,'COLL')
  endif
 
@@ -775,6 +768,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! Important to set to zero here for all procs since we're going to use a dirty reduction later 
          ! The reduction 'xmpi_sum' does not induce a significant performance loss in the tested systems
          ac_epsm1cqwz2(:,:,:) = czero_gw
+         neig(:) = 0
          do iiw=1,Er%nomega_i
            ! Use the available MPI tasks to parallelize over iw'
            if ( Dtset%gwpara == 2 .and. MODULO(iiw-1,Wfd%nproc) /= Wfd%my_rank ) CYCLE
@@ -787,13 +781,17 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! (epsm1-1) has negative eigenvalues
            ! after the diago, they will be sorted starting from the most negative
            call xheev('V','L',npwc,ac_epsm1cqwz2(:,:,iiw),epsm1_ev)
-           neig(iiw) = neig(1)
+
+           ! Eliminate the spurious positive eigenvalues that may occur in harsh conditions
+           neig(iiw) = MIN(COUNT(epsm1_ev(:)<-1.0e-10_dp),neigmax)
+
            do ilwrk=1,neig(iiw)
              ac_epsm1cqwz2(:,ilwrk,iiw) = ac_epsm1cqwz2(:,ilwrk,iiw) * SQRT( -epsm1_ev(ilwrk) )
            end do
          end do
          if ( Dtset%gwpara == 2 ) then
            call xmpi_sum(ac_epsm1cqwz2, Wfd%comm, ierr)
+           call xmpi_sum(neig, Wfd%comm, ierr)
          endif
          call timab(444,2,tsec) ! ac_lrk_diag
 
@@ -1448,10 +1446,9 @@ end subroutine calc_sigc_me
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      calc_sigc_me
+!!      m_sigc
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1567,10 +1564,9 @@ end subroutine calc_coh_comp
 !!  limited frequency mesh used for W.
 !!
 !! PARENTS
-!!      calc_sigc_me,m_screen
+!!      m_sigc
 !!
 !! CHILDREN
-!!      spline,splint,xgemm,xgemv
 !!
 !! SOURCE
 
@@ -1990,7 +1986,7 @@ end subroutine calc_sigc_cd
 !! Taken from old routine
 !!
 !! PARENTS
-!!      calc_sigc_me
+!!      m_sigc
 !!
 !! CHILDREN
 !!

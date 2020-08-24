@@ -146,16 +146,17 @@ contains
 !! CHILDREN
 !!      abi_io_redirect,abi_linalg_finalize,abi_linalg_init,bethe_salpeter
 !!      chkdilatmx,destroy_results_out,destroy_results_respfn,dtfil_init
-!!      dtfil_init_img,dtset_copy,dtset_free,echo_xc_name,eph,exit_check
+!!      dtfil_init_img,dtset%free,dtsets,echo_xc_name,eph,exit_check
 !!      f_malloc_set_status,fftw3_cleanup,fftw3_init_threads,find_getdtset
 !!      gather_results_out,gstateimg,gwls_sternheimer,init_results_respfn
 !!      libpaw_write_comm_set,libxc_functionals_end,libxc_functionals_init
-!!      mkrdim,mpi_environment_set,nonlinear,nullify_wvl_data,pawang_free
-!!      pawrad_free,pawtab_free,pawtab_nullify,psps_free,psps_init_from_dtset
-!!      psps_init_global,respfn,screening,sigma,status,timab,wfk_analyze,wrtout
-!!      xc_vdw_done,xc_vdw_init,xc_vdw_libxc_init,xc_vdw_memcheck,xc_vdw_read
-!!      xc_vdw_show,xc_vdw_trigger,xc_vdw_write,xcart2xred,xg_finalize
-!!      xgscalapack_config,xmpi_bcast,xred2xcart
+!!      longwave,mkrdim,mpi_environment_set,nonlinear,nullify_wvl_data
+!!      pawang_free,pawrad_free,pawtab_free,pawtab_nullify,psps_free
+!!      psps_init_from_dtset,psps_init_global,respfn,screening,sigma,timab
+!!      wfk_analyze,wrtout,xc_vdw_done,xc_vdw_init,xc_vdw_libxc_init
+!!      xc_vdw_memcheck,xc_vdw_read,xc_vdw_show,xc_vdw_trigger,xc_vdw_write
+!!      xcart2xred,xg_finalize,xgscalapack_config,xmpi_bcast,xred2xcart
+!!      yaml_iterstart,ydoc%add_ints,ydoc%add_reals,ydoc%write_and_free
 !!
 !! SOURCE
 

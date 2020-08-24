@@ -194,9 +194,10 @@ CONTAINS
 !!  bandfft_kpt_in=<type(bandfft_kpt)>=bandfft_kpt datastructure
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -646,9 +647,10 @@ end subroutine bandfft_kpt_init1
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      prep_bandfft_tabs
+!!      m_bandfft_kpt
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -726,9 +728,10 @@ end subroutine bandfft_kpt_init2
 !!  bandfft_kpt_in=the datastructure to nullify
 !!
 !! PARENTS
-!!      posdoppler
+!!      m_positron
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -765,9 +768,10 @@ end subroutine bandfft_kpt_reset
 !!  bandfft_kpt_in=the datastructure to destroy
 !!
 !! PARENTS
-!!      m_bandfft_kpt,posdoppler
+!!      m_bandfft_kpt,m_positron
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -878,9 +882,10 @@ end subroutine bandfft_kpt_destroy
 !!
 !!
 !! PARENTS
-!!      gstate,gwls_hamiltonian
+!!      m_gstate,m_gwls_hamiltonian
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -948,6 +953,7 @@ end subroutine bandfft_kpt_destroy_array
 !! PARENTS
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1156,9 +1162,10 @@ end subroutine bandfft_kpt_copy
 !!  ierr=Error status
 !!
 !! PARENTS
-!!      posdoppler
+!!      m_positron
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1451,9 +1458,10 @@ end subroutine bandfft_kpt_mpi_send
 !!  output=# of on proc. sender
 !!
 !! PARENTS
-!!      posdoppler
+!!      m_positron
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1798,9 +1806,10 @@ end subroutine bandfft_kpt_mpi_recv
 !!  kinpw(:)=kinetic energy for each plane wave (Hartree)
 !!
 !! PARENTS
-!!      energy,fock2ACE,forstrnps
+!!      m_dft_energy,m_fock_getghc,m_forstr
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1886,9 +1895,10 @@ end subroutine bandfft_kpt_savetabs
 !!  bandfft_kpt_out=<type(bandfft_kpt)>=bandfft_kpt datastructure
 !!
 !! PARENTS
-!!      energy,fock2ACE,forstrnps
+!!      m_dft_energy,m_fock_getghc,m_forstr
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1977,9 +1987,10 @@ end subroutine bandfft_kpt_restoretabs
 !!  bandfft_kpt_current_ikpt value changed
 !!
 !! PARENTS
-!!      mkrho,prep_bandfft_tabs,vtorho
+!!      m_bandfft_kpt,m_mkrho,m_vtorho
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -2053,7 +2064,7 @@ end function bandfft_kpt_get_ikpt
 !!  bandfft_kpt tabs (defined in m_bandfft_kpt module)
 !!
 !! PARENTS
-!!      energy,fock2ACE,forstrnps,vtorho
+!!      m_dft_energy,m_fock_getghc,m_forstr,m_vtorho
 !!
 !! CHILDREN
 !!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv

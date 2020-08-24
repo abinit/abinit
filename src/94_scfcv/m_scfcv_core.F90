@@ -256,25 +256,9 @@ contains
 !!      m_scfcv
 !!
 !! CHILDREN
-!!      ab7_mixing_deallocate,ab7_mixing_new,ab7_mixing_use_disk_cache
-!!      afterscfloop,build_vxc,check_kxc,chkpawovlp,cprj_clean,cprj_paw_alloc
-!!      ctocprj,destroy_distribfft,destroy_mpi_enreg,energies_init,energy
-!!      etotfor,extraprho,fftdatar_write_from_hdr,first_rec,fock2ace
-!!      fock_ace_destroy,fock_bz_destroy,fock_common_destroy,fock_destroy
-!!      fock_init,fock_updatecwaveocc,fourdp,fresid,getcut,getmpw,getng,getph
-!!      gshgg_mkncwrite,hdr_update,init_distribfft,init_distribfft_seq
-!!      init_metricrec,initmpi_seq,initylmg,int2char4,kpgio,metric,mkrho,newrho
-!!      newvtr,nhatgrid,odamix,out_geometry_xml,out_resultsgs_xml,outscfcv
-!!      paw2wvl_ij,paw_an_free,paw_an_init,paw_an_nullify,paw_an_reset_flags
-!!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
-!!      pawcprj_free,pawcprj_getdim,pawcprj_reorder,pawdenpot,pawdij
-!!      pawfgrtab_free,pawfgrtab_init,pawmknhat,pawmkrho,pawmkrhoij
-!!      pawtab_get_lsize,pawuj_red,prc_mem_free,prtene,psolver_rhohxc,rhotov
-!!      rhotoxc,scf_history_free,scf_history_init,scprqt,setnoccmmp
-!!      setrhoijpbe0,setsym,setup_positron,setvtr,sphereboundary,status,symdij
-!!      symmetrize_xred,timab,transgrid,update_e_field_vars,vtorho,vtorhorec
-!!      vtorhotf,wf_mixing,wrtout,wvl_cprjreorder,wvl_nhatgrid,xcdata_init
-!!      xmpi_isum,xmpi_sum,xmpi_wait
+!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
+!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
+!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
 !!
 !! SOURCE
 
@@ -321,7 +305,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp), intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
   !(nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise)
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc)
- real(dp), intent(in) :: rprimd(3,3)
+ real(dp), intent(inout) :: rprimd(3,3)
  real(dp), pointer :: rhog(:,:),rhor(:,:)
  real(dp), pointer :: taug(:,:),taur(:,:)
  real(dp), intent(inout) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
@@ -2492,10 +2476,12 @@ end subroutine scfcv_core
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
 !! PARENTS
-!!      scfcv_core
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      forces,nres2vres,pawgrnl,timab
+!!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj
+!!      lincom_cgcprj,pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_get
+!!      pawcprj_getdim,pawcprj_lincom,pawcprj_put,timab,xmpi_sum,zgesv
 !!
 !! SOURCE
 
@@ -2530,7 +2516,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  real(dp),intent(in) :: gmet(3,3),grchempottn(3,dtset%natom),grcondft(3,dtset%natom)
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),red_ptot(3)
- real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rmet(3,3),rprimd(3,3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rmet(3,3)
  real(dp),intent(in) :: vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
  real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: xccc3d(n3xccc)
@@ -2540,6 +2526,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  real(dp),intent(inout) :: xred(3,dtset%natom)
  real(dp),intent(out) :: favg(3),fred(3,dtset%natom)
  real(dp),intent(inout) :: fcart(3,dtset%natom)
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(out) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
  real(dp),intent(inout) :: grxc(3,dtset%natom)
  real(dp),intent(out) :: synlgr(3,dtset%natom)
@@ -2813,7 +2800,7 @@ end subroutine etotfor
 !!  scf_history_wf <type(scf_history_type)>=arrays obtained from previous SCF cycles
 !!
 !! PARENTS
-!!      scfcv_core
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      cgcprj_cholesky,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj

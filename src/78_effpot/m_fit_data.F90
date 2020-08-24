@@ -225,7 +225,7 @@ end subroutine fit_data_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_fit_data,m_fit_polynomial_coeff
+!!      m_fit_data,m_fit_polynomial_coeff,m_opt_effpot
 !!
 !! CHILDREN
 !!
@@ -285,7 +285,7 @@ end subroutine fit_data_free
 !! fit_data<fit_data_type> = fit_data is now filled
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff
+!!      m_fit_polynomial_coeff,m_opt_effpot
 !!
 !! CHILDREN
 !!
