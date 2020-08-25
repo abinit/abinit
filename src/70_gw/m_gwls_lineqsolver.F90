@@ -79,7 +79,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray,gwls_polarisability
+!!      m_gwls_DielectricArray,m_gwls_polarisability
 !!
 !! CHILDREN
 !!      hpsikc,precondition_cplx,unset_precondition,xmpi_sum
@@ -621,7 +621,7 @@ end subroutine sqmr
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_polarisability
+!!      m_gwls_polarisability
 !!
 !! CHILDREN
 !!      hpsikc,precondition_cplx,unset_precondition,xmpi_sum

@@ -108,7 +108,7 @@ contains
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! NOTES
 !!
@@ -128,6 +128,7 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
+!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
@@ -461,9 +462,10 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 !!  Initialize the wavefunction descriptor
 !!
 !! PARENTS
-!!      wfk_analyze
+!!      m_wfk_analyze
 !!
 !! CHILDREN
+!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 

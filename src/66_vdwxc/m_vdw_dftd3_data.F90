@@ -32,7 +32,7 @@
 !!  index_cnj: table containing the index of non-zero values of CNj coefficients
 !!
 !! PARENTS
-!!      vdw_dftd3
+!!      m_vdw_dftd3
 !!
 !! CHILDREN
 !!

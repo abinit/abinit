@@ -1,0 +1,58 @@
+# Ga50In50N test xredtreatment in case of tolsym loose.
+
+ecut 3 
+tolvrs 1.0d-12
+tolsym 1.0d-5
+
+# SCF procedure  
+iscf 17
+nline 1
+nstep 1
+ecutsm  0.5
+     
+# k-point grid
+kptopt 1
+ngkpt 1 1 1
+nshiftk 1         
+shiftk   0.0  0.0  0.5
+
+#Definition of the atom types and unit cell
+ntypat 3
+znucl 49 31 7
+natom 8  
+typat 1 1 2 2 3 3 3 3 
+# This set of position is slightly inaccurate, symmetries will not be found with the usual tolsym, 
+# but will be recognized with tolsym 1.0d-5
+xred   2/3   1/3     0.250179499   #In
+       2/3   1/3     0.750179529   #In
+       1/3   2/3     0.000179500   #Ga
+       1/3   2/3     0.500179529   #Ga
+       2/3   1/3     0.439820498   #N
+       2/3   1/3     0.939820528   #N
+       1/3   2/3     0.189820498   #N
+       1/3   2/3     0.689820528   #N
+acell   5.6691783749808  5.6691783749808  20.7869873749295
+angdeg 90 90 120
+chkprim 0
+
+ pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8"
+ pseudos "In.psp8, Ga.psp8, N.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t16.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = PAW
+#%% description =
+#%%   Ga50In50N, GGA, PAW.
+#%%   Test correct treatment of atomic positions that are slightly inaccurate
+#%%   Was mistreated prior to ABINITv9.2
+#%% topics = PAW
+#%%<END TEST_INFO>
+

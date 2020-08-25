@@ -101,7 +101,6 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      alignph,ddb_diel_elec,ddb_oscstr,wrtout
 !!
 !! SOURCE
 
@@ -401,7 +400,7 @@ end subroutine ddb_diel
 !! OUTPUT
 !! 
 !! PARENTS
-!!      ddb_diel
+!!      m_ddb_diel
 !!
 !! CHILDREN
 !!
@@ -478,7 +477,7 @@ end subroutine ddb_diel_elec
 !!  the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
 !! 
 !! PARENTS
-!!      ddb_diel
+!!      m_ddb_diel
 !!
 !! CHILDREN
 !!
@@ -656,7 +655,7 @@ end subroutine ddb_oscstr
 !!  the cartesian axes.
 !!
 !! PARENTS
-!!      ddb_diel
+!!      m_ddb_diel
 !!
 !! CHILDREN
 !!

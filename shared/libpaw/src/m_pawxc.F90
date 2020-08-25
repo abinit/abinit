@@ -268,6 +268,7 @@ end subroutine pawxc_xcpositron_wrapper
 !!      m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -318,6 +319,7 @@ contains
 !!      m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -920,7 +922,7 @@ end function pawxc_get_uselaplacian
 !!                          k3xc(:,4)=d3Exc/drho_dn drho_dn drho_dn
 !!
 !! PARENTS
-!!      m_pawpsp,pawdenpot
+!!      m_paw_denpot,m_pawpsp
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -1808,7 +1810,7 @@ end subroutine pawxc
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!
 !! PARENTS
-!!      pawdenpot
+!!      m_paw_denpot
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -2118,7 +2120,7 @@ end subroutine pawxcpositron
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
-!!      pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -3676,7 +3678,7 @@ end subroutine pawxcsphpositron
 !!    sum2(cplexsum*nrad,lm_size,nsums)=second order sums
 !!
 !! PARENTS
-!!      m_pawxc,poslifetime,posratecore
+!!      m_pawxc,m_positron
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -4057,7 +4059,7 @@ end subroutine pawxcsphpositron
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
-!!      m_pawpsp,pawdenpot
+!!      m_paw_denpot,m_pawpsp
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -4849,7 +4851,7 @@ end subroutine pawxcsphpositron
 !!      Input  if option==3
 !!
 !! PARENTS
-!!      pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -5199,7 +5201,7 @@ end subroutine pawxcsphpositron
 !! NOTES
 !!
 !! PARENTS
-!!      pawdenpot
+!!      m_paw_denpot
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -5699,9 +5701,10 @@ end subroutine pawxcmpositron
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
-!!      m_pawxc,respfn,nonlinear
+!!      m_nonlinear,m_pawxc,m_respfn_driver
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 

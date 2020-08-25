@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h20 )
+.Starting date : Sat  1 Aug 2020.
+- ( at 18h17 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t18-t19/t18.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Test_suite/v6_t18-t19/t18.in
 - output file    -> t18.out
 - root for input  files -> t18i
 - root for output files -> t18o
@@ -81,6 +81,7 @@ P           mkmem           1
         strtarget     -4.75846000E-04 -4.75846000E-04 -4.75846000E-04
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
            toldfe      1.00000000E-06 Hartree
+           tolsym      1.00000000E-08
             typat      1  1  1  1  1  1  1  1  2  2  2  2  2  2  2  2
            xangst      2.3588282449E+00  1.0082971812E+00  5.9347457533E+00
                        5.0133863359E-01 -8.1216218286E-01  5.9347449648E+00
@@ -165,8 +166,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.01664
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosHGH_pwteter/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -184,8 +185,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/53i.7.hgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/53i.7.hgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosHGH_pwteter/53i.7.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosHGH_pwteter/53i.7.hgh
 - Hartwigsen-Goedecker-Hutter psp for I,  from PRB58, 3641 (1998)
 - 53.00000   7.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -511,6 +512,7 @@ P           mkmem           1
            strten     -7.5859332275E-04 -7.5902968407E-04 -1.9555606072E-04
                        3.3677952532E-08  3.4999620824E-08 -1.1362930730E-06
            toldfe      1.00000000E-06 Hartree
+           tolsym      1.00000000E-08
             typat      1  1  1  1  1  1  1  1  2  2  2  2  2  2  2  2
            xangst      2.3588282449E+00  1.0082971812E+00  5.9347457533E+00
                        5.0133863359E-01 -8.1216218286E-01  5.9347449648E+00
@@ -647,10 +649,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.8  wall=          6.9
+- Proc.   0 individual time (sec): cpu=          6.9  wall=          9.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.8  wall=          6.9
+.Delivered   1 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.9  wall=          9.9

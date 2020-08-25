@@ -79,10 +79,10 @@ CONTAINS  !===========================================================
 !!  (only counters updated)
 !!
 !! PARENTS
-!!      wrtout
+!!      m_specialmsg
 !!
 !! CHILDREN
-!!      xmpi_sum
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -123,7 +123,7 @@ end subroutine specialmsg_setcount
 !!      abinit
 !!
 !! CHILDREN
-!!      xmpi_sum
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -157,10 +157,10 @@ end subroutine specialmsg_getcount
 !!  (only counters updated)
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
-!!      xmpi_sum
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -205,11 +205,11 @@ end subroutine specialmsg_mpisum
 !!  (only writing)
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,bsepostproc,cut3d,fftprof,ioprof,lapackprof,mrgddb
-!!      mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet,vdw_kernelgen
+!!      abinit,aim,anaddb,cut3d,fftprof,ioprof,lapackprof,mrgddb,mrgdv,mrggkk
+!!      mrgscr,multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
-!!      date_and_time,wrtout
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -342,6 +342,7 @@ end subroutine herald
 !!  (only writing)
 !!
 !! PARENTS
+!!      m_specialmsg
 !!
 !! CHILDREN
 !!      flush_unit,specialmsg_setcount,write_lines
@@ -442,6 +443,7 @@ end subroutine wrtout_unit
 !! PARENTS
 !!
 !! CHILDREN
+!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -502,7 +504,7 @@ end subroutine wrtout_units
 !!  (only writing)
 !!
 !! PARENTS
-!!      wrtout_unit
+!!      m_specialmsg
 !!
 !! CHILDREN
 !!      flush_unit,specialmsg_setcount,write_lines

@@ -479,7 +479,6 @@ end subroutine lgroup_print
 !!  Free memory
 !!
 !! PARENTS
-!!      m_sigmaph
 !!
 !! CHILDREN
 !!

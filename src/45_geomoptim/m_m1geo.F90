@@ -97,6 +97,12 @@ contains  !=============================================================
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!      m_gstateimg
+!!
+!! CHILDREN
+!!      abihist_free,abimover_destroy,delocint_fin,mttk_fin
+!!
 !! SOURCE
 
  subroutine m1geo_init(dtfil,dtset,m1geo_param)
@@ -211,6 +217,12 @@ contains  !=============================================================
 !! INPUTS
 !!
 !! OUTPUT
+!!
+!! PARENTS
+!!      m_gstateimg
+!!
+!! CHILDREN
+!!      abihist_free,abimover_destroy,delocint_fin,mttk_fin
 !!
 !! SOURCE
 

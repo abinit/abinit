@@ -84,7 +84,7 @@ contains
 !!        if ider=2, compute only the second derivative of the function (in derfun)
 !!
 !! PARENTS
-!!      getnel,m_pawpwij,mkffnl,pawgylmg,psp8lo
+!!      m_mkffnl,m_mklocl,m_occ,m_pawpwij,m_psptk
 !!
 !! CHILDREN
 !!
@@ -231,12 +231,10 @@ end subroutine splfit
 !!    Work space, double precision DIAG(N) - should be removed ...
 !!
 !! PARENTS
-!!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      init_occ_ent,integrho,m_atom,m_dens,m_entropyDMFT,m_ewald,m_paw_slater
-!!      m_special_funcs,m_splines,outscfcv,pawinit,predict_string,psp10in
-!!      psp10nl,psp11nl,psp1cc,psp1in,psp1nl,psp2in,psp2nl,psp3in,psp3nl,psp4cc
-!!      psp5in,psp5nl,psp6cc,psp6in,psp8in,psp8lo,psp8nl,psp9in
-!!      random_stopping_power,spline_paw_fncs,upf2abinit,vso_realspace_local
+!!      m_a2ftr,m_bader,m_dens,m_entropyDMFT,m_mkrho,m_occ,m_outscfcv
+!!      m_paw_atomorb,m_paw_init,m_paw_mkrho,m_paw_slater,m_predict_string
+!!      m_psp1,m_psp5,m_psp6,m_psp8,m_psp9,m_psp_hgh,m_psptk,m_screening_driver
+!!      m_sigc,m_special_funcs,m_spin_current,m_splines,m_upf2abinit
 !!
 !! CHILDREN
 !!
@@ -675,10 +673,10 @@ end subroutine spline_complex
 !!    The input value is incremented by the number of such points.
 !!
 !! PARENTS
-!!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      m_atom,m_cut3d,m_entropyDMFT,m_paw_slater,m_special_funcs,m_splines
-!!      outscfcv,partial_dos_fractions,predict_string,psp6cc
-!!      random_stopping_power,spline_paw_fncs,vso_realspace_local,wvl_initro
+!!      m_a2ftr,m_cut3d,m_entropyDMFT,m_epjdos,m_mkrho,m_outscfcv,m_paw_atomorb
+!!      m_paw_mkrho,m_paw_slater,m_predict_string,m_psp6,m_psptk
+!!      m_screening_driver,m_sigc,m_special_funcs,m_spin_current,m_splines
+!!      m_wvl_rho
 !!
 !! CHILDREN
 !!

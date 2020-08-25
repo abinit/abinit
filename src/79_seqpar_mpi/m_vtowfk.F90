@@ -140,12 +140,10 @@ contains
 !!                    for occopt<3 (fixed occupation numbers)
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,lobpcgwf2,meanvalue_g
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
-!!      prep_nonlop,pw_orthon,subdiago,timab,wrtout,xmpi_sum,zhemm
+!!      timab,xmpi_sum
 !!
 !! NOTES
 !!  The cprj are distributed over band and spinors processors.
@@ -1028,7 +1026,7 @@ end subroutine vtowfk
 !! This should be cleared up.
 !!
 !! PARENTS
-!!      vtowfk
+!!      m_vtowfk
 !!
 !! CHILDREN
 !!      timab,xmpi_sum

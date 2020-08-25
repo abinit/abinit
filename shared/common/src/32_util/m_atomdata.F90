@@ -94,9 +94,9 @@ contains
 !! character(len=2) symbol=atomic symbol
 !!
 !! PARENTS
-!!      bonds_lgth_angles,fresid,ingeo,invars1,m_abimover,m_atomdata,m_crystal
-!!      m_crystal_io,m_effective_potential_file,m_epjdos,mlwfovlp_setup,out1dm
-!!      prt_cif,prtposcar,randomcellpos,vdw_dftd2,vdw_dftd3
+!!      m_abimover,m_atomdata,m_crystal,m_effective_potential_file,m_epjdos
+!!      m_forces,m_geometry,m_ingeo,m_invars1,m_mlwfovlp,m_multipoles
+!!      m_vdw_dftd2,m_vdw_dftd3
 !!
 !! CHILDREN
 !!
@@ -361,7 +361,7 @@ end subroutine atomdata_from_znucl
 !! OUTPUT
 !!
 !! PARENTS
-!!      append_xyz,m_atomdata,upf2abinit,upfheader2abi
+!!      m_atomdata,m_parser,m_pspheads,m_upf2abinit
 !!
 !! CHILDREN
 !!
@@ -821,7 +821,7 @@ end function atom_length
 !! gauss(2,ntypat)=Gaussian parameters.
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!

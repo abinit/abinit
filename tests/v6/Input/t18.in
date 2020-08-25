@@ -20,6 +20,7 @@ diemac 12       # Although this is not mandatory, it is worth to
 # Definition of the unit cell: Triclinic
 acell 1.3652185228E+01  1.9310062579E+01  9.8097544562E+00
 angdeg 90.00000116  90.00000117  44.99121644
+tolsym 1.0e-8 # With the default value of tolsym, ABINIT recognize more symmetries than we want.
 strtarget -4.75846d-4 -4.75846d-4 -4.75846d-4 0 0 0
 strprecon 0.1
 # Definition of the atom types
@@ -69,7 +70,7 @@ ecut 15.0          # Maximal kinetic energy cut-off, in Hartree
 #%% authors = Unknown
 #%% keywords = 
 #%% description = 
-#%%   HI 8 molecule per cell, the cell is triclinic.
+#%%   HI 8 molecule per cell, the cell is triclinic (has to change tolsym as default is too permissive)
 #%%   Prepare the density for the next Bader analysis.
 #%% topics = Bader
 #%%<END TEST_INFO>

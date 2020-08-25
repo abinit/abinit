@@ -87,11 +87,10 @@ contains
 !!                              from psp file (used in NC only)
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
-!!      atomdata_from_symbol,cc_derivatives,nderiv,psp11lo,psp11nl,read_pseudo
-!!      smooth,spline,upfxc2abi
+!!      ctrap
 !!
 !! SOURCE
 
@@ -317,10 +316,10 @@ end subroutine upf2abinit
 !! NOTES
 !!
 !! PARENTS
-!!      upf2abinit
+!!      m_upf2abinit
 !!
 !! CHILDREN
-!!      ctrap,jbessel,spline
+!!      ctrap
 !!
 !! SOURCE
 
@@ -449,7 +448,7 @@ end subroutine psp11nl
 !!   (needed for spline fitter).
 !!
 !! PARENTS
-!!      upf2abinit
+!!      m_upf2abinit
 !!
 !! CHILDREN
 !!      ctrap

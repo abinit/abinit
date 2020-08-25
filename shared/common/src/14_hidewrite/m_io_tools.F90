@@ -224,7 +224,7 @@ end function file_exists
 !!  The specified file is deleted.
 !!
 !! PARENTS
-!!      abinit,ioprof,m_io_redirect,m_nctk,m_wfk,mlwfovlp
+!!      ioprof,m_dvdb,m_io_redirect,m_mlwfovlp,m_nctk,m_wfk
 !!
 !! CHILDREN
 !!
@@ -765,10 +765,10 @@ end function read_string
 !!  Available only if the compiler implements this intrinsic procedure.
 !!
 !! PARENTS
-!!      abinit,anaddb,bsepostproc,cchi0,cchi0q0,cut3d,fftprof,impurity_solve
-!!      m_errors,m_hdr,m_io_redirect,m_io_tools,m_matlu,m_shirley,m_xc_vdw
-!!      mrggkk,mrgscr,multibinit,optic,pawmkaewf,prep_calc_ucrpa,qmc_prep_ctqmc
-!!      scprqt,vdw_kernelgen,vtorho,wrtout
+!!      abinit,anaddb,cut3d,fftprof,m_chi0,m_common,m_dmft,m_errors,m_forctqmc
+!!      m_hdr,m_io_redirect,m_io_tools,m_matlu,m_mpi_setup,m_paw_mkaewf
+!!      m_prep_calc_ucrpa,m_specialmsg,m_tdep_shell,m_vtorho,m_xc_vdw,mrggkk
+!!      mrgscr,multibinit,optic,vdw_kernelgen
 !!
 !! CHILDREN
 !!
@@ -1181,7 +1181,7 @@ end function close_unit
 !!  Only writing.
 !!
 !! PARENTS
-!!      m_io_tools,wrtout
+!!      m_io_tools,m_specialmsg
 !!
 !! CHILDREN
 !!

@@ -74,9 +74,10 @@ contains
 !!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
+!!      invcb
 !!
 !! SOURCE
 
@@ -242,9 +243,10 @@ end subroutine xcpzca
 !! b1 must be 1 and a0 must be $(3/4)(3/(2\pi))^{2/3}$.
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
+!!      invcb
 !!
 !! SOURCE
 
@@ -737,9 +739,10 @@ end subroutine xcspol
 !!  $d^2(Vxc)/d(\rho)^2= rs/(3*\rho)^2)*(4*d(Vxc)/d(rs)+rs*d^2(Vxc)/d(rs)^2)$.
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
+!!      invcb
 !!
 !! SOURCE
 
@@ -900,9 +903,10 @@ end subroutine xctetr
 !!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
+!!      invcb
 !!
 !! SOURCE
 
@@ -1009,9 +1013,10 @@ end subroutine xcwign
 !!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
+!!      invcb
 !!
 !! SOURCE
 
@@ -1104,9 +1109,10 @@ end subroutine xchelu
 !!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
+!!      invcb
 !!
 !! SOURCE
 
@@ -1206,9 +1212,10 @@ end subroutine xcxalp
 !!   is added at output.
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
+!!      invcb
 !!
 !! SOURCE
 
@@ -1288,7 +1295,7 @@ end subroutine xclb
 !!  vxci(npts,nspden)=exchange-correlation potential
 !!
 !! PARENTS
-!!      rhotoxc
+!!      m_rhotoxc
 !!
 !! CHILDREN
 !!      invcb

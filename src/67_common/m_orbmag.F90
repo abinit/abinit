@@ -313,10 +313,11 @@ CONTAINS  !=====================================================================
 !!  mpi_enreg = information about MPI parallelization
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      kpgsph,listkk,setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -918,6 +919,8 @@ end subroutine initorbmag
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -1033,8 +1036,11 @@ end subroutine rho_norm_check
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -1110,6 +1116,8 @@ end subroutine covar_cprj
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -1759,8 +1767,11 @@ end subroutine duqdu_gamma
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -2079,8 +2090,11 @@ end subroutine duqdu
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -2218,8 +2232,11 @@ end subroutine mpicomm_helper
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -2730,8 +2747,11 @@ end subroutine duqhqdu
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -3363,8 +3383,11 @@ end subroutine udsqdu_gamma
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -3652,8 +3675,11 @@ end subroutine udsdsu
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -3741,8 +3767,11 @@ end subroutine make_onsite_l_k
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -3846,8 +3875,11 @@ end subroutine make_onsite_l
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -4057,8 +4089,11 @@ end subroutine make_onsite_bm
 !! Direct questions and comments to J Zwanziger
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -4341,8 +4376,11 @@ end subroutine make_eeig
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -4465,8 +4503,11 @@ end subroutine make_S1trace
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -4594,8 +4635,11 @@ end subroutine make_rhorij1
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -4703,8 +4747,11 @@ end subroutine cpg_dij_cpb
 !! and Gonze and Zwanziger, PRB 84, 064445 (2011) [[cite:Gonze2011a]].
 !!
 !! PARENTS
+!!      m_afterscfloop
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -4827,8 +4874,11 @@ end subroutine orbmag
 !! derivatives as in [[cite:Ceresoli2006]].
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -5118,8 +5168,11 @@ end subroutine orbmag_wf
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -5224,8 +5277,11 @@ end subroutine output_orbmag
 !! and Gonze and Zwanziger, PRB 84 064445 (2011) [[cite:Gonze2011a]].
 
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -5379,8 +5435,11 @@ end subroutine make_dpdp
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -5838,8 +5897,11 @@ end subroutine make_smat
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -6082,8 +6144,11 @@ end subroutine ctocprjb
 !! expansion vectors, with no shift, for each k point.
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -6278,8 +6343,11 @@ end subroutine applyap
 !! Direct questions and comments to J Zwanziger
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -6786,8 +6854,11 @@ end subroutine make_eeig123
 !! Direct questions and comments to J Zwanziger
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -7119,8 +7190,11 @@ end subroutine orbmag_rho
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 
@@ -7459,8 +7533,11 @@ end subroutine make_pdpdpH
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_mpi_recv
+!!      pawcprj_mpi_send,xmpi_sum
 !!
 !! SOURCE
 

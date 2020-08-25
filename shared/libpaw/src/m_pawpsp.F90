@@ -132,7 +132,7 @@ CONTAINS
 !!  f_l(q) = $ \int_0^{rmax}[j_l(2\pi q r) u_l(r)  r dr]$
 !!
 !! PARENTS
-!!      m_pawpsp,pawinit
+!!      m_paw_init,m_pawpsp
 !!
 !! CHILDREN
 !!
@@ -465,7 +465,7 @@ end subroutine pawpsp_lo
 !!  yp1,ypn=derivatives of n(q) wrt q at q=0 and q=qmax (needed for spline fitter).
 !!
 !! PARENTS
-!!      dfpt_eltfrxc,m_pawpsp,m_psps
+!!      m_dfpt_elt,m_pawpsp,m_psps
 !!
 !! CHILDREN
 !!
@@ -1365,7 +1365,7 @@ end subroutine pawpsp_read
 !! NOTES
 !!
 !! PARENTS
-!!      optics_paw_core,posdoppler
+!!      m_paw_optics,m_positron
 !!
 !! CHILDREN
 !!
@@ -2964,7 +2964,7 @@ end subroutine pawpsp_wvl_calc
 !!  shape_type= 3 ; gl(r)=Alpha(1,l)*jl(q(1,l)*r)+Alpha(2,l)*jl(q(2,l)*r) for each l
 !!
 !! PARENTS
-!!      m_pawpsp,pspatm
+!!      m_pawpsp,m_pspini
 !!
 !! CHILDREN
 !!
@@ -3898,7 +3898,7 @@ end subroutine pawpsp_17in
 !!  Spin-orbit not yet implemented (to be done)
 !!
 !! PARENTS
-!!      m_pawpsp,pspatm
+!!      m_pawpsp,m_pspini
 !!
 !! CHILDREN
 !!
@@ -4304,7 +4304,7 @@ end subroutine pawpsp_read_header_2
 !! NOTES
 !!
 !! PARENTS
-!!      m_pawpsp,pspatm
+!!      m_pawpsp,m_pspini
 !!
 !! CHILDREN
 !!
@@ -4421,7 +4421,7 @@ end subroutine pawpsp_wvl
 !! check pspheads commented out in pawpsp_17in, and routine pawpsp_read_xml_2
 !!
 !! PARENTS
-!!      m_pawpsp,pawpsxml2ab,pspatm
+!!      m_pawpsp,m_pspheads
 !!
 !! CHILDREN
 !!
@@ -4604,7 +4604,7 @@ end subroutine pawpsp_read_header_xml
 !! NOTES
 !!
 !! PARENTS
-!!      m_pawpsp,pawpsxml2ab,pspatm
+!!      m_pawpsp,m_pspheads
 !!
 !! CHILDREN
 !!
@@ -4697,7 +4697,7 @@ end subroutine pawpsp_read_pawheader
 !!  xcccrc=XC core correction cutoff radius (bohr) from psp file
 !!
 !! PARENTS
-!!      m_pawpsp,pspatm
+!!      m_pawpsp,m_pspini
 !!
 !! CHILDREN
 !!

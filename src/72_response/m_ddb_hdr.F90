@@ -177,9 +177,10 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gstate,nonlinear,respfn
+!!      m_dfpt_looppert,m_eig2d,m_gstate,m_longwave,m_nonlinear,m_respfn_driver
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -308,9 +309,9 @@ end subroutine ddb_hdr_init
 !!  Allocate dynamic memory.
 !!
 !! PARENTS
-!!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -357,6 +358,7 @@ end subroutine ddb_hdr_malloc
 !! PARENTS
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -409,10 +411,9 @@ end subroutine ddb_hdr_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      ddb_interpolate,dfpt_looppert,eig2tot,gstate,mblktyp1,mblktyp5
-!!      nonlinear,respfn
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -467,10 +468,11 @@ end subroutine ddb_hdr_open_write
 !! OUTPUT
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5
-!!      mrgddb,thmeig
+!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,m_ifc,m_thmeig
+!!      mrgddb
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -605,9 +607,9 @@ end subroutine ddb_hdr_open_read
 !! OUTPUT
 !!
 !! PARENTS
-!!      mblktyp1,mblktyp5
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -711,6 +713,7 @@ end subroutine ddb_hdr_compare
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1159,6 +1162,7 @@ end subroutine psddb8
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1749,6 +1753,7 @@ end subroutine ioddb8_in
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1827,6 +1832,7 @@ end subroutine ddb_getdims
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2323,6 +2329,7 @@ end subroutine inprep8
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2430,6 +2437,7 @@ end subroutine ddb_chkname
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2770,6 +2778,7 @@ end subroutine compare_ddb_variables
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2823,6 +2832,7 @@ subroutine chkr8(reali,realt,name,tol)
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 

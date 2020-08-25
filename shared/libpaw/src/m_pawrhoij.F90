@@ -232,11 +232,11 @@ CONTAINS
 !! If both are present, only pawtab(:) is used.
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv
-!!      dfpt_vtorho,energy,extraprho,initrhoij,m_electronpositron,m_hdr,m_ioarr
-!!      m_pawrhoij,m_qparticles,paw_qpscgw,posdoppler,respfn,screening
-!!      setup_bse,setup_positron,setup_screening,setup_sigma,sigma,vtorho
-!!      wfk_analyze
+!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfpt_vtorho,m_dfptnl_loop,m_dfptnl_pert,m_dft_energy
+!!      m_electronpositron,m_extraprho,m_hdr,m_ioarr,m_nonlinear
+!!      m_paw_occupancies,m_pawrhoij,m_positron,m_qparticles,m_respfn_driver
+!!      m_screening_driver,m_sigma_driver,m_vtorho,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -392,11 +392,12 @@ end subroutine pawrhoij_alloc
 !! pawrhoij(:)<type(pawrhoij_type)>= rhoij datastructure
 !!
 !! PARENTS
-!!      bethe_salpeter,d2frnl,dfpt_looppert,dfpt_nstpaw,dfpt_rhofermi
-!!      dfpt_scfcv,dfpt_vtorho,energy,gstate,m_electronpositron,m_hdr,m_ioarr
-!!      m_paral_pert,m_pawrhoij,m_scf_history,mrgscr,pawgrnl,pawmkrho
-!!      pawmkrhoij,pawprt,posdoppler,respfn,screening,setup_bse,setup_positron
-!!      setup_screening,setup_sigma,sigma,vtorho,wfk_analyze
+!!      m_bethe_salpeter,m_d2frnl,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfpt_vtorho,m_dfptnl_loop,m_dfptnl_pert,m_dft_energy
+!!      m_electronpositron,m_gstate,m_hdr,m_ioarr,m_nonlinear,m_outscfcv
+!!      m_paral_pert,m_paw_dfpt,m_paw_mkrho,m_paw_occupancies,m_paw_tools
+!!      m_pawrhoij,m_positron,m_respfn_driver,m_scf_history,m_screening_driver
+!!      m_sigma_driver,m_vtorho,m_wfk_analyze,mrgscr
 !!
 !! CHILDREN
 !!
@@ -463,8 +464,9 @@ end subroutine pawrhoij_free
 !! pawrhoij(:)<type(pawrhoij_type)>= rhoij datastructure
 !!
 !! PARENTS
-!!      d2frnl,dfpt_looppert,m_ioarr,m_pawrhoij,m_scf_history,outscfcv,pawgrnl
-!!      pawmkrho,pawprt,posdoppler,respfn
+!!      m_d2frnl,m_dfpt_looppert,m_dfptnl_loop,m_dfptnl_pert,m_ioarr
+!!      m_nonlinear,m_outscfcv,m_paw_dfpt,m_paw_mkrho,m_paw_tools,m_pawrhoij
+!!      m_positron,m_respfn_driver,m_scf_history
 !!
 !! CHILDREN
 !!
@@ -539,9 +541,10 @@ end subroutine pawrhoij_nullify
 !!  In case of a single copy operation pawrhoij_out must have been allocated.
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,gstate,inwffil,m_electronpositron,m_hdr
-!!      m_ioarr,m_pawrhoij,m_wfk,outscfcv,pawmkrho,respfn,screening,setup_bse
-!!      setup_positron,setup_screening,setup_sigma,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_dfpt_looppert,m_electronpositron,m_gstate,m_hdr
+!!      m_inwffil,m_ioarr,m_nonlinear,m_outscfcv,m_paw_mkrho,m_pawrhoij
+!!      m_positron,m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk
+!!      m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -1236,7 +1239,7 @@ end subroutine pawrhoij_copy
 !!  The gathered structure are ordered like in sequential mode.
 !!
 !! PARENTS
-!!      d2frnl,m_pawrhoij,pawgrnl,pawprt,posdoppler
+!!      m_d2frnl,m_paw_dfpt,m_paw_tools,m_pawrhoij,m_positron
 !!
 !! CHILDREN
 !!
@@ -1574,7 +1577,7 @@ end subroutine pawrhoij_gather
 !!    Eventually distributed according to comm_atom communicator
 !!
 !! PARENTS
-!!      respfn
+!!      m_nonlinear,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -2744,7 +2747,7 @@ end subroutine pawrhoij_io
 !!   * If use_rhoij_/=1, rhoij_ is allocated and the corresponding flag is set to 1.
 !!
 !! PARENTS
-!!      paw_qpscgw
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -2815,7 +2818,8 @@ end subroutine pawrhoij_unpack
 !!   * In output the rhoij_ array is allocated
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,energy,pawmkrhoij
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dfptnl_pert,m_dft_energy
+!!      m_paw_occupancies
 !!
 !! CHILDREN
 !!
@@ -2868,7 +2872,7 @@ end subroutine pawrhoij_init_unpacked
 !!   * In output the rhoij_ array is deallocated
 !!
 !! PARENTS
-!!      dfpt_rhofermi,energy,pawmkrho
+!!      m_dfpt_scfcv,m_dft_energy,m_paw_mkrho
 !!
 !! CHILDREN
 !!
@@ -3116,7 +3120,7 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 !!               next value are irrelevant
 !!
 !! PARENTS
-!!      m_pawrhoij, newrho, newvtr
+!!      m_dfpt_scfcv,m_extraprho,m_newrho,m_newvtr,m_odamix,m_pawrhoij
 !!
 !! CHILDREN
 !!
@@ -3246,6 +3250,11 @@ end subroutine pawrhoij_filter
 !!  [nspden_rhoij]= value of nspden associated to pawrhoij
 !!
 !! PARENTS
+!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfpt_vtorho,m_dfptnl_loop,m_dfptnl_pert,m_dft_energy,m_extraprho
+!!      m_hdr,m_nonlinear,m_paw_occupancies,m_positron,m_qparticles
+!!      m_respfn_driver,m_screening_driver,m_sigma_driver,m_vtorho
+!!      m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -3327,7 +3336,7 @@ end subroutine pawrhoij_inquire_dim
 !! NOTES
 !!
 !! PARENTS
-!!      m_pawrhoij
+!!      m_paw_tools,m_pawrhoij,m_wfd
 !!
 !! CHILDREN
 !!
@@ -3536,7 +3545,7 @@ end subroutine pawrhoij_print_rhoij
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
 !!
 !! PARENTS
-!!      d2frnl,energy,paw_qpscgw,pawmkrho,posdoppler
+!!      m_d2frnl,m_dft_energy,m_paw_mkrho,m_positron,m_sigma_driver
 !!
 !! CHILDREN
 !!

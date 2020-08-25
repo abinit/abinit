@@ -60,13 +60,13 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,cryst%free,crystal_init
 !!      ebands_copy,ebands_free,ebands_init,ebands_update_occ,eprenorms_bcast
-!!      eprenorms_free,eprenorms_from_epnc,flush_unit,hdr_bcast,hdr_copy
-!!      hdr_free,herald,int2char4,linelop,linopt,mati3inv,matr3inv,metric
-!!      nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart,pmat_renorm,renorm_bst
-!!      sym2cart,timein,wfk_close,wfk_open_read,wfk_read_eigk,wrtout,xmpi_bcast
-!!      xmpi_end,xmpi_init,xmpi_sum
+!!      eprenorms_free,eprenorms_from_epnc,flush_unit,hdr%bcast,hdr%free
+!!      hdr_copy,hdr_ddk,hdr_ncread,herald,int2char4,linelop,linopt,mati3inv
+!!      matr3inv,metric,nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart
+!!      pmat_renorm,renorm_bst,sym2cart,timein,wfk0%close,wfk0%read_eigk
+!!      wfk_open_read,wfks,wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 

@@ -168,12 +168,12 @@ contains
 !! NOT OUTPUT NOW !
 !!
 !! PARENTS
-!!      dfpt_looppert,dfptnl_loop,gstate,nonlinear,respfn
+!!      m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_gstate,m_longwave,m_nonlinear
+!!      m_pead_nl_loop,m_respfn_driver
 !!
 !! CHILDREN
-!!      copy_mpi_enreg,destroy_mpi_enreg,hdr_check,hdr_free,hdr_io,hdr_ncread
-!!      kpgio,listkk,matr3inv,newkpt,pawrhoij_copy,timab,wffopen,wfsinp,wrtout
-!!      wvl_wfsinp_disk,wvl_wfsinp_scratch
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1103,11 +1103,11 @@ end subroutine inwffil
 !! THE DESCRIPTION IS TO BE COMPLETELY REVISED, AS THIS ONE COMES FROM inwffil.f
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      initwf,mpi_bcast,mpi_recv,mpi_send,pareigocc,timab,wfconv,wffreadskipk
-!!      wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1829,11 +1829,11 @@ end subroutine wfsinp
 !! ikptsp_old=number of the previous spin-k point, or 0 if first call of present file
 !!
 !! PARENTS
-!!      wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      rwwf,timab,wffreadskipk,wfk_close,wfk_open_read,wfk_read_band_block
-!!      wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2062,10 +2062,11 @@ end subroutine initwf
 !! * In the present status of this routine, occ is not output.
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      pareigocc,prmat,randac,rdnpw,rwwf,timab,wfconv,wffreadskipk,wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2656,7 +2657,7 @@ end subroutine newkpt
 !! When the two nspinor differ, one must have nbd1/nspinor1<nbd2/nspinor2
 !!
 !! PARENTS
-!!      newkpt,wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
 !!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere

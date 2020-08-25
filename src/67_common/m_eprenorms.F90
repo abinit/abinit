@@ -168,7 +168,7 @@ end subroutine eprenorms_init
 !! Epren<eprenorms_t>=The datatype to be freed
 !!
 !! PARENTS
-!!      bethe_salpeter,optic
+!!      m_bethe_salpeter,optic
 !!
 !! CHILDREN
 !!      listkk
@@ -209,7 +209,7 @@ end subroutine eprenorms_free
 !! Epren<eprenorms_t> = fields are initialized and filled with data from filename
 !!
 !! PARENTS
-!!      optic,setup_bse
+!!      m_bethe_salpeter,optic
 !!
 !! CHILDREN
 !!      listkk
@@ -273,7 +273,7 @@ end subroutine eprenorms_from_epnc
 !!  Epren<eprenorms_t> = Data broadcasted on every node from master
 !!
 !! PARENTS
-!!      optic,setup_bse
+!!      m_bethe_salpeter,optic
 !!
 !! CHILDREN
 !!      listkk

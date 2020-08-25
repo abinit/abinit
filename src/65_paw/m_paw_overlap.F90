@@ -91,10 +91,9 @@ CONTAINS  !=====================================================================
 !! atom type.
 !!
 !! PARENTS
-!!      chern_number
+!!      m_orbmag
 !!
 !! CHILDREN
-!!      expibi,qijb_kk
 !!
 !! SOURCE
 
@@ -210,11 +209,9 @@ CONTAINS  !=====================================================================
 !!  The mpi part will work with mlwfovlp but not for berryphase_new
 !!
 !! PARENTS
-!!      mlwfovlp
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      initylmr,pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,sbf8
-!!      simp_gen
 !!
 !! SOURCE
 
@@ -624,7 +621,7 @@ CONTAINS  !=====================================================================
 !! atom type.
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,make_grad_berry
+!!      m_berryphase_new,m_cgwf
 !!
 !! CHILDREN
 !!
@@ -720,10 +717,9 @@ CONTAINS  !=====================================================================
 !! <u_nk|u_mk+b>, that is, two Bloch vectors at two different k points.
 !!
 !! PARENTS
-!!      initberry,overlap_k1k2_paw
+!!      m_berryphase_new,m_paw_overlap
 !!
 !! CHILDREN
-!!      initylmr,sbf8,simp_gen
 !!
 !! SOURCE
 
@@ -862,7 +858,7 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      initberry,overlap_k1k2_paw
+!!      m_berryphase_new,m_paw_overlap
 !!
 !! CHILDREN
 !!

@@ -144,17 +144,10 @@ contains
 !!  the physical observables. 
 !! 
 !! PARENTS
-!!   
-!!  respfn
+!!      m_longwave
 !!
 !! CHILDREN
-!!
-!!  appdig, distrb2, dfpt_qdrpout, dfpt_qdrpwf, dfpt_rhotov, distrb2, dotprod_vn, ebands_init, 
-!!  ebands_free, fftdatar_write_from_hdr, 
-!!  fourdp, getcut, getmpw, getph, hdr_init, hdr_update, init_hamiltonian, 
-!!  initmpi_band, initylmg, inwffil, kpgio, load_spin_hamiltonian,
-!!  hartredq, read_rhor, rf2_getidirs, setsym, symkpt, WffClose,  
-!!  wfk_open_read, wrtout, xmpi_sum
+!!      cart39
 !!
 !! SOURCE
 
@@ -1115,12 +1108,10 @@ end subroutine dfpt_qdrpole
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  dfpt_qdrpole
+!!      m_dfpt_lw
 !!
 !! CHILDREN
-!!
-!!  cart39
+!!      cart39
 !!
 !! SOURCE
 
@@ -1617,16 +1608,10 @@ end subroutine dfpt_qdrpout
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  respfn
+!!      m_longwave
 !!
 !! CHILDREN
-!!  appdig,dfpt_ciflexoout,dfpt_ciflexowf,dfpt_rhotov,distrb2,dotprod_vn,
-!!  ebands_free,ebands_init,fourdp,
-!!  getcut,getmpw,getph,hdr_init,hdr_update,
-!!  initmpi_band,init_hamiltonian,initylmg,inwffil,kpgio
-!!  load_spin_hamiltonian,hartredq,rf2_getidirs,read_rhor,
-!!  setsym,symkpt,WffClose,wfk_open_read,wrtout,xmpi_sum
+!!      cart39
 !!
 !! SOURCE
 
@@ -3070,12 +3055,10 @@ end subroutine dfpt_flexo
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  dfpt_flexo
+!!      m_dfpt_lw
 !!
 !! CHILDREN
-!!
-!!  cart39 
+!!      cart39
 !!
 !! SOURCE
 
@@ -3616,12 +3599,10 @@ end subroutine dfpt_ciflexoout
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  dfpt_flexo
+!!      m_dfpt_lw
 !!
 !! CHILDREN
-!!
-!!  cart39 
+!!      cart39
 !!
 !! SOURCE
 
@@ -3997,12 +3978,10 @@ end subroutine dfpt_ciflexoout
 !! NOTES
 !!
 !! PARENTS
-!!
-!!  dfpt_flexo
+!!      m_dfpt_lw
 !!
 !! CHILDREN
-!!
-!!  cart39 
+!!      cart39
 !!
 !! SOURCE
 

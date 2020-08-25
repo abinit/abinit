@@ -52,7 +52,7 @@ gwgamma2? -8   # rpa bootstrap kernel in TC-TC dielectric function
 gwpara     2
 symchi     1
 symsigma   0
-icutcoul   7   # Gygi-Baldereschi auxiliary function
+gw_icutcoul  7   # Gygi-Baldereschi auxiliary function
 
 nband      16
 ecutwfn    54 Ry

@@ -84,7 +84,7 @@ contains
 !!                               acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
 !!      fcart2fred,hist2var,metric,mkrdim,var2hist,wrtout,xcart2xred
