@@ -218,7 +218,6 @@ pages:
     - tutorial/nuc.md
     - tutorial/optic.md
     - tutorial/positron.md
-    - tutorial/source_code.md
     - tutorial/tddft.md
     - tutorial/wannier90.md
 - Theory:

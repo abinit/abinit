@@ -11,7 +11,7 @@ then we discuss how to evaluate the e-ph self-energy and perform typical converg
 Further details concerning the implementation are given in [[cite:Gonze2019]] and [[cite:Romero2020]].
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
-and that he/she is familiar with the calculation of ground state and response properties,
+and that he/she is familiar with the calculation of ground state and response properties
 in particular phonons, Born effective charges and dielectric tensor.
 It goes without saying that one should have read the [introduction page for the EPH code](eph_intro)
 before running these examples.
@@ -107,18 +107,6 @@ the physical temperature T.
     within each degenerate subspace.
     As a consequence, **accidental degeneracies won't be removed when the sum is performed in the $\text{IBZ}_k$**.
 
-<!--
-Both the FM and the DW term converge slowly with respect to the number of empty states and the $\qq$-sampling.
-Note that, in principle, one should sum an infinite number of states (read from the external WFK file)
-and that the convergence is rather slow.
-Note also that QP energy differences usually converge faster than QP energies (the same behaviour is observed in $GW$).
-The EPH code implements numerical tricks to accelerate the convergence with respect to [[nband]] that are discussed
-in more detail in the next sections.
-Also, the convergence with the $\qq$-sampling is rather slow and delicate.
-This is especially true in polar materials due to the divergence of the polar e-ph matrix elements
-in the $\qq \rightarrow 0$ limit [[cite:Vogl1976]].
--->
-
 Both the FM and the DW term converge slowly with respect to the number of empty states and the $\qq$-sampling.
 In order to accelerate the convergence with the number of empty states, ABINIT replaces the contributions
 given by the high-energy states above a certain band index $M$ with the solution
@@ -182,7 +170,7 @@ bdgw   4 5    # [2, nkptgw] arary giving the initial and the last band index
 ```
 
 as the index of the valence band is given by 8 / 2 = 4.
-Obviously this input file will only provide the ZPR of the optical gap as Si has an indirect bandgap.
+Obviously this input file will only provide the ZPR of the direct gap as the fundamental bandgap of Si is indirect.
 
 Alternatively, one can use [[gw_qprange]] or [[sigma_erange]].
 Note that [[gw_qprange]] is mainly used to compute all the corrections for the occupied states plus
@@ -446,7 +434,7 @@ at the end of the output file:
 ```
 
 This indicates that our DVDB database is complete in the sense that the EPH code will be able
-to reconstruct by symmetry all the 3 [[natom]] perturbations for each $\qq$-qpoint.
+to reconstruct by symmetry all the 3 [[natom]] perturbations for each $\qq$-point.
 
 !!! warning
 
@@ -466,7 +454,7 @@ the position of the KS band edges as these are the states we want to correct.
 We use [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[irdden]].
 
 Note that in all the input files of the tutorial, we will be using the new [[structure]]
-variable (added in v9) to initialize the unit cell from an external input file so that
+variable added in v9 to initialize the unit cell from an external input file so that
 we don't need to repeat this part over and over again in the input files.
 The syntax is:
 
@@ -524,7 +512,7 @@ although low-energy states converge much faster.
 To avoid wasting precious computing time, we use a buffer that is ~10% of [[nband]].
 This reduces significantly the wall-time as the NSCF calculation completes when
 only the first [[nband]] - [[nbdbuf]] states are converged within the given [[tolwfr]].
-Obvisouly, one should not use the last [[nbdbuf]] states in the subsequent EPH calculation.
+Obviously, one should not use the last [[nbdbuf]] states in the subsequent EPH calculation.
 The same trick is highly recommended when performing $GW$ calculations.
 
 !!! important
@@ -835,30 +823,6 @@ The maximum [[nfreqsp]] and [[freqspmax]].
 
 ### MPI parallelism and memory requirements
 
-<!--
-There are five different MPI levels that can be used to distribute the workload
-and the most memory-demanding data structures.
-By default, the code tries to reach some compromise between memory requirements and time to solution
-by activating the parallelism over $\qq$-points if no other input is provided by the user.
-You can however specify manually the MPI distribution across the five different levels
-by using [[eph_np_pqbks]] (a list of 5 integers).
-The product of these five numbers **must be equal** to the total number of MPI processes.
-The first number gives the number of processes for the parallelization over perturbations.
-The allowed value range between 1 and 3 × [[natom]], and should be a divisor
-of 3 × [[natom]] to distribute the work equally.
-The higher this number, the lower the memory requirements at the price of increased MPI communication.
-The second number determines the parallelization over the $\qq$-points in the IBZ.
-This parallelization level allows one to decrease both the computational time as well as memory although
-it's not always possible to distribute the load equally among the processes.
-The parallelization over bands is usually not relevant for mobility computations
-as only a few states close to the VBM or CBM are considered.
-It is however useful when the real part of the self-energy is needed.
-The MPI parallelism over $\kk$-points and spins is very efficient
-but it requires HDF5 with MPI-IO support and memory does not scale.
-Use these additional levels if memory requirements are under control
-and you want to boost the calculation.
--->
-
 There is an important difference with respect to [[eph_task]] -4 that is worth discussing in more detail.
 When computing the imaginary part at the KS energy for transport properties,
 the EPH code is able to filter both $\kk$- and $\qq$-points so that only the relevant states
@@ -883,7 +847,6 @@ To recap:
 2. Once the memory for the wavefunctions reaches a reasonable amount, activate the parallelism
    over perturbations in order to decrease the memory for $W(\rr, \RR, \text{3 natom})$.
    For better efficiency, *eph_nperts* should divide 3 * [[natom]].
-   Using *np_perts* = [[natom]] is usually a reasonable choice.
 
 3. If the memory for the wavefunctions and $W(\rr, \RR, \text{3 natom})$ is under control,
    you may want to activate the $\qq$-point parallelism to speedup the calculation.
