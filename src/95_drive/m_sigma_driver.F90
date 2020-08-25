@@ -219,7 +219,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose,icutcoul_eff,usefock_ixc,nqlwl,xclevel_ixc ! MRM new gw1rdm and verbose
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc ! MRM new gw1rdm and verbose
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,coef_hyb ! MRM 
@@ -2586,7 +2586,6 @@ endif
        call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
        call hartre(1,gsqcut,dtset%icutcoul,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,dtset%nkpt,dtset%rcut,gw_rhog,&
        Cryst%rprimd,dtset%vcutgeo,gw_vhartr)                                                            ! Build Vhartree -> gw_vhartr
-
        ABI_MALLOC(tmp_kstab,(2,Wfd%nkibz,Wfd%nsppol))
        tmp_kstab=0
        do spin=1,Sigp%nsppol
@@ -2605,8 +2604,6 @@ endif
        !
        ! Exchange <NO_i|K[NO]|NO_j> and save old K and new J matrices
        !
-       rcut=Dtset%rcut
-       icutcoul_eff=Dtset%icutcoul
        if (Dtset%gw_nqlwl==0) then
          nqlwl=1
          ABI_MALLOC(qlwl,(3,nqlwl))
@@ -2616,12 +2613,14 @@ endif
          ABI_MALLOC(qlwl,(3,nqlwl))
          qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
        end if
+       rcut=Dtset%rcut
+       icsing_eff=Dtset%gw_icutcoul
         ! Use a Vcp_full to compute the full Coulomb interaction for NOs
        if (Gsph_x%ng > Gsph_c%ng) then
-         call vcoul_init(Vcp_full,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+         call vcoul_init(Vcp_full,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
           Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
        else
-         call vcoul_init(Vcp_full,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+         call vcoul_init(Vcp_full,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
           Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
        end if
         ! Use a Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
@@ -2635,23 +2634,21 @@ endif
            endif
          else if(abs(Dtset%hyb_mixing_sr)>tol8)then
            coef_hyb=abs(Dtset%hyb_mixing_sr)
-           icutcoul_eff=5
+           icsing_eff=5
          endif
          if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8) then
            rcut=one/Dtset%hyb_range_fock
          endif
        endif
        if (Gsph_x%ng > Gsph_c%ng) then
-         call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+         call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
           Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
        else
-         call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+         call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
           Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
        end if
        ABI_FREE(qlwl)
         ! Now compute the "residual" Coulomb interactions. 
-       Vcp_full%vc_sqrt_resid=Vcp_full%vc_sqrt
-       Vcp_full%i_sz_resid=Vcp_full%i_sz
        Vcp_ks%vc_sqrt_resid=sqrt(coef_hyb*Vcp_ks%vc_sqrt**2)
        Vcp_ks%i_sz_resid=coef_hyb*Vcp_ks%i_sz
         ! Now compute the matrix elements and save them on Sr%x_mat 
@@ -2758,7 +2755,7 @@ endif
        write(msg,'(a1)')  ' '
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a108)') ' Band corrections Delta eik = <KS_i|K[NO]-K[KS]+vH[NO]-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik'
+       write(msg,'(a110)') ' Band corrections Delta eik = <KS_i|K[NO]-a*K[KS]+vH[NO]-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        write(msg,'(a1)')  ' '
@@ -2769,6 +2766,7 @@ endif
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
          write(msg,'(a98)')' k-point  band      eik^new     Delta eik        K[NO]         K[KS]         Vxc[KS]    DVhartree'
+         write(msg,'(a98)')' k-point  band      eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]    DVhartree'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
          do ib=b1gw,b2gw
