@@ -936,8 +936,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! ============================
  ! Compute vnk matrix elements
  ! ============================
-
-
  ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
  ABI_CALLOC(sigma%vcar_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
 
@@ -5599,6 +5597,7 @@ subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
 
  ! Return phonon displacement in reduced coordinates.
  !call phdispl_cart2red(natom, crystal%gprimd, displ_cart, out_displ_red)
+ ABI_UNUSED(sq(1))
 
 end subroutine pheigvec_rotate
 !!***
@@ -5930,6 +5929,8 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
  real(dp) :: eigvec_qpt(2, self%natom3, self%natom3)
 
 ! *************************************************************************
+
+ ABI_UNUSED(qpt_ibz(1))
 
  if (self%use_ifc_fourq) then
    ! Debugging section.

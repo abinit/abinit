@@ -459,7 +459,7 @@ while allowing one to decrease the cost of the calculation and the memory by a f
 A significant fraction of the wall-time in EPH is spent for performing the FFTs required
 to apply the first-order Hamiltonian $H^1$.
 The use of single precision in the FFT routines allows one to decrease the computational cost without losing precision.
-This trick is activated by setting [[mixprec]] = 1. 
+This trick is activated by setting [[mixprec]] = 1.
 Note however that this feature is available only if the code is linked with FFTW3 or intel-MKL.
 
 !!! important
@@ -594,7 +594,7 @@ A typical test would be:
    This step produces another WFK file that will be used as reference to check the interpolation
    (let's call it **KPATH_WKF**)
 
-3. Use the *abitk* executable in *src/98_main* to interpolate the KS energies using the eigenvalues 
+3. Use the *abitk* executable in *src/98_main* to interpolate the KS energies using the eigenvalues
    in **IBZ_WFK** and compare the results with the ab-initio band structure stored in **KPATH_WFK**.
 
 The syntax is:
@@ -625,13 +625,13 @@ If the fit is not satisfactory, you may want to try one of the following options
 2. Increase the value of `lpratio`
 3. Play with *rcut* and *rsigma* to damp the oscillations in the interpolant
 
-Note that it is sometimes difficult to get completely rid of spurious oscillations 
+Note that it is sometimes difficult to get completely rid of spurious oscillations
 or artifacts in the SKW interpolation
 especially in the presence of **degeneracies or band crossing/anti-crossing**,
 Remember, however, that achieving perfect agreement between the SKW interpolation and the ab-initio results
-is not crucial since the SKW bands are only used to find those $\kk$-points that are sufficiently 
+is not crucial since the SKW bands are only used to find those $\kk$-points that are sufficiently
 close to the band edges (Fermi level).
-All these wavevectors will be recomputed afterwards with KS-DFT and possible oscillations 
+All these wavevectors will be recomputed afterwards with KS-DFT and possible oscillations
 or artifacts will disappear in the ab-initio results.
 
 In a nutshell, you need to **make sure that the SKW bands are reasonably close** to the ab-initio results

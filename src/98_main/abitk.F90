@@ -455,9 +455,9 @@ program abitk
 contains
 !!***
 
-!!****f* abitk/abitk_show_help()
+!!****f* abitk/abitk_show_help
 !! NAME
-!! abitk_show_help()
+!! abitk_show_help
 !!
 !! FUNCTION
 !!  Show command line help

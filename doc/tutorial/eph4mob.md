@@ -164,33 +164,14 @@ cp ../teph4mob_1.in .
 
 {% dialog tests/tutorespfn/Input/teph4mob_1.in %}
 
-<!--
-!!! important
-
-    Since ABINIT v9, the use of the files file is deprecated. The input file will be used instead,
-    with an additional input variable listing the pseudopotentials.
-    You should edit *teph4mob_1.in* to include the pseudopotentials, see [[pseudos]].
-    This variable gives the different paths to the pseudopotentials.
-    Use, for instance,
-
-    ```sh
-    pseudos "../../../Psps_for_tests/13al.981214.fhi, ../../../Psps_for_tests/33as.pspnc"
-    ```
-
-    to specify the relative path to the pseudos if you are following the conventions employed in this tutorials.
-    You may need to adapt the paths depending on your *$ABI_PSPDIR*.
--->
-
 This tutorial starts with the DFPT calculation for all the $\qq$-points in the IBZ.
-This step might be quite time-consuming so you can immediately start the job in background with:
+This step might be quite time-consuming so you may want to immediately start the job in background with:
 
 ```sh
 abinit teph4mob_1.in > teph4mob_1.log 2> err &
 ```
 
 The calculation is done for AlAs, the same crystalline material as in the first two DFPT tutorials.
-<!-- Many input parameters are also quite similar. -->
-<!-- as the EPH code can use symmetries can be used to reduce the number of atomic perturbations. -->
 For more details about this first step, please refer to the first and second tutorials on DFPT.
 
 !!! important
@@ -266,19 +247,15 @@ The DDB will be used to Fourier interpolate the phonon frequencies on an **arbit
 the DVDB will be used to Fourier interpolate the DFPT scattering potentials [[cite:Brunin2020]].
 The only ingredient that is still missing is the WFK file with the GS wavefunctions on the dense $\kk$-mesh.
 
-!!! important
+!!! warning
 
     In real computations, you should always compute the electronic band structure along a $\kk$-path
     to have a qualitative understanding of the band dispersion, the position of the band edges,
     and the value of the band gap(s).
     Note also that there are several parts of the EPH code in which it is assumed that no vibrational instability
     is present so you should **always look at the phonon spectrum computed by the code**.
-    Don't expect to get meaningful results if imaginary phonon frequencies (a.k.a **negative frequencies**) are present.
-
-<!--
-In principle, the code can deal with small instabilties for the acoustic modes around $\Gamma$
-but this does not mean you should trust your results.
--->
+    Don't expect to get meaningful results if imaginary phonon frequencies 
+    (a.k.a **negative frequencies**) are present.
 
 
 ## Calculation of the dense WFK file
@@ -293,11 +270,12 @@ We will therefore need the wavefunctions on this dense mesh.
 -->
 Note that in this tutorial, a single dense $\kk$-mesh is used.
 However, the mobility strongly depends on the BZ sampling and a convergence study should be performed by 
-increasing the $\kk$-mesh density, as well as the $\qq$-mesh.
-This study is explained later and left to the user as excercise.
+**increasing** the $\kk$-mesh density, as well as the $\qq$-mesh.
+A dense $\qq$-mesh is needed to obtain converged values for the lifetimes, whereas a dense $\kk$-sampling 
+is needed to have enough points in the electron/hole pockets when computing the transport coefficients.
+This study is explained later and left as excercise.
 It should be clear that systems with small effective masses (e.g GaAs)
-require denser homogeneous $\kk$-meshes to sample the pockets and that results 
-are more difficult to converge.
+require very dense homogeneous $\kk$-meshes to describe the pockets.
 
 The computation of the dense WFK file is similar to a NSCF band structure computation.
 The main difference is that we need wavefunctions on a $\kk$-mesh instead of a $\kk$-path
@@ -337,7 +315,7 @@ The file *\$ABI_TUTORESPFN/Input/teph4mob_5.in* is an example of such computatio
 
 First of all, we need to read the WFK, the DDB and the DVDB files obtained previously.
 Since it is not possible to run a mobility calculation with a single input file
-with datasets, we use strings to specify the path to the different input files:
+with datasets, we use **strings** to specify the path of the different input files:
 
 ```sh
 getwfk_filepath "teph4mob_4o_DS2_WFK"
@@ -367,16 +345,16 @@ Let's discuss the meaning of the e-ph variables in more details:
   of the e-ph self-energy at the KS energy, which directly gives the quasi-particle lifetimes due to e-ph scattering.
 
 * The homogeneous $\kk$-mesh corresponding to the WFK file is specified by [[ngkpt]] 24 24 24.
-  The code will stop with an error if [[ngkpt]] is not the same as the one corresponding to the 
-  dense WFK file. At present, multiple shifts ([[nshiftk]] > 1) are not supported.
+  The code aborts with an error if [[ngkpt]] is not the same as the one found in the 
+  input WFK file. At present, multiple shifts ([[nshiftk]] > 1) are not supported.
 
 * [[occopt]] 3 is required to correctly compute the
   location of the Fermi level using the Fermi-Dirac occupation function as we are dealing with the
   physical temperature and not a fictitious broadening for integration purposes.
 
-* [[ddb_ngqpt]] defines the initial grid used for the DFPT computation (4×4×4 in this example)
+* [[ddb_ngqpt]] defines the initial $\qq$-grid used for the DFPT computation (4×4×4 in this example)
 
-* [[eph_ngqpt_fine]] defines the dense $\qq$-mesh onto which the scattering potentials are interpolated
+* [[eph_ngqpt_fine]] defines the dense $\qq$-mesh where the scattering potentials are interpolated
   and the e-ph matrix elements are computed. 
 
 
@@ -411,10 +389,10 @@ The use of the tetrahedron method is automatically activated when [[eph_task]] i
 It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended 
 as the calculation will become significantly slower.
 
-The list of temperatures for which the mobility is computed is specified by [[tmesh]].
+The list of temperatures for which the mobility is computed is specified by [[tmesh]] in Kelvin units.
 The free carrier concentration is specified by [[eph_doping]] in |electron_charge| / cm^3 units 
-so negative values for electron-doping, positive values for hole doping (alternatively, one 
-can use [[eph_extrael]] or [[eph_fermie]]).
+so negative values for electron-doping, positive values for hole doping.
+Alternatively, one  can use [[eph_extrael]] or [[eph_fermie]]).
 To obtain results that are representative of the intrinsic mobility,
 we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$.
 
@@ -427,7 +405,7 @@ we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ elect
     Note also that transport properties at low temperatures are much more difficult to converge as the
     derivative of the Fermi-Dirac distribution is strongly peaked around the Fermi level and hence 
     a very dense sampling is needed to convergence the BZ integrals.
-    In a nutshell, avoid low T unless you are really interested in this region.
+    In a nutshell, avoid low temperatures unless you are really interested in this region.
     
 
 The [[sigma_erange]] variable defines the energy window, below the VBM and above the
@@ -498,7 +476,8 @@ Computing self-energy matrix elements for k-point: [ 4.5833E-01,  4.5833E-01,  0
 
 You can find various information for each $\kk$-point, such as:
 
-* the total number of $\qq$-points in the irreducible zone defined by the little group of $\kk$ (called IBZ(k) in the code),
+* the total number of $\qq$-points in the irreducible zone defined by 
+  the little group of $\kk$ (called IBZ(k) in the code),
 
 * the number of $\qq$-point in the IBZ(k) contributing to the imaginary part of $\Sigma_\nk$ 
   (in most cases, this number will be much smaller than the total number of $\qq$-points in the IBZ(k))
@@ -558,7 +537,7 @@ to be used for the computation of $\tau_{n\kk}$.
 We can do that by performing mobility computations with fixed $\kk$- and $\qq$-mesh
 and increasing [[sigma_erange]] energy window.
 
-!!! important
+!!! tip
 
     The code can compute both electron and hole mobilities in a single run 
     but this is not the recommended procedure as the $\qq$-point filtering is expected to be less efficient.
@@ -618,10 +597,11 @@ to reach convergence within 5%.
 In order to compute the mobility with a $\qq$-mesh twice as dense as the $\kk$-mesh, 
 there are two possible approaches.
 Let us take the previous example of silicon.
+The two possibilities are:
 
 1. Run a computation with:
 
-       * [[ngkpt]] 90 90 90,
+       * [[ngkpt]] 90 90 90, [[nshiftk]] 1 and [[shiftk]] 0 0 0
        * [[eph_ngqpt_fine]] 90 90 90,
        * [[sigma_ngkpt]] 45 45 45.
 
@@ -630,13 +610,14 @@ Let us take the previous example of silicon.
 
 2. Run a computation with:
 
-      * [[ngkpt]] 90 90 90,
+      * [[ngkpt]] 90 90 90, [[nshiftk]] 1 and [[shiftk]] 0 0 0
       * [[eph_ngqpt_fine]] 90 90 90,
       * [[sigma_ngkpt]] 90 90 90.
 
    In this way, you have the mobility with 90×90×90 $\kk$- and $\qq$-meshes. 
    You can then run again the transport driver only,
-   by setting [[eph_task]] 7, and setting [[transport_ngkpt]] 45 45 45. This will downsample the $\kk$-mesh used
+   by setting [[eph_task]] 7, and setting [[transport_ngkpt]] 45 45 45. 
+   This will downsample the $\kk$-mesh used
    in the computation of the mobility. This second option has the advantage that it delivers two mobilities
    (useful for convergence studies), but it requires more computational time 
    if only the 45×45×45/90×90×90 results are needed.
@@ -659,9 +640,10 @@ Another possibility to improve the results without increasing the computation ti
 is the double-grid (DG) technique.
 In this case, a coarse sampling is used for the $\kk$-mesh and the $\qq$-mesh for the e-ph matrix elements,
 but a finer mesh is used for the phonon absorption/emission terms.
-This technique allows one to better capture these processes, while computing the matrix elements on a coarser mesh.
-The efficiency of this method depends
-on the polar divergence of the matrix elements: if this divergence is very difficult to capture numerically,
+This technique allows one to better capture these processes, while computing the e-ph 
+matrix elements on a coarser mesh.
+The efficiency of this method depends on the polar divergence of the matrix elements: 
+if this divergence is very difficult to capture numerically,
 the coarse $\qq$-mesh for the e-ph matrix elements will have to be denser.
 
 The double-grid technique requires a second WFK file, containing the KS eigenvalues on the fine mesh.
@@ -688,9 +670,9 @@ coarse:                24          24          24
 fine:                  48          48          48
 ```
 
-The mobility obtained, at 300 K, is 157.59 cm$^2$/V/s.
+The mobility obtained at 300 K is 157.59 cm$^2$/V/s.
 Using a 48×48×48 $\qq$-mesh for the matrix elements as well would give 96.38.
-The result is indeed improved, since using a 24×24×24 mesh for everything gives 364.31.
+The result is indeed improved, since using a 24×24×24 mesh both for electrons and phonons gives 364.31.
 You can also use a finer mesh, but always a multiple of the initial coarse mesh
 (in this case, 72×72×72, 96×96×96, etc).
 However, we found that there is very little use to go beyond a mesh three times as dense as the coarse one.
@@ -715,7 +697,7 @@ for all the $\kk$-points (and spins) considered.
 The list of $\kk$-points is initialized at the beginning of the calculation and an internal table
 in the netcdf file stores the status of each $\kk$-point (whether it has been computed or not).
 This means that calculations that are killed by the resource manager due to time limit can reuse
-the SIGEPH file to perform an automatic in-place restart.
+the SIGEPH file to perform an **automatic in-place restart**.
 Just set [[eph_restart]] to 1 in the input file and rerun the job 
 
 !!! important
@@ -726,9 +708,9 @@ Just set [[eph_restart]] to 1 in the input file and rerun the job
 
 ### Transport calculation from SIGEPH.nc
 
-The routine that computes carrier mobilites is automatically invoked when [[eph_task]] -4 is used
+The routine that computes carrier mobilites is automatically invoked when [[eph_task]] -4
 and a *RTA.nc* file with the final results is produced.
-There are however cases in which one would like to compute mobilities from an already existing
+There are however cases in which one would like to compute mobilities starting from an pre-existent
 SIGEPH.nc file without performing a full calculation from scratch.
 In this case, one can use [[eph_task]] 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
 The advanced input variable [[transport_ngkpt]] can be use to downsample 
@@ -855,7 +837,8 @@ This WKF file can then be used in the EPH code to compute mobilites.
 
 For further examples see [[test:v9_57]], and [[test:v9_61]].
 Also note that the two tests cannot be executed in multidataset mode with a single input file.
-Note, however, that the quality of the interpolation depends on the initial coarse $\kk$-mesh.
+Finally, keep in mind that the quality of the interpolation depends on the initial coarse $\kk$-mesh.
 So we recommended, to look at the interpolant.
-It is also a good idea to use an energy window that is larger than the one employed for the mobility.
+It is also a good idea to use an energy window that is larger than the one that will be employed 
+to compute the mobility in the EPH code.
 <!--as well as the position of the band edges-->
