@@ -2595,7 +2595,6 @@ endif
            tmp_kstab(2,ik_ibz,spin)=Sigp%maxbnd(ikcalc,spin)
          end do
        end do
-       !call calc_vhxc_me(Wfd_nato_all,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&    ! Build matrix elements from gw_vhartr -> GW1RDM_me
        call calc_vhxc_me(Wfd,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&           ! Build matrix elements from gw_vhartr -> GW1RDM_me
        & ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
        & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
@@ -2765,7 +2764,6 @@ endif
          write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
-         write(msg,'(a98)')' k-point  band      eik^new     Delta eik        K[NO]         K[KS]         Vxc[KS]    DVhartree'
          write(msg,'(a98)')' k-point  band      eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]    DVhartree'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
@@ -2773,9 +2771,9 @@ endif
            delta_band_ibik=(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ikcalc,1))+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)&
                           &-old_purex(ib,ikcalc)
            eik_new=real(KS_BSt%eig(ib,ikcalc,1))+real(delta_band_ibik)
-           write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5)') ikcalc,ib,eik_new,real(delta_band_ibik),& 
-           & real(Sr%x_mat(ib,ib,ikcalc,1)),real(old_purex(ib,ikcalc)),real(KS_me%vxcval(ib,ib,ikcalc,1)), &
-           & real(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ikcalc,1))
+           write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5)') ikcalc,ib,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
+           & real(Sr%x_mat(ib,ib,ikcalc,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,real(KS_me%vxcval(ib,ib,ikcalc,1))*Ha_eV, &
+           & real(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ikcalc,1))*Ha_eV
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
          enddo
