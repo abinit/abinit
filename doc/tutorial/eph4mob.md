@@ -565,8 +565,8 @@ Note that you should perform this convergence study with a $\kk$-mesh that is al
 capture the band dispersion correctly.
 In this case, we are using a 24×24×24 mesh, which is not very dense for such computations.
 This means that, when increasing [[sigma_erange]], sometimes
-no additional $\kk$-point is included at the sampling is too coarse 
-It is the case here for the first 3 datasets (3 $\kk$-points), and the last two datasets (6 $\kk$-points).
+no additional $\kk$-point is included and the sampling is too coarse 
+This is the case for the first three datasets (3 $\kk$-points), and the last two datasets (6 $\kk$-points).
 If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
 
 <!-- 

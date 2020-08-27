@@ -543,10 +543,6 @@ by using a number of star functions equal to the number of *ab initio* $\kk$-poi
 but this usually leads to sharp oscillations between the input eigenvalues.
 To avoid this problem, one uses more star functions than *ab initio* $\kk$-points and constrains the
 fit so that the interpolant function passes through the input energies and a roughness function is minimized [[cite:Pickett1988]].
-<!--
-A similar approach is used in the Bolztrap code to interpolate the electron dispersion, compute group velocities and
-evaluate transport properties withing the constant relaxation time approximation.
--->
 
 This [[einterp]] variable activates the interpolation of the electronic eigenvalues.
 The user can specify the number of star functions per
@@ -638,6 +634,9 @@ In a nutshell, you need to **make sure that the SKW bands are reasonably close**
 especially in the region around the band edge for semiconductors or around the Fermi level for metals.
 Small deviations between SKW and ab-initio bands can always be accounted for by increasing the value
 of [[sigma_erange]] used for generating the KERANGE.nc file.
+
+Examples of input files to compute WFK files with the KERANGE are given in the last section of 
+the [mobility tutorial](eph4mob#how-to-compute-only-the-k-points-close-to-the-band-edges).
 
 <!--
 TODO: Recheck the code, perhaps I can use the ab-initio band edge if its greater/smaller than the SKW one.
