@@ -834,7 +834,7 @@ contains
   !------------------------------
   subroutine set_oiju_sc(self, scpot, scmaker)
     class(slc_primitive_potential_t), intent(inout) :: self
-    type(slc_potential_t),            intent(inout) :: scpot
+    class(slc_potential_t),            intent(inout) :: scpot
     type(supercell_maker_t),          intent(inout) :: scmaker
         
     integer :: icell, Rj_prim(3), Ru_prim(3), oiju_ind(5), iRj, iRu, i_prim, j_prim, u_prim, inz
