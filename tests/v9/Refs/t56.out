@@ -657,7 +657,7 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
- EPH double grid interpolation: will read energies from: t50o_DS6_WFK
+- EPH double grid interpolation: will read energies from: t50o_DS6_WFK
 
 
  === Gaps, band edges and relative position wrt Fermi level ===
@@ -1234,7 +1234,7 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
 
- EPH double grid interpolation: will read energies from: t50o_DS6_WFK
+- EPH double grid interpolation: will read energies from: t50o_DS6_WFK
 
 
  === Gaps, band edges and relative position wrt Fermi level ===

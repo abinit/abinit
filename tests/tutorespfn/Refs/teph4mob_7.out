@@ -486,7 +486,7 @@ meta: {optdriver: 7, eph_task: -4, }
    2.28550852E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
- EPH double grid interpolation: will read energies from: teph4mob_4o_DS3_WFK
+- EPH double grid interpolation: will read energies from: teph4mob_4o_DS3_WFK
 
 
  === Gaps, band edges and relative position wrt Fermi level ===
