@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.6 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 20h17 )
+.Starting date : Thu 30 Jul 2020.
+- ( at 11h20 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/wannier90_t03/t03.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Test_suite/wannier90_t03/t03.in
 - output file    -> t03.out
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -586,8 +586,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -894,8 +894,8 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -996,10 +996,10 @@ meta: {optdriver: 3, gwcalctyp: 28, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.041   0.004  -0.012   0.012  -0.004  -0.004   0.012  -0.012   0.004
-      0.000   0.004  -0.012   0.012  -0.004   0.004  -0.012   0.012  -0.004
+     -0.000   0.004  -0.012   0.012  -0.004   0.004  -0.012   0.012  -0.004
        1       2       3       4       5       6       7       8       9
       0.041   0.004  -0.012   0.012  -0.004  -0.004   0.012  -0.012   0.004
-      0.000  -0.004   0.012  -0.012   0.004  -0.004   0.012  -0.012   0.004
+     -0.000  -0.004   0.012  -0.012   0.004  -0.004   0.012  -0.012   0.004
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.4742 [eV]
@@ -1019,7 +1019,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -7.931  -1.159  -0.561  -0.566  -0.562   2.604  -1.445  -1.426  -1.441
-       -0.000  -1.159  -0.561  -0.566  -0.562  -2.604   1.445   1.426   1.441
+        0.000  -1.159  -0.561  -0.566  -0.562  -2.604   1.445   1.426   1.441
 
     2  -1.159  -8.721  -0.147  -0.152  -0.148   0.000   0.000   0.000   0.000
         1.159   0.000  -0.000  -0.000  -0.000  -4.034   0.231   0.214   0.228
@@ -1044,7 +1044,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000  -0.940  -1.414  -1.420  -1.415  -3.146   1.570   1.545   1.565
 
     2  -0.940  -6.666   0.681   0.679   0.680   0.000   0.000   0.000   0.000
-        0.940  -0.000  -0.000  -0.000  -0.000  -3.376   0.191   0.182   0.190
+        0.940   0.000  -0.000  -0.000  -0.000  -3.376   0.191   0.182   0.190
 
   chi0(G,G') at the    2 th omega   0.0000  16.4742 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1066,7 +1066,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000  -1.673   0.180   0.180  -1.673  -0.180   1.673   1.673  -0.180
 
     2  -1.673  -9.421  -0.099  -0.135   0.003   0.000  -0.000  -0.000  -0.000
-        1.673  -0.000  -0.000  -0.000  -0.000  -3.404   0.320   0.314  -0.072
+        1.673   0.000  -0.000  -0.000  -0.000  -3.404   0.320   0.314  -0.072
 
   chi0(G,G') at the    2 th omega   0.0000  16.4742 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1107,7 +1107,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -13.014   0.562  -1.590  -1.578  -1.413  -1.413  -1.578  -1.590   0.562
-       -0.000   0.562  -1.590  -1.578  -1.413   1.413   1.578   1.590  -0.562
+        0.000   0.562  -1.590  -1.578  -1.413   1.413   1.578   1.590  -0.562
 
     2   0.562 -13.659   1.052   1.018   0.075   0.000  -0.000  -0.000   0.000
        -0.562   0.000   0.000   0.000   0.000  -3.149   0.154   0.155  -1.618
@@ -1132,7 +1132,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000  -1.585  -0.764  -0.764  -1.585   0.764   1.585   1.585   0.764
 
     2  -1.585  -7.555   0.471   0.436   0.553  -0.000   0.000   0.000   0.000
-        1.585  -0.000  -0.000  -0.000  -0.000  -2.218   0.222   0.220  -0.113
+        1.585   0.000  -0.000  -0.000  -0.000  -2.218   0.222   0.220  -0.113
 
   chi0(G,G') at the    2 th omega   0.0000  16.4742 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1151,10 +1151,10 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -14.883  -1.098  -1.556  -1.395  -1.207  -1.207  -1.395  -1.556  -1.098
-       -0.000  -1.098  -1.556  -1.395  -1.207   1.207   1.395   1.556   1.098
+        0.000  -1.098  -1.556  -1.395  -1.207   1.207   1.395   1.556   1.098
 
     2  -1.098 -14.854   0.269   1.941   0.137  -0.000  -0.000  -0.000   0.000
-        1.098  -0.000   0.000   0.000   0.000  -2.364   0.000   0.245   0.000
+        1.098   0.000   0.000   0.000   0.000  -2.364   0.000   0.245   0.000
 
   chi0(G,G') at the    2 th omega   0.0000  16.4742 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1333,7 +1333,7 @@ QP_gap     :    3.537
 Delta_QP_KS:    0.875
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -5.353   -10.151    -5.353     4.798   -16.065     7.890     1.000     0.000    -8.174     1.977    -3.376    -3.377
+        1    -5.353   -10.151    -5.353     4.798   -16.065     7.890     1.000     0.000    -8.174     1.977    -3.377    -3.377
         2     1.876   -10.177     1.876    12.053   -12.410     3.190     1.000     0.000    -9.221     0.956     2.832     2.832
         3     5.070   -10.230     5.070    15.300   -11.133     2.296     1.000     0.000    -8.837     1.393     6.463     6.448
         4     5.070   -10.230     5.070    15.300   -11.149     2.298     1.000     0.000    -8.851     1.379     6.449     6.463
@@ -1373,7 +1373,7 @@ QP_gap     :    3.790
 Delta_QP_KS:    0.809
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -5.067   -10.163    -5.067     5.096   -15.956     7.775     1.000     0.000    -8.181     1.982    -3.085    -3.085
+        1    -5.067   -10.163    -5.067     5.096   -15.956     7.776     1.000     0.000    -8.180     1.982    -3.084    -3.085
         2     2.327   -10.352     2.327    12.680   -12.383     3.042     1.000     0.000    -9.341     1.011     3.338     3.336
         3     3.915   -10.164     3.915    14.079   -11.527     2.581     1.000     0.000    -8.946     1.218     5.133     5.132
         4     3.915   -10.164     3.915    14.079   -11.522     2.580     1.000     0.000    -8.941     1.223     5.138     5.137
@@ -1393,7 +1393,7 @@ QP_gap     :    4.622
 Delta_QP_KS:    0.938
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -3.421   -10.340    -3.421     6.919   -15.408     6.203     1.000     0.000    -9.205     1.136    -2.286    -2.286
+        1    -3.421   -10.340    -3.421     6.919   -15.408     6.204     1.000     0.000    -9.205     1.136    -2.286    -2.286
         2    -0.573   -10.328    -0.573     9.755   -13.941     4.406     1.000     0.000    -9.534     0.794     0.221     0.220
         3     2.242    -9.912     2.242    12.154   -11.772     2.868     1.000     0.000    -8.903     1.009     3.250     3.250
         4     3.596   -10.157     3.596    13.753   -11.729     2.712     1.000     0.000    -9.016     1.141     4.736     4.736
@@ -1581,10 +1581,10 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000 -10.064   0.133   0.087   0.126  -0.000   0.000   0.000   0.000
-       -0.000  -0.000  -0.000   0.000   0.000  -4.247   0.181   0.135   0.174
+       -0.000   0.000  -0.000   0.000   0.000  -4.247   0.181   0.135   0.174
 
   chi0(G,G') at the    2 th omega   0.0000  16.4743 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1604,19 +1604,19 @@ meta: {optdriver: 3, gwcalctyp: 28, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.079   0.006  -0.018   0.018  -0.006  -0.006   0.018  -0.018   0.006
-     -0.000   0.006  -0.018   0.018  -0.006   0.006  -0.018   0.018  -0.006
+      0.000   0.006  -0.018   0.018  -0.006   0.006  -0.018   0.018  -0.006
        1       2       3       4       5       6       7       8       9
       0.079   0.006  -0.018   0.018  -0.006  -0.006   0.018  -0.018   0.006
-     -0.000  -0.006   0.018  -0.018   0.006  -0.006   0.018  -0.018   0.006
+      0.000  -0.006   0.018  -0.018   0.006  -0.006   0.018  -0.018   0.006
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.4743 [eV]
        1       2       3       4       5       6       7       8       9
       0.541   0.008  -0.025   0.025  -0.008  -0.008   0.025  -0.025   0.008
-      0.000   0.008  -0.025   0.025  -0.008   0.008  -0.025   0.025  -0.008
+     -0.000   0.008  -0.025   0.025  -0.008   0.008  -0.025   0.025  -0.008
        1       2       3       4       5       6       7       8       9
       0.541   0.008  -0.025   0.025  -0.008  -0.008   0.025  -0.025   0.008
-      0.000  -0.008   0.025  -0.025   0.008  -0.008   0.025  -0.025   0.008
+     -0.000  -0.008   0.025  -0.025   0.008  -0.008   0.025  -0.025   0.008
 
 
 
@@ -1648,7 +1648,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -10.904  -0.953  -1.231  -1.238  -1.232   2.840  -1.420  -1.392  -1.412
+    1 -10.904  -0.953  -1.231  -1.238  -1.232   2.840  -1.420  -1.392  -1.413
         0.000  -0.953  -1.231  -1.238  -1.232  -2.839   1.420   1.392   1.413
 
     2  -0.953  -5.923   0.585   0.583   0.584  -0.000  -0.000  -0.000  -0.000
@@ -1671,7 +1671,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -8.610  -1.472   0.180   0.181  -1.473   0.179  -1.473  -1.474   0.179
-       -0.000  -1.472   0.180   0.180  -1.473  -0.178   1.473   1.474  -0.179
+        0.000  -1.472   0.180   0.180  -1.473  -0.178   1.473   1.474  -0.179
 
     2  -1.472  -8.586  -0.027  -0.070   0.063  -0.001   0.000   0.000   0.000
         1.472   0.000  -0.000  -0.000   0.000  -3.033   0.276   0.269   0.013
@@ -1693,7 +1693,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -12.226  -1.225  -0.913  -0.922  -1.441   0.707  -1.545  -1.540  -0.874
-       -0.000  -1.225  -0.913  -0.922  -1.441  -0.706   1.545   1.540   0.875
+        0.000  -1.225  -0.913  -0.922  -1.441  -0.706   1.545   1.540   0.875
 
     2  -1.225  -6.468   0.339   0.332   0.443  -0.000  -0.000  -0.000  -0.000
         1.225   0.000   0.000   0.000   0.000  -2.557   0.190   0.188  -0.026
@@ -1762,7 +1762,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000  -0.900  -1.371  -1.256  -1.109   1.109   1.256   1.371   0.900
 
     2  -0.900 -13.103   0.212   1.705   0.128  -0.000   0.000   0.000   0.000
-        0.900  -0.000   0.000  -0.000   0.000  -1.970   0.005   0.216  -0.001
+        0.900   0.000   0.000  -0.000   0.000  -1.970   0.005   0.216  -0.001
 
   chi0(G,G') at the    2 th omega   0.0000  16.4743 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1871,8 +1871,8 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
   Number of electrons    =    7.8825
 
-  QP Band energy    [Ha] =  5.57250181904263E-01
-  QP Hartree energy [Ha] =  4.13120532842984E-01
+  QP Band energy    [Ha] =  5.57253668216104E-01
+  QP Hartree energy [Ha] =  4.13120228647642E-01
 
 --------------------------------------------------------------------------------
 
@@ -1943,7 +1943,7 @@ QP_gap     :    3.632
 Delta_QP_KS:    0.111
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -5.353   -10.151    -3.377     4.787   -16.058     6.524     1.000     0.000    -9.534    -1.370    -4.747    -4.747
+        1    -5.353   -10.151    -3.377     4.787   -16.058     6.525     1.000     0.000    -9.534    -1.370    -4.747    -4.747
         2     1.876   -10.177     2.832    12.040   -12.387     3.098     1.000     0.000    -9.289    -0.081     2.751     2.751
         3     5.070   -10.230     6.448    15.288   -11.125     2.201     1.000     0.000    -8.924    -0.084     6.364     6.364
         4     5.070   -10.230     6.463    15.293   -11.114     2.198     1.000     0.000    -8.916    -0.086     6.377     6.377
@@ -1983,7 +1983,7 @@ QP_gap     :    3.907
 Delta_QP_KS:    0.116
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -5.067   -10.163    -3.085     5.082   -15.946     6.393     1.000     0.000    -9.553    -1.386    -4.471    -4.472
+        1    -5.067   -10.163    -3.085     5.082   -15.946     6.392     1.000     0.000    -9.553    -1.387    -4.472    -4.472
         2     2.327   -10.352     3.336    12.664   -12.356     2.956     1.000     0.000    -9.399    -0.072     3.265     3.265
         3     3.915   -10.164     5.132    14.059   -11.489     2.477     1.000     0.000    -9.013    -0.085     5.047     5.046
         4     3.915   -10.164     5.137    14.059   -11.483     2.475     1.000     0.000    -9.008    -0.086     5.051     5.051
@@ -2003,7 +2003,7 @@ QP_gap     :    4.734
 Delta_QP_KS:    0.113
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -3.421   -10.340    -2.286     6.905   -15.393     5.791     1.000     0.000    -9.602    -0.411    -2.696    -2.697
+        1    -3.421   -10.340    -2.286     6.905   -15.393     5.791     1.000     0.000    -9.602    -0.411    -2.697    -2.697
         2    -0.573   -10.328     0.220     9.738   -13.918     4.289     1.000     0.000    -9.630    -0.112     0.108     0.108
         3     2.242    -9.912     3.250    12.141   -11.759     2.789     1.000     0.000    -8.970    -0.078     3.171     3.171
         4     3.596   -10.157     4.736    13.742   -11.709     2.621     1.000     0.000    -9.088    -0.082     4.654     4.654
@@ -2023,7 +2023,7 @@ QP_gap     :    4.775
 Delta_QP_KS:    0.114
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -4.104   -10.271    -2.773     6.152   -15.647     6.195     1.000     0.000    -9.452    -0.527    -3.299    -3.299
+        1    -4.104   -10.271    -2.773     6.152   -15.647     6.196     1.000     0.000    -9.451    -0.526    -3.299    -3.299
         2     0.328   -10.425     1.212    10.739   -13.520     3.875     1.000     0.000    -9.645    -0.118     1.094     1.094
         3     2.018    -9.704     2.971    11.706   -11.644     2.835     1.000     0.000    -8.810    -0.074     2.897     2.897
         4     4.488   -10.409     5.857    14.889   -11.487     2.358     1.000     0.000    -9.129    -0.097     5.759     5.759
@@ -2044,12 +2044,12 @@ Delta_QP_KS:    0.117
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -1.997   -10.367    -1.151     8.359   -14.725     5.055     1.000     0.000    -9.669    -0.159    -1.311    -1.311
-        2    -1.997   -10.367    -1.139     8.359   -14.711     5.044     1.000     0.000    -9.668    -0.169    -1.308    -1.308
+        2    -1.997   -10.367    -1.139     8.359   -14.711     5.044     1.000     0.000    -9.667    -0.169    -1.308    -1.308
         3     2.939   -10.083     3.931    13.016   -12.017     2.860     1.000     0.000    -9.157    -0.072     3.859     3.859
         4     2.939   -10.083     3.932    13.016   -12.017     2.861     1.000     0.000    -9.157    -0.073     3.859     3.859
         5     6.458    -8.757     8.354    15.219    -4.664    -2.156     1.000     0.000    -6.820     0.044     8.398     8.398
         6     6.458    -8.757     8.355    15.218    -4.663    -2.156     1.000     0.000    -6.820     0.044     8.399     8.399
-        7    15.778    -9.398    18.807    25.172    -2.659    -3.664     1.000     0.000    -6.322     0.043    18.850    18.849
+        7    15.778    -9.398    18.807    25.172    -2.659    -3.664     1.000     0.000    -6.322     0.042    18.850    18.849
         8    15.778    -9.398    18.807    25.172    -2.658    -3.664     1.000     0.000    -6.323     0.042    18.849    18.850
 ...
 
@@ -2074,7 +2074,7 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.887683E-01 Ha ,    7.857785E+00 eV
+ New Fermi energy :        2.887683E-01 Ha ,    7.857784E+00 eV
  New Exchange energy :    -1.921194E+00 Ha ,   -5.227834E+01 eV
 
  === QP Band Gaps ===
@@ -2090,9 +2090,9 @@ data: !SigmaeeData |
 .  kptgw no:  1; Maximum DeltaE = (  -2.076   0.005) for band index:  1
 .  kptgw no:  2; Maximum DeltaE = (  -1.370  -0.001) for band index:  1
 .  kptgw no:  3; Maximum DeltaE = (  -0.534  -0.003) for band index:  1
-.  kptgw no:  4; Maximum DeltaE = (  -1.386   0.084) for band index:  1
+.  kptgw no:  4; Maximum DeltaE = (  -1.387   0.084) for band index:  1
 .  kptgw no:  5; Maximum DeltaE = (  -0.411  -0.014) for band index:  1
-.  kptgw no:  6; Maximum DeltaE = (  -0.527  -0.049) for band index:  1
+.  kptgw no:  6; Maximum DeltaE = (  -0.526  -0.049) for band index:  1
 .  kptgw no:  7; Maximum DeltaE = (  -0.169  -0.004) for band index:  2
 .  kptgw no:  8; Maximum DeltaE = (  -0.245   0.014) for band index:  2
 
@@ -2138,8 +2138,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2218,30 +2218,30 @@ force_length_stats: {min: null, max: null, mean: null, }
    Writing top of the overlap matrix: M_mn(ikb,ik)
    m=n=1:3, ikb=1, ik=1
 
-;   (   0.473830   0.874987 ,  -0.058144  -0.048877 ,   0.000109   0.000917 ,    )
-;   (   0.013664   0.013493 ,   0.363665   0.150300 ,  -0.341620  -0.663970 ,    )
-;   (   0.017273   0.017249 ,   0.484255   0.200610 ,   0.192057   0.351922 ,    )
+;   (  -0.474118  -0.874831 ,   0.058159   0.048853 ,  -0.000109  -0.000916 ,    )
+;   (   0.013661   0.013492 ,   0.363652   0.150320 ,  -0.341117  -0.664233 ,    )
+;   (   0.017271   0.017250 ,   0.484278   0.200646 ,   0.191802   0.352084 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
-;   (   0.779912  -0.256343 ,   0.000833  -0.001983 ,  -0.000110  -0.000335 ,    )
-;   (  -0.000460   0.000801 ,  -0.392228  -0.819211 ,  -0.202538  -0.295681 ,    )
-;   (  -0.000053  -0.000117 ,   0.356100  -0.039679 ,  -0.876174   0.237742 ,    )
+;   (   0.779994  -0.256085 ,   0.000830  -0.001984 ,  -0.000108  -0.000335 ,    )
+;   (  -0.000460   0.000800 ,  -0.393872  -0.818478 ,  -0.201292  -0.296374 ,    )
+;   (  -0.000056  -0.000115 ,   0.354974  -0.047773 ,  -0.872088   0.252500 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
-;   (  -0.306233   0.913617 ,  -0.306256   0.913673 ,  -0.306244   0.913689 ,    )
-;   (   0.000669   0.493954 ,  -0.000433  -0.459758 ,  -0.000868  -0.536328 ,    )
-;   (  -0.001304   0.419538 ,  -0.000005  -0.607343 ,   0.000198   0.559121 ,    )
+;   (   0.305875  -0.913737 ,   0.305897  -0.913794 ,   0.305886  -0.913809 ,    )
+;   (   0.000663   0.493960 ,  -0.000425  -0.459752 ,  -0.000867  -0.536332 ,    )
+;   (  -0.001315   0.419482 ,  -0.000001  -0.607384 ,   0.000199   0.559158 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
-;   (  -0.282073   0.190148 ,  -0.282938   0.190725 ,  -0.284973   0.192045 ,    )
-;   (   0.089400  -0.366162 ,   0.127019  -0.394466 ,  -0.215977   0.758933 ,    )
-;   (   0.625549   0.305652 ,  -0.597779  -0.310227 ,  -0.026478   0.004890 ,    )
+;   (  -0.282068   0.190163 ,  -0.282934   0.190739 ,  -0.284969   0.192060 ,    )
+;   (   0.089125  -0.366235 ,   0.126720  -0.394559 ,  -0.215404   0.759094 ,    )
+;   (   0.632004   0.292067 ,  -0.604342  -0.297243 ,  -0.026361   0.005463 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t03o_DS7_w90.wout for details.
@@ -2692,10 +2692,57 @@ P           mkmem7         64
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         12.5        0.21      0.003
+- Total wall clock time (s,m,h):         14.3        0.24      0.004
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           12.5, wall_time =           14.3
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  5.595  44.7      5.966  41.9              2      -1.00        0.94       0.94
+- fourwf%(pot)                   1.580  12.6      1.599  11.2           7072      -1.00        0.99       0.99
+- pspini                         0.987   7.9      0.990   6.9              7      -1.00        1.00       1.00
+- invars2                        0.666   5.3      0.666   4.7              7      -1.00        1.00       1.00
+- ewald                          0.617   4.9      0.616   4.3              9      -1.00        1.00       1.00
+- projbd                         0.226   1.8      0.217   1.5           8624      -1.00        1.04       1.04
+- vtowfk(ssdiag)                 0.178   1.4      0.177   1.2             -1      -1.00        1.01       1.01
+- mkresi                         0.172   1.4      0.174   1.2             64      -1.00        0.99       0.99
+- timing timab                   0.143   1.1      0.143   1.0             10      -1.00        1.00       1.00
+- abinit(2)                      0.133   1.1      0.133   0.9              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.125   1.0      0.111   0.8           7328      -1.00        1.13       1.13
+- getghc-other                   0.089   0.7      0.084   0.6             -1      -1.00        1.06       1.06
+- others (114)                   0.217   1.7      0.219   1.5             -1      -1.00        0.99       0.99
+-<END_TIMER>
+-
+- subtotal                      10.728  85.7     11.095  77.8                                  0.97       0.97
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          12.5, wall_time =          14.3
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  5.595  44.7      5.966  41.9              2      -1.00        0.94       0.94
+- fourwf%(pot)                   1.580  12.6      1.599  11.2           7072      -1.00        0.99       0.99
+- pspini                         0.987   7.9      0.990   6.9              7      -1.00        1.00       1.00
+- invars2                        0.666   5.3      0.666   4.7              7      -1.00        1.00       1.00
+- ewald                          0.617   4.9      0.616   4.3              9      -1.00        1.00       1.00
+- projbd                         0.226   1.8      0.217   1.5           8624      -1.00        1.04       1.04
+- vtowfk(ssdiag)                 0.178   1.4      0.177   1.2             -1      -1.00        1.01       1.01
+- mkresi                         0.172   1.4      0.174   1.2             64      -1.00        0.99       0.99
+- timing timab                   0.143   1.1      0.143   1.0             10      -1.00        1.00       1.00
+- abinit(2)                      0.133   1.1      0.133   0.9              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.125   1.0      0.111   0.8           7328      -1.00        1.13       1.13
+- getghc-other                   0.089   0.7      0.084   0.6             -1      -1.00        1.06       1.06
+- others (114)                   0.217   1.7      0.219   1.5             -1      -1.00        0.99       0.99
+-<END_TIMER>
 
+- subtotal                      10.728  85.7     11.095  77.8                                  0.97       0.97
 
 ================================================================================
 
@@ -2780,10 +2827,10 @@ P           mkmem7         64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.6  wall=         10.9
+- Proc.   0 individual time (sec): cpu=         12.5  wall=         14.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  39 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.6  wall=         10.9
++Overall time at end (sec) : cpu=         12.5  wall=         14.3

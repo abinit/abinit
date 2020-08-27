@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.6 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h21 )
+.Starting date : Thu 30 Jul 2020.
+- ( at 14h14 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t51/t51.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/TestBot_MPI1/v67mbpt_t51/t51.in
 - output file    -> t51.out
 - root for input  files -> t51i
 - root for output files -> t51o
@@ -355,8 +355,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -629,8 +629,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_gwac_speedup/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -732,7 +732,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -15.044  -2.218   4.391  -2.058  -3.587  -2.058  -3.587  -2.058  -3.587
-       -0.000  -2.218  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
+        0.000  -2.218  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
 
     2  -2.218 -12.123  -0.000   0.100   0.000   0.100  -0.000   0.100   0.000
         2.218   0.000  -6.848  -0.000   0.446  -0.000   0.446  -0.000   0.446
@@ -746,10 +746,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -19.733  -4.427  -0.402  -0.402  -4.427  -0.402  -4.427  -4.427  -0.402
-       -0.000  -4.427   0.402  -0.402   4.427  -0.402   4.427  -4.427   0.402
+        0.000  -4.427   0.402  -0.402   4.427  -0.402   4.427  -4.427   0.402
 
     2  -4.427 -14.156  -0.000   0.260   0.000   0.260   0.000  -1.040   0.000
-        4.427  -0.000  -4.842   0.000   1.478   0.000   1.478  -0.000  -0.988
+        4.427   0.000  -4.842   0.000   1.478   0.000   1.478  -0.000  -0.988
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     49.10  [%]
 
@@ -861,10 +861,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0001_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 61 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 73 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 62 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 71 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 72 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0001_EXC_MDF
   
  Macroscopic dielectric function:
@@ -886,7 +886,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 67 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0002_EXC_MDF
   
@@ -906,9 +906,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 56 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0003_EXC_MDF
@@ -928,7 +928,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 55 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 45 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 47 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
@@ -1045,7 +1045,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0009_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
@@ -1324,10 +1324,63 @@ P           mkmem4          3
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         10.9        0.18      0.003
+- Total wall clock time (s,m,h):         14.6        0.24      0.004
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           10.9, wall_time =           14.6
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- bse(mkexceps)                  5.189  47.7      7.136  48.7              1      -1.00        0.73       0.73
+- bse(exc_haydock_driver)        5.188  47.7      7.136  48.7              1      -1.00        0.73       0.73
+- fourwf%(pot)                   1.017   9.4      0.989   6.8           6870      -1.00        1.03       1.03
+- pspini                         0.811   7.5      0.815   5.6              4      -1.00        0.99       0.99
+- bse(mkexcham)                  0.580   5.3      1.295   8.8              1      -1.00        0.45       0.45
+- invars2                        0.336   3.1      0.335   2.3              4      -1.00        1.00       1.00
+- bse(Init1)                     0.334   3.1      0.334   2.3              1      -1.00        1.00       1.00
+- ewald                          0.325   3.0      0.326   2.2              4      -1.00        1.00       1.00
+- projbd                         0.206   1.9      0.221   1.5          10672      -1.00        0.93       0.93
+- bse(mkrho)                     0.162   1.5      0.161   1.1              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.155   1.4      0.171   1.2           6870      -1.00        0.91       0.91
+- timing timab                   0.114   1.0      0.115   0.8              9      -1.00        0.99       0.99
+- getghc-other                   0.086   0.8      0.085   0.6             -1      -1.00        1.02       1.02
+- vtowfk(ssdiag)                 0.081   0.7      0.087   0.6             -1      -1.00        0.93       0.93
+- abinit(2)                      0.078   0.7      0.079   0.5              1      -1.00        0.99       0.99
+- others (111)                   0.191   1.8      0.191   1.3             -1      -1.00        1.00       1.00
+-<END_TIMER>
+-
+- subtotal                      14.853 136.6     19.476 132.9                                  0.76       0.76
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          10.9, wall_time =          14.6
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- bse(mkexceps)                  5.189  47.7      7.136  48.7              1      -1.00        0.73       0.73
+- bse(exc_haydock_driver)        5.188  47.7      7.136  48.7              1      -1.00        0.73       0.73
+- fourwf%(pot)                   1.017   9.4      0.989   6.8           6870      -1.00        1.03       1.03
+- pspini                         0.811   7.5      0.815   5.6              4      -1.00        0.99       0.99
+- bse(mkexcham)                  0.580   5.3      1.295   8.8              1      -1.00        0.45       0.45
+- invars2                        0.336   3.1      0.335   2.3              4      -1.00        1.00       1.00
+- bse(Init1)                     0.334   3.1      0.334   2.3              1      -1.00        1.00       1.00
+- ewald                          0.325   3.0      0.326   2.2              4      -1.00        1.00       1.00
+- projbd                         0.206   1.9      0.221   1.5          10672      -1.00        0.93       0.93
+- bse(mkrho)                     0.162   1.5      0.161   1.1              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.155   1.4      0.171   1.2           6870      -1.00        0.91       0.91
+- timing timab                   0.114   1.0      0.115   0.8              9      -1.00        0.99       0.99
+- getghc-other                   0.086   0.8      0.085   0.6             -1      -1.00        1.02       1.02
+- vtowfk(ssdiag)                 0.081   0.7      0.087   0.6             -1      -1.00        0.93       0.93
+- abinit(2)                      0.078   0.7      0.079   0.5              1      -1.00        0.99       0.99
+- others (111)                   0.191   1.8      0.191   1.3             -1      -1.00        1.00       1.00
+-<END_TIMER>
 
+- subtotal                      14.853 136.6     19.476 132.9                                  0.76       0.76
 
 ================================================================================
 
@@ -1407,10 +1460,10 @@ P           mkmem4          3
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.5  wall=         11.6
+- Proc.   0 individual time (sec): cpu=         10.9  wall=         14.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.5  wall=         11.6
++Overall time at end (sec) : cpu=         10.9  wall=         14.7
