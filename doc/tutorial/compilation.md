@@ -53,7 +53,7 @@ Before starting, it is also worth reading this document prepared by Marc Torrent
 that introduces important concepts as well as
 a detailed description of the configuration options supported by the ABINIT build system
 The examples are for Abinit v8 and some options should be changed to be compatible
-with the build system of version 9 still the document is a valuable source of information.
+with the build system of version 9, still the document is a valuable source of information.
 
 <embed src="https://school2019.abinit.org/images/lectures/abischool2019_installing_abinit_lecture.pdf"
 type="application/pdf" width="100%" height="480px">
@@ -1004,9 +1004,8 @@ Before actually starting the compilation, type:
 
 and take some time to read the documentation of the different options.
 
-Besides the standard environment variables: CC, CFLAGS, FC, FCFLAGS etc.
-the build system provides specialized options to pass
-to activate support for external libraries.
+Besides the standard environment variables: **CC**, **CFLAGS**, **FC**, **FCFLAGS** etc.
+the build system provides specialized options to to activate support for external libraries.
 For *libxc*, for instance, we have:
 
 ```md
@@ -1055,7 +1054,7 @@ To make *configure* read options from file use the syntax:
 ./configure --with-config-file="myconf.ac9"
 ```
 
-where double quotes may be needed for portability reasons.
+where double quotation marks may be needed for portability reasons.
 
 !!! important
 
@@ -1067,8 +1066,9 @@ where double quotes may be needed for portability reasons.
     Also note that in the configuration file it is possible to use **shell variables**
     and reuse the output of external tools using
     [backtick syntax](https://unix.stackexchange.com/questions/48392/understanding-backtick/48393)
-    as is *\`nf-config --flibs`* to reduce the amount of typing
-    and have a configuration file that can be easily reused in other contexts.
+    as is *\`nf-config --flibs`*.
+    This tricks allow us to reduce the amount of typing
+    and have configuration files that can be easily reused in other contexts.
 
 
 ```sh
@@ -1248,7 +1248,7 @@ Since we decided to compile with dynamic linking, the external libraries are not
 Actually, the libraries will be loaded by the OS at runtime when we start to run the executable and
 the list of directories specified in `$LD_LIBRARY_PATH` (`$DYLD_LIBRARY_PATH` for MacOs) will play a crucial role.
 
-On Linux one can use the *ldd* tool to prints the shared objects (shared libraries) required by each
+On Linux one can use the *ldd* tool to print the shared objects (shared libraries) required by each
 program or shared object specified on the command line.
 
 ```sh
@@ -1438,7 +1438,7 @@ Fortran constructs that are not supported by that particular version of the comp
 In the first two cases, please report the problem on the forum.
 In the later case, you will need a more recent version of the compiler.
 Sometimes the compilation aborts with an **internal compiler error** that should be considered
-as a bug in the compiler rather than a errors in the ABINIT source code.
+as a bug in the compiler rather than an error in the ABINIT source code.
 Decreasing the optimization level when compiling the particular routine that triggers the error
 (use -O1 or even -O0 for the most problematic cases) may solve the problem else
 try a more recent version of the compiler.
@@ -1446,14 +1446,15 @@ It is also possible to trigger internal compiler errors when trying to use modul
 produced by different versions of the same compiler.
 In this case, the solution is straightforward: use libraries and modules built with the same version.
 
-**Runtime errors** are more difficult to fix as they may require the use of a debugger or some basic
-understanding of Linux signals.
+**Runtime errors** are more difficult to fix as they may require the use of a debugger and some basic
+understanding of [Linux signals](https://en.wikipedia.org/wiki/Signal_(IPC).
+Here we focus on two common scenarios: SIGILL and SIGSEGV.
+
 If the code raises the **SIGILL** signal, it means that the CPU attempted to execute
 an instruction it didn't understand.
 Very likely, your executables/libraries have been compiled for the **wrong architecture**.
 This may happen on clusters when the CPU family available on the frontend differs
-from the one available on the compute node
-and aggressive optimization options are used (-O3, --march, -xHost etc).
+from the one available on the compute node and aggressive optimization options (-O3, --march, -xHost, etc) are used.
 Removing the optimization options and using the much safer -O2 level may help.
 Alternatively, one can compile the source directly on the compute node or use compilation options
 compatible both with the frontend and the compute node (ask your sysadmin for details).
@@ -1473,22 +1474,27 @@ The ideal solution would be to run the code under the control of the debugger,
 use the backtrace to locate the line of code where the segmentation fault occurs and then
 report the outcome on the forum.
 
-Using the debugger in sequential is really simple.
-First of all, make sure the code has been compiled with the `-g` option
-to generate source-level debug information.
-To use the GNU debugger `gdb`, perform the following operations:
+!!! tip
 
-1. Load the executable in the GNU debugger using the syntax:
+  Using the debugger in sequential is really simple.
+  First of all, make sure the code has been compiled with the `-g` option
+  to generate source-level debug information.
+  To use the GNU debugger `gdb`, perform the following operations:
 
-    gdb path_to_abinit_executable
+    1. Load the executable in the GNU debugger using the syntax:
 
-2. Run the code with the gdb *run* command and redirect the standard input with:
+        gdb path_to_abinit_executable
 
-    (gdb) run t01.in
+    2. Run the code with the gdb *run* command and redirect the standard input with:
 
-Wait for the error e.g. SIGSEGV, then print the **backtrace** with:
+        (gdb) run t01.in
 
-    (gdb) bt
+  Wait for the error e.g. SIGSEGV, then print the **backtrace** with:
+
+      (gdb) bt
+
+
+  Avoid debugging code compiled with `-O3` or `-Ofast` as the backtrace may not be reliable.
 
 <!--
 How to use LLDB
@@ -1510,10 +1516,6 @@ Avoid VECLIB on MacOsx
 enable_zdot_bugfix="yes"
 ```
 -->
-
-!!! tip
-
-    Avoid debugging code compiled with `-O3` or `-Ofast` as the backtrace may not be reliable.
 
 ## How to compile ABINIT on a cluster with the intel toolchain
 
@@ -1605,7 +1607,7 @@ To activate OpenMP support in the Fortran routines of ABINIT, pass
 enable_openmp="yes"
 ```
 
-to the configure script via the configuration file.
+to the *configure* script via the configuration file.
 This will automatically activate the compilation option needed to enable OpenMP support in the ABINIT source code
 (`-fopenmp` for *gfortran*).
 Note that this option is just part of the story as a significant fraction of the wall-time is spent in external

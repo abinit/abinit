@@ -262,34 +262,6 @@ More rigorously, we should say that the DVDB file stores the local part of the D
 but this is a rather technical point discussed in more detail in [[cite:Brunin2020]] that is not relevant
 for the present discussion so we do not elaborate more on this.
 
-<!--
-In a pseudopotential-based implementation the KS potential is given by
-
-\begin{equation}
-    \begin{split}
-    V^\KS(\rr,\rr') = \underbrace{\Bigl[ \VH[n](\rr)  + \Vxc[n](\rr) + \Vloc(\rr) \Bigr] }_{\Vscf(\rr)} & \\
-    \times \delta(\rr-\rr') + \Vnl(\rr,\rr')
-    \end{split}
-\end{equation}
-
-and consists of contributions from the Hartree part ($\VH$), the exchange-correlation (XC) potential ($\Vxc$),
-and the bare pseudopotential term that, in turn, consists of the local ($\Vloc$) and non-local ($\Vnl$) parts~\cite{Payne1992}.
-Following the internal \abinit convention, we group the Hartree, XC
-and local terms in a single potential, $\Vscf$, although only the first two terms are computed self-consistently.
-The lattice-periodic part of the first-order derivative of the KS potential thus reads
-
-\begin{equation}
-    \begin{split}
-    \partial_{\kappa\alpha,\qq} v^\KS = \underbrace{ \Bigl [
-        \partial_{\kappa\alpha,\qq} \vH +
-        \partial_{\kappa\alpha,\qq} \vxc +
-        \partial_{\kappa\alpha,\qq} \vloc \Bigr ]}_{\partial_{\kappa\alpha,\qq} \vscf} & \\
-    +\, \partial_{\kappa\alpha,\qq} \vnl.
-    \end{split}
-    \label{eq:dvKS}
-\end{equation}
--->
-
 !!! important
 
     The number of irreducible atomic perturbations depends on the $\qq$-point and the symmetries of the system.
@@ -394,7 +366,9 @@ The expression for the LR model including both dipole and quadrupole terms reads
 \label{eq:LRpot}
 \end{equation}
 
+<!--
 TODO: Discuss more the integration with the DFPT part.
+-->
 
 In the implementation, each Fourier component is multiplied by the
 Gaussian filter $e^{-\frac{|\qG|^2}{4\alpha}}$
@@ -576,7 +550,7 @@ An example can be found in this
 %Therefore it is possible to employ the star-function interpolation by Shankland, Koelling and Wood in the improved version proposed by Pickett to fit the {\it ab initio} results. This interpolation technique, by construction, passes through the initial points and satisfies the basic symmetry property of the band energies.
 %It should be stressed, however, that this Fourier-based method can have problems in the presence of band crossings that may cause unphysical oscillations between the {\it ab initio} points.
 -->
-Without entering into details (that will be discussed in the other specialized lessons)
+Without entering into details that will be discussed in the other specialized lessons,
 one can use the SKW algorithm to find the relevant $\kk$-points, perform an *ab-initio* NSCF run
 for these wavevectors only in order to produce a WFK file that can be used by the EPH code.
 The entire procedure is performed in an automatic way inside ABINIT but before running big EPH calculations,

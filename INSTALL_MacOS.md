@@ -4,11 +4,11 @@ authors: M. Torrent
 
 # How to install ABINIT on macOS
 
-This file describes how to install ABINIT on macOS:
+This file describes how to install ABINIT on macOS using one of the following approaches:
 
- - Using the Homebrew package manager
- - Using the MacPorts package manager
- - Compiling from source
+ - Homebrew package manager
+ - MacPorts package manager
+ - Compilation from source
 
 ## Using [homebrew](http://brew.sh)
 
@@ -34,28 +34,28 @@ To install ABINIT just type:
 
     brew install abinit
 
-and ABINIT should install smoothly with its dependencies.
+and ABINIT should install smoothly with all its dependencies.
 
-Note:
+Note that:
 
-* the LibXC and netCDF fallbacks (plugins) are used by default.
+* the LibXC and netCDF fallbacks are enabled by default.
   Wannier90 and BigDFT are not available in Homebrew.
-  AtomPAW can be installed as a separate package (formula).
+  AtomPAW can be installed as a separate formula.
 
-* The following options are available for the ABINIT formula:
+* the following extra options are available for the ABINIT formula:
 
-      --with-testsuite    --> Run full test suite (time consuming)
-      --without-check     --> Skip build-time tests (not recommended)
-      --without-openmp    --> Disable openMP multithreading
-      --without-netcdf    --> Build without netcdf support
-      --without-libxc     --> Build without libXC support
-      --without-fftw      --> Build without fftw support
-      --without-scalapack --> Build without scalapack support
+      * --with-testsuite    --> Run full test suite (time consuming)
+      * --without-check     --> Skip build-time tests (not recommended)
+      * --without-openmp    --> Disable openMP multithreading
+      * --without-netcdf    --> Build without netcdf support
+      * --without-libxc     --> Build without libXC support
+      * --without-fftw      --> Build without fftw support
+      * --without-scalapack --> Build without scalapack support
 
 ## Using [macports](http://www.macports.org)
 
-ABINIT is available on the MacPorts project, not necessarily in its latest version.
-Tested with Mac OS X v10.8 (Mountain Lion) --> v10.15 (Catalina)
+ABINIT is available on the MacPorts project, but it is not necessarily the latest version.
+The procedure has been tested with Mac OS X v10.8 (Mountain Lion) and v10.15 (Catalina)
 
 ### Prerequisites:
 
@@ -66,22 +66,20 @@ Tested with Mac OS X v10.8 (Mountain Lion) --> v10.15 (Catalina)
     1. gcc (last version) with Fortran variant (Fortran compiler),
     2. mpich or openmpi (MPI)
 
-3. Before starting, it is preferable to update MacPorts system:
+3. Before starting, it is preferable to update the MacPorts system:
 
         sudo port selfupdate
         sudo port upgrade outdated
 
 ### Installing ABINIT
 
-To install ABINIT just type:
+To install ABINIT, just type:
 
     sudo port install abinit
 
 ### ABINIT port variants
 
-By default, ABINIT is installed with the following plugins/fallbacks:
-
-    libXC, Wannier90
+By default, ABINIT is installed with libXC and Wannier90
 
 To activate support for the FFTW3 library:
 
@@ -116,31 +114,35 @@ Other options available, see:
 3. A Fortran compiler installed. Possible options:
 
       - [gfortran-for-macOS project](https://github.com/fxcoudert/gfortran-for-macOS/releases).
-      - gfortran binary from: [http://hpc.sourceforge.net](http://hpc.sourceforge.net)
-      - gfortran binary from: [https://gcc.gnu.org/wiki/GFortranBinaries#MacOS](https://gcc.gnu.org/wiki/GFortranBinaries#MacOS)
+      - gfortran binary from [http://hpc.sourceforge.net](http://hpc.sourceforge.net)
+      - gfortran binary from [https://gcc.gnu.org/wiki/GFortranBinaries#MacOS](https://gcc.gnu.org/wiki/GFortranBinaries#MacOS)
       - gfortran installed via a package manager (MacPorts, Homebrew, Fink)
       - intel Fortran compiler
 
 4. Mandatory libraries.
 
-      - HDF5 (High-performance data management and storage suite) ([https://www.hdfgroup.org/solutions/hdf5/](https://www.hdfgroup.org/solutions/hdf5/))
-      - NetCDF (Network Common Data Form) ([https://www.unidata.ucar.edu/software/netcdf/](https://www.unidata.ucar.edu/software/netcdf/))
-      - libXC (library of exchange-correlation functionals) ([https://tddft.org/programs/libxc/download/](https://tddft.org/programs/libxc/download/))
+      - [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
+        (High-performance data management and storage suite)
 
-5. A MPI library installed  (If you want to benefit from parallelism; recommended).
+      - [NetCDF](https://www.unidata.ucar.edu/software/netcdf/)
+        (Network Common Data Form) 
+      - [libXC](https://tddft.org/programs/libxc/download/) (library of exchange-correlation functionals)
+
+5. A MPI library installed (if you want to benefit from parallelism; recommended).
    Possible options:
 
       - mpich from [http://www.mpich.org](http://www.mpich.org), or via package manager
       - open-mpi from [http://www.open-mpi.org](http://www.open-mpi.org), or via package manager
 
-6. A Linear Algebra library installed.<br />
-  By default the `accelerate` Framework is installed on macOS
-  and ABINIT build system should find it.<br />
-  But you might want to install a parallel library: `scalapack`, `atlas`, `mkl`, ...
+6. A Linear Algebra library installed.
+   By default the `accelerate` Framework is installed on macOS and the ABINIT build system should find it.
+   But you might want to install a parallel library: `scalapack`, `atlas`, `mkl`, etc.
+   If ABINIT is linked with the accelerate library, make sure the code is configured with
+   `--enable-zdot-bugfix="yes"`. 
+   Use `otool -L abinit` to print the shared libraries required by the program.
 
-### Installing ABINIT
+### Installing ABINIT from source
 
-Download ABINIT. 
 For normal users it is advised to get the newest version from our website (replace 9.0.4 by the newest version available).
 
     wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
@@ -151,14 +153,14 @@ Create a working directory:
 
     mkdir build && cd build
 
-To configure the sequential version:
+To configure the sequential version, use:
 
     ../configure FC=gfortran CC=clang FCFLAGS_EXTRA="-ffree-line-length-none"
 
-For the parallel version (only with MPI installed):
+For the parallel version (only if MPI installed):
 
     ../configure FC=mpif90 CC=mpicc FCFLAGS_EXTRA="-ffree-line-length-none" \
-        --enable-mpi  --enable-mpi-io
+                 --enable-mpi  --enable-mpi-io
 
 Compile with:
 
@@ -168,7 +170,9 @@ Install (optional):
 
     make install
 
+Remember that on MacOs, the environment variant LD_LIBRARY_PATH should be replaced by DYLD_LIBRARY_PATH.
+
 ## Comments
 
-To benefit from the optional "fallbacks" (`Wannier90`, `libPSML`, ...),<br />
+To benefit from the optional "fallbacks" (`Wannier90`, `libPSML`, ...),
 consult the [abinit-fallbacks Project](https://gitlab.abinit.org/buildbot/abinit-fallbacks)
