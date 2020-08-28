@@ -1164,7 +1164,7 @@ This file is included in every ABINIT source file and it defines the features th
 at compilation-time depending on the libraries available on your machine.
 Let's have a look at a selected portion of **config.h**:
 
-```cpp
+```c
 /* Define to 1 if you have a working MPI installation. */
 #define HAVE_MPI 1
 
@@ -1476,25 +1476,24 @@ report the outcome on the forum.
 
 !!! tip
 
-  Using the debugger in sequential is really simple.
-  First of all, make sure the code has been compiled with the `-g` option
-  to generate source-level debug information.
-  To use the GNU debugger `gdb`, perform the following operations:
+    Using the debugger in sequential is really simple.
+    First of all, make sure the code has been compiled with the `-g` option
+    to generate source-level debug information.
+    To use the GNU debugger `gdb`, perform the following operations:
 
-    1. Load the executable in the GNU debugger using the syntax:
+      1. Load the executable in the GNU debugger using the syntax:
 
-        gdb path_to_abinit_executable
+          gdb path_to_abinit_executable
 
-    2. Run the code with the gdb *run* command and redirect the standard input with:
+      2. Run the code with the gdb *run* command and redirect the standard input with:
 
-        (gdb) run t01.in
+          (gdb) run t01.in
 
-  Wait for the error e.g. SIGSEGV, then print the **backtrace** with:
+    Wait for the error e.g. SIGSEGV, then print the **backtrace** with:
 
-      (gdb) bt
+        (gdb) bt
 
-
-  Avoid debugging code compiled with `-O3` or `-Ofast` as the backtrace may not be reliable.
+    PS: avoid debugging code compiled with `-O3` or `-Ofast` as the backtrace may not be reliable.
 
 <!--
 How to use LLDB

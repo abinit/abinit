@@ -609,7 +609,7 @@ especially in the region around the band edge for semiconductors or around the F
 Small deviations between SKW and ab-initio bands can always be accounted for by increasing the value
 of [[sigma_erange]] used for generating the KERANGE.nc file.
 
-Examples of input files to compute WFK files with the KERANGE are given in the last section of 
+Examples of input files to compute WFK files with the KERANGE are given in the last section of
 the [mobility tutorial](eph4mob#how-to-compute-only-the-k-points-close-to-the-band-edges).
 
 <!--

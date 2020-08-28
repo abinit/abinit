@@ -2,7 +2,7 @@
 
 This page provides an introduction to the installation of the
 ABINIT package and the compilation of the executables.
-It also discusses how to test whether the installation/compilation was successful by running the 
+It also discusses how to test whether the installation/compilation was successful by running the
 internal test suite.
 Finally, it gives related complements for the developers.
 
@@ -18,51 +18,53 @@ Simply contact the ABINIT group on the [forum](https://forum.abinit.org).
 
 ## Overview
 
-For the vast majority of people willing to use ABINIT (simple users -not developers-, with Unix/Linux or MacOS 
+For the vast majority of people willing to use ABINIT (simple users -not developers-, with Unix/Linux or MacOS
 working in the terminal),
 the installation/compilation steps are:
 
-  1. Prerequisite: you need a Fortran compiler, a C compiler, the Python interpreter (>2.7.5),
-     some mandatory libraries (Linalg, FFT, NetCDF, HDF5, LibXC),
+  1. **Prerequisite**: you need a Fortran compiler, a C compiler, the Python interpreter (>= 2.7.5),
+     some mandatory libraries (**BLAS/LAPACK**, **FFT**, **NetCDF4**, **HDF5** and **LibXC**),
      possibly some recommended libraries (MPI) and other optional libraries such as Wannier90.
-     The libraries can be installed with the help of the "fallback" procedure. See below for more info on this step.
-     Alternatively, you may want to install everything from source using the procedure detailed in 
+     The libraries can be installed with the help of the "fallback" procedure, see below for more info on this step.
+     Alternatively, you may want to install everything from source using the procedure detailed in
      this [tutorial](tutorial/compilation).
   2. Get the [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz)
-     from the abinit Web site.
+     from the abinit web site.
      More information are available [here](#how-to-get-a-version-of-abinit).
-  3. Prepare a configuration file named "hostname".ac9, that contains the information 
+  3. Prepare a configuration file named "hostname".ac9, that contains the information
      about libraries and compilation options.
-     This is not mandatory, as the ABINIT configure script will try to detect the installation location, 
+     This step is not mandatory as the ABINIT *configure* script will try to detect the installation location
      if options are not provided but the automatic detection procedure can fail.
-     See below for more information, as well as in [this section](#how-to-write-the-hostnameac9-file-).
-  4. Issue `./configure` (even better, first create a *tmp* directory for the build, 
-     then `cd tmp` and run `../configure` withing the build directory).
-     For further detauls, consult [this link](https://wiki.abinit.org/doku.php?id=build:configure).
-  5. Issue `make` (or `make -jN` for compiling with N processors on a SMP machine, e.g. `make -j4` 
+     See below for more information, as well as [this section](#how-to-write-the-hostnameac9-file).
+  4. Issue `./configure` (or, even better, first create a *tmp* directory for the build
+     then `cd tmp` and finally run `../configure` within the build directory).
+     For further details, consult [this link](https://wiki.abinit.org/doku.php?id=build:configure).
+  5. Issue `make` (or `make -jN` for compiling with N processors, e.g. `make -j4`
      to use four processors). This step might take dozen of minutes depending on the compilation options.
      More information are available [here](#how-to-make-the-executables).
-  6. Optionally, issue `make install` to install the package.
+  6. Optionally, issue `make install` to install the package (root privileges may be needed).
 
 Note that the details of step 1 and 3 might vary significantly depending on the operating system.
-This [tutorial](tutorial/compilation) covers different scenarios.
-There are also web pages that focus specifically on 
-[macOS](INSTALL_MacOS) users, [CentOS](INSTALL_CentOS) users and [Ubuntu](INSTALL_Ubuntu) users. 
-The three latter Web pages also show how to bypass the above-mentioned steps 
+This [tutorial](tutorial/compilation) covers different scenarios in which you want to build everything from source
+and install libraries in your $HOME directory.
+There are also other pages focusing on
+[macOS](INSTALL_MacOS), [CentOS](INSTALL_CentOS) and [Ubuntu](INSTALL_Ubuntu)
+that discuss how to bypass the compilation of the external libraries
 using homebrew or MacPorts (for macOS), dnf (for CentOS) or apt (for Ubuntu).
 
-For step 3, examples of configuration files to configure and compile Abinit on clusters are available
+Examples of configuration files to compile Abinit on clusters are available
 in the |abiconfig| package on github
 (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)),
 while the configuration files
 used for our buildbot testfarm are available in the [autoconf_examples section](developers/autoconf_examples/).
-The [ABINIT Wiki](https://wiki.abinit.org) also has a **build abinit** section, that might be useful. 
+The [ABINIT Wiki](https://wiki.abinit.org) also has a **build abinit** section, that might be useful.
 In particular, the current documentation for the fallback procedure is available
-[here](https://wiki.abinit.org/doku.php?id=build:fallbacks), as well as in the [information on the configure](https://wiki.abinit.org/doku.php?id=build:configure) page.
+[here](https://wiki.abinit.org/doku.php?id=build:fallbacks) while configuration options are documented
+[in this page](https://wiki.abinit.org/doku.php?id=build:configure).
 
 If you succeed to build the executables, and would like to check whether
-the executables work properly, please go to the [Internal tests section](#how-to-make-the-internal-tests)
-and the [Automatic tests section](#how-to-make-the-automatic-tests).
+the executables work properly, please consult the two sections on [Internal tests](#how-to-run-the-internal-tests)
+and [Automatic tests](#how-to-make-the-automatic-tests).
 
 If you want to have a much better handling on the ABINIT source code than normal users, or if
 you downloaded ABINIT from Gitlab or GitHub anyhow, then consult the section [For developers](#for-developers).
@@ -71,7 +73,7 @@ you downloaded ABINIT from Gitlab or GitHub anyhow, then consult the section [Fo
 
 We assume that you have a F90 compiler under UNIX/Linux or macOS X and that you want to
 **compile the source files**, and, perhaps, **modify and/or add
-new files**. This is the case of most users and  system administrators.
+new files**. This is the typical scenario for most users and system administrators.
 In what follows, _x.y.z_ represents the ABINIT version.
 
 In order to get the ABINIT package, you have first to download the file
@@ -82,7 +84,7 @@ In order to get the ABINIT package, you have first to download the file
 gunzip abinit-x.y.z.tar.gz | tar -xvf -
 ```
 
-Alternatively, you might also use
+Alternatively, you may use
 
 ```sh
 wget https://www.abinit.org/sites/default/files/packages/abinit-x.y.z.tar.gz
@@ -94,27 +96,26 @@ If correctly done, a main directory, denoted ~abinit in the present document
 subdirectories should have been created, including:
 
   * the source files inside the **_src_** directory;
-  * a tarball with the fallbacks and a script to create libraries, in the directory **_fallbacks_**;
+  * a tarball with the fallbacks and a script to create libraries in the directory **_fallbacks_**;
   * the documentation, in the **_doc_** directory;
   * the complete set of tests and the pseudopotentials needed for the automatic tests in the directory **_tests_**;
-  * all the scripts and configuration options needed to generate *configure* and Makefiles are 
+  * all the scripts and configuration options needed to generate *configure* and Makefiles
     in the **_config_** directory.
 
 Obviously, the package does not contain object files and binary executables that will be built by *make*.
-Pseudopotentials for production runs **are not shipped** with the package.
-The tarball contain several dozen pseudopotentials **for testing purposes** in ~abinit/tests/Psps_for_tests/. 
-The largest set of pseudopotentials and PAW atomic datafiles for production runs can be found 
-on the [ABINIT Atomic data pseudopotentials and PAW datasets Web page](http://www.abinit.org/psp-tables). 
+Note also that pseudopotentials for production runs **are not shipped** with the package.
+The tarball contains several dozen pseudopotentials **for testing purposes** in ~abinit/tests/Psps_for_tests/.
+The largest set of pseudopotentials and PAW atomic datafiles for production runs can be found
+on the [ABINIT Atomic data pseudopotentials and PAW datasets Web page](http://www.abinit.org/psp-tables).
 Other pseudopotentials have been generated by many different users, and might be
-shared, but you might have to contact them.
-
+shared but you might have to contact them.
 <!--
 The "fallbacks" are **not** in the installation package. They are downloaded from
 the Web automatically at configure time. If you do not have the command "wget"
 installed on your machine, or if you do not have an access to the internet, you should disable all the fallbacks.
 -->
 
-The Web site <https://www.abinit.org> contains many other resources, including links to the forum,
+The web site <https://www.abinit.org> contains many other resources including links to the forum,
 the mailing list, the ABINIT events etc and, last but not least, tutorials and documentation pages.
 
 ## How to compile the executables?
@@ -127,23 +128,23 @@ compiler), the adequate compiler options, and, if you want to
 produce the parallel binaries, the location of the MPI library.
 
 Although the present building tools should be powerful enough to
-succeed to build the binaries without you giving such information, 
+succeed to build the binaries without you giving such information,
 on a significant number of platforms it has been observed that it is still better to specify
 options explicitly in order to avoid suboptimal executables or downgraded capabilities.
 
-Supposing that you are in the lucky case in which the build system is able detects all the requirements, 
-then building ABINIT is rather simple. 
+Supposing that you are in the lucky case in which the build system is able detects all the requirements,
+then building ABINIT is rather simple.
 Issue:
 
   * `./configure` (or first create a tmp directory, then `cd tmp`, then `../configure`).
-  * `make` (or `make -jN` for compiling with N processors on a SMP machine, e.g. `make -j4` for four processors). 
+  * `make` (or `make -jN` for compiling with N processors on a SMP machine, e.g. `make -j4` for four processors).
     Might take two minutes.
   * Optionally, `make install`
 
 Well, it might also be that only one additional information is needed, in which case something like:
 
 ```sh
-configure FC=gcc
+configure FC=gfortran
 make
 ```
 
@@ -152,14 +153,17 @@ might work. In both cases, let's explain a bit what is done, and the further pos
 The *configure* step produces the set of Makefile files (among other things),
 taking into account information about your machine and the "hostname".ac9 file.
 It takes three minute or less. The *make* step compiles everything,
-according to the Makefile files produced in the previous step. The time required to build
-everything is highly dependent on the compiler and platform. On a 2.8 GHz
-quad-proc machine (using *make -j4*), the whole compilation is about 10 minutes.
-On other platforms, with only one processor, it might be more than one hour.
-
+according to the Makefile files produced in the previous step.
 The executables will be located in the subdirectory ~abinit/src/98_main, if
 you have chosen to issue ./configure in the ~abinit directory. If you have
 issued ./configure in another directory, it will be placed accordingly.
+
+!!! important
+
+    The time required to build
+    everything is highly dependent on the compiler and platform. On a 2.8 GHz
+    quad-proc machine (using *make -j4*), the whole compilation is about 10 minutes.
+    On other platforms, with only one processor, it might be more than one hour.
 
 The *make* command accepts the name of the target(s) as optional argument.
 To compile only one of the executable after the configure step, issue
@@ -183,7 +187,7 @@ will install the package in the /usr/local directory.
 Let's come back to the case where the build system needs some more
 information. This information should be stored in a file named "hostname".ac9,
 where "hostname" is the result of executing the command `hostname -s` on your
-machine. 
+machine.
 
 !!! tip
 
@@ -194,20 +198,15 @@ machine.
 There is a template for such "hostname".ac9 file, located in ~abinit/doc/config/. Its name
 is config-template.ac9. Examples of such files, that are used for testing
 the package on our testfarm, can be found in ~abinit/doc/build/config-examples/,
-or equivalently in the [autoconf_examples section](developers/autoconf_examples/),
-Examples for clusters provided by the abiconfig project are available
+or equivalently in the [autoconf_examples section](developers/autoconf_examples/).
+Examples of config files for clusters are provided by the abiconfig project and are available
 [here](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters).
 
 Most of the examples provided in the ~abinit/doc/build/config-examples/
 directory contain about five definitions: F90 and C location, F90 and C
-compilation options, location of MPI library (if enabled). 
+compilation options, location of MPI library (if enabled).
 On the other hand, there are many other possible control flags ("with_XYZ"),
-needed for advanced use. 
-
-<!--
-In case you have trouble with some optional library (LibXC,
-WANNIER90, ...), you may disable its build.
--->
+needed for advanced use.
 
 Your hostname.ac9 file might be placed in your home directory in a new
 directory that you will name ~/.abinit/build/. At that location, every time you
@@ -218,8 +217,8 @@ On the other hand, if you need to play with several computers, you can place
 the hostname.ac9 file directory in the ~abinit directory, where such a
 hostname.ac9 file will be also seen by the build system (and preferred over the
 one located in ~/.abinit/build/) or in your build directory (like
-~abinit/tmp/). As mentioned above, you might even type at the terminal the
-definitions contained in the hostname.ac9 file.
+~abinit/tmp/). As mentioned above, you might even input the options contained in the hostname.ac9 file
+directly on the command line.
 
 Note the order of precedence for the location of the hostname.ac9 file (or
 command-line information), in case more than one possibility is used,
@@ -233,7 +232,7 @@ command-line information), in case more than one possibility is used,
 
 When the hostname.ac9 file is ready, you can come back to the configure/make sequence.
 
-## How to make the internal tests?
+## How to run the internal tests
 
 In case you are running under Unix (Linux or another flavour), the abinit code
 has several small internal tests (three basic ones, called *fast*, *v1* and
@@ -292,10 +291,11 @@ This is useful if you consider that the installation has been successful. Or
 you might continue to read the present Web page, and try to perform the speed
 tests, as well as the other tests.
 
-## How to execute the automatic tests?
+## How to execute the automatic tests
 
-The workhorse script to run the tests is called *runtests.py*. It is very
-flexible. A reasonable set of tests (those contained in the fast and v"x"
+The workhorse script to run the tests is called *runtests.py*.
+It is very flexible.
+A reasonable set of tests (those contained in the fast and v"x"
 directories), can be executed automatically by issuing inside the ~abinit/tests directory the command:
 
 ```sh
@@ -320,20 +320,19 @@ The command line options of *runtests.py* are numerous. Please issue
 ./runtests.py --help
 ```
 
-in order to access the documentation or consult the video below.
+in order to access the documentation and the examples or consult the video below.
 
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
 Let us now examine the different subdirectories of the ~abinit/tests directory.
 
-~ABINIT/tests/fast/ is the simplest, and its content will be described in some
-detail below. For tests of the parallel version see the directory
-tests/paral/. For tests
+~ABINIT/tests/fast is the simplest, and its content will be described in some
+detail below. For tests of the parallel version see the directory tests/paral. For tests
 of the response function features of abinit, and for tests of mrgddb and
 anaddb, see the subdirectories tests/v2. The other directories tests/v3,
 tests/v4, etc present further tests of recently implemented features of ABINIT.
 
-**1) tests/fast/** (for the sequential version only)
+**1) tests/fast** (for the sequential version only)
 
 This subdirectory contains a basic set of tests of the code, aimed at testing
 whether the code is coherent in time (successive versions), and exercising
@@ -489,7 +488,7 @@ ABINIT distribution.
 
 If you want to have a full handle on the package (compilation, modification of files, writing
 of scripts, you need additional prerequisites, the
-(free) software applications git, automake, autoconf, libtools.
+(free) software applications *git*, *automake*, *autoconf*, *libtools*.
 
 More explicitly, you need minimally (version numbers can be upgraded)
 
@@ -525,13 +524,13 @@ start to modify these, you will not be able to include them afterwards in the ar
 
 Working with `git clone` creates a local archive for your daily work, this
 archive being linked to the main ABINIT archive. This very efficient technique
-is recommended, as it makes you more independent for the management of your
+is recommended as it makes you more independent for the management of your
 work (you will be able to create new branches). One big advantage of this
-technique is that people working with a laptop can develop and commit safely
+approach is that people working with a laptop can develop and commit safely
 without a network connection.
 
-Then, make sure you have the ABINIT prerequisite (compilers, libraries ...), and that you
-have set up a *.ac9 file.
+Then, make sure you have the ABINIT prerequisite (compilers, libraries etc), and that you
+have set up an ac9 file.
 
 At this stage, before being able to compile, cd to the newly created abinit directory, and issue:
 

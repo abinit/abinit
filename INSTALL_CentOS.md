@@ -15,10 +15,10 @@ Tested with __CentOS 8.2__
 
 1.  __Fortran compiler__
 
-    Possible options:       
+    Possible options:
 
     - gfortran, the GNU compiler. ([https://gcc.gnu.org/](https://gcc.gnu.org))
-    - ifort, the intel compiler. This is a commercial compiler, slightly more complicated 
+    - ifort, the intel compiler. This is a commercial compiler, slightly more complicated
       to use but more optimized for intel architecture.
 
 2.  __Python interpreter__ (**v3.7+ recommended**)
@@ -34,9 +34,9 @@ Tested with __CentOS 8.2__
 
     Possible options:
 
-    - MKL (Intel® Math Kernel Library) ([Free Download](https://software.intel.com/content/www/us/en/develop/tools/math-kernel-library/choose-download/linux.html)) (**recommended**)
-    - [OpenBLAS](https://www.openblas.net): An optimized BLAS library, (**recommended with GNU**)
-    - [Netlib](https://www.netlib.org): blas, lapack, scalapack)
+    - MKL (Intel® Math Kernel Library): [Free Download](https://software.intel.com/content/www/us/en/develop/tools/math-kernel-library/choose-download/linux.html), **recommended** for performance
+    - [OpenBLAS](https://www.openblas.net): An optimized BLAS library, **recommended with GNU**.
+    - [Netlib](https://www.netlib.org): blas, lapack, scalapack
     - [ATLAS](http://math-atlas.sourceforge.net/): Automatically Tuned Linear Algebra Software
 
 5.  __Mandatory libraries:__
@@ -49,15 +49,16 @@ Tested with __CentOS 8.2__
 
     - [FFTW3](http://www.fftw.org/): Library for computing the discrete Fourier transform, **recommended with GNU**
     - [libxml2](http://xmlsoft.org/downloads.html): XML C parser, recommended for multibinit
-    - [Wannier90](http://www.wannier.org) 
+    - [Wannier90](http://www.wannier.org)
     - [LibPSML](https://esl.cecam.org/PSML) + [xmlf90](https://gitlab.com/siesta-project/libraries/xmlf90)
+      to read pseudopotentials in psml format
 
 ## Installation of tools and libraries
 
 All mandatory libraries are installed through the DNF package manager.
 For other optional libraries, compilation from source is needed.
 
-The steps required to install MPICH, fftw3 and OpenBLAS with dnf and compile 
+The steps required to install MPICH, fftw3 and OpenBLAS with dnf and compile
 __a relatively simple parallel version of ABINIT__ are summarized below:
 
 1. __Install the compiler__
@@ -105,7 +106,7 @@ __a relatively simple parallel version of ABINIT__ are summarized below:
 
     then, you need to find out where the MPI wrappers are installed.
 
-    If you installed the MPICH package via dnf, all directories can be displayed by using:
+    If you installed the MPICH package via dnf, the installation directories can be obtained by using e.g.
 
     ```sh
     rpm -ql mpich-devel | grep mpif90
@@ -132,7 +133,7 @@ __a relatively simple parallel version of ABINIT__ are summarized below:
 
 __Download ABINIT__.
 
-For normal users, it is advised to get the newest version 
+For normal users, it is advised to get the latest stable version
 from our [website](https://www.abinit.org/packages) (replace 9.0.4 by the newest version available).
 
 ```sh
@@ -153,7 +154,7 @@ __Configure with__:
 ../configure --with-config-file='my_config_file.ac'
 ```
 
-where `my_config_file.ac` is either a self made configuration file.
+where `my_config_file.ac` is an external file providing all the configuration flags and options.
 More on the configure options is presented in [next section](#the-config-file).
 
 __Compile with__:
@@ -162,7 +163,8 @@ __Compile with__:
 make -j 4
 ```
 
-where '-j 4' means that 4 cores are used to compile but you can use more.
+where `-j 4` means that 4 cores are used to compile. Adjust this value according to number of
+physical cores available on your machine.
 
 To run the test suite, issue:
 
@@ -175,7 +177,7 @@ cd tests
 
     At the end of the test, one should get something like:
 
-    ``` 
+    ```
     Suite   failed  passed  succeeded  skipped  disabled  run_etime  tot_etime
     fast         0       0         11        0         0      27.72      27.98
 
@@ -191,7 +193,7 @@ __Install__ (optional):
 
 ## The configuration file
 
-The configure command takes as input some variables and flags.
+The configure command takes in input variables and flags.
 For example:
 
 ```sh
@@ -199,25 +201,18 @@ For example:
 ```
 
 tells ABINIT to enable MPI support.
-Any variable or flag can be found by typing:
+All the variables and flags supported by the script can be found by typing:
 
 ```sh
 ../configure --help
 ```
 
-Most options are detected automatically by ABINIT.
-For example, with the option `--with-mpi="yes"`, ABINIT will try to use the parallel fortran compiler (mpifort)
-and detect directories with useful library and header files for MPI support.
+Some options are detected automatically by the script.
+For example, with the option `--with-mpi="yes"`, ABINIT will try to use the parallel fortran compiler
+found in $PATH (e.g. mpifort) and will try to detect the directories containing the associated libraries
+and the header files required by MPI.
 
-When a lot of options are used, it is advised to use a config file.
-
-!!! Important
-
-    The name of the options in the `.ac` files is in normalized form that is
-    the initial `--` is removed from the option name and all the other `-` characters
-    in the string are replaced by an underscore `_`.
-    Following these simple rules, the configure option `--with-mpi` becomes `with_mpi`
-    in the ac file.
+When a lot of options are needed, it is advised to use a config file.
 
 The `.ac` file for __our simple parallel ABINIT__ build based on OpenBLAS can be written as:
 
@@ -246,6 +241,14 @@ FFTW3_LIBS="-L/usr/lib64 -lfftw3 -lfftw3f"
 # Enable Netcdf mode in Abinit (use netcdf as default I/O library)
 enable_netcdf_default="yes"
 ```
+
+!!! Important
+
+    The name of the options in the `.ac` files is in normalized form that is
+    the initial `--` is removed from the option name and all the other `-` characters
+    in the string are replaced by an underscore `_`.
+    Following these simple rules, the configure option `--with-mpi` becomes `with_mpi`
+    in the ac file.
 
 ## To go further
 
