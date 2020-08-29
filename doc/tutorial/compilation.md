@@ -1411,7 +1411,7 @@ As usual, use:
 ```
 
 to list the available options.
-A more detailed discussion is given in [this page](testsuite_howto).
+A more detailed discussion is given in [this page](../developers/testsuite_howto).
 
 [![asciicast](https://asciinema.org/a/40324.png)](https://asciinema.org/a/40324)
 
