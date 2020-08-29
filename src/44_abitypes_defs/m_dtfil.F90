@@ -1636,7 +1636,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
    else
      ! Redirect standard output to null
      close(std_out, err=10, iomsg=errmsg)
-     if (open_file(NULL_FILE,msg,unit=std_out,action="write") /= 0) then
+     if (open_file(NULL_FILE, msg, unit=std_out, action="write") /= 0) then
        MSG_ERROR(msg)
      end if
    end if

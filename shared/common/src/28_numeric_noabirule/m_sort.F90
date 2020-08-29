@@ -74,7 +74,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine sort_dp(n,list,iperm,tol)
+subroutine sort_dp(n, list, iperm, tol)
 
 !Arguments ------------------------------------
 !scalars

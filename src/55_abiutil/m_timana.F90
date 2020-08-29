@@ -221,7 +221,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(13)='mkresi                          '
  names(14)='rwwf                            '; basic(13)=1
  names(15)='pspini                          '; basic(15)=1
- names(16)='mkffnl                          '
+ names(16)='mkffnl                          '; basic(16)=1
  names(17)='symrhg(no FFT)                  '; basic(17)=1
  names(19)='inwffil                         '
 
@@ -438,6 +438,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(290)='rwwf%initwf(RF)                 '
  names(291)='rwwf%newkpt(GS)                 '
  names(292)='rwwf%newkpt(RF)                 '
+
+ ! wfd
+ names(300)='wfd_read_wfk                    '; basic(300) = 1
 
  names(301)='screening                       '
  names(302)='screening(init1)                '
@@ -995,9 +998,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  ! IFC object
  names(1748)='ifc_fourq'; basic(1748) = 1
- names(1749)='ewald9'; basic(1749) = 1
+ !names(1749)='ewald9'; basic(1749) = 1
+ !names(1750)='gtdyn9'; basic(1750) = 1
+ !names(1751)='dfpt_phfrq'; basic(1751) = 1
 
- names(1780)='ctk_rotate'; basic(1780) = 1
+ names(1780)='cgtk_rotate'; basic(1780) = 1
 
  ! DVDB object
  names(1800)='dvdb_new'; basic(1800) = 1
@@ -1006,17 +1011,24 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1803)='dvdb_rotate_fqg'; basic(1803) = 1
  names(1804)='v1phq_rotate'; basic(1804) = 1
  names(1805)='dvdb_readsym_allv1'; basic(1805) = 1
- names(1806)='dvdb_xmpi_sum'; basic(1806) = 1
+ names(1806)='dvdb_collect_v1_3natom'; basic(1806) = 1
  names(1807)='dvdb_qcache_update'; basic(1807) = 1
  names(1808)='dvdb_ftqcache_build'; basic(1808) = 1
  names(1809)='dvdb_get_ftqbz'; basic(1809) = 1
 
  ! SIGEPH
- names(1900)='sigph_pre_qloop'; basic(1900) = 1
- names(1901)='sigph_qloop_preamble'; basic(1901) = 1
- names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
+ !names(1900)='sigph_pre_qloop'; basic(1900) = 1
+ !names(1901)='sigph_qloop_preamble'; basic(1901) = 1
+ !names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
  names(1903)='sigph_bsum'; basic(1903) = 1
- names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
+ names(1904)='sigph_bsum_1'; basic(1904) = 1
+ names(1905)='sigph_bsum_2'; basic(1905) = 1
+ names(1906)='sigph_bsum_3'; basic(1906) = 1
+ names(1907)='sigph_bsum_4'; basic(1907) = 1
+
+ !names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
+ !names(1905)='splfit'; basic(1905) = 1
+ !names(1906)='mkkin'; basic(1906) = 1
 
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
@@ -1326,8 +1338,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    end if
  end do
 
- percent_limit=0.5_dp; if (timopt<0) percent_limit=0.0001_dp
- !percent_limit=tol12
+ percent_limit=0.5_dp
+ if (timopt<0) percent_limit=0.0001_dp
+ !if (timopt<0) percent_limit=tol12
 
 !In case there is parallelism, report times for node 0
 !if (me==0 .and. nproc>1) then
@@ -1373,7 +1386,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      isort = list(ilist)
 
      if ( (times(1,isort)*cpunm  > percent_limit .and. &
-           times(2,isort)*wallnm > percent_limit) .and. ncount(isort)/=0 ) then ! Timing analysis
+           times(2,isort)*wallnm > percent_limit) .and. ncount(isort) /= 0) then ! Timing analysis
 
        write(ount,format01041)names(isort),&
          times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
@@ -1680,7 +1693,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 #endif
            end if
            if(ncount(isort)/=0)then
-             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then   ! Does not write a slot if the wall time ratio is below a threshold
+             ! Do not write a slot if the wall time ratio is below a threshold
+             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then
                if ( times(2,isort) < 0.0001 ) times(2,isort) = -1.d0
                write(ount,format01040)names(isort),&
                  times(1,isort),times(1,isort)*cpunm,&

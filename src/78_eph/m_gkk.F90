@@ -255,10 +255,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  ! Read wavefunctions on the k-points grid and q-shifted k-points grid.
  call wfd_k%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
- if (.False.) call wfd_k%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  call wfd_kq%read_wfk(wfq_path, iomode_from_fname(wfq_path))
- if (.False.) call wfd_kq%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
