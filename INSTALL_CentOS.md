@@ -214,7 +214,7 @@ and the header files required by MPI.
 
 When a lot of options are needed, it is advised to use a config file.
 
-The `.ac` file for __our simple parallel ABINIT__ build based on OpenBLAS can be written as:
+The `.ac` file for __our simple parallel ABINIT__ build based on OpenBLAS is:
 
 ```sh
 # installation location
@@ -250,14 +250,15 @@ enable_netcdf_default="yes"
     Following these simple rules, the configure option `--with-mpi` becomes `with_mpi`
     in the ac file.
 
+<!--
 ## To go further
 
 - compiling optional libraries with the fallback project: Wannier90, libPSML/XMLF90.
 - enabling OpenMP
 - using libxml2
+-->
 
-
-## Quick Guide for the Impatient
+## Quick Guide for the impatient
 
 We will build ABINIT with the following components:
 
@@ -279,7 +280,7 @@ sudo dnf install fftw fftw-devel
 sudo dnf install python3
 ```
 
-### Getting ABINIT tarball
+### Getting the ABINIT tarball
 
 ```sh
 wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
@@ -340,7 +341,7 @@ export OPENBLAS_NUM_THREADS=1
 make install
 ```
 
-## Quick Guide for the Impatient (MKL version)
+## Quick Guide for the impatient (MKL version)
 
 We will build ABINIT with the following components:
 

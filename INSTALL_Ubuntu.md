@@ -35,15 +35,13 @@ then enter your user password and ABINIT should install smoothly with all its de
 
 The source code of the latest stable release is available at [https://www.abinit.org/packages](https://www.abinit.org/packages).
 Compiling from source enables one to optimize the build, activate MPI parallelism, customize linear algebra libraries etc.
-All the required packages are available via *apt*.
-Simply type
+All the required packages are available via *apt* and can be installed with the syntax:
 
     sudo apt install [package]
 
-To search for a package or get more details about a particular package,
-use the commands `apt search` and `apt show`, respectively.
+Use the commands `apt search` and `apt show` to search for a package or to get info about a particular package.
 
-Packages install executables in the bin folder (e.g. /usr/bin).
+Ubuntu packages install their executables in the bin folder (e.g. /usr/bin).
 The location of the executable can be found via the unix `which` command.
 For example
 
@@ -69,6 +67,7 @@ from the *dpkg* package
 
 The prerequisites are first discussed qualitatively, because the installation may
 depend on the linux distribution. Then we discuss how to compile the source code.
+
 A possible list of prerequisites (tested for Ubuntu 19.10) is:
 
 1. Ubuntu or similar Ubuntu-based distributions
@@ -93,11 +92,11 @@ A possible list of prerequisites (tested for Ubuntu 19.10) is:
    but you might want to install a math library yourself, especially for parallel computations:
    You can choose among:
 
-   - `blas` (libblas-dev)
-   - `lapack` (liblapack-dev)
-   - `scalapack` (libscalapack-...-dev)
-   - `atlas` (libatlas-base-dev),
-   - `mkl` from Intel (or you might try the libmkl-full-dev package).
+     - `blas` (libblas-dev)
+     - `lapack` (liblapack-dev)
+     - `scalapack` (libscalapack-...-dev)
+     - `atlas` (libatlas-base-dev),
+     - `mkl` from Intel (or you might try the libmkl-full-dev package).
 
 5. Some mandatory libraries:
 
@@ -107,7 +106,7 @@ A possible list of prerequisites (tested for Ubuntu 19.10) is:
 
       - LIBXC, a library containing exchange-correlation potentials, from the `libxc-dev` package.
 
-   It is also possible to generate these libraries via the ABINIT fallbacks:
+   Note that it is also possible to generate these libraries via the ABINIT fallbacks:
 
    ```sh
    cd fallbacks
@@ -116,8 +115,8 @@ A possible list of prerequisites (tested for Ubuntu 19.10) is:
 
    In the latter case, the ABINIT configuration file (see later) should contain `with_fallbacks="yes"`.
 
-These are the commands required to install
-the required packages from apt assuming a relatively simple ABINIT build with MPI support.
+These are the commands required to install the required packages from apt 
+assuming a relatively simple ABINIT build with MPI support.
 The list of commands may change depending on your linux distribution,
 the exact ABINIT version you want to compile and the libraries you want to use.
 
@@ -158,7 +157,7 @@ To configure, use:
 ../configure --with-config-file='my_config_file.ac9'
 ```
 
-where 'my_config_file.ac9' is a configuration file that is discussed in the next section.
+where 'my_config_file.ac9' is a configuration file that is discussed in more details in the next section.
 
 Compile with:
 
@@ -174,27 +173,35 @@ make install
 
 ### The configuration file
 
-The configure command accepts variables and flags to customize the configuration.
+The configure script accepts variables and flags to customize the configuration.
 For example
 
 ```sh
 ../configure FC=mpifort --with-mpi="yes"
 ```
 
-tells ABINIT to configure for a compilation with gfortran and to enable MPI support.
-To obtain the documentation for variables and flags, use:
+tells ABINIT to configure for a MPI build with the *mpifort* MPI wrapper.
+To obtain the documentation for the different variables and flags, use:
 
 ```sh
 ../configure --help
 ```
 
-Most options are detected automatically by ABINIT.
-For example, if `with_mpi` is set to 'yes', ABINIT will try to use the parallel fortran compiler (mpifort)
-and detect directories with useful library (.so) and header (.h) files for MPI support.
-When you install the Open MPI package via apt, these directories can be displayed by using `dpkg -L 'libopenmpi-dev'`.
+Most configuration options are detected automatically by configure.
+For example, if `with_mpi` is set to 'yes', configure will try to use the parallel fortran compiler (mpifort)
+and automatically detect the MPI installation with libraries (.so) and header (.h) files.
+When you install the Open MPI package via apt, these directories can be printed to terminal 
+by using `dpkg -L 'libopenmpi-dev'`.
 
-When a lot of options are used, it is advised to use a config file.
-For example, a parallelized version of abinit using lapack and blas is obtained by using the config file
+When a lot of options must be passed to configure, it is advised to use an external configuration file with
+the syntax:
+
+```sh
+../configure --with-config-file='my_config_file.ac9'
+```
+
+An example of configuration file to build abinit with MPI, lapack and blas and automatic 
+detection for libxc, hdf5, and netcdf:
 
 ```sh
 # MPI settings
