@@ -5,9 +5,6 @@ ndtset 10
 getwfk_filepath  "t60o_DS20_WFK"
 getddb_filepath  "t60o_DS20_DDB"
 
-#getwfk   20    # Read GS wavefunctions from DS20_WFK
-#getddb   20    # Read DDB files from DS20_DDB
-
 # Global parameters.
 ecut   35
 tolwfr 1e-16
@@ -41,7 +38,7 @@ nband      20
 symsigma  1
 tmesh 0 300 2
 
-# This just to test (part of) the restart code
+# This just to test the restart code when SIGEPH is not present.
 eph_restart 1
 
 ############
@@ -78,8 +75,7 @@ gw_qprange4 4
 sigma_ngkpt4 2 2 2
 #sigma_bsum_range4 1 7
 eph_intmeth4 2  # Tetra are more stable when bands are selected. No long-range Lorentzian.
-# Use interpolated DVDB produced in dataset 2
-getdvdb4   2
+getdvdb4   2  # Use interpolated DVDB produced in dataset 2
 eph_ngqpt_fine4 4 4 4
 
 ############
@@ -100,12 +96,13 @@ ph_qpath5
 ############
 # DATASET 6
 ############
-# Test erange and tolerance on tetra weigts
+# Test erange and tolerance on tetra weights
 eph_task6 -4
 eph_intmeth6 2  
 sigma_ngkpt6 2 2 2
 sigma_erange6  0.5 0.5 eV
 eph_tols_idelta6 1e-6 1e-6
+eph_phwinfact6 3.9
 getdvdb6  2
 eph_ngqpt_fine6 4 4 4
 
@@ -181,12 +178,12 @@ getdvdb_filepath10  "t60o_DS20_DVDB"
 #%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
 #%% [files]
 #%% files_to_test = 
-#%%   t60.out, tolnlines = 45, tolabs = 0.4, tolrel = 0.1
+#%%   t60.out, tolnlines = 55, tolabs = 0.4, tolrel = 0.15
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, RTA
 #%% description = 
 #%%   Calculation of the Fan-Migdal self-energy matrix elements in LiF.
 #%%<END TEST_INFO>

@@ -36,7 +36,7 @@ ntypat 1
 znucl 22  # Titanium
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "22ti.pspnc"
+ pseudos "PseudosTM_pwteter/22ti.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

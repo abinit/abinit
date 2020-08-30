@@ -34,6 +34,8 @@ module m_symkpt
  use m_numeric_tools
  use m_time
 
+ use m_fstrings,   only : sjoin, itoa
+
  implicit none
 
  private
@@ -92,11 +94,11 @@ contains
 !!  Bad scaling wrt nkbz. Should try to MPI parallelize or implement more efficient algorithm
 !!
 !! PARENTS
-!!      dfpt_looppert,elphon,ep_setupqpt,get_npert_rbz,getkgrid,harmonic_thermo
-!!      m_bz_mesh,m_ifc,m_sigmaph
+!!      m_bz_mesh,m_dfpt_looppert,m_dfpt_lw,m_dtset,m_elphon,m_harmonic_thermo
+!!      m_ifc,m_kpts,m_tdep_psij,m_unittests
 !!
 !! CHILDREN
-!!      sort_dp,wrtout
+!!      krank%free,wrtout
 !!
 !! SOURCE
 
@@ -119,7 +121,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  integer :: ikpt_current_length,isym,itim,jj,nkpout,quit,tident
  real(dp) :: difk,difk1,difk2,difk3,length2trial,reduce,reduce1,reduce2,reduce3
  !real(dp) :: cpu,wall,gflops
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: list(:),bz2ibz_idx(:)
  real(dp) :: gmetkpt(3),ksym(3)
@@ -139,8 +141,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 !ENDDEBUG
 
  if (timrev/=1 .and. timrev/=0) then
-   write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
-   MSG_BUG(message)
+   MSG_BUG(sjoin(' timrev should be 0 or 1, while it is equal to:', itoa(timrev)))
  end if
 
  ! Find the identity symmetry operation
@@ -157,8 +158,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      end do
      if(tident==1)then
        identi=isym
-       !write(message, '(a,i0)' )' symkpt : found identity, with number',identi
-       !call wrtout(std_out,message,'COLL')
+       !call wrtout(std_out, sjoin(' symkpt: found identity, with number: ',itoa(identi)))
        exit
      end if
    end do
@@ -185,7 +185,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
    ! Store the length of vectors, but take into account umklapp
    ! processes by selecting the smallest length of all symmetric vectors
-   ABI_ALLOCATE(length2,(nkbz))
+   ABI_MALLOC(length2,(nkbz))
 
    do ikpt=1,nkbz
      do isym=1,nsym
@@ -211,7 +211,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    !call cwtime_report("symkpt: length", cpu, wall, gflops)
 
    ! Sort the lengths
-   ABI_ALLOCATE(list,(nkbz))
+   ABI_MALLOC(list,(nkbz))
    list(:)=(/ (ikpt,ikpt=1,nkbz) /)
    call sort_dp(nkbz,length2,list,tol14)
    ! do ikpt=1,nkbz; write(std_out,*)ikpt,length2(ikpt),list(ikpt),kbz(1:3,list(ikpt)); end do
@@ -259,7 +259,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
              end do
 
              if (quit==0) then
-               write(message,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
+               write(msg,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
                'Chksymbreak=1. It has been observed that the k point grid is not symmetric:',ch10,&
                'for the symmetry number: ',isym,ch10,&
                'with symrec= ',symrec(1:3,1:3,isym),ch10,&
@@ -267,7 +267,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
                'does not belong to the k point grid.',ch10,&
                'Read the description of the input variable chksymbreak,',ch10,&
                'You might switch it to zero, or change your k point grid to one that is symmetric.'
-               MSG_ERROR(message)
+               MSG_ERROR(msg)
              end if
 
            end if ! End condition of non-identity symmetry
@@ -351,8 +351,8 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      end do ! ikpt2
    end do ! ikpt
 
-   ABI_DEALLOCATE(length2)
-   ABI_DEALLOCATE(list)
+   ABI_FREE(length2)
+   ABI_FREE(list)
    !call cwtime_report("symkpt: loop", cpu, wall, gflops)
  end if ! End check on possibility of change
 
@@ -384,10 +384,10 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
  if(iout/=0)then
    if(nkbz/=nkibz)then
-     write(message, '(a,a,a,i6,a)' )&
+     write(msg, '(a,a,a,i6,a)' )&
      ' symkpt : the number of k-points, thanks to the symmetries,',ch10,' is reduced to',nkibz,' .'
-     call wrtout(iout,message,'COLL')
-     if(iout/=std_out) call wrtout(std_out,message,'COLL')
+     call wrtout(iout,msg)
+     if(iout/=std_out) call wrtout(std_out,msg)
 
      nkpout=nkibz
      !if (nkibz>80) then
@@ -395,21 +395,21 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      !  nkpout=20
      !end if
      !do ii=1,nkpout
-     !  write(message, '(1x,i2,a2,3es16.8)' ) ii,') ',kbz(1:3,ibz2bz(ii))
-     !  call wrtout(std_out,message,'COLL')
+     !  write(msg, '(1x,i2,a2,3es16.8)' ) ii,') ',kbz(1:3,ibz2bz(ii))
+     !  call wrtout(std_out,msg)
      !end do
 
      !DEBUG
-     !call wrtout(std_out,'   Here are the new weights :','COLL')
+     !call wrtout(std_out,'   Here are the new weights :')
      !do ikpt=1,nkbz,6
-     !  write(message, '(6f12.6)' ) wtk_folded(ikpt:min(nkbz,ikpt+5))
-     !  call wrtout(std_out,message,'COLL')
+     !  write(msg, '(6f12.6)' ) wtk_folded(ikpt:min(nkbz,ikpt+5))
+     !  call wrtout(std_out,msg)
      !end do
      !ENDDEBUG
    else
-     write(message, '(a)' )' symkpt : not enough symmetry to change the number of k points.'
-     call wrtout(iout,message,'COLL')
-     if (iout/=std_out) call wrtout(std_out,message,'COLL')
+     write(msg, '(a)' )' symkpt : not enough symmetry to change the number of k points.'
+     call wrtout(iout,msg)
+     if (iout/=std_out) call wrtout(std_out,msg)
    end if
  end if
 
@@ -432,8 +432,10 @@ end subroutine symkpt
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_kpts,m_lgroup,m_unittests
 !!
 !! CHILDREN
+!!      krank%free,wrtout
 !!
 !! SOURCE
 
@@ -455,7 +457,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  integer :: identi,ii,ikpt,ikibz,ikpt_found
  integer :: isym,itim,jj,nkpout,tident
  !real(dp) :: cpu, gflops, wall
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: ksym(3),kpt1(3)
 
@@ -465,8 +467,8 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  ABI_UNUSED(gmet)
 
  if (timrev/=1 .and. timrev/=0) then
-   write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
-   MSG_BUG(message)
+   write(msg,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
+   MSG_BUG(msg)
  end if
 
  ! Find the identity symmetry operation
@@ -483,8 +485,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
      end do
      if(tident==1)then
        identi=isym
-       !write(message, '(a,i0)' )' symkpt : found identity, with number',identi
-       !call wrtout(std_out,message,'COLL')
+       !call wrtout(std_out, sjoin(' symkpt_new: found identity, with number: ',itoa(identi)))
        exit
      end if
    end do
@@ -534,7 +535,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
            !end if
            !if k-point not found
            if (ikpt_found < 0) then
-             write(message,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
+             write(msg,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
              'Chksymbreak=1. It has been observed that the k point grid is not symmetric:',ch10,&
              'for the symmetry number: ',isym,ch10,&
              'with symrec= ',symrec(1:3,1:3,isym),ch10,&
@@ -542,7 +543,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
              'does not belong to the k point grid.',ch10,&
              'Read the description of the input variable chksymbreak,',ch10,&
              'You might switch it to zero, or change your k point grid to one that is symmetric.'
-             MSG_ERROR(message)
+             MSG_ERROR(msg)
            end if
          end do ! itim
        end do ! isym
@@ -578,7 +579,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
          !  MSG_ERROR('Wrong k-point mapping found by krank')
          !end if
          if (ikpt_found >= ikpt) cycle
-         bz2ibz_smap(:3, ikpt)  = [ikpt_found,isym,itim]
+         bz2ibz_smap(:3, ikpt)  = [ikpt_found, isym, itim]
          bz2ibz_smap(4,ikpt) = bz2ibz_smap(4,ikpt) + bz2ibz_smap(4,ikpt_found)
          bz2ibz_smap(4,ikpt_found) = 0
        end do ! itim
@@ -618,12 +619,17 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
                                kpt1(3)*symrec(ii,3,isym) )
        end do
 
-       !find this point
+       ! Find this point
        ikpt_found = krank%get_index(ksym)
        if (ikpt_found < 0) cycle
        if (bz2ibz_smap(1, ikpt_found) /= 0) cycle
-       bz2ibz_smap(:3, ikpt_found) = [ikpt,isym,itim]
+       bz2ibz_smap(:3, ikpt_found) = [ikpt, isym, itim]
        bz2ibz_smap(4:, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
+
+       ! TODO: Use same conventions as in listkk but must propagate the changes!
+       !bz2ibz_smap(1:2, ikpt_found) = [ikpt, isym]
+       !bz2ibz_smap(3:5, ikpt_found) = nint(-ksym + kbz(:,ikpt_found)  + tol12)
+       !bz2ibz_smap(6, ikpt_found) = itim
      end do
    end do
  end do
@@ -631,9 +637,9 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 
  call krank%free()
 
- !Here I make a check if the mapping was sucessfull
+ ! Check whether the mapping was sucessfull
  if (any(bz2ibz_smap(1, :) == 0)) then
-   MSG_ERROR('Could not find mapping BZ to IBZ')
+   MSG_ERROR('Could not initial mapping BZ to IBZ. Perhaps your grid breaks the symmetry of the lattice!')
  end if
 
  !do ikpt=1,nkbz
@@ -642,16 +648,16 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
 
  if(iout/=0)then
    if(nkbz/=nkibz)then
-     write(message, '(a,a,a,i6,a)' )&
+     write(msg, '(a,a,a,i6,a)' )&
      ' symkpt_new : the number of k-points, thanks to the symmetries,',ch10,' is reduced to',nkibz,' .'
-     call wrtout(iout,message,'COLL')
-     if(iout/=std_out) call wrtout(std_out,message,'COLL')
+     call wrtout(iout,msg)
+     if(iout/=std_out) call wrtout(std_out,msg)
 
      nkpout=nkibz
    else
-     write(message, '(a)' )' symkpt_new : not enough symmetry to change the number of k points.'
-     call wrtout(iout,message,'COLL')
-     if (iout/=std_out) call wrtout(std_out,message,'COLL')
+     write(msg, '(a)' )' symkpt_new : not enough symmetry to change the number of k points.'
+     call wrtout(iout,msg)
+     if (iout/=std_out) call wrtout(std_out,msg)
    end if
  end if
 

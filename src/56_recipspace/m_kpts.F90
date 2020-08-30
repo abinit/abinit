@@ -37,7 +37,7 @@ module m_kpts
  use m_time,           only : cwtime, cwtime_report
  use m_copy,           only : alloc_copy
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
- use m_fstrings,       only : sjoin, itoa, ltoa
+ use m_fstrings,       only : sjoin, itoa, ltoa, ktoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_symkpt,         only : symkpt, symkpt_new
@@ -131,15 +131,16 @@ end function kpts_timrev_from_kptopt
 !!  [bz2ibz(6,nkbz)]=Mapping BZ --> IBZ
 !!
 !! PARENTS
-!!      m_dvdb,m_ebands,m_gruneisen,m_ifc,m_kpts,m_phgamma,m_phonons,m_sigmaph
+!!      abitk,m_dvdb,m_ebands,m_ephwg,m_gruneisen,m_ifc,m_kpts,m_phgamma
+!!      m_phonons,m_sigmaph,m_sigtk,m_unittests
 !!
 !! CHILDREN
-!!      getkgrid,kpts_ibz_from_kptrlatt,listkk
+!!      wrtout
 !!
 !! SOURCE
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
+                                  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -169,7 +170,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
  ! Copy kptrlatt and shifts because getkgrid can change them
  ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
- ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be between 1 and", itoa(MAX_NSHIFTK)))
+ ABI_CHECK_IRANGE(nshiftk, 1, MAX_NSHIFTK, "Invalid value of nshiftk")
  my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
  my_kptrlatt = kptrlatt
 
@@ -486,8 +487,6 @@ end function symkchk
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
 !!  comm=MPI communicator.
-!!  [exit_loop]: if present and True, exit the loop over k-points in the sphere as soon as the lenght**2 of the
-!!    difference vector is smaller than tol12. Default: False
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT
@@ -512,22 +511,23 @@ end function symkchk
 !!  the comparison of the squared lengths of the separate vectors.
 !!
 !! PARENTS
-!!      initberry,initorbmag,inwffil,m_dvdb,m_ebands,m_eprenorms,m_exc_diago
-!!      m_fock,m_fstab,m_haydock,m_ifc,m_kpts,m_phgamma,m_sigmaph,mlwfovlp_qp
+!!      m_berryphase_new,m_dvdb,m_ebands,m_eph_double_grid,m_ephwg,m_eprenorms
+!!      m_exc_diago,m_fock,m_fstab,m_haydock,m_inwffil,m_lgroup,m_mlwfovlp_qp
+!!      m_orbmag,m_phgamma,m_rta,m_sigmaph,m_sigtk,m_unittests
 !!
 !! CHILDREN
-!!      sort_dp,timab
+!!      wrtout
 !!
 !! SOURCE
 
-subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
-                  exit_loop, use_symrec) ! optional
+subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppoldbl, symafm, symmat, timrev, comm, &
+                  use_symrec) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt1,nkpt2,nsym,sppoldbl,timrev,comm
  real(dp),intent(out) :: dksqmax
- logical,optional,intent(in) :: use_symrec, exit_loop
+ logical,optional,intent(in) :: use_symrec
 !arrays
  integer,intent(in) :: symafm(nsym),symmat(3,3,nsym)
  integer,intent(out) :: indkk(nkpt2*sppoldbl,6)
@@ -700,7 +700,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
          ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
          do itimrev=0,timrev_used
            do isym=1,nsym_used
-           !do itimrev=0,timrev_used
 
              ! Select magnetic characteristic of symmetries
              if (isppol == 1 .and. symafm(isym) == -1) cycle
@@ -745,13 +744,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
                ! Note that in this condition, each coordinate is tested separately, without squaring.
                ! So, it is a much stronger condition than dksqmn < tol12
                if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done = 1
-
-               ! This line leads to a significant speedup for dense meshes but ~30 tests fail after this change.
-               if (present(exit_loop)) then
-                 if (exit_loop) then
-                   if (dksq < tol12) ikpt2_done = 1
-                 end if
-               end if
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
@@ -900,11 +892,11 @@ end subroutine listkk
 !! [nkpthf] = number of k points in the full BZ, for the Fock operator.
 !!
 !! PARENTS
-!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
-!!      nonlinear,testkgrid,thmeig
+!!      m_ab7_kpoints,m_bz_mesh,m_elphon,m_getshell,m_inkpts,m_kpts,m_nonlinear
+!!      m_thmeig
 !!
 !! CHILDREN
-!!      mati3inv,matr3inv,metric,smallprim,smpbz,symkpt
+!!      wrtout
 !!
 !! SOURCE
 
@@ -998,11 +990,10 @@ end subroutine getkgrid
 !! [nkpthf] = number of k points in the full BZ, for the Fock operator.
 !!
 !! PARENTS
-!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
-!!      nonlinear,testkgrid,thmeig
+!!      m_kpts
 !!
 !! CHILDREN
-!!      mati3inv,matr3inv,metric,smallprim,smpbz,symkpt
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1403,7 +1394,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 #endif
 
  else if(kptopt==3)then
-   ABI_CALLOC(bz2ibz_smap, (6, nkpt_fullbz))
+   ABI_ICALLOC(bz2ibz_smap, (6, nkpt_fullbz))
    bz2ibz_smap(1,:) = [(ii,ii=1,nkpt_fullbz)]
    bz2ibz_smap(2,:) = 1 !isym
    nkpt_computed=nkpt_fullbz
@@ -1501,10 +1492,9 @@ end subroutine getkgrid_low
 !! TODO: This routine should be removed
 !!
 !! PARENTS
-!!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_kpt_fullbz,get_rank_1kpt,mati3inv,mkkptrank
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1587,10 +1577,10 @@ end subroutine get_full_kgrid
 !!  kpt_fullbz(3,nkpt_fullbz)=kpoints in full brillouin zone
 !!
 !! PARENTS
-!!      get_full_kgrid,invars2
+!!      m_kpts
 !!
 !! CHILDREN
-!!      mati3det,matr3inv,wrap2_pmhalf
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1757,11 +1747,11 @@ end subroutine get_kpt_fullbz
 !!  R.A. Evarestov and V.P. Smirnov, Phys. Stat. Sol. (b) 119, 9 (1983) [[cite:Evarestov1983]]
 !!
 !! PARENTS
-!!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,initorbmag,m_fstab,m_ifc
-!!      m_tdep_abitypes
+!!      m_berryphase_new,m_elphon,m_fstab,m_harmonic_thermo,m_ifc,m_kpts
+!!      m_orbmag,m_tdep_abitypes
 !!
 !! CHILDREN
-!!      matr3inv,wrap2_pmhalf,wrtout
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2319,10 +2309,10 @@ end subroutine smpbz
 !! Note that kptopt is always =1 in this routine.
 !!
 !! PARENTS
-!!      inkpts,m_ab7_kpoints
+!!      m_ab7_kpoints,m_inkpts
 !!
 !! CHILDREN
-!!      getkgrid,abi_abort,matr3inv,metric,smallprim,wrtout,xmpi_abort
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2998,7 +2988,7 @@ end subroutine testkgrid
 !!  Do not use this routine, it is obsolete and should be replaced by make_path in m_bz_mesh.
 !!
 !! PARENTS
-!!      inkpts
+!!      m_inkpts
 !!
 !! CHILDREN
 !!      wrtout

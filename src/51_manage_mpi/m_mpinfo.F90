@@ -122,7 +122,7 @@ CONTAINS  !=====================================================================
 !!  MPI_enreg<MPI_type>=All pointer set to null().
 !!
 !! PARENTS
-!!      lapackprof,mpi_setup
+!!      lapackprof,m_mpi_setup
 !!
 !! CHILDREN
 !!
@@ -161,7 +161,7 @@ end subroutine init_mpi_enreg
 !!  MPI_enreg<MPI_type>=All pointer set to null().
 !!
 !! PARENTS
-!!      initmpi_seq,m_fft_prof,m_wfd
+!!      m_fft_prof,m_mpinfo
 !!
 !! CHILDREN
 !!
@@ -196,13 +196,13 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 !!  MPI_enreg<MPI_type>=Datatype gathering information on the parallelism.
 !!
 !! PARENTS
-!!      abinit,bethe_salpeter,bsepostproc,calc_vhxc_me,conducti,cut3d
-!!      debug_tools,dfpt_nstpaw,dieltcel,eph,fftprof,gwls_hamiltonian,inwffil
-!!      ks_ddiago,lapackprof,linear_optics_paw,m_cut3d,m_dvdb,m_fft,m_fft_prof
-!!      m_fftcore,m_fock,m_gsphere,m_hamiltonian,m_ioarr,m_kxc,m_pawpwij
-!!      m_ppmodel,m_screening,m_wfd,m_wfk,mlwfovlp_qp,mover_effpot,mrggkk
-!!      mrgscr,partial_dos_fractions,posdoppler,scfcv,screening,sigma
-!!      suscep_stat,susk,suskmm,ujdet,vdw_kernelgen,wfk_analyze
+!!      abinit,conducti,cut3d,fftprof,lapackprof,m_bethe_salpeter,m_cut3d,m_ddk
+!!      m_dfpt_nstwf,m_dvdb,m_eph_driver,m_epjdos,m_fft,m_fft_prof,m_fftcore
+!!      m_fock,m_gsphere,m_gwls_hamiltonian,m_inwffil,m_ioarr,m_ksdiago,m_kxc
+!!      m_mlwfovlp_qp,m_mover_effpot,m_paw_optics,m_pawpwij,m_positron
+!!      m_ppmodel,m_prcref,m_scfcv_core,m_screening,m_screening_driver
+!!      m_sigma_driver,m_suscep_stat,m_vhxc_me,m_wfd,m_wfk,m_wfk_analyze,mrgscr
+!!      ujdet
 !!
 !! CHILDREN
 !!
@@ -259,7 +259,7 @@ end subroutine destroy_mpi_enreg
 !!  MPI_enreg2<MPI_type>=output mpi_enreg datastructure
 !!
 !! PARENTS
-!!      gwls_hamiltonian,inwffil,m_fft_prof,m_fock,m_wfd
+!!      m_fft_prof,m_fock,m_gwls_hamiltonian,m_inwffil,m_wfd
 !!
 !! CHILDREN
 !!
@@ -431,7 +431,7 @@ end subroutine copy_mpi_enreg
 !!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
 !!
 !! PARENTS
-!!      atm2fft,dfpt_atm2fft,pawmknhat,pawmknhat_psipsi,pawsushat,posdoppler
+!!      m_atm2fft,m_paw_nhat,m_positron
 !!
 !! CHILDREN
 !!
@@ -477,7 +477,7 @@ end subroutine set_mpi_enreg_fft
 !!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
 !!
 !! PARENTS
-!!      atm2fft,dfpt_atm2fft,pawmknhat,pawmknhat_psipsi,pawsushat,posdoppler
+!!      m_atm2fft,m_paw_nhat,m_positron
 !!
 !! CHILDREN
 !!
@@ -528,11 +528,9 @@ end subroutine unset_mpi_enreg_fft
 !!  ffti3_local(:) = local i3 indices in fourdp
 !!
 !! PARENTS
-!!      dfpt_eltfrhar,dfpt_eltfrloc,dfpt_vlocal,fftpac,fourdp,hartre,hartrestr
-!!      indirect_parallel_Fourier,initro,laplacian,m_fock,m_ioarr,mag_penalty
-!!      make_efg_el,mkcore,mkcore_paw,mklocl_realspace,mklocl_recipspace
-!!      moddiel,out1dm,posdoppler,prcrskerker2,strhar,symrhg,vlocalstr,xcden
-!!      xcpot
+!!      m_dens,m_dfpt_elt,m_fft,m_fock,m_ioarr,m_mkcore,m_mklocl
+!!      m_mklocl_realspace,m_mkrho,m_multipoles,m_nucprop,m_positron,m_prcref
+!!      m_spacepar,m_stress,m_xctk
 !!
 !! CHILDREN
 !!
@@ -611,7 +609,7 @@ end subroutine ptabs_fourdp
 !!  ffti3_local(:) = local i3 indices in fourwf
 !!
 !! PARENTS
-!!      fourwf
+!!      m_fft
 !!
 !! CHILDREN
 !!
@@ -962,10 +960,9 @@ end subroutine proc_distrb_band
 !! OUTPUT
 !!
 !! PARENTS
-!!      finddistrproc
+!!      m_mpi_setup
 !!
 !! CHILDREN
-!!      abi_io_redirect,libpaw_write_comm_set
 !!
 !! SOURCE
 
@@ -1019,16 +1016,14 @@ end subroutine initmpi_world
 !!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
-!!      atm2fft,bethe_salpeter,bsepostproc,calc_vhxc_me,cut3d,debug_tools
-!!      dfpt_atm2fft,dfpt_nstpaw,dieltcel,eph,fftprof,ks_ddiago
-!!      linear_optics_paw,m_cut3d,m_dvdb,m_fft,m_fft_prof,m_fftcore,m_gsphere
-!!      m_hamiltonian,m_ioarr,m_kxc,m_mpinfo,m_pawpwij,m_ppmodel,m_screening
-!!      m_wfd,m_wfk,mlwfovlp_qp,mrggkk,mrgscr,partial_dos_fractions,pawmknhat
-!!      pawmknhat_psipsi,pawsushat,posdoppler,scfcv,screening,sigma,suscep_stat
-!!      susk,suskmm,ujdet,vdw_kernelgen,wfk_analyze
+!!      cut3d,fftprof,m_atm2fft,m_bethe_salpeter,m_cut3d,m_ddk,m_dfpt_nstwf
+!!      m_dvdb,m_eph_driver,m_epjdos,m_fft,m_fft_prof,m_fftcore,m_gsphere
+!!      m_ioarr,m_ksdiago,m_kxc,m_mlwfovlp_qp,m_mpinfo,m_paw_nhat,m_paw_optics
+!!      m_pawpwij,m_positron,m_ppmodel,m_prcref,m_scfcv_core,m_screening
+!!      m_screening_driver,m_sigma_driver,m_suscep_stat,m_vhxc_me,m_wfd,m_wfk
+!!      m_wfk_analyze,mrgscr,ujdet
 !!
 !! CHILDREN
-!!      nullify_mpi_enreg
 !!
 !! SOURCE
 
@@ -1128,10 +1123,9 @@ end subroutine initmpi_seq
 !!    my_atmtab(mpi_enreg%natom)=indexes of the atoms treated by current processor
 !!
 !! PARENTS
-!!      m_paral_pert,mpi_setup
+!!      m_mpi_setup,m_paral_pert
 !!
 !! CHILDREN
-!!      get_my_atmtab,get_my_natom
 !!
 !! SOURCE
 
@@ -1290,11 +1284,9 @@ end subroutine clnmpi_atom
 !! OUTPUT
 !!
 !! PARENTS
-!!      mpi_setup
+!!      m_mpi_setup
 !!
 !! CHILDREN
-!!      mpi_cart_coords,mpi_cart_create,mpi_cart_sub,mpi_comm_rank,wrtout
-!!      xmpi_abort,xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1668,10 +1660,9 @@ end subroutine clnmpi_grid
 !!    mpi_enreg%distrb_img(:)=index of processor treating each image (in comm_img communicator)
 !!
 !! PARENTS
-!!      mpi_setup
+!!      m_mpi_setup
 !!
 !! CHILDREN
-!!      sort_int
 !!
 !! SOURCE
 
@@ -2033,10 +2024,9 @@ end subroutine clnmpi_img
 !!  mpi_enreg=information about MPI parallelization
 !!
 !! PARENTS
-!!      mpi_setup
+!!      m_mpi_setup
 !!
 !! CHILDREN
-!!      get_npert_rbz,xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2199,7 +2189,7 @@ end subroutine clnmpi_pert
 !!  mpi_enreg%comm_band=communicator of BAND set
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert,m_dfpt_lw
 !!
 !! CHILDREN
 !!
@@ -2358,7 +2348,7 @@ end subroutine initmpi_band
 !!  array_allgather= gathered data
 !!
 !! PARENTS
-!!      fresid
+!!      m_forces
 !!
 !! CHILDREN
 !!
@@ -2403,7 +2393,7 @@ end subroutine pre_gather
 !!  array= scattered data
 !!
 !! PARENTS
-!!      fresid
+!!      m_forces
 !!
 !! CHILDREN
 !!
@@ -2491,7 +2481,7 @@ end function iwrite_fftdatar
 !!  present computation of k+G sphere, independent of the spin.
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2stern,eig2tot,mpi_setup
+!!      m_dfpt_looppert,m_dfpt_lw,m_eig2d,m_mpi_setup
 !!
 !! CHILDREN
 !!
@@ -2829,7 +2819,7 @@ end subroutine distrb2
 !!  present computation of k+G sphere, independent of the spin.
 !!
 !! PARENTS
-!!      mpi_setup
+!!      m_mpi_setup
 !!
 !! CHILDREN
 !!

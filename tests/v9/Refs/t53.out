@@ -1,5 +1,5 @@
 
-.Version 9.1.5 of ABINIT 
+.Version 9.1.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h47 )
+.Starting date : Thu 13 Aug 2020.
+- ( at 17h42 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t53.in
 - output file    -> t53.out
@@ -211,9 +211,9 @@ meta: {optdriver: 7, eph_task: -4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t53o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t53o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -226,38 +226,10 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -273,6 +245,23 @@ All the independent perturbations are available
 
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000    15.265     2.465     2.053
+ 300.0     0.026    15.169     2.369     2.148
+
+
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -299,6 +288,7 @@ All the independent perturbations are available
    6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   2    6
    7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   2    6
    8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   2    6
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
@@ -309,6 +299,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 8 of 8
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -335,9 +326,17 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2  12.800   -0.334      1.0    0.000
+   3  12.800   -0.334      1.0    0.000
+   4  12.800   -0.334      1.0    0.000
+   5  18.426   -0.316      1.0    5.626
+   6  18.426   -0.316      1.0    0.000
+ 
+ KS gap:    5.626 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   6.210   -0.225      1.5    0.000
@@ -345,6 +344,17 @@ K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    4  11.056   -0.438      0.8    0.000
    5  20.688   -0.753      0.4    9.632
    6  20.688   -0.753      0.4    0.000
+ 
+ KS gap:    9.632 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
+K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   6.210   -0.232      1.4    0.000
+   3  11.056   -0.442      0.7    4.846
+   4  11.056   -0.442      0.7    0.000
+   5  20.688   -0.768      0.4    9.632
+   6  20.688   -0.768      0.4    0.000
  
  KS gap:    9.632 (assuming bval:4 ==> bcond:5)
  
@@ -360,6 +370,17 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2  -0.746   -0.102      3.2    0.000
+   3   9.967   -0.478      0.7   10.714
+   4   9.967   -0.478      0.7    0.000
+   5  21.328   -1.035      0.3   11.360
+   6  21.328   -1.035      0.3    0.000
+ 
+ KS gap:   11.360 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   8.403   -0.606      0.5    0.000
@@ -367,6 +388,17 @@ K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    4   8.627   -0.199      1.7    0.000
    5  17.318   -0.016     20.2    8.690
    6  23.137   -1.857      0.2    5.820
+ 
+ KS gap:    8.690 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
+K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   8.403   -0.609      0.5    0.000
+   3   8.627   -0.201      1.6    0.224
+   4   8.627   -0.201      1.6    0.000
+   5  17.318   -0.016     20.0    8.690
+   6  23.137   -1.891      0.2    5.820
  
  KS gap:    8.690 (assuming bval:4 ==> bcond:5)
  
@@ -382,6 +414,17 @@ K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
  KS gap:   11.074 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   1.990   -0.247      1.3    0.000
+   3   6.030   -0.738      0.4    4.040
+   4   7.856   -0.248      1.3    1.826
+   5  18.930   -0.308      1.1   11.074
+   6  24.324   -0.725      0.5    5.394
+ 
+ KS gap:   11.074 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   4.137   -0.502      0.7    0.000
@@ -389,6 +432,17 @@ K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    4   9.771   -0.245      1.3    4.668
    5  20.822   -0.206      1.6   11.050
    6  22.959   -0.533      0.6    2.137
+ 
+ KS gap:   11.050 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
+K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   4.137   -0.507      0.6    0.000
+   3   5.103   -0.054      6.1    0.966
+   4   9.771   -0.246      1.3    4.668
+   5  20.822   -0.207      1.6   11.050
+   6  22.959   -0.555      0.6    2.137
  
  KS gap:   11.050 (assuming bval:4 ==> bcond:5)
  
@@ -404,6 +458,17 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
  KS gap:   11.187 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   0.073   -0.253      1.3    0.000
+   3   6.408   -0.074      4.5    6.335
+   4   6.408   -0.074      4.5    0.000
+   5  17.595   -0.275      1.2   11.187
+   6  17.595   -0.275      1.2    0.000
+ 
+ KS gap:   11.187 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    5.0 [K], mu_e:   15.265
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   0.933   -0.119      2.8    0.000
@@ -415,75 +480,17 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    5.0 [K], mu_e:   15.265
  KS gap:   19.109 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-
- Entering transport RTA computation driver.
-- Reading carrier lifetimes from: t53o_DS1_SIGEPH.nc
-
-
-
-  >>>> For spin  1
-   Minimum direct gap =   5.63 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   4.52 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-   Valence Max:     12.80 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:  17.32 (eV) at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-
-
-
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
- Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
- Number of k-points in the IBZ: 8
- Fermi level:   1.23189641E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   9.14819245E-03
- Total number of electrons at eF:    8.0
-
-
- Transport (RTA) calculation results:
-
-Cartesian component of SERTA mobility tensor: xx
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00          122.77            0.00
-
-
-Cartesian component of SERTA mobility tensor: yy
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00          122.77            0.00
-
-
-Cartesian component of SERTA mobility tensor: zz
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00          122.77            0.00
-
-
-
-
-Cartesian component of MRTA mobility tensor: xx
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00           65.95            0.00
-
-
-Cartesian component of MRTA mobility tensor: yy
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00           65.95            0.00
-
-
-Cartesian component of MRTA mobility tensor: zz
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00           65.95            0.00
-
-
-
-
-
-- Writing RTA transport results to: t53o_DS1_RTA.nc
+K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   0.933   -0.120      2.8    0.000
+   3   4.309   -0.096      3.4    3.376
+   4   4.309   -0.096      3.4    0.000
+   5  23.418   -0.536      0.6   19.109
+   6  23.418   -0.536      0.6    0.000
+ 
+ KS gap:   19.109 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -521,9 +528,9 @@ meta: {optdriver: 7, eph_task: -4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t53o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t53o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -536,35 +543,24 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000    15.265     2.465     2.053
+ 300.0     0.026    15.169     2.369     2.148
+
+
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -591,6 +587,7 @@ All the independent perturbations are available
    6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   2    6
    7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    6
    8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   1    6
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
 P Number of CPUs for parallelism over perturbations: 1
@@ -601,6 +598,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 8 of 8
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -628,9 +626,18 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2  12.800   -0.334      1.0    0.000
+   3  12.800   -0.334      1.0    0.000
+   4  12.800   -0.334      1.0    0.000
+   5  18.426   -0.316      1.0    5.626
+   6  18.426   -0.316      1.0    0.000
+   7  18.426   -0.316      1.0    0.000
+ 
+ KS gap:    5.626 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   6.210   -0.225      1.5    0.000
@@ -638,6 +645,17 @@ K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    4  11.056   -0.438      0.8    0.000
    5  20.688   -0.753      0.4    9.632
    6  20.688   -0.753      0.4    0.000
+ 
+ KS gap:    9.632 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
+K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   6.210   -0.232      1.4    0.000
+   3  11.056   -0.442      0.7    4.846
+   4  11.056   -0.442      0.7    0.000
+   5  20.688   -0.768      0.4    9.632
+   6  20.688   -0.768      0.4    0.000
  
  KS gap:    9.632 (assuming bval:4 ==> bcond:5)
  
@@ -653,6 +671,17 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2  -0.746   -0.102      3.2    0.000
+   3   9.967   -0.478      0.7   10.714
+   4   9.967   -0.478      0.7    0.000
+   5  21.328   -1.035      0.3   11.360
+   6  21.328   -1.035      0.3    0.000
+ 
+ KS gap:   11.360 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   8.403   -0.606      0.5    0.000
@@ -660,6 +689,17 @@ K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    4   8.627   -0.199      1.7    0.000
    5  17.318   -0.016     20.2    8.690
    6  23.137   -1.857      0.2    5.820
+ 
+ KS gap:    8.690 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
+K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   8.403   -0.609      0.5    0.000
+   3   8.627   -0.201      1.6    0.224
+   4   8.627   -0.201      1.6    0.000
+   5  17.318   -0.016     20.0    8.690
+   6  23.137   -1.891      0.2    5.820
  
  KS gap:    8.690 (assuming bval:4 ==> bcond:5)
  
@@ -675,6 +715,17 @@ K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
  KS gap:   11.074 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   1.990   -0.247      1.3    0.000
+   3   6.030   -0.738      0.4    4.040
+   4   7.856   -0.248      1.3    1.826
+   5  18.930   -0.308      1.1   11.074
+   6  24.324   -0.725      0.5    5.394
+ 
+ KS gap:   11.074 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2   4.137   -0.502      0.7    0.000
@@ -682,6 +733,17 @@ K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
    4   9.771   -0.245      1.3    4.668
    5  20.822   -0.206      1.6   11.050
    6  22.959   -0.533      0.6    2.137
+ 
+ KS gap:   11.050 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
+K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2   4.137   -0.507      0.6    0.000
+   3   5.103   -0.054      6.1    0.966
+   4   9.771   -0.246      1.3    4.668
+   5  20.822   -0.207      1.6   11.050
+   6  22.959   -0.555      0.6    2.137
  
  KS gap:   11.050 (assuming bval:4 ==> bcond:5)
  
@@ -698,6 +760,18 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:   15.265
  KS gap:   11.187 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   1   0.073   -0.253      1.3    0.000
+   2   0.073   -0.253      1.3    0.000
+   3   6.408   -0.074      4.5    6.335
+   4   6.408   -0.074      4.5    0.000
+   5  17.595   -0.275      1.2   11.187
+   6  17.595   -0.275      1.2    0.000
+ 
+ KS gap:   11.187 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    5.0 [K], mu_e:   15.265
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1   0.933   -0.119      2.8    0.000
@@ -710,75 +784,18 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    5.0 [K], mu_e:   15.265
  KS gap:   19.109 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-
- Entering transport RTA computation driver.
-- Reading carrier lifetimes from: t53o_DS2_SIGEPH.nc
-
-
-
-  >>>> For spin  1
-   Minimum direct gap =   5.63 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   4.52 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-   Valence Max:     12.80 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:  17.32 (eV) at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-
-
-
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
- Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
- Number of k-points in the IBZ: 8
- Fermi level:   1.23189641E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   9.14819245E-03
- Total number of electrons at eF:    8.0
-
-
- Transport (RTA) calculation results:
-
-Cartesian component of SERTA mobility tensor: xx
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00          122.77            0.00
-
-
-Cartesian component of SERTA mobility tensor: yy
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00          122.77            0.00
-
-
-Cartesian component of SERTA mobility tensor: zz
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00          122.77            0.00
-
-
-
-
-Cartesian component of MRTA mobility tensor: xx
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00           65.95            0.00
-
-
-Cartesian component of MRTA mobility tensor: yy
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00           65.95            0.00
-
-
-Cartesian component of MRTA mobility tensor: zz
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.14E-13        0.00E+00           65.95            0.00
-
-
-
-
-
-- Writing RTA transport results to: t53o_DS2_RTA.nc
+K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:  300.0 [K], mu_e:   15.169
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   1   0.933   -0.120      2.8    0.000
+   2   0.933   -0.120      2.8    0.000
+   3   4.309   -0.096      3.4    3.376
+   4   4.309   -0.096      3.4    0.000
+   5  23.418   -0.536      0.6   19.109
+   6  23.418   -0.536      0.6    0.000
+ 
+ KS gap:   19.109 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -970,10 +987,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         11.2  wall=         13.4
+- Proc.   0 individual time (sec): cpu=          3.3  wall=         10.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.2  wall=         13.4
+.Delivered   5 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.3  wall=         10.5

@@ -56,11 +56,11 @@ contains
   !! OUTPUT
   !!
   !! PARENTS
-  !!
-  !!
+!!      multibinit
+!!
   !! CHILDREN
-  !!
-  !!
+!!      manager%run_all
+!!
   !! SOURCE
   subroutine multibinit_main2(filnam)
     character(len=fnlen), intent(inout) :: filnam(17)

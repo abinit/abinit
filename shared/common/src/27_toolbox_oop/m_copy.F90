@@ -1183,6 +1183,7 @@ end subroutine alloc_copy_int3d
 !! PARENTS
 !!
 !! CHILDREN
+!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1218,6 +1219,7 @@ end subroutine alloc_copy_int4d_1b
 !! PARENTS
 !!
 !! CHILDREN
+!!      c_f_pointer
 !!
 !! SOURCE
 

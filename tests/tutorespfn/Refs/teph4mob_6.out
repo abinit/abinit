@@ -1,5 +1,5 @@
 
-.Version 9.1.5 of ABINIT 
+.Version 9.1.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h50 )
+.Starting date : Thu 13 Aug 2020.
+- ( at 17h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.in
 - output file    -> teph4mob_6.out
@@ -443,16 +443,16 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
-         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         1    2.115792E+00   -9.041670E-17   -9.045344E-17
+         1         2   -9.041670E-17    2.115792E+00    9.037996E-17
          1         3    9.041670E-17    9.041670E-17    2.115792E+00
-         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
-         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         1   -2.115792E+00    9.041670E-17    9.045344E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.037996E-17
          2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -529,53 +529,6 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS1_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
@@ -591,8 +544,8 @@ All the independent perturbations are available
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -608,6 +561,27 @@ All the independent perturbations are available
 
    2.28550852E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.523     1.166     0.003
+  64.0     0.006     3.492     1.136     0.033
+ 123.0     0.011     3.461     1.104     0.065
+ 182.0     0.016     3.428     1.072     0.097
+ 241.0     0.021     3.393     1.036     0.133
+ 300.0     0.026     3.355     0.998     0.171
+
+
 
  Number of bands in e-ph self-energy sum: 1
  From bsum_start: 5 to bsum_stop: 5
@@ -631,6 +605,7 @@ All the independent perturbations are available
    1     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
    2     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -641,6 +616,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
  Final results in eV.
@@ -658,18 +634,75 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31934.9    0.000
+   5   3.573    0.000  32634.9    0.000
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  10657.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2785.9    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    938.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    471.4    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    295.0    0.000
+============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    482.1    0.000
+   5   3.608    0.001    488.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    412.2    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    316.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    222.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    158.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    119.0    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783698.3    0.000
+   5   3.525    0.000 783227.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 582543.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  37737.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   9034.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4133.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2487.0    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -677,13 +710,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   2.36 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   1.17 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -696,66 +727,66 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.87            0.00
-          182.00        0.23E+17        0.00E+00          423.94            0.00
-          241.00        0.23E+17        0.00E+00          419.47            0.00
-          300.00        0.23E+17        0.00E+00          363.87            0.00
+           64.00        0.23E+17        0.00E+00           39.22            0.00
+          123.00        0.23E+17        0.00E+00          353.18            0.00
+          182.00        0.23E+17        0.00E+00          435.13            0.00
+          241.00        0.23E+17        0.00E+00          434.11            0.00
+          300.00        0.23E+17        0.00E+00          379.29            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.87            0.00
-          182.00        0.23E+17        0.00E+00          423.94            0.00
-          241.00        0.23E+17        0.00E+00          419.47            0.00
-          300.00        0.23E+17        0.00E+00          363.87            0.00
+           64.00        0.23E+17        0.00E+00           39.22            0.00
+          123.00        0.23E+17        0.00E+00          353.18            0.00
+          182.00        0.23E+17        0.00E+00          435.13            0.00
+          241.00        0.23E+17        0.00E+00          434.11            0.00
+          300.00        0.23E+17        0.00E+00          379.29            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.87            0.00
-          182.00        0.23E+17        0.00E+00          423.94            0.00
-          241.00        0.23E+17        0.00E+00          419.47            0.00
-          300.00        0.23E+17        0.00E+00          363.87            0.00
+           64.00        0.23E+17        0.00E+00           39.22            0.00
+          123.00        0.23E+17        0.00E+00          353.18            0.00
+          182.00        0.23E+17        0.00E+00          435.13            0.00
+          241.00        0.23E+17        0.00E+00          434.11            0.00
+          300.00        0.23E+17        0.00E+00          379.29            0.00
 
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.77            0.00
-          182.00        0.23E+17        0.00E+00          460.73            0.00
-          241.00        0.23E+17        0.00E+00          459.74            0.00
-          300.00        0.23E+17        0.00E+00          401.89            0.00
+           64.00        0.23E+17        0.00E+00           38.24            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
+          182.00        0.23E+17        0.00E+00          470.23            0.00
+          241.00        0.23E+17        0.00E+00          469.82            0.00
+          300.00        0.23E+17        0.00E+00          411.57            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.77            0.00
-          182.00        0.23E+17        0.00E+00          460.73            0.00
-          241.00        0.23E+17        0.00E+00          459.74            0.00
-          300.00        0.23E+17        0.00E+00          401.89            0.00
+           64.00        0.23E+17        0.00E+00           38.24            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
+          182.00        0.23E+17        0.00E+00          470.23            0.00
+          241.00        0.23E+17        0.00E+00          469.82            0.00
+          300.00        0.23E+17        0.00E+00          411.57            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.77            0.00
-          182.00        0.23E+17        0.00E+00          460.73            0.00
-          241.00        0.23E+17        0.00E+00          459.74            0.00
-          300.00        0.23E+17        0.00E+00          401.89            0.00
+           64.00        0.23E+17        0.00E+00           38.24            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
+          182.00        0.23E+17        0.00E+00          470.23            0.00
+          241.00        0.23E+17        0.00E+00          469.82            0.00
+          300.00        0.23E+17        0.00E+00          411.57            0.00
 
 
 
@@ -834,16 +865,16 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
-         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         1    2.115792E+00   -9.041670E-17   -9.045344E-17
+         1         2   -9.041670E-17    2.115792E+00    9.037996E-17
          1         3    9.041670E-17    9.041670E-17    2.115792E+00
-         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
-         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         1   -2.115792E+00    9.041670E-17    9.045344E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.037996E-17
          2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -920,54 +951,28 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS2_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.523     1.166     0.003
+  64.0     0.006     3.492     1.136     0.033
+ 123.0     0.011     3.461     1.104     0.065
+ 182.0     0.016     3.428     1.072     0.097
+ 241.0     0.021     3.393     1.036     0.133
+ 300.0     0.026     3.355     0.998     0.171
+
+
 
  Number of bands in e-ph self-energy sum: 1
  From bsum_start: 5 to bsum_stop: 5
@@ -991,6 +996,7 @@ All the independent perturbations are available
    1     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
    2     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -1001,6 +1007,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
  Final results in eV.
@@ -1018,18 +1025,75 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31934.9    0.000
+   5   3.573    0.000  32634.9    0.000
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  10657.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2785.9    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    938.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    471.4    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    295.0    0.000
+============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    482.1    0.000
+   5   3.608    0.001    488.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    412.2    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    316.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    222.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    158.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    119.0    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783698.3    0.000
+   5   3.525    0.000 783227.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 582543.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  37737.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   9034.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4133.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2487.0    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -1037,13 +1101,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   2.36 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   1.17 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1056,66 +1118,66 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.87            0.00
-          182.00        0.23E+17        0.00E+00          423.94            0.00
-          241.00        0.23E+17        0.00E+00          419.47            0.00
-          300.00        0.23E+17        0.00E+00          363.87            0.00
+           64.00        0.23E+17        0.00E+00           39.22            0.00
+          123.00        0.23E+17        0.00E+00          353.18            0.00
+          182.00        0.23E+17        0.00E+00          435.13            0.00
+          241.00        0.23E+17        0.00E+00          434.11            0.00
+          300.00        0.23E+17        0.00E+00          379.29            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.87            0.00
-          182.00        0.23E+17        0.00E+00          423.94            0.00
-          241.00        0.23E+17        0.00E+00          419.47            0.00
-          300.00        0.23E+17        0.00E+00          363.87            0.00
+           64.00        0.23E+17        0.00E+00           39.22            0.00
+          123.00        0.23E+17        0.00E+00          353.18            0.00
+          182.00        0.23E+17        0.00E+00          435.13            0.00
+          241.00        0.23E+17        0.00E+00          434.11            0.00
+          300.00        0.23E+17        0.00E+00          379.29            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.87            0.00
-          182.00        0.23E+17        0.00E+00          423.94            0.00
-          241.00        0.23E+17        0.00E+00          419.47            0.00
-          300.00        0.23E+17        0.00E+00          363.87            0.00
+           64.00        0.23E+17        0.00E+00           39.22            0.00
+          123.00        0.23E+17        0.00E+00          353.18            0.00
+          182.00        0.23E+17        0.00E+00          435.13            0.00
+          241.00        0.23E+17        0.00E+00          434.11            0.00
+          300.00        0.23E+17        0.00E+00          379.29            0.00
 
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.77            0.00
-          182.00        0.23E+17        0.00E+00          460.73            0.00
-          241.00        0.23E+17        0.00E+00          459.74            0.00
-          300.00        0.23E+17        0.00E+00          401.89            0.00
+           64.00        0.23E+17        0.00E+00           38.24            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
+          182.00        0.23E+17        0.00E+00          470.23            0.00
+          241.00        0.23E+17        0.00E+00          469.82            0.00
+          300.00        0.23E+17        0.00E+00          411.57            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.77            0.00
-          182.00        0.23E+17        0.00E+00          460.73            0.00
-          241.00        0.23E+17        0.00E+00          459.74            0.00
-          300.00        0.23E+17        0.00E+00          401.89            0.00
+           64.00        0.23E+17        0.00E+00           38.24            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
+          182.00        0.23E+17        0.00E+00          470.23            0.00
+          241.00        0.23E+17        0.00E+00          469.82            0.00
+          300.00        0.23E+17        0.00E+00          411.57            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.77            0.00
-          182.00        0.23E+17        0.00E+00          460.73            0.00
-          241.00        0.23E+17        0.00E+00          459.74            0.00
-          300.00        0.23E+17        0.00E+00          401.89            0.00
+           64.00        0.23E+17        0.00E+00           38.24            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
+          182.00        0.23E+17        0.00E+00          470.23            0.00
+          241.00        0.23E+17        0.00E+00          469.82            0.00
+          300.00        0.23E+17        0.00E+00          411.57            0.00
 
 
 
@@ -1194,16 +1256,16 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
-         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         1    2.115792E+00   -9.041670E-17   -9.045344E-17
+         1         2   -9.041670E-17    2.115792E+00    9.037996E-17
          1         3    9.041670E-17    9.041670E-17    2.115792E+00
-         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
-         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         1   -2.115792E+00    9.041670E-17    9.045344E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.037996E-17
          2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1280,54 +1342,28 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS3_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.523     1.166     0.003
+  64.0     0.006     3.492     1.136     0.033
+ 123.0     0.011     3.461     1.104     0.065
+ 182.0     0.016     3.428     1.072     0.097
+ 241.0     0.021     3.393     1.036     0.133
+ 300.0     0.026     3.355     0.998     0.171
+
+
 
  Number of bands in e-ph self-energy sum: 1
  From bsum_start: 5 to bsum_stop: 5
@@ -1351,6 +1387,7 @@ All the independent perturbations are available
    1     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
    2     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -1361,6 +1398,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
  Final results in eV.
@@ -1378,18 +1416,75 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31934.9    0.000
+   5   3.573    0.000  32634.9    0.000
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  10657.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2785.9    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    938.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    471.4    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    295.0    0.000
+============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    482.1    0.000
+   5   3.608    0.001    488.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    412.2    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    316.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    222.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    158.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    119.0    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783698.3    0.000
+   5   3.525    0.000 783227.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 582543.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  37737.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   9034.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4133.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2487.0    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -1397,13 +1492,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   2.36 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   1.17 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1416,66 +1509,66 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.87            0.00
-          182.00        0.23E+17        0.00E+00          423.94            0.00
-          241.00        0.23E+17        0.00E+00          419.47            0.00
-          300.00        0.23E+17        0.00E+00          363.87            0.00
+           64.00        0.23E+17        0.00E+00           39.22            0.00
+          123.00        0.23E+17        0.00E+00          353.18            0.00
+          182.00        0.23E+17        0.00E+00          435.13            0.00
+          241.00        0.23E+17        0.00E+00          434.11            0.00
+          300.00        0.23E+17        0.00E+00          379.29            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.87            0.00
-          182.00        0.23E+17        0.00E+00          423.94            0.00
-          241.00        0.23E+17        0.00E+00          419.47            0.00
-          300.00        0.23E+17        0.00E+00          363.87            0.00
+           64.00        0.23E+17        0.00E+00           39.22            0.00
+          123.00        0.23E+17        0.00E+00          353.18            0.00
+          182.00        0.23E+17        0.00E+00          435.13            0.00
+          241.00        0.23E+17        0.00E+00          434.11            0.00
+          300.00        0.23E+17        0.00E+00          379.29            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.87            0.00
-          182.00        0.23E+17        0.00E+00          423.94            0.00
-          241.00        0.23E+17        0.00E+00          419.47            0.00
-          300.00        0.23E+17        0.00E+00          363.87            0.00
+           64.00        0.23E+17        0.00E+00           39.22            0.00
+          123.00        0.23E+17        0.00E+00          353.18            0.00
+          182.00        0.23E+17        0.00E+00          435.13            0.00
+          241.00        0.23E+17        0.00E+00          434.11            0.00
+          300.00        0.23E+17        0.00E+00          379.29            0.00
 
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.77            0.00
-          182.00        0.23E+17        0.00E+00          460.73            0.00
-          241.00        0.23E+17        0.00E+00          459.74            0.00
-          300.00        0.23E+17        0.00E+00          401.89            0.00
+           64.00        0.23E+17        0.00E+00           38.24            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
+          182.00        0.23E+17        0.00E+00          470.23            0.00
+          241.00        0.23E+17        0.00E+00          469.82            0.00
+          300.00        0.23E+17        0.00E+00          411.57            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.77            0.00
-          182.00        0.23E+17        0.00E+00          460.73            0.00
-          241.00        0.23E+17        0.00E+00          459.74            0.00
-          300.00        0.23E+17        0.00E+00          401.89            0.00
+           64.00        0.23E+17        0.00E+00           38.24            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
+          182.00        0.23E+17        0.00E+00          470.23            0.00
+          241.00        0.23E+17        0.00E+00          469.82            0.00
+          300.00        0.23E+17        0.00E+00          411.57            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.77            0.00
-          182.00        0.23E+17        0.00E+00          460.73            0.00
-          241.00        0.23E+17        0.00E+00          459.74            0.00
-          300.00        0.23E+17        0.00E+00          401.89            0.00
+           64.00        0.23E+17        0.00E+00           38.24            0.00
+          123.00        0.23E+17        0.00E+00          371.57            0.00
+          182.00        0.23E+17        0.00E+00          470.23            0.00
+          241.00        0.23E+17        0.00E+00          469.82            0.00
+          300.00        0.23E+17        0.00E+00          411.57            0.00
 
 
 
@@ -1554,16 +1647,16 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
-         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         1    2.115792E+00   -9.041670E-17   -9.045344E-17
+         1         2   -9.041670E-17    2.115792E+00    9.037996E-17
          1         3    9.041670E-17    9.041670E-17    2.115792E+00
-         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
-         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         1   -2.115792E+00    9.041670E-17    9.045344E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.037996E-17
          2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1640,54 +1733,28 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS4_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.523     1.166     0.003
+  64.0     0.006     3.492     1.136     0.033
+ 123.0     0.011     3.461     1.104     0.065
+ 182.0     0.016     3.428     1.072     0.097
+ 241.0     0.021     3.393     1.036     0.133
+ 300.0     0.026     3.355     0.998     0.171
+
+
 
  Number of bands in e-ph self-energy sum: 1
  From bsum_start: 5 to bsum_stop: 5
@@ -1713,6 +1780,7 @@ All the independent perturbations are available
    3     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
    4     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
    5     1  [-4.5833E-01,  5.0000E-01,  4.1667E-02]   5    5
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -1723,6 +1791,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 5 of 5
+
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
  Final results in eV.
@@ -1740,26 +1809,123 @@ P Number of k-point in Sigma_nk treated by this proc: 5 of 5
  
 K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.673    0.004     88.4    0.000
+   5   3.673    0.004     90.7    0.000
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     86.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     78.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.005     68.3    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     58.1    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     49.6    0.000
+============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31934.9    0.000
+   5   3.573    0.000  32223.5    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  10541.7    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2756.8    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    928.5    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    466.7    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    292.0    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    482.1    0.000
+   5   3.608    0.001    483.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    408.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    312.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    218.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    155.4    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    116.3    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783698.3    0.000
+   5   3.525    0.000 783227.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 580944.3    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  37362.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   8941.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4090.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2461.1    0.000
 ============================================================================================
 K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.673    0.006     58.9    0.000
+   5   3.673    0.005     60.8    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     58.5    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     54.5    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     48.5    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.008     42.3    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.009     36.8    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -1767,13 +1933,11 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   2.36 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   1.17 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1786,66 +1950,66 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.79            0.00
-          182.00        0.23E+17        0.00E+00          424.37            0.00
-          241.00        0.23E+17        0.00E+00          422.77            0.00
-          300.00        0.23E+17        0.00E+00          371.75            0.00
+           64.00        0.23E+17        0.00E+00           38.80            0.00
+          123.00        0.23E+17        0.00E+00          349.43            0.00
+          182.00        0.23E+17        0.00E+00          430.38            0.00
+          241.00        0.23E+17        0.00E+00          431.20            0.00
+          300.00        0.23E+17        0.00E+00          381.30            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.79            0.00
-          182.00        0.23E+17        0.00E+00          424.37            0.00
-          241.00        0.23E+17        0.00E+00          422.77            0.00
-          300.00        0.23E+17        0.00E+00          371.75            0.00
+           64.00        0.23E+17        0.00E+00           38.80            0.00
+          123.00        0.23E+17        0.00E+00          349.43            0.00
+          182.00        0.23E+17        0.00E+00          430.38            0.00
+          241.00        0.23E+17        0.00E+00          431.20            0.00
+          300.00        0.23E+17        0.00E+00          381.30            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.79            0.00
-          182.00        0.23E+17        0.00E+00          424.37            0.00
-          241.00        0.23E+17        0.00E+00          422.77            0.00
-          300.00        0.23E+17        0.00E+00          371.75            0.00
+           64.00        0.23E+17        0.00E+00           38.80            0.00
+          123.00        0.23E+17        0.00E+00          349.43            0.00
+          182.00        0.23E+17        0.00E+00          430.38            0.00
+          241.00        0.23E+17        0.00E+00          431.20            0.00
+          300.00        0.23E+17        0.00E+00          381.30            0.00
 
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.71            0.00
-          182.00        0.23E+17        0.00E+00          461.34            0.00
-          241.00        0.23E+17        0.00E+00          463.71            0.00
-          300.00        0.23E+17        0.00E+00          411.13            0.00
+           64.00        0.23E+17        0.00E+00           37.76            0.00
+          123.00        0.23E+17        0.00E+00          367.23            0.00
+          182.00        0.23E+17        0.00E+00          466.28            0.00
+          241.00        0.23E+17        0.00E+00          469.78            0.00
+          300.00        0.23E+17        0.00E+00          417.73            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.71            0.00
-          182.00        0.23E+17        0.00E+00          461.34            0.00
-          241.00        0.23E+17        0.00E+00          463.71            0.00
-          300.00        0.23E+17        0.00E+00          411.13            0.00
+           64.00        0.23E+17        0.00E+00           37.76            0.00
+          123.00        0.23E+17        0.00E+00          367.23            0.00
+          182.00        0.23E+17        0.00E+00          466.28            0.00
+          241.00        0.23E+17        0.00E+00          469.78            0.00
+          300.00        0.23E+17        0.00E+00          417.73            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.71            0.00
-          182.00        0.23E+17        0.00E+00          461.34            0.00
-          241.00        0.23E+17        0.00E+00          463.71            0.00
-          300.00        0.23E+17        0.00E+00          411.13            0.00
+           64.00        0.23E+17        0.00E+00           37.76            0.00
+          123.00        0.23E+17        0.00E+00          367.23            0.00
+          182.00        0.23E+17        0.00E+00          466.28            0.00
+          241.00        0.23E+17        0.00E+00          469.78            0.00
+          300.00        0.23E+17        0.00E+00          417.73            0.00
 
 
 
@@ -1924,16 +2088,16 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
-         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         1    2.115792E+00   -9.041670E-17   -9.045344E-17
+         1         2   -9.041670E-17    2.115792E+00    9.037996E-17
          1         3    9.041670E-17    9.041670E-17    2.115792E+00
-         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
-         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         1   -2.115792E+00    9.041670E-17    9.045344E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.037996E-17
          2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2010,54 +2174,28 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS5_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.523     1.166     0.003
+  64.0     0.006     3.492     1.136     0.033
+ 123.0     0.011     3.461     1.104     0.065
+ 182.0     0.016     3.428     1.072     0.097
+ 241.0     0.021     3.393     1.036     0.133
+ 300.0     0.026     3.355     0.998     0.171
+
+
 
  Number of bands in e-ph self-energy sum: 1
  From bsum_start: 5 to bsum_stop: 5
@@ -2084,6 +2222,7 @@ All the independent perturbations are available
    4     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
    5     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
    6     1  [-4.5833E-01,  5.0000E-01,  4.1667E-02]   5    5
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -2094,6 +2233,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 6 of 6
+
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
  Final results in eV.
@@ -2111,30 +2251,147 @@ P Number of k-point in Sigma_nk treated by this proc: 6 of 6
  
 K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.673    0.004     88.4    0.000
+   5   3.673    0.004     89.7    0.000
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     85.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     77.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.005     67.1    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     56.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     48.4    0.000
+============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.677    0.005     72.0    0.000
+   5   3.677    0.004     73.5    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.005     70.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.005     64.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.006     56.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.007     48.0    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.008     41.1    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31934.9    0.000
+   5   3.573    0.000  32223.5    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  10539.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2748.8    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    924.7    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    464.6    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    290.6    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    482.1    0.000
+   5   3.608    0.001    483.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    407.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    311.4    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    217.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    153.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    114.8    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783698.3    0.000
+   5   3.525    0.000 783227.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 580944.3    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  37362.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   8941.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4090.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2461.1    0.000
 ============================================================================================
 K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.673    0.006     58.9    0.000
+   5   3.673    0.005     60.3    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     57.9    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     53.8    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     47.7    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.008     41.4    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.009     35.9    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -2142,13 +2399,11 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   2.36 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   1.17 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -2161,66 +2416,66 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.80            0.00
-          182.00        0.23E+17        0.00E+00          424.97            0.00
-          241.00        0.23E+17        0.00E+00          426.18            0.00
-          300.00        0.23E+17        0.00E+00          379.63            0.00
+           64.00        0.23E+17        0.00E+00           38.79            0.00
+          123.00        0.23E+17        0.00E+00          348.40            0.00
+          182.00        0.23E+17        0.00E+00          428.63            0.00
+          241.00        0.23E+17        0.00E+00          431.14            0.00
+          300.00        0.23E+17        0.00E+00          385.47            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.80            0.00
-          182.00        0.23E+17        0.00E+00          424.97            0.00
-          241.00        0.23E+17        0.00E+00          426.18            0.00
-          300.00        0.23E+17        0.00E+00          379.63            0.00
+           64.00        0.23E+17        0.00E+00           38.79            0.00
+          123.00        0.23E+17        0.00E+00          348.40            0.00
+          182.00        0.23E+17        0.00E+00          428.63            0.00
+          241.00        0.23E+17        0.00E+00          431.14            0.00
+          300.00        0.23E+17        0.00E+00          385.47            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.80            0.00
-          182.00        0.23E+17        0.00E+00          424.97            0.00
-          241.00        0.23E+17        0.00E+00          426.18            0.00
-          300.00        0.23E+17        0.00E+00          379.63            0.00
+           64.00        0.23E+17        0.00E+00           38.79            0.00
+          123.00        0.23E+17        0.00E+00          348.40            0.00
+          182.00        0.23E+17        0.00E+00          428.63            0.00
+          241.00        0.23E+17        0.00E+00          431.14            0.00
+          300.00        0.23E+17        0.00E+00          385.47            0.00
 
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.73            0.00
-          182.00        0.23E+17        0.00E+00          462.02            0.00
-          241.00        0.23E+17        0.00E+00          467.59            0.00
-          300.00        0.23E+17        0.00E+00          420.11            0.00
+           64.00        0.23E+17        0.00E+00           37.75            0.00
+          123.00        0.23E+17        0.00E+00          366.41            0.00
+          182.00        0.23E+17        0.00E+00          465.40            0.00
+          241.00        0.23E+17        0.00E+00          471.70            0.00
+          300.00        0.23E+17        0.00E+00          424.77            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.73            0.00
-          182.00        0.23E+17        0.00E+00          462.02            0.00
-          241.00        0.23E+17        0.00E+00          467.59            0.00
-          300.00        0.23E+17        0.00E+00          420.11            0.00
+           64.00        0.23E+17        0.00E+00           37.75            0.00
+          123.00        0.23E+17        0.00E+00          366.41            0.00
+          182.00        0.23E+17        0.00E+00          465.40            0.00
+          241.00        0.23E+17        0.00E+00          471.70            0.00
+          300.00        0.23E+17        0.00E+00          424.77            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.73            0.00
-          182.00        0.23E+17        0.00E+00          462.02            0.00
-          241.00        0.23E+17        0.00E+00          467.59            0.00
-          300.00        0.23E+17        0.00E+00          420.11            0.00
+           64.00        0.23E+17        0.00E+00           37.75            0.00
+          123.00        0.23E+17        0.00E+00          366.41            0.00
+          182.00        0.23E+17        0.00E+00          465.40            0.00
+          241.00        0.23E+17        0.00E+00          471.70            0.00
+          300.00        0.23E+17        0.00E+00          424.77            0.00
 
 
 
@@ -2299,16 +2554,16 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
-         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         1    2.115792E+00   -9.041670E-17   -9.045344E-17
+         1         2   -9.041670E-17    2.115792E+00    9.037996E-17
          1         3    9.041670E-17    9.041670E-17    2.115792E+00
-         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
-         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         1   -2.115792E+00    9.041670E-17    9.045344E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.037996E-17
          2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2385,54 +2640,28 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS6_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.523     1.166     0.003
+  64.0     0.006     3.492     1.136     0.033
+ 123.0     0.011     3.461     1.104     0.065
+ 182.0     0.016     3.428     1.072     0.097
+ 241.0     0.021     3.393     1.036     0.133
+ 300.0     0.026     3.355     0.998     0.171
+
+
 
  Number of bands in e-ph self-energy sum: 1
  From bsum_start: 5 to bsum_stop: 5
@@ -2459,6 +2688,7 @@ All the independent perturbations are available
    4     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
    5     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
    6     1  [-4.5833E-01,  5.0000E-01,  4.1667E-02]   5    5
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -2469,6 +2699,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 6 of 6
+
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
  Final results in eV.
@@ -2486,30 +2717,147 @@ P Number of k-point in Sigma_nk treated by this proc: 6 of 6
  
 K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.673    0.004     88.4    0.000
+   5   3.673    0.004     89.7    0.000
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     85.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     77.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.005     67.1    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     56.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     48.4    0.000
+============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.677    0.005     72.0    0.000
+   5   3.677    0.004     73.5    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.005     70.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.005     64.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.006     56.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.007     48.0    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.008     41.1    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31934.9    0.000
+   5   3.573    0.000  32223.5    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  10539.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2748.8    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    924.7    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    464.6    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    290.6    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    482.1    0.000
+   5   3.608    0.001    483.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    407.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    311.4    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    217.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    153.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    114.8    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783698.3    0.000
+   5   3.525    0.000 783227.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 580944.3    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  37362.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   8941.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4090.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2461.1    0.000
 ============================================================================================
 K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.673    0.006     58.9    0.000
+   5   3.673    0.005     60.3    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:   64.0 [K], mu_e:    3.492
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     57.9    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  123.0 [K], mu_e:    3.461
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     53.8    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  182.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     47.7    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  241.0 [K], mu_e:    3.393
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.008     41.4    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.355
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.009     35.9    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -2517,13 +2865,11 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   2.36 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   1.17 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -2536,66 +2882,66 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.80            0.00
-          182.00        0.23E+17        0.00E+00          424.97            0.00
-          241.00        0.23E+17        0.00E+00          426.18            0.00
-          300.00        0.23E+17        0.00E+00          379.63            0.00
+           64.00        0.23E+17        0.00E+00           38.79            0.00
+          123.00        0.23E+17        0.00E+00          348.40            0.00
+          182.00        0.23E+17        0.00E+00          428.63            0.00
+          241.00        0.23E+17        0.00E+00          431.14            0.00
+          300.00        0.23E+17        0.00E+00          385.47            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.80            0.00
-          182.00        0.23E+17        0.00E+00          424.97            0.00
-          241.00        0.23E+17        0.00E+00          426.18            0.00
-          300.00        0.23E+17        0.00E+00          379.63            0.00
+           64.00        0.23E+17        0.00E+00           38.79            0.00
+          123.00        0.23E+17        0.00E+00          348.40            0.00
+          182.00        0.23E+17        0.00E+00          428.63            0.00
+          241.00        0.23E+17        0.00E+00          431.14            0.00
+          300.00        0.23E+17        0.00E+00          385.47            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.53            0.00
-          123.00        0.23E+17        0.00E+00          345.80            0.00
-          182.00        0.23E+17        0.00E+00          424.97            0.00
-          241.00        0.23E+17        0.00E+00          426.18            0.00
-          300.00        0.23E+17        0.00E+00          379.63            0.00
+           64.00        0.23E+17        0.00E+00           38.79            0.00
+          123.00        0.23E+17        0.00E+00          348.40            0.00
+          182.00        0.23E+17        0.00E+00          428.63            0.00
+          241.00        0.23E+17        0.00E+00          431.14            0.00
+          300.00        0.23E+17        0.00E+00          385.47            0.00
 
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.73            0.00
-          182.00        0.23E+17        0.00E+00          462.02            0.00
-          241.00        0.23E+17        0.00E+00          467.59            0.00
-          300.00        0.23E+17        0.00E+00          420.11            0.00
+           64.00        0.23E+17        0.00E+00           37.75            0.00
+          123.00        0.23E+17        0.00E+00          366.41            0.00
+          182.00        0.23E+17        0.00E+00          465.40            0.00
+          241.00        0.23E+17        0.00E+00          471.70            0.00
+          300.00        0.23E+17        0.00E+00          424.77            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.73            0.00
-          182.00        0.23E+17        0.00E+00          462.02            0.00
-          241.00        0.23E+17        0.00E+00          467.59            0.00
-          300.00        0.23E+17        0.00E+00          420.11            0.00
+           64.00        0.23E+17        0.00E+00           37.75            0.00
+          123.00        0.23E+17        0.00E+00          366.41            0.00
+          182.00        0.23E+17        0.00E+00          465.40            0.00
+          241.00        0.23E+17        0.00E+00          471.70            0.00
+          300.00        0.23E+17        0.00E+00          424.77            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           37.46            0.00
-          123.00        0.23E+17        0.00E+00          363.73            0.00
-          182.00        0.23E+17        0.00E+00          462.02            0.00
-          241.00        0.23E+17        0.00E+00          467.59            0.00
-          300.00        0.23E+17        0.00E+00          420.11            0.00
+           64.00        0.23E+17        0.00E+00           37.75            0.00
+          123.00        0.23E+17        0.00E+00          366.41            0.00
+          182.00        0.23E+17        0.00E+00          465.40            0.00
+          241.00        0.23E+17        0.00E+00          471.70            0.00
+          300.00        0.23E+17        0.00E+00          424.77            0.00
 
 
 
@@ -2884,10 +3230,10 @@ P           mkmem         413
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        140.9  wall=        143.0
+- Proc.   0 individual time (sec): cpu=        130.8  wall=        139.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        140.9  wall=        143.0
+.Delivered  20 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=        130.8  wall=        139.2

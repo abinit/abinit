@@ -16,6 +16,7 @@ eph_task1 -4
 eph_task2  7  
 getsigeph_filepath2 "teph4mob_7o_DS1_SIGEPH.nc"
 transport_ngkpt2 12 12 12 
+#sigma_ngkpt2 12 12 12 
 
 #########################
 # Common to all datasets
@@ -51,8 +52,8 @@ sigma_erange  0 0.15 eV # We compute the lifetimes of electrons only,
 
 # Input variables related to the e-ph run
 mixprec 1     # We use single precision in some parts.
-              # It does not affect the precision of the result
-              # but helps decreasing the memory requirements.
+              # It does not affect the precision of the result but accelerates the calculation
+              #
 boxcutmin 1.1 # Use boxcutmin 1.1 to decrease the memory
               # requirements. Check that it does not affect
               # your results by increasing this (up to 2 max).
@@ -64,13 +65,13 @@ boxcutmin 1.1 # Use boxcutmin 1.1 to decrease the memory
 ecut 3
 nband 8
 
-#Definition of the unit cell
+# Definition of the unit cell
     acell   3*10.61         # This is equivalent to   10.61 10.61 10.61
     rprim   0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors
             0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1
             0.5  0.5  0.0   # that is, the default.
 
-#Definition of the atom types
+# Definition of the atom types
    ntypat   2         # There are two types of atom
     znucl   13 33     # The keyword "znucl" refers to the atomic number of the
                       # possible type(s) of atom. The pseudopotential(s)
@@ -87,7 +88,7 @@ nband 8
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi, 33as.pspnc"
+ pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -95,9 +96,9 @@ nband 8
 #%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
 #%% [files]
 #%% files_to_test =
-#%%   teph4mob_7.out, tolnlines= 57, tolabs=  30, tolrel= 0.03;
+#%%   teph4mob_7.out, tolnlines= 57, tolabs=  80, tolrel= 0.05;
 #%%   teph4mob_7o_DS1_SERTA_KAPPA, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_MRTA_KAPPA, tolnlines= 50, tolabs= 1.2e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_KAPPA, tolnlines= 50, tolabs= 1.5e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_MRTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
@@ -108,7 +109,7 @@ nband 8
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, RTA
 #%% description =
-#%%   E-ph for the mobility in semiconductors
+#%%   E-ph for mobility in semiconductors
 #%%<END TEST_INFO>

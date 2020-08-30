@@ -92,7 +92,7 @@ contains
 !!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
 !!
 !! PARENTS
-!!      m_pawxc,rhohxcpositron,rhotoxc
+!!      m_electronpositron,m_pawxc,m_rhotoxc
 !!
 !! CHILDREN
 !!      invcb

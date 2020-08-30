@@ -107,7 +107,7 @@ end function complex_vector_product
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_GWlanczos
+!!      m_gwls_GWlanczos
 !!
 !! CHILDREN
 !!      matrix_function,xmpi_sum,zgemm
@@ -197,7 +197,7 @@ end subroutine orthogonalize
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray,gwls_GenerateEpsilon
+!!      m_gwls_DielectricArray,m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!      matrix_function,xmpi_sum,zgemm
@@ -258,7 +258,7 @@ end subroutine driver_invert_positive_definite_hermitian_matrix
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputePoles,gwls_GenerateEpsilon
+!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!      matrix_function,xmpi_sum,zgemm

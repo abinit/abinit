@@ -63,7 +63,7 @@ kptbounds2  1/4 1/4 1/4 #R'
             0.0 0.0 0.0 #Gamma
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "V.LDA_PW-JTH.xml, Sr.LDA_PW-JTH.xml, O.LDA_PW-JTH.xml"
+ pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -75,7 +75,7 @@ kptbounds2  1/4 1/4 1/4 #R'
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%% files_to_test = tucrpa_1_MPI24.out, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%% files_to_test = tucrpa_1_MPI24.out, tolnlines = 3, tolabs = 4.0e-10, tolrel = 2.0e-02
 #%% [extra_info]
 #%% keywords = LDA, FATBANDS
 #%% authors = B. Amadon

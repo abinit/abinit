@@ -97,7 +97,7 @@ contains
 !!  computation, so that their values if choice=1 or choice=2 will differ.
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
 !!      prttagm,prttagm_images
@@ -781,6 +781,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%eph_ecutosc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_ecutosc','ENE',0)
 
+ dprarr(1,:)=dtsets(:)%eph_phwinfact
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_phwinfact','DPR',0)
+
  dprarr(1,:)=dtsets(:)%eph_extrael
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_extrael','DPR',0)
 
@@ -937,6 +940,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(2,:)=dtsets(:)%fockdownsampling(2)
  intarr(3,:)=dtsets(:)%fockdownsampling(3)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
+
+ intarr(1,:)=dtsets(:)%fock_icutcoul
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fock_icsing','INT',0)
 
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)
@@ -1180,6 +1186,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    end if
  endif
 
+ intarr(1,:)=dtsets(:)%gwaclowrank
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwaclowrank','INT',0)
+
  intarr(1,:)=dtsets(:)%gwcalctyp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcalctyp','INT',0)
 
@@ -1231,6 +1240,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gw_frqre_tangrid
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_frqre_tangrid','INT',0)
 
+
  intarr(1,:)=dtsets(:)%gw_invalid_freq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_invalid_freq','INT',0)
 
@@ -1266,9 +1276,11 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gw_sctype
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_sctype','INT',0)
 
-
  intarr(1,:)=dtsets(:)%gw_sigxcore
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_sigxcore','INT',0)
+
+ intarr(1,:)=dtsets(:)%gw_icutcoul
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icutcoul','INT',0)
 
  dprarr(1,:)=dtsets(:)%gw_toldfeig
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_toldfeig','ENE',0)

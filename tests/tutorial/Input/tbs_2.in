@@ -33,7 +33,7 @@ chksymbreak 0             # Mandatory for using symmetry-breaking k-meshes in th
 ecutwfn 8.0               # Cutoff for the wavefunction.
 ecuteps 2.0               # Cutoff for W and /bare v used to calculate the BS matrix elements.
 inclvkb 2                 # The commutator for the optical limit is correctly evaluated.
-icutcoul 3                # Legacy value
+gw_icutcoul 3               # Legacy value
 
 # VARIABLES COMMON TO THE DIFFERENT DATASETS
 
@@ -66,7 +66,7 @@ diemac 12.0
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

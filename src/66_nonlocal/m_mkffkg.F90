@@ -85,7 +85,7 @@ contains
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
 !!
 !! PARENTS
-!!      opernl3,opernl4a,opernl4b
+!!      m_opernl
 !!
 !! CHILDREN
 !!
@@ -651,7 +651,7 @@ end subroutine dfpt_mkffkg
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
 !!
 !! PARENTS
-!!      opernl2
+!!      m_opernl
 !!
 !! CHILDREN
 !!

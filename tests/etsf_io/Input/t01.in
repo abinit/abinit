@@ -37,6 +37,7 @@ xcart
     -0.75695   2.11523  -0.12023
      0.75695   5.66557   3.54768
     -0.75695   5.66557   3.54768    Angstrom
+tolsym 1.0e-8
 
 # Definition of the planewave basis set
 ecut   20           # This cut-off is too low for real calculations
@@ -54,7 +55,7 @@ toldfe 1.0d-4       # Tolerance on difference of energy
 iomode  3
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "08o.pspgth, 01h.pspgth"
+ pseudos "PseudosGTH_pwteter/08o.pspgth, PseudosGTH_pwteter/01h.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

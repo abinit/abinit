@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h46 )
+.Starting date : Sat 18 Jul 2020.
+- ( at 11h42 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_5/tpositron_5.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Test_suite/tutorial_tpositron_5/tpositron_5.in
 - output file    -> tpositron_5.out
 - root for input  files -> tpositron_5i
 - root for output files -> tpositron_5o
@@ -190,8 +190,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.05836
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
 - Paw atomic data for element Si - Generated with atompaw v3.1.0.3
 - 14.00000   4.00000  20170718                znucl, zion, pspdat
     7    7    1    0      1390   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -231,22 +231,22 @@ tolerances: {tolvrs: 1.00E-08, }
 TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
  ETOT  1  -7.9546523123210    -7.955E+00 1.303E-02 1.628E+00
  ETOT  2  -7.9456456124107     9.007E-03 1.967E-04 2.683E-01
- ETOT  3  -7.9421219898823     3.524E-03 4.113E-05 5.899E-03
+ ETOT  3  -7.9421219898822     3.524E-03 4.113E-05 5.899E-03
  ETOT  4  -7.9422117547452    -8.976E-05 8.398E-06 3.391E-04
  ETOT  5  -7.9422060861293     5.669E-06 1.038E-06 2.009E-05
  ETOT  6  -7.9422058187139     2.674E-07 1.899E-07 5.811E-07
- ETOT  7  -7.9422058016505     1.706E-08 2.117E-08 2.290E-09
+ ETOT  7  -7.9422058016504     1.706E-08 2.117E-08 2.290E-09
 
  At SCF step    7       nres2   =  2.29E-09 < tolvrs=  1.00E-08 =>converged.
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT  8  -8.2371139909329    -2.949E-01 4.607E-01 1.742E-01
- ETOT  9  -8.2586640065134    -2.155E-02 9.323E-03 4.894E-02
- ETOT 10  -8.2588010263424    -1.370E-04 1.378E-02 3.391E-03
- ETOT 11  -8.2588024287642    -1.402E-06 2.060E-01 1.912E-05
- ETOT 12  -8.2588023602644     6.850E-08 6.302E-03 6.318E-08
- ETOT 13  -8.2588023612886    -1.024E-09 3.315E-01 1.056E-08
- ETOT 14  -8.2588023613507    -6.209E-11 9.107E-02 1.130E-10
+ ETOT  8  -8.2371139909332    -2.949E-01 4.607E-01 1.742E-01
+ ETOT  9  -8.2586640065136    -2.155E-02 9.323E-03 4.894E-02
+ ETOT 10  -8.2588010263426    -1.370E-04 1.378E-02 3.391E-03
+ ETOT 11  -8.2588024287644    -1.402E-06 2.060E-01 1.912E-05
+ ETOT 12  -8.2588023602647     6.850E-08 6.302E-03 6.318E-08
+ ETOT 13  -8.2588023612889    -1.024E-09 3.315E-01 1.056E-08
+ ETOT 14  -8.2588023613510    -6.209E-11 9.109E-02 1.130E-10
 
  At SCF step   14       nres2   =  1.13E-10 < tolvrs=  1.00E-08 =>converged.
 
@@ -265,7 +265,7 @@ lattice_vectors:
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7010716E+02
-convergence: {deltae: -6.209E-11, res2:  1.130E-10, residm:  9.107E-02, diffor:  0.000E+00, }
+convergence: {deltae: -6.209E-11, res2:  1.130E-10, residm:  9.109E-02, diffor:  0.000E+00, }
 etotal    :  -8.25880236E+00
 entropy   :   0.00000000E+00
 fermie    :  -2.63847357E-01
@@ -287,8 +287,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.000575266213147
- Compensation charge over fine fft grid    =     -0.000574795449852
+ Compensation charge over spherical meshes =     -0.000575266212143
+ Compensation charge over fine fft grid    =     -0.000574795450703
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -363,7 +363,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  Annihilation rate PAW decomposition:
    Plane-wave contribution to ann.rate          (ns-1) =  3.22909928E+00
    Plane-wave valence contribution to ann.rate  (ns-1) =  3.16923751E+00
-   On-site core contribution to ann.rate        (ns-1) =  8.70854788E-02
+   On-site core contribution to ann.rate        (ns-1) =  8.70854787E-02
    On-site valence contribution to ann.rate     (ns-1) = -2.27953935E-03
    Plane-wave contribution to ann.rate with IPM (ns-1) =  3.20316441E+00
    Plane-wave core contrb. to ann.rate with IPM (ns-1) =  2.69549005E-02
@@ -389,8 +389,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  Annihilation rate PAW decomposition:
    Plane-wave contribution to ann.rate          (ns-1) =  4.06648739E+00
    Plane-wave valence contribution to ann.rate  (ns-1) =  4.00670819E+00
-   On-site core contribution to ann.rate        (ns-1) =  8.70757157E-02
-   On-site valence contribution to ann.rate     (ns-1) = -2.27968039E-03
+   On-site core contribution to ann.rate        (ns-1) =  8.70757156E-02
+   On-site valence contribution to ann.rate     (ns-1) = -2.27968040E-03
    Plane-wave contribution to ann.rate with IPM (ns-1) =  4.04056624E+00
    Plane-wave core contrb. to ann.rate with IPM (ns-1) =  2.69549005E-02
 
@@ -401,13 +401,13 @@ force_length_stats: {min: null, max: null, mean: null, }
 -Use ~abinit/scripts/post_processing/posdopspectra.F90 to process it.
 
  Annihilation rate obtained from integration of e-p pairs momentum distribution:
-   lambda=    4.630058676831E+00 ns-1
+   lambda=    4.630058676624E+00 ns-1
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   23.352E-04; max=  91.073E-03
+ Mean square residual over all n,k,spin=   23.354E-04; max=  91.087E-03
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -430,18 +430,18 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.23759187664527E+00
-hartree             :  6.25909911548777E-01
-xc                  : -4.79464396456554E+00
+kinetic             :  3.23759187664327E+00
+hartree             :  6.25909911547407E-01
+xc                  : -4.79464396456463E+00
 Ewald energy        : -8.39947182979609E+00
 psp_core            :  2.32215214290181E-01
-local_psp           : -2.48760557118463E+00
-spherical_terms     :  3.64385166872595E+00
-electronic          : -7.94215269433608E+00
-positronic          : -1.97233948739888E-01
-electron_positron_interaction: -1.19362610960362E-01
-total_energy        : -8.25874925403633E+00
-total_energy_eV     : -2.24731996155071E+02
+local_psp           : -2.48760557118146E+00
+spherical_terms     :  3.64385166872596E+00
+electronic          : -7.94215269433536E+00
+positronic          : -1.97233948741574E-01
+electron_positron_interaction: -1.19362610958948E-01
+total_energy        : -8.25874925403588E+00
+total_energy_eV     : -2.24731996155059E+02
 ...
 
 
@@ -634,10 +634,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         76.7  wall=         77.7
+- Proc.   0 individual time (sec): cpu=         72.6  wall=         74.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  29 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         76.7  wall=         77.7
++Overall time at end (sec) : cpu=         72.6  wall=         74.7

@@ -159,14 +159,11 @@ contains
 !!   compute the electronic dielectric tensor.
 !!
 !! PARENTS
-!!      elpolariz,update_e_field_vars
+!!      m_berryphase_new,m_elpolariz
 !!
 !! CHILDREN
-!!      appdig,dsdr_k_paw,outwf,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_get,pawcprj_getdim,pawcprj_mpi_allgather,pawcprj_mpi_recv
-!!      pawcprj_mpi_send,pawcprj_put,pawcprj_symkn,pawpolev,polcart,rhophi
-!!      smatrix,smatrix_k_paw,wrtout,xmpi_allgather,xmpi_bcast,xmpi_recv
-!!      xmpi_send,xmpi_sum,xred2xcart
+!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
+!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -1796,8 +1793,11 @@ end subroutine berryphase_new
 !! NOTES
 !!
 !! PARENTS
+!!      m_scfcv_core
 !!
 !! CHILDREN
+!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
+!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -2301,10 +2301,11 @@ end subroutine update_e_field_vars
 !!  (only writing)
 !!
 !! PARENTS
-!!      gstate,update_e_field_vars
+!!      m_berryphase_new,m_gstate
 !!
 !! CHILDREN
-!!      metric,wrtout
+!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
+!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -2702,9 +2703,11 @@ end subroutine prtefield
 !! NOTES
 !!
 !! PARENTS
+!!      m_gstate
 !!
 !! CHILDREN
-!!      initberry
+!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
+!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -2843,7 +2846,7 @@ end subroutine init_e_field_vars
 !!           nneighbour = number of neighbours for each k-point (= 6)
 !!
 !! PARENTS
-!!      init_e_field_vars
+!!      m_berryphase_new
 !!
 !! CHILDREN
 !!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk

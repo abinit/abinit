@@ -56,7 +56,7 @@ nkpthf  27          # number of k-point in the full-BZ
 nbandhf  4         # number of occupied states
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspgth"
+ pseudos "PseudosGTH_pwteter/14si.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

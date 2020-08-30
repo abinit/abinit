@@ -105,7 +105,7 @@ contains
 !! nkpt= number of k-points
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      dgemm,opernlc_ylm,xmpi_sum,zgemm
@@ -138,7 +138,7 @@ contains
 !! nkpt= number of k-points
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      dgemm,opernlc_ylm,xmpi_sum,zgemm
@@ -177,7 +177,7 @@ contains
 !! INPUTS
 !!
 !! PARENTS
-!!      energy,vtorho
+!!      m_dft_energy,m_vtorho
 !!
 !! CHILDREN
 !!      dgemm,opernlc_ylm,xmpi_sum,zgemm
@@ -307,7 +307,7 @@ contains
 !! INPUTS
 !!
 !! PARENTS
-!!      nonlop
+!!      m_nonlop
 !!
 !! CHILDREN
 !!      dgemm,opernlc_ylm,xmpi_sum,zgemm

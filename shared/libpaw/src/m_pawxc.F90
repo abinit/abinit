@@ -268,6 +268,7 @@ end subroutine pawxc_xcpositron_wrapper
 !!      m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -318,6 +319,7 @@ contains
 !!      m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -372,7 +374,7 @@ subroutine pawxc_size_dvxc_local()
  if (abs(order)>=2) then
    if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
 &      ixc==21.or.ixc==22) then
-     ndvxc_=min(nspden,2)+1  
+     ndvxc_=min(nspden,2)+1
    else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
      ndvxc_=1
    else if (ixc==12.or.ixc==24) then
@@ -920,7 +922,7 @@ end function pawxc_get_uselaplacian
 !!                          k3xc(:,4)=d3Exc/drho_dn drho_dn drho_dn
 !!
 !! PARENTS
-!!      m_pawpsp,pawdenpot
+!!      m_paw_denpot,m_pawpsp
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -1808,7 +1810,7 @@ end subroutine pawxc
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!
 !! PARENTS
-!!      pawdenpot
+!!      m_paw_denpot
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -2118,7 +2120,7 @@ end subroutine pawxcpositron
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
-!!      pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -3676,7 +3678,7 @@ end subroutine pawxcsphpositron
 !!    sum2(cplexsum*nrad,lm_size,nsums)=second order sums
 !!
 !! PARENTS
-!!      m_pawxc,poslifetime,posratecore
+!!      m_pawxc,m_positron
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -4057,7 +4059,7 @@ end subroutine pawxcsphpositron
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
-!!      m_pawpsp,pawdenpot
+!!      m_paw_denpot,m_pawpsp
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -4105,7 +4107,7 @@ end subroutine pawxcsphpositron
 !************************************************************************
 
  if(nkxc>3) then
-   msg='Kxc not implemented for GGA!'
+   msg='Kxc not implemented for GGA! Use pawxcdev 0 '
    MSG_ERROR(msg)
  end if
  if(nkxc>0.and.nspden==4) then
@@ -4849,7 +4851,7 @@ end subroutine pawxcsphpositron
 !!      Input  if option==3
 !!
 !! PARENTS
-!!      pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -5199,7 +5201,7 @@ end subroutine pawxcsphpositron
 !! NOTES
 !!
 !! PARENTS
-!!      pawdenpot
+!!      m_paw_denpot
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -5699,9 +5701,10 @@ end subroutine pawxcmpositron
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
-!!      m_pawxc,respfn,nonlinear
+!!      m_nonlinear,m_pawxc,m_respfn_driver
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 

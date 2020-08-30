@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h46 )
+.Starting date : Sat 18 Jul 2020.
+- ( at 11h42 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_6/tpositron_6.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Test_suite/tutorial_tpositron_6/tpositron_6.in
 - output file    -> tpositron_6.out
 - root for input  files -> tpositron_6i
 - root for output files -> tpositron_6o
@@ -231,8 +231,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.05836
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
 - Paw atomic data for element Si - Generated with atompaw v3.1.0.3
 - 14.00000  12.00000  20170718                znucl, zion, pspdat
     7    7    1    0      1361   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -275,8 +275,8 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  5  -203.64243299058    -1.044E-05 1.844E-04 4.467E-05
  ETOT  6  -203.64243345701    -4.664E-07 2.092E-04 2.631E-06
  ETOT  7  -203.64243348929    -3.229E-08 4.757E-05 8.795E-07
- ETOT  8  -203.64243348896     3.357E-10 5.653E-05 1.051E-08
- ETOT  9  -203.64243348890     5.784E-11 1.204E-05 8.832E-11
+ ETOT  8  -203.64243348896     3.359E-10 5.653E-05 1.051E-08
+ ETOT  9  -203.64243348890     5.764E-11 1.204E-05 8.832E-11
 
  At SCF step    9       nres2   =  8.83E-11 < tolvrs=  1.00E-08 =>converged.
 
@@ -290,7 +290,7 @@ lattice_vectors:
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7010716E+02
-convergence: {deltae:  5.784E-11, res2:  8.832E-11, residm:  1.204E-05, diffor:  0.000E+00, }
+convergence: {deltae:  5.764E-11, res2:  8.832E-11, residm:  1.204E-05, diffor:  0.000E+00, }
 etotal    :  -2.03642433E+02
 entropy   :   0.00000000E+00
 fermie    :   2.14909771E-01
@@ -312,8 +312,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     14.089732157014369
- Compensation charge over fine fft grid    =     14.089924533995129
+ Compensation charge over spherical meshes =     14.089732157014534
+ Compensation charge over fine fft grid    =     14.089924533995285
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -403,28 +403,28 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.20556636339262E+00
-hartree             :  5.78476441958212E+01
-xc                  : -3.34977066487142E+00
+kinetic             :  8.20556636339172E+00
+hartree             :  5.78476441958250E+01
+xc                  : -3.34977066487178E+00
 Ewald energy        : -7.55952464681649E+01
 psp_core            :  1.70691039262478E+00
-local_psp           : -1.71106454839261E+02
-spherical_terms     : -2.13510742183458E+01
-total_energy        : -2.03642425238805E+02
-total_energy_eV     : -5.54139220335447E+03
+local_psp           : -1.71106454839266E+02
+spherical_terms     : -2.13510742183472E+01
+total_energy        : -2.03642425238808E+02
+total_energy_eV     : -5.54139220335456E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.61429657549122E+01
+band_energy         : -5.61429657549100E+01
 Ewald energy        : -7.55952464681649E+01
 psp_core            :  1.70691039262478E+00
-xc_dc               : -5.68234129951182E+01
-spherical_terms     : -1.67877186633283E+01
+xc_dc               : -5.68234129951219E+01
+spherical_terms     : -1.67877186633269E+01
 total_energy_dc     : -2.03642433488899E+02
-total_energy_dc_eV  : -5.54139242785094E+03
+total_energy_dc_eV  : -5.54139242785095E+03
 ...
 
 
@@ -466,8 +466,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.05836
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/Si.12el.LDA-PW-paw.abinit
 - Paw atomic data for element Si - Generated with atompaw v3.1.0.3
 - 14.00000  12.00000  20170718                znucl, zion, pspdat
     7    7    1    0      1361   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -545,8 +545,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.000258162988718
- Compensation charge over fine fft grid    =      0.000259129979937
+ Compensation charge over spherical meshes =      0.000258162988713
+ Compensation charge over fine fft grid    =      0.000259129979921
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -696,26 +696,26 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  6.01920066641557E-02
-local_psp           : -1.00792898082191E+00
-spherical_terms     : -2.94770593777863E-03
-positronic          : -9.50684680095549E-01
+kinetic             :  6.01920066631933E-02
+local_psp           : -1.00792898082205E+00
+spherical_terms     : -2.94770593774862E-03
+positronic          : -9.50684680096595E-01
 electronic          : -2.03642433488899E+02
-electron_positron_interaction:  4.75715568164759E-01
-total_energy        : -2.04117402600830E+02
-total_energy_eV     : -5.55431699467734E+03
+electron_positron_interaction:  4.75715568164839E-01
+total_energy        : -2.04117402600831E+02
+total_energy_eV     : -5.55431699467736E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.74990223682690E-01
+band_energy         : -4.74990223682746E-01
 spherical_terms     :  0.00000000000000E+00
-electron_positron_dc: -4.75715568164912E-01
-positronic          : -9.50705791847611E-01
+electron_positron_dc: -4.75715568164993E-01
+positronic          : -9.50705791847748E-01
 electronic          : -2.03642433488899E+02
-electron_positron_interaction:  4.75715568164759E-01
+electron_positron_interaction:  4.75715568164839E-01
 total_energy_dc     : -2.04117423712582E+02
 total_energy_dc_eV  : -5.55431756915733E+03
 ...
@@ -935,10 +935,10 @@ P           mkmem2          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.3
+- Proc.   0 individual time (sec): cpu=          5.9  wall=         11.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.2  wall=          5.3
++Overall time at end (sec) : cpu=          5.9  wall=         11.2

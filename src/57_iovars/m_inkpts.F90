@@ -125,10 +125,10 @@ contains
 !! to strange bugs in the debugging procedure, if one tries to print wtk or istwfk, in this case!
 !!
 !! PARENTS
-!!      invars1,invars2
+!!      m_invars1,m_invars2
 !!
 !! CHILDREN
-!!      getkgrid,intagm,metric,mknormpath,testkgrid,timab,wrtout
+!!      getkgrid,intagm,metric,symfind,symlatt
 !!
 !! SOURCE
 
@@ -573,7 +573,7 @@ end subroutine inkpts
 !!  wtqc=weigth of the eventual current q point
 !!
 !! PARENTS
-!!      invars1
+!!      m_invars1
 !!
 !! CHILDREN
 !!      getkgrid,intagm,metric,symfind,symlatt

@@ -33,7 +33,7 @@ phimax   1.57079632679    #
 #%% [files]
 #%% files_to_test = 
 #%%   t33.out, tolnlines = 19, tolabs = 2.000e-03, tolrel = 2.000e-04, fld_options = -medium
-#%% psp_files = o.fc, mg.fc
+#%% psp_files = DensityCore_pw/08-O.8.fc, DensityCore_pw/12-Mg.8.fc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

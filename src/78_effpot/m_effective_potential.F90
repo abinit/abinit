@@ -446,8 +446,8 @@ end subroutine effective_potential_initmpi
 !! eff_pot<type(effective_potential_type)>  = effective_potential datatype
 !!
 !! PARENTS
-!!      compute_anharmonics,m_effective_potential,m_effective_potential_file
-!!      multibinit
+!!      m_compute_anharmonics,m_effective_potential,m_effective_potential_file
+!!      m_multibinit_driver
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -1057,7 +1057,7 @@ end subroutine effective_potential_generateDipDip
 !!
 !! PARENTS
 !!      m_effective_potential,m_effective_potential_file,m_fit_polynomial_coeff
-!!      mover_effpot
+!!      m_mover_effpot,m_opt_effpot
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -1127,7 +1127,7 @@ end subroutine effective_potential_setCoeffs
 !!
 !!
 !! PARENTS
-!!      compute_anharmonics
+!!      m_compute_anharmonics
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -1170,7 +1170,7 @@ end subroutine effective_potential_setElastic3rd
 !!
 !!
 !! PARENTS
-!!      compute_anharmonics
+!!      m_compute_anharmonics
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -1214,7 +1214,7 @@ end subroutine effective_potential_setElastic4th
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
 !! PARENTS
-!!      compute_anharmonics
+!!      m_compute_anharmonics
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -1261,7 +1261,7 @@ end subroutine effective_potential_setStrainPhononCoupling
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
 !! PARENTS
-!!      compute_anharmonics
+!!      m_compute_anharmonics
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -1311,7 +1311,7 @@ end subroutine effective_potential_setElasticDispCoupling
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
 !! PARENTS
-!!      m_effective_potential,multibinit
+!!      m_effective_potential,m_multibinit_driver
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -1374,7 +1374,7 @@ end subroutine effective_potential_setConfinement
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype
 !!
 !! PARENTS
-!!      m_effective_potential,m_effective_potential_file,mover_effpot
+!!      m_effective_potential,m_effective_potential_file,m_mover_effpot
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -1705,7 +1705,7 @@ end subroutine effective_potential_printSupercell
 !! OUTPUT
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -2029,7 +2029,7 @@ end subroutine effective_potential_writeXML
 !! OUTPUT
 !!
 !! PARENTS
-!!      compute_anharmonics
+!!      m_compute_anharmonics
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -2209,7 +2209,7 @@ end subroutine effective_potential_writeAbiInput
 !! strten(6) = stress tensor (Ha/Bohr^3)
 !!
 !! PARENTS
-!!      m_effective_potential,m_fit_data,m_fit_polynomial_coeff,mover
+!!      m_effective_potential,m_fit_data,m_fit_polynomial_coeff,m_mover
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -2961,9 +2961,7 @@ end subroutine effective_potential_distributeResidualForces
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_mover_effpot
-!!      m_fit_polynomial_coeff_testEffPot
-!!      m_fit_polynomial_coeff_fit
+!!      m_fit_polynomial_coeff,m_mover_effpot,m_opt_effpot
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout
@@ -3649,7 +3647,7 @@ end subroutine effective_potential_checkDEV
 !! OUTPUT
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver
 !!
 !! CHILDREN
 !!      ab_define_var,isfile,wrtout

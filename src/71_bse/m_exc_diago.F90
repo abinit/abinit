@@ -84,9 +84,15 @@ contains
 !!  Eigenvalues and eigenvectors are written on file.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -209,6 +215,12 @@ end subroutine exc_diago_driver
 !!      m_exc_diago
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -286,12 +298,13 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  neh1 = Bsp%nreh(1); neh2 = neh1
  if (Hdr_bse%nsppol==2) neh2 = Bsp%nreh(2)
 
+ ! Scalapack is disabled due to portability issues in slk_read
+ ! This part should be rewritten  with hdf5 + mpi-io
+
  use_scalapack = .FALSE.
-#if defined HAVE_LINALG_SCALAPACK
- use_scalapack = (nprocs > 1)
-#endif
- !use_scalapack = .FALSE.
- !use_scalapack = .TRUE.
+!#if defined HAVE_LINALG_SCALAPACK
+! use_scalapack = (nprocs > 1)
+!#endif
  if (use_scalapack .and. nsppol == 2) then
    use_scalapack = .False.
    msg = "Scalapack with nsppol==2 not yet available. Using sequential version"
@@ -314,8 +327,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  end if
 
  write(msg,'(a,i0)')' Direct diagonalization of the resonant excitonic Hamiltonian, Matrix size= ',exc_size
- call wrtout(std_out,msg,"COLL")
- call wrtout(ab_out,msg,"COLL")
+ call wrtout([std_out, ab_out], msg)
 
  ABI_MALLOC_OR_DIE(exc_ene,(exc_size), ierr)
 
@@ -340,14 +352,12 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  CASE (.FALSE.)
 
    write(msg,'(a)')". Using LAPACK sequential version. "
-   call wrtout(std_out,msg,"PERS")
-   call wrtout(ab_out,msg,"COLL")
-
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,f8.1,a)')' Allocating excitonic eigenvalues. Memory required: ', exc_size*dp*b2Mb,' Mb. '
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
 
    write(msg,'(a,f8.1,a)')' Allocating excitonic hamiltonian.  Memory required: ',exc_size**2*dpc*b2Mb,' Mb.'
-   call wrtout(std_out,msg,"COLL",do_flush=.True.)
+   call wrtout(std_out, msg, do_flush=.True.)
 
    ABI_MALLOC_OR_DIE(exc_mat,(exc_size,exc_size), ierr)
 
@@ -442,18 +452,18 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
      if (do_full_diago) then
        if(do_ep_renorm) then
-         call wrtout(std_out," Full diagonalization with XGEEV... ","COLL")
+         call wrtout(std_out," Full diagonalization with XGEEV... ")
          ABI_MALLOC(exc_vec,(exc_size,exc_size))
          call xgeev('V','V',exc_size,exc_mat,exc_size,exc_ene_c,exc_vl,exc_size,exc_vec,exc_size)
          exc_mat(:,1:nstates) = exc_vec
          ABI_FREE(exc_vec)
        else
-         call wrtout(std_out," Full diagonalization with XHEEV... ","COLL")
+         call wrtout(std_out," Full diagonalization with XHEEV... ")
          call xheev("Vectors","Upper",exc_size,exc_mat,exc_ene)
          exc_ene_c(:) = exc_ene(:)
        end if
      else
-       call wrtout(std_out," Partial diagonalization with XHEEVX... ","COLL")
+       call wrtout(std_out," Partial diagonalization with XHEEVX... ")
        abstol=zero; il=1; iu=nstates
        ABI_MALLOC_OR_DIE(exc_vec,(exc_size,nstates),ierr)
        call xheevx("Vectors","Index","Upper",exc_size,exc_mat,vl,vu,il,iu,abstol,mene_found,exc_ene,exc_vec,exc_size)
@@ -467,7 +477,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
      ! ==============================================
 
      ! * Write the final results.
-     call wrtout(std_out,' Writing eigenvalues and eigenvectors on file: '//TRIM(bseig_fname),"COLL")
+     call wrtout(std_out,' Writing eigenvalues and eigenvectors to file: '//TRIM(bseig_fname))
 
      if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
        MSG_ERROR(msg)
@@ -528,11 +538,10 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    istwf_k=1; tbloc=50
    write(msg,'(2(a,i0))')". Using scaLAPACK version with nprocs= ",nprocs,"; block size= ",tbloc
-   call wrtout(std_out,msg,"PERS")
-   call wrtout(ab_out,msg,"COLL")
+   call wrtout([std_out, ab_out], msg)
 
    write(msg,'(a,f8.1,a)')' Allocating excitonic eigenvalues. Memory required: ',exc_size*dp*b2Mb,' Mb. '
-   call wrtout(std_out,msg,"PERS")
+   call wrtout(std_out, msg)
    !
    ! Init scaLAPACK environment.
    call init_scalapack(Slk_processor,comm)
@@ -567,11 +576,11 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    ABI_CHECK_MPI(ierr,"FILE_CLOSE")
 
    if (do_full_diago) then
-     call wrtout(std_out," Performing full diagonalization with scaLAPACK...","COLL")
+     call wrtout(std_out," Performing full diagonalization with scaLAPACK...")
 
      call slk_pzheev("Vectors","Upper",Slk_mat,Slk_vec,exc_ene)
    else
-     call wrtout(std_out," Performing partial diagonalization with scaLAPACK...","COLL")
+     call wrtout(std_out," Performing partial diagonalization with scaLAPACK...")
      il=1; iu=nstates; abstol=zero !ABSTOL = PDLAMCH(comm,'U')
      call slk_pzheevx("Vectors","Index","Upper",Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    end if
@@ -580,7 +589,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    call destruction_matrix_scalapack(Slk_mat)
 
-   call wrtout(std_out,' Writing eigenvalues/vectors on file: '//TRIM(bseig_fname),"COLL", do_flush=.True.)
+   call wrtout(std_out,' Writing eigenvalues/vectors to file: '//TRIM(bseig_fname), do_flush=.True.)
 
    ! Write distributed matrix on file bseig_fname with Fortran records.
    if (my_rank==master) then ! Write exc eigenvalues. Vectors will be appended in slk_write.
@@ -636,23 +645,20 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
 
  write(msg,'(a,i4)')' Excitonic eigenvalues in eV up to n= ',nene_printed
- call wrtout(std_out,msg,"PERS")
- call wrtout(ab_out,msg,"COLL")
+ call wrtout([std_out, ab_out], msg)
 
  do it=0,(nene_printed-1)/8
    write(msg,'(8f10.5)') ( DBLE(exc_ene_c(ii))*Ha_eV, ii=1+it*8,MIN(it*8+8,nene_printed) )
-   call wrtout(std_out,msg,"PERS")
-   call wrtout(ab_out,msg,"COLL")
+   call wrtout([std_out, ab_out], msg)
  end do
 
  exc_gap    = MINVAL(DBLE(exc_ene_c(1:nstates)))
  exc_maxene = MAXVAL(DBLE(exc_ene_c(1:nstates)))
 
  write(msg,'(a,2(a,f7.2,2a),a)')ch10,&
-&  " First excitonic eigenvalue= ",exc_gap*Ha_eV,   " [eV]",ch10,&
-&  " Last  excitonic eigenvalue= ",exc_maxene*Ha_eV," [eV]",ch10,ch10
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
- call wrtout(ab_out,msg,"COLL",do_flush=.True.)
+  " First excitonic eigenvalue= ",exc_gap*Ha_eV,   " [eV]",ch10,&
+  " Last  excitonic eigenvalue= ",exc_maxene*Ha_eV," [eV]",ch10,ch10
+ call wrtout([std_out, ab_out], msg, do_flush=.True.)
 
  ABI_FREE(exc_ene_c)
  ABI_FREE(exc_ene)
@@ -685,6 +691,12 @@ end subroutine exc_diago_resonant
 !!      m_exc_diago
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -767,12 +779,10 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 &  " GW  direct gap     ",gw_gap*Ha_eV,     " [eV] ",ch10,&
 &  " EXC direct gap     ",exc_gap*Ha_eV,    " [eV] ",ch10,&
 &  " EXC binding energy ",bind_energy*Ha_eV," [eV] ",ch10
- call wrtout(std_out,msg,"COLL")
- call wrtout(ab_out,msg,"COLL")
+ call wrtout([std_out, ab_out], msg)
 
  msg=' Excitonic eigenvalues up to the GW energy gap [eV]'
- call wrtout(std_out,msg,"COLL")
- call wrtout(ab_out,msg,"COLL")
+ call wrtout([std_out, ab_out], msg)
 
  do ii=1,nstates_read
    if (DBLE(exc_cene(ii)) > zero) EXIT
@@ -785,8 +795,7 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 
  do ieig=ii,j
    write(msg,'(i3,a,2f6.2,a)')ieig," (",exc_cene(ieig)*Ha_eV,")"
-   call wrtout(std_out,msg,"COLL")
-   call wrtout(ab_out,msg,"COLL")
+   call wrtout([std_out, ab_out], msg)
  end do
 
  ii=ii-1
@@ -799,7 +808,7 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
  if (ii>0) then
    do k=ii,j,-1
      write(msg,'(i3,a,2f6.2,a)')k," (",exc_cene(k)*Ha_eV,")"
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out, msg)
    end do
  end if
 
@@ -834,6 +843,12 @@ end subroutine exc_print_eig
 !!      m_exc_diago
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -892,20 +907,19 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  if (my_rank/=master) GOTO 10
 
  write(msg,'(a,i0)')' Direct diagonalization of the full excitonic Hamiltonian, Matrix size= ',exc_size
- call wrtout(std_out,msg,"COLL")
- call wrtout(ab_out,msg,"COLL")
+ call wrtout([std_out, ab_out], msg)
 
  bsize_ham = 2*dpc*exc_size**2
  write(msg,'(a,f9.2,a)')' Allocating full excitonic Hamiltonian. Memory requested: ',bsize_ham*b2Gb,' Gb. '
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out, msg)
 
  ABI_MALLOC_OR_DIE(exc_ham,(exc_size,exc_size), ierr)
 
  write(msg,'(3a,f8.1,3a,f8.1,a)')&
-&  ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
-&  ' Memory-space requested: ',2*dpc*exc_size*b2Gb,' Gb. ',ch10,&
-&  ' Memory-space requested: ',bsize_ham*b2Gb,' Gb. '
- call wrtout(std_out,msg,"COLL")
+  ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
+  ' Memory-space requested: ',2*dpc*exc_size*b2Gb,' Gb. ',ch10,&
+  ' Memory-space requested: ',bsize_ham*b2Gb,' Gb. '
+ call wrtout(std_out, msg)
 
  ABI_MALLOC_OR_DIE(exc_ene,(exc_size), ierr)
 
@@ -915,7 +929,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
    hreso_fname = BS_files%out_hreso
  end if
 
- call wrtout(std_out,' Reading resonant excitonic Hamiltonian from '//TRIM(hreso_fname),"COLL")
+ call wrtout(std_out,' Reading resonant excitonic Hamiltonian from '//TRIM(hreso_fname))
 
  if (open_file(hreso_fname,msg,newunit=hreso_unt,form="unformatted",status="old",action="read") /= 0) then
    MSG_ERROR(msg)
@@ -942,7 +956,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
    hcoup_fname =  BS_files%out_hcoup
  end if
 
- call wrtout(std_out,' Reading coupling excitonic Hamiltonian from '//TRIM(hcoup_fname),"COLL")
+ call wrtout(std_out,' Reading coupling excitonic Hamiltonian from '//TRIM(hcoup_fname))
  if (open_file(hcoup_fname,msg,newunit=hcoup_unt,form="unformatted",status="old",action="read") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -988,7 +1002,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  ABI_MALLOC_OR_DIE(exc_rvect,(exc_size,exc_size), ierr)
 
  if (do_full_diago) then
-   call wrtout(std_out,"Complete direct diagonalization with xgeev...","COLL")
+   call wrtout(std_out,"Complete direct diagonalization with xgeev...")
    call xgeev("No_left_eigen","Vectors",exc_size,exc_ham,exc_size,exc_ene,vl_dpc,ldvl,exc_rvect,exc_size)
  else
    MSG_ERROR("Not implemented error")
@@ -1001,11 +1015,10 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  temp       = MAXVAL(ABS(AIMAG(exc_ene(1:nstates))))
 
  write(msg,'(2(a,f7.2,2a),a,es9.2,2a)')&
-&  " First excitonic eigenvalue: ",exc_gap*Ha_eV,   " [eV].",ch10,&
-&  " Last  excitonic eigenvalue: ",exc_maxene*Ha_eV," [eV].",ch10,&
-&  " Largest imaginary part:     ",temp*Ha_eV,      " [eV] ",ch10
- call wrtout(std_out,msg,"COLL")
- call wrtout(ab_out,msg,"COLL")
+  " First excitonic eigenvalue: ",exc_gap*Ha_eV,   " [eV].",ch10,&
+  " Last  excitonic eigenvalue: ",exc_maxene*Ha_eV," [eV].",ch10,&
+  " Largest imaginary part:     ",temp*Ha_eV,      " [eV] ",ch10
+ call wrtout([std_out, ab_out], msg)
 
  nene_printed = MIN(32*nsppol,nstates); if (prtvol>10) nene_printed = nstates
 
@@ -1014,14 +1027,14 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  ! might produce different orderings. Might sort the eigenvalues though, just for printing.
 
  write(msg,'(a,i0)')' Complex excitonic eigenvalues in eV up to n= ',nene_printed
- call wrtout(std_out,msg,"PERS")
+ call wrtout(std_out,msg)
 
  do it=0,(nene_printed-1)/4
    write(msg,'(8f10.5)') ( exc_ene(ii)*Ha_eV, ii=1+it*4,MIN(it*4+4,nene_printed) )
-   call wrtout(std_out,msg,"PERS")
+   call wrtout(std_out,msg)
  end do
 
- call wrtout(std_out,ch10//" Writing eigenvalues and eigenvectors on file "//TRIM(bseig_fname),"COLL")
+ call wrtout(std_out,ch10//" Writing eigenvalues and eigenvectors on file "//TRIM(bseig_fname))
 
  if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
    MSG_ERROR(msg)
@@ -1041,7 +1054,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  ABI_MALLOC_OR_DIE(ovlp,(nstates,nstates), ierr)
 
- call wrtout(std_out,' Calculating overlap matrix... ',"COLL")
+ call wrtout(std_out,' Calculating overlap matrix... ')
 
  !do itp=1,nstates
  !  do it=1,nstates
@@ -1051,7 +1064,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  call xgemm("C","N",exc_size,nstates,nstates,cone,exc_rvect,exc_size,exc_rvect,exc_size,czero,ovlp,nstates)
  ABI_FREE(exc_rvect)
 
- call wrtout(std_out," Inverting overlap matrix... ","COLL")
+ call wrtout(std_out," Inverting overlap matrix... ")
 
  ! Version for generic complex matrix.
  !call xginv(ovlp,exc_size)
@@ -1060,7 +1073,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  call xhdp_invert("Upper",ovlp,nstates)
  call hermitianize(ovlp,"Upper")
 
- call wrtout(std_out,' Writing overlap matrix S^-1 on file: '//TRIM(bseig_fname),"COLL")
+ call wrtout(std_out,' Writing overlap matrix S^-1 on file: '//TRIM(bseig_fname))
 
  do it=1,nstates
    write(eig_unt) CMPLX(ovlp(:,it),kind=dpc)
@@ -1099,6 +1112,12 @@ end subroutine exc_diago_coupling
 !!      m_exc_diago
 !!
 !! CHILDREN
+!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
+!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
+!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
+!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
+!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
+!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
@@ -1163,8 +1182,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  do_full_diago=(nstates==exc_size)
 
  write(msg,'(a,i0)')'. Direct diagonalization of the full excitonic Hamiltonian, Matrix size= ',exc_size
- call wrtout(std_out,msg,"COLL")
- call wrtout(ab_out,msg,"COLL")
+ call wrtout([std_out, ab_out], msg)
 
  bseig_fname = BS_files%out_eig
  if (BS_files%in_eig /= BSE_NOFILE) then
@@ -1176,19 +1194,30 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  else
    reso_fname = BS_files%out_hreso
  end if
- call wrtout(std_out,' Reading resonant excitonic Hamiltonian from '//TRIM(reso_fname),"COLL")
+ call wrtout(std_out,' Reading resonant excitonic Hamiltonian from '//TRIM(reso_fname))
 
  if (BS_files%in_hcoup /= BSE_NOFILE) then
    coup_fname =  BS_files%in_hcoup
  else
    coup_fname =  BS_files%out_hcoup
  end if
- call wrtout(std_out,' Reading coupling excitonic Hamiltonian from '//TRIM(coup_fname),"COLL")
+ call wrtout(std_out,' Reading coupling excitonic Hamiltonian from '//TRIM(coup_fname))
+
+ ! TODO: Reintegrate SCALAPACK: use new format
+! --- !ERROR
+! src_file: m_exc_diago.F90
+! src_line: 1398
+! mpi_rank: 0
+! message: |
+!     SET_VIEW
+!     Other I/O error , error stack:
+!     ADIO_Set_view(48):  **iobadoverlap displacements of filetype must be in a monotonically nondecreasing order
+! ...
 
  use_scalapack = .FALSE.
-#ifdef HAVE_LINALG_SCALAPACK
- use_scalapack = (nprocs > 1)
-#endif
+!#ifdef HAVE_LINALG_SCALAPACK
+! use_scalapack = (nprocs > 1)
+!#endif
  !use_scalapack = .FALSE.
  !use_scalapack = .TRUE.
 
@@ -1200,22 +1229,21 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  CASE (.FALSE.)
    write(msg,'(a)')". Using LAPACK sequential version to solve FHv = ev with H positive definite. "
-   call wrtout(std_out,msg,"PERS")
-   call wrtout(ab_out,msg,"COLL")
+   call wrtout([std_out, ab_out], msg)
 
    bsize_ham = 2*dpc*exc_size**2
    write(msg,'(a,f9.2,a)')' Allocating full excitonic Hamiltonian. Memory requested: ',2*bsize_ham*b2Gb,' Gb. '
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
 
    ABI_MALLOC_OR_DIE(exc_ham,(exc_size,exc_size), ierr)
 
    ABI_MALLOC_OR_DIE(fmat,(exc_size,exc_size), ierr)
 
    write(msg,'(3a,f8.1,3a,f8.1,a)')&
-&    ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
-&    ' Memory-space requested: ',2*dpc*exc_size*b2Gb,' Gb. ',ch10,&
-&    ' Memory-space requested: ',bsize_ham*b2Gb,' Gb. '
-   call wrtout(std_out,msg,"COLL")
+    ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
+    ' Memory-space requested: ',2*dpc*exc_size*b2Gb,' Gb. ',ch10,&
+    ' Memory-space requested: ',bsize_ham*b2Gb,' Gb. '
+   call wrtout(std_out, msg)
 
    if (open_file(reso_fname,msg,newunit=hreso_unt,form="unformatted",status="old",action="read") /= 0) then
      MSG_ERROR(msg)
@@ -1270,10 +1298,10 @@ write(666)exc_ham
    !
    itype=2
    if (do_full_diago) then
-     call wrtout(std_out," Full diagonalization with XHEGV... ","COLL")
+     call wrtout(std_out," Full diagonalization with XHEGV... ")
      call xhegv(itype,"Vectors","Upper",exc_size,fmat,exc_ham,exc_ene)
    else
-     call wrtout(std_out," Partial diagonalization with XHEGVX... ","COLL")
+     call wrtout(std_out," Partial diagonalization with XHEGVX... ")
      ABI_MALLOC_OR_DIE(exc_rvect,(exc_size,nstates), ierr)
      il=1; iu=1; abstol=zero
      call xhegvx(itype,"Vectors","All","Upper",exc_size,fmat,exc_ham,vl,vu,il,iu,abstol,neig_found,exc_ene,exc_rvect,exc_size)
@@ -1288,7 +1316,7 @@ write(666)exc_ham
 
    ABI_FREE(fmat)
 
-   call wrtout(std_out," Writing eigenvalues and eigenvectors on file: "//TRIM(bseig_fname),"COLL")
+   call wrtout(std_out," Writing eigenvalues and eigenvectors on file: "//TRIM(bseig_fname))
 
    if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
      MSG_ERROR(msg)
@@ -1309,7 +1337,7 @@ write(666)exc_ham
 
    ABI_MALLOC_OR_DIE(ovlp,(nstates,nstates), ierr)
 
-   call wrtout(std_out,' Calculating overlap matrix...',"COLL")
+   call wrtout(std_out,' Calculating overlap matrix...')
 
    call xgemm("C","N",exc_size,nstates,nstates,cone,exc_rvect,exc_size,exc_rvect,exc_size,czero,ovlp,nstates)
    ABI_FREE(exc_rvect)
@@ -1318,7 +1346,7 @@ write(666)exc_ham
 write(667)ovlp
 #endif
 
-   call wrtout(std_out," Inverting overlap matrix... ","COLL")
+   call wrtout(std_out," Inverting overlap matrix... ")
    !
    ! The overlap is Hermitian definite positive.
    call xhdp_invert("Upper",ovlp,nstates)
@@ -1331,7 +1359,7 @@ write(667)ovlp
 write(668,*)ovlp
 #endif
 
-   call wrtout(std_out,' Writing overlap matrix O^-1 on file: '//TRIM(bseig_fname),"COLL")
+   call wrtout(std_out,' Writing overlap matrix O^-1 on file: '//TRIM(bseig_fname))
    do it=1,nstates
      write(eig_unt) ovlp(:,it)
    end do
@@ -1355,8 +1383,7 @@ write(668,*)ovlp
    !
    tbloc=50
    write(msg,'(2(a,i0))')". Using MPI-IO + scaLAPACK version with nprocs= ",nprocs,"; block size= ",tbloc
-   call wrtout(std_out,msg,"PERS",do_flush=.True.)
-   call wrtout(ab_out,msg,"COLL",do_flush=.True.)
+   call wrtout([std_out, ab_out], msg, do_flush=.True.)
    !
    ! Init scaLAPACK environment.
    call init_scalapack(Slk_processor,comm)
@@ -1557,7 +1584,7 @@ write(668,*)ovlp
    call destruction_matrix_scalapack(Slk_F)
    call destruction_matrix_scalapack(Slk_Hbar)
 
-   call wrtout(std_out,ch10//" Writing eigenvalues and eigenvectors on file: "//TRIM(bseig_fname),"COLL")
+   call wrtout(std_out,ch10//" Writing eigenvalues and eigenvectors on file: "//TRIM(bseig_fname))
    !
    ! Open the file with Fortran-IO to write the Header.
    if (my_rank==master) then
@@ -1593,7 +1620,7 @@ write(668,*)ovlp
    gsub(:,2) = (/exc_size,nstates/)
    call slk_write(Slk_vec,"All",is_fortran_file,mpi_fh=mpi_fh,offset=ehdr_offset,glob_subarray=gsub)
 
-   call wrtout(std_out,' Calculating overlap matrix... ',"COLL")
+   call wrtout(std_out,' Calculating overlap matrix... ')
    if (.not.do_full_diago) then
      MSG_ERROR(" Init of Slk_ovlp is wrong")
    end if
@@ -1625,7 +1652,7 @@ write(668,*)ovlp
 
    call destruction_matrix_scalapack(Slk_vec)
 
-   call wrtout(std_out," Inverting overlap matrix... ","COLL")
+   call wrtout(std_out," Inverting overlap matrix... ")
    uplo="Upper"
 
 #if 0
@@ -1672,7 +1699,7 @@ write(668,*)ovlp
    !write(std_out,*)"MAX ERR",MAXVAL(ABS(Slk_ovlp%buffer_cplx - TRANSPOSE(DCONJG(Slk_ovlp%buffer_cplx))))
 #endif
 
-   call wrtout(std_out,' Writing overlap matrix S^-1 on file: '//TRIM(bseig_fname),"COLL")
+   call wrtout(std_out,' Writing overlap matrix S^-1 on file: '//TRIM(bseig_fname))
 
    call slk_write(Slk_ovlp,"All",is_fortran_file,mpi_fh=mpi_fh,offset=ehdr_offset)
 
@@ -1692,18 +1719,17 @@ write(668,*)ovlp
  exc_maxene = MAXVAL(ABS(exc_ene(1:nstates)))
 
  write(msg,'(2(a,f7.2,2a))')&
-&  " First excitonic eigenvalue: ",exc_gap*Ha_eV,   " [eV].",ch10,&
-&  " Last  excitonic eigenvalue: ",exc_maxene*Ha_eV," [eV].",ch10
- call wrtout(std_out,msg,"COLL")
- call wrtout(ab_out,msg,"COLL")
+  " First excitonic eigenvalue: ",exc_gap*Ha_eV,   " [eV].",ch10,&
+  " Last  excitonic eigenvalue: ",exc_maxene*Ha_eV," [eV].",ch10
+ call wrtout([std_out, ab_out], msg)
 
  nene_printed = MIN(32*nsppol,nstates); if (prtvol>10) nene_printed = nstates
  write(msg,'(a,i0)')' Complex excitonic eigenvalues in eV up to n= ',nene_printed
- call wrtout(std_out,msg,"PERS")
+ call wrtout(std_out, msg)
 
  do it=0,(nene_printed-1)/4
    write(msg,'(4f10.5)') ( exc_ene(ii)*Ha_eV, ii=1+it*4,MIN(it*4+4,nene_printed) )
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
  end do
 
  ABI_FREE(exc_ene)

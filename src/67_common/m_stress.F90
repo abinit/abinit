@@ -166,11 +166,10 @@ contains
 !!   (7) Ewald energy.
 !!
 !! PARENTS
-!!      forstr
+!!      m_forstr
 !!
 !! CHILDREN
-!!      atm2fft,ewald2,fourdp,metric,mkcore,mkcore_alt,mklocl_recipspace
-!!      stresssym,strhar,timab,vdw_dftd2,vdw_dftd3,wrtout,zerosym
+!!      metric,ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -197,27 +196,27 @@ contains
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: efield(3),kinstr(6),nlstr(6)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
- real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),rprimd(3,3),strsxc(6)
+ real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),strsxc(6)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden),vxctau(nfft,nspden,4*usekden)
  real(dp),allocatable,intent(in) :: vxc_hf(:,:)
  real(dp),intent(in) :: xccc1d(n1xccc*(1-usepaw),6,ntypat),xcccrc(ntypat)
  real(dp),intent(in) :: xred(3,natom),zion(ntypat),znucl(ntypat)
- real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*usekden)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*usekden),rprimd(3,3)
  real(dp),intent(out) :: strten(6)
  type(pawrad_type),intent(in) :: pawrad(ntypat*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: coredens_method,coretau_method,iatom,icoulomb,idir,ii,ipositron,mu
+ integer :: coredens_method,coretau_method,iatom,icoulomb,idir,ii,ipositron,mu,nkpt=1
  integer :: optatm,optdyfr,opteltfr,opt_hybr,optgr,option,optn,optn2,optstr,optv,sdir,vloc_method
  real(dp),parameter :: tol=1.0d-15
- real(dp) :: e_dum,strsii,ucvol,vol_element
+ real(dp) :: e_dum,dum_rcut=zero,strsii,ucvol,vol_element
  character(len=500) :: message
  logical :: calc_epaw3_stress, efield_flag
 !arrays
- integer :: qprtrb_dum(3)
- real(dp) :: corstr(6),dumstr(6),ep3(3),epaws3red(6),ewestr(6),gmet(3,3)
+ integer :: qprtrb_dum(3),icutcoul=3
+ real(dp) :: corstr(6),dumstr(6),ep3(3),epaws3red(6),ewestr(6),gmet(3,3),vcutgeo(3)
  real(dp) :: gprimd(3,3),harstr(6),lpsstr(6),rmet(3,3),taustr(6),tsec(2),uncorr(3)
  real(dp) :: vdwstr(6),vprtrb_dum(2)
  real(dp) :: Maxstr(6),ModE !Maxwell-stress constribution, and magnitude of efield
@@ -283,7 +282,7 @@ contains
      call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,dum_rcut,rhog,rprimd,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    end if
@@ -302,7 +301,7 @@ contains
      call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,taustr,dumstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,dum_rcut,rhog,rprimd,taustr,dumstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
      corstr(1:6)=corstr(1:6)+taustr(1:6)
@@ -316,9 +315,9 @@ contains
    ABI_ALLOCATE(dyfr_dum,(3,3,natom))
    ABI_ALLOCATE(gr_dum,(3,natom))
    ABI_ALLOCATE(v_dum,(nfft))
-   call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
-&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,&
-&   qprtrb_dum,rhog,ucvol,vlspl,vprtrb_dum,v_dum)
+   call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,icutcoul,lpsstr,mgfft,&
+&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,ntypat,option,ph1d,qgrid,&
+&   qprtrb_dum,dum_rcut,rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb_dum,v_dum)
    ABI_DEALLOCATE(dyfr_dum)
    ABI_DEALLOCATE(gr_dum)
    ABI_DEALLOCATE(v_dum)
@@ -734,7 +733,7 @@ end subroutine stress
 !!   in the order 11, 22, 33, 32, 31, 21 (suggested by Xavier Gonze).
 !!
 !! PARENTS
-!!      stress
+!!      m_stress
 !!
 !! CHILDREN
 !!      metric,ptabs_fourdp,timab,xmpi_sum

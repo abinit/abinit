@@ -63,8 +63,8 @@ xred
    0.803779258   0.196220742   0.500000000
    0.196220742   0.803779258   0.500000000
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "HGH/22ti.12.hgh, HGH/8o.6.hgh"
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "22ti.12.hgh, 8o.6.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

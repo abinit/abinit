@@ -38,7 +38,7 @@ getwfk    -1          # Use GS wave functions from dataset1
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "HGH/1h.1.hgh"
+ pseudos "PseudosHGH_pwteter/1h.1.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

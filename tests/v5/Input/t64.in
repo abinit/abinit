@@ -37,7 +37,7 @@ nkptgw3     1
 kptgw3   0.0  0.0  1/4
 bdgw3    24  25
 zcut3     0.1 eV
-icutcoul3   3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul3   3          # old deprecated value of icutcoul, only used for legacy
 
 
 # DATASET 4 : calculations using only symmorphic operations
@@ -59,20 +59,20 @@ inclvkb5    0
 awtr5       1       
 
 # DATASET 6 : sigma calculation
-optdriver6 4
-symsigma6  1
-getwfk6   -2
-getscr6   -1
-ppmodel6   1
+optdriver6  4
+symsigma6   1
+getwfk6    -2
+getscr6    -1
+ppmodel6    1
 ecutsigx6   6
 ecutwfn6    6
 fftgw6      11
 nband6      50
 nkptgw6     1
-kptgw6   0.0  0.0  1/4
-bdgw6    24  25
-zcut6     0.1 eV
-icutcoul6   3            # old deprecated value of icutcoul, only used for legacy
+kptgw6      0.0  0.0  1/4
+bdgw6      24  25
+zcut6       0.1 eV
+gw_icutcoul6  3           # old deprecated value of icutcoul, only used for legacy
 
 
 #################### COMMON PART #########################
@@ -123,7 +123,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc, 08o_001023.pspfhi"
+ pseudos "PseudosTM_pwteter/14si.pspnc, 08o_001023.pspfhi"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

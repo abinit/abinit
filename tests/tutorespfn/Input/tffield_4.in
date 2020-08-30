@@ -22,6 +22,9 @@ rprim3     0.                     0.70710678118654757    0.70710678118654757
            0.70710236181059671   -0.00353551180905298    0.70710236181059671 
            0.70710236181059671    0.70710236181059671   -0.00353551180905298
 
+tolsym 1.0e-8 # Since we make rather small lattice vector changes, with the default value of tolsym
+              # ABINIT will recognize that we are close to a more symmetric
+              # configuration, and will resymmetrize the primitive vectors, something we want to avoid ...
 
 
 #Definition of the atoms
@@ -60,7 +63,7 @@ rprim3     0.                     0.70710678118654757    0.70710678118654757
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.pspnc, 33as.pspnc"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

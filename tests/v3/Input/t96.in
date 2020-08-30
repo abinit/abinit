@@ -42,7 +42,7 @@
  wtk 4*0.25
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspgth, 32ge_lda.fhi"
+ pseudos "PseudosGTH_pwteter/14si.pspgth, 32ge_lda.fhi"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

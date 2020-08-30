@@ -101,7 +101,7 @@ xred
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = ba.hpc.paw.xml, ti.hpc.paw.xml, o.hpc.paw.xml
+#%% psp_files = Pseudodojo_paw_pw_stringent/Ba.xml, Pseudodojo_paw_pw_stringent/Ti.xml, Pseudodojo_paw_pw_stringent/O.xml
 #%% [paral_info]
 #%% nprocs_to_test = 32, 64, 128
 #%% max_nprocs = 128

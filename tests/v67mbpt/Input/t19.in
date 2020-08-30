@@ -69,8 +69,8 @@ inclvkb5    0
 gwcomp5     1        # Extrapolar trick to accelerate convergence vs. empty bands
 gwencomp5   1.00
 
-icutcoul5   4        # long-range only electron-electron interaction
-rcut5       1.00
+gw_icutcoul5   4       # long-range only electron-electron interaction
+rcut5        1.00
 
 ###############################################
 # Data common to the different datasets
@@ -120,7 +120,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
                   # Here, we follow the prescription for bulk silicon.
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -135,7 +135,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% keywords = GW, FAILS_IFMPI
 #%% description = 
 #%%   RPA correlation energy calculation in Si:
-#%%   using exact or numerication integration over the coupling constant, using extrapolar trick or not,
+#%%   using exact or numerical integration over the coupling constant, using extrapolar trick or not,
 #%%   using the full or long-range only Coulomb interaction
 #%% topics = RPACorrEn
 #%%<END TEST_INFO>

@@ -71,6 +71,7 @@ nband3             8
 bs_freq_mesh3 0 6 0.1 eV
 bs_hayd_term3      0      # No terminator
 
+
 # Preparation of interpolation
 bs_interp_prep3    1
 
@@ -105,7 +106,7 @@ nshiftk5           1
 shiftk5            0.22 0.24 0.26
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

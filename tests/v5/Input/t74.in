@@ -28,7 +28,7 @@ shiftk  0.5 0.0 0.0
  nband             6
  typat             8*1
  xred
-   0.00000000000000        0.00000000000000       1.249999996844053E-007
+   0.00000000000000        0.00000000000000       1.249999996844053E-007  # Intentional lowering of symmetry group, to allow charge sloshing to develop
    0.500000000000000       0.500000000000000       6.250012499999968E-002
    0.00000000000000        0.00000000000000       0.125000000000000
    0.500000000000000       0.500000000000000       0.187500000000000
@@ -36,6 +36,7 @@ shiftk  0.5 0.0 0.0
    0.500000000000000       0.500000000000000       0.312500000000000
    0.00000000000000        0.00000000000000       0.375000000000000
    0.500000000000000       0.500000000000000       0.437500000000000
+ tolsym 1.0e-8  # In order to enforce the lowering of symmetry due to the above displacements of atoms, need to change tolsym
 
 ntypat 1
 occopt 4
@@ -48,7 +49,7 @@ prtwf 0
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "79au.1.hgh"
+ pseudos "PseudosHGH_pwteter/79au.1.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

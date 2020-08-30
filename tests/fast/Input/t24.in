@@ -53,7 +53,7 @@
  znucl 19 17
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "19k.pspnc, 17cl.pspnc"
+ pseudos "PseudosTM_pwteter/19k.pspnc, PseudosTM_pwteter/17cl.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

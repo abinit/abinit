@@ -78,7 +78,7 @@ contains
 !!  gvnlxc(2,*)=updated gvnlxc
 !!
 !! PARENTS
-!!      chebfi
+!!      m_chebfi
 !!
 !! CHILDREN
 !!
@@ -299,7 +299,7 @@ end subroutine rayleigh_ritz_subdiago
 !!  gvnlxc(2,*)=updated gvnlxc
 !!
 !! PARENTS
-!!      chebfi
+!!      m_chebfi
 !!
 !! CHILDREN
 !!
@@ -579,7 +579,7 @@ end subroutine rayleigh_ritz_distributed
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      rayleigh_ritz
+!!      m_rayleigh_ritz
 !!
 !! CHILDREN
 !!
@@ -633,7 +633,7 @@ end subroutine from_mat_to_block_cyclic
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      rayleigh_ritz
+!!      m_rayleigh_ritz
 !!
 !! CHILDREN
 !!

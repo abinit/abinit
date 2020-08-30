@@ -425,6 +425,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !arrays
  real(dp) :: strsxc(6)
  real(dp) :: dum(0)
+ real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
  real(dp),allocatable :: vxc(:,:),xccc3d(:)
 
@@ -507,7 +508,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    optionrhoxc = 2 !See rhotoxc.f
 
-   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartree)
+   call hartre(1,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog,rprimd,dummyvgeo,vhartree)
    call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
@@ -562,7 +563,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    optionrhoxc = -2 !See rhotoxc.f
 
-   call hartre(1,gsqcut,0,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartree)
+   call hartre(1,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog,rprimd,dummyvgeo,vhartree)
    call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
@@ -883,7 +884,7 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
 !Maximum value allowed for rs.
 !scalars
  integer :: ifft,ikxc,ncut,nkxc,nlop,tim_fourdp
- real(dp),parameter :: rslim=50._dp
+ real(dp),parameter :: rslim=50._dp,dummyvgeo(3)=zero
  real(dp) :: a2,a3,a4,rho,rhocuttot,rhomin,rs
  character(len=500) :: message
 !arrays
@@ -1015,7 +1016,7 @@ end subroutine kxc_eok
 !!  No nl core correction
 !!
 !! PARENTS
-!!      screening,sigma
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
@@ -1048,6 +1049,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  real(dp) :: qphon(3),strsxc(6),dum(0)
+ real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcpw_g(:,:),kxcr(:,:),phas(:,:,:)
  real(dp),allocatable :: rhog(:,:),vhartr(:),kxcpw_r(:,:),vxclda(:,:)
  real(dp),allocatable :: xccc3d(:),xx(:,:)
@@ -1118,7 +1120,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    call libxc_functionals_init(ixc,Dtset%nspden,xc_tb09_c=Dtset%xc_tb09_c)
  end if
 
- call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft_tot,ngfft,rhog,Cryst%rprimd,vhartr)
+ call hartre(1,gsqcut,3,izero,MPI_enreg_seq,nfft_tot,ngfft,1,zero,rhog,Cryst%rprimd,dummyvgeo,vhartr)
 
 !Compute the kernel.
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
@@ -1267,7 +1269,7 @@ end subroutine kxc_driver
 !!  No nl core correction
 !!
 !! PARENTS
-!!      screening,sigma
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
@@ -1307,6 +1309,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: qpg(3),qpgp(3),qphon(3),strsxc(6),q_point(3),dum(0)
+ real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcr(:,:)
  real(dp),allocatable :: rhog(:,:),vhartr(:),vxclda(:,:)
  real(dp),allocatable :: xccc3d(:),my_rhor(:,:)
@@ -1435,7 +1438,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    call libxc_functionals_init(ixc,Dtset%nspden,xc_tb09_c=Dtset%xc_tb09_c)
  end if
 
- call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,rhog,Cryst%rprimd,vhartr)
+ call hartre(1,gsqcut,3,izero,MPI_enreg_seq,nfft,ngfft,1,zero,rhog,Cryst%rprimd,dummyvgeo,vhartr)
  call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
 & n3xccc,option,my_rhor,Cryst%rprimd,&

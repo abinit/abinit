@@ -30,6 +30,9 @@ module m_splines
  use m_abicore
  use m_errors
 
+ use m_fstrings, only : sjoin, itoa, ftoa
+ !use m_time,   only : timab
+
  implicit none
 
  public :: splfit
@@ -56,15 +59,13 @@ contains
 !!  splfit
 !!
 !! FUNCTION
-!!  Evaluate cubic spline fit to get function values on input set
-!!  of ORDERED, UNFORMLY SPACED points.
+!!  Evaluate cubic spline fit to get function values on input set of ORDERED, UNFORMLY SPACED points.
 !!  Optionally gives derivatives (first and second) at those points too.
 !!  If point lies outside the range of arg, assign the extremal
 !!  point values to these points, and zero derivative.
 !!
 !! INPUTS
-!!  arg(numarg)=equally spaced arguments (spacing delarg) for data
-!!   to which spline was fit.
+!!  arg(numarg)=equally spaced arguments (spacing de) for data to which spline was fit.
 !!  fun(numarg,2)=function values to which spline was fit and spline
 !!   fit to second derivatives (from Numerical Recipes spline).
 !!  ider=  see above
@@ -82,122 +83,126 @@ contains
 !!        if ider=0, compute only the function (contained in fun)
 !!        if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
 !!        if ider=2, compute only the second derivative of the function (in derfun)
+!!
 !! PARENTS
-!!      getnel,m_pawpwij,mkffnl,pawgylmg,psp8lo
+!!      m_mkffnl,m_mklocl,m_occ,m_pawpwij,m_psptk
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
+subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
 
- integer, intent(in) :: ider,numarg,numnew
- real(dp), intent(in) :: arg(numarg),fun(numarg,2),newarg(numnew)
+ integer, intent(in) :: ider, numarg, numnew
+ real(dp), intent(in) :: arg(numarg), fun(numarg,2), newarg(numnew)
  real(dp), intent(out) :: derfun(numnew)
  real(dp), intent(inout) :: newfun(numnew)
 
+!Local variables---------------------------------------
  integer :: i,jspl
- real(dp) :: argmin,delarg,d,aa,bb,cc,dd
- character(len=500) :: msg
+ real(dp) :: argmin,de,d,aa,bb,cc,dd,de2_dby_six,de_dby_six
+ !real(dp) :: tsec(2)
 
-!argmin is smallest x value in spline fit; delarg is uniform spacing of spline argument
- argmin=arg(1)
- delarg=(arg(numarg)-argmin)/dble(numarg-1)
+! *************************************************************************
 
- if(delarg<tol12)then
-   write(msg,'(a,es16.8)') ' delarg should be strictly positive, while delarg= ',delarg
-   MSG_ERROR(msg)
+ ! Keep track of time spent in mkffnl
+ !call timab(1905, 1, tsec)
+
+ ! argmin is smallest x value in spline fit; de is uniform spacing of spline argument
+ argmin = arg(1)
+ de = (arg(numarg) - argmin) / dble(numarg-1)
+ de2_dby_six = de**2 / six
+ de_dby_six = de / six
+
+ if (de < tol12) then
+   MSG_ERROR(sjoin('spacing should be strictly positive, while de is: ', ftoa(de)))
  endif
 
- jspl=-1
+ jspl = -1
 
-!Do one loop for no grads, other for grads:
- if (ider==0) then
-! Spline index loop for no grads:
+ ! Do one loop for no grads, other for grads
+ select case (ider)
+ case (0)
+
+  ! Spline index loop for no grads:
   do i=1,numnew
-   if (newarg(i).ge.arg(numarg)) then
-! MJV 6/4/2009 FIXME this message is never used
-    write(msg,1000)char(10),i,newarg(i), &
-&     jspl,char(10),numarg,arg(numarg),char(10),char(10),char(10)
-1000 format(a1,' splfit: for arg number',i8,2x,'of value', &
-&    1p,e12.4,1x,'jspl=',i8,a1,' is >= numarg=',i8,  &
-&    '  (max arg(numarg)=',e12.4,')',a1,             &
-&    ' Means function values are being requested outside',       &
-&    ' range of data.',a1,' Function and slope will be set to',  &
-&    ' values at upper end of data.',a1)
+    if (newarg(i) >= arg(numarg)) then
+      ! function values are being requested outside range of data.',a1,'
+      ! Function and slope will be set to values at upper end of data.
 
-    newfun(i)=fun(numarg,1)
+      newfun(i) = fun(numarg,1)
 
-   else if (newarg(i).le.arg(1)) then
-    newfun(i)=fun(1,1)
+    else if (newarg(i) <= arg(1)) then
+      newfun(i) = fun(1,1)
 
-   else
-    jspl=1+int((newarg(i)-argmin)/delarg)
-    d=newarg(i)-arg(jspl)
-    bb = d/delarg
-    aa = 1.0d0-bb
-    cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
-    dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
-    newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
-   end if
+    else
+      jspl = 1 + int((newarg(i) - argmin)/de)
+      d = newarg(i) - arg(jspl)
+      bb = d / de
+      aa = one - bb
+      cc = aa*(aa**2 -one) * de2_dby_six
+      dd = bb*(bb**2 -one) * de2_dby_six
+      newfun(i)= aa * fun(jspl,1) + bb*fun(jspl+1,1) + cc*fun(jspl,2) + dd*fun(jspl+1,2)
+    end if
   enddo
 
- else if(ider==1)then
+ case (1)
 
-! Spline index loop includes grads:
-  do i=1,numnew
+   ! Spline index loop includes grads:
+   do i=1,numnew
 
-   if (newarg(i).ge.arg(numarg)) then
-    newfun(i)=fun(numarg,1)
-    derfun(i)=0.0d0
+     if (newarg(i) >= arg(numarg)) then
+       newfun(i) = fun(numarg,1)
+       derfun(i) = zero
 
-   else if (newarg(i).le.arg(1)) then
-    newfun(i)=fun(1,1)
-    derfun(i)=0.0d0
+     else if (newarg(i) <= arg(1)) then
+       newfun(i) = fun(1,1)
+       derfun(i) = zero
 
-   else
+     else
+       ! cubic spline interpolation:
+       jspl = 1 + int((newarg(i) - arg(1)) / de)
+       d = newarg(i) - arg(jspl)
+       bb = d / de
+       aa = one - bb
+       cc = aa*(aa**2 - one) * de2_dby_six
+       dd = bb*(bb**2 - one) * de2_dby_six
+       newfun(i) = aa*fun(jspl,1) + bb*fun(jspl+1,1) + cc*fun(jspl,2) + dd*fun(jspl+1,2)
+       ! spline fit to first derivative:
+       ! note correction of Numerical Recipes sign error
+       derfun(i) = (fun(jspl+1,1)-fun(jspl,1)) / de +    &
+          (-(3.d0*aa**2 -one) * fun(jspl,2) + (3.d0*bb**2 -one) * fun(jspl+1,2)) * de_dby_six
 
-!   cubic spline interpolation:
-    jspl=1+int((newarg(i)-arg(1))/delarg)
-    d=newarg(i)-arg(jspl)
-    bb = d/delarg
-    aa = 1.0d0-bb
-    cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
-    dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
-    newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
-!   spline fit to first derivative:
-!   note correction of Numerical Recipes sign error
-    derfun(i) = (fun(jspl+1,1)-fun(jspl,1))/delarg +    &
-&      (-(3.d0*aa**2-1.d0)*fun(jspl,2)+                 &
-&        (3.d0*bb**2-1.d0)*fun(jspl+1,2)) * delarg/6.0d0
+     end if
+   enddo
 
-          end if
-  enddo
+ case (2)
 
- else if (ider==2) then
+   do i=1,numnew
 
-  do i=1,numnew
+     if (newarg(i) >= arg(numarg)) then
+       derfun(i) = zero
 
-   if (newarg(i).ge.arg(numarg)) then
-    derfun(i)=0.0d0
+     else if (newarg(i) <= arg(1)) then
+       derfun(i) = zero
 
-   else if (newarg(i).le.arg(1)) then
-    derfun(i)=0.0d0
+     else
+       ! cubic spline interpolation:
+       jspl = 1 + int((newarg(i) - argmin) / de)
+       d = newarg(i) - arg(jspl)
+       bb = d / de
+       aa = one - bb
+       ! second derivative of spline (piecewise linear function)
+       derfun(i) = aa*fun(jspl,2) + bb*fun(jspl+1,2)
 
-   else
+     end if
+   enddo
 
-!   cubic spline interpolation:
-    jspl=1+int((newarg(i)-argmin)/delarg)
-    d=newarg(i)-arg(jspl)
-    bb = d/delarg
-    aa = 1.0d0-bb
-!   second derivative of spline (piecewise linear function)
-    derfun(i) = aa*fun(jspl,2)+bb*fun(jspl+1,2)
+ case default
+   MSG_ERROR(sjoin("Invalid ider:", itoa(ider)))
+ end select
 
-   end if
-  enddo
-
- end if
+ !call timab(1905, 2, tsec)
 
 end subroutine splfit
 !!***
@@ -230,12 +235,10 @@ end subroutine splfit
 !!    Work space, double precision DIAG(N) - should be removed ...
 !!
 !! PARENTS
-!!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      init_occ_ent,integrho,m_atom,m_dens,m_entropyDMFT,m_ewald,m_paw_slater
-!!      m_special_funcs,m_splines,outscfcv,pawinit,predict_string,psp10in
-!!      psp10nl,psp11nl,psp1cc,psp1in,psp1nl,psp2in,psp2nl,psp3in,psp3nl,psp4cc
-!!      psp5in,psp5nl,psp6cc,psp6in,psp8in,psp8lo,psp8nl,psp9in
-!!      random_stopping_power,spline_paw_fncs,upf2abinit,vso_realspace_local
+!!      m_a2ftr,m_bader,m_dens,m_entropyDMFT,m_mkrho,m_occ,m_outscfcv
+!!      m_paw_atomorb,m_paw_init,m_paw_mkrho,m_paw_slater,m_predict_string
+!!      m_psp1,m_psp5,m_psp6,m_psp8,m_psp9,m_psp_hgh,m_psptk,m_screening_driver
+!!      m_sigc,m_special_funcs,m_spin_current,m_splines,m_upf2abinit
 !!
 !! CHILDREN
 !!
@@ -436,8 +439,6 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
   enddo
 
   ABI_DEALLOCATE(tmp)
-
-  return
 end subroutine spline
 !!***
 
@@ -674,10 +675,10 @@ end subroutine spline_complex
 !!    The input value is incremented by the number of such points.
 !!
 !! PARENTS
-!!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      m_atom,m_cut3d,m_entropyDMFT,m_paw_slater,m_special_funcs,m_splines
-!!      outscfcv,partial_dos_fractions,predict_string,psp6cc
-!!      random_stopping_power,spline_paw_fncs,vso_realspace_local,wvl_initro
+!!      m_a2ftr,m_cut3d,m_entropyDMFT,m_epjdos,m_mkrho,m_outscfcv,m_paw_atomorb
+!!      m_paw_mkrho,m_paw_slater,m_predict_string,m_psp6,m_psptk
+!!      m_screening_driver,m_sigc,m_special_funcs,m_spin_current,m_splines
+!!      m_wvl_rho
 !!
 !! CHILDREN
 !!
@@ -816,14 +817,6 @@ end subroutine splint_complex
 !!
 !! FUNCTION
 !!  Calculates an integral using cubic spline interpolation.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2020 ABINIT Group (Yann Pouillon)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!  For the initials of contributors, see
-!!  ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  npts= number of grid points of input mesh

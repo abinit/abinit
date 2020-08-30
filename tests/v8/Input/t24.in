@@ -36,13 +36,12 @@
  nstep  20
  ecut 5
 
- pp_dirpath "$ABI_PSPDIR"
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
  pseudos "1h.pspnc, 1h.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-##%% exclude_builders = ubu_intel_17.0_openmpi
 #%% [files]
 #%% files_to_test = 
 #%%   t24.out, tolnlines = 2, tolabs = 2.2e-9, tolrel = 1.0e-9

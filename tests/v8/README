@@ -15,4 +15,5 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Tests 95-99 concern again ground state (constrained DFT and checking of symmetries)
 
+* Tests 101-  concern again ground state (1/G**2 cut-off)
 ------------------------------------------------------------------

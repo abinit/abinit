@@ -89,7 +89,7 @@
  znucl 50
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "50sn.psphgh"
+ pseudos "PseudosHGH_pwteter/50sn.4.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

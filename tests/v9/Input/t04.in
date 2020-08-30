@@ -12,7 +12,7 @@ outdata_prefix = "t04.outdata"
 tmpdata_prefix = "t04.tmpdata"
 output_file = "t04.output"
 pp_dirpath "$ABI_PSPDIR"
-pseudos = "12mg.pspnc, 05b.soft_tm"
+pseudos = "PseudosTM_pwteter/12mg.pspnc, 05b.soft_tm"
 
 # MgB2 lattice structure.
 ## ntypat  2
@@ -61,7 +61,7 @@ nband   8
 #%% max_nprocs = 2
 #%% [shell]
 #%% pre_commands =
-#%%   pw_cp 12mg.pspnc 12mg.pspnc;
+#%%   pw_cp PseudosTM_pwteter/12mg.pspnc 12mg.pspnc;
 #%%   pw_cp 05b.soft_tm 05b.soft_tm;
 #%%   iw_cp t04_POSCAR t04_POSCAR;
 #%%   iw_cp mgb2.ucell mgb2.ucell;

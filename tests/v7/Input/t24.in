@@ -48,7 +48,7 @@ istwfk *1
 
 #For all the dataset
 nsym 1
-icutcoul 6
+gw_icutcoul 6
 nband 27
 
 #==================================================================================
@@ -132,7 +132,6 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t23.in, t24.in, t25.in
-#%% exclude_hosts = ibm@ibm8
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
 #%% files_to_test = 

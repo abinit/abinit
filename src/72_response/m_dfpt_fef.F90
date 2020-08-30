@@ -95,10 +95,10 @@ contains
 !!      into a common constructor in m_dtefield or somethin
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      kpgio,wrtout
+!!      dzgedi,dzgefa,overlap_g
 !!
 !! SOURCE
 
@@ -741,10 +741,10 @@ end subroutine dfptff_initberry
 !! grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!
 !! PARENTS
-!!      dfpt_vtorho
+!!      m_dfpt_vtorho
 !!
 !! CHILDREN
-!!      overlap_g
+!!      dzgedi,dzgefa,overlap_g
 !!
 !! SOURCE
 
@@ -1230,10 +1230,10 @@ end subroutine dfptff_gradberry
 !! grad_berry = the gradient of the Berry phase term
 !!
 !! PARENTS
-!!      dfpt_vtorho
+!!      m_dfpt_vtorho
 !!
 !! CHILDREN
-!!      overlap_g
+!!      dzgedi,dzgefa,overlap_g
 !!
 !! SOURCE
 
@@ -1731,10 +1731,10 @@ end subroutine dfptff_gbefd
 !! eberry = the energy of the Berry phase term
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      overlap_g
+!!      dzgedi,dzgefa,overlap_g
 !!
 !! SOURCE
 
@@ -2128,10 +2128,10 @@ end subroutine dfptff_edie
 !! grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      overlap_g
+!!      dzgedi,dzgefa,overlap_g
 !!
 !! SOURCE
 
@@ -2456,10 +2456,10 @@ end subroutine dfptff_ebp
 !! diet = electric susceptibility tensor
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      overlap_g
+!!      dzgedi,dzgefa,overlap_g
 !!
 !! SOURCE
 
@@ -2660,10 +2660,10 @@ end subroutine dfptff_die
 !! d2lo(1,1:3,natom+5,1:3,1:natom) = Born effective charge tensor
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      overlap_g
+!!      dzgedi,dzgefa,overlap_g
 !!
 !! SOURCE
 
@@ -2861,7 +2861,7 @@ end subroutine dfptff_bec
 !! qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3) = inverse of the overlap matrix
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
 !!      dzgedi,dzgefa,overlap_g

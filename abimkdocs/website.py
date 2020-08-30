@@ -456,14 +456,14 @@ Change the input yaml files or the python code
         #with self.new_mdfile(dirname, "index.md") as mdf:
         #    mdf.write("\n".join(index_md))
 
-    def copy_readme_files(self):
+    def copy_install_files(self):
         """
-        Copy README_*.md files from ~abint to ~abinit/doc and *git ignore* them.
+        Copy INSTALL_*.md files from ~abinit to ~abinit/doc and *git ignore* them.
         Files must be included in mkdocs.yml in the `Installation` section.
         """
         top = os.path.abspath(os.path.join(self.root, ".."))
         for f in os.listdir(top):
-            if f.startswith("README_") and f.endswith(".md"):
+            if f.startswith("INSTALL_") and f.endswith(".md"):
                 src = os.path.join(top, f)
                 dest = os.path.join(self.root, f)
                 shutil.copy(src, dest)
@@ -477,12 +477,14 @@ Change the input yaml files or the python code
         app("""
 # Autoconf examples
 
-This page gathers the autoconf files used by the buildbot testfarm
+This page gathers the autoconf files used by the buildbot testfarm. The different
+bots are described in the Wiki: [slave matrix](https://wiki.abinit.org/doku.php?id=bb:slaves)
+and [builder matrix](https://wiki.abinit.org/doku.php?id=bb:builder).
 
 """)
         for f in os.listdir(dirpath):
             path = os.path.join(dirpath, f)
-            if os.path.isdir(path) or path.endswith(".swp"): continue
+            if os.path.isdir(path) or path.endswith(".swp") or path.endswith(".ac"): continue
             app("## %s  " %  f)
             with io.open(path, "rt", encoding="utf-8") as fh:
                 # Remove all comments except for options that are specified.
@@ -512,7 +514,7 @@ This page gathers the autoconf files used by the buildbot testfarm
         """Generate markdown files using the data stored in the bibtex file, the abivars file ..."""
         start = time.time()
 
-        self.copy_readme_files()
+        self.copy_install_files()
         self.generate_page_with_ac_examples()
 
         # Write index.md with the description of the input variables.

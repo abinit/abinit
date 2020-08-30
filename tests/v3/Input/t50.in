@@ -44,7 +44,7 @@ xred 0.1  0.15  0.2
 wtk 1 znucl 12
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "12mg.pspnc"
+ pseudos "PseudosTM_pwteter/12mg.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
