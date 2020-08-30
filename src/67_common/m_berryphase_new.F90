@@ -1288,7 +1288,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
          end do
 
 
-!        correction to obtain a smouth logarithm of the determinant
+!        correction to obtain a smooth logarithm of the determinant
          ABI_ALLOCATE(str_flag,(nstr))
 !        DEBUG
 !        since we don't have any case of non-nul Chern number,
