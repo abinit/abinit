@@ -46,6 +46,7 @@
  amu         10.8113
  natom       32
  typat       32*1
+ tolsym      1.0e-8 # The default value of tolsym is quite permissive, so that the cell would be identified as being non-primitive with a high multiplicity
  xred
   0.0000026487 0.0000019908 -0.0000037886
   0.2500018579 0.2499988383 0.0000027427

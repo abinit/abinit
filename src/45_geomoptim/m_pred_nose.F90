@@ -80,7 +80,7 @@ contains
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
 !!      hist2var,metric,var2hist,wrtout,xcart2xred,xred2xcart

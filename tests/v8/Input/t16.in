@@ -25,7 +25,7 @@ spin_dt=1e-16 s
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% exclude_hosts = nag@abiref
+#%% exclude_builders = .*_nag_7.0_.*
 #%% system_xml = t16.xml
 #%% [files]
 #%% files_to_test = 

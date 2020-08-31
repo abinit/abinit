@@ -324,7 +324,7 @@ pure function arth_int(start, step, nn)
    end do
 
  case (0)
-   RETURN
+   return
  end select
 
 end function arth_int
@@ -2790,7 +2790,7 @@ end subroutine quadrature
 !! NOTES
 !!
 !! PARENTS
-!!      psden,psp11lo,psp11nl,psp5lo,psp5nl,psp8lo,psp8nl,vhtnzc
+!!      m_phonons,m_psp6,m_psptk,m_unittests,m_upf2abinit
 !!
 !! CHILDREN
 !!
@@ -3106,8 +3106,7 @@ end subroutine cspint
 !! weights(n)=array of integration weights
 !!
 !! PARENTS
-!!      calc_rpa_functional,calc_sigc_me,integrho,integvol,m_numeric_tools
-!!      screening,surf
+!!      m_bader,m_numeric_tools,m_screening_driver,m_sigc
 !!
 !! CHILDREN
 !!
@@ -3486,10 +3485,9 @@ end subroutine mkherm
 !!  Interface allows aliasing
 !!
 !! PARENTS
-!!      extrapwf,subdiago
+!!      m_cgtools,m_extraprho
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3746,7 +3744,7 @@ end subroutine symmetrize_dpc
 !! mat_out(N*N+1)= packed matrix
 !!
 !! PARENTS
-!!      rayleigh_ritz
+!!      m_rayleigh_ritz
 !!
 !! CHILDREN
 !!
@@ -4511,7 +4509,7 @@ end function mincm
 !!  spectrum(nz)=Contains f(z) on the input mesh.
 !!
 !! PARENTS
-!!      bsepostproc,m_haydock
+!!      m_haydock
 !!
 !! CHILDREN
 !!
@@ -5219,15 +5217,15 @@ end subroutine interpolate_denpot
 !!  int_values(npts)=integral of values.
 !!
 !! PARENTS
-!!      eliashberg_1d,evdw_wannier,kramerskronig,m_ebands,m_exc_spectra
-!!      m_numeric_tools,m_phgamma,m_phonons,m_xc_vdw,mka2f,mka2fQgrid,mka2f_tr
-!!      mka2f_tr_lova,mlwfovlp_projpaw,mlwfovlp_radial,outscfcv,radsintr
+!!      m_a2ftr,m_ebands,m_eliashberg_1d,m_elphon,m_evdw_wannier,m_exc_spectra
+!!      m_integrals,m_mlwfovlp,m_numeric_tools,m_outscfcv,m_phgamma,m_phonons
+!!      m_rta,m_tdep_psij,m_xc_vdw
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine simpson_int(npts,step,values,int_values)
+subroutine simpson_int(npts, step, values, int_values)
 
 !Arguments ------------------------------------
 !scalars
@@ -5516,7 +5514,7 @@ end subroutine vdiff_print
 !!  a(mesh)=Input values, smoothed in output
 !!
 !! PARENTS
-!!      psp6cc,upf2abinit
+!!      m_psp6,m_upf2abinit
 !!
 !! CHILDREN
 !!
@@ -5582,7 +5580,7 @@ end subroutine smooth
 !!  zz(ndim)= first or second derivative of y
 !!
 !! PARENTS
-!!      upf2abinit
+!!      m_upf2abinit
 !!
 !! CHILDREN
 !!
@@ -5879,7 +5877,6 @@ end function uniformrandom
 !!      m_bfgs
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -6062,10 +6059,9 @@ end subroutine findmin
 !! Inspired to check_kramerskronig of the DP code
 !!
 !! PARENTS
-!!      linear_optics_paw
+!!      m_paw_optics
 !!
 !! CHILDREN
-!!      simpson_int,wrtout
 !!
 !! SOURCE
 
@@ -6266,7 +6262,7 @@ end function dotproduct
 !!  rspts(npts)=inverse cubic root of rhoarr
 !!
 !! PARENTS
-!!      drivexc,gammapositron,xchcth,xcpbe,xcpositron,xctfw
+!!      m_drivexc,m_gammapositron,m_xchcth,m_xclda,m_xcpbe,m_xcpositron
 !!
 !! CHILDREN
 !!
@@ -6382,6 +6378,11 @@ end subroutine safe_div
 !!
 !! FUNCTION
 !!  Allocate and return array with the indices in the input boolean array `bool_list` that evaluates to .True.
+!!
+!! PARENTS
+!!      m_wfd
+!!
+!! CHILDREN
 !!
 !! SOURCE
 

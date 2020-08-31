@@ -38,7 +38,7 @@ prtden 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
+#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
 #%% files_to_test = 
 #%%   t06.out, tolnlines = 2, tolabs = 1.100e-07, tolrel = 5.000e-04

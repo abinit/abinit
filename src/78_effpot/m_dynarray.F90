@@ -117,9 +117,9 @@ CONTAINS
 !! OUTPUT
 !! real_array<type(real_array_type)()> = real_array_type data
 !! PARENTS
-!!      m_dynarray
 !!
 !! CHILDREN
+!!      binsearch_test,insertion_sort_int_test,int2d_array_test
 !!
 !! SOURCE
 subroutine real_array_type_push(self, val)
@@ -156,9 +156,9 @@ end subroutine real_array_type_push
 !! OUTPUT
 !! real_array<type(real_array_type)()> = real_array_type data
 !! PARENTS
-!!      m_dynarray
 !!
 !! CHILDREN
+!!      binsearch_test,insertion_sort_int_test,int2d_array_test
 !!
 !! SOURCE
 subroutine real_array_type_finalize(self)
@@ -185,9 +185,9 @@ end subroutine real_array_type_finalize
 !! OUTPUT
 !! int_array<type(real_array_type)()> = int_array_type data
 !! PARENTS
-!!      m_dynarray
 !!
 !! CHILDREN
+!!      binsearch_test,insertion_sort_int_test,int2d_array_test
 !!
 !! SOURCE
 subroutine int_array_type_push(self, val)
@@ -303,9 +303,9 @@ end subroutine int_array_type_sort
 !! OUTPUT
 !! int_array<type(int_array_type)()> = int_array_type data
 !! PARENTS
-!!      m_dynarray
 !!
 !! CHILDREN
+!!      binsearch_test,insertion_sort_int_test,int2d_array_test
 !!
 !! SOURCE
 subroutine int_array_type_finalize(self)
@@ -334,9 +334,9 @@ end subroutine int_array_type_finalize
 !! OUTPUT
 !! int_array<type(real_array_type)()> = int2d_array_type data
 !! PARENTS
-!!      m_dynarray
 !!
 !! CHILDREN
+!!      binsearch_test,insertion_sort_int_test,int2d_array_test
 !!
 !! SOURCE
 subroutine int2d_array_type_push(self, val)
@@ -418,9 +418,9 @@ subroutine int2d_array_type_push_unique(self, val, position)
 !! OUTPUT
 !! int_array<type(int2d_array_type)()> = int2d_array_type data
 !! PARENTS
-!!      m_dynarray
 !!
 !! CHILDREN
+!!      binsearch_test,insertion_sort_int_test,int2d_array_test
 !!
 !! SOURCE
 subroutine int2d_array_type_finalize(self)

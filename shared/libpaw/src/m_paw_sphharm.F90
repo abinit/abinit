@@ -3304,8 +3304,7 @@ end subroutine realgaunt
 !!  NOTES
 !!  
 !! PARENTS
-!! 
-!! m_pawang
+!!      m_pawang
 !!
 !! CHILDREN
 !!

@@ -342,11 +342,11 @@ contains
 !! * Complete implementation of spin-orbit
 !!
 !! PARENTS
-!!      nonlop
+!!      m_nonlop
 !!
 !! CHILDREN
-!!      mkkpg,opernla_ylm,opernlb_ylm,opernlc_ylm,opernld_ylm,ph1d3d,strconv
-!!      xmpi_sum
+!!      mkkpg,mkkpgcart,opernla_ylm,opernlb_ylm,opernlc_ylm,opernld_ylm,ph1d3d
+!!      strconv,xmpi_sum
 !!
 !! SOURCE
 

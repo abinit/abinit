@@ -12,7 +12,7 @@ ecutwfn    24            # Cutoff for the wavefunctions.
 ecuteps     8            # Cutoff in the correlation part.
 ecutsigx   20            # Cutoff in the exchange part.
 nband       50           # Number of bands for the correlation part.
-icutcoul    3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul   3            # old deprecated value of icutcoul, only used for legacy
 
 timopt -1
 

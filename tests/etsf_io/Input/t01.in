@@ -37,6 +37,7 @@ xcart
     -0.75695   2.11523  -0.12023
      0.75695   5.66557   3.54768
     -0.75695   5.66557   3.54768    Angstrom
+tolsym 1.0e-8
 
 # Definition of the planewave basis set
 ecut   20           # This cut-off is too low for real calculations

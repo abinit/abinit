@@ -87,7 +87,7 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      end_sortph,ifc_fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,wrtout
+!!      end_sortph,ifc%fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,wrtout
 !!
 !! SOURCE
 

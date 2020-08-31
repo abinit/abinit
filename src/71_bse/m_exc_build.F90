@@ -151,9 +151,12 @@ contains
 !!      -----------------------------------
 !!
 !! PARENTS
-!!      exc_build_ham
+!!      m_exc_build
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1734,6 +1737,9 @@ end subroutine exc_build_block
 !! PARENTS
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2106,9 +2112,12 @@ end subroutine exc_build_v
 !!  The excitonic Hamiltonian is saved on an external binary file (see below).
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2232,9 +2241,12 @@ end subroutine exc_build_ham
 !!     Allocated here and filled with the matrix elements on each node.
 !!
 !! PARENTS
-!!      exc_build_ham
+!!      m_exc_build
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 

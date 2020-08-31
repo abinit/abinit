@@ -323,13 +323,12 @@ contains
 !! * In the case signs=1, the array vectout is not used.
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nsteltwf,dfptnl_resp,energy,fock_getghc,forstrnps,getgh1c
-!!      getgh1dq,getgh2c,getghc,getgsc,m_invovl,m_lobpcgwf,make_grad_berry,
-!!      nonlop_test,prep_nonlop,vtowfk,wfd_vnlpsi
+!!      m_cgwf,m_d2frnl,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy,m_fock_getghc
+!!      m_forstr,m_getgh1c,m_getgh2c,m_getghc,m_invovl,m_lobpcgwf,m_nonlop_test
+!!      m_orbmag,m_pead_nl_loop,m_prep_kgb,m_rf2,m_vtowfk
 !!
 !! CHILDREN
-!!      gemm_nonlop,nonlop_gpu,nonlop_pl,nonlop_ylm,pawcprj_alloc,pawcprj_copy
-!!      pawcprj_free,timab
+!!      dotprod_g,gpu_nonlop
 !!
 !! SOURCE
 
@@ -937,7 +936,7 @@ end subroutine nonlop
 !! * Implementation for response function (phonons, ddk, elastic tensor, ...)
 !!
 !! PARENTS
-!!      nonlop
+!!      m_nonlop
 !!
 !! CHILDREN
 !!      dotprod_g,gpu_nonlop

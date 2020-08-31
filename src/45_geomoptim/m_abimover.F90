@@ -412,7 +412,7 @@ contains  !=============================================================
 !! NOTES
 !!
 !! PARENTS
-!!      mover
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -802,7 +802,10 @@ end subroutine abimover_ini
 !!  ab_mover <type(abimover)> = The abimover structure to be destroyed
 !!
 !! PARENTS
-!!      m_abimover,mover
+!!      m_m1geo,m_mover
+!!
+!! CHILDREN
+!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -932,7 +935,7 @@ end subroutine abimover_print
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -967,7 +970,7 @@ end subroutine mttk_ini
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -1007,7 +1010,7 @@ end subroutine mttk_fin
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_mover,m_precpred_1geo
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -1041,7 +1044,7 @@ end subroutine abiforstr_ini
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_mover,m_precpred_1geo
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -1116,7 +1119,7 @@ end subroutine abiforstr_fin
 !!   to be less dependent of the internals already incorporated.
 !!
 !! PARENTS
-!!      pred_delocint
+!!      m_pred_delocint
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -1664,7 +1667,7 @@ end subroutine make_bonds
 !! NOTES
 !!
 !! PARENTS
-!!      pred_delocint,xcart2deloc
+!!      m_pred_delocint
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -1966,7 +1969,7 @@ end function angle_dihedral
 !!                       adition of covalent radius to decide if a bond is created
 !!
 !! PARENTS
-!!      prec_simple
+!!      m_pred_simple
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -2203,7 +2206,7 @@ end subroutine make_bonds_new
 !!  Free memory
 !!
 !! PARENTS
-!!      m_abimover,prec_simple
+!!      m_abimover,m_pred_simple
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -2338,8 +2341,10 @@ end subroutine print_bonds
 !! deloc= container object for delocalized internal coordinates
 !!
 !! PARENTS
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
+!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -2389,7 +2394,7 @@ end subroutine delocint_ini
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_abimover
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds

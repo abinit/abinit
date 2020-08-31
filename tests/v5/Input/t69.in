@@ -29,7 +29,7 @@ gwcomp3     0
 nkptgw3     2
 kptgw3      0. 0. 0.     0.5 0.5 0.
 bdgw3       2 4          5 5
-icutcoul3   3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul3  3           # old deprecated value of icutcoul, only used for legacy
 
 # DATASET 4 : SIG
 optdriver4  4
@@ -44,7 +44,7 @@ gwencomp4   1.2
 nkptgw4     2
 kptgw4      0. 0. 0.     0.5 0.5 0.
 bdgw4       2 4          5 5
-icutcoul4   3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul4  3           # old deprecated value of icutcoul, only used for legacy
 
 # DATASET 5 : SCR
 symchi5     1
@@ -71,7 +71,7 @@ gwencomp6   1.2
 nkptgw6     2
 kptgw6      0. 0. 0.     0.5 0.5 0.
 bdgw6       2 4          5 5
-icutcoul6   3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul6  3           # old deprecated value of icutcoul, only used for legacy
 
 
 

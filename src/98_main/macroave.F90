@@ -38,7 +38,7 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,four1,hdr_fort_read,hdr_free
+!!      abi_io_redirect,abimem_init,abinit_doctor,four1,hdr%free,hdr_fort_read
 !!      hdr_ncread,iorho,macroav_spline,macroav_splint,thetaft,xmpi_end
 !!      xmpi_init
 !!

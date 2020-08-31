@@ -80,9 +80,10 @@ CONTAINS
 !!  elements of \nabla instead of the elements of the momentum operator p.
 !!
 !! PARENTS
+!!      m_bethe_salpeter,m_paw_optics,m_screening_driver
 !!
 !! CHILDREN
-!!      setnabla_ylm,nderiv_gen,pawrad_deducer0,simp_gen
+!!      nderiv_gen,pawrad_deducer0,setnabla_ylm,simp_gen
 !!
 !! SOURCE
 
@@ -246,9 +247,10 @@ end subroutine pawnabla_init
 !!  elements of \nabla instead of the elements of the momentum operator p.
 !!
 !! PARENTS
+!!      m_paw_optics
 !!
 !! CHILDREN
-!!      setnabla_ylm,nderiv_gen,pawrad_deducer0,simp_gen
+!!      nderiv_gen,pawrad_deducer0,setnabla_ylm,simp_gen
 !!
 !! SOURCE
 

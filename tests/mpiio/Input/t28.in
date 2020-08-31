@@ -50,7 +50,7 @@ kptrlatt 2 2 -2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = nag@abiref
+#%% exclude_builders = .*_nag_7.0_.*
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

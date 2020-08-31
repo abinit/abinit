@@ -179,8 +179,8 @@ CONTAINS
 !!    %rmax = Max. value of r = rad(mesh_size)
 !!
 !! PARENTS
-!!      dfpt_eltfrxc,m_atom,m_paw_gaussfit,m_pawpsp,m_pawpwij,m_pawxmlps,m_psps
-!!      mkcore,mkcore_paw,mkcore_wvl,psp8in,psp9in,wvl_initro
+!!      m_dfpt_elt,m_mkcore,m_paw_atomorb,m_paw_gaussfit,m_pawpsp,m_pawpwij
+!!      m_pawxmlps,m_psp8,m_psp9,m_psps,m_wvl_rho,mkcore_wvl
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -409,7 +409,7 @@ end subroutine pawrad_free_1D
 !!  Only writing.
 !!
 !! PARENTS
-!!      m_atom
+!!      m_paw_atomorb
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -504,7 +504,7 @@ end subroutine pawrad_print
 !!    * 2 if Rmesh2 is denser than Rmesh1
 !!
 !! PARENTS
-!!      m_atom,m_paw_slater
+!!      m_paw_atomorb,m_paw_slater
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -644,9 +644,9 @@ end subroutine pawrad_copy
 !!  func(funcsz)=array containing values of function to extrapolate
 !!
 !! PARENTS
-!!      denfgr,m_paw_atom,m_paw_gaussfit,m_paw_pwaves_lmn,m_paw_slater,m_pawdij
-!!      m_pawpsp,m_pawrad,m_pawxc,make_efg_onsite,optics_paw,optics_paw_core
-!!      pawdenpot,pawdensities,pawnabla_init
+!!      m_orbmag,m_paw_atom,m_paw_denpot,m_paw_gaussfit,m_paw_init,m_paw_mkrho
+!!      m_paw_nmr,m_paw_onsite,m_paw_pwaves_lmn,m_paw_slater,m_pawdij,m_pawpsp
+!!      m_pawrad,m_pawxc
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -854,11 +854,10 @@ end subroutine pawrad_bcast
 !!  intg=resulting integral by Simpson rule
 !!
 !! PARENTS
-!!      calc_ubare,m_atom,m_paw_atom,m_paw_slater,m_pawdij,m_pawhr,m_pawpsp
-!!      m_pawpwij,m_pawrad,m_pawxc,m_plowannier,m_psps,make_efg_onsite
-!!      mlwfovlp_projpaw,optics_paw,optics_paw_core,partial_dos_fractions_paw
-!!      pawdensities,pawinit,pawnabla_init,pawpuxinit,posdoppler,poslifetime
-!!      posratecore,qijb_kk,smatrix_pawinit
+!!      m_epjdos,m_mlwfovlp,m_orbmag,m_paw_atom,m_paw_atomorb
+!!      m_paw_correlations,m_paw_denpot,m_paw_dfptnl,m_paw_hr,m_paw_init
+!!      m_paw_nmr,m_paw_onsite,m_paw_overlap,m_paw_slater,m_pawdij,m_pawpsp
+!!      m_pawpwij,m_pawrad,m_pawxc,m_plowannier,m_positron,m_psps
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -981,8 +980,8 @@ end subroutine simp_gen
 !!  [der2(:)]= -- optional -- 2nd derivative of input function
 !!
 !! PARENTS
-!!      m_paw_pwaves_lmn,m_pawdij,m_pawpsp,m_pawxc,optics_paw,optics_paw_core
-!!      pawinit,pawnabla_init,poslifetime,posratecore,spline_paw_fncs
+!!      m_paw_init,m_paw_onsite,m_paw_pwaves_lmn,m_pawdij,m_pawpsp,m_pawxc
+!!      m_positron
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -1184,7 +1183,7 @@ end subroutine nderiv_lin
 !!  yp1,ypn= derivatives of func at r(1) and r(n)
 !!
 !! PARENTS
-!!      m_paw_atom,m_pawpsp,m_pawxmlps,outscfcv
+!!      m_outscfcv,m_paw_atom,m_pawpsp,m_pawxmlps
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -1240,7 +1239,7 @@ end subroutine bound_deriv
 !!                                   +(r^l) int[r''^(1-l)g(r'')dr''])
 !!
 !! PARENTS
-!!      calc_ubare,m_paw_atom,m_pawpsp,m_pawrad,pawdenpot,pawinit,pawpuxinit
+!!      m_paw_atom,m_paw_correlations,m_paw_denpot,m_paw_init,m_pawpsp,m_pawrad
 !!
 !! CHILDREN
 !!      poisson,simp_gen

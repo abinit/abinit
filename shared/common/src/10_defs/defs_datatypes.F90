@@ -75,9 +75,11 @@ module defs_datatypes
   real(dp) :: entropy              ! Entropy associated with the smearing (adimensional)
   real(dp) :: fermie               ! Fermi energy
   real(dp) :: nelect               ! Number of electrons.
-  !real(dp),protected :: nelect0    ! TODO: should add nelect0 to ebands to keep track of intrinsic
   real(dp) :: tphysel              ! Physical temperature of electrons.
   real(dp) :: tsmear               ! Temperature of smearing.
+
+  !real(dp) :: spinmagntarget
+  ! TODO This should be set via dtset%spinmagntarget to simplify the API.
 
   integer,allocatable :: istwfk(:)
   ! istwfk(nkpt)
@@ -104,21 +106,21 @@ module defs_datatypes
   ! Linewidth of each band
   ! MG: TODO: This array should be removed (I think Yannick introduced it, see also Ktmesh)
 
-  real(dp),allocatable :: kTmesh(:)
+  !real(dp),allocatable :: kTmesh(:)
   ! kTmesh(ntemp)
   ! List of temperatures (KT units).
 
-  real(dp),allocatable :: velocity(:,:,:,:)
+  !real(dp),allocatable :: velocity(:,:,:,:)
   ! velocity(3,mband,nkpt,nsppol)
   ! Group velocity of each band
   ! MG: TODO: This array should be removed (I think HM introduced it)
 
   real(dp),allocatable :: occ(:,:,:)
-  ! occ(mband,nkpt,nsppol)
+  ! occ(mband, nkpt, nsppol)
   ! occupation of each band.
 
   real(dp),allocatable :: doccde(:,:,:)
-  ! doccde(mband,nkpt,nsppol)
+  ! doccde(mband, nkpt, nsppol)
   ! derivative of the occupation of each band wrt energy (needed for RF).
 
   real(dp),allocatable :: wtk(:)
@@ -133,16 +135,27 @@ module defs_datatypes
 
   real(dp) :: charge
   ! nelect = zion - charge
+  ! Extra charge added to the unit cell when performing GS calculations
+  ! To treat a system missing one electron per unit cell, charge is set to +1.
+  ! When reading the band structure from an external file,
+  ! charge is mainly used as metadata describing the GS calculation that procuded the ebands_t object.
+  ! To simulate doping in a post-processing tool, use ebands_set_extrael that defines the value of %extra_el.
+  ! and changes %nelect, accordingly.
+
+  real(dp) :: extrael = zero
+  ! Extra number of electrons.
+  ! This variable is mainly used to simulate doping in the rigid band approximation.
+  ! Set by ebands_set_extrael method.
 
   integer :: kptrlatt_orig(3,3), kptrlatt(3,3)
   ! Original value of kptrlatt and value after the call to inkpts
 
   real(dp),allocatable :: shiftk_orig(:,:)
-  ! shiftk_orig(3,nshiftk_orig)
+  ! shiftk_orig(3, nshiftk_orig)
   ! original shifts given in input (changed in inkpts).
 
   real(dp),allocatable :: shiftk(:,:)
-  ! shiftk(3,nshiftk)
+  ! shiftk(3, nshiftk)
 
  end type ebands_t
 !!***

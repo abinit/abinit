@@ -125,7 +125,7 @@ contains
 !!     then, we apply the imaginary part (-sin(qR).D^s1s2_ij)
 !!
 !! PARENTS
-!!      m_gemm_nonlop,nonlop_ylm
+!!      m_gemm_nonlop,m_nonlop_ylm
 !!
 !! CHILDREN
 !!      xmpi_sum
