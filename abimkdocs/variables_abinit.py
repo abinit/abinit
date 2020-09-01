@@ -1770,7 +1770,8 @@ Variable(
     vartype="real",
     topics=['ElPhonInt_useful'],
     dimensions="scalar",
-    defaultval=1024,
+    #defaultval=1024,
+    defaultval=0.0,
     mnemonics="DVDB Q-CACHE size in Megabytes",
     added_in_version="before_v9",
     text=r"""
@@ -1784,6 +1785,11 @@ The speedup is important especially if the QP corrections are computed for sever
 
 A negative value signals to the code that all the q-points in the DVDB should be stored in memory.
 Use zero value disables the cache.
+
+!!! note
+
+    This variable is still under development as many things changed in the treatment of the interpolation
+    of the DFPT potential. For the time being, avoid using this option unless you know what you are doing.
 """,
 ),
 
@@ -4373,20 +4379,20 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 !!!Under development!!!
-Electronic structure calculations for isolated systems, 1D and 2D systems 
+Electronic structure calculations for isolated systems, 1D and 2D systems
 present a slow convergence with respect to the size of the supercell due to the
-long ranged Coulomb interaction and the high degree of non-locality of the 
-operators involved. Thus, restricting the range of the Coulomb interaction, 
-in order to prevent supercell images to interact can significantly speed-up 
+long ranged Coulomb interaction and the high degree of non-locality of the
+operators involved. Thus, restricting the range of the Coulomb interaction,
+in order to prevent supercell images to interact can significantly speed-up
 convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
 [[fock_icutcoul]] defines the particular expression to be used for the Fock
-operator in reciprocal space. The choice of [[fock_icutcoul]] depends on the 
-dimensionality and the character of the XC functional used (or otherwise the 
-presence of the exclusive treatment of the short-range exchange interaction). 
-Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are available 
-options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals. 
+operator in reciprocal space. The choice of [[fock_icutcoul]] depends on the
+dimensionality and the character of the XC functional used (or otherwise the
+presence of the exclusive treatment of the short-range exchange interaction).
+Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are available
+options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals.
 The corresponding influential variables are [[vcutgeo]] and [[rcut]].
 
   * 0 --> sphere (molecules, but also 3D-crystals, see below).
@@ -5809,16 +5815,16 @@ Variable(
     requires="[[optdriver]] in [3,4]",
     added_in_version="v9.1",
     text=r"""
-Many-body calculations for fully periodic systems are problematic due to the 
+Many-body calculations for fully periodic systems are problematic due to the
 presence of the integrable Coulomb singularity at $\mathbf{G}=0$ that hinders
-the convergence with respect to the number of q-points used to sample the 
+the convergence with respect to the number of q-points used to sample the
 Brillouin zone. The convergence can be accelerated by integrating accurately
 the zone in the neighborhood of $\mathbf{G}=0$.
 
 [[gw_icutcoul]] defines the particular expression to be used for such integration.
 It can be used in conjunction with its equivalent for the ground state electronic
 structure cut-off [[icutcoul]].
-  
+
   * 0 --> sphere (molecules, but also 3D-crystals, see below).
   * 1 --> cylinder (nanowires, nanotubes).
   * 2 --> surface.
@@ -6916,11 +6922,11 @@ Variable(
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
     added_in_version="before_v9",
     text=r"""
-Electronic structure calculations for isolated systems, 1D and 2D systems 
+Electronic structure calculations for isolated systems, 1D and 2D systems
 present a slow convergence with respect to the size of the supercell due to the
-long ranged Coulomb interaction and the high degree of non-locality of the 
-operators involved. Thus, restricting the range of the Coulomb interaction, 
-in order to prevent supercell images to interact can significantly speed-up 
+long ranged Coulomb interaction and the high degree of non-locality of the
+operators involved. Thus, restricting the range of the Coulomb interaction,
+in order to prevent supercell images to interact can significantly speed-up
 convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
@@ -10217,9 +10223,10 @@ following. The third case is only for implementation convenience.
 In non-self-consistent GS calculations ([[iscf]]<0), the highest levels might
 be difficult to converge, if they are degenerate with another level, that does
 not belong to the set of bands treated. Then, it might take extremely long to
-reach [[tolwfr]], although the other bands are already extremely well-
-converged, and the energy of the highest bands (whose residual are not yet
+reach [[tolwfr]], although the other bands are already extremely well-converged,
+and the energy of the highest bands (whose residual are not yet
 good enough), is also rather well converged.
+
 In response to this problem, for non-zero [[nbdbuf]], the largest residual
 (residm), to be later compared with [[tolwfr]], will be computed only in the
 set of non-buffer bands (this modification applies for non-self-consistent as
@@ -10228,13 +10235,13 @@ For a GS calculation, with [[iscf]]<0, supposing [[nbdbuf]] is not initialized
 in the input file, then ABINIT will overcome the default [[nbdbuf]] value, and
 automatically set [[nbdbuf]] to 2.
 
-In metallic RF calculations, in the conjugate gradient optimisation of first-
-order wavefunctions, there is an instability situation when the q wavevector
+In metallic RF calculations, in the conjugate gradient optimisation of first-order wavefunctions,
+there is an instability situation when the q wavevector
 of the perturbation brings the eigenenergy of the highest treated band at some
-k point higher than the lowest untreated eigenenergy at some k+q point. If one
+k-point higher than the lowest untreated eigenenergy at some k+q point. If one
 accepts a buffer of frozen states, this instability can be made to disappear.
 Frozen states receive automatically a residual value of -0.1
-For a RF calculation, with 3<=[[occopt]]<=7, supposing [[nbdbuf]] is not
+For a RF calculation, with 3 <= [[occopt]] <= 7, supposing [[nbdbuf]] is not
 initialized in the input file, then ABINIT will overcome the default
 [[nbdbuf]] value, and automatically set [[nbdbuf]] to 2. This value might be
 too low in some cases.
@@ -16840,7 +16847,7 @@ translations.
 Alternatively to [[rprim]], directions of dimensionless primitive vectors can
 be specified by using the input variable [[angdeg]]. This is especially useful
 for hexagonal lattices (with 120 or 60 degrees angles). Indeed, in order for
-symmetries to be recognized, rprim must be symmetric up to [[tolsym]] (1.0e-5 by default), 
+symmetries to be recognized, rprim must be symmetric up to [[tolsym]] (1.0e-5 by default),
 inducing a specification such as
 
       rprim  0.86602  0.5  0.0
@@ -19382,7 +19389,7 @@ the cylinder along the periodic dimension, that should always be smaller than
 the extension of the Born von Karman box. The length of the cylinder is given
 in terms of a multiple of the primitive vector along the periodic direction.
 Another option provided by Rozzi [[cite:Rozzi2006]] is the infinite length cylinder.
-In order to activate it in ABINIT, 
+In order to activate it in ABINIT,
 one needs to use a very large negative [[vcutgeo]] value on the third direction
 (i.e. vcutgeo(3) <= -999).
 
@@ -21739,6 +21746,33 @@ Variable(
 Gives the doping charge in units of |e_charge| / cm^3.
 Negative for n-doping, positive for p-doping.
 Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
+""",
+),
+
+Variable(
+    abivarname="eph_phwinfact",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=1.1,
+    mnemonics="EPH PHonon FACTor for energy WINdow",
+    added_in_version="9.2.0",
+    text=r"""
+This variable is used to define the effective energy window for the $\kq$ KS states
+in the computation of electron lifetimes ([[eph_task]] -4) and predict
+the list of $\qq$-points in the BZ that will be needeed during the calculation.
+
+The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk}$ but then this
+initial energy window must be increased a bit to accomodate for phonon absorption/emission (from $\kk$ to $\kq$).
+This is importat for $\nk$ states that are close to edge of the initial energy window as this states may be needed
+for the linear interpolation used in tetrahedron method.
+
+In a nuthshell, the code increases the initial window using the max phonon frequency multiplied by [[eph_phwinfact]].
+The default value is a compromise between numerical stability and efficiency.
+Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substancial decrease in the number of
+$\kq$ KS states that must be read from file with a subsequent decrease in the memory requirements for the wavefunctions.
+We recommended to perform initial tests to decide whether a value smaller than four can be used.
 """,
 ),
 

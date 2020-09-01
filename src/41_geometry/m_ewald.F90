@@ -616,7 +616,6 @@ end subroutine ewald2
 !!***
 
 !!****f* m_ewald/ewald9
-!!
 !! NAME
 !! ewald9
 !!
@@ -674,15 +673,14 @@ end subroutine ewald2
 !!
 !! SOURCE
 
-subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, &
-      qdrp_cart,option,dipquad,quadquad)
+subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, qdrp_cart, &
+                  option, dipquad, quadquad)  ! optional
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,sumg0
- integer,optional,intent(in) :: option
+ integer,optional,intent(in) :: option, dipquad, quadquad
  real(dp),intent(in) :: ucvol
- integer,optional,intent(in) :: dipquad, quadquad
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qphon(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),xred(3,natom),zeff(3,3,natom)
@@ -712,7 +710,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: c3r(2*mr+1),cosqxred(natom),wdielt(3,3),eig_dielt(3),gpq(3),gpqfac(3,3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
- real(dp) :: gprimbyacell(3,3),tsec(2)
+ real(dp) :: gprimbyacell(3,3) !,tsec(2)
  real(dp),allocatable :: dyddt(:,:,:,:,:), dydqt(:,:,:,:,:,:), dyqqt(:,:,:,:,:,:,:)
  real(dp),allocatable :: work(:)
  complex(dpc) :: exp2piqx(natom)
@@ -728,7 +726,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  do_quadrupole = any(qdrp_cart /= zero)
 
  ! Keep track of total time spent.
- call timab(1749, 1, tsec)
+ !call timab(1749, 1, tsec)
 
  ! Initialize dipquad and quadquad options
  dipquad_=0; if(present(dipquad)) dipquad_=dipquad
@@ -775,7 +773,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
  ! Compute a material-dependent width for the Gaussians that hopefully
  ! will make the Ewald real-space summation innecessary.
- if (ewald_option == 1) then 
+ if (ewald_option == 1) then
 
    wdielt(:,:)=dielt(:,:)
 
@@ -800,9 +798,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    if (firstcall) then
      firstcall = .FALSE.
      write(message, '(4a,f9.4,9a)' ) ch10,&
-    &' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', ch10, & 
+    &' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', ch10, &
     &' in ewald9 has been set to eta= ', eta, ' 1/bohr and the real-space sums have been neglected.', ch10, &
-    &' One should check whether this choice leads to correct results for the specific system under study', & 
+    &' One should check whether this choice leads to correct results for the specific system under study', &
     &' and q-point grid.',ch10, &
     &' It is recommended to check that calculations with dipdip=1 and -1 (both with dipquad=0 and quadquad=0)', ch10, &
     &' lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.', ch10
@@ -812,7 +810,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    !Internally eta is the square of the gaussians width
    eta=eta*eta
 
- end if 
+ end if
 
  inv4eta = one / four / eta
 
@@ -1227,7 +1225,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ABI_DEALLOCATE(dydqt)
  ABI_DEALLOCATE(dyqqt)
 
- call timab(1749, 2, tsec)
+ !call timab(1749, 2, tsec)
 
 end subroutine ewald9
 !!***

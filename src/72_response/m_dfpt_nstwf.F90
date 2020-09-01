@@ -471,15 +471,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Index of strain perturbation, if any
  istr=idir;if (ipert==dtset%natom+4) istr=idir+3
 
-!Open ddk WF file(s)
+!Open ddk WF file(s) in sequential mode
  if (has_ddk_file) then
    do kdir1=1,mdir1
      idir1=jdir1(kdir1)
      if (ddkfil(idir1)/=0) then
        write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk(idir1))
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       call wfk_open_read(ddks(idir1),fiwfddk(idir1),formeig1,dtset%iomode,ddkfil(idir1),spaceworld)
+       call wrtout([std_out, ab_out],msg)
+       call wfk_open_read(ddks(idir1),fiwfddk(idir1),formeig1,dtset%iomode,ddkfil(idir1), xmpi_comm_self)
      end if
    end do
  end if
@@ -866,10 +865,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              ik_ddk = indkpt1(ikpt)
              npw_ = ddks(idir1)%hdr%npwarr(ik_ddk)
              if (npw_/=npw_k) then
-               write(unit=msg,fmt='(a,i3,a,i5,a,i3,a,a,i5,a,a,i5)')&
-&               'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',idir,ch10,&
-&               'the number of plane waves in the ddk file is equal to', npw_,ch10,&
-&               'while it should be ',npw_k
+               write(msg, '(a,i0,a,i0,a,i0,a,a,i0,a,a,i0)')&
+               'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',idir,ch10,&
+               'the number of plane waves in the ddk file is equal to', npw_,ch10,&
+               'while it should be ',npw_k
                MSG_ERROR(msg)
              end if
 
@@ -1600,9 +1599,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  if (has_ddk_file) then
    do kdir1=1,mdir1
      idir1=jdir1(kdir1)
-     if (ddkfil(idir1)/=0)then
-       call ddks(idir1)%close()
-     end if
+     if (ddkfil(idir1)/=0) call ddks(idir1)%close()
    end do
  end if
  ABI_DEALLOCATE(jpert1)

@@ -164,9 +164,7 @@ pages:
     - Statistics: variables/varset_stats.md
 - Tutorial:
     - Overview: tutorial/index.md
-    - Building Abinit: 
-        - Compilation Howto: tutorial/compilation.md
-        - Source Code: tutorial/source_code.md
+    - Building Abinit: tutorial/compilation.md
     - Base Tutorials:
         - Base1: tutorial/base1.md
         - Base2: tutorial/base2.md
@@ -191,8 +189,8 @@ pages:
     - EPH:
         - tutorial/eph_intro.md
         - tutorial/eph4mob.md
-          #- tutorial/eph4zpr.md
-          #- tutorial/eph4isotc.md
+        #- tutorial/eph4zpr.md
+        #- tutorial/eph4isotc.md
     - EPH-legacy:
         - tutorial/eph.md
         - tutorial/tdepes.md
@@ -218,7 +216,6 @@ pages:
     - tutorial/nuc.md
     - tutorial/optic.md
     - tutorial/positron.md
-    - tutorial/source_code.md
     - tutorial/tddft.md
     - tutorial/wannier90.md
 - Theory:

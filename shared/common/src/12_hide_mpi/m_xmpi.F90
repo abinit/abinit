@@ -240,8 +240,9 @@ MODULE m_xmpi
    module procedure xmpi_distab_4D
  end interface xmpi_distab
 
-!MPI generic interfaces.
+ ! MPI generic interfaces.
  public :: xmpi_allgather
+ public :: xmpi_iallgather
  public :: xmpi_allgatherv
  public :: xmpi_alltoall
  public :: xmpi_ialltoall
@@ -262,6 +263,7 @@ MODULE m_xmpi
  public :: xmpi_sum_master
  public :: xmpi_sum
  public :: xmpi_isum
+ public :: xmpi_isum_ip
  public :: xmpi_land              ! allreduce with MPI_LAND
  public :: xmpi_lor               ! allreduce with MPI_LOR
 
@@ -310,6 +312,19 @@ interface xmpi_allgather
 end interface xmpi_allgather
 
 !----------------------------------------------------------------------
+
+! non-blocking version (requires MPI3)
+! Prototype:
+!
+!   call xmpi_iallgather(SENDBUF, SENDCOUNT, SENDTYPE, RECVBUF, RECVCOUNT, RECVTYPE, COMM, REQUEST, IERROR)
+!
+! If the MPI library does not provide ialltoall, we call the blocking version and
+! we return xmpi_request_null (see xmpi_iallgather.finc)
+! Client code should always test/wait the request so that code semantics is preserved.
+
+interface xmpi_iallgather
+  module procedure xmpi_iallgather_dp4d
+end interface xmpi_iallgather
 
 interface xmpi_allgatherv
   module procedure xmpi_allgatherv_int2d
@@ -361,7 +376,7 @@ end interface xmpi_alltoallv
 ! non-blocking version (requires MPI3)
 ! Prototype:
 !
-!   call xmpi_ialltoallv(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,request)
+!   call xmpi_ialltoallv(xval, sendcnts, sdispls, recvbuf, recvcnts, rdispls, comm, request)
 !
 ! If the MPI library does not provide ialltoallv, we call the blocking version and
 ! we return xmpi_request_null (see xmpi_ialltoallv.finc)
@@ -380,6 +395,7 @@ interface xmpi_bcast
   module procedure xmpi_bcast_int1d
   module procedure xmpi_bcast_int2d
   module procedure xmpi_bcast_int3d
+  module procedure xmpi_bcast_int4d
   module procedure xmpi_bcast_dpv
   module procedure xmpi_bcast_dp1d
   module procedure xmpi_bcast_dp2d
@@ -413,9 +429,11 @@ end interface xmpi_bcast
 
 interface xmpi_ibcast
   module procedure xmpi_ibcast_int1d
+  module procedure xmpi_ibcast_int4d
   module procedure xmpi_ibcast_dp1d
   module procedure xmpi_ibcast_dp2d
   module procedure xmpi_ibcast_dp3d
+  module procedure xmpi_ibcast_dp4d
 end interface xmpi_ibcast
 
 !----------------------------------------------------------------------
@@ -617,11 +635,17 @@ interface xmpi_sum
 end interface xmpi_sum
 !!***
 
+! Non-blocking version
 interface xmpi_isum
   module procedure xmpi_isum_int0d
 end interface xmpi_isum
 !!***
 
+! Non-blocking in-place version
+interface xmpi_isum_ip
+  module procedure xmpi_isum_ip_dp4d
+end interface xmpi_isum_ip
+!!***
 
 interface xmpi_land
   module procedure xmpi_land_log0d
@@ -868,7 +892,7 @@ subroutine xmpi_abort(comm,mpierr,msg,exit_status)
  !  write(std_out,'(2a)')" MPI_ERROR_STRING: ",TRIM(mpi_msg_error)
  !end if
 
- call MPI_ABORT(my_comm,my_errorcode,ierr)
+ call MPI_ABORT(my_comm, my_errorcode, ierr)
 #endif
 
  if (present(exit_status)) then
@@ -1876,11 +1900,11 @@ end subroutine xmpi_iprobe
 !!
 !! SOURCE
 
-subroutine xmpi_wait(request,mpierr)
+subroutine xmpi_wait(request, mpierr)
 
 !Arguments-------------------------
- integer,intent(out) :: mpierr
  integer,intent(inout) :: request
+ integer,intent(out) :: mpierr
 
 !Local variables-------------------
 #ifdef HAVE_MPI
@@ -2405,11 +2429,11 @@ end subroutine xmpi_split_list
 !!
 !! SOURCE
 
-subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop)
+subroutine xmpi_split_work2_i4b(ntasks, nprocs, istart, istop)
 
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,nprocs
- integer,intent(inout) :: istart(nprocs),istop(nprocs)
+ integer,intent(inout) :: istart(nprocs), istop(nprocs)
 
 !Local variables-------------------------------
  integer :: res,irank,block,block_tmp
@@ -2631,8 +2655,8 @@ end function xmpi_distrib_with_replicas
 !!  routines when the number of elements to communicate exceeds a 32bit integer.
 !!
 !! INPUTS
-!!  inputtype= (INTEGER) input type (typically INTEGER, REAL(dp), ...)
 !!  largecount= total number of elements expressed as a 64bit integer
+!!  inputtype= (INTEGER) input type (typically INTEGER, REAL(dp), ...)
 !!  op_type= type of operation that will be applied during collective comms
 !!           At present, MPI_SUM, MPI_LOR, MPI_LAND are implemented
 !!
@@ -2653,7 +2677,7 @@ end function xmpi_distrib_with_replicas
 !!       copies of the Software, and to permit persons to whom the Software is
 !!       furnished to do so.
 !!
-!!  From MPI4 specification, thiss routine is useless aslarge-count MPI communications
+!!  From MPI4 specification, this routine is useless as large-count MPI communications
 !!    can be called with the use of the MPI_count datatype (instead of INTEGER).
 !!
 !! PARENTS
@@ -2955,48 +2979,28 @@ end subroutine xmpi_largetype_free
 
 ! Include files providing wrappers for some of the most commonly used MPI primitives.
 
+#include "xmpi_iallgather.finc"
 #include "xmpi_allgather.finc"
-
 #include "xmpi_allgatherv.finc"
-
 #include "xmpi_alltoall.finc"
-
 #include "xmpi_ialltoall.finc"
-
 #include "xmpi_alltoallv.finc"
-
 #include "xmpi_ialltoallv.finc"
-
 #include "xmpi_bcast.finc"
-
 #include "xmpi_ibcast.finc"
-
 #include "xmpi_exch.finc"
-
 #include "xmpi_gather.finc"
-
 #include "xmpi_gatherv.finc"
-
 #include "xmpi_max.finc"
-
 #include "xmpi_min.finc"
-
 #include "xmpi_recv.finc"
-
 #include "xmpi_irecv.finc"
-
 #include "xmpi_scatterv.finc"
-
 #include "xmpi_send.finc"
-
 #include "xmpi_isend.finc"
-
 #include "xmpi_sum_master.finc"
-
 #include "xmpi_sum.finc"
-
 #include "xmpi_isum.finc"
-
 #include "xmpi_land_lor.finc"
 
 !------------------------------------------------------------------------------------

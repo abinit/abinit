@@ -30,9 +30,11 @@ module m_mkffnl
  use m_abicore
  use m_errors
  use m_splines
+ use m_xmpi
 
  use m_time,     only : timab
  use m_kg,       only : mkkin
+ use m_sort,     only : sort_dp
 
  implicit none
 
@@ -92,9 +94,12 @@ contains
 !!         1=using Ylm, 0=using Legendre polynomials
 !!  ylm   (npw,mpsang*mpsang*useylm)=real spherical harmonics for each G and k point
 !!  ylm_gr(npw,3,mpsang*mpsang*useylm)=gradients of real spherical harmonics wrt (k+G)
+!! [comm]=MPI communicator. Default: xmpi_comm_self.
 !!
 !! OUTPUT
 !!  ffnl(npw,dimffnl,lmnmax,ntypat)=described below
+!! [request]=Used in conjunction with [comm] to perform non-blocking xmpi_isum_ip. Client code must
+!!  wait on request before using ffnl. If not present, blocking API is used.
 !!
 !! NOTES
 !!  Uses spline fit ffspl provided by Numerical Recipes spline subroutine.
@@ -182,14 +187,17 @@ contains
 !!
 !! SOURCE
 
-subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
-&                   kg,kpg,kpt,lmnmax,lnmax,mpsang,mqgrid,nkpg,npw,ntypat,pspso,&
-&                   qgrid,rmet,usepaw,useylm,ylm,ylm_gr)
+subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, indlmn, &
+                   kg, kpg, kpt, lmnmax, lnmax, mpsang, mqgrid, nkpg, npw, ntypat, pspso, &
+                   qgrid, rmet, usepaw, useylm, ylm, ylm_gr, &
+                   comm, request) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dimekb,dimffnl,ider,idir,lmnmax,lnmax,mpsang,mqgrid,nkpg
  integer,intent(in) :: npw,ntypat,usepaw,useylm
+ integer,optional,intent(in) :: comm
+ integer ABI_ASYNC, optional,intent(out):: request
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg(3,npw),pspso(ntypat)
  real(dp),intent(in) :: ekb(dimekb,ntypat*(1-usepaw))
@@ -197,14 +205,19 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  real(dp),intent(in) :: kpg(npw,nkpg),kpt(3),qgrid(mqgrid),rmet(3,3)
  real(dp),intent(in) :: ylm(:,:),ylm_gr(:,:,:)
  real(dp),intent(out) :: ffnl(npw,dimffnl,lmnmax,ntypat)
+ ! MG: Should be ABI_ASYNC due to optional non-Blocking API but NAG complains
+ ! Error: m_d2frnl.F90, line 600: Array section FFNL_STR(:,:,:,:,MU) supplied for dummy FFNL (no. 4) of MKFFNL,
+ ! the dummy is ASYNCHRONOUS but not assumed-shape
+ ! so we declare request as ASYNCHRONOUS
 
 !Local variables-------------------------------
 !scalars
  integer :: ider_tmp,iffnl,ig,ig0,il,ilm,ilmn,iln,iln0,im,itypat,mu,mua,mub,nlmn,nu,nua,nub
+ integer :: nprocs, my_rank, cnt, ierr
  real(dp),parameter :: renorm_factor=0.5d0/pi**2,tol_norm=tol10
  real(dp) :: ecut,ecutsm,effmass_free,fact,kpg1,kpg2,kpg3,kpgc1,kpgc2,kpgc3,rmetab,yp1
  logical :: testnl=.false.
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
@@ -216,17 +229,20 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
+ ! Keep track of time spent in mkffnl
+ call timab(16, 1, tsec)
 
-!Keep track of time spent in mkffnl
- call timab(16,1,tsec)
+ nprocs = 1; my_rank = 0
+ if (present(comm)) then
+   nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ end if
 
-!Compatibility tests
+ ! Compatibility tests
  if (mpsang>4) then
-   write(message,'(a,i0,a,a)')&
-&   'Called with mpsang > 4, =',mpsang,ch10,&
-&   'This subroutine will not accept lmax+1 > 4.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,a,a)')&
+   'Called with mpsang > 4, =',mpsang,ch10,&
+   'This subroutine will not accept lmax+1 > 4.'
+   MSG_BUG(msg)
  end if
  if (idir<-7.or.idir>4) then
    MSG_BUG('Called with idir<-6 or idir>4 !')
@@ -247,9 +263,9 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    end if
  end if
  if (iffnl/=dimffnl) then
-   write(message,'(2(a,i1),a,i2)') 'Incompatibility between ider, idir and dimffnl : ider = ',ider,&
-&                                    ' idir = ',idir,' dimffnl = ',dimffnl
-   MSG_BUG(message)
+   write(msg,'(2(a,i1),a,i2)') 'Incompatibility between ider, idir and dimffnl : ider = ',ider,&
+                               ' idir = ',idir,' dimffnl = ',dimffnl
+   MSG_BUG(msg)
  end if
  if (useylm==1) then
    ABI_CHECK(size(ylm,1)==npw,'BUG: wrong ylm size (1)')
@@ -260,15 +276,17 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
      ABI_CHECK(size(ylm_gr,3)==mpsang**2,'BUG: wrong ylm_gr size (3)')
    end if
  end if
-!Get (k+G) and |k+G|:
- ABI_ALLOCATE(kpgnorm,(npw))
- ABI_ALLOCATE(kpgnorm_inv,(npw))
+
+ ! Get (k+G) and |k+G|
+ ABI_MALLOC(kpgnorm,(npw))
+ ABI_MALLOC(kpgnorm_inv,(npw))
+
  ig0=-1 ! index of |k+g|=0 vector
 
  if (useylm==1) then
-   ABI_ALLOCATE(kpgc,(npw,3))
+   ABI_MALLOC(kpgc,(npw,3))
    if (ider>=1) then
-     ABI_ALLOCATE(kpgn,(npw,3))
+     ABI_MALLOC(kpgn,(npw,3))
    end if
    if (nkpg<3) then
 !$OMP PARALLEL DO PRIVATE(ig,kpg1,kpg2,kpg3,kpgc1,kpgc2,kpgc3)
@@ -311,7 +329,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  else
    if (nkpg<3) then
      ecut=huge(0.0d0)*0.1d0;ecutsm=zero;effmass_free=one
-!    Note that with ecutsm=0, the right kinetic energy is computed
+     ! Note that with ecutsm=0, the right kinetic energy is computed
      call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw,0,0)
 !$OMP PARALLEL DO
      do ig=1,npw
@@ -332,7 +350,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    end if
  end if
 
-!Need rprimd in some cases
+ ! Need rprimd in some cases
  if (ider>=1.and.useylm==1.and.ig0>0) then
    do mu=1,3
      do nu=1,3
@@ -341,79 +359,88 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    end do
  end if
 
-!Allocate several temporary arrays
- ABI_ALLOCATE(wk_ffnl1,(npw))
- ABI_ALLOCATE(wk_ffnl2,(npw))
- ABI_ALLOCATE(wk_ffnl3,(npw))
- ABI_ALLOCATE(wk_ffspl,(mqgrid,2))
+ ! Allocate several temporary arrays
+ ABI_MALLOC(wk_ffnl1,(npw))
+ ABI_MALLOC(wk_ffnl2,(npw))
+ ABI_MALLOC(wk_ffnl3,(npw))
+ ABI_MALLOC(wk_ffspl,(mqgrid,2))
+
  if (ider>=1.and.useylm==1) then
-   ABI_ALLOCATE(dffnl_red,(npw,3))
-   if (idir/=0)  then
-     ABI_ALLOCATE(dffnl_cart,(npw,3))
+   ABI_MALLOC(dffnl_red,(npw,3))
+   if (idir/=0) then
+     ABI_MALLOC(dffnl_cart,(npw,3))
    end if
-   if (idir>0)   then
-     ABI_ALLOCATE(dffnl_tmp,(npw))
+   if (idir>0) then
+     ABI_MALLOC(dffnl_tmp,(npw))
    end if
  end if
- if (ider>=2.and.useylm==1) then
-   ABI_ALLOCATE(d2ffnl_red,(npw,6))
-   if (idir==4)  then
-     ABI_ALLOCATE(d2ffnl_cart,(npw,6))
-     ABI_ALLOCATE(d2ffnl_tmp,(npw))
+ if (ider>=2 .and. useylm==1) then
+   ABI_MALLOC(d2ffnl_red,(npw,6))
+   if (idir==4) then
+     ABI_MALLOC(d2ffnl_cart,(npw,6))
+     ABI_MALLOC(d2ffnl_tmp,(npw))
    end if
  end if
 
-!Loop over types of atoms
+ ! Loop over types of atoms
+ ffnl = zero; cnt = 0
  do itypat=1,ntypat
 
-!  Loop over (l,m,n) values
-   iln0=0;nlmn=count(indlmn(3,:,itypat)>0)
-   ffnl(:,:,:,itypat)=zero
+   ! Loop over (l,m,n) values
+   iln0=0; nlmn=count(indlmn(3,:,itypat)>0)
+
    do ilmn=1,nlmn
      il=indlmn(1,ilmn,itypat)
      im=indlmn(2,ilmn,itypat)
      ilm =indlmn(4,ilmn,itypat)
      iln =indlmn(5,ilmn,itypat)
      iffnl=ilmn;if (useylm==0) iffnl=iln
-!    Special case : we enter the loop in case of spin-orbit calculation
-!       even if the psp has no spin-orbit component.
-     if ((indlmn(6,ilmn,itypat)==1).or.(pspso(itypat)/=0)) then
 
-!      Compute FFNL only if ekb>0 or paw
+     ! Special case: we enter the loop in case of spin-orbit calculation
+     ! even if the psp has no spin-orbit component.
+     if (indlmn(6,ilmn,itypat) ==1 .or. pspso(itypat) /=0) then
+
+       ! Compute FFNL only if ekb>0 or paw
        if (usepaw==1) testnl=.true.
        if (usepaw==0) testnl=(abs(ekb(iln,itypat))>tol_norm)
-       if (testnl) then
 
-!        Store form factors (from ffspl)
-!        -------------------------------
-         if (iln>iln0) then
-           do ig=1,mqgrid
-             wk_ffspl(ig,1)=ffspl(ig,1,iln,itypat)
-             wk_ffspl(ig,2)=ffspl(ig,2,iln,itypat)
-           end do
-           ider_tmp=min(ider,1)
+       if (testnl) then
+         cnt = cnt + 1
+         if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism (optional)
+         !
+         ! Store form factors (from ffspl)
+         ! -------------------------------
+         ! MG: This part is an hotspot of in the EPH code due to the large number of k-points used
+         ! To improve memory locality, I tried to:
+         !      1) call a new version of splfit that operates on wk_ffspl with shape: (2,mqgrid)
+         !      2) pass a sorted kpgnorm array and then rearrange the output spline
+         ! but I didn't manage to make it significantly faster.
+         ! For the time being, we rely on MPI-parallelsism via the optional MPI communicator.
+         if (iln > iln0) then
+           wk_ffspl(:,:)=ffspl(:,:,iln,itypat)
+           ider_tmp = min(ider, 1)
            call splfit(qgrid,wk_ffnl2,wk_ffspl,ider_tmp,kpgnorm,wk_ffnl1,mqgrid,npw)
-           if(ider==2) then
+           if (ider == 2) then
              call splfit(qgrid,wk_ffnl3,wk_ffspl,ider,kpgnorm,wk_ffnl1,mqgrid,npw)
            end if
          end if
 
-!        Store FFNL and FFNL derivatives
-!        -------------------------------
+         ! Store FFNL and FFNL derivatives
+         ! -------------------------------
 
-!        =========================================================================
-!        A-USE OF SPHER. HARMONICS IN APPLICATION OF NL OPERATOR:
-!        ffnl(K,l,m,n)=fnl(K).Ylm(K)
-!        --if (idir==0)
-!        ffnl_prime(K,1:3,l,m,n)=3 reduced coordinates of d(ffnl)/dK^cart
-!        =fnl_prime(K).Ylm(K).K^red_i/|K|+fnl(K).(dYlm/dK^cart)^red_i
-!        --if (0<idir<4)
-!        ffnl_prime(K,l,m,n)=cart. coordinate idir of d(ffnl)/dK^red
-!        --if (idir==4)
-!        ffnl_prime(K,l,m,n)=3 cart. coordinates of d(ffnl)/dK^red
-!        --if (-7<=idir<0) - |idir|=(mu,nu) (1->11,2->22,3->33,4->32,5->31,6->21)
-!        ffnl_prime(K,l,m,n)=1/2 [d(ffnl)/dK^cart_mu K^cart_nu + d(ffnl)/dK^cart_nu K^cart_mu]
-!        ffnl_prime_prime(K,l,m,n)=6 reduced coordinates of d2(ffnl)/dK^cart.dK^cart
+         ! =========================================================================
+         ! A-USE OF SPHER. HARMONICS IN APPLICATION OF NL OPERATOR:
+         ! ffnl(K,l,m,n)=fnl(K).Ylm(K)
+         ! --if (idir==0)
+         ! ffnl_prime(K,1:3,l,m,n)=3 reduced coordinates of d(ffnl)/dK^cart
+         ! =fnl_prime(K).Ylm(K).K^red_i/|K|+fnl(K).(dYlm/dK^cart)^red_i
+         ! --if (0<idir<4)
+         ! ffnl_prime(K,l,m,n)=cart. coordinate idir of d(ffnl)/dK^red
+         ! --if (idir==4)
+         ! ffnl_prime(K,l,m,n)=3 cart. coordinates of d(ffnl)/dK^red
+         ! --if (-7<=idir<0) - |idir|=(mu,nu) (1->11,2->22,3->33,4->32,5->31,6->21)
+         ! ffnl_prime(K,l,m,n)=1/2 [d(ffnl)/dK^cart_mu K^cart_nu + d(ffnl)/dK^cart_nu K^cart_mu]
+         ! ffnl_prime_prime(K,l,m,n)=6 reduced coordinates of d2(ffnl)/dK^cart.dK^cart
 
          if (useylm==1) then
 !$OMP PARALLEL DO
@@ -428,7 +455,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
                  dffnl_red(ig,mu)=ylm(ig,ilm)*wk_ffnl2(ig)*kpgn(ig,mu)+ylm_gr(ig,mu,ilm)*wk_ffnl1(ig)
                end do
              end do
-             !Special cases |k+g|=0
+             ! Special cases |k+g|=0
              if (ig0>0) then
                do mu=1,3
                  dffnl_red(ig0,mu)=zero
@@ -495,18 +522,14 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
                  mu=abs(idir);mua=alpha(mu);mub=beta(mu)
 !$OMP PARALLEL DO
                  do ig=1,npw
-                   ffnl(ig,2,iffnl,itypat)=0.5d0* &
-&                   (dffnl_cart(ig,mua)*kpgc(ig,mub) &
-&                   +dffnl_cart(ig,mub)*kpgc(ig,mua))
+                   ffnl(ig,2,iffnl,itypat)=0.5d0* (dffnl_cart(ig,mua)*kpgc(ig,mub) + dffnl_cart(ig,mub)*kpgc(ig,mua))
                  end do
                else if (idir==-7) then
 !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(mua, mub)
                  do mu=1,6
                    do ig=1,npw
                      mua=alpha(mu);mub=beta(mu)
-                     ffnl(ig,1+mu,iffnl,itypat)=0.5d0* &
-&                     (dffnl_cart(ig,mua)*kpgc(ig,mub) &
-&                     +dffnl_cart(ig,mub)*kpgc(ig,mua))
+                     ffnl(ig,1+mu,iffnl,itypat)=0.5d0 * (dffnl_cart(ig,mua)*kpgc(ig,mub) + dffnl_cart(ig,mub)*kpgc(ig,mua))
                    end do
                  end do
                end if
@@ -520,12 +543,12 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 !$OMP PARALLEL DO
                do ig=1,npw
                  d2ffnl_red(ig,mu)= &
-&                 ylm_gr(ig,3+mu,ilm)*wk_ffnl1(ig) &
-&                 + (rmetab-kpgn(ig,mua)*kpgn(ig,mub))*ylm(ig,ilm)*wk_ffnl2(ig)*kpgnorm_inv(ig) &
-&                 + ylm(ig,ilm)*kpgn(ig,mua)*kpgn(ig,mub)*wk_ffnl3(ig) &
-&                 + (ylm_gr(ig,mua,ilm)*kpgn(ig,mub)+ylm_gr(ig,mub,ilm)*kpgn(ig,mua))*wk_ffnl2(ig)
+                 ylm_gr(ig,3+mu,ilm)*wk_ffnl1(ig) &
+                 + (rmetab-kpgn(ig,mua)*kpgn(ig,mub))*ylm(ig,ilm)*wk_ffnl2(ig)*kpgnorm_inv(ig) &
+                 + ylm(ig,ilm)*kpgn(ig,mua)*kpgn(ig,mub)*wk_ffnl3(ig) &
+                 + (ylm_gr(ig,mua,ilm)*kpgn(ig,mub)+ylm_gr(ig,mub,ilm)*kpgn(ig,mua))*wk_ffnl2(ig)
                end do
-               !Special cases |k+g|=0
+               ! Special cases |k+g|=0
                if (ig0>0) then
                  d2ffnl_red(ig0,mu)=zero
                  if (il==0) then
@@ -538,7 +561,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
                    if (im==+1) d2ffnl_red(ig0,mu)=fact*(rprimd(1,mua)*rprimd(3,mub)+rprimd(3,mua)*rprimd(1,mub))
                    if (im==+2) d2ffnl_red(ig0,mu)=fact*(rprimd(1,mua)*rprimd(1,mub)-rprimd(2,mua)*rprimd(2,mub))
                    if (im== 0) d2ffnl_red(ig0,mu)=(fact/sqrt3)*(two*rprimd(3,mua)*rprimd(3,mub) &
-&                   -rprimd(1,mua)*rprimd(1,mub)-rprimd(2,mua)*rprimd(2,mub))
+                                                  -rprimd(1,mua)*rprimd(1,mub)-rprimd(2,mua)*rprimd(2,mub))
                  end if
                end if
              end do
@@ -587,12 +610,12 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
              end if
            end if
 
-!          =========================================================================
-!          B-USE OF LEGENDRE POLYNOMIAL IN APPLICATION OF NL OPERATOR:
-!          ffnl(K,l,n)=fnl(K)/|K|^l
-!          ffnl_prime(K,l,n)=(fnl_prime(K)-l*fnl(K)/|K|)/|K|^(l+1)
-!          ffnl_prime_prime(K,l,n)=(fnl_prime_prime(K)-(2*l+1)*fnl_prime(K)/|K|
-!          +l*(l+2)*fnl(K)/|K|^2)/|K|^(l+2)
+           ! =========================================================================
+           ! B-USE OF LEGENDRE POLYNOMIAL IN APPLICATION OF NL OPERATOR:
+           ! ffnl(K,l,n)=fnl(K)/|K|^l
+           ! ffnl_prime(K,l,n)=(fnl_prime(K)-l*fnl(K)/|K|)/|K|^(l+1)
+           ! ffnl_prime_prime(K,l,n)=(fnl_prime_prime(K)-(2*l+1)*fnl_prime(K)/|K|
+           ! +l*(l+2)*fnl(K)/|K|^2)/|K|^(l+2)
          else if (iln>iln0) then
 
            if (il==0) then
@@ -615,15 +638,16 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 !$OMP PARALLEL DO
                do ig=1,npw
                  ffnl(ig,3,iffnl,itypat)= (wk_ffnl3(ig)-       &
-&                 dble(2*il+1)*wk_ffnl2(ig)*kpgnorm_inv(ig)+   &
-&                 dble(il*(il+2))*wk_ffnl1(ig)*kpgnorm_inv(ig)**2)*kpgnorm_inv(ig)**(il+2)
+                   dble(2*il+1)*wk_ffnl2(ig)*kpgnorm_inv(ig)+   &
+                   dble(il*(il+2))*wk_ffnl1(ig)*kpgnorm_inv(ig)**2)*kpgnorm_inv(ig)**(il+2)
                end do
              end if
            end if
 
-         end if  ! End if - Use of Ylm or not
+         end if  ! Use of Ylm or not
 
-       else ! No NL part
+       else
+         ! No NL part
 !$OMP PARALLEL DO COLLAPSE(2)
          do mu=1,dimffnl
            do ig=1,npw
@@ -631,13 +655,20 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
            end do
          end do
 
-       end if ! End if - a nonlocal part exists
-     end if ! End if - special case : spin orbit calc. & no spin-orbit psp
+       end if ! testnl (a nonlocal part exists)
+     end if ! special case: spin orbit calc. & no spin-orbit psp
 
-     if (iln>iln0) iln0=iln
-   end do ! End do - loop over (l,m,n) values
+     if (iln > iln0) iln0 = iln
 
- end do  ! End do - loop over atom types
+   end do ! loop over (l,m,n) values
+ end do ! loop over atom types
+
+ ABI_FREE(kpgnorm_inv)
+ ABI_FREE(kpgnorm)
+ ABI_FREE(wk_ffnl1)
+ ABI_FREE(wk_ffnl2)
+ ABI_FREE(wk_ffnl3)
+ ABI_FREE(wk_ffspl)
 
  ! Optional deallocations.
  ABI_SFREE(kpgc)
@@ -649,16 +680,18 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  ABI_SFREE(dffnl_tmp)
  ABI_SFREE(d2ffnl_tmp)
 
- ABI_DEALLOCATE(kpgnorm_inv)
- ABI_DEALLOCATE(kpgnorm)
- ABI_DEALLOCATE(wk_ffnl1)
- ABI_DEALLOCATE(wk_ffnl2)
- ABI_DEALLOCATE(wk_ffnl3)
- ABI_DEALLOCATE(wk_ffspl)
+ if (nprocs > 1) then
+   ! Blocking/non-blocking depending on the presence of request.
+   if (present(request)) then
+     call xmpi_isum_ip(ffnl, comm, request, ierr)
+   else
+     call xmpi_sum(ffnl, comm, ierr)
+   end if
+ else
+   if (present(request)) request = xmpi_request_null
+ end if
 
- call timab(16,2,tsec)
-
- DBG_EXIT("COLL")
+ call timab(16, 2, tsec)
 
 end subroutine mkffnl
 !!***
