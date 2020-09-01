@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_gaussfit
 !! NAME
 !!  m_paw_gaussfit
@@ -71,7 +70,6 @@ CONTAINS
 !===========================================================
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* m_paw_gaussfit/gaussfit_main
 !! NAME
 !!  gaussfit_main

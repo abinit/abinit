@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paral_atom
 !! NAME
 !!  m_paral_atom

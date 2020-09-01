@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_symkpt
 !! NAME
 !!  m_symkpt

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/21_hashfuncs/tests/test_md5_sum_from_string
 !! NAME
 !!  test_md5_sum_from_string
