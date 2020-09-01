@@ -1503,10 +1503,13 @@ rescaling as described in [[dilatmx]], the code will stop execution.
 Also, the use of [[chkdilatmx]] = 0 allows one to set [[dilatmx]] to a larger value than 1.15,
 otherwise forbidden as being a waste of CPU and memory.
 
+So, when using [[chkdilatmx]]=0, the relaxed lattice parameters might not be accurate, but will simply better
+than the starting ones.
+
 [[chkdilatmx]]=0 is useful when the starting geometry is likely very inaccurate. However, if the user is in search
 of an accurate geometry estimation, then a first determination of the (better but inaccurate) geometry with [[chkdilatmx]]=0
-should be followed by a more accurate second run from the better geometry with [[chkdilatmx]]=1 and [[dilatmx]] close to 1,
-like 1.05 .
+should be followed by a more accurate second run from the better geometry with [[chkdilatmx]]=1 and [[dilatmx]] slightly larger than 1,
+(possibly 1.05).
 """,
 ),
 
@@ -2469,7 +2472,7 @@ then the recommended value of [[dilatmx]] is 1.05.
 When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
 you need an accurate estimation of the geometry, then make a first
 run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using 
-the newly estimated geometry, with [[chkdilatmx]]=0 and [[dilatmx]] set to 1.15. 
+the newly estimated geometry, with [[chkdilatmx]]=0 and [[dilatmx]] set to 1.05. 
 If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]]=0 only once.
 
 In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
@@ -2497,7 +2500,7 @@ By default, ABINIT will not accept that you define [[dilatmx]] bigger than 1.15.
 This behaviour will be overcome by using [[chkdilatmx]] == 0.
 Supposing you think that the optimized [[acell]] values might be 5% larger
 than your input values, use simply [[dilatmx]] 1.05. This will lead to
-an increase of the number of planewaves by a factor $(1.05)^3$, which is about $=1.158$, and a
+an increase of the number of planewaves by a factor $(1.05)^3$, which is about $1.158$, and a
 corresponding increase in CPU time and memory.
 It is possible to use [[dilatmx]] when [[optcell]] =0, but a value larger than
 1.0 will be a waste.
