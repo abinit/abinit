@@ -287,12 +287,6 @@ Found 6 distinct q-points among the total 9 points reported in the headers.
 
  Checking if the list of q-points is complete. 
 
- symatm: atom number 1 is reached starting at atom
-   1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2
-   1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2
- symatm: atom number 2 is reached starting at atom
-   2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1
-   2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     2
  Reduced coordinates and weights : 

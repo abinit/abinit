@@ -43,12 +43,14 @@ typat   1
 xred    0.0  0.0  0.0
 znucl   28
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Ni-psval-icmod3.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test=t10.out, tolnlines=5, tolabs=1.00e-3, tolrel=2.00e-2, fld_options=-easy
-#%% psp_files = Ni-psval-icmod3.psp8
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

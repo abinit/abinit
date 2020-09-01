@@ -74,6 +74,9 @@ ecut  8       # Maximal kinetic energy cut-off, in Hartree
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc, PseudosTM_pwteter/1h.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -83,7 +86,6 @@ ecut  8       # Maximal kinetic energy cut-off, in Hartree
 #%% [files]
 #%% files_to_test = 
 #%%  tw90_3.out,  tolnlines=   12,   tolabs=  3.00e-04,   tolrel=  2.00e-02, fld_options = -medium
-#%% psp_files =  14si.pspnc, 1h.pspnc
 #%% extra_inputs = 
 #%% [paral_info]
 #%% max_nprocs = 1

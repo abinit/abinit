@@ -82,13 +82,15 @@ prtbbb 1
  nbdbuf 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "56ba.psp_mod, 8o.psp_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t77.out, tolnlines = 45, tolabs = 4.0e-03, tolrel = 1.001e+00, fld_options =  -easy
-#%% psp_files = 56ba.psp_mod, 8o.psp_mod
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

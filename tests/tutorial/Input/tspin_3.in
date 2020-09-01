@@ -52,13 +52,15 @@ nshiftk   1
  prtkpt   1
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tspin_3.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

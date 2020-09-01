@@ -898,6 +898,7 @@ integer pure function wfk_findk(wfk, kpt, ktol) result(ikpt)
 
  my_ktol = 0.0001_dp; if (present(ktol)) my_ktol = ktol
 
+!TODO: replace with krank type and routines, probably save mapping on init of the wfk object
  ikpt = -1
  do ik=1,wfk%hdr%nkpt
    if (all(abs(wfk%hdr%kptns(:, ik) - kpt) < my_ktol)) then
@@ -4983,7 +4984,8 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
    write(std_out, "(2a)")ch10, repeat("=", 92)
    !call wrtout([std_out, ab_out], msg)
    write(std_out, "(a)")" Generating new WKF file with dense k-mesh:"
-   write(std_out, "(2a)")" Taking wavefunctions with k-point list from WFK file: ", trim(in_wfkpath)
+   write(std_out, "(2a)")" Taking ab-initio wavefunctions with k-point list from WFK file: ", trim(in_wfkpath)
+   write(std_out, "(a)")" When the routine returns, this file will be replaced by a new one with the dense k-mesh"
    write(std_out, "(2a)")" Taking eigenvalues and k-point tables from KERANGE file: ", trim(kerange_path)
    write(std_out, "(a, 9(i0, 1x))")"   fine_kptrlatt: ", fine_hdr%kptrlatt
    do ii=1,fine_hdr%nshiftk

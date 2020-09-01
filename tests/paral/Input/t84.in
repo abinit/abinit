@@ -82,13 +82,15 @@ npband2 2
 npfft2 1
 bandpp2 11
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%   t84.out, tolnlines =  3, tolabs =5.0e-1, tolrel = 5.0e-1, fld_options=-medium ;
-#%% psp_files = 23v.paw
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10

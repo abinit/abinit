@@ -39,13 +39,15 @@ prtgden 1 # Test the gradient of electronic density.
 prtlden 1 # Test the Laplacian of electronic density.
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit 
 #%% test_chain = t21.in, t22.in, t23.in, t24.in
 #%% [files]
 #%% files_to_test = t21.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 01h.bare
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

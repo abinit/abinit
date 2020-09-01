@@ -81,13 +81,15 @@ typat  1
 xred
     0.00000000000    0.00000000000    0.00000000000 # Au
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/79au.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t72.out, tolnlines = 4, tolabs = 1.001e-03, tolrel = 1.500e-01, fld_options = -medium
-#%% psp_files = 79au.pspnc
 #%% [paral_info]
 #%% max_nprocs = 3
 #%% [extra_info]

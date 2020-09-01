@@ -67,6 +67,9 @@ prtden 0     # Don't print the density
 prtwf 0      # Don't output the wave-functions
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "22ti.12.khgh, PseudosHGH_pwteter/11na.1.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -75,7 +78,6 @@ prtwf 0      # Don't output the wave-functions
 #%% files_to_test = 
 #%%   t14.out, tolnlines = 2, tolabs = 1.0e-4, tolrel = 1.0e-4
 #%% extra_inputs = t14i_OCCUP
-#%% psp_files = 22ti.12.khgh, HGH/11na.1.hgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

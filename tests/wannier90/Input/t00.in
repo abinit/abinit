@@ -41,12 +41,14 @@ istwfk 8*1
  znucl  31 33
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/31ga.pspnc, PseudosTM_pwteter/33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t00.out, tolnlines=5, tolabs=2.3e-05, tolrel=4.00e-04
-#%% psp_files= 31ga.pspnc, 33as.pspnc
 #%% extra_inputs = t00o_w90.win
 #%% [paral_info]
 #%% max_nprocs = 1

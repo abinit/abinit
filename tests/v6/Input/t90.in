@@ -141,6 +141,9 @@ znucl 22
 #prtnest 1
 #fermie_nest 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/22ti.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -152,7 +155,6 @@ znucl 22
 ####  fails on several slaves due to a different number of SCF cycles
 ####  Finding the magic numbers that make the test pass everywhere is a tricky business.
 ####%% t90.out, tolnlines = 11, tolabs = 4.0e-3, tolrel = 1.1, fld_options =  -easy
-#%% psp_files = 22ti.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

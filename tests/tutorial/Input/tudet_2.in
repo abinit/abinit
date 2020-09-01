@@ -84,9 +84,10 @@
      prtden  0
 
 #PAW atomic data
-     pseudos = "Fe.GGA_PBE-JTH.xml"
-     pp_dirpath = "../../Psps_for_tests"
      indata_prefix = "tudet_1.o"
+
+     pp_dirpath "$ABI_PSPDIR"
+     pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -96,7 +97,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   tudet_2.abo, tolnlines=  4, tolabs=  8.000e-03, tolrel=  6.500e-01, fld_options = -easy
-#%% psp_files =  Fe.GGA_PBE-JTH.xml
 #%% output_file = "tudet_2.abo"
 #%% [paral_info]
 #%% max_nprocs = 1

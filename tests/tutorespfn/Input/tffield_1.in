@@ -59,13 +59,15 @@ jdtset 1 2 3
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tffield_1.out, tolnlines=  1, tolabs=  1.100e-08, tolrel=  3.000e-04
-#%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

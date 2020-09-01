@@ -229,7 +229,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
  integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt
  integer :: opt_cylinder,opt_surface,test,rank,nprocs
  integer, allocatable :: seed(:)
- real(dp),parameter :: tolq0=1.d-3
+ real(dp),parameter :: tolq0=1.d-3,tol999=999.0
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph
  real(dp) :: qbz_norm,step,ucvol,intfauxgb, alfa
@@ -571,6 +571,10 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
        if (check<zero) then  ! use Rozzi's method.
          Vcp%hcyl=ABS(check)*SQRT(SUM(Cryst%rprimd(:,ii)**2))
          opt_cylinder=2
+         !Check to enter the infinite Rozzi treatment
+         if(Vcp%vcutgeo(3).le.-tol999) then
+           Vcp%hcyl=tol12 
+         end if
        end if
      end if
    end do
@@ -671,7 +675,8 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 
    ! Beigi"s method: the surface must be along x-y and R must be L_Z/2.
    if (opt_surface==1) then
-     ABI_CHECK(ALL(Vcp%pdir == (/1,1,0/)),"Surface must be in the x-y plane")
+     msg="2D geometry, Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo or your geometry."
+     ABI_CHECK(ALL(Vcp%pdir == (/1,1,0/)), msg)
      Vcp%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
@@ -1934,9 +1939,10 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
    !   the simplified Eq.1 for the Coulomb interaction is used.
    if (ANY(ABS(qcart(3,:))>SMALL)) then
      write(std_out,*)qcart(:,:)
-     write(msg,'(5a)')&
-&      'Found q-points with non-zero component along non-periodic direction ',ch10,&
-&      'This is not allowed, see Notes in cutoff_surface.F90 ',ch10,&
+     write(msg,'(7a)')&
+&      '2D geometry, Beigi method. Found q-points with non-zero component along non-periodic (z) direction ',ch10,&
+&      'This is not allowed. Check your k or q point grid, vectors must be of the form (kx,ky,0). ',ch10,&
+&      'Possibly shiftk triggers this problem.',ch10,&
 &      'ACTION : Modify the q-point sampling '
      MSG_ERROR(msg)
    end if

@@ -62,13 +62,15 @@ xred   0.0  0.0  0.0
        0.25 0.25 0.25  
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al-psval.psp8, As-psval.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t45.out, tolnlines= 5, tolabs=5.0e-04, tolrel=5.0e-04, fld_options=-medium
-#%% psp_files = Al-psval.psp8, As-psval.psp8
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

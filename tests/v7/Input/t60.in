@@ -73,12 +73,14 @@
    pawmixdg 1
   pawecutdg 15
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al.GGA-PBE-paw.abinit, Al.GGA-PBE-paw.abinit.xml, Al.GGA-PBE-paw.abinit_vb.xml, Al.GGA-PBE-paw.abinit_kj.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t60.out, tolnlines=149, tolabs=6.00e-05, tolrel=2.00e-05
-#%% psp_files=Al.GGA-PBE-paw.abinit, Al.GGA-PBE-paw.abinit.xml, Al.GGA-PBE-paw.abinit_vb.xml, Al.GGA-PBE-paw.abinit_kj.xml
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

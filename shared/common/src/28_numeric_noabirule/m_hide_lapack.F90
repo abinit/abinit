@@ -2732,9 +2732,10 @@ subroutine cginv(a,n,comm)
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
   nprocs = xmpi_comm_size(comm)
-#ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
-#endif
+  ! TODO
+!#ifdef HAVE_LINALG_SCALAPACK
+!  use_scalapack = (nprocs>1)
+!#endif
  end if
 
  SELECT CASE(use_scalapack)
@@ -3286,12 +3287,11 @@ subroutine matrginv(a,lda,n)
 
  call dgeicd(a,lda,n,0,rcond,det,work,nwork)
  if(abs(rcond)==zero) then
-   write(message, '(10a)' ) ch10,&
-&   ' matrginv : BUG -',ch10,&
-&   '  The matrix that has been passed in argument of this subroutine',ch10,&
-&   '  is probably either singular or nearly singular.',ch10,&
-&   '  The ESSL routine dgeicd failed.',ch10,&
-&   '  Action: Contact ABINIT group '
+   write(message, '(7a)' )&
+   '  The matrix that has been passed in argument of this subroutine',ch10,&
+   '  is probably either singular or nearly singular.',ch10,&
+   '  The ESSL routine dgeicd failed.',ch10,&
+   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
 
@@ -3299,22 +3299,22 @@ subroutine matrginv(a,lda,n)
 
  call dbgmlu(a,lda,n,ipvt,ierr)
  if(ierr /= 0) then
-   write(message, '(10a)' ) ch10,&
-&   ' matrginv : BUG -',ch10,&
-&   '  The matrix that has been passed in argument of this subroutine',ch10,&
-&   '  is probably either singular or nearly singular.',ch10,&
-&   '  The ASL routine dbgmlu failed.',ch10,&
-&   '  Action: Contact ABINIT group '
+   write(message, '(7a)' ) ch10,&
+   '  The matrix that has been passed in argument of this subroutine',ch10,&
+   '  is probably either singular or nearly singular.',ch10,&
+   '  The ASL routine dbgmlu failed.',ch10,&
+   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
+
  call dbgmdi(a,lda,n,ipvt,det,-1,work,ierr)
+
  if(ierr /= 0) then
-   write(message, '(10a)' ) ch10,&
-&   ' matrginv : BUG -',ch10,&
-&   '  The matrix that has been passed in argument of this subroutine',ch10,&
-&   '  is probably either singular or nearly singular.',ch10,&
-&   '  The ASL routine dbgmdi failed.',ch10,&
-&   '  Action: Contact ABINIT group '
+   write(message, '(7a)' ) &
+   '  The matrix that has been passed in argument of this subroutine',ch10,&
+   '  is probably either singular or nearly singular.',ch10,&
+   '  The ASL routine dbgmdi failed.',ch10,&
+   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
 
@@ -3322,22 +3322,22 @@ subroutine matrginv(a,lda,n)
 
  call dgetrf(n,n,a,lda,ipvt,ierr)
  if(ierr /= 0) then
-   write(message, '(10a)' ) ch10,&
-&   ' matrginv : BUG -',ch10,&
-&   '  The matrix that has been passed in argument of this subroutine',ch10,&
-&   '  is probably either singular or nearly singular.',ch10,&
-&   '  The LAPACK routine dgetrf failed.',ch10,&
-&   '  Action: Contact ABINIT group '
+   write(message, '(7a)' ) &
+   '  The matrix that has been passed in argument of this subroutine',ch10,&
+   '  is probably either singular or nearly singular.',ch10,&
+   '  The LAPACK routine dgetrf failed.',ch10,&
+   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
+
  call dgetri(n,a,lda,ipvt,work,n,ierr)
+
  if(ierr /= 0) then
-   write(message, '(10a)' ) ch10,&
-&   ' matrginv : BUG -',ch10,&
-&   '  The matrix that has been passed in argument of this subroutine',ch10,&
-&   '  is probably either singular or nearly singular.',ch10,&
-&   '  The LAPACK routine dgetri failed.',ch10,&
-&   '  Action: Contact ABINIT group '
+   write(message, '(7a)' ) &
+   '  The matrix that has been passed in argument of this subroutine',ch10,&
+   '  is probably either singular or nearly singular.',ch10,&
+   '  The LAPACK routine dgetri failed.',ch10,&
+   '  Action: Contact ABINIT group '
    MSG_ERROR(message)
  end if
 
@@ -3400,7 +3400,6 @@ end subroutine matr3eigval
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/jacobi
 !! NAME
 !!  jacobi

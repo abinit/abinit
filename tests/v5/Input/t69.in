@@ -117,13 +117,15 @@ xred
 ixc     7
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc, PseudosTM_pwteter/6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t69.out, tolnlines = 15, tolabs = 1.010e-03, tolrel = 7.000e-03, fld_options = -medium
-#%% psp_files = 14si.pspnc, 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

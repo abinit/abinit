@@ -3698,6 +3698,21 @@ end subroutine slk_write
 !! TODO
 !!  * Generalize the implementation adding the reading of the real buffer.
 !!
+!!  This routine is not portable as this kind of access pattern is not supported by all MPI implementations
+!!  E.g. with MPICH we have
+!!
+!! --- !ERROR
+!! src_file: m_slk.F90
+!! src_line: 3780
+!! mpi_rank: 1
+!! message: |
+!!     SET_VIEW
+!!     Other I/O error , error stack:
+!!     ADIO_Set_view(48):  **iobadoverlap displacements of filetype must be in a monotonically nondecreasing order
+!! ...
+!!
+!! FIXME: This routine should be removed and replaced by hdf5 + mpi-io
+!!
 !! PARENTS
 !!      m_exc_diago
 !!

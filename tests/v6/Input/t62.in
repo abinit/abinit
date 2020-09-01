@@ -101,13 +101,15 @@
 #PAW parameters
 pawecutdg   9.
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "al_ps.abinit.paw, as_ps.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t62.out, tolnlines = 50, tolabs = 3.5e-2, tolrel = 9.0e-3, fld_options = -easy
-#%% psp_files = al_ps.abinit.paw, as_ps.paw
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

@@ -17,6 +17,9 @@
  xred 3*0.00d0 3*0.25d0
  znucl 14
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -24,7 +27,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t09.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 14si.pspnc
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp t09o_WFK t11i_WFK;

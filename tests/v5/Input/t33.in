@@ -61,13 +61,15 @@ occopt 1
 #Definition of the SCF procedure
 nstep 50               # Maximal number of SCF cycles
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "cu_ps.736.lda, o_ps.736.lda"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t33.out, tolnlines = 2, tolabs = 1.100e-05, tolrel = 5.000e-06, fld_options = -medium
-#%% psp_files = cu_ps.736.lda, o_ps.736.lda
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -150,6 +150,7 @@ type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(
  krank%time_reversal = .true.
  if (present(time_reversal)) then
    if (.not. time_reversal) timrev = 1
+   krank%time_reversal = .false.
  end if
 
  ! Ensure kpt(i)+one is positive, and the smallest difference between kpts should be larger than 1/100 ie ngkpt < 100.
@@ -176,7 +177,7 @@ type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(
      ! favor the former by looping it last
      do itim = timrev, 1, -1
        do isym = 1, nsym
-         symkpt = (-1)**(timrev+1) * matmul(symrec(:,:,isym), kpt(:, ikpt))
+         symkpt = (-1)**(itim+1) * matmul(symrec(:,:,isym), kpt(:, ikpt))
          symkptrank = krank%get_rank(symkpt(:))
          krank%invrank(symkptrank) = ikpt
        end do

@@ -80,12 +80,14 @@ nnos6 5
 qmass6 5*10.0
 pitransform6 2  #staging
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "1h.atompaw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t08.out, tolnlines=5, tolabs=2.0e-4, tolrel=6.0e-4, fld_options = -easy
-#%% psp_files = 1h.atompaw
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

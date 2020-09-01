@@ -52,13 +52,15 @@ rprim     -0.5  0.5  0.5
            0.5 -0.5  0.5
            0.5  0.5 -0.5
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%   t42.out, tolnlines = 51, tolabs = 8.0e+2, tolrel = 2.0e-1, fld_options= -easy ;
-#%% psp_files = 26fe.paw
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]

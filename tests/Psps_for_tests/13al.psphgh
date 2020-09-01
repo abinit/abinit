@@ -1,7 +1,0 @@
-HGH psp for aluminium, from PRB58, 3641 (1998)
-13   3  010221                      zatom,zion,pspdat
-3    1  1     0  2001  0            pspcod,pspxc,lmax,lloc,mmax,r2well
-0.450000 -8.491351 0.000000 0.0 0.0  rloc, c1, c2, c3, c4
-0.460104  5.088340 2.679700 0.0      rs, h11s, h22s, h33s
-0.536744  2.193438 0.000000 0.0      rp, h11p, h22p, h33p
-          0.006154 0.003947 0.0          k11p, k22p, k33p

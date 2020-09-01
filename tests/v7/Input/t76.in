@@ -125,6 +125,9 @@ kptbounds4  0.0 0.0 0.0 #Gamma
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Cu_LDA_abinit"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -132,7 +135,6 @@ kptbounds4  0.0 0.0 0.0 #Gamma
 #%% [files]
 #%% files_to_test = 
 #%%   t76.out, tolnlines = 5, tolabs = 1.0E-15, tolrel = 1.0E-20, fld_options = 
-#%% psp_files = Cu_LDA_abinit
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

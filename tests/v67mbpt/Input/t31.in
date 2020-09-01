@@ -104,6 +104,9 @@ ngkpt5             4 4 4
 nshiftk5           1
 shiftk5            0.22 0.24 0.26
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -117,7 +120,6 @@ shiftk5            0.22 0.24 0.26
 #%%  t31o_DS5_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t31o_DS5_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t31o_DS5_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
-#%% psp_files = 14si.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]

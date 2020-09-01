@@ -39,8 +39,8 @@ ndtset 7   acell: 3*3.515 angstrom  acell+ 3*0.005 angstrom
  prtwf 1 prtden 0 prteig 0
  getwfk -1
 
- pseudos = "C.LDA_PW-JTH.xml"
- pp_dirpath = "../../Psps_for_tests"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "C.LDA_PW-JTH.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -49,7 +49,6 @@ ndtset 7   acell: 3*3.515 angstrom  acell+ 3*0.005 angstrom
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw1_5.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
-#%% psp_files =  C.LDA_PW-JTH.xml
 #%% output_file = "tpaw1_5.abo"
 #%% [paral_info]
 #%% max_nprocs = 4

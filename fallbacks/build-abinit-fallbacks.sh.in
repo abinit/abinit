@@ -21,7 +21,6 @@ cd $source
   --disable-bigdft \
   --disable-atompaw \
   --disable-wannier90 \
-  --disable-xmlf90 --disable-libpsml \
   LIBS_NETCDF4_FORTRAN="-ldl -lm -lz" \
   CC="@CC@" \
   CXX="@CXX@" \

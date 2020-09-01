@@ -52,13 +52,15 @@
   toldfe   1.0d-7
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t17.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
-#%% psp_files = 83bi.psphgh
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
