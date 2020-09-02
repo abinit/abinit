@@ -8,10 +8,21 @@ EXTRA_DIST += \
 	INSTALL_gpu.md \
 	RELNOTES \
 	abimkdocs \
+	abimkdocs_plugin \
+	abimkdocs_tests \
 	abinit_theme \
 	abisrc.py \
 	abisrc_requirements.txt \
 	autogen.sh \
+	doc/tests \
+	doc/theory/a-TDEP/a-TDEP_Guide.pdf \
+	doc/theory/a-TDEP/a-TDEP_Paper.pdf \
+	doc/topics/documents/elphon_manual.pdf \
+	doc/topics/documents/geometry.pdf \
+	doc/topics/documents/gwa.pdf \
+	doc/topics/documents/howto_chebfi.pdf \
+	doc/topics/documents/hybrids-2017.pdf \
+	doc/topics/documents/noncol.pdf \
 	mkdocs.yml \
 	mksite.py \
 	requirements.txt \
