@@ -7,12 +7,15 @@ EXTRA_DIST += \
         INSTALL_Ubuntu.md \
 	INSTALL_gpu.md \
 	RELNOTES \
+	abimkdocs \
+	abinit_theme \
 	abisrc.py \
 	abisrc_requirements.txt \
 	autogen.sh \
 	mkdocs.yml \
 	mksite.py \
 	requirements.txt \
+	scripts \
 	setup.cfg \
 	tasks.py \
 	wipeout.sh \
