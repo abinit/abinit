@@ -185,7 +185,7 @@ cd tests
     Summary: failed=0, succeeded=11, passed=0, skipped=0, disabled=0
     ```
 
-    otherwise there is a __problem__ with the compilation: see [Troubleshooting](#troubleshooting)
+otherwise there is a __problem__ with the compilation: see [Troubleshooting](#troubleshooting)
 
 __Install__ (optional):
 
