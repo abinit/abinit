@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_libpaw_mpi
 !! NAME
 !!  m_libpaw_mpi

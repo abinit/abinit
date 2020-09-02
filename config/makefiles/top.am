@@ -2,11 +2,19 @@
 EXTRA_DIST += \
 	KNOWN_PROBLEMS \
 	PACKAGING \
+	INSTALL_CentOS.md \
 	INSTALL_MacOS.md \
         INSTALL_Ubuntu.md \
 	INSTALL_gpu.md \
 	RELNOTES \
+	abisrc.py \
+	abisrc_requirements.txt \
 	autogen.sh \
+	mkdocs.yml \
+	mksite.py \
+	requirements.txt \
+	setup.cfg \
+	tasks.py \
 	wipeout.sh \
 	upgrade-build-config-file.sh
 
