@@ -1800,12 +1800,16 @@ pp_dirpath $ABI_PSPDIR
             compilers.append(compiler)
             slaves.append(host)
 
-        # Find the slave and compare the name of the compiler.
+        # Find the slave
+        # Use short hostname i.e. the toke before '.' so alps.pcml.ucl.ac.be becomes alps
         try:
-            idx = slaves.index(self.build_env.hostname)
+            #idx = slaves.index(self.build_env.hostname)
+            short_hostname = self.build_env.hostname.split('.', 1)[0]
+            idx = slaves.index(short_hostname)
         except ValueError:
             return False
 
+        # Compare the name of the compiler.
         return compilers[idx] == self.build_env.fortran_compiler.name
 
     def skip_buildbot_builder(self):
@@ -1926,11 +1930,13 @@ pp_dirpath $ABI_PSPDIR
             if not os.path.exists(os.path.join(src, "README.md")):
                 self._status = "skipped"
                 msg = self.full_id + ": Skipped:\n\tThis test requires files in the git submodule:\n\t\t%s\n" % src
-                msg += "\tUse:\n\t`git submodule init && git submodule update --recursive --remote`\n\t to fetch the last version from the remote url."
+                msg += "\tbut cannot find README.md file in dir\n"
+                msg += "\tUse:\n\t\t`git submodule init && git submodule update --recursive --remote`\n\tto fetch the last version from the remote url."
                 self.cprint(msg, status2txtcolor[self._status])
                 can_run = False
             else:
-                os.symlink(src, dst)
+                if not os.path.exists(dst):
+                    os.symlink(src, dst)
 
         self.run_etime = 0.0
 

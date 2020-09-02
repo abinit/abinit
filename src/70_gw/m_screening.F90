@@ -274,7 +274,7 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_screening,mrgscr,sigma
+!!      m_screening,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -517,7 +517,7 @@ end subroutine em1results_print
 !!  Symmetrization can be skipped if iq_bz correspond to a point in the IBZ
 !!
 !! PARENTS
-!!      calc_sigc_me,cohsex_me
+!!      m_cohsex,m_sigc
 !!
 !! CHILDREN
 !!
@@ -642,7 +642,7 @@ end subroutine Epsm1_symmetrizer
 !!  Symmetrization can be skipped if iq_bz correspond to a point in the IBZ
 !!
 !! PARENTS
-!!      calc_sigc_me
+!!      m_sigc
 !!
 !! CHILDREN
 !!
@@ -738,7 +738,7 @@ end subroutine Epsm1_symmetrizer_inplace
 !!  Er<Epsilonm1_results>=The structure initialized with basic dimensions and arrays.
 !!
 !! PARENTS
-!!      m_screening,mrgscr,setup_sigma
+!!      m_screening,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -871,7 +871,7 @@ end subroutine init_Er_from_file
 !! OUTPUT
 !!
 !! PARENTS
-!!      mrgscr,sigma
+!!      m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -1151,7 +1151,7 @@ end subroutine mkdump_Er
 !!  Remove this routine. Now everything should be done with mkdump_Er
 !!
 !! PARENTS
-!!      calc_sigc_me,cohsex_me
+!!      m_cohsex,m_sigc
 !!
 !! CHILDREN
 !!
@@ -1392,7 +1392,7 @@ end subroutine decompose_epsm1
 !!   the symmetrized inverse dielectric matrix.
 !!
 !! PARENTS
-!!      m_screening,screening
+!!      m_screening,m_screening_driver
 !!
 !! CHILDREN
 !!
@@ -2917,7 +2917,7 @@ end function chi_new
 !! OUTPUT
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!
@@ -2960,7 +2960,7 @@ end subroutine chi_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!

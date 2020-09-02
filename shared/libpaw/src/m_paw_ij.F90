@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_ij
 !! NAME
 !!  m_paw_ij
@@ -319,8 +318,9 @@ CONTAINS
 !!   according to the input variables.
 !!
 !! PARENTS
-!!      bethe_salpeter,d2frnl,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv,ldau_self
-!!      m_energy,paw_qpscgw,respfn,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_dfptnl_pert,m_nonlinear,m_respfn_driver,m_scfcv_core
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -564,8 +564,9 @@ end subroutine paw_ij_init
 !!  paw_ij(:)<type(paw_ij_type)>=paw arrays given on (i,j) channels
 !!
 !! PARENTS
-!!      bethe_salpeter,d2frnl,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv,ldau_self
-!!      m_energy,m_paral_pert,m_paw_ij,pawprt,respfn,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_dfptnl_pert,m_nonlinear,m_paral_pert,m_paw_ij,m_paw_tools
+!!      m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -672,8 +673,9 @@ end subroutine paw_ij_free
 !!  Paw_ij(:)<type(paw_ij_type)>=PAW arrays given on (i,j) channels.
 !!
 !! PARENTS
-!!      bethe_salpeter,d2frnl,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv,ldau_self
-!!      m_energy,m_paw_ij,paw_qpscgw,pawprt,respfn,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_dfptnl_pert,m_nonlinear,m_paw_ij,m_paw_tools,m_respfn_driver
+!!      m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -978,7 +980,7 @@ end subroutine paw_ij_copy
 !! NOTES
 !!
 !! PARENTS
-!!      m_pawdij,sigma
+!!      m_pawdij,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -1349,7 +1351,7 @@ end subroutine paw_ij_print
 !!  paw_ij_gathered(:)<type(paw_ij_type)>= output paw_oij datastructure
 !!
 !! PARENTS
-!!      m_paw_ij,outkss,pawprt
+!!      m_io_kss,m_paw_ij,m_paw_tools
 !!
 !! CHILDREN
 !!
@@ -2345,7 +2347,8 @@ end subroutine paw_ij_redistribute
 !!  Paw_ij<type(paw_ij_type)>=paw_ij structure
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstpaw,dfpt_scfcv,scfcv
+!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!

@@ -172,10 +172,10 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      scfcv
+!!      scfcv_core
 !!
 !! SOURCE
 
@@ -370,10 +370,10 @@ end subroutine scfcv_init
 !! NOTES
 !!
 !! PARENTS
-!!      gstate,mover_effpot
+!!      m_gstate,m_mover_effpot
 !!
 !! CHILDREN
-!!      scfcv
+!!      scfcv_core
 !!
 !! SOURCE
 
@@ -478,10 +478,10 @@ end subroutine scfcv_destroy
 !! NOTES
 !!
 !! PARENTS
-!!      gstate,mover,pawuj_drive
+!!      m_gstate,m_mover
 !!
 !! CHILDREN
-!!      scfcv
+!!      scfcv_core
 !!
 !! SOURCE
 
@@ -602,7 +602,7 @@ end subroutine scfcv_run
 !!      m_scfcv
 !!
 !! CHILDREN
-!!      scfcv
+!!      scfcv_core
 !!
 !! SOURCE
 
@@ -686,7 +686,7 @@ end subroutine scfcv_runWEntropyDMFT
 !!      m_scfcv
 !!
 !! CHILDREN
-!!      scfcv
+!!      scfcv_core
 !!
 !! SOURCE
 

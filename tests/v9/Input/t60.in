@@ -102,6 +102,7 @@ eph_intmeth6 2
 sigma_ngkpt6 2 2 2
 sigma_erange6  0.5 0.5 eV
 eph_tols_idelta6 1e-6 1e-6
+eph_phwinfact6 3.9
 getdvdb6  2
 eph_ngqpt_fine6 4 4 4
 
@@ -177,7 +178,7 @@ getdvdb_filepath10  "t60o_DS20_DVDB"
 #%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
 #%% [files]
 #%% files_to_test = 
-#%%   t60.out, tolnlines = 45, tolabs = 0.4, tolrel = 0.1
+#%%   t60.out, tolnlines = 55, tolabs = 0.4, tolrel = 0.15
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

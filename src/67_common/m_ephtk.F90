@@ -71,8 +71,11 @@ contains  !=====================================================
 !!   phmodes_skip(natom3) For each mode: 1 to skip the contribution given by this phonon branch else 0
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -134,8 +137,11 @@ end subroutine ephtk_set_phmodes_skip
 !!     pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
 !!
 !! PARENTS
+!!      m_phgamma,m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -200,8 +206,11 @@ end subroutine ephtk_set_pertables
 !! qpttoqpt(2, cryst%nsym, nqbz)) = qpoint index mapping under symops.
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -287,9 +296,11 @@ end subroutine ephtk_mkqtabs
 !!   gam_now = output gamma matrices multiplied by displacement matrices
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
-!!      zgemm
+!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -350,9 +361,11 @@ end subroutine ephtk_gam_atm2qnu
 !!  gkq_nu(2,nb1,nb2,3*natom)=EPH matrix elements in the phonon-mode basis.
 !!
 !! PARENTS
-!!      m_ephtk
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -410,8 +423,11 @@ end subroutine ephtk_gkknu_from_atm
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      m_eph_driver,m_rta
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_fermie,ebands_set_nelect
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -459,7 +475,7 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
  else if (abs(dtset%eph_extrael) > zero) then
    call wrtout(unts, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
    call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
-   call ebands_set_nelect(ebands, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
+   call ebands_set_extrael(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
    call wrtout(unts, msg)
  end if
 

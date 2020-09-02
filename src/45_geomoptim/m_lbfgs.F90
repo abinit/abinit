@@ -83,7 +83,7 @@ contains
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pred_lbfgs
+!!      m_pred_bfgs
 !!
 !! CHILDREN
 !!
@@ -131,7 +131,7 @@ end subroutine lbfgs_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      pred_lbfgs
+!!      m_pred_bfgs
 !!
 !! CHILDREN
 !!

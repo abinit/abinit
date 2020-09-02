@@ -7,7 +7,6 @@ t39o           # Prefix for output file
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgscr
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t37.in, t38.in, t39.in
 #%% [files]
 #%% files_to_test=t39.stdout, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00

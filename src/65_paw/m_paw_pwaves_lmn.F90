@@ -126,7 +126,8 @@ CONTAINS !===========================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      classify_bands,exc_plot,m_wfd,pawmkaewf,screening,sigma,wfk_analyze
+!!      m_classify_bands,m_exc_analyze,m_paw_mkaewf,m_screening_driver
+!!      m_sigma_driver,m_wfd,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -434,8 +435,8 @@ end subroutine paw_pwaves_lmn_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      classify_bands,exc_plot,m_paw_pwaves_lmn,m_wfd,pawmkaewf,screening
-!!      sigma,wfk_analyze
+!!      m_classify_bands,m_exc_analyze,m_paw_mkaewf,m_paw_pwaves_lmn
+!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
 !!
 !! CHILDREN
 !!

@@ -158,7 +158,8 @@ CONTAINS
 !!  Pawfgr<pawfgr_type>=For PAW, Fine rectangular GRid parameters and related data
 !!
 !! PARENTS
-!!      bethe_salpeter,eph,gstate,respfn,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_eph_driver,m_gstate,m_longwave,m_nonlinear
+!!      m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -292,8 +293,8 @@ end subroutine pawfgr_init
 !!  pawfgr<type(pawfgr_type)>= Fine GRid parameters and related data
 !!
 !! PARENTS
-!!      bethe_salpeter,eph,fourier_interpol,gstate,m_rec,respfn,screening,sigma
-!!      wfk_analyze
+!!      m_bethe_salpeter,m_eph_driver,m_fourier_interpol,m_gstate,m_nonlinear
+!!      m_rec,m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -402,7 +403,7 @@ end subroutine pawfgr_nullify
 !!   the coarse grid).
 !!
 !! PARENTS
-!!      fourier_interpol,m_pawfgr,m_rec
+!!      m_fourier_interpol,m_pawfgr,m_rec
 !!
 !! CHILDREN
 !!

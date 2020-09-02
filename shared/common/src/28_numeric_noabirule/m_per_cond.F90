@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_per_cond
 !! NAME
 !!  m_per_cond

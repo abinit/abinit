@@ -272,10 +272,9 @@ end function epjdos_new
 !!  deallocate memory
 !!
 !! PARENTS
-!!      outscfcv
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -332,10 +331,10 @@ end subroutine epjdos_free
 !!  (no explicit output)
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -882,10 +881,10 @@ end subroutine dos_calcnwrite
 !!    different contributions outside the loop thus reducing the number of MPI calls.
 !!
 !! PARENTS
-!!      m_cut3d,partial_dos_fractions
+!!      m_cut3d,m_epjdos
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1243,7 +1242,7 @@ end subroutine recip_ylm
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1437,7 +1436,7 @@ end subroutine dens_in_sph
 !!      m_epjdos
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1502,10 +1501,10 @@ end subroutine sphericaldens
 !!  This routine should be called by master only
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1735,10 +1734,10 @@ end subroutine prtfatbands
 !!  Only writing
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      cwtime,wrtout
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1926,11 +1925,10 @@ end subroutine fatbands_ncwrite
 !!  where the sum over G is done on the reduced G-sphere and w(G) = 1/2 if G=G0 else 1.
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      cg_getspin,cwtime,destroy_mpi_enreg,getkpgnorm,getph,initmpi_seq
-!!      initylmg,jlspline_free,ph1d3d,recip_ylm,sort_dp,splint,wrtout,xmpi_sum
+!!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2438,7 +2436,7 @@ end subroutine partial_dos_fractions
 !!              m discretization of partial DOS fractions
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
 !!      pawcprj_alloc,pawcprj_free,simp_gen,timab,xmpi_sum

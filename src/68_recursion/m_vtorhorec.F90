@@ -100,13 +100,10 @@ contains
 !!  rset%efermi= fermi energy
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      calcnrec,cudarec,destroy_distribfft,entropyrec,fermisolverec
-!!      gran_potrec,init_distribfft,nlenergyrec,prtwork,recursion,reshape_pot
-!!      symrhg,timab,transgrid,wrtout,xmpi_allgatherv,xmpi_barrier,xmpi_max
-!!      xmpi_sum,xredistribute
+!!      timab
 !!
 !! NOTES
 !!  at this time :
@@ -950,10 +947,10 @@ end subroutine vtorhorec
 !!  ent_out1,ent_out2,ent_out3,ent_out4=debug entropy at the point
 !!
 !! PARENTS
-!!      vtorhorec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      timab,wrtout
+!!      timab
 !!
 !! NOTES
 !!  at this time :
@@ -1272,11 +1269,10 @@ end subroutine entropyrec
 !!  a, b2 : coefficient given by recursion recomputed for the new fermi energy
 !!
 !! PARENTS
-!!      vtorhorec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      alloc_dens_cuda,dealloc_dens_cuda,density_cuda,density_rec,timab,wrtout
-!!      xmpi_barrier,xmpi_sum
+!!      timab
 !!
 !! NOTES
 !!  at this time :
@@ -1559,10 +1555,10 @@ end subroutine fermisolverec
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      fermisolverec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      timab,trottersum
+!!      timab
 !!
 !! NOTES
 !!  at this time :
@@ -1678,10 +1674,10 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 !!  grand-potential (omega=-PV) divided by -T
 !!
 !! PARENTS
-!!      vtorhorec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      timab,wrtout
+!!      timab
 !!
 !! NOTES
 !!  in reality it is not the gren potential but the grand-potential (omega=-PV) divided by -T
@@ -1973,10 +1969,10 @@ end subroutine gran_potrec
 !! NOTES
 !!
 !! PARENTS
-!!      vtorhorec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      recursion_nl,reshape_pot,timab,wrtout,xmpi_sum
+!!      timab
 !!
 !! SOURCE
 
@@ -2182,11 +2178,10 @@ end subroutine nlenergyrec
 !! NOTES
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      cpu_distribution,cudarec,get_pt0_pt1,green_kernel,init_nlpsprec
-!!      random_number,recursion,reshape_pot,timab,timein,wrtout,xmpi_sum
+!!      timab
 !!
 !! SOURCE
 
@@ -2412,10 +2407,10 @@ end subroutine first_rec
 !!  ZT_p=fourier transforme of the Green kernel
 !!
 !! PARENTS
-!!      first_rec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      fourdp,timab,wrtout
+!!      timab
 !!
 !! NOTES
 !!  at this time :
@@ -2573,10 +2568,10 @@ end subroutine green_kernel
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      first_rec,vtorhorec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      fourdp,timab,trottersum,vn_nl_rec
+!!      timab
 !!
 !! NOTES
 !!  at this time :
@@ -2800,10 +2795,10 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 !!  un(:,:,:)=initial vector on the grid. it is changed in output
 !!
 !! PARENTS
-!!      nlenergyrec
+!!      m_vtorhorec
 !!
 !! CHILDREN
-!!      fourdp,timab,trottersum,vn_nl_rec,wrtout
+!!      timab
 !!
 !! NOTES
 !!  at this time :
@@ -3004,7 +2999,7 @@ end subroutine recursion_nl
 !! vn_nl(:,:,:)=the non_local contribution to vn
 !!
 !! PARENTS
-!!      recursion,recursion_nl
+!!      m_vtorhorec
 !!
 !! CHILDREN
 !!      timab

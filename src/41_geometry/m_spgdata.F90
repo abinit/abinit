@@ -67,10 +67,10 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      memory_eval
+!!      m_memeval
 !!
 !! CHILDREN
-!!      ptgmadata,spgdata,wrtout,xred2xcart
+!!      symdet
 !!
 !! SOURCE
 
@@ -382,10 +382,10 @@ end subroutine prtspgroup
 !! these are mentioned as being X, unknown, or to be determined.
 !!
 !! PARENTS
-!!      m_ab7_symmetry,prt_cif,prtspgroup,symsgcube,symsghexa,symsgmono
-!!      symsgortho,symsgtetra,symspgr
+!!      m_ab7_symmetry,m_crystal,m_spgdata,m_symfind,m_symsg
 !!
 !! CHILDREN
+!!      symdet
 !!
 !! SOURCE
 
@@ -2131,9 +2131,10 @@ end subroutine spgdata
 !! ptgrpmasb= symbol
 !!
 !! PARENTS
-!!      prtspgroup
+!!      m_spgdata
 !!
 !! CHILDREN
+!!      symdet
 !!
 !! SOURCE
 
@@ -2292,9 +2293,10 @@ end subroutine ptgmadata
 !! ptgroupma = magnetic point group number
 !!
 !! PARENTS
-!!      symanal
+!!      m_symfind
 !!
 !! CHILDREN
+!!      symdet
 !!
 !! SOURCE
 
@@ -2429,7 +2431,7 @@ end subroutine getptgroupma
 !! ptgroup=symmetry point group
 !!
 !! PARENTS
-!!      symanal,symbrav
+!!      m_symfind
 !!
 !! CHILDREN
 !!      symdet

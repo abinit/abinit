@@ -92,7 +92,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_Projected_AT,gwls_Projected_BT
+!!      m_gwls_Projected_AT,m_gwls_Projected_BT
 !!
 !! CHILDREN
 !!      zgetrf,zgetri
@@ -162,7 +162,7 @@ end subroutine setup_LanczosResolvents
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_Projected_AT,gwls_Projected_BT
+!!      m_gwls_Projected_AT,m_gwls_Projected_BT
 !!
 !! CHILDREN
 !!      zgetrf,zgetri
@@ -260,7 +260,7 @@ end subroutine matrix_function_preconditioned_Hamiltonian
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_LanczosResolvents
+!!      m_gwls_LanczosResolvents
 !!
 !! CHILDREN
 !!      zgetrf,zgetri
@@ -328,7 +328,7 @@ end subroutine build_preconditioned_Hamiltonian_Lanczos_basis
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_Projected_AT
+!!      m_gwls_Projected_AT
 !!
 !! CHILDREN
 !!      zgetrf,zgetri
@@ -442,7 +442,7 @@ end subroutine compute_resolvent_column_shift_lanczos
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_Projected_BT
+!!      m_gwls_Projected_BT
 !!
 !! CHILDREN
 !!      zgetrf,zgetri
@@ -513,7 +513,7 @@ end subroutine compute_resolvent_column_shift_lanczos_right_vectors
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_LanczosResolvents,gwls_Projected_BT
+!!      m_gwls_LanczosResolvents,m_gwls_Projected_BT
 !!
 !! CHILDREN
 !!      zgetrf,zgetri

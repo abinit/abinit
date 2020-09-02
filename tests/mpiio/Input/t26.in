@@ -99,8 +99,6 @@ natom 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%%###### This was required for making the test pass with pw_unbal_thresh
-#%%###### exclude_builders = .*_intel_1[89].0_.*, buda2_gnu_8.2_mpich3, graphene_gnu_8.3_macports, .*_gnu_9.[12]_.*
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_sphharm
 !! NAME
 !!  m_paw_sphharm
@@ -3304,8 +3303,7 @@ end subroutine realgaunt
 !!  NOTES
 !!  
 !! PARENTS
-!! 
-!! m_pawang
+!!      m_pawang
 !!
 !! CHILDREN
 !!

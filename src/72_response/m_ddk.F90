@@ -208,7 +208,6 @@ CONTAINS
 !!  prefix: Prefix for output EVK file. Empty if output files are not wanted
 !!
 !! PARENTS
-!!      wfk_analyse
 !!
 !! CHILDREN
 !!
@@ -970,7 +969,7 @@ end subroutine ddkop_apply
 !!  ddkop_get_braket
 !!
 !! FUNCTION
-!!  Compute matrix element in Cartesian coordinates.
+!!  Compute diagonal matrix element in Cartesian coordinates.
 !!
 !! INPUTS
 !!  eig0mk: Eigenvalue associated to the "bra" wavefunction

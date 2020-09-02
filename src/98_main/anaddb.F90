@@ -22,17 +22,18 @@
 !!
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,anaddb_dtset_free,anaddb_init
-!!      asrq0_apply,asrq0_free,crystal_free,ddb_diel,ddb_elast,ddb_free
-!!      ddb_from_file,ddb_hdr_free,ddb_hdr_open_read,ddb_internalstr
-!!      ddb_interpolate,ddb_piezo,dfpt_phfrq,dfpt_prtph,dfpt_symph
-!!      elast_ncwrite,electrooptic,elphon,flush_unit,gruns_anaddb,gtblk9,gtdyn9
-!!      harmonic_thermo,herald,ifc_free,ifc_init,ifc_outphbtrap,ifc_print
-!!      ifc_speedofsound,ifc_write,instrng,int2char4,inupper,invars9,isfile
-!!      mkphbs,mkphdos,nctk_defwrite_nonana_terms,outvars_anaddb,phdos_free
-!!      phdos_ncwrite,phdos_print,phdos_print_debye,phdos_print_msqd
-!!      phdos_print_thermo,ramansus,relaxpol,thermal_supercell_free
-!!      thermal_supercell_make,thermal_supercell_print,thmeig,timein,wrtout
-!!      xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
+!!      asrq0%apply,asrq0%free,crystal%free,ddb%free,ddb%get_block,ddb_diel
+!!      ddb_elast,ddb_flexo,ddb_from_file,ddb_hdr%free,ddb_hdr_open_read
+!!      ddb_internalstr,ddb_interpolate,ddb_lw%free,ddb_lw_copy,ddb_piezo
+!!      dfpt_phfrq,dfpt_prtph,electrooptic,elphon,flush_unit,gruns_anaddb
+!!      gtdyn9,harmonic_thermo,herald,ifc%free,ifc%outphbtrap,ifc%print
+!!      ifc%speedofsound,ifc%write,ifc_coarse%free,ifc_init,instrng,int2char4
+!!      inupper,invars9,isfile,mkphbs,mkphdos,nctk_defwrite_nonana_raman_terms
+!!      nctk_defwrite_nonana_terms,nctk_defwrite_raman_terms,outvars_anaddb
+!!      phdos%free,phdos%ncwrite,phdos%print,phdos%print_debye,phdos%print_msqd
+!!      phdos%print_thermo,ramansus,relaxpol,thermal_supercell_free,thmeig
+!!      timab,timein,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
+!!      zacharias_supercell_make,zacharias_supercell_print
 !!
 !! SOURCE
 

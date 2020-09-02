@@ -58,7 +58,7 @@
     getscr3     2
      nband3    10
    ecutwfn3     1.49923969E+00 Hartree
-  icutcoul3     3   #  old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul3     3   #  old deprecated value of icutcoul, only used for legacy
 
 
 #Common to all model GW calculations

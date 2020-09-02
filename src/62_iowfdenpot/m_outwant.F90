@@ -90,7 +90,7 @@ contains
 !!  (only writing)
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
 !!      matr3inv,wrtout

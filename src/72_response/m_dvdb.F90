@@ -16,6 +16,10 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
+!! TODO
+!!  Do we still need to support the case in which the potentials are read from file
+!!  without interpolation? We know that IO is gonna be terrible.
+!!
 !! PARENTS
 !!
 !! SOURCE
@@ -42,6 +46,7 @@ module m_dvdb
  use m_ddb
  use m_ddb_hdr
  use m_dtset
+ use m_krank
 
  use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
@@ -126,6 +131,9 @@ module m_dvdb
    logical :: use_3natom_cache = .False.
     ! True if v1scf_3natom_qibz cache is used.
 
+   integer :: v1scf_3natom_request = xmpi_request_null
+    ! Reques for v1scf_3natom_qibz iallgather
+
    integer :: stats(4)
     ! Total number of calls, number of cache hit in v1scf_3natom_qibz cache, hit in key cache, cache misses.
 
@@ -144,7 +152,8 @@ module m_dvdb
     ! Store all the 3*natom perturbations associated to `stored_iqibz_cplex`
     ! Used to reduce the number of MPI communications required to collect all the potentials
     ! on the MPI rank before computing V(Sq) from V(q).
-    ! I assume client code is looping over stars/shells. cplex value is stored in `stored_iqibz_cplex`.
+    ! IMPORTANT: This cache is beneficial provided client code loops over q-points grouped in stars/shells.
+    ! cplex value is stored in `stored_iqibz_cplex`.
 
    integer :: stored_iqibz_cplex(2) = huge(1)
     ! The index of the qpoint in the IBZ/DVDB file associated to v1scf_3natom_qibz.
@@ -788,9 +797,9 @@ end function dvdb_new
 !!   comm=MPI communicator
 !!
 !! PARENTS
-!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -877,6 +886,7 @@ end subroutine dvdb_open_read
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -910,9 +920,9 @@ end subroutine dvdb_close
 !! Close the file and release the memory allocated.
 !!
 !! PARENTS
-!!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -979,9 +989,9 @@ end subroutine dvdb_free
 !!  Only printing.
 !!
 !! PARENTS
-!!      eph,m_dvdb,m_sigmaph,mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1334,9 +1344,9 @@ end function dvdb_read_onev1
 !!  v1scf(cplex, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
 !! PARENTS
-!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1454,6 +1464,7 @@ end subroutine dvdb_readsym_allv1
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1500,7 +1511,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    cplex = db%qcache%stored_iqibz_cplex(2)
    ABI_MALLOC(work2, (cplex, nfft, db%nspden, db%natom3))
    call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
-     db%nspden, db%nsppol, db%mpi_enreg, db%qcache%v1scf_3natom_qibz, work2, db%comm_pert)
+                     db%nspden, db%mpi_enreg, db%qcache%v1scf_3natom_qibz, work2, db%comm_pert)
    ! Extract my data from work2
    ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
    do imyp=1,db%my_npert
@@ -1558,7 +1569,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
      ABI_MALLOC(work, (cplex, nfft, db%nspden, db%natom3))
      work = v1scf
      call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
-       db%nspden, db%nsppol, db%mpi_enreg, work, v1scf, db%comm_pert)
+                       db%nspden, db%mpi_enreg, work, v1scf, db%comm_pert)
      ABI_FREE(work)
 
    else
@@ -1592,13 +1603,13 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
        ! Now rotate.
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
-         db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
+                         db%nspden, db%mpi_enreg, work, work2, db%comm_pert)
        ABI_FREE(work)
 
      else
        ! All 3 natom have been read in v1scf by dvdb_readsym_allv1
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
-         db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2, db%comm_pert)
+                         db%nspden, db%mpi_enreg, v1scf, work2, db%comm_pert)
      end if
 
      ! Reallocate v1scf with my_npert and extract data from work2.
@@ -1686,13 +1697,16 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
  end if
 
  ! Allocate cache with all the 3*natom perturbations.
- ! Disable it if no parallelism over perturbations.
- qcache%use_3natom_cache = .True.
+ ! Disable it no parallelism over perturbations.
+ ! Disabled as slow FT R --> q seems to be faster.
+ qcache%use_3natom_cache = .False.
+ !qcache%use_3natom_cache = .True.
  if (my_npert == natom3) qcache%use_3natom_cache = .False.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then
    ABI_MALLOC(qcache%v1scf_3natom_qibz, (2, nfft, nspden, natom3))
  end if
+ qcache%v1scf_3natom_request = xmpi_request_null
 
  call wrtout(std_out, sjoin(" Using cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" Max number of q-points stored in memory: ", itoa(qcache%maxnq)))
@@ -1730,6 +1744,7 @@ end function qcache_new
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1797,7 +1812,8 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
    ABI_FREE(v1scf)
  end do
 
- call wrtout(std_out, sjoin(" Memory allocated for cache:", ftoa(db%qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM"))
+ call wrtout(std_out, sjoin(" Memory allocated for cache:", ftoa(db%qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM"), &
+             pre_newlines=2)
  call cwtime_report(" DVDB qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
  call timab(1801, 2, tsec)
 
@@ -1825,6 +1841,7 @@ end subroutine dvdb_qcache_read
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1910,6 +1927,7 @@ end subroutine dvdb_qcache_update_from_file
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1921,7 +1939,7 @@ subroutine qcache_free(qcache)
 
 !Local variables-------------------------------
 !scalars
- integer :: iq
+ integer :: iq, ierr
 
 ! *************************************************************************
 
@@ -1933,6 +1951,8 @@ subroutine qcache_free(qcache)
  end if
  ABI_SFREE(qcache%count_qused)
  ABI_SFREE(qcache%itreatq)
+
+ if (qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(qcache%v1scf_3natom_request, ierr)
  ABI_SFREE(qcache%v1scf_3natom_qibz)
 
 end subroutine qcache_free
@@ -1950,6 +1970,7 @@ end subroutine qcache_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1962,7 +1983,12 @@ subroutine qcache_report_stats(qcache)
 ! *************************************************************************
 
  if (qcache%maxnq == 0) then
-   write(std_out, "(a)")" qcache deactivated with maxnq == 0"
+   write(std_out, "(/,a)")" MPI-distributed q-cache deactivated as maxnq == 0"
+   if (qcache%use_3natom_cache) then
+     write(std_out, "(a,i0,2x,a,f5.1,a)") &
+       " Cache hit in v1scf_3natom_qibz: ", qcache%stats(2), "(", (100.0_dp * qcache%stats(2)) / qcache%stats(1), "%)"
+   end if
+
  else if (qcache%maxnq > 0 .and. qcache%stats(1) /= 0) then
    write(std_out, "(2a)")ch10, " Qcache stats:"
    write(std_out, "(4x,a,i0)")" Total number of calls: ", qcache%stats(1)
@@ -1972,10 +1998,11 @@ subroutine qcache_report_stats(qcache)
      " Cache hit in MPI-distributed cache: ", qcache%stats(3), "(", (100.0_dp * qcache%stats(3)) / qcache%stats(1), "%)"
    write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
      " Cache miss: ", qcache%stats(4), "(", (100.0_dp * qcache%stats(4)) / qcache%stats(1), "%)"
-   write(std_out, "(a)")sjoin("     Memory allocated for cache: ", ftoa(qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM")
+   write(std_out, "(a)")sjoin("     Memory allocated for MPI cache: ", ftoa(qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM")
    write(std_out, "(a)")sjoin(" max_mbsize:", ftoa(qcache%max_mbsize, fmt="f8.1"), &
                               "(Decrease this value if calculation goes out of memory)")
  end if
+
  write(std_out, "(a)")
  qcache%stats = 0
 
@@ -2125,6 +2152,7 @@ end function qcache_make_room
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2314,8 +2342,8 @@ pcase_loop: &
      end if
    end do
 
-   if (symv1==1) then
-     if (debug) write(std_out,*)"Calling v1phq_symmetrize"
+   if (symv1 == 1) then
+     if (debug) write(std_out,*)" Calling v1phq_symmetrize"
      call v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1scf(:,:,pcase))
    end if
  end do pcase_loop
@@ -2369,6 +2397,7 @@ end subroutine v1phq_complete
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2436,7 +2465,7 @@ end subroutine find_symeq
 !! v1phq_rotate
 !!
 !! FUNCTION
-!!  Reconstruct the DFPT potential for a q-point in the BZ starting from its symmetrical image in the IBZ.
+!!  Reconstruct all the DFPT potential for a q-point in the BZ starting from its symmetrical image in the IBZ.
 !!
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
@@ -2448,7 +2477,6 @@ end subroutine find_symeq
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!  nfft=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
 !!  nspden=number of spin-density components
-!!  nsppol=Number of independent spin polarizations
 !!  mpi_enreg=information about MPI parallelization
 !!  v1r_qibz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space
 !!    for the irreducible q-point `qpt_ibz`
@@ -2461,14 +2489,16 @@ end subroutine find_symeq
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
-subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r_qibz,v1r_qbz,comm)
+subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, nspden, &
+                        mpi_enreg, v1r_qibz, v1r_qbz, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: isym,itimrev,cplex,nfft,nspden,nsppol,comm
+ integer,intent(in) :: isym, itimrev, cplex, nfft, nspden, comm
  type(crystal_t),intent(in) :: cryst
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -2479,8 +2509,8 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: tim_fourdp0=0
- integer,save :: enough=0
+ integer,parameter :: tim_fourdp0 = 0
+ integer,save :: enough = 0
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr,root
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
@@ -2494,7 +2524,6 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  ! Keep track of total time spent.
  call timab(1804, 1, tsec)
 
- ABI_UNUSED(nsppol)
  ABI_CHECK(cplex == 2, "cplex != 2")
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -2508,21 +2537,19 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    do ispden=1,nspden
      cnt = cnt + 1; root = mod(cnt, nproc)
      if (root == my_rank) then ! Non-blocking
-       call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
+       call fourdp(cplex, v1g_qibz(:,ispden,mu), v1r_qibz(:,ispden,mu), -1, mpi_enreg, nfft, 1, ngfft, tim_fourdp0)
      end if
      call xmpi_ibcast(v1g_qibz(:,ispden,mu), root, comm, requests(ispden, mu), ierr)
    end do
  end do
 
- ABI_MALLOC(workg, (2*nfft,nspden))
- ABI_MALLOC(v1g_mu, (2*nfft,nspden))
+ ABI_MALLOC(workg, (2*nfft, nspden))
+ ABI_MALLOC(v1g_mu, (2*nfft, nspden))
 
- ! For each perturbation:
- ! FIXME: This is wrong if natom > 1
  symrec_eq = cryst%symrec(:,:,isym)
  call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
 
- !v1r_qbz = zero
+ ! For each perturbation.
  do mu=1,natom3
    root = mod(mu, nproc)
    ! MPI parallelism.
@@ -2533,18 +2560,17 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
      l0 = cryst%indsym(1:3,isym,ipert)
      tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
      ! FIXME
-     !ABI_CHECK(all(abs(tnon) < tol12), "tnon!")
-     if (.not.all(abs(tnon) < tol12)) then
+     if (.not. all(abs(tnon) < tol12)) then
        enough = enough + 1
        if (enough == 1) MSG_WARNING("tnon must be tested!")
      end if
 
-     ipert_eq = cryst%indsym(4,isym,ipert)
+     ipert_eq = cryst%indsym(4, isym, ipert)
 
      v1g_mu = zero; cnt = 0
      do idir_eq=1,3
        if (symrec_eq(idir, idir_eq) == 0) cycle
-       mu_eq = idir_eq + (ipert_eq-1)*3
+       mu_eq = idir_eq + (ipert_eq - 1) * 3
        cnt = cnt + 1
 
        ! Wait for request before operating on v1g_qibz
@@ -2556,7 +2582,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
        end if
 
        ! Rotate in G-space and accumulate in workg
-       call rotate_fqg(itimrev,sm1,qpt_ibz,tnon,ngfft,nfft,nspden,v1g_qibz(:,:,mu_eq),workg)
+       call rotate_fqg(itimrev, sm1, qpt_ibz, tnon, ngfft, nfft, nspden, v1g_qibz(:,:,mu_eq), workg)
        v1g_mu = v1g_mu + workg * symrec_eq(idir, idir_eq)
      end do ! idir_eq
 
@@ -2564,12 +2590,11 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 
      ! Transform to real space and take into account a possible shift. Results are stored in v1r_qbz.
      do ispden=1,nspden
-       call fourdp(cplex,v1g_mu(:,ispden),v1r_qbz(:,ispden,mu),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
-       call times_eigr(-g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
+       call fourdp(cplex, v1g_mu(:, ispden), v1r_qbz(:, ispden, mu), +1, mpi_enreg, nfft, 1, ngfft, tim_fourdp0)
+       call times_eigr(-g0q, ngfft, nfft, 1, v1r_qbz(:, ispden, mu))
        !call times_eigr(tsign * g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
      end do
 
-     !call v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r)
    end if ! root == myrank
 
    call xmpi_ibcast(v1r_qbz(:,:,mu), root, comm, requests_v1r_qbz(mu), ierr)
@@ -2586,6 +2611,142 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  call timab(1804, 2, tsec)
 
 end subroutine v1phq_rotate
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/v1phq_rotate_myperts
+!! NAME
+!! v1phq_rotate_myperts
+!!
+!! FUNCTION
+!!  Reconstruct all the DFPT potential for a q-point in the BZ starting from its symmetrical image in the IBZ.
+!!
+!! INPUTS
+!!  cryst<crystal_t>=crystal structure parameters
+!!  qpt_ibz(3)=q-point in the IBZ in reduced coordinates.
+!!  ngfft=array of dimensions for different FFT grids
+!!  isym, itimrev, g0q:
+!!    qpt_bz = I(itimrev) S(isym) q_ibz + g0q
+!!  ngfft(18)=contain all needed information about 3D FFT.
+!!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
+!!  nfft=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
+!!  nspden=number of spin-density components
+!!  mpi_enreg=information about MPI parallelization
+!!  v1r_qibz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space
+!!    for the irreducible q-point `qpt_ibz`
+!!
+!! OUTPUT
+!!  v1r_qbz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space for the q-point in the BZ
+!!
+!! PARENTS
+!!      m_dvdb
+!!
+!! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
+!!
+!! SOURCE
+
+subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, nspden, &
+                                mpi_enreg, my_npert, my_pinfo, v1r_qibz, v1r_qbz)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: isym, itimrev, cplex, nfft, nspden, my_npert
+ type(crystal_t),intent(in) :: cryst
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: g0q(3), ngfft(18), my_pinfo(3, my_npert)
+ real(dp),intent(in) :: qpt_ibz(3)
+ real(dp),intent(inout) :: v1r_qibz(cplex*nfft,nspden,3*cryst%natom)
+ real(dp),intent(out) :: v1r_qbz(cplex*nfft,nspden,my_npert)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: tim_fourdp0 = 0
+ integer,save :: enough = 0
+ integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,imyp !ierr,
+!arrays
+ integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
+ logical :: fourdp_done(3*cryst%natom)
+ real(dp) :: tnon(3), tsec(2)
+ real(dp), allocatable :: v1g_qibz(:,:,:),workg(:,:),v1g_mu(:,:)
+
+! *************************************************************************
+
+ ! Keep track of total time spent.
+ call timab(1804, 1, tsec)
+
+ ABI_CHECK(cplex == 2, "cplex != 2")
+
+ natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
+
+ ! Compute IBZ potentials in G-space. Results stored in v1g_qibz(G)
+ fourdp_done = .False.
+ ABI_MALLOC(v1g_qibz, (2*nfft, nspden, natom3))
+ !do mu=1,natom3
+ !  do ispden=1,nspden
+ !    call fourdp(cplex, v1g_qibz(:,ispden,mu), v1r_qibz(:,ispden,mu), -1, mpi_enreg, nfft, 1, ngfft, tim_fourdp0)
+ !  end do
+ !end do
+
+ ABI_MALLOC(workg, (2*nfft, nspden))
+ ABI_MALLOC(v1g_mu, (2*nfft, nspden))
+
+ symrec_eq = cryst%symrec(:,:,isym)
+ call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
+
+ ! For each perturbation treated by this MPI proc
+ do imyp=1,my_npert
+   idir = my_pinfo(1, imyp); ipert = my_pinfo(2, imyp); mu = my_pinfo(3, imyp)
+
+   ! Phase due to L0 + R^{-1}tau
+   l0 = cryst%indsym(1:3,isym,ipert)
+   tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
+   ! FIXME
+   if (.not. all(abs(tnon) < tol12)) then
+     enough = enough + 1
+     if (enough == 1) MSG_WARNING("tnon must be tested!")
+   end if
+
+   ipert_eq = cryst%indsym(4, isym, ipert)
+
+   v1g_mu = zero; cnt = 0
+   do idir_eq=1,3
+     if (symrec_eq(idir, idir_eq) == 0) cycle
+     mu_eq = idir_eq + (ipert_eq - 1) * 3
+     cnt = cnt + 1
+
+     if (.not. fourdp_done(mu_eq)) then
+       do ispden=1,nspden
+         call fourdp(cplex, v1g_qibz(:,ispden,mu_eq), v1r_qibz(:,ispden,mu_eq), -1, mpi_enreg, nfft, 1, ngfft, tim_fourdp0)
+       end do
+       fourdp_done(mu_eq) = .True.
+     end if
+
+     ! Rotate in G-space and accumulate in workg
+     call rotate_fqg(itimrev, sm1, qpt_ibz, tnon, ngfft, nfft, nspden, v1g_qibz(:,:,mu_eq), workg)
+     v1g_mu = v1g_mu + workg * symrec_eq(idir, idir_eq)
+   end do ! idir_eq
+
+   ABI_CHECK(cnt /= 0, "cnt should not be zero!")
+
+   ! Transform to real space and take into account a possible shift. Results are stored in v1r_qbz.
+   do ispden=1,nspden
+     call fourdp(cplex, v1g_mu(:, ispden), v1r_qbz(:, ispden, imyp), +1, mpi_enreg, nfft, 1, ngfft, tim_fourdp0)
+     call times_eigr(-g0q, ngfft, nfft, 1, v1r_qbz(:, ispden, imyp))
+     !call times_eigr(tsign * g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,imyp))
+   end do
+
+ end do ! imyp
+
+ ABI_FREE(workg)
+ ABI_FREE(v1g_mu)
+ ABI_FREE(v1g_qibz)
+
+ call timab(1804, 2, tsec)
+
+end subroutine v1phq_rotate_myperts
 !!***
 
 !!****f* m_dvdb/v1phq_symmetrize
@@ -2616,14 +2777,15 @@ end subroutine v1phq_rotate
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
-subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r)
+subroutine v1phq_symmetrize(cryst, idir, ipert, symq, ngfft, cplex, nfft, nspden, nsppol ,mpi_enreg, v1r)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: idir,ipert,cplex,nfft,nspden,nsppol
+ integer,intent(in) :: idir, ipert, cplex, nfft, nspden, nsppol
  type(crystal_t),intent(in) :: cryst
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -2631,8 +2793,8 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  real(dp),intent(inout) :: v1r(cplex*nfft,nspden)
 
 !Local variables-------------------------------
- integer,parameter :: syuse0=0,rfmeth2=2,iscf1=1
- integer :: nsym1,nfftot
+ integer,parameter :: syuse0 = 0, rfmeth2 = 2, iscf1 = 1
+ integer :: nsym1, nfftot
 !arrays
  integer :: symafm1(cryst%nsym),symrel1(3,3,cryst%nsym),symrc1(3,3,cryst%nsym)
  integer,allocatable :: irrzon1(:,:,:),indsy1(:,:,:)
@@ -2657,7 +2819,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  ABI_MALLOC(indsy1,(4,nsym1,cryst%natom))
 
  call setsym(indsy1,irrzon1,iscf1,cryst%natom,nfft,ngfft,nspden,nsppol,&
-   nsym1,phnons1,symafm1,symrc1,symrel1,tnons1,cryst%typat,cryst%xred)
+             nsym1,phnons1,symafm1,symrc1,symrel1,tnons1,cryst%typat,cryst%xred)
 
  !if (psps%usepaw==1) then
  !  ! Allocate/initialize only zarot in pawang1 datastructure
@@ -2670,7 +2832,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 
  ABI_MALLOC(v1g, (2,nfft))
  call symrhg(cplex,cryst%gprimd,irrzon1,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym1,&
-    phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1,tnons1)
+             phnons1,v1g,v1r,cryst%rprimd,symafm1,symrel1,tnons1)
 
  ABI_FREE(irrzon1)
  ABI_FREE(phnons1)
@@ -2694,6 +2856,7 @@ end subroutine v1phq_symmetrize
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2726,7 +2889,7 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
  ABI_CHECK(nfftot == nfft, "FFT parallelism not supported")
  id1 = n1/2+2; id2 = n2/2+2; id3=n3/2+2
 
- ABI_CHECK(any(itirev == [1,2]), "Wrong itirev")
+ ABI_CHECK(any(itirev == [1, 2]), "Wrong itirev")
  tsign = 3-2*itirev; has_phase = any(abs(tnon) > tol12)
 
  !outfg = zero
@@ -2771,7 +2934,7 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
          ! Get linear index of rotated point Gj
          ind2 = k1+n1*((k2-1)+n2*(k3-1))
 
-         ! TOD: Here I believe there are lots of cache misses, should perform low-level profiling
+         ! TODO: Here I believe there are lots of cache misses, should perform low-level profiling
          ! OMP perhaps can accelerate this part but mind false sharing...
          if (has_phase) then
            ! compute exp(-2*Pi*I*G dot tau) using original G
@@ -2794,7 +2957,6 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
  end do ! isp
 
  !call xmpi_sum(comm, outfg, ierr)
-
  call timab(1803, 2, tsec)
 
 end subroutine rotate_fqg
@@ -2828,6 +2990,7 @@ end subroutine rotate_fqg
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2896,6 +3059,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ! Use REMALLOC so that we can call this routine multiple times i.e. for chaning add_lr
  db%my_nrpt = my_rstop - my_rstart + 1
  ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
+
  ABI_REMALLOC(db%my_rpt, (3, db%my_nrpt))
  db%my_rpt = all_rpt(:, my_rstart:my_rstop)
  ABI_REMALLOC(db%my_irpt2tot, (db%my_nrpt))
@@ -2918,9 +3082,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  write(std_out, "(a, i0)")" Number of R-points treated by this MPI rank: ", db%my_nrpt
  write(std_out, "(a, 3(i0, 1x))")" ngfft: ", ngfft(1:3)
  write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
- ! Allocate potential in the supercell. Memory is distributed over my_nrpt and my_npert
+ ! Allocate potential in the supercell. Memory is MPI-distributed over my_nrpt and my_npert
  call wrtout(std_out, sjoin(" Memory required for W(R,r): ", &
-    ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * sp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
+            ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * sp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
 
  ABI_SFREE(all_cell)
  ABI_SFREE(all_wghatm)
@@ -2950,11 +3114,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
      iqst = iqst + 1
      !if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism.
      iq_bz = iperm(iqst)
-     ABI_CHECK(iq_ibz == indqq(iq_bz,1), "iq_ibz !/ indqq(1)")
+     ABI_CHECK(iq_ibz == indqq(1, iq_bz), "iq_ibz !/ indqq(1)")
      qpt_bz = qbz(:, iq_bz)
      !if (all(abs(qpt_bz) < tol12)) cycle
      ! IS(q_ibz) + g0q = q_bz
-     isym = indqq(iq_bz, 2); itimrev = indqq(iq_bz, 6) + 1; g0q = indqq(iq_bz, 3:5)
+     isym = indqq(2, iq_bz); itimrev = indqq(6, iq_bz) + 1; g0q = indqq(3:5, iq_bz)
      isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
      !write(std_out, *)"qbz", trim(ktoa(qpt_bz)), " --> qibz ", trim(ktoa(qibz(:,iq_ibz)))
      !write(std_out, *)"via isym, itimrev, g0q:", isym, itimrev, g0q
@@ -3001,15 +3165,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
          v1r_qbz = v1r_qibz
        else
          call v1phq_rotate(db%cryst, qibz(:,iq_ibz), isym, itimrev, g0q, &
-           ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
+                           ngfft, cplex_qibz, nfft, db%nspden, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
        end if
-
-       !call littlegroup_q(db%cryst%nsym, qpt_bz, symq, db%cryst%symrec, db%cryst%symafm, timerev_q, prtvol=db%prtvol)
-       !do ipc=1,db%natom3
-       !  idir = mod(ipc - 1, 3) + 1; ipert = (ipc - idir) / 3 + 1
-       !  call v1phq_symmetrize(db%cryst, idir, ipert, symq, ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, &
-       !                        db%mpi_enreg, v1r_qbz(:,:,:,ipc))
-       !end do
 
        ! Multiply by e^{iqpt_bz.r}
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden * db%natom3, v1r_qbz)
@@ -3127,7 +3284,7 @@ subroutine dvdb_get_maxw(db, ngqpt, all_rpt, all_rmod, maxw)
      phre = zero
      do ispden=1,db%nspden
        do ifft=1,nfft
-         phre = max(phre, db%wsr(1,irpt,ifft,ispden,imyp) ** 2) ! + db%wsr(2,irpt,ifft,ispden,imyp) ** 2)
+         phre = max(phre, real(db%wsr(1,irpt,ifft,ispden,imyp), kind=dp) ** 2) ! + db%wsr(2,irpt,ifft,ispden,imyp) ** 2)
        end do
      end do
      maxw(irpt_tot, ipc) = sqrt(phre)
@@ -3161,7 +3318,7 @@ end subroutine dvdb_get_maxw
 !!  prepare_ftinterp
 !!
 !! FUNCTION
-!!
+!!  Internal helper function used to prepare the Fourier interpolation of the DFPT potentials.
 
 subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
                             qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, comm)
@@ -3179,7 +3336,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1, timrev1=1, cutmode2=2
+ integer,parameter :: timrev1=1, cutmode2=2
  integer :: iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,iq_dvdb
  integer :: iqst,nqst,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3, nrtot
@@ -3187,6 +3344,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  logical :: found
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
+ type(krank_t) :: qrank
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz_sort(:),all_cell(:,:)
@@ -3254,7 +3412,8 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    call mkradim(acell, rprim, cryst%rprimd)
    call canat9(db%brav, cryst%natom, rcan, rprim, trans, cryst%xred)
    call matr3inv(rprim, gprim)
-   ! TODO: In principle one may have N_R that depends on iatom to minimize memory.
+
+   ! In principle one may have N_R that depends on iatom to minimize memory.
    call get_bigbox_and_weights(db%brav, cryst%natom, nqbz, ngqpt, nqshift, qshift, rprim, cryst%rprimd, gprim, rcan, &
                                cutmode2, nrtot, all_rcart, all_cell, all_wghatm, r_inscribed_sphere, comm)
    ABI_FREE(all_cell)
@@ -3272,9 +3431,12 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ! Find correspondence BZ --> IBZ. Note:
  ! q --> -q symmetry is always used for phonons.
  ! we use symrec instead of symrel
- ABI_MALLOC(indqq, (nqbz*sppoldbl1, 6))
- call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+
+ ABI_MALLOC(indqq, (6, nqbz))
+ qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
+ call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
+                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ call qrank%free()
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -3284,7 +3446,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ABI_MALLOC(iperm, (nqbz))
  ABI_MALLOC(bz2ibz_sort, (nqbz))
  iperm = [(ii, ii=1,nqbz)]
- bz2ibz_sort = indqq(:,1)
+ bz2ibz_sort = indqq(1, :)
  call sort_int(nqbz, bz2ibz_sort, iperm)
 
  ! Reconstruct the IBZ according to what is present in the DVDB.
@@ -3331,8 +3493,10 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ABI_FREE(bz2ibz_sort)
 
  ! Redo the mapping with the new IBZ
- call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+ qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
+ call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
+                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ call qrank%free()
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -3366,9 +3530,10 @@ end subroutine prepare_ftinterp
 !!  ov1r(2*nfft, nspden, my_npert)=Interpolated DFPT potentials at the given q-point (periodic part)
 !!
 !! PARENTS
-!!      m_dvdb,m_phgamma,m_phpi,m_sigmaph
+!!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3387,21 +3552,22 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cplex2 = 2
- integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr, my_add_lr
- real(dp) :: wr, qmod !wi,
- !complex(dpc) :: beta
+ integer :: ispden, imyp, idir, ipert, timerev_q, ierr, my_add_lr !, ifft, ir
+ !real(dp) :: qmod
+ !real(sp) :: beta_sp !, wr !,wi
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
- real(dp) :: qcart(3)
- real(dp),allocatable :: eiqr(:,:), weiqr(:,:), v1r_lr(:,:,:)
+ !real(dp) :: qcart(3)
+ real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
+ real(sp),allocatable :: weiqr_sp(:,:), ov1r_sp(:, :), eiqr_sp(:,:)
 
 ! *************************************************************************
 
  my_add_lr = db%add_lr; if (present(add_lr)) my_add_lr = add_lr
 
- qcart = two_pi * matmul(db%cryst%gprimd, qpt)
- qmod = sqrt(dot_product(qcart, qcart))
+ !qcart = two_pi * matmul(db%cryst%gprimd, qpt)
+ !qmod = sqrt(dot_product(qcart, qcart))
 
  if (my_add_lr == 4) then
    ! Use LR part only and return immediately.
@@ -3421,12 +3587,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  ! Examine the symmetries of the q-wavevector
  call littlegroup_q(db%cryst%nsym, qpt, symq, db%cryst%symrec, db%cryst%symafm, timerev_q, prtvol=db%prtvol)
 
- ! Compute e^{iqR} FT phases for this q-point.
- ABI_MALLOC(weiqr, (2, db%my_nrpt))
- ABI_MALLOC(eiqr, (2, db%my_nrpt))
- call calc_eiqr(qpt, db%my_nrpt, db%my_rpt, eiqr)
-
- ! Compute long-range part of the coupling potential
+ ! Compute long-range part of the coupling potential.
  if (my_add_lr > 0) then
    ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
    do imyp=1,db%my_npert
@@ -3435,37 +3596,66 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    end do
  end if
 
+ ! Compute e^{iq.R} FT phases for this q-point.
+ ABI_MALLOC(eiqr, (2, db%my_nrpt))
+ call calc_eiqr(qpt, db%my_nrpt, db%my_rpt, eiqr)
+
  ! Interpolate potentials (results in ov1r)
- ov1r = zero
+ if (db%nprocs_rpt > 1) ov1r = zero
+ ABI_MALLOC(ov1r_sp, (2, nfft))
+
+#define DEV_USE_SGEMV
+
+#ifdef DEV_USE_SGEMV
+ ABI_MALLOC(weiqr_sp, (db%my_nrpt, 2))
+ ABI_MALLOC(eiqr_sp, (db%my_nrpt, 2))
+ eiqr_sp = transpose(eiqr)
+#else
+ ABI_MALLOC(weiqr_sp, (2, db%my_nrpt))
+#endif
+
  do imyp=1,db%my_npert
    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
-   weiqr(1,:) = db%my_wratm(:, ipert) * eiqr(1,:)
-   weiqr(2,:) = db%my_wratm(:, ipert) * eiqr(2,:)
+
+#ifdef DEV_USE_SGEMV
+   weiqr_sp(:, 1) = db%my_wratm(:, ipert) * eiqr_sp(:, 1)
+   weiqr_sp(:, 2) = db%my_wratm(:, ipert) * eiqr_sp(:, 2)
+#else
+   weiqr_sp(1, :) = db%my_wratm(:, ipert) * eiqr(1, :)
+   weiqr_sp(2, :) = db%my_wratm(:, ipert) * eiqr(2, :)
+#endif
 
    do ispden=1,db%nspden
 
-     ! Slow FT.
+#ifdef DEV_USE_SGEMV
+     ! We need to compute: sum_R W(R, r) e^{iq.R} with W real matrix.
+     ! Use BLAS2 to compute ov1r = W (x + iy) but need to handle kind conversion as ov1r is double-precision
+
+     call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,1), 1, &
+                zero_sp, ov1r_sp(1,1), 2)
+     call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,2), 1, &
+                zero_sp, ov1r_sp(2,1), 2)
+
+     ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
+     ! Add the long-range part of the potential
+     if (my_add_lr > 0) ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
+
+#else
+     ! Slow FT with do loops
      do ifft=1,nfft
        do ir=1,db%my_nrpt
          wr = db%wsr(1, ir, ifft, ispden, imyp)
+         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + wr * weiqr_sp(:, ir)
          !wi = db%wsr(2, ir, ifft, ispden, imyp)
-         ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr(1, ir) ! - wi * weiqr(2, ir)
-         ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) ! + wi * weiqr(1, ir)
+         !ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr_sp(1, ir) ! - wi * weiqr_sp(2, ir)
+         !ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr_sp(2, ir) ! + wi * weiqr_sp(1, ir)
        end do
        ! Add the long-range part of the potential
        if (my_add_lr > 0) then
-         ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + v1r_lr(1, ifft, imyp)
-         ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + v1r_lr(2, ifft, imyp)
+         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + v1r_lr(:, ifft, imyp)
        end if
      end do ! ifft
-
-     !beta = czero
-     !if (my_add_lr > 0) then
-     !  beta = cone
-     !  ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
-     !end if
-     !call ZGEMV("T", db%my_nrpt, nfft, cone, db%wsr(1,1,1,ispden,imyp), db%mynrpt, weiqr, 1, &
-     !           beta, ov1r(1,1,ispden,imyp), 1)
+#endif
 
      ! Remove the phase to get the lattice-periodic part.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
@@ -3474,19 +3664,22 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      if (db%nprocs_rpt > 1) call xmpi_sum(ov1r(:,:,ispden,imyp), comm_rpt, ierr)
    end do ! ispden
 
-   ! Be careful with gamma and cplex!
-   if (db%symv1==1) then !(.and. reveiver == -1 .or. receiver == db%comm_rpt%my_rank)
+   ! Be careful with Gamma-point and cplex!
+   if (db%symv1 == 1) then !(.and. reveiver == -1 .or. receiver == db%comm_rpt%my_rank)
      call v1phq_symmetrize(db%cryst, idir, ipert, symq, ngfft, cplex2, nfft, db%nspden, db%nsppol, &
-         db%mpi_enreg, ov1r(:,:,:,imyp))
+                           db%mpi_enreg, ov1r(:,:,:,imyp))
    end if
  end do ! imyp
 
+ ABI_FREE(ov1r_sp)
+
  if (db%symv1 == 2) then
+   ! Symmetrize potentials (this part is seldom executed)
    ! Initialize the list of perturbations rfpert and rdfir
    ! WARNING: Only phonon perturbations are considered for the time being.
    ABI_MALLOC(rfpert, (db%mpert))
    rfpert = 0; rfpert(1:db%cryst%natom) = 1; rfdir = 1
-   ABI_MALLOC(pertsy, (3,db%mpert))
+   ABI_MALLOC(pertsy, (3, db%mpert))
    ABI_MALLOC(pflag, (3, db%natom))
 
    ! Determine the symmetrical perturbations. Meaning of pertsy:
@@ -3514,8 +3707,9 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  if (sum(qpt**2) < tol14) ov1r(2, :, :, :) = zero
 
  ABI_FREE(eiqr)
- ABI_FREE(weiqr)
+ ABI_FREE(weiqr_sp)
  ABI_SFREE(v1r_lr)
+ ABI_SFREE(eiqr_sp)
 
 end subroutine dvdb_ftinterp_qpt
 !!***
@@ -3545,6 +3739,7 @@ end subroutine dvdb_ftinterp_qpt
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3571,6 +3766,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
+
  ABI_UNUSED(comm)
 
  ! Keep track of total time spent.
@@ -3584,19 +3780,21 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  isym = indq2ibz(2); itimrev = indq2ibz(6) + 1; g0q = indq2ibz(3:5)
  isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
 
+ if (db%ft_qcache%use_3natom_cache .and. db%ft_qcache%v1scf_3natom_request /= xmpi_request_null) then
+   ! Wait for completion of iallgather.
+   call xmpi_wait(db%ft_qcache%v1scf_3natom_request, ierr)
+ end if
+
  if (db%ft_qcache%use_3natom_cache .and. db%ft_qcache%stored_iqibz_cplex(1) == iq_ibz .and. .not. isirr_q) then
-   ! All 3 natom potentials for qibz are in cache. Symmetrize to get Sq without MPI communication.
+
+   ! All 3 natom potentials for qibz are in cache. Symmetrize to get Sq for my_npert perturbations
    db%ft_qcache%stats(2) = db%ft_qcache%stats(2) + 1
    cplex = db%ft_qcache%stored_iqibz_cplex(2)
-   ABI_MALLOC(work2, (cplex, nfft, db%nspden, db%natom3))
-   call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
-     db%nspden, db%nsppol, db%mpi_enreg, db%ft_qcache%v1scf_3natom_qibz, work2, db%comm_pert)
-   ! Extract my data from work2
+
    ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
-   do imyp=1,db%my_npert
-     v1scf(:,:,:,imyp) = work2(:,:,:,db%my_pinfo(3, imyp))
-   end do
-   ABI_FREE(work2)
+   call v1phq_rotate_myperts(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
+                             db%nspden, db%mpi_enreg, db%my_npert, db%my_pinfo, &
+                             db%ft_qcache%v1scf_3natom_qibz, v1scf)
    call timab(1809, 2, tsec); return
  end if
 
@@ -3626,11 +3824,22 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  end if
 
  if (.not. incache) then
-   !MSG_ERROR("For the time being incache should always be true when FT interpolation is used!")
    ! Interpolate the dvscf potentials directly in the **BZ** for my_npert perturbations.
    ! This is possible only if all procs inside comm_rpt call this routine else deadlock
    ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
    call db%ftinterp_qpt(qbz, nfft, ngfft, v1scf, db%comm_rpt)
+
+   if (db%ft_qcache%use_3natom_cache .and. isirr_q) then
+     !call wrtout(std_out, " Collecting in cache all 3*natom DFPT potentials for q in the IBZ")
+     if (cplex /= db%ft_qcache%stored_iqibz_cplex(2)) then
+       ABI_REMALLOC(db%ft_qcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))
+     end if
+     db%ft_qcache%stored_iqibz_cplex = [iq_ibz, cplex]
+     ! Gather 3 * natom potentials on each pert proc. Note non-blocking version with request handle.
+     call xmpi_iallgather(v1scf, cplex*nfft*db%nspden*db%my_npert, &
+                          db%ft_qcache%v1scf_3natom_qibz, db%comm_pert, db%ft_qcache%v1scf_3natom_request)
+   end if
+
    call timab(1809, 2, tsec); return
  end if
 
@@ -3642,7 +3851,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
      ABI_MALLOC(work, (cplex, nfft, db%nspden, db%natom3))
      work = v1scf
      call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
-       db%nspden, db%nsppol, db%mpi_enreg, work, v1scf, db%comm_pert)
+                       db%nspden, db%mpi_enreg, work, v1scf, db%comm_pert)
      ABI_FREE(work)
 
    else
@@ -3667,9 +3876,9 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
        call timab(1806, 2, tsec)
 
        call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
-         db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
+                         db%nspden, db%mpi_enreg, work, work2, db%comm_pert)
 
-       ! Store all 3 natom potentials for q in IBZ in cache.
+       ! Now Store all 3 natom potentials for q in IBZ in cache.
        if (db%ft_qcache%use_3natom_cache .and. db%ft_qcache%stored_iqibz_cplex(1) /= iq_ibz) then
          if (cplex /= db%ft_qcache%stored_iqibz_cplex(2)) then
            ABI_REMALLOC(db%ft_qcache%v1scf_3natom_qibz, (cplex, nfft, db%nspden, db%natom3))
@@ -3683,7 +3892,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
        NOT_IMPLEMENTED_ERROR()
        ! All 3 natom have been read in v1scf by dvdb_readsym_allv1
        !call v1phq_rotate(cryst, qibz, isym, itimrev, g0q, ngfft, cplex, nfft, &
-       !  db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2, db%comm_pert)
+       !                  db%nspden, db%mpi_enreg, v1scf, work2, db%comm_pert)
      end if
 
      ! Reallocate v1scf with my_npert and extract data from work2.
@@ -3729,6 +3938,7 @@ end subroutine dvdb_get_ftqbz
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3762,34 +3972,38 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  db%ft_qcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%ft_qcache%itreatq(:) = itreatq
 
- ! Note that cplex is always set to 2 here
- cplex = 2
- ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+ ! All procs skip this part is qcache is not used.
+ if (db%ft_qcache%maxnq /= 0) then
 
- do iq_ibz=1,nqibz
-   ! Ignore points reported by the oracle. We can still recompute them on the fly if needed.
-   if (qselect_ibz(iq_ibz) == 0) cycle
-   if (itreatq(iq_ibz) == 0) cycle
+   ! Note that cplex is always set to 2 here
+   cplex = 2
+   ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
 
-   call cwtime(cpu, wall, gflops, "start")
+   do iq_ibz=1,nqibz
+     ! Ignore points reported by the oracle. We can still recompute them on the fly if needed.
+     if (qselect_ibz(iq_ibz) == 0) cycle
+     if (itreatq(iq_ibz) == 0) cycle
 
-   ! Interpolate my_npert potentials inside comm_rpt
-   call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
+     call cwtime(cpu, wall, gflops, "start")
 
-   ! Points in the IBZ may be distributed to reduce memory.
-   if (db%ft_qcache%itreatq(iq_ibz) /= 0) then
-     ABI_MALLOC_OR_DIE(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
-     db%ft_qcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
-   end if
+     ! Interpolate my_npert potentials inside comm_rpt
+     call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
 
-   ! Print progress.
-   if (iq_ibz <= 50 .or. mod(iq_ibz, 100) == 0) then
-     write(msg,'(2(a,i0),a)') " Interpolating q-point [", iq_ibz, "/", nqibz, "]"
-     call cwtime_report(msg, cpu, wall, gflops)
-   end if
- end do
+     ! Points in the IBZ may be distributed to reduce memory.
+     if (db%ft_qcache%itreatq(iq_ibz) /= 0) then
+       ABI_MALLOC_OR_DIE(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
+       db%ft_qcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
+     end if
 
- ABI_FREE(v1scf)
+     ! Print progress.
+     if (iq_ibz <= 50 .or. mod(iq_ibz, 100) == 0) then
+       write(msg,'(2(a,i0),a)') " Interpolating q-point [", iq_ibz, "/", nqibz, "]"
+       call cwtime_report(msg, cpu, wall, gflops)
+     end if
+   end do
+
+   ABI_FREE(v1scf)
+ end if
 
  ! Compute final cache size.
  my_mbsize = db%ft_qcache%get_mbsize()
@@ -3826,6 +4040,7 @@ end subroutine dvdb_ftqcache_build
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3917,6 +4132,7 @@ end subroutine dvdb_ftqcache_update_from_ft
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4016,7 +4232,12 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  ! we use symrec instead of symrel
  ABI_MALLOC(indqq, (nqbz*sppoldbl1,6))
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,exit_loop=.True., use_symrec=.True.)
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
+
+ !qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
+ !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
+ !call qrank%free()
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -4073,7 +4294,12 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
  ! Redo the mapping with the new IBZ
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,exit_loop=.True., use_symrec=.True.)
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
+
+ !qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
+ !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
+ !call qrank%free()
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -4152,8 +4378,8 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
          v1r_qbz = v1r_qibz
        else
          !call cwtime(cpu, wall, gflops, "start")
-         call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q,&
-           ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
+         call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q, &
+                           ngfft, cplex_qibz, nfft, db%nspden, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
          !call cwtime_report(" rotate", cpu, wall, gflops)
          !v1r_qbz = zero; v1r_qbz = v1r_qibz
 
@@ -4252,6 +4478,7 @@ end subroutine dvdb_get_v1scf_rpt
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4333,7 +4560,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
  end do
 
  ! Be careful with gamma and cplex!
- if (db%symv1==1) then
+ if (db%symv1 == 1) then
    call v1phq_symmetrize(db%cryst, idir, iat, symq, ngfft, cplex2, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1scf_qpt)
  end if
 
@@ -4368,9 +4595,9 @@ end subroutine dvdb_get_v1scf_qpt
 !!  v1scf(2, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
 !! PARENTS
-!!      m_gkk
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4550,6 +4777,7 @@ end function dvdb_find_qpts
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4602,6 +4830,7 @@ end subroutine dvdb_set_pert_distrib
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4797,9 +5026,9 @@ end function my_hdr_skip
 !!  npert_miss = Number of missing perturbations.
 !!
 !! PARENTS
-!!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4974,6 +5203,7 @@ end subroutine dvdb_list_perts
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5146,6 +5376,7 @@ end subroutine dvdb_merge_files
 !!  calc_eiqr
 !!
 !! FUNCTION
+!!   Compute e^{iq.r} for nrpt R-points.
 !!
 !! INPUTS
 !!
@@ -5164,8 +5395,8 @@ pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 !scalars
  integer,intent(in) :: nrpt
 !arrays
- real(dp),intent(in) :: qpt(3),rpt(3,nrpt)
- real(dp),intent(out) :: eiqr(2,nrpt)
+ real(dp),intent(in) :: qpt(3), rpt(3, nrpt)
+ real(dp),intent(out) :: eiqr(2, nrpt)
 
 !Local variables -------------------------
 !scalars
@@ -5176,7 +5407,7 @@ pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 
  do ir=1,nrpt
    qr = two_pi * dot_product(qpt, rpt(:,ir))
-   eiqr(1,ir) = cos(qr); eiqr(2,ir) = sin(qr)
+   eiqr(1, ir) = cos(qr); eiqr(2, ir) = sin(qr)
  end do
 
 end subroutine calc_eiqr
@@ -5268,6 +5499,7 @@ end function dvdb_check_fform
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5408,6 +5640,7 @@ end subroutine dvdb_test_v1rsym
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5645,9 +5878,9 @@ end subroutine dvdb_test_v1complete
 !!  Only writing.
 !!
 !! PARENTS
-!!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6030,6 +6263,7 @@ end subroutine dvdb_write_v1qavg
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6261,9 +6495,9 @@ end subroutine dvdb_test_ftinterp
 !!  v1r_lr = dipole potential
 !!
 !! PARENTS
-!!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6340,6 +6574,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  tau_red = db%cryst%xred(:,iatom)
 
  ! Get the set of G vectors
+ ! TODO: May use zero-padded FFT with small G-sphere
  call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
  !if (db%has_zeff .or. db%has_quadrupoles) then
@@ -6624,9 +6859,9 @@ end subroutine dvdb_load_efield
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -7070,6 +7305,7 @@ end subroutine dvdb_interpolate_and_write
 !! PARENTS
 !!
 !! CHILDREN
+!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 

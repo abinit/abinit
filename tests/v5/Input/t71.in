@@ -47,7 +47,7 @@ symsigma3   1
 getwfk3     1
 getscr3     2
 nband3      25
-icutcoul3   3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul3  3          # old deprecated value of icutcoul, only used for legacy
 
 # Data common to the three different datasets
 # Definition of the unit cell: fcc
