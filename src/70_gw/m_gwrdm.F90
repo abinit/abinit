@@ -41,7 +41,7 @@ module m_gwrdm
  private :: no2ks,ks2no
 !!***
  
- public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene 
+ public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene,print_tot_occ 
 !!***
 
 contains
@@ -463,6 +463,49 @@ pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
  eh_energy=half*eh_energy
 
 end function me_get_haene
+!!***
+
+subroutine print_tot_occ(sigma,kmesh,bands)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: eh_energy
+ type(sigma_t),intent(in) :: sigma
+ type(kmesh_t),intent(in) :: kmesh
+ type(ebands_t),intent(in) :: bands
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+ integer :: ik,ib,spin
+ real(dp) :: wtk,occ_bks,tot_occ
+
+! *************************************************************************
+
+ tot_occ=zero
+
+ do spin=1,sigma%nsppol
+   do ik=1,sigma%nkibz
+     wtk = kmesh%wt(ik)
+     do ib=sigma%b1gw,sigma%b2gw
+       occ_bks = bands%occ(ib,ik,spin)
+       if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
+         tot_occ=tot_occ+occ_bks*wtk
+       end if
+     end do
+   end do
+ end do
+
+ write(msg,'(a1)') ' '
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a39,f10.5)') ' Total averaged occ. from all k-points: ',tot_occ
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a1)') ' '
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+end subroutine print_tot_occ
 !!***
 
 subroutine ks2no(ndim,mat,rot) 
