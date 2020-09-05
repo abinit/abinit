@@ -100,7 +100,7 @@ contains
 !! (see last section of the routine, but are presently disabled)
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
 !!      prttagm,prttagm_images

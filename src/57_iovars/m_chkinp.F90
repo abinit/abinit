@@ -81,7 +81,7 @@ contains
 !!
 !! CHILDREN
 !!      chkdpr,chkgrp,chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne,chkorthsy
-!!      dtset_copy,dtset_free,metric,wrtout,xmpi_sum
+!!      dt%free,metric,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -790,13 +790,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (any(dt%sigma_erange > zero) .and. dt%gw_qprange /= 0) then
      MSG_ERROR_NOSTOP("sigma_erange and gw_qprange are mutually exclusive", ierr)
    end if
+   if (any(dt%sigma_erange < zero) .and. any(dt%sigma_erange > zero)) then
+     MSG_ERROR_NOSTOP("Found negative sigma_erange entry (metals) with another positive entry (semiconductors)!", ierr)
+   end if
 
 !  effmass_free
    if(abs(dt%effmass_free-one)>tol8.and.(dt%ixc/=31.and.dt%ixc/=35).and.mgga==1)then
      write(msg, '(5a)' )&
-&     'A modified electronic effective mass is not useable with a meta-GGA XC functional!',ch10,&
-&     'Except with some fake metaGGAs (ixc=31 or ixc=35).',ch10,&
-&     'effmass should be included in kinetic energy density (tau).'
+      'A modified electronic effective mass is not useable with a meta-GGA XC functional!',ch10,&
+      'Except with some fake metaGGAs (ixc=31 or ixc=35).',ch10,&
+      'effmass should be included in kinetic energy density (tau).'
      MSG_ERROR_NOSTOP(msg, ierr)
    end if
 
@@ -850,11 +853,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'enable_mpi_io',xmpi_mpiio,1,(/1/),iout)
    end if
 
-   !  eph variables
+   ! eph variables
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       14, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, 15, -15, 16], iout)
+       15, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 15, -15, 16], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -879,7 +882,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
      !  MSG_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
      !end if
-     ! TODO: Activate this test
      if (dt%eph_fermie /= zero .and. nint(dt%tmesh(3)) /= 1) then
        MSG_ERROR_NOSTOP("eph_fermie does not support multiple temperatures in tmesh !", ierr)
      end if
@@ -3175,7 +3177,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  (lengths and absolute values of scalar products should be preserved)
    iexit=0
 
-   call chkorthsy(gprimd,iexit,dt%nsym,rmet,rprimd,dt%symrel)
+   call chkorthsy(gprimd,iexit,dt%nsym,rmet,rprimd,dt%symrel,tol8)
 
 !  symchi
    if (all(dt%symchi /= [0, 1])) then

@@ -269,7 +269,7 @@ contains
 !!  exc_vdw includes deltae_vdw.
 !!
 !! PARENTS
-!!      rhotoxc
+!!      m_rhotoxc
 !!
 !! CHILDREN
 !!      wrtout
@@ -840,7 +840,7 @@ end subroutine xc_vdw_energy
 !!  vdw_params= van der Waals parameters
 !!
 !! PARENTS
-!!      driver,vdw_kernelgen
+!!      m_driver,vdw_kernelgen
 !!
 !! CHILDREN
 !!      wrtout
@@ -944,7 +944,7 @@ end subroutine xc_vdw_get_params
 !!  vdw_params= parameters for the van der Waals calculations
 !!
 !! PARENTS
-!!      driver,vdw_kernelgen
+!!      m_driver,vdw_kernelgen
 !!
 !! CHILDREN
 !!      wrtout
@@ -1330,7 +1330,7 @@ end subroutine xc_vdw_init
 !!  Internal variable my_vdw_params receives the selected functional.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      wrtout
@@ -1397,7 +1397,7 @@ end subroutine xc_vdw_libxc_init
 !!  vp= van der Waals parameters
 !!
 !! PARENTS
-!!      driver,vdw_kernelgen
+!!      m_driver,vdw_kernelgen
 !!
 !! CHILDREN
 !!      wrtout
@@ -1505,7 +1505,7 @@ end subroutine xc_vdw_memcheck
 !!  design an extension for ETSF_IO
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      wrtout
@@ -1761,7 +1761,7 @@ end subroutine xc_vdw_set_params
 !!  vp= van der Waals parameters
 !!
 !! PARENTS
-!!      driver,vdw_kernelgen
+!!      m_driver,vdw_kernelgen
 !!
 !! CHILDREN
 !!      wrtout
@@ -1863,7 +1863,7 @@ end function xc_vdw_status
 !!  condition= boolean condition to trigger the calculations
 !!
 !! PARENTS
-!!      driver,scprqt
+!!      m_common,m_driver
 !!
 !! CHILDREN
 !!      wrtout
@@ -1916,7 +1916,7 @@ end subroutine xc_vdw_trigger
 !!  FIXME: design an extension for ETSF_IO
 !!
 !! PARENTS
-!!      driver,vdw_kernelgen
+!!      m_driver,vdw_kernelgen
 !!
 !! CHILDREN
 !!      wrtout

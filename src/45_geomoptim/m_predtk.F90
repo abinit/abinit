@@ -156,7 +156,7 @@ function fdtion(ab_mover,itime,xcart,fcart,vel)
 !!  (only writing)
 !!
 !! PARENTS
-!!      constrf,prtimg
+!!      m_forces,m_gstateimg
 !!
 !! CHILDREN
 !!      wrtout

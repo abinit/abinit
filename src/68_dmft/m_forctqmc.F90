@@ -95,19 +95,11 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      impurity_solve
+!!      m_dmft
 !!
 !! CHILDREN
-!!      add_matlu,checkreal_matlu,compute_levels,copy_green,copy_matlu
-!!      ctqmc_triqs_run,ctqmcinterface_finalize,ctqmcinterface_init
-!!      ctqmcinterface_run,ctqmcinterface_setopts,data4entropydmft_setdocc
-!!      destroy_green,destroy_matlu,destroy_oper,diag_matlu,diff_matlu
-!!      fac_matlu,flush_unit,fourier_green,hybridization_asymptotic_coefficient
-!!      identity_matlu,init_green,init_matlu,init_oper,int_fct,inverse_oper
-!!      jbessel,nf_check,occup_green_tau,print_green,print_matlu,printocc_green
-!!      printplot_matlu,prod_matlu,rotate_matlu,rotatevee_hu,sbf8,shift_matlu
-!!      slm2ylm_matlu,sym_matlu,testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv
-!!      xmpi_barrier,xmpi_bcast
+!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
+!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1715,9 +1707,11 @@ end subroutine qmc_prep_ctqmc
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
+!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
+!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1823,9 +1817,11 @@ end subroutine testcode_ctqmc_b
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
+!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
+!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2102,9 +2098,11 @@ end subroutine testcode_ctqmc
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
+!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
+!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2238,9 +2236,11 @@ end subroutine ctqmcoutput_to_green
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
+!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
+!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2414,9 +2414,11 @@ end subroutine ctqmcoutput_printgreen
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
+!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
+!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 

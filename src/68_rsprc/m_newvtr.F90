@@ -185,12 +185,13 @@ contains
 !!    and that the residual is not a combination of V_res and rhoij_res (pawoptmix=0).
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      ab7_mixing_copy_current_step,ab7_mixing_eval,ab7_mixing_eval_allocate
 !!      ab7_mixing_eval_deallocate,ab7_mixing_use_moving_atoms,fourdp,mean_fftr
-!!      metric,prcref_pma,timab,wvl_prcref,wvl_vtrial_abi2big
+!!      metric,pawrhoij_filter,prcref_pma,timab,wvl_prcref,wvl_vtrial_abi2big
+!!      xcpot
 !!
 !! SOURCE
 

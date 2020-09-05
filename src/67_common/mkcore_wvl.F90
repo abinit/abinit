@@ -102,11 +102,10 @@ contains
 !! Based on mkcore.F90. Adapted to WVL case.
 !!
 !! PARENTS
-!!      forces,setvtr
+!!      m_forces,m_setvtr
 !!
 !! CHILDREN
-!!      ext_buffers,ind_positions,metric,mkcore_inner,mkdenpos,pawrad_free
-!!      pawrad_init,strconv,timab,wrtout,xcart2xred,xmpi_sum,xred2xcart
+!!      paw_splint,paw_splint_der,sort_dp
 !!
 !! SOURCE
 
@@ -542,8 +541,7 @@ end subroutine mkcore_wvl
 !! PARENTS
 !!
 !! CHILDREN
-!!      ext_buffers,ind_positions,metric,mkcore_inner,mkdenpos,pawrad_free
-!!      pawrad_init,strconv,timab,wrtout,xcart2xred,xmpi_sum,xred2xcart
+!!      paw_splint,paw_splint_der,sort_dp
 !!
 !! SOURCE
 
@@ -912,7 +910,7 @@ end subroutine mkcore_wvl_old
 !! NOTES
 !!
 !! PARENTS
-!!      mkcore_paw,mkcore_wvl
+!!      mkcore_wvl
 !!
 !! CHILDREN
 !!      paw_splint,paw_splint_der,sort_dp

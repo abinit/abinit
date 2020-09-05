@@ -71,7 +71,7 @@ contains
 !!   | keys=its access keys for compact storage.
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!
@@ -292,7 +292,7 @@ end subroutine derfcf
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      mklocl_realspace,mklocl_wavelets
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
 !!
@@ -334,11 +334,9 @@ end subroutine derf_ab
 !!  wfs <type(wvl_wf_type)>=wavefunctions informations in a wavelet basis.
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
-!!      deallocate_comms,deallocate_lr,deallocate_lzd_except_glr
-!!      deallocate_orbs,f_free_ptr
 !!
 !! SOURCE
 
@@ -405,7 +403,7 @@ end subroutine wvl_wfs_free
 !! wfs <type(wvl_wf_type)> = output localistaion region
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!

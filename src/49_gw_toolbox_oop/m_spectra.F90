@@ -158,7 +158,6 @@ end subroutine spectra_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_screening,screening
 !!
 !! CHILDREN
 !!
@@ -197,7 +196,6 @@ end subroutine spectra_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      screening
 !!
 !! CHILDREN
 !!
@@ -316,7 +314,6 @@ end subroutine spectra_write
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_screening,screening
 !!
 !! CHILDREN
 !!

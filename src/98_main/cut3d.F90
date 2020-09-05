@@ -29,12 +29,11 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_from_hdr
-!!      cut3d_hirsh,cut3d_lineint,cut3d_planeint,cut3d_pointint,cut3d_rrho
-!!      cut3d_volumeint,cut3d_wffile,destroy_mpi_enreg,fftdatar_write
-!!      flush_unit,hdr_echo,hdr_free,hdr_read_from_fname,herald
-!!      init_distribfft_seq,initmpi_seq,metric,ngfft_seq,timein,wrtout,xmpi_end
-!!      xmpi_init,xred2xcart
+!!      abi_io_redirect,abimem_init,abinit_doctor,cryst%free,cut3d_hirsh
+!!      cut3d_lineint,cut3d_planeint,cut3d_pointint,cut3d_rrho,cut3d_volumeint
+!!      cut3d_wffile,destroy_mpi_enreg,fftdatar_write,flush_unit,hdr%echo
+!!      hdr%free,hdr_read_from_fname,herald,init_distribfft_seq,initmpi_seq
+!!      metric,ngfft_seq,timein,wrtout,xmpi_end,xmpi_init,xred2xcart
 !!
 !! SOURCE
 

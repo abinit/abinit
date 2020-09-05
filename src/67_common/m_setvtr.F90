@@ -184,14 +184,10 @@ contains
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
 !! PARENTS
-!!      bethe_salpeter,scfcv,screening,sigma
+!!      m_bethe_salpeter,m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      atm2fft,denspot_set_history,dotprod_vn,ewald,hartre,ionion_realspace
-!!      ionion_surface,jellium,mag_penalty,mkcore,mkcore_alt,mkcore_wvl,mklocl
-!!      psolver_rhohxc,rhohxcpositron,rhotoxc,spatialchempot,timab,vdw_dftd2
-!!      vdw_dftd3,wvl_psitohpsi,wvl_vtrial_abi2big,xcdata_init,xchybrid_ncpp_cc
-!!      xred2xcart
+!!      ionicenergyandforces,xred2xcart
 !!
 !! SOURCE
 
@@ -831,9 +827,10 @@ end subroutine setvtr
 !! grchempottn(3,natom)=grads of e_chempot wrt xred(3,natom), hartrees.
 !!
 !! PARENTS
-!!      setvtr
+!!      m_setvtr
 !!
 !! CHILDREN
+!!      ionicenergyandforces,xred2xcart
 !!
 !! SOURCE
 
@@ -961,10 +958,10 @@ end subroutine spatialchempot
 !!  grewtn(3,natom)=grads of ion/ion wrt xred(3,natom), hartrees.
 !!
 !! PARENTS
-!!      setvtr
+!!      m_setvtr
 !!
 !! CHILDREN
-!!      xred2xcart
+!!      ionicenergyandforces,xred2xcart
 !!
 !! SOURCE
 
@@ -1059,7 +1056,7 @@ end subroutine ionion_realSpace
 !!  grewtn(3,natom)=grads of ion/ion wrt xred(3,natom), hartrees.
 !!
 !! PARENTS
-!!      setvtr
+!!      m_setvtr
 !!
 !! CHILDREN
 !!      ionicenergyandforces,xred2xcart

@@ -100,10 +100,12 @@ contains
 !! of their multi-dataset representation.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      invars2,metric,mkrdim,setshells
+!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      libxc_functionals_end,libxc_functionals_get_hybridparams
+!!      libxc_functionals_init,sort_int,timab,wrtout
 !!
 !! SOURCE
 
@@ -221,13 +223,12 @@ end subroutine invars2m
 !! At the input, they already contain a default value.
 !!
 !! PARENTS
-!!      invars2m,m_ab7_invars_f90
+!!      m_invars2
 !!
 !! CHILDREN
-!!      dtset_chkneu,get_auxc_ixc,get_kpt_fullbz,get_xclevel,intagm_img,inkpts
-!!      intagm,invacuum,libxc_functionals_end
-!!      libxc_functionals_get_hybridparams,libxc_functionals_init,matr3inv
-!!      sort_int,timab,wrtout
+!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      libxc_functionals_end,libxc_functionals_get_hybridparams
+!!      libxc_functionals_init,sort_int,timab,wrtout
 !!
 !! SOURCE
 
@@ -375,6 +376,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      end do
    end if
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwaclowrank',tread,'INT')
+ if(tread==1) dtset%gwaclowrank=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwcalctyp',tread,'INT')
  if(tread==1) dtset%gwcalctyp=intarr(1)
@@ -1375,6 +1379,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_ecutosc',tread,'ENE')
  if(tread==1) dtset%eph_ecutosc=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_phwinfact',tread,'DPR')
+ if(tread==1) dtset%eph_phwinfact = dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_ngqpt_fine',tread,'INT')
  if(tread==1) dtset%eph_ngqpt_fine=intarr(1:3)

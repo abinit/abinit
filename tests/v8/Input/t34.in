@@ -44,8 +44,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-##%% exclude_hosts = nag@abiref
-##%% exclude_builders  = buda2_gnu_8.2_mpich3
 #%% [files]
 #%% files_to_test = 
 #%%   t34.out, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy

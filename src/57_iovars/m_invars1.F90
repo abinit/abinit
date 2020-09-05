@@ -94,10 +94,9 @@ contains
 !!   List of empty strings if we are legacy "files file" mode. Allocated here, caller should free memory.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      get_ndevice,intagm
 !!
 !! SOURCE
 
@@ -685,9 +684,9 @@ end subroutine invars0
 !!  mx<ab_dimensions>=datatype storing the maximal dimensions. Partly initialized in input.
 !!
 !! PARENTS
+!!      m_common
 !!
 !! CHILDREN
-!!      indefo1,invars1
 !!
 !! SOURCE
 
@@ -893,7 +892,7 @@ end subroutine invars1m
 !!   some of which are given a default value here.
 !!
 !! PARENTS
-!!      invars1m
+!!      m_invars1
 !!
 !! CHILDREN
 !!
@@ -1101,11 +1100,9 @@ end subroutine indefo1
 !! They should be kept consistent with defaults of the same variables provided to the invars routines.
 !!
 !! PARENTS
-!!      invars1m
+!!      m_invars1
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,chkint_ge,ingeo,inkpts,inqpt,intagm,inupper
-!!      invacuum,mkrdim,wrtout
 !!
 !! SOURCE
 
@@ -2007,7 +2004,7 @@ end subroutine invars1
 !! provided the value does not depend on runtime conditions.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
 !!
@@ -2052,7 +2049,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
  dtsets(0)%ptgroupma=0
  dtsets(0)%spgroup=0
  dtsets(0)%shiftk(:,:)=half
- dtsets(0)%tolsym=tol8
+!XG20200801 Changed the default value. This default value is also defined in m_ingeo.F90 . Must be coherent !
+!dtsets(0)%tolsym=tol8
+ dtsets(0)%tolsym=tol5
  dtsets(0)%znucl(:)=zero
  dtsets(0)%ucrpa=0
  dtsets(0)%usedmft=0
@@ -2383,6 +2382,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !
    !nline
    dtsets(idtset)%nline=4
+
    if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
      if(dtsets(idtset)%usepaw==1) then
        dtsets(idtset)%nline=4
@@ -2491,7 +2491,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtkpt = -1
    dtsets(idtset)%prtwf=1; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
-   !if (dtset%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
+   !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    do ii=1,dtsets(idtset)%natom,1
      dtsets(idtset)%prtatlist(ii)=ii
    end do
@@ -2565,6 +2565,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
+
    dtsets(idtset)%tsmear=0.01_dp
 !  U
    dtsets(idtset)%ucrpa_bands(:)=-1
@@ -2639,6 +2640,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ziontypat(:)=zero
 
    dtsets(idtset)%bs_loband=0
+
+   !if (dtsets(idtset)%optdriver == RUNL_EPH) then
+   !  dtsets(idtset)%mixprec = 1
+   !  dtsets(idtset)%boxcutmin = 1.1_dp
+   !end if
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
 ! They might be initialized somewhereelse, I don't know.

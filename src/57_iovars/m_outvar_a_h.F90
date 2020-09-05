@@ -97,7 +97,7 @@ contains
 !!  computation, so that their values if choice=1 or choice=2 will differ.
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
 !!      prttagm,prttagm_images
@@ -781,6 +781,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%eph_ecutosc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_ecutosc','ENE',0)
 
+ dprarr(1,:)=dtsets(:)%eph_phwinfact
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_phwinfact','DPR',0)
+
  dprarr(1,:)=dtsets(:)%eph_extrael
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_extrael','DPR',0)
 
@@ -1182,6 +1185,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
      nimagem(0)=tmpimg0
    end if
  endif
+
+ intarr(1,:)=dtsets(:)%gwaclowrank
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwaclowrank','INT',0)
 
  intarr(1,:)=dtsets(:)%gwcalctyp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcalctyp','INT',0)

@@ -145,9 +145,10 @@ contains
 !!  extracting the G-vectors treated by the node.
 !!
 !! PARENTS
+!!      m_fock
 !!
 !! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
+!!      cutoff_cylinder,cutoff_surface
 !!
 !! SOURCE
 

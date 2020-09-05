@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hide_lapack
 !! NAME
 !!  m_hide_lapack
@@ -210,7 +209,6 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -308,7 +306,6 @@ end subroutine wrap_CHEEV
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -471,7 +468,6 @@ end subroutine wrap_ZHEEV
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -675,7 +671,6 @@ end subroutine wrap_DSYEV_ZHEEV
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -786,7 +781,6 @@ end subroutine wrap_CHPEV
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -963,7 +957,6 @@ end subroutine wrap_ZHPEV
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -1161,7 +1154,6 @@ end subroutine wrap_ZHEGV
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -1440,7 +1432,6 @@ end subroutine wrap_DSYGV_ZHEGV
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -1680,7 +1671,6 @@ end subroutine wrap_ZHEEVX
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -1968,7 +1958,6 @@ end subroutine wrap_DSYEVX_ZHEEVX
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -2237,7 +2226,6 @@ end subroutine wrap_ZHEGVX
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -2487,7 +2475,6 @@ end subroutine wrap_DSYGVX_ZHEGVX
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -2606,7 +2593,6 @@ end subroutine wrap_CGEEV
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -2699,7 +2685,6 @@ end subroutine wrap_ZGEEV
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -2892,7 +2877,6 @@ end subroutine cginv
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -3041,7 +3025,6 @@ end subroutine zginv
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,xginv
 !!
 !! SOURCE
 
@@ -3238,12 +3221,10 @@ end subroutine test_xginv
 !! a(lda,n)= array of real elements, input, inverted at output
 !!
 !! PARENTS
-!!      calc_optical_mels,ddb_elast,ddb_piezo,get_tau_k,linear_optics_paw
-!!      m_haydock,m_vcoul,matpointsym,mka2f_tr,mlwfovlp_ylmfar,setup_bse
-!!      strainsym
+!!      m_a2ftr,m_bethe_salpeter,m_ddb_elast,m_ddb_piezo,m_geometry,m_haydock
+!!      m_mlwfovlp,m_paw_optics,m_symtk,m_vcoul,m_wfd_optic
 !!
 !! CHILDREN
-!!      dbgmdi,dbgmlu,dgeicd,dgetrf,dgetri
 !!
 !! SOURCE
 
@@ -3363,10 +3344,9 @@ end subroutine matrginv
 !!  eigval(3)=three eigenvalues
 !!
 !! PARENTS
-!!      chkdilatmx
+!!      m_geometry
 !!
 !! CHILDREN
-!!      zhpev
 !!
 !! SOURCE
 
@@ -3421,7 +3401,7 @@ end subroutine matr3eigval
 !!  This routine is deprecated, use Lapack API
 !!
 !! PARENTS
-!!      conducti_nc,critic
+!!      m_bader,m_conducti
 !!
 !! CHILDREN
 !!
@@ -3711,7 +3691,7 @@ END SUBROUTINE LUBKSB
 !! NOTES
 !!
 !! PARENTS
-!!      berryphase,dfptnl_mv,qmatrix,relaxpol,smatrix,uderiv
+!!      m_berryphase,m_berrytk,m_dfpt_fef,m_elpolariz,m_pead_nl_loop,m_relaxpol
 !!
 !! CHILDREN
 !!
@@ -3900,7 +3880,7 @@ end subroutine dzgedi
 !! NOTES
 !!
 !! PARENTS
-!!      berryphase,dfptnl_mv,qmatrix,relaxpol,smatrix,uderiv
+!!      m_berryphase,m_berrytk,m_dfpt_fef,m_elpolariz,m_pead_nl_loop,m_relaxpol
 !!
 !! CHILDREN
 !!

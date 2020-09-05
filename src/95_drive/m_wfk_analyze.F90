@@ -108,7 +108,7 @@ contains
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! NOTES
 !!
@@ -128,6 +128,7 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
+!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
@@ -213,46 +214,17 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  cryst = wfk0_hdr%get_crystal()
  call cryst%print(header="Crystal structure from WFK file")
 
- ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
-
- ! TODO:
- ! Make sure everything is OK if WFK comes from a NSCF run since occ are set to zero
- ! fermie is set to 0 if nscf!
-
- ! Here we change the GS bands (fermi level, scissors operator ...)
- ! All the modifications to ebands should be done here.
-
- !if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
- !  write(msg,"(2a,2(a,i0,a,f14.6,a))")&
- !    " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
- !    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
- !    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
- !  call wrtout(ab_out,msg)
- !  call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
- !end if
-
- !if (dtset%eph_fermie /= zero) then ! default value of eph_fermie is zero hence no tolerance is used!
- !  ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
- !  call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
- !  call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
- !  call wrtout(ab_out,msg)
-
- !else if (abs(dtset%eph_extrael) > tol12) then
- !  NOT_IMPLEMENTED_ERROR()
- !  ! TODO: Be careful with the trick used in elphon for passing the concentration
- !  !call ebands_set_nelect(ebands, dtset%eph_extrael, spinmagntarget, msg)
- !  call wrtout(ab_out,msg)
- !end if
+ ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
 
  !call ebands_update_occ(ebands, spinmagntarget)
- call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
+ call ebands_print(ebands,header="Ground state energies", prtvol=dtset%prtvol)
  ABI_FREE(gs_eigen)
 
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
                   gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
 
- call print_ngfft(ngfftc,header='Coarse FFT mesh used for the wavefunctions')
- call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
+ call print_ngfft(ngfftc, header='Coarse FFT mesh used for the wavefunctions')
+ call print_ngfft(ngfftf, header='Dense FFT mesh used for densities and potentials')
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
@@ -461,9 +433,10 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 !!  Initialize the wavefunction descriptor
 !!
 !! PARENTS
-!!      wfk_analyze
+!!      m_wfk_analyze
 !!
 !! CHILDREN
+!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 

@@ -142,12 +142,10 @@ contains
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
-!!      appdig,dfpt_mkcore,dfpt_mkvxc,dfpt_vlocal,pead_nl_mv,pead_nl_resp
-!!      dotprod_vn,fourdp,getph,hartre,initylmg,inwffil,read_rhor,status,timab
-!!      wffclose,wrtout
+!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -617,11 +615,10 @@ end subroutine pead_nl_loop
 !!  d3lo(2,3,mpert,3,mpert,3,mpert) = matrix of the 3DTEs
 !!
 !! PARENTS
-!!      pead_nl_loop
+!!      m_pead_nl_loop
 !!
 !! CHILDREN
-!!      dotprod_g,fftpac,fourwf,init_hamiltonian
-!!      mkffnl,mkkpg,nonlop,status,xmpi_sum
+!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -935,10 +932,10 @@ end subroutine pead_nl_resp
 !! 12dir = 1,2,3
 !!
 !! PARENTS
-!!      pead_nl_loop
+!!      m_pead_nl_loop
 !!
 !! CHILDREN
-!!      dzgedi,dzgefa,mpi_recv,mpi_send,status,wrtout,xmpi_sum
+!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 

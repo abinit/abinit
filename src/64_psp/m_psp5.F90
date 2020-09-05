@@ -98,7 +98,7 @@ contains
 !!  xccc1d(n1xccc,6)=1D core charge function and five derivatives, from psp file
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
 !!      psp1cc,psp5lo,psp5nl,spline,wrtout

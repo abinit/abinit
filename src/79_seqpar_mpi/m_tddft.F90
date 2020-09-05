@@ -121,7 +121,7 @@ contains
 !!   Theory, edited by J.M. Seminario (Elsevier, Amsterdam, 1996).
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      fourdp,fourwf,hartre,matr3inv,mpi_bcast,mpi_gatherv,mpi_reduce

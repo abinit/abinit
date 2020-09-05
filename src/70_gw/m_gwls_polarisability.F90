@@ -80,7 +80,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_polarisability
+!!      m_gwls_polarisability
 !!
 !! CHILDREN
 !!      epsilon_k
@@ -661,7 +661,7 @@ end subroutine Pk
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_polarisability
+!!      m_gwls_polarisability
 !!
 !! CHILDREN
 !!      epsilon_k
@@ -698,7 +698,8 @@ end subroutine epsilon_k
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy,gwls_ComputePoles,gwls_GenerateEpsilon
+!!      m_gwls_ComputeCorrelationEnergy,m_gwls_ComputePoles
+!!      m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!      epsilon_k

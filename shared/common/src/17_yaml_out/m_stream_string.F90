@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_stream_string
 !! NAME
 !!  m_stream_string

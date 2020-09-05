@@ -38,7 +38,7 @@ MODULE m_crystal
 
  use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
- use m_fstrings,       only : int2char10, sjoin, yesno, itoa
+ use m_fstrings,       only : int2char10, sjoin, yesno, itoa, strcat
  use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
  use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart
@@ -227,6 +227,9 @@ MODULE m_crystal
    procedure :: print => crystal_print
    ! Print dimensions and basic info stored in the object
 
+   procedure :: print_abivars => crystal_print_abivars
+   ! Print unit cell info in Abinit/abivars format
+
    procedure :: symmetrize_cart_vec3 => crystal_symmetrize_cart_vec3
    ! Symmetrize a 3d cartesian vector
 
@@ -287,12 +290,13 @@ CONTAINS  !=====================================================================
 !!  6) Likely I will need also info on the electric field and berryopt
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_ddb
-!!      m_effective_potential,m_effective_potential_file,m_tdep_abitypes,mover
-!!      optic,outscfcv,respfn,vtorho
+!!      m_crystal,m_ddb,m_dfpt_looppert,m_effective_potential
+!!      m_effective_potential_file,m_eig2d,m_gwls_hamiltonian,m_hdr,m_outscfcv
+!!      m_precpred_1geo,m_respfn_driver,m_tdep_abitypes,m_unittests,m_vtorho
+!!      optic
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -321,7 +325,6 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  integer :: symrec(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  integer,pointer :: symrel_noI(:,:,:)
- integer,allocatable :: indsym(:,:,:)
  real(dp),pointer :: tnons_noI(:,:)
 ! *************************************************************************
 
@@ -442,18 +445,14 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
  ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
  !
- ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym = 0
+ ABI_MALLOC(cryst%indsym,(4, Cryst%nsym, natom))
  tolsym8=tol8
- call symatm(indsym,natom,Cryst%nsym,Cryst%symrec,Cryst%tnons,tolsym8,Cryst%typat,Cryst%xred)
-
- ABI_MALLOC(Cryst%indsym,(4,Cryst%nsym,natom))
- Cryst%indsym=indsym
- ABI_FREE(indsym)
+ call symatm(cryst%indsym, natom, Cryst%nsym, Cryst%symrec, Cryst%tnons, tolsym8, Cryst%typat, Cryst%xred)
 
  ! Rotations in spinor space
- ABI_MALLOC(Cryst%spinrot,(4,Cryst%nsym))
+ ABI_MALLOC(Cryst%spinrot, (4, Cryst%nsym))
  do isym=1,Cryst%nsym
-   call getspinrot(Cryst%rprimd,Cryst%spinrot(:,isym),Cryst%symrel(:,:,isym))
+   call getspinrot(Cryst%rprimd, Cryst%spinrot(:,isym), Cryst%symrel(:,:,isym))
  end do
 
 end subroutine crystal_init
@@ -503,14 +502,9 @@ end function crystal_without_symmetries
 !!  Destroy the dynamic arrays in a crystal_t data type.
 !!
 !! PARENTS
-!!      anaddb,bethe_salpeter,cut3d,dfpt_looppert,eig2tot,eph,fold2Bloch,gstate
-!!      gwls_hamiltonian,m_ddk,m_dvdb,m_effective_potential
-!!      m_effective_potential_file,m_gruneisen,m_ioarr,m_iowf,m_wfd,m_wfk
-!!      mlwfovlp_qp,mover,mrgscr,optic,outscfcv,respfn,screening,sigma,vtorho
-!!      wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -567,11 +561,9 @@ end subroutine crystal_free
 !!  Only printing
 !!
 !! PARENTS
-!!      eph,gwls_hamiltonian,m_dvdb,m_gruneisen,setup_bse,setup_screening
-!!      setup_sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -596,7 +588,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
 
  msg=' ==== Info on the Cryst% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(my_unt, sjoin(ch10, msg), my_mode)
 
  write(msg,'(a)')' Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):'
  call wrtout(my_unt,msg,my_mode)
@@ -624,7 +616,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  if (my_prtvol == -1) return
 
  if (my_prtvol > 0) then
-   call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
+   call print_symmetries(Cryst%nsym, Cryst%symrel, Cryst%tnons, Cryst%symafm, unit=my_unt, mode_paral=my_mode)
    if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
 
    ! Print indsym using the same format as in symatm
@@ -646,11 +638,76 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
 
  call wrtout(my_unt, " Reduced atomic positions [iatom, xred, symbol]:", my_mode)
  do iatom=1,cryst%natom
-   write(msg,"(i5,a,2x,3f11.7,2x,a)")iatom,")",cryst%xred(:,iatom),symbol_type(cryst,cryst%typat(iatom))
+   write(msg,"(i5,a,2x,3f11.7,2x,a)")iatom,")",cryst%xred(:,iatom), cryst%symbol_type(cryst%typat(iatom))
    call wrtout(my_unt,msg,my_mode)
  end do
 
 end subroutine crystal_print
+!!***
+
+!!****f* m_crystal/crystal_print_abivars
+!! NAME
+!!  crystal_print_abivars
+!!
+!! FUNCTION
+!!   Print unit cell info in Abinit/abivars format
+!!
+!! INPUTS
+!!  unit=Output unit
+!!
+!! OUTPUT
+!!  Only printing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine crystal_print_abivars(cryst, unit)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: unit
+ class(crystal_t),intent(in) :: cryst
+
+!Local variables-------------------------------
+ integer :: iatom, ii
+ !character(len=500) :: fmt
+! *********************************************************************
+
+ if (unit == dev_null) return
+
+ ! Write variables using standard Abinit input format.
+ write(unit, "(/,/,a)")" # Abinit variables"
+ write(unit, "(a)")" acell 1.0 1.0 1.0"
+ write(unit, "(a)")" rprimd"
+ do ii=1,3
+    write(unit, "(3(f11.7,1x))")cryst%rprimd(:, ii)
+ end do
+ write(unit, "(a, i0)")" natom ", cryst%natom
+ write(unit, "(a, i0)")" ntypat ", cryst%ntypat
+ write(unit, strcat("(a, ", itoa(cryst%natom), "(i0,1x))")) " typat ", cryst%typat
+ write(unit, strcat("(a, ", itoa(cryst%npsp), "(f5.1,1x))")) " znucl ", cryst%znucl
+ write(unit, "(a)")" xred"
+ do iatom=1,cryst%natom
+   write(unit,"(1x, 3f11.7,2x,2a)")cryst%xred(:,iatom), " # ", cryst%symbol_type(cryst%typat(iatom))
+ end do
+
+ ! Write variables using the abivars format supported by structure variable.
+ !write(unit, "(/,/,a)")" # Abivars format (external file with structure variable)"
+ !write(unit, "(a)")" acell 1.0 1.0 1.0"
+ !write(unit, "(a)")" rprimd"
+ !do ii=1,3
+ !   write(unit, "(1x, 3(f11.7,1x))")cryst%rprimd(:, ii)
+ !end do
+ !write(unit, "(a, i0)")" natom ", cryst%natom
+ !write(unit, "(a)")" xred_symbols"
+ !do iatom=1,cryst%natom
+ !  write(unit,"(1x, 3f11.7,2x,a)")cryst%xred(:,iatom), cryst%symbol_type(cryst%typat(iatom))
+ !end do
+
+end subroutine crystal_print_abivars
 !!***
 
 !----------------------------------------------------------------------
@@ -674,10 +731,11 @@ end subroutine crystal_print
 !! symbols = array with the symbol of each atoms
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_polynomial_coeff
+!!      m_effective_potential_file,m_fit_polynomial_coeff,m_opt_effpot
+!!      m_polynomial_coeff
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -926,10 +984,9 @@ end function symbol_iatom
 !!  has_inversion=True if spatial inversion is present in the point group.
 !!
 !! PARENTS
-!!      m_skw
 !!
 !! CHILDREN
-!!      mati3inv,sg_multable
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -946,9 +1003,8 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 
 !Local variables-------------------------------
 !scalars
- logical :: debug
- integer :: isym,search,tmp_nsym,ierr
- logical :: found,my_include_timrev
+ integer :: isym, search, tmp_nsym, ierr
+ logical :: found, my_include_timrev, debug
 !arrays
  integer :: work_symrel(3,3,cryst%nsym)
  integer,allocatable :: symafm(:)
@@ -1220,9 +1276,10 @@ end function crystal_ncwrite_path
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1358,9 +1415,10 @@ end subroutine prt_cif
 !! NOTES
 !!
 !! PARENTS
-!!      prt_cif
+!!      m_crystal
 !!
 !! CHILDREN
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1436,7 +1494,7 @@ end subroutine symrel2string
 !!   Only files written
 !!
 !! PARENTS
-!!      afterscfloop
+!!      m_afterscfloop
 !!
 !! CHILDREN
 !!      atomdata_from_znucl

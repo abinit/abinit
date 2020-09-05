@@ -165,12 +165,12 @@ contains
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      ab7_mixing_copy_current_step,ab7_mixing_eval,ab7_mixing_eval_allocate
 !!      ab7_mixing_eval_deallocate,ab7_mixing_use_moving_atoms,fourdp,metric
-!!      prcref,timab,wvl_prcref,wvl_rho_abi2big
+!!      pawrhoij_filter,prcref,timab,wvl_prcref,wvl_rho_abi2big
 !!
 !! SOURCE
 

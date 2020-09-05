@@ -99,7 +99,7 @@ contains
 !!      m_ab7_mixing
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -137,7 +137,7 @@ end subroutine init_
 !!      m_ab7_mixing
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -173,10 +173,10 @@ end subroutine nullify_
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_scfcv,scfcv
+!!      m_dfpt_scfcv,m_scfcv_core
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -364,10 +364,10 @@ end subroutine ab7_mixing_new
 !!  Obsolete?
 !!
 !! PARENTS
-!!      dfpt_scfcv,scfcv
+!!      m_dfpt_scfcv,m_scfcv_core
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -405,10 +405,10 @@ end subroutine ab7_mixing_use_disk_cache
 !! NOTES
 !!
 !! PARENTS
-!!      newrho,newvtr
+!!      m_newrho,m_newvtr
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -446,10 +446,10 @@ end subroutine ab7_mixing_use_moving_atoms
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_newvtr,newrho,newvtr
+!!      m_dfpt_scfcv,m_newrho,m_newvtr
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
@@ -521,10 +521,10 @@ end subroutine ab7_mixing_copy_current_step
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_newvtr,newrho,newvtr
+!!      m_dfpt_scfcv,m_newrho,m_newvtr
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -604,10 +604,10 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_newvtr,newrho,newvtr
+!!      m_dfpt_scfcv,m_newrho,m_newvtr
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -671,10 +671,10 @@ end subroutine ab7_mixing_eval_deallocate
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_newvtr,newrho,newvtr
+!!      m_dfpt_scfcv,m_newrho,m_newvtr
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -834,10 +834,10 @@ end subroutine ab7_mixing_eval
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_scfcv,scfcv
+!!      m_dfpt_scfcv,m_scfcv_core
 !!
 !! CHILDREN
-!!      nullify_
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -966,7 +966,7 @@ end subroutine ab7_mixing_deallocate
 !!      m_ab7_mixing
 !!
 !! CHILDREN
-!!      aprxdr,findminscf,sqnormm_v,wrtout
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -1766,7 +1766,7 @@ end subroutine scfcge
 !!      m_ab7_mixing
 !!
 !! CHILDREN
-!!      wrtout
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -1957,7 +1957,7 @@ end subroutine scfeig
 !!      m_ab7_mixing
 !!
 !! CHILDREN
-!!      dgetrf,dgetri,dotprodm_v,sqnormm_v,wrtout,xmpi_sum
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -2335,10 +2335,10 @@ end subroutine scfopt
 !!         2 if some other problem
 !!
 !! PARENTS
-!!      scfcge
+!!      m_ab7_mixing
 !!
 !! CHILDREN
-!!      wrtout
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -2480,10 +2480,10 @@ end subroutine findminscf
 !!     opt_storage=1: V are stored as : V, B_x, B_y, B_z         (complex)
 !!
 !! PARENTS
-!!      scfopt
+!!      m_ab7_mixing
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -2655,10 +2655,10 @@ end subroutine dotprodm_v
 !!     N are stored as : n, m_x, m_y, mZ          (complex)
 !!
 !! PARENTS
-!!      aprxdr
+!!      m_ab7_mixing
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -2943,10 +2943,10 @@ end subroutine dotprodm_vn
 !!  norm2(mult)= value of the square of the norm of the different potentials
 !!
 !! PARENTS
-!!      scfcge,scfopt
+!!      m_ab7_mixing
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
+!!      dotprodm_vn
 !!
 !! SOURCE
 
@@ -3064,7 +3064,7 @@ end subroutine sqnormm_v
 !! Should be OpenMP parallelized
 !!
 !! PARENTS
-!!      scfcge
+!!      m_ab7_mixing
 !!
 !! CHILDREN
 !!      dotprodm_vn

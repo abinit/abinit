@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_xc_noncoll
 !! NAME
 !! m_xc_noncoll
@@ -89,7 +88,7 @@ CONTAINS
 !!
 !!
 !! PARENTS
-!!      dfpt_mkvxc_noncoll,m_pawxc
+!!      m_dfpt_mkvxc,m_pawxc
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -227,7 +226,7 @@ end subroutine rotate_mag
 !!  vxc_out(vectsize,4)=output non-collinear XC potential
 !!
 !! PARENTS
-!!      dfpt_mkvxc_noncoll,m_pawxc
+!!      m_dfpt_mkvxc,m_pawxc
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -317,7 +316,7 @@ end subroutine rotate_back_mag
 !!  vxc1_out(vectsize,4)=output 1st-order non-collinear XC potential
 !!
 !! PARENTS
-!!      dfpt_mkvxc_noncoll,m_pawxc,m_xc_noncoll
+!!      m_dfpt_mkvxc,m_pawxc,m_xc_noncoll
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt

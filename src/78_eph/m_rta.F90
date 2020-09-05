@@ -37,6 +37,7 @@ module m_rta
  use m_sigmaph
  use m_dtset
  use m_dtfil
+ use m_krank
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -45,9 +46,9 @@ module m_rta
  use m_io_tools,       only : open_file
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
- use m_numeric_tools,  only : bisect, simpson_int, safe_div
+ use m_numeric_tools,  only : bisect, simpson_int, safe_div, arth
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
- use m_kpts,           only : listkk, kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_timrev_from_kptopt
  use m_occ,            only : occ_fd, occ_dfde
  use m_pawtab,         only : pawtab_type
  use m_ddk,            only : ddkstore_t
@@ -57,7 +58,8 @@ module m_rta
  private
 !!****
 
- public :: rta_driver ! Main entry point for transport calculations withing RTA
+ public :: rta_driver                 ! Main entry point for transport calculations withing RTA
+ public :: rta_estimate_sigma_erange
 !!****
 
 !----------------------------------------------------------------------
@@ -227,6 +229,11 @@ contains  !=====================================================
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
 !!
+!! PARENTS
+!!      m_eph_driver
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
@@ -333,6 +340,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  type(klinterp_t) :: klinterp
  type(ddkstore_t) :: ds
  type(sigmaph_t) :: sigmaph
+ type(krank_t) :: krank
 !arrays
  integer :: kptrlatt(3,3), unts(2), sigma_ngkpt(3)
  integer,allocatable :: indkk(:,:)
@@ -346,6 +354,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ !ABI_CHECK(any(abs(dtset%sigma_erange) > zero), "rta_driver requires the specification of sigma_erange")
  new%assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 
  sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., &
@@ -357,7 +366,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = sigmaph%kTmesh
 
- ! How many RTA approximations have we computed in sigmaph? (SERTA, MRTA)
+ ! How many RTA approximations have we computed in sigmaph? (SERTA, MRTA ...?)
  new%nrta = 2; if (sigmaph%mrta == 0) new%nrta = 1
 
  new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
@@ -371,7 +380,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  new%eminmax_spin = ebands_get_minmax(ebands, "eig")
 
  if (new%assume_gap) then
-   ! Information about the gaps
+   ! Get gaps
    new%gaps = ebands_get_gaps(ebands, ierr)
    if (ierr /= 0) then
      do spin=1, nsppol
@@ -535,11 +544,12 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
    ! Map the points of the downsampled bands to dense ebands
    timrev = kpts_timrev_from_kptopt(ebands%kptopt)
-   ABI_MALLOC(indkk, (tmp_ebands%nkpt, 6))
+   ABI_MALLOC(indkk, (6, tmp_ebands%nkpt))
 
-   call listkk(dksqmax, cryst%gmet, indkk, new%ebands%kptns, tmp_ebands%kptns, &
-               new%ebands%nkpt, tmp_ebands%nkpt, cryst%nsym, &
-               sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+   krank = krank_from_kptrlatt(new%ebands%nkpt, new%ebands%kptns, new%ebands%kptrlatt, compute_invrank=.False.)
+   call krank%get_mapping(tmp_ebands%nkpt, tmp_ebands%kptns, dksqmax, cryst%gmet, indkk, &
+                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
+   call krank%free()
 
    if (dksqmax > tol12) then
       write(msg, '(3a,es16.6,a)' ) &
@@ -552,14 +562,14 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    ABI_MOVE_ALLOC(new%linewidths, tmp_array5)
    ABI_REMALLOC(new%linewidths, (new%ntemp, new%bmin:new%bmax, tmp_ebands%nkpt, nsppol, new%nrta))
    do ikpt=1,tmp_ebands%nkpt
-     new%linewidths(:,:,ikpt,:,:) = tmp_array5(:,:,indkk(ikpt, 1),:,:)
+     new%linewidths(:,:,ikpt,:,:) = tmp_array5(:,:,indkk(1, ikpt),:,:)
    end do
    ABI_FREE(tmp_array5)
 
    ABI_MOVE_ALLOC(new%velocity, tmp_array4)
    ABI_REMALLOC(new%velocity, (3, new%bmin:new%bmax, tmp_ebands%nkpt, nsppol))
    do ikpt=1,tmp_ebands%nkpt
-     new%velocity(:,:,ikpt,:) = tmp_array4(:,:,indkk(ikpt, 1),:)
+     new%velocity(:,:,ikpt,:) = tmp_array4(:,:,indkk(1, ikpt),:)
    end do
    ABI_FREE(tmp_array4)
 
@@ -622,6 +632,10 @@ end function rta_new
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! comm=MPI communicator.
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1030,6 +1044,10 @@ end subroutine rta_compute
 !! dtset<dataset_type>=All input variables for this dataset.
 !! comm=MPI communicator.
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine rta_compute_mobility(self, cryst, dtset, comm)
@@ -1060,6 +1078,8 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ABI_MALLOC(self%mobility_mu, (3, 3, 2, self%ntemp, self%nsppol, self%nrta))
  ABI_CALLOC(self%ne, (self%ntemp))
  ABI_CALLOC(self%nh, (self%ntemp))
+
+ !call ebands_get_carriers(self%ebands, self%ntemp, kTmesh, mu_e, self%nh, self%ne)
 
  ! Compute carrier concentration
  do spin=1,nsppol
@@ -1162,6 +1182,11 @@ end subroutine rta_compute_mobility
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ncid=Netcdf file handle.
+!!
+!! PARENTS
+!!      m_rta
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1279,6 +1304,10 @@ end subroutine rta_ncwrite
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=variables related to files.
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
@@ -1385,7 +1414,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
 
  ! write header
  write(ount, "(2a)")"# ", trim(header)
- write(ount, "(a)")"# ", trim(rta_type)
+ write(ount, "(2a)")"# ", trim(rta_type)
  ! TODO: Units ?
  write(ount, "(a, 3(i0, 1x))")"#", dtset%transport_ngkpt
  write(ount, "(a)")"#"
@@ -1402,7 +1431,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
  if (self%nsppol == 1) then
    do itemp=1, self%ntemp
      write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
-     write(ount, "(a)")"# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor."
+     write(ount, "(a)")"# Energy [Ha], (xx, yx, zx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor."
      do iw=1,self%nw
        write(ount, "(10(es16.6))")self%edos%mesh(iw), tmp_values(:, :, iw, itemp, 1)
      end do
@@ -1412,7 +1441,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
    do itemp=1, self%ntemp
      write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
      write(ount, "(a)") &
-       "# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor for spin up followed by spin down."
+       "# Energy [Ha], (xx, yx, zx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor for spin up followed by spin down."
      do iw=1,self%nw
        write(ount, "(19(es16.6))")self%edos%mesh(iw), tmp_values(:, :, iw, itemp, 1), tmp_values(:, :, iw, itemp, 2)
      end do
@@ -1437,6 +1466,10 @@ end subroutine rta_write_tensor
 !!  Free dynamic memory.
 !!
 !! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1478,8 +1511,6 @@ end subroutine rta_free
 
 !----------------------------------------------------------------------
 
-#if 0
-
 !!****f* m_rta/rta_estimate_sigma_erange
 !! NAME
 !! rta_estimate_sigma_erange
@@ -1487,6 +1518,10 @@ end subroutine rta_free
 !! FUNCTION
 !!
 !! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1499,89 +1534,123 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
 
 !Local variables ------------------------------
 !scalars
- integer :: ntemp, nsppol, order, spin, iw, imu, irta, nw
- real(dp) :: mu, ee, kT, max_occ, min_ene, max_ene, estep
+ integer :: ntemp, order, ie, ne, my_rank, ii, ierr
+ real(dp) :: mu, kT, max_occ, vb_max, cb_min, estep, magic_ratio, estart, estop
  logical :: assume_gap
+ character(len=500) :: msg
+ type(gaps_t) :: gaps
 !arrays
- real(dp),allocatable :: kTmesh(:), eminmax_spin(:,:), ff(:,:), mesh(:)
+ real(dp) :: est_sigma_erange(2, 0:2), mu_vals(1)
+ real(dp),allocatable :: kTmesh(:), ff(:), emesh(:)
+
 !************************************************************************
 
- ! Compute kTmesh and take the maximum
+ my_rank = xmpi_comm_rank(comm); if (my_rank /= 0) return
+
+ ! Compute kTmesh and take the highest T.
  ntemp = nint(dtset%tmesh(3))
- ABI_CHECK(new%ntemp > 0, "ntemp <= 0")
+ ABI_CHECK(ntemp > 0, "ntemp <= 0")
  ABI_MALLOC(kTmesh, (ntemp))
  kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), ntemp) * kb_HaK
  kT = kTmesh(ntemp)
  ABI_FREE(kTmesh)
+ ntemp = 1
 
- ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
- !call ebands_get_muT_with_fd(ebands, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
+ ! Compute the chemical potential for the highest T with Fermi-Dirac.
+ call ebands_get_muT_with_fd(ebands, ntemp, [Kt], dtset%spinmagntarget, dtset%prtvol, mu_vals, xmpi_comm_self)
+ mu = mu_vals(1)
 
+ !call ebands_print(ebands, header="Estimating sigma_erange", unit=ab_out)
+
+ ! It's funny that we need dtset%sigma_erange to estimate sigma_erange!
+ if (all(dtset%sigma_erange == 0)) then
+   msg = "We need `sigma_erange` to understand if we are dealing with e/h in semiconductors or metals."
+   MSG_ERROR(msg)
+ end if
  assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 
- nsppol = ebands%nsppol
- ! Get spin degeneracy
+ ! Spin degeneracy
  max_occ = two / (ebands%nspinor * ebands%nsppol)
 
- ABI_MALLOC(eminmax_spin, (2, nsppol))
- eminmax_spin = ebands_get_minmax(ebands, "eig")
+ if (assume_gap) then
+   ! Get gaps. In case of magnetic semiconductor everything is referred to the (highest CBM | smallest VBM).
+   gaps = ebands_get_gaps(ebands, ierr)
+   call gaps%print(unit=std_out); call gaps%print(unit=ab_out)
+   ABI_CHECK(ierr == 0, "ebands_get_gaps returned non-zero exit status. See above warning messages...")
+   vb_max = maxval(gaps%vb_max)
+   cb_min = minval(gaps%cb_min)
 
- !min_ene = minval(eminmax_spin(1, :)); min_ene = min_ene - 0.1_dp * abs(min_ene)
- !max_ene = maxval(eminmax_spin(2, :)); max_ene = max_ene + 0.1_dp * abs(max_ene)
+ else
+   ! metals --> use Fermi level TODO: fermie or mu?
+   vb_max = ebands%fermie
+   cb_min = ebands%fermie
+ end if
 
- !if (new%assume_gap) then
- !  ! Information about the gaps
- !  new%gaps = ebands_get_gaps(ebands, ierr)
- !  if (ierr /= 0) then
- !    do spin=1, nsppol
- !      MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
- !      new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
- !      new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
- !    end do
- !    !MSG_ERROR("ebands_get_gaps returned non-zero exit status. See above warning messages...")
- !    MSG_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
- !  end if
+ est_sigma_erange = 0
 
- !  if (my_rank == master) then
- !    call new%gaps%print(unit=std_out); call new%gaps%print(unit=ab_out)
- !  end if
- !end if
+ ! In [24]: integrand_range / integrand_CBM
+ ! 0.006325409327517321 in Si
+ ! 0.002865971520647022 in GaP
+ ! 0.0014470714061475284 in GaAs
+ magic_ratio = 0.003_dp
 
- estep = tol2 * eV_Ha
- nw = nint((max_ene - min_ene) / estep) + 1
- ABI_MALLOC(edos%mesh, (nw))
- mesh = arth(min_ene, estep, nw)
+ do ii=1,2
+   if (assume_gap .and. dtset%sigma_erange(ii) <= zero) cycle
 
- ! Compute (e - mu)^alpha * (-df/de)
- ABI_MALLOC(ff, (nw, 0:2))
-
- do order=0, 2
-   if (order > 0) then
-     !ff(:, order) = -max_occ * (ee - mu) ** order * occ_dfde(ee, kT, mu)
+   if (ii == 1) then
+     ! Valence or metals below ef
+     estart = vb_max
+     estop = vb_max - two * eV_Ha
    else
-     !ff(:, order) = -max_occ * occ_dfde(ee, kT, mu)
+     ! Conduction or metals above ef
+     estart = cb_min
+     estop = estart + two * eV_Ha
    end if
 
-   ! Spline data
- end do
+   ! We build two meshes for Conduction and Valence.
+   ! For valence, the mesh starts at the VBM and decreases monotonically so tha we can use the same loop over ie.
+   estep = tol2 * eV_Ha; if (ii == 1) estep = -estep
+   ne = nint((abs(estop - estart)) / estep) + 1
+   ABI_MALLOC(emesh, (ne))
+   emesh = arth(estart, estep, ne)
 
- ABI_FREE(ff)
+   ! Compute (e - mu)^alpha * (-df/de)
+   ABI_MALLOC(ff, (ne))
 
- ! Bisection algorithm
- do order=0, 2
+   do order=0,2
+     if (order == 0) ff(:) = -max_occ * occ_dfde(emesh, kT, mu)
+     if (order > 0)  ff(:) = -max_occ * (emesh - mu) ** order * occ_dfde(emesh, kT, mu)
+     do ie=2,ne
+       if (ff(ie) / ff(1) < magic_ratio) then
+         est_sigma_erange(ii, order) = abs(emesh(ie) - estart)
+         if (.not. assume_gap) est_sigma_erange(ii, order) = est_sigma_erange(ii, order)
+         exit
+       end if
+     end do
+     ABI_CHECK(ie /= ne + 1, sjoin("Cannot find energy such that ratio becomes smaller than!", ftoa(magic_ratio)))
+   end do
+
+   ABI_FREE(ff)
+   ABI_FREE(emesh)
  end do
 
  ! Print results
- !if (my_rank == master) then
- !end if
+ do order=0,2
+   write(ab_out, "(a,i0,a,2(f8.3,1x),a)")" For order: ", order, ", sigma_erange = ", est_sigma_erange(:, order) * Ha_eV, " eV"
+ end do
 
- ABI_FREE(eminmax_spin)
- ABI_FREE(mesh)
+ write(ab_out, "(/,a)")" Note that this is a qualitative estimate that depends on several factors:"
+ write(ab_out, "(a)")" T_max, nelect, doping and the input k-mesh."
+ write(ab_out, "(a)")" Systems with small effective masses may require larger energy ranges and better k-sampling"
+ write(ab_out, "(a)") &
+   " It is strongly suggested to increase the window if you are using this value to generate the WFK file with KERANGE"
+ write(ab_out, "(a,/)") &
+   " Also remember that it's possible to decrease sigma_erange at the level or the RTA calculation"
+
+ call gaps%free()
 
 end subroutine rta_estimate_sigma_erange
 !!***
-
-#endif
 
 end module m_rta
 !!***

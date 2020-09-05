@@ -75,6 +75,7 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
+!!      matr3inv
 !!
 !! SOURCE
 

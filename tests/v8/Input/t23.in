@@ -27,7 +27,7 @@ spin_write_traj = 0
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% exclude_hosts = nag@abiref
+#%% exclude_builders = .*_nag_7.0_.*
 #%% system_xml = t23.xml
 #%% [files]
 #%% files_to_test = 
