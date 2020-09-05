@@ -814,7 +814,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    formeig = 1
  end if
 
- ! same_layout is set to True if the interal representation of the cgs
+ ! same_layout is set to True if the internal representation of the cgs
  ! is compatible with the representation on file.
  iomode = IO_MODE_ETSF
  if (response == 0) then
