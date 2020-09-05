@@ -213,11 +213,13 @@ contains
     etmp=0.5_dp * sum(f*lwf)
     if (self%has_self_bound_term) then
        etmp = etmp + &
-            & self%self_bound_coeff*sum(lwf**(self%self_bound_order))
+            & self%self_bound_coeff*sum(lwf**(self%self_bound_order)) & 
+            & -1.1344*sum(lwf**6) + 0.438*sum(lwf**8)
     end if
 
     !TODO: remove. For testing only
     etmp = etmp+ self%beta*sum(lwf(::2)**2 * lwf(1::2)**2)
+
 
     if (present(energy)) then
        energy=energy+etmp
@@ -250,12 +252,15 @@ contains
 
     call self%convert_coeff_to_csr()
     call self%coeff%mv_one_row(ilwf, lwf, tmp)
-    deltaE=deltaE+tmp*dlwf
+    deltaE=deltaE+ tmp*dlwf
 
+    ! bound term
     if (self%has_self_bound_term) then
        deltaE= deltaE+ &
             & self%self_bound_coeff*(lwf_new**(self%self_bound_order) &
             & - lold**(self%self_bound_order))
+    ! Adding x^6 and x^8 for VO2
+        deltaE=deltaE -1.1344*(lwf_new**6-lold**6) + 0.438*(lwf_new**8-lold**8)
     end if
 
     if(modulo(ilwf, 2)==0) then

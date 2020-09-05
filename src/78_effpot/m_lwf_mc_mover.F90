@@ -110,7 +110,7 @@
      ! try to change lwf
      r=self%attempt(self%rng, effpot)
      ! metropolis-hastings
-     if(self%rng%rand_unif_01()< min(1.0_dp, r) ) then
+     if(self%rng%rand_unif_01()< min(1.0_dp, r) .and. abs(self%lwf_new)<0.4 ) then
         self%naccept=self%naccept+1
         call self%accept()
      else

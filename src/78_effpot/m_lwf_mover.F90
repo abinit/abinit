@@ -177,7 +177,6 @@ contains
        call self%hist%set_hist(lwf=self%lwf, energy=self%energy )
        if(modulo(i, self%params%lwf_nctime)==0) then
           call self%ncfile%write_one_step(self%hist)
-       end if
        !print *, "Step: ", i,   "Ev", self%energy, "Etot"
 
 !       write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
@@ -190,6 +189,7 @@ contains
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
 
+       end if
        !TODO: output, observables
     end do
 
