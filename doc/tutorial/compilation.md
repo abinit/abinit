@@ -4,11 +4,11 @@ authors: MG
 
 # How to compile ABINIT
 
-This tutorial explains how to compile ABINIT including the required external dependencies
+This tutorial explains how to compile ABINIT including the external dependencies
 without relying on pre-compiled libraries, package managers and root privileges.
 You will learn how to use the standard **configure** and **make** Linux tools
 to build and install your own software stack including the MPI library and the associated
-*mpif90* and *mpicc* wrappers required to compile parallel MPI applications.
+*mpif90* and *mpicc* wrappers required to compile MPI applications.
 
 It is assumed that you already have a standard Unix-like installation
 that provides the basic tools needed to build software from source (Fortran/C compilers and *make*).
@@ -32,19 +32,19 @@ If this is the first time you use the **configure && make** approach to build so
 we **strongly** recommended to read this
 [guide](https://www.codecoffee.com/software-installation-configure-make-install/)
 before proceeding with the next steps.
-
-If you are not interested in compiling all the components from source, you may want to consider the following alternatives:
+If, on the other hand, you are not interested in compiling all the components from source,
+you may want to consider the following alternatives:
 
 * Compilation with external libraries provided by apt-get based Linux distributions (e.g. Ubuntu).
-  More info available [here](INSTALL_Ubuntu)
+  More info available [here](INSTALL_Ubuntu).
 
 * Compilation with external libraries on Fedora/RHEL/CentOS Linux distributions.
-  More info available [here](INSTALL_CentOS)
+  More info available [here](INSTALL_CentOS).
 
 * Homebrew bottles or macports for MacOsX users.
   More info available [here](INSTALL_MacOS).
 
-* Automatic compilation and  and generation of modules on clusters with EasyBuild.
+* Automatic compilation and generation of modules on clusters with EasyBuild.
   More info available [here](INSTALL_EasyBuild).
 
 * Compiling Abinit using the internal fallbacks and the *build-abinit-fallbacks.sh* script
@@ -56,7 +56,7 @@ Before starting, it is also worth reading this document prepared by Marc Torrent
 that introduces important concepts and provides a detailed description of the configuration options
 supported by the ABINIT build system
 Note that the document has been written for Abinit v8 hence some examples should be changed to be compatible
-with the build system of version 9, still the document is a valuable source of information.
+with the build system of version 9, yet the document represents a valuable source of information.
 
 <embed src="https://school2019.abinit.org/images/lectures/abischool2019_installing_abinit_lecture.pdf"
 type="application/pdf" width="100%" height="480px">
@@ -66,18 +66,19 @@ type="application/pdf" width="100%" height="480px">
 
     The aim of this tutorial is to teach you how to compile code from source but we cannot guarantee
     that these recipes will work out of the box on every possible architecture.
-    We will do our best to explain how to setup your environment and how to avoid the typical pitfalls but
-    we cannot cover all the possible cases.
+    We will do our best to explain how to **setup your environment** and how to **avoid the typical pitfalls**
+    but we cannot cover all the possible cases.
+
     Fortunately, the internet provides lots of resources.
     Search engines and stackoverflow are your best friends and in some cases one can find the solution
     by just copying the error message in the search bar.
     For more complicated issues, you can ask for help on the [Abinit forum](https://forum.abinit.org)
     or contact the sysadmin of your cluster but remember to provide enough information about your system
-    and the issue to help the developers.
+    and the problem.
 
 ## Getting started
 
-Since ABINIT is written in Fortran, we need a **recent** Fortran compiler
+Since ABINIT is written in Fortran, we need a **recent Fortran compiler**
 that supports the **F2003 specifications** as well as a C compiler.
 At the time of writing ( |today| ), the C++ compiler is optional and required only for advanced features
 that are not treated in this tutorial.
@@ -85,7 +86,7 @@ that are not treated in this tutorial.
 In what follows, we will be focusing on the GNU toolchain i.e. *gcc* for C and *gfortran* for Fortran.
 These "sequential" compilers are adequate if you don't need to compile parallel MPI applications.
 The compilation of MPI code, indeed, requires the installation of **additional libraries**
-and **specialized wrappers** (*mpif90*, *mpicc*) replacing the "sequential" compilers.
+and **specialized wrappers** (*mpicc*, *mpif90* or *mpiifort* ) replacing the "sequential" compilers.
 This very important scenario is covered in more detail in the next sections.
 For the time being, we mainly focus on the compilation of sequential applications/libraries.
 
@@ -121,7 +122,7 @@ GNU Fortran (GCC) 5.3.1 20160406 (Red Hat 5.3.1-6)
 Copyright (C) 2015 Free Software Foundation, Inc.
 ```
 
-At the time of writing ( |today|), ABINIT requires gfortran >= v5.4.
+Starting with version 9, ABINIT requires gfortran >= v5.4.
 Consult the release notes to check whether your gfortran version is supported by the latest ABINIT releases.
 
 Now let's check whether **make** is already installed using:
@@ -143,13 +144,13 @@ can proceed with the next steps.
 
 !!! tip
 
-    Life get hard if you are a Mac-OsX user as Apple does not officially
-    support Fortran (😞) so you will need to install gfortran and gcc either via
+    Life gets hard if you are a Mac-OsX user as Apple does not officially
+    support Fortran (😞) so you need to install *gfortran* and *gcc* either via
     [homebrew](https://brew.sh/) or [macport](https://www.macports.org/).
-    Alternatively, one can install gfortran using one of the standalone DMG installers
+    Alternatively, one can install *gfortran* using one of the standalone DMG installers
     provided by the [gfortran-for-macOS project](https://github.com/fxcoudert/gfortran-for-macOS/releases).
     Note also that MaxOsX users will need to install **make** via [Xcode](https://developer.apple.com/xcode/).
-    More info are available [here](INSTALL_MacOS).
+    More info can be found in [this page](INSTALL_MacOS).
 
 ## How to compile BLAS and LAPACK
 
@@ -160,7 +161,7 @@ pre-compiled versions but, as already mentioned in the introduction, we are geek
 prefer to compile everything from source.
 Moreover the compilation of BLAS/LAPACK represents an excellent exercise
 that gives us the opportunity to discuss some basic concepts that
-will reveal useful in the other parts of this tutorial.
+will reveal very useful in the other parts of this tutorial.
 
 First of all, let's create a new directory inside your `$HOME` (let's call it **local**) using the command:
 
@@ -195,7 +196,7 @@ The *src* directory will be used to store the packages with the source files and
 whereas executables and libraries will be installed in `$HOME/local/bin` and `$HOME/local/lib`, respectively.
 We use `$HOME/local/` because we are working as **normal users** and we cannot install software
 in `/usr/local` where root privileges are required and `sudo make install` is needed.
-Moreover working inside `$HOME/local` allows us to keep our software stack well separated
+Moreover, working inside `$HOME/local` allows us to keep our software stack well separated
 from the libraries installed by our Linux distribution so that we can easily test new libraries and/or
 different versions without affecting the software stack installed by our distribution.
 
@@ -274,19 +275,19 @@ that indicates that the openblas library now supports threads.
 -->
 
 You may have noticed that, in this particular case, *make* is not just building the library but is also
-running unit tests to validate the build.
+running **unit tests** to validate the build.
 This means that if *make* completes successfully, we can be confident that the build is OK
 and we can proceed with the installation.
-Other packages use a different philosophy and provide a **make check** option that should be executed after *make*
+Other packages use a (more standard) approach and provide a **make check** option that should be executed after *make*
 in order to run the test suite before installing the package.
 
-To install openblas in $HOME/local, issue:
+To install *openblas* in $HOME/local, issue:
 
 ```sh
 make PREFIX=$HOME/local/ install
 ```
 
-At this point, we should have the include files installed in $HOME/local/include:
+At this point, we should have the following include files installed in $HOME/local/include:
 
 ```sh
 ls $HOME/local/include/
@@ -307,27 +308,27 @@ Files ending with `.so` are **shared libraries** (`.so` stands for shared object
 `.a` files are **static libraries**.
 When compiling source code that relies on external libraries, the name of the library
 (without the *lib* prefix and the file extension) as well as the directory where the library is located must be passed
-to the compiler that in turn will pass these parameters to the linker when building the executable.
+to the linker when building the executable.
 
 The name of the library is usually specified with the `-l` option while the directory is given by `-L`.
 According to these simple rules, in order to compile source code that uses BLAS/LAPACK routines,
-one should pass to the compiler the following options:
+one should use the following option:
 
     -L$HOME/local/lib -lopenblas
 
-We will use a similar syntax to help the ABINIT configure script locate the external linear algebra library.
+We will use a similar syntax to help the ABINIT *configure* script locate the external linear algebra library.
 
 !!! important
 
     You may have noticed that we haven't specified the file extension in the library name.
     If both static and shared libraries are found, the linker gives preference to linking with the shared library
     unless the `-static` option is used.
-    Dynamic is the default behaviour on several Linux distributions so we assume dynamic linking
+    **Dynamic is the default behaviour** on several Linux distributions so we assume dynamic linking
     in what follows.
 
 If you are compiling C or Fortran code requiring include files with the declaration of prototypes and the definition
 of named constants, you will need to specify the location of the **include files** via the `-I` option.
-In this case, the previous options should be replaced by:
+In this case, the previous options should be augmented by:
 
 ```sh
 -L$HOME/local/lib -lopenblas -I$HOME/local/include
@@ -335,8 +336,8 @@ In this case, the previous options should be replaced by:
 
 This approach is quite common for C code where `.h` files must be included to compile properly.
 It is less common for modern Fortran code in which include files are usually replaced by `.mod` files
-*i.e.* module files produced by the Fortran compiler whose location is specified via the `-J` option.
-Still, the `-I` option for include files is valuable also when compiling Fortran applications as important libraries
+*i.e.* Fortran module files produced by the Fortran whose location is usually specified via the `-J` option.
+Still, the `-I` option for include files is valuable also when compiling Fortran applications as libraries
 such as FFTW and MKL rely on (Fortran) include files whose location should be passed to the compiler
 via `-I` instead of `-J`,
 see also the official [gfortran documentation](https://gcc.gnu.org/onlinedocs/gfortran/Directory-Options.html#Directory-Options).
@@ -345,7 +346,7 @@ Don't worry if this rather technical point is not clear to you.
 Any external library has its own requirements and peculiarities and the ABINIT build system provides several options
 to automate the detection of external dependencies and the final linkage.
 The most important thing is that you are now aware that the compilation of ABINIT requires
-the correct specification of the `-L`, `-l`, `-I` and `-J` options.
+the correct specification of `-L`, `-l` for libraries `-I` for include files and `-J` for Fortran modules.
 We will elaborate more on this topic when we discuss the configuration options supported by the ABINIT build system.
 
 <!--
@@ -398,7 +399,7 @@ echo $LD_LIBRARY_PATH
 ```
 
 Note how `/home/gmatteo/local/bin` has been prepended to the previous value of $PATH.
-From now on, we can invoke any executable in $HOME/local/bin by just typing its base name in the shell
+From now on, we can invoke any executable located in $HOME/local/bin by just typing its base name in the shell
 without having to the type the full path.
 
 Using:
@@ -423,11 +424,24 @@ is not a very good idea as the shell will stop working. Can you explain why?
 
     to print only the variables whose name starts with **LD_**
 
+We terminate this section with another tip.
+From time to time, some compilers complain or do not display important messages
+because language support is improperly configured on your computer.
+Should this happen, we recommend to export the two variables:
+
+```sh
+export LANG=C
+export LC_ALL=C
+```
+
+This will reset the language support to its most basic defaults and will make sure that you get
+all messages from the compilers in English.
+
 
 ## How to compile libxc
 
-At this point, it should not be so difficult to compile and install the *libxc* library that provides
-many useful XC functionals such as meta-GGA and hybrid functionals.
+At this point, it should not be so difficult to compile and install *libxc*, a library that provides
+many useful XC functionals (PBE, meta-GGA, hybrid functionals, etc).
 Libxc is written in C and can be built using the standard `configure && make` approach.
 No external dependency is needed, except for basic C libraries that are available
 on any decent Linux distribution.
@@ -444,14 +458,15 @@ tar -zxvf libxc.tar.gz
 ```
 
 Now configure the package with the standard `--prefix` option
-to specify the location where all the libraries, executables, include files,
-Fortran modules, man pages, etc. will be installed when we execute `make install`.
+to **specify the location** where all the libraries, executables, include files,
+Fortran modules, man pages, etc. will be installed when we execute `make install`
+(the default is `/usr/local`)
 
 ```sh
 cd libxc-4.3.4 && ./configure --prefix=$HOME/local
 ```
 
-Finally, build the library, run the tests and install libxc with:
+Finally, build the library, run the tests and install with:
 
 ```sh
 make -j2
@@ -468,26 +483,20 @@ At this point, we should have these include files in $HOME/local/include
 /home/gmatteo/local/include/xc_f90_lib_m.mod   /home/gmatteo/local/include/xc_version.h
 ```
 
-where `.mod` are Fortran modules generated by the compiler that will be needed
-when compiling Fortran source that use the libxc modules e.g.:
-
-
-```fortran
-use libxc_funcs_m
-use xc_f90_types_m
-```
+where `.mod` are Fortran modules generated by the compiler that are needed
+when compiling Fortran source using *libxc*.
 
 !!! warning
 
     The `.mod` files are **compiler- and version-dependent**.
     In other words, one cannot use these `.mod` files to compile code with a different Fortran compiler.
     Moreover, you should not expect to be able to use modules compiled with
-    a different version of the different compiler.
-    This is one of the reasons why the version of the Fortran compiler used
-    to build the software stack is very important.
+    a different version of the same compiler.
+    This is one of the reasons why the version of the Fortran compiler employed
+    to build our software stack is very important.
 
 
-Finally we have the following static libraries installed in ~/local/lib
+Finally, we have the following static libraries installed in ~/local/lib
 
 ```sh
 ls ~/local/lib/libxc*
@@ -502,7 +511,7 @@ where:
   * **libxcf03** is the library with the F2003 API
 
 Both *libxcf90* and *libxcf03* depends on the C library where most of the work is done.
-At present, ABINIT requires the F90 API only so one should pass the compiler
+At present, ABINIT requires the F90 API only so we should use
 
     -L$HOME/local/lib -lxcf90 -lxc
 
@@ -517,28 +526,29 @@ This is done on purpose as `libxcf90` depends on `libxc` (the Fortran API calls 
 Inverting the order of the libraries will likely trigger errors (**undefined references**)
 in the last step of the compilation when the linker tries to build the final application.
 
+Things become more complicated when we have to build applications using many different interdependent
+libraries as the **order of the libraries** passed to the linker is of crucial importance.
+Fortunately the ABINIT build system is aware of this problem and all the dependencies
+(BLAS, LAPACK, FFT, LIBXC, MPI, etc) will be automatically put in the right order so
+you don't have to worry about this point although it is worth knowing about it.
+
+<!--
 !!! important
 
-    Things become more complicated when we have to build applications using many different interdependent
-    libraries as the order of the libraries passed to the linker is of crucial importance.
-    Fortunately the ABINIT build system is aware of this problem and all the dependencies
-    (BLAS, LAPACK, FFT, LIBXC, MPI, etc) will be automatically put in the right order so
-    you don't have to worry about this point although it is worth knowing about it.
-
-Since this is the first time we use a library with Fortran bindings, it is worth to clarify
-that the bindings must be built with the **same compiler as the one we will use to compile Abinit**.
-In a nutshell, Fortran and C++ libraries are compiler-dependent because these two languages
-are relatively high-level so they need to rely on implementation details.
-C libraries, on the other hand, are usually more portable as the C language has less abstractions
-and, most importantly, the Linux-OS is written in C, the Linux kernel
-is usually compiled with GCC and all the other C compilers need to maintain binary compatibility with the GCC ABI.
-If you wonder about the difference between API and ABI, please read this
-[stackoverflow post](https://stackoverflow.com/questions/2171177/what-is-an-application-binary-interface-abi).
+    Since this is the first time we use a library with Fortran bindings, it is worth to clarify
+    that the bindings must be built with the **same compiler as the one we will use to compile Abinit**.
+    In a nutshell, Fortran and C++ libraries are compiler-dependent because these two languages
+    are relatively high-level so they need to rely on implementation details.
+    C libraries, on the other hand, are usually more portable as the C language has less abstractions
+    and, most importantly, the Linux-OS is written in C, the Linux kernel
+    is usually compiled with GCC and all the other C compilers need to maintain binary compatibility with the GCC ABI.
+    If you wonder about the difference between API and ABI, please read this
+    [stackoverflow post](https://stackoverflow.com/questions/2171177/what-is-an-application-binary-interface-abi).
 
 !!! tip
-
     In principle, one can reuse libraries as long as the major version of the Fortran compiler is the same
     but experience has shown that it's always a good idea to require strict matching.
+-->
 
 ## Compiling and installing FFTW
 
@@ -567,9 +577,9 @@ wget http://www.fftw.org/fftw-3.3.8.tar.gz
 tar -zxvf fftw-3.3.8.tar.gz && cd fftw-3.3.8
 ```
 
-The compilation procedure is very similar to the one already used for the libxc package.
+The compilation procedure is very similar to the one already used for the *libxc* package.
 Note, however, that ABINIT needs both the **single-precision** and the **double-precision** version.
-This means that we need to configure, build and install the fftw package **twice**.
+This means that we need to configure, build and install the package **twice**.
 
 To build the single precision version, use:
 
@@ -579,8 +589,8 @@ make -j2
 make check && make install
 ```
 
-During the configuration step, make sure that configure finds the Fortran compiler
-because we need to build FFTW with the Fortran interface.
+During the configuration step, make sure that *configure* finds the Fortran compiler
+because ABINIT needs the Fortran interface.
 
 ```md
 checking for gfortran... gfortran
@@ -600,8 +610,9 @@ ls $HOME/local/lib/libfftw3*
 
 the `f` at the end stands for `float` (C jargon for single precision).
 Note that only static libraries have been built.
+To build shared libraries, one should use `--enable-shared` when configuring.
 
-Now we configure for the double precision version (default behaviour)
+Now we configure for the double precision version (this is the default behaviour so no extra option is needed)
 
 ```sh
 ./configure --prefix=$HOME/local
@@ -621,11 +632,14 @@ To compile ABINIT with FFTW3 support, one should use:
 
     -L$HOME/local/lib -lfftw3f -lfftw3 -I$HOME/local/include
 
-Note that, unlike in *libxc*, here we don't have to specify different libs for Fortran and C
-as FFTW3 bundles both the C and the Fortran API in the same library.
-The Fortran interface is included by default provided the FFTW3 configure script can find a Fortran compiler on your system.
-In our case, we know that our FFTW3 libraries support Fortran as *gfortran* is available
-but this may not be true if we are using a precompiled library installed by our package manager.
+
+!!! important
+
+    Note that, unlike in *libxc*, here we don't have to specify different libraries for Fortran and C
+    as FFTW3 bundles both the C and the Fortran API in the same library.
+    The Fortran interface is included by default provided the FFTW3 *configure* script can find a Fortran compiler on your system.
+    In our case, we know that our FFTW3 librs support Fortran as *gfortran* was found by *configure*
+    but this may not be true if we are using a precompiled library installed by our package manager.
 
 To make sure we have the Fortran API bundled in the library, one can use the `nm` tool
 to get the list of symbols in the library and then use *grep* to search for the Fortran API.
@@ -650,7 +664,7 @@ FFTs (*sfftw_plan_many_dft*) and the version for multiple double-precision FFTs 
 00000000000040d0 T dfftw_plan_many_dft_r2c__
 ```
 
-If you are using a FFTW3 library without Fortran API, the ABINIT configure script will complain that the library
+If you are using a FFTW3 library without Fortran API, the ABINIT *configure* script will complain that the library
 cannot be called from Fortran and you will need to dig into *config.log* to understand what's going on.
 
 !!! note
@@ -672,10 +686,10 @@ that act as a sort of wrapper around the sequential Fortran and the C compilers,
 These scripts **must be used** to compile parallel software using MPI instead
 of the "sequential" *gfortran* and *gcc*.
 The MPI library also provides launcher scripts installed in the *bin* directory (*mpirun* or *mpiexec*)
-that must be used to execute MPI applications with NUM_PROCS MPI processes with the syntax:
+that must be used to execute an MPI application EXEC with NUM_PROCS MPI processes with the syntax:
 
 ```sh
-mpirun -n NUM_PROCS EXECUTABLE [EXEC_ARGS]
+mpirun -n NUM_PROCS EXEC [EXEC_ARGS]
 ```
 
 !!! warning
@@ -690,7 +704,7 @@ mpirun -n NUM_PROCS EXECUTABLE [EXEC_ARGS]
     the *mpif90* wrapper provided by e.g. *openmpi*.
     By the same token, don't try to run executables compiled with e.g. *intel mpi* with the
     *mpirun* launcher provided by *openmpi* unless you are looking for troubles!
-    Again, the *which* command is quite useful to pinpoint possible problems especially if there are multiple
+    Again, the *which* command is quite handy to pinpoint possible problems especially if there are multiple
     installations of MPI in your $PATH (not a very good idea!).
 
 In this tutorial, we employ the *mpich* implementation that can be downloaded
@@ -794,20 +808,20 @@ options automatically if you provide the installation root ($HOME/local).
 
 Abinit developers are trying to move away from Fortran binary files as this
 format is not portable and difficult to read from high-level languages such as python.
-For this reason, HDF5 and netcdf4 have become **hard-requirements** in Abinit9.
-This means that the configure script will abort if these libraries are not found on your system.
-In this section we explain how to build the HDF5 and netcdf4 from source including support for parallel IO.
+For this reason, in Abinit9, HDF5 and netcdf4 have become **hard-requirements**.
+This means that the *configure* script will abort if these libraries are not found.
+In this section, we explain how to build the HDF5 and netcdf4 from source including support for parallel IO.
 
 Netcdf4 is built on top of HDF5 and consists of two different layers:
 
-* The **low-level** C library
+* The **low-level C library**
 
 * The **Fortran bindings** i.e. Fortran routines calling the low-level C implementation.
   This is the high-level API/ABI used by ABINIT to perform all the IO operations on netcdf files.
 
-To build the libraries required by ABINIT, we will compile the different layers
-in a bottom-up fashion starting from the HDF5 package.
-Since we want to activate support for parallel IO, we need to compile the library using the wrappers
+To build the libraries required by ABINIT, we will compile the three different layers
+in a bottom-up fashion starting from the HDF5 package (*HDF5 --> netcdf-c --> netcdf-fortran*).
+Since we want to activate support for parallel IO, we need to compile the libraries **using the wrappers**
 provided by our MPI installation instead of using *gcc* or *gfortran* directly.
 
 Let's start by downloading the HDF5 tarball from this [download page](https://www.hdfgroup.org/downloads/hdf5/source-code/).
@@ -818,7 +832,7 @@ Uncompress the archive with *tar* as usual, then configure the package with:
             CC=$HOME/local/bin/mpicc --enable-parallel --enable-shared
 ```
 
-where we've used the *CC* variable to specify the C compiler.
+where we've used the **CC** variable to specify the C compiler.
 This step is crucial in order to activate support for parallel IO.
 
 !!! tip
@@ -834,13 +848,9 @@ At the end of the configuration step, you should get the following output:
                Shared C Library: yes
                Static C Library: yes
 
-
                         Fortran: no
-
                             C++: no
-
                            Java: no
-
 
 Features:
 ---------
@@ -873,9 +883,11 @@ Parallel HDF5: yes
 tells us that our HDF5 build supports parallel IO.
 The Fortran API is not activated but this is not a problem
 as ABINIT will be interfaced with HDF5 through the Fortran bindings provided by netcdf-fortran.
-In other words, ABINIT requires netcdf-fortran and not the HDF5 Fortran bindings.
+In other words, **ABINIT requires _netcdf-fortran_** and not the HDF5 Fortran bindings.
 
-Again, issue `make -j NUM` followed by `make check` (**it may take some time!**) and finally `make install`.
+Again, issue `make -j NUM` followed by `make check` and finally `make install`.
+Note that `make check` may take some time so you may want to install immediately and run the tests in another terminal
+so that you can continue with the tutorial.
 
 Now let's move to netcdf.
 Download the C version and the Fortran bindings from the
@@ -899,8 +911,8 @@ cd netcdf-c-4.7.3
             LDFLAGS=-L$HOME/local/lib CPPFLAGS=-I$HOME/local/include
 ```
 
-where we use `mpicc` as C compiler and we have to specify LDFLAGS, CPPFLAGS because
-we want to use our installation of hdf5.
+where we use `mpicc` as C compiler and we have to specify **LDFLAGS** and **CPPFLAGS** 
+as we want to link against out installation of hdf5.
 At the end of the configuration step, one should obtain
 
 ```sh
@@ -948,7 +960,7 @@ ERANGE Fill Support:	no
 Relaxed Boundary Check:	yes
 ```
 
-This section:
+The section:
 
 ```sh
 HDF5 Support:		yes
@@ -956,7 +968,7 @@ NetCDF-4 API:		yes
 NC-4 Parallel Support:	yes
 ```
 
-tells us that configure detected our installation of hdf5 and support for parallel IO is activated.
+tells us that *configure* detected our installation of *hdf5* and that support for parallel-IO is activated.
 
 Now use the standard sequence of commands to compile and install the package:
 
@@ -965,7 +977,7 @@ make -j2
 make check && make install
 ```
 
-Once installation is completed, use the `nc-config` executable to
+Once the installation is completed, use the `nc-config` executable to
 inspect the features provided by the library we've just installed.
 
 ```sh
@@ -976,10 +988,11 @@ which nc-config
 nc-config --prefix
 /home/gmatteo/local/
 ```
+
 To get a summary of the options used to build the C layer and the available features, use
 
 ```sh
-[gmatteo@bob netcdf-c-4.7.3]$ nc-config --all
+nc-config --all
 
 This netCDF 4.7.3 has been built with the following features:
 
@@ -991,9 +1004,9 @@ This netCDF 4.7.3 has been built with the following features:
   <snip>
 ```
 
-*nc-config* is quite useful as it provides the relevant compiler options to
-build C applications based on netcdf-c (`--cflags` and `--libs`).
-Unfortunately, this tool is not enough for ABINIT as we need the netcdf Fortran bindings.
+*nc-config* is quite useful as it prints the compiler options required to
+build C applications requiring netcdf-c (`--cflags` and `--libs`).
+Unfortunately, this tool is not enough for ABINIT as we need the Fortran bindings as well.
 
 To compile the Fortran bindings, execute:
 
@@ -1004,8 +1017,8 @@ cd netcdf-fortran-4.5.2
             LDFLAGS=-L$HOME/local/lib CPPFLAGS=-I$HOME/local/include
 ```
 
-where **FC** points to our *mpif90* wrapper (*CC* is not needed here).
-For further info on how to build netcdf-fortran, see the
+where **FC** points to our *mpif90* wrapper (**CC** is not needed here).
+For further info on how to build *netcdf-fortran*, see the
 [official documentation](https://www.unidata.ucar.edu/software/netcdf/docs/building_netcdf_fortran.html).
 
 Now issue:
@@ -1015,7 +1028,7 @@ make -j2
 make check && make install
 ```
 
-To inspect the features activated in our Fortran library, use `nf-config` instead of `nc-config` 
+To inspect the features activated in our Fortran library, use `nf-config` instead of `nc-config`
 (note the `nf-` prefix):
 
 ```sh
@@ -1030,7 +1043,7 @@ nf-config --prefix
 To get a summary of the options used to build the Fortran bindings and the list of available features, use
 
 ```sh
-[gmatteo@bob netcdf-fortran-4.5.2]$ nf-config --all
+nf-config --all
 
 This netCDF-Fortran 4.5.2 has been built with the following features:
 
@@ -1051,7 +1064,7 @@ This netCDF-Fortran 4.5.2 has been built with the following features:
   --version   -> netCDF-Fortran 4.5.2
 ```
 
-*nf-config* is quite handy if we need to pass options to the configure script of ABINIT.
+*nf-config* is quite handy if we need to pass options to the ABINIT *configure* script.
 Instead of typing the full list of libraries (`--flibs`) and the location of the include files (`--fflags`)
 we can delegate this boring task to *nf-config* using
 [backtick syntax](https://unix.stackexchange.com/questions/48392/understanding-backtick/48393):
@@ -1061,13 +1074,13 @@ NETCDF_FORTRAN_LIBS=`nf-config --flibs`
 NETCDF_FORTRAN_FCFLAGS=`nf-config --fflags`
 ```
 
-Alternatively, one can simply pass the installation directory with:
+Alternatively, one can simply pass the installation directory with `$(...)`:
 
 ```sh
 --with-netcdf-fortran=$(nf-config --prefix)
 ```
 
-and then let *configure* detect *NETCDF_FORTRAN_LIBS* and *NETCDF_FORTRAN_FCFLAGS*.
+and then let *configure* detect **NETCDF_FORTRAN_LIBS** and **NETCDF_FORTRAN_FCFLAGS**.
 
 ## How to compile ABINIT
 
@@ -1097,8 +1110,8 @@ Before actually starting the compilation, type:
 
 and take some time to read the documentation of the different options.
 
-The documentation lists some of the most important environment variables
-that can be used to specify the compilers and the compilation flags.
+The documentation reports the most important environment variables
+that can be used to specify compilers and compilation flags.
 We already encountered some of the variables in the previous examples:
 
 ```md
@@ -1160,20 +1173,19 @@ to tell the build system where external dependencies are located instead of pass
 -->
 
 In the previous examples, we executed *configure* in the top level directory of the package but
-for ABINIT we prefer to do things in a much cleaner way and use a **build directory**
-to keep object files and executables separated from the source code.
-Thanks to this approach, it is possible to build different versions of ABINIT using the same source tree.
-For example, one can have a version compiled with *gfortran* and another build directory for
-the intel *ifort* compiler.
+for ABINIT we prefer to do things in a much cleaner way using a **build directory**
+The advantage of this approach is that we keep object files and executables separated from the source code
+and this allows us to **build different executables using the same source tree**.
+For example, one can have a build directory with a version compiled with *gfortran* and another
+build directory for the intel *ifort* compiler or builds done with same compiler but different compilation options.
 
 Let's call the build directory `build_gfortran`:
 
 ```sh
-mkdir build_gfortran
-cd build_gfortran
+mkdir build_gfortran && cd build_gfortran
 ```
 
-At this point we should define the options that will be passed to the *configure* script.
+Now we should define the options that will be passed to the *configure* script.
 Instead of using the command line as done in the previous examples,
 we will be using an **external file** (*myconf.ac9*) to collect all our options.
 The syntax is:
@@ -1183,8 +1195,8 @@ The syntax is:
 ```
 
 where double quotation marks may be needed for portability reasons.
-Note the use of `../configure` as we are working inside the build directory `build_gfortran` while 
-th `configure` script is located in the top level directory of the package.
+Note the use of `../configure` as we are working inside the build directory `build_gfortran` while
+the `configure` script is located in the top level directory of the package.
 
 !!! important
 
@@ -1198,23 +1210,19 @@ th `configure` script is located in the top level directory of the package.
     [backtick syntax](https://unix.stackexchange.com/questions/48392/understanding-backtick/48393)
     as is *\`nf-config --flibs`*.
     This tricks allow us to reduce the amount of typing
-    and have configuration files that can be easily reused in other contexts.
+    and have configuration files that can be easily reused for other machines.
 
-This an example of configuration file in which we try to use the high-level interface
-(`with_LIBNAME=dirname`) as much as possible, except for linalg and FFTW3.
-The explicit value for *LIBNAME_LIBS* and *LIBNAME_FCFLAGS* is also reported in the comments as reference:
+This an example of configuration file in which we use the high-level interface
+(`with_LIBNAME=dirpath`) as much as possible, except for linalg and FFTW3.
+The explicit value for *LIBNAME_LIBS* and *LIBNAME_FCFLAGS* is also reported in the comments.
 
 ```sh
 # -------------------------------------------------------------------------- #
 # MPI support                                                                #
 # -------------------------------------------------------------------------- #
 
-# Determine whether to build parallel code (default is auto)
-
-# Note:
-#
 #   * the build system expects to find subdirectories named bin/, lib/,
-#     include/ under the prefix.
+#     include/ inside the with_mpi directory
 #
 with_mpi=$HOME/local/
 
@@ -1241,9 +1249,7 @@ FFTW3_LIBS="-L$HOME/local/lib -lfftw3f -lfftw3"
 FFTW3_FCFLAGS="-L$HOME/local/include"
 
 # LibXC
-# Website: http://www.tddft.org/programs/octopus/wiki/index.php/Libxc
-
-# Trigger and install prefix for LibXC (default is unset)
+# Install prefix for LibXC (default is unset)
 #
 with_libxc="$HOME/local/lib"
 
@@ -1252,9 +1258,8 @@ with_libxc="$HOME/local/lib"
 #LIBXC_FCFLAGS="-I$HOME/local/include"
 
 # NetCDF
-# Website: http://www.unidata.ucar.edu/software/netcdf/
 
-# Trigger and install prefix for NetCDF (default is unset)
+# install prefix for NetCDF (default is unset)
 #
 with_netcdf=$(nc-config --prefix)
 with_netcdf_fortran=$(nf-config --prefix)
@@ -1264,7 +1269,7 @@ with_netcdf_fortran=$(nf-config --prefix)
 #NETCDF_FORTRAN_LIBS=`nf-config --flibs`
 #NETCDF_FORTRAN_FCFLAGS=`nf-config --fflags`
 
-# Trigger and install prefix for HDF5 (default is unset)
+# install prefix for HDF5 (default is unset)
 #
 with_hdf5=$(nf-config --prefix)
 
@@ -1272,7 +1277,7 @@ with_hdf5=$(nf-config --prefix)
 #HDF5_LIBS=`nf-config --flibs`
 #HDF5_FCFLAGS=`nf-config --fflags`
 
-# Enable OpenMP (gmatteo, torrent)
+# Enable OpenMP (default is no)
 enable_openmp="no"
 ```
 
@@ -1326,14 +1331,14 @@ You may now type "make" to build Abinit.
 
 !!! important
 
-    Please take your time to read carefully the final summary and **make sure you get what you are expecting**.
+    Please take your time to read carefully the final summary and **make sure you are getting what you expect**.
     A lot of typos or configuration errors can be easily spotted at this level.
 
     You might then find useful to have a look at other examples available [in this page](../developers/autoconf_examples).
     Additional configuration files for clusters can be found in the
     [abiconfig package](https://github.com/abinit/abiconfig).
 
-At this point the *configure* script has generated several **Makefiles** required by *make* as well as the **config.h**
+The *configure* script has generated several **Makefiles** required by *make* as well as the **config.h**
 include file with all the pre-processing options that will be used to build ABINIT.
 This file is included in every ABINIT source file and it defines the features that will be activated or deactivated
 at compilation-time depending on the libraries available on your machine.
@@ -1363,8 +1368,8 @@ find the content of `config.h` valuable to understand what's going on.
 
 Now we can finally compile the package with e.g. *make -j2*.
 If the compilation completes successfully, you should end up with a bunch of executables inside *src/98_main*.
-Note, however, that the fact that the compilation completed successfully does not necessarily imply that
-the executables will work as expected as there are many different things that can go wrong at runtime.
+Note, however, that the fact that the compilation completed successfully **does not necessarily imply that
+the executables will work as expected** as there are many different things that can go wrong at runtime.
 
 First of all, let's try to execute:
 
@@ -1397,10 +1402,10 @@ make test_fast
 ```
 
 to run some basic tests.
-If something goes wrong when executing the binary or when running the tests, 
+If something goes wrong when executing the binary or when running the tests,
 checkout the [Troubleshooting](#trouble-shooting) section for possible solutions.
 
-Finally you may want to execute the *runtests.py* python script in the *tests* directory
+Finally, you may want to execute the *runtests.py* python script in the *tests* directory
 in order to validate the build before running production calculations:
 
 ```sh
@@ -1422,15 +1427,18 @@ A more detailed discussion is given in [this page](../developers/testsuite_howto
 
 ### Dynamic libraries and ldd
 
-Since we decided to compile with dynamic linking, the external libraries are not included in the final executables.
-Actually, the libraries will be loaded by the OS at runtime when we start to run the executable and
-the list of directories specified in `$LD_LIBRARY_PATH` (`$DYLD_LIBRARY_PATH` for MacOs) will play a crucial role.
+Since we decided to compile with **dynamic linking**, the external libraries are not included in the final executables.
+Actually, the libraries will be loaded by the Operating System (OS) at runtime when we execute the binary.
+The OS will search for dynamic libraries using the list of directories specified
+in `$LD_LIBRARY_PATH` (`$DYLD_LIBRARY_PATH` for MacOs).
+A typical error is to execute abinit with a wrong `$LD_LIBRARY_PATH` that is either empty or 
+different from the one used when compiling the code.
 
 On Linux, one can use the *ldd* tool to print the shared objects (shared libraries) required by each
 program or shared object specified on the command line:
 
 ```sh
-[gmatteo@bob tests]$ ldd src/98_main/abinit
+ldd src/98_main/abinit
 
 	linux-vdso.so.1 (0x00007fffbe7a4000)
 	libopenblas.so.0 => /home/gmatteo/local/lib/libopenblas.so.0 (0x00007fc892155000)
@@ -1451,8 +1459,8 @@ program or shared object specified on the command line:
     <snip>
 ```
 
-As expected, our executable uses the  *openblas*, *netcdf*, *hdf5*, *mpi* libraries from $HOME/local/lib plus
-other basic libs in `lib64`(e.g. *libgfortran*) that have been added by the compiler.
+As expected, our executable uses the  *openblas*, *netcdf*, *hdf5*, *mpi* libraries installed in $HOME/local/lib plus
+other basic libs coming from `lib64`(e.g. *libgfortran*) added by the compiler.
 
 !!! tip
 
@@ -1470,7 +1478,7 @@ other basic libs in `lib64`(e.g. *libgfortran*) that have been added by the comp
     ```
 
     it means that you are linking against MacOsx VECLIB.
-    In this case, make sure to use `--enable-zdot-bugfix="yes"` when configuring the package 
+    In this case, make sure to use `--enable-zdot-bugfix="yes"` when configuring the package
     otherwise the code will crash at runtime due to ABI Incompatibility.
     Did I tell you that MacOsX does not care about Fortran?
 
@@ -1484,7 +1492,7 @@ echo $LD_LIBRARY_PATH
 
 then rerun *ldd* (or *otool*) again.
 Do you understand what's happening here?
-Can you execute *abinit* with an empty $LD_LIBRARY_PATH?
+Why it's not possible to execute *abinit* with an empty `$LD_LIBRARY_PATH`?
 How would you fix the problem?
 
 ### Trouble shooting
@@ -1512,7 +1520,7 @@ Without this file, indeed, it is almost impossible to understand what's going on
 An example will help.
 Let's assume we are compiling on a cluster using modules provided by our sysadmin.
 More specifically, there is an `openmpi_intel2013_sp1.1.106` module that is supposed to provide
-the openmpi implementation of the MPI library compiled with a particular version of the intel compiler
+the *openmpi* implementation of the MPI library compiled with a particular version of the intel compiler
 (remember what we said about using the same version of the compiler).
 Obviously **we need to load the modules before running configure** in order to setup our environment
 so we issue:
@@ -1533,7 +1541,7 @@ where `$MPI_HOME` is a environment variable set by *module load* (use e.g. `env 
 Unfortunately, the *configure* script aborts at the very beginning complaining
 that the C compiler does not work!
 
-```md
+```text
 checking for gcc... /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/bin/mpicc
 checking for C compiler default output file name...
 configure: error: in `/home/gmatteo/abinit/build':
@@ -1636,7 +1644,7 @@ Obviously, one can encounter cases in which modules are properly configured yet 
 because it does not know how to deal with your software stack.
 In both cases, *config.log* is key to pinpoint the problem and sometimes you will find that
 the problem is rather simple to solve.
-For example you are trying to use F90 module files produced by *gfortran* while trying to compile with the
+For instance, you are trying to use F90 module files produced by *gfortran* while trying to compile with the
 intel compiler or perhaps you are trying to use modules produced by a different version of the same compiler!.
 Perhaps you forgot to add the include directory required by an external library and the compiler
 cannot find the include file or maybe there is a typo in the configuration options.
@@ -1664,21 +1672,10 @@ If the code raises the **SIGILL** signal, it means that the CPU attempted to exe
 an instruction it didn't understand.
 Very likely, your executables/libraries have been compiled for the **wrong architecture**.
 This may happen on clusters when the CPU family available on the frontend differs
-from the one available on the compute node and aggressive optimization options (-O3, --march, -xHost, etc) are used.
+from the one available on the compute node and aggressive optimization options (-O3, -march, -xHost, etc) are used.
 Removing the optimization options and using the much safer -O2 level may help.
 Alternatively, one can compile the source directly on the compute node or use compilation options
 compatible both with the frontend and the compute node (ask your sysadmin for details).
-
-<!--
-!!! warning
-
-    Feel free to complain to your sysadmin if your cluster consists of an **heterogeneous** system
-    of compute nodes as many MPI codes assume consistency at the binary level *i.e.*
-    the same input should produce the same output on different MPI processes,
-    where equality means the **same sequence of bits**.
-    If you are forced to work with such a wierd machine, use the options provided by the resource manager
-    to select the compute nodes with the same CPU family.
--->
 
 Segmentation faults (**SIGSEGV**) are usually due to bugs in the code but they may also be
 triggered by non-portable code or misconfiguration of the software stack.
@@ -1716,33 +1713,34 @@ report the outcome on the forum.
 
     PS: avoid debugging code compiled with `-O3` or `-Ofast` as the backtrace may not be reliable.
 
-<!--
-How to use LLDB
-
-$ lldb ../../../src/98_main/abinit
-(lldb) target create "../../../src/98_main/abinit"
-Current executable set to '../../../src/98_main/abinit' (x86_64).
-(lldb) settings set target.input-path t85.in
-(lldb) run
--->
-
 ## How to compile ABINIT on a cluster with the intel toolchain
 
-On intel-based clusters, we suggest to compile ABINIT with the intel compilers and the MKL library
-for performance reasons.
+On intel-based clusters, we suggest to compile ABINIT with the intel compilers (*icc* and *ifort*)
+and the MKL library for efficiency reasons.
 The MKL library, indeed, provides highly-optimized implementations for BLAS, LAPACK, FFT, and SCALAPACK
 that can lead to a **significant speedup** while simplifying considerably the compilation process.
+As concerns MPI, intel provides its own implementation (Intel MPI) but it is also possible to use 
+other MPI implementations (*openmpi*, *mpich*, etc.) provided these libraries have been compiled with the intel compilers.
 
-In what follows, we assume a cluster that uses modules to manage software so it is worth summarizing
-the most important commands needed to interact with modules:
+!!! warning
 
-To list the modules installed on your machine, use:
+    Note that Intel MPI provides **two sets of MPI wrappers**.
+    (*mpiicc*, *mpicpc*, *mpiifort*) and (*mpicc*, *mpicxx*, *mpif90*) that use Intel compilers and GNU compilers, respectively.
+    Use the `-show` option (e.g. `mpif90 -show`) to display the underlying compiler.
+    Unless you really need to use GNU compilers, we strongly suggest the wrappers based on the Intel compilers.
+
+In what follows, we assume a cluster that uses **modules** and the 
+[EasyBuild](https://easybuild.readthedocs.io/en/latest/index.html) framework
+to manage software so it is worth summarizing the most important commands needed to interact with modules
+before proceeding with the next steps.
+
+To list the modules installed on the cluster, use:
 
 ```sh
 module avail
 ```
 
-The syntax to load a module is
+The syntax to load a module is:
 
 ```sh
 module load MODULE_NAME
@@ -1755,90 +1753,287 @@ module list
 ```
 
 prints the list of modules currently loaded.
+
+To list all modules containing "string" 
+
+```sh
+module spider string  # requires LMOD with LUA
+```
+
+Finally,
+
+
+```sh
+module show MODULE_NAME
+```
+
+shows the commands in the module file (very useful for debugging).
 For a more complete introduction to environment modules, please consult
 [this page](https://support.ceci-hpc.be/doc/_contents/UsingSoftwareAndLibraries/UsingPreInstalledSoftware/index.html).
 
-At this point, we should select the toolchain (set of compilers, MPI implementation) to compile ABINIT.
-Remember that we must use libraries compiled with the same toolchain so finding an usable toolchain 
-is not necessarily an easy task.
+<!--
+At this point, we should select the **toolchain (compilers, MPI implementation)** we want to use to compile ABINIT.
+Remember that we must use libraries compiled with the same toolchain so finding an usable toolchain
+is not always an easy task.
 This is especially true if the software on the machine is not actively maintained
-as we may have lots of incompatible modules or a rather limited set that does not provide all the dependencies we need.
-Modules are usually organized in a proper way when modern frameworks such as 
-[EasyBuild](https://easybuild.readthedocs.io/en/latest/index.html) or [spack](https://spack.readthedocs.io/en/latest/) 
-are employed for managing software.
-The goal of this tutorial, however, is to teach you how to survive into the wild
-so we will try explain the approach one should use when we are dealing with a clusters
-that does not provide a fully consistent installation
-Obviously, you won't be able to reproduce these steps on your machines but this is not crucial 
-as the goal is to explain the procedure and the reason why we are doing so.
+as we may have lots of incompatible modules or a subset of modules that does not provide all the dependencies we need.
+We also assume a cluster when modules have been automatically generated 
+-->
 
-First of all, use the output of `module avail` to find modules providing *netcdf-fortran*, *netcdf*, and *libxc*.
+The first thing we should do is to locate the module(s) proving MKL and the MPI library.
+Sorry for repeating it again but the MPI module will define our toolchain (MPI library + compilers) 
+and all the other libraries **must be compiled with the same toolchain**.
+
+In the cluster used for preparing this tutorial, I can activate intel MPI by executing:
+
+```
+module load releases/2018b
+module load iimpi/2018b
+```
+
+Obviously, the name of the modules are cluster-dependent.
+If the modules are properly configured, you should have `mpiifort` in $PATH 
+
+```sh
+mpiifort -v
+mpiifort for the Intel(R) MPI Library 2018 Update 3 for Linux*
+Copyright(C) 2003-2018, Intel Corporation.  All rights reserved.
+ifort version 18.0.3
+```
+
+that, as expected, wraps intel `ifort`.
+The module has set some useful environment variables including intel-specific ones that starts with `I_`:
+
+```sh
+$ env | grep I_MPI
+I_MPI_ROOT=/opt/cecisw/arch/easybuild/2018b/software/impi/2018.3.222-iccifort-2018.3.222-GCC-7.3.0-2.30
+```
+
+We will use `$I_MPI_ROOT` in our configuration file.
+
+The output of `mpif90 -v`:
+
+```sh
+$ mpif90 -v
+mpif90 for the Intel(R) MPI Library 2018 Update 3 for Linux*
+COLLECT_GCC=gfortran
+<snip>
+Thread model: posix
+gcc version 7.3.0 (GCC)
+```
+
+shows that `mpif90` wraps GNU *gfortran* an mentioned at the beginning of the paragraph.
+
+At this point, it is worth checking immediately if there are modules for
+*libxc*, *netcdf-fortran*, *netcdf-c* and *hdf5* compiled with the same toolchain.
+Hopefully, you will find a pre-existent installation for *netcdf* and *hdf5* as these libraries are quite common on HPC centers.
+Perhaps, you may encounter problems with *libxc* as this library is rather domain-specific
+
+On my cluster, I have:
+
+```sh
+[gmatteo@lemaitre3 _build_intel]$ module spider libxc
+
+------------------------------------------------------------------------------------------------------------------------
+  libxc:
+------------------------------------------------------------------------------------------------------------------------
+    Description:
+      Libxc is a library of exchange-correlation functionals for density-functional theory. The aim is to provide a
+      portable, well tested and reliable set of exchange and correlation functionals.
+
+     Versions:
+        libxc/3.0.0-GCC-5.4.0-2.26
+        libxc/3.0.0-intel-2016a
+        libxc/3.0.0-intel-2017b
+        libxc/3.0.1-intel-2018a
+        libxc/3.0.1-intel-2018b
+        libxc/4.2.3-foss-2018b
+        libxc/4.2.3-intel-2018b
+        libxc/4.3.4-GCC-8.3.0
+        libxc/4.3.4-iccifort-2019.5.281
+     Other possible modules matches:
+        libxcb
+
+------------------------------------------------------------------------------------------------------------------------
+  To find other possible module matches execute:
+
+      $ module -r spider '.*libxc.*'
+
+------------------------------------------------------------------------------------------------------------------------
+  For detailed information about a specific "libxc" package (including how to load the modules) use the module's full name.
+  Note that names that have a trailing (E) are extensions provided by other modules.
+  For example:
+
+    $ module spider libxc/4.3.4-iccifort-2019.5.281
+------------------------------------------------------------------------------------------------------------------------
+```
+
+However it should not be that difficult to reuse the expertise acquired in this tutorial to build 
+your version and then install the missing dependencies inside your $HOME/local directory.
+Just remember to load the appropriate modules before executing *configure* and
+set **CC=mpiicc** and **FC=mpiifort** so that the intel version is used.
+As a consequence, we mainly focus 
+
+
+Modules are usually organized in a proper way when modern frameworks such as
+[EasyBuild](https://easybuild.readthedocs.io/en/latest/index.html) or 
+[spack](https://spack.readthedocs.io/en/latest/)
+are employed for managing software.
+The purpose of this tutorial, however, is to teach you how to survive into the wild
+so we will try explain the approach to use when dealing with clusters with **messy installations**.
+Obviously, you won't be able to reproduce these steps on your machine but this is not important
+as our goal is to explain the approach to be used and the reason why we are doing so.
+
+First of all, use the output of `module avail` to find modules providing *netcdf-fortran*, *netcdf*, and *libxc*
 (use `module spider netcdf-fortran` if you have a recent version of Lmod).
+
+
 This step allows you to understand if all the dependencies are already available and if all the libs
 are compiled with the same toolchain.
 
+
 In my particular case, I only have C-netcdf compiled with `intelmpi_2018.0.1`
 
-     netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
-
-but no netcdf-fortran nor libxc. 
-
-Very bad! This means that we will have to compile libxc and netcd-fortran with `intelmpi_2018.0.1`
-but, at least, we don't need to build hdf5 and c-netcdf from source!
-
-Load the module with:
-
 ```sh
-$ module load netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
+netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
 ```
 
-and look at the output of `nc-config --all` to understand is this library 
-has been built with hdf5 support (very likely)  and whether it supports MPI-IO (`--has-parallel  -> yes`). 
+but neither *netcdf-fortran* nor *libxc* are available.
+This means that we will have to compile *libxc* and *netcdf-fortran* with `intelmpi_2018.0.1`.
+The good news is that we don't need to build *hdf5* and *netcdf-c* from scratch!
 
-In principle we should have intel `mpiicc` in the PATH because we have loaded a module that depends on it 
-but on my cluster this is not the case.
-You can use `which mpiiic` or alternatively look at the output of
+At this point, it is a very good idea to check whether this module provides the features we need
+so we load the module with:
 
 ```sh
- module list
+module load netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
+```
+
+and look at the output of `nc-config --all`
+
+```sh
+$ nc-config --all
+
+This netCDF 4.7.4 has been built with the following features:
+
+  --cc            -> mpiicc
+  --cflags        -> -I/softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/include -I/softs/hdf5/1.12/intel/2018.0.1/intelmpi/2018.0.1/include
+  --libs          -> -L/softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib -lnetcdf
+  --static        -> -lhdf5_hl -lhdf5 -lm -lcurl -L/softs/hdf5/1.12/intel/2018.0.1/intelmpi/2018.0.1/lib
+
+  <snip>
+
+  --has-nc4       -> yes
+  --has-hdf5      -> yes
+  --has-parallel4 -> yes
+  --has-parallel  -> yes
+
+  --prefix        -> /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1
+  --includedir    -> /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/include
+  --libdir        -> /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib
+  --version       -> netCDF 4.7.4
+```
+
+So far so good: the netcdf-c library uses *hdf5* with MPI-IO support.
+Moreover, this library has been compiled with `mpiicc` rather that `mpicc` (intel icc vs gcc) so we can use it with intel MPI.
+
+The bad news: in principle, we should have intel `mpiicc` in $PATH because we have loaded a module that depends on it
+but on my cluster this is not the case.
+How do I know that?
+Well, you can use  `which mpiicc` or use bash-completion by typing
+`mpii` followed by `<TAB>` or, alternatively, look at the output of `module list` that,
+in my case is:
+
+```sh
+$ module list
+
 Currently Loaded Modulefiles:
   1) netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
 ```
+
+This clearly indicates that the module is not automatically loading its dependencies so
+we will have to import all the dependencies manually.
+
+Look at what happens if you load a similar *netcdf* module on another cluster
+where modules are **properly configured**.
+In this case, we load the netcdf library compiled with `intel MPI 2019b` and all the other dependencies
+are automatically activated as expected.
+
 ```sh
-$ module show netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
--------------------------------------------------------------------
-/usr/share/Modules/modulefiles/netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1:
+$ module load netCDF/4.7.1-iimpi-2019b
 
-module-whatis	 Adds NetCDF-C 4.7.4 to your environment
-conflict	 netcdf
-prepend-path	 PATH /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/bin
-prepend-path	 PKG_CONFIG_PATH /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib/pkgconfig
-prepend-path	 LD_LIBRARY_PATH /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib
-setenv		 NETCDF /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/
-setenv		 NETCDFDIR /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib
-setenv		 NETCDFINCLUDE /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/include
--------------------------------------------------------------------
-```
-
-
-Since we are loading a module that depends on `intelmpi_2018.0.1`, in principle 
-we
-
-On lemaitre3
+$ module list
 
 Currently Loaded Modules:
   1) tis/2018.01               (S)   5) binutils/2.32-GCCcore-8.3.0           9) Szip/2.1.1-GCCcore-8.3.0
   2) releases/2019b            (S)   6) iccifort/2019.5.281                  10) HDF5/1.10.5-iimpi-2019b
   3) GCCcore/8.3.0                   7) impi/2018.5.288-iccifort-2019.5.281  11) cURL/7.66.0-GCCcore-8.3.0
   4) zlib/1.2.11-GCCcore-8.3.0       8) iimpi/2019b                          12) netCDF/4.7.1-iimpi-2019b
+```
 
+!!! tip
 
-At this point, it should not be that difficult to reuse the expertise acquired
-in this tutorial to build our version of netcdf-fortran and libxc 
+    To understand what's happening, use `module show MODULE_NAME`.
+
+    When we run it on the cluster with misconfigured modules, we get:
+
+      ```sh
+      $ module show netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
+
+      module-whatis	 Adds NetCDF-C 4.7.4 to your environment
+      conflict	 netcdf
+      prepend-path	 PATH /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/bin
+      prepend-path	 LD_LIBRARY_PATH /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib
+      setenv		 NETCDF /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/
+      setenv		 NETCDFDIR /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib
+      setenv		 NETCDFINCLUDE /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/include
+      ```
+
+    Here the module is just adding the netcdf installation directory to PATH and LD_LIBRARY_PATH without
+    setting the compilers!
+    On the contrary, if we execute a similar command on the cluster with properly configured modules, we get:
+
+      ```sh
+      whatis("Description: NetCDF (network Common Data Form) is a set of software libraries
+       and machine-independent data formats that support the creation, access, and sharing of array-oriented
+       scientific data.")
+      whatis("Homepage: https://www.unidata.ucar.edu/software/netcdf/")
+      whatis("URL: https://www.unidata.ucar.edu/software/netcdf/")
+      conflict("netCDF")
+      load("iimpi/2019b")
+      load("HDF5/1.10.5-iimpi-2019b")
+      load("cURL/7.66.0-GCCcore-8.3.0")
+      load("Szip/2.1.1-GCCcore-8.3.0")
+      prepend_path("CPATH","/opt/sw/arch/easybuild/2019b/software/netCDF/4.7.1-iimpi-2019b/include")
+      prepend_path("LD_LIBRARY_PATH","/opt/sw/arch/easybuild/2019b/software/netCDF/4.7.1-iimpi-2019b/lib64")
+      prepend_path("LIBRARY_PATH","/opt/sw/arch/easybuild/2019b/software/netCDF/4.7.1-iimpi-2019b/lib64")
+      ```
+
+    Note the `load` commands that activate the dependencies (intel mpi and hdf5).
+    The line with `load("iimpi/2019b")` will in turn load the module for the C/Fortran compilers.
+
+Since the module is not activating all its dependencies, we have to to manually load them with
+
+```sh
+$ module load compiler/intel/comp_and_lib/2018.1.163
+$ module load intelmpi/5.1.3.181/64
+
+$ mpiifort -v
+
+mpiifort for the Intel(R) MPI Library 5.1.3 for Linux*
+Copyright(C) 2003-2015, Intel Corporation.  All rights reserved.
+ifort version 18.0.1
+```
+
+At this point, we have an environment that provides the intel C/Fortran wrappers that
+are compatible with the C library `netCDF/4.7.1-iimpi-2019b`.
+It should not be that difficult to reuse the expertise acquired
+in this tutorial to build your version of *netcdf-fortran* and *libxc*
 and install the missing libs inside your $HOME/local directory.
-In a nutshell, it's just a matter of loading the `intelmpi_2018.0.1` module:
+Just remember to load the appropriate modules before executing *configure* and
+set **CC=mpiicc** and **FC=mpiifort** so that the intel version is used.
 
-Now search for the mkl library in the list of modules reported by `module avail`.
+Now search for the MKL library in the list of modules reported by `module avail`.
 In my particular case, I have:
 
 ```
@@ -1865,7 +2060,7 @@ It we import this module with:
 module load mkl/2018.0.1
 ```
 
-and execute:
+and execute `env` we find:
 
 ```sh
 $ env | grep MKL
@@ -1880,8 +2075,10 @@ To see what libraries are recommended for a particular use case, specify the par
 
 ## How to compile ABINIT with support for OpenMP threads
 
-For a quick introduction to MPI and OpenMP and a comparison between the two parallel programming paradigms, see this 
-[presentation](https://princetonuniversity.github.io/PUbootcamp/sessions/parallel-programming/Intro_PP_bootcamp_2018.pdf).
+!!! tip
+
+    For a quick introduction to MPI and OpenMP and a comparison between the two parallel programming paradigms, see this
+    [presentation](https://princetonuniversity.github.io/PUbootcamp/sessions/parallel-programming/Intro_PP_bootcamp_2018.pdf).
 
 Compiling ABINIT with OpenMP is not that difficult as everything boils down to:
 
@@ -1899,21 +2096,24 @@ is much more difficult as there are several factors that should be taken into ac
 To keep a long story short, one should use OpenMP threads
 when we start to trigger **limitations or bottlenecks in the MPI implementation**,
 especially at the level of the memory requirements or in terms of parallel scalability.
-These problems are usually observed in large calculations with large [[natom]], [[mpw]], [[nband]].
+These problems are usually observed in calculations with big values of [[natom]], [[mpw]], [[nband]].
 
-As a matter of fact, it does not make sense to compile ABINIT with OpenMP
-if your calculations are relatively small.
-Indeed, ABINIT is mainly designed with MPI-parallelism in mind.
-For instance, calculations done with a relatively large number of $\kk$-points will benefit more of MPI than OpenMP,
-especially if the number of MPI processes divides the number of $\kk$-points exactly.
-Even worse, do not compile the code with OpenMP support if you do not plan to use threads because the OpenMP
-version will have an **additional overhead** due to the creation of the threaded sections.
-Remember also that increasing the number of threads does not necessarily leads to faster calculations 
-(the same is true for MPI processes).
-There's always an **optimal value** for the number of threads (MPI processes)
-beyond which the parallel efficiency will start to deteriorate.
-Unfortunately, this value is strongly hardware and software dependent so you will need to benchmark the code
-before running production calculations.
+!!! note
+
+    As a matter of fact, it does not make sense to compile ABINIT with OpenMP
+    if your calculations are relatively small.
+    Indeed, ABINIT is mainly designed with MPI-parallelism in mind.
+    For instance, calculations done with a relatively large number of $\kk$-points will benefit more of MPI than OpenMP,
+    especially if the number of MPI processes divides the number of $\kk$-points exactly.
+    Even worse, do not compile the code with OpenMP support if you do not plan to use threads because the OpenMP
+    version will have an **additional overhead** due to the creation of the threaded sections.
+
+    Remember also that increasing the number of threads does not necessarily leads to faster calculations
+    (the same is true for MPI processes).
+    There's always an **optimal value** for the number of threads (MPI processes)
+    beyond which the parallel efficiency starts to deteriorate.
+    Unfortunately, this value is strongly hardware and software dependent so you will need to benchmark the code
+    before running production calculations.
 
 After this necessary preamble, let's discuss how to compile a threaded version.
 To activate OpenMP support in the Fortran routines of ABINIT, pass
@@ -1933,7 +2133,7 @@ reconfigure with the correct options for the OpenMP version and then issue
 *make and make install* again to build the threaded version.
 Also note that the name of libraries may change.
 FFTW3, for example, ships the OpenMP version in *libfftw3_omp*
-(see the [official documentation](http://www.fftw.org/fftw3_doc/Installation-and-Supported-Hardware_002fSoftware.html#Installation-and-Supported-Hardware_002fSoftware) hence **FFTW3_LIBS** should be changed accordingly.
+(see the [official documentation](http://www.fftw.org/fftw3_doc/Installation-and-Supported-Hardware_002fSoftware.html#Installation-and-Supported-Hardware_002fSoftware)) hence the list of libraries in **FFTW3_LIBS** should be changed accordingly.
 
 Life is much easier if you are using intel MKL because in this case
 it is just a matter of selecting *OpenMP threading* as threading layer
@@ -1950,9 +2150,9 @@ and then pass these options to the ABINIT build system together with `enable_ope
 
     either in your *bash_profile* or in the submission script.
     **By default, OpenMP uses all the availables CPUs** so it's very easy to overload
-    the system especially if one uses threads in conjunction with MPI processes.
+    the machine, especially if one uses threads in conjunction with MPI processes.
 
-    We also recommend to increase the limit for the stack size using e.g.
+    We also recommend to increase the **stack size limit** using e.g.
 
     ```sh
     ulimit -s unlimited
@@ -1960,4 +2160,4 @@ and then pass these options to the ABINIT build system together with `enable_ope
 
     if the sysadmin allows you to do so.
 
-    To run the test suite with e.g. two threads, use the `-o2` option of *runtests.py*
+    To run the ABINIT test suite with e.g. two threads, use the `-o2` option of *runtests.py*
