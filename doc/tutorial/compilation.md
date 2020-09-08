@@ -911,7 +911,7 @@ cd netcdf-c-4.7.3
             LDFLAGS=-L$HOME/local/lib CPPFLAGS=-I$HOME/local/include
 ```
 
-where we use `mpicc` as C compiler and we have to specify **LDFLAGS** and **CPPFLAGS** 
+where we use `mpicc` as C compiler and we have to specify **LDFLAGS** and **CPPFLAGS**
 as we want to link against out installation of hdf5.
 At the end of the configuration step, one should obtain
 
@@ -1431,7 +1431,7 @@ Since we decided to compile with **dynamic linking**, the external libraries are
 Actually, the libraries will be loaded by the Operating System (OS) at runtime when we execute the binary.
 The OS will search for dynamic libraries using the list of directories specified
 in `$LD_LIBRARY_PATH` (`$DYLD_LIBRARY_PATH` for MacOs).
-A typical error is to execute abinit with a wrong `$LD_LIBRARY_PATH` that is either empty or 
+A typical error is to execute abinit with a wrong `$LD_LIBRARY_PATH` that is either empty or
 different from the one used when compiling the code.
 
 On Linux, one can use the *ldd* tool to print the shared objects (shared libraries) required by each
@@ -1713,126 +1713,196 @@ report the outcome on the forum.
 
     PS: avoid debugging code compiled with `-O3` or `-Ofast` as the backtrace may not be reliable.
 
-## How to compile ABINIT on a cluster with the intel toolchain
+## How to compile ABINIT on a cluster with the intel toolchain and modules
 
-On intel-based clusters, we suggest to compile ABINIT with the intel compilers (*icc* and *ifort*)
-and the MKL library for efficiency reasons.
+On intel-based clusters, we suggest to compile ABINIT with the intel compilers (**_icc_** and **_ifort_**)
+and MKL in order to achieve better performance.
 The MKL library, indeed, provides highly-optimized implementations for BLAS, LAPACK, FFT, and SCALAPACK
 that can lead to a **significant speedup** while simplifying considerably the compilation process.
-As concerns MPI, intel provides its own implementation (Intel MPI) but it is also possible to use 
-other MPI implementations (*openmpi*, *mpich*, etc.) provided these libraries have been compiled with the intel compilers.
+As concerns MPI, intel provides its own implementation (**Intel MPI**) but it is also possible to employ
+*openmpi* or *mpich* provided these libraries have been compiled with the **same intel compilers**.
 
-!!! warning
+In what follows, we assume a cluster that uses **modules** and the
+[EasyBuild](https://easybuild.readthedocs.io/en/latest/index.html) framework to manage scientific software.
+Before proceeding with the next steps, it is worth summarizing the most important *module* commands.
 
-    Note that Intel MPI provides **two sets of MPI wrappers**.
-    (*mpiicc*, *mpicpc*, *mpiifort*) and (*mpicc*, *mpicxx*, *mpif90*) that use Intel compilers and GNU compilers, respectively.
-    Use the `-show` option (e.g. `mpif90 -show`) to display the underlying compiler.
-    Unless you really need to use GNU compilers, we strongly suggest the wrappers based on the Intel compilers.
+!!! tip
 
-In what follows, we assume a cluster that uses **modules** and the 
-[EasyBuild](https://easybuild.readthedocs.io/en/latest/index.html) framework
-to manage software so it is worth summarizing the most important commands needed to interact with modules
-before proceeding with the next steps.
+    To list the modules installed on the cluster, use:
 
-To list the modules installed on the cluster, use:
+    ```sh
+    module avail
+    ```
 
-```sh
-module avail
-```
+    The syntax to load the module `MODULE_NAME` is:
 
-The syntax to load a module is:
+    ```sh
+    module load MODULE_NAME
+    ```
 
-```sh
-module load MODULE_NAME
-```
+    while
 
-while
+    ```sh
+    module list
+    ```
 
-```sh
-module list
-```
+    prints the list of modules currently loaded.
 
-prints the list of modules currently loaded.
+    To list all modules containing "string", use:
 
-To list all modules containing "string" 
+    ```sh
+    module spider string  # requires LMOD with LUA
+    ```
 
-```sh
-module spider string  # requires LMOD with LUA
-```
+    Finally,
 
-Finally,
+    ```sh
+    module show MODULE_NAME
+    ```
 
-
-```sh
-module show MODULE_NAME
-```
-
-shows the commands in the module file (very useful for debugging).
-For a more complete introduction to environment modules, please consult
-[this page](https://support.ceci-hpc.be/doc/_contents/UsingSoftwareAndLibraries/UsingPreInstalledSoftware/index.html).
+    shows the commands in the module file (useful for debugging).
+    For a more complete introduction to environment modules, please consult
+    [this page](https://support.ceci-hpc.be/doc/_contents/UsingSoftwareAndLibraries/UsingPreInstalledSoftware/index.html).
 
 <!--
-At this point, we should select the **toolchain (compilers, MPI implementation)** we want to use to compile ABINIT.
-Remember that we must use libraries compiled with the same toolchain so finding an usable toolchain
-is not always an easy task.
-This is especially true if the software on the machine is not actively maintained
-as we may have lots of incompatible modules or a subset of modules that does not provide all the dependencies we need.
-We also assume a cluster when modules have been automatically generated 
+The first thing we should do is to locate the module(s) proving MKL and the MPI library.
+Sorry for repeating it again but this step is crucial as the MPI module
+will define our toolchain (MPI library + compilers)
+and all the other libraries **must be compiled with the same toolchain**.
 -->
 
-The first thing we should do is to locate the module(s) proving MKL and the MPI library.
-Sorry for repeating it again but the MPI module will define our toolchain (MPI library + compilers) 
-and all the other libraries **must be compiled with the same toolchain**.
+On my cluster, I can activate **intel MPI** by executing:
 
-In the cluster used for preparing this tutorial, I can activate intel MPI by executing:
-
-```
+```sh
 module load releases/2018b
+module load intel/2018b
 module load iimpi/2018b
 ```
 
-Obviously, the name of the modules are cluster-dependent.
-If the modules are properly configured, you should have `mpiifort` in $PATH 
+to load the `2018b` intel MPI [EasyBuild toolchain](https://easybuild.readthedocs.io/en/latest/Common-toolchains.html).
+On your cluster you may need to load different modules but the effect
+at the level of the environment should be the same.
+More specifically, `mpiifort` now is in **PATH**
 
 ```sh
 mpiifort -v
 mpiifort for the Intel(R) MPI Library 2018 Update 3 for Linux*
 Copyright(C) 2003-2018, Intel Corporation.  All rights reserved.
-ifort version 18.0.3
+ifort version 18.0.3  # Note how `mpiifort` wraps intel `ifort`.
 ```
 
-that, as expected, wraps intel `ifort`.
-The module has set some useful environment variables including intel-specific ones that starts with `I_`:
+and the directories with the libraries required by the compiler and intel MPI have been added
+to **LD_LIBRARY_PATH**.
+Last but not least, we should have [intel-specific variables](https://software.intel.com/content/www/us/en/develop/documentation/mpi-developer-reference-windows/top/environment-variable-reference/compilation-environment-variables.html)
+whose name starts with `I_`:
 
 ```sh
-$ env | grep I_MPI
+$ env | grep I_
 I_MPI_ROOT=/opt/cecisw/arch/easybuild/2018b/software/impi/2018.3.222-iccifort-2018.3.222-GCC-7.3.0-2.30
 ```
 
-We will use `$I_MPI_ROOT` in our configuration file.
+!!! warning
 
-The output of `mpif90 -v`:
+    Intel MPI installs **two sets of MPI wrappers**.
+    (*mpiicc*, *mpicpc*, *mpiifort*) and (*mpicc*, *mpicxx*, *mpif90*) that use
+    Intel compilers and GNU compilers, respectively.
+    Use the `-show` option (e.g. `mpif90 -show`) to display the underlying compiler as in
+
+    ```sh
+    $ mpif90 -v
+
+    mpif90 for the Intel(R) MPI Library 2018 Update 3 for Linux*
+    COLLECT_GCC=gfortran
+    <snip>
+    Thread model: posix
+    gcc version 7.3.0 (GCC)
+    ```
+
+    that indeed shows that `mpif90` wraps GNU *gfortran*.
+    Unless you really need to use GNU compilers, we strongly suggest the wrappers
+    based on the Intel compilers (**_mpiicc_**, **_mpicpc_**, **_mpiifort_**)
+
+Note that **I_MPI_ROOT** points to the installation directory of intel MPI.
+We can therefore use this env variable to tell *configure* how to locate our MPI installation, using:
 
 ```sh
-$ mpif90 -v
-mpif90 for the Intel(R) MPI Library 2018 Update 3 for Linux*
-COLLECT_GCC=gfortran
-<snip>
-Thread model: posix
-gcc version 7.3.0 (GCC)
+with_mpi="${I_MPI_ROOT}"
+
+FC="mpiifort"  # Use intel wrappers. Important!
+CC="mpiicc"
+CXX="mpiicpc"
 ```
 
-shows that `mpif90` wraps GNU *gfortran* an mentioned at the beginning of the paragraph.
-
-At this point, it is worth checking immediately if there are modules for
-*libxc*, *netcdf-fortran*, *netcdf-c* and *hdf5* compiled with the same toolchain.
-Hopefully, you will find a pre-existent installation for *netcdf* and *hdf5* as these libraries are quite common on HPC centers.
-Perhaps, you may encounter problems with *libxc* as this library is rather domain-specific
-
-On my cluster, I have:
+In my particular case, `module load intel/2018b` is also setting **MKLROOT**
 
 ```sh
-[gmatteo@lemaitre3 _build_intel]$ module spider libxc
+env | grep MKL
+MKLROOT=/opt/cecisw/arch/easybuild/2018b/software/imkl/2018.3.222-iimpi-2018b/mkl
+```
+
+that can be used in conjunction with the
+[mkl-link-line-advisor](https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor)
+to link with MKL. On other clusters, you may need load the *mkl* module explicitly.
+
+Let's now discuss how to configure ABINIT with MKL starting from the simplest cases:
+
+- BLAS and Lapack 
+- DFTI for FFT
+- no Scalapack (parallel linear algebra based on MPI)
+- no OpenMP threads.
+
+These are the options I have to select in the link line advisor to enable this configuration:
+
+The options should be self-explanatory.
+Perhaps the tricky part is **Select interface layer** where one should select **32-bit integer**
+so that default integer is assumed to be 32-bits wide.
+Note how the threading layer is set to **Sequential** (no OpenMP)
+and how we choose to **link with MKL libraries explicitly**:
+
+Now we can simply use these options in our configuration file.
+
+```sh
+# BLAS/LAPACK with MKL
+with_linalg_flavor="mkl"
+
+LINALG_CPPFLAGS="-I${MKLROOT}/include"
+LINALG_FCFLAGS="-I${MKLROOT}/include"
+LINAGL_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm -ldl"
+
+# FFT from MKL
+with_fft_flavor="dfti"
+
+FFT_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm -ldl"
+```
+
+If we run *configure* with these options, we should obtain:
+
+At this point, we should check whether our cluster provides modules for
+*libxc*, *netcdf-fortran*, *netcdf-c* and *hdf5* **compiled with the same toolchain**. 
+Use `module spider netcdf` or `module keyword netcdf` to find the modules.
+Hopefully, you will find a pre-existent installation for *netcdf* and *hdf5* (possibly with MPI-IO support)
+as these libraries are quite common on HPC centers.
+Load these modules to have `nc-config` and `nf-config` to your PATH and then use these utilities 
+with the `--prefix` option to pass the installation directory to the ABINIT *configure* script as done previously.
+
+You may encounter problems with *libxc* as this library is rather domain-specific
+and not all the HPC centers install *libxc* modules.
+If your cluster does not provide one of the hard-dependencies it should not be that difficult
+to reuse the expertise acquired in this tutorial to build
+your version and then install the missing dependencies inside $HOME/local.
+Just remember to:
+
+1. load the correct modules for MPI with the associated compilers before configuring
+2. *configure* with **CC=mpiicc** and **FC=mpiifort** so that the intel compilers are used
+3. install the libraries and prepend $HOME/local/lib to LD_LIBRARY_PATH
+4. use the *with_LIBNAME* option in conjunction with $HOME/local/lib in the ac9 file.
+5. run *configure* with the ac9 file.
+
+<!--
+On my cluster, I can use `module spider` to inspect quickly the available modules:
+
+```sh
+$ module spider libxc
 
 ------------------------------------------------------------------------------------------------------------------------
   libxc:
@@ -1868,210 +1938,74 @@ On my cluster, I have:
 ------------------------------------------------------------------------------------------------------------------------
 ```
 
-However it should not be that difficult to reuse the expertise acquired in this tutorial to build 
-your version and then install the missing dependencies inside your $HOME/local directory.
-Just remember to load the appropriate modules before executing *configure* and
-set **CC=mpiicc** and **FC=mpiifort** so that the intel version is used.
-As a consequence, we mainly focus 
 
+Fortunately, we have a `libxc/4.2.3-intel-2018b` module that can be used directly.
 
-Modules are usually organized in a proper way when modern frameworks such as
-[EasyBuild](https://easybuild.readthedocs.io/en/latest/index.html) or 
-[spack](https://spack.readthedocs.io/en/latest/)
-are employed for managing software.
-The purpose of this tutorial, however, is to teach you how to survive into the wild
-so we will try explain the approach to use when dealing with clusters with **messy installations**.
-Obviously, you won't be able to reproduce these steps on your machine but this is not important
-as our goal is to explain the approach to be used and the reason why we are doing so.
-
-First of all, use the output of `module avail` to find modules providing *netcdf-fortran*, *netcdf*, and *libxc*
-(use `module spider netcdf-fortran` if you have a recent version of Lmod).
-
-
-This step allows you to understand if all the dependencies are already available and if all the libs
-are compiled with the same toolchain.
-
-
-In my particular case, I only have C-netcdf compiled with `intelmpi_2018.0.1`
+At this point, you should have `nc-config` and `nf-config` in $PATH and we can use these executables to
+pass the installation directory to the ABINIT *configure* script.
+Unfortunately, *libxc* does not provide a similar utility so you will need to explicitly pass
+the installation directory to *configure* or, alternatively, use the EasyBuild environment variable `EBROOTLIBXC`.
 
 ```sh
-netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
+with_netcdf="`nc-config --prefix`"
+with_netcdf_fortran="`nf-config --prefix`"
+with_hdf5="`nf-config --prefix`"
+
+# libxc
+with_libxc="${EBROOTLIBXC}"
 ```
+-->
 
-but neither *netcdf-fortran* nor *libxc* are available.
-This means that we will have to compile *libxc* and *netcdf-fortran* with `intelmpi_2018.0.1`.
-The good news is that we don't need to build *hdf5* and *netcdf-c* from scratch!
+<!--
 
-At this point, it is a very good idea to check whether this module provides the features we need
-so we load the module with:
+Let's do a similar test for *netcdf-fortran*:
 
 ```sh
-module load netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
+$ module spider netcdf-fortran
+
+------------------------------------------------------------------------------------------------------------------------
+  netCDF-Fortran:
+------------------------------------------------------------------------------------------------------------------------
+    Description:
+      NetCDF (network Common Data Form) is a set of software libraries and machine-independent data formats that
+      support the creation, access, and sharing of array-oriented scientific data.
+
+     Versions:
+        netCDF-Fortran/4.4.4-foss-2016b
+        netCDF-Fortran/4.4.4-intel-2016a
+        netCDF-Fortran/4.4.4-intel-2017b-HDF5-1.8.19
+        netCDF-Fortran/4.4.4-intel-2017b
+        netCDF-Fortran/4.4.4-intel-2018a
+        netCDF-Fortran/4.4.4-intel-2018b
+        netCDF-Fortran/4.5.2-gompi-2019b
+        netCDF-Fortran/4.5.2-iimpi-2019b
+
+------------------------------------------------------------------------------------------------------------------------
+  For detailed information about a specific "netCDF-Fortran" package (including how to load the modules) use the module's fu
+ll name.
+  Note that names that have a trailing (E) are extensions provided by other modules.
+  For example:
+
+     $ module spider netCDF-Fortran/4.5.2-iimpi-2019b
+------------------------------------------------------------------------------------------------------------------------
 ```
 
-and look at the output of `nc-config --all`
+So far so good!
+It seems that our sysadmin has already installed all the libraries we need thus we can use:
 
 ```sh
-$ nc-config --all
-
-This netCDF 4.7.4 has been built with the following features:
-
-  --cc            -> mpiicc
-  --cflags        -> -I/softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/include -I/softs/hdf5/1.12/intel/2018.0.1/intelmpi/2018.0.1/include
-  --libs          -> -L/softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib -lnetcdf
-  --static        -> -lhdf5_hl -lhdf5 -lm -lcurl -L/softs/hdf5/1.12/intel/2018.0.1/intelmpi/2018.0.1/lib
-
-  <snip>
-
-  --has-nc4       -> yes
-  --has-hdf5      -> yes
-  --has-parallel4 -> yes
-  --has-parallel  -> yes
-
-  --prefix        -> /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1
-  --includedir    -> /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/include
-  --libdir        -> /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib
-  --version       -> netCDF 4.7.4
+module load libxc/4.2.3-intel-2018b
+module load netCDF-Fortran/4.4.4-intel-2018b # Will load netCDF/4.6.1-intel-2018b providing the C library
 ```
 
-So far so good: the netcdf-c library uses *hdf5* with MPI-IO support.
-Moreover, this library has been compiled with `mpiicc` rather that `mpicc` (intel icc vs gcc) so we can use it with intel MPI.
+to activate an environment with all the dependencies required to compile ABINIT.
 
-The bad news: in principle, we should have intel `mpiicc` in $PATH because we have loaded a module that depends on it
-but on my cluster this is not the case.
-How do I know that?
-Well, you can use  `which mpiicc` or use bash-completion by typing
-`mpii` followed by `<TAB>` or, alternatively, look at the output of `module list` that,
-in my case is:
+**Exercise:**
 
-```sh
-$ module list
+!!! note
 
-Currently Loaded Modulefiles:
-  1) netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
-```
-
-This clearly indicates that the module is not automatically loading its dependencies so
-we will have to import all the dependencies manually.
-
-Look at what happens if you load a similar *netcdf* module on another cluster
-where modules are **properly configured**.
-In this case, we load the netcdf library compiled with `intel MPI 2019b` and all the other dependencies
-are automatically activated as expected.
-
-```sh
-$ module load netCDF/4.7.1-iimpi-2019b
-
-$ module list
-
-Currently Loaded Modules:
-  1) tis/2018.01               (S)   5) binutils/2.32-GCCcore-8.3.0           9) Szip/2.1.1-GCCcore-8.3.0
-  2) releases/2019b            (S)   6) iccifort/2019.5.281                  10) HDF5/1.10.5-iimpi-2019b
-  3) GCCcore/8.3.0                   7) impi/2018.5.288-iccifort-2019.5.281  11) cURL/7.66.0-GCCcore-8.3.0
-  4) zlib/1.2.11-GCCcore-8.3.0       8) iimpi/2019b                          12) netCDF/4.7.1-iimpi-2019b
-```
-
-!!! tip
-
-    To understand what's happening, use `module show MODULE_NAME`.
-
-    When we run it on the cluster with misconfigured modules, we get:
-
-      ```sh
-      $ module show netcdf/4.7.4-el6/intel_2018.0.1/intelmpi_2018.0.1
-
-      module-whatis	 Adds NetCDF-C 4.7.4 to your environment
-      conflict	 netcdf
-      prepend-path	 PATH /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/bin
-      prepend-path	 LD_LIBRARY_PATH /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib
-      setenv		 NETCDF /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/
-      setenv		 NETCDFDIR /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/lib
-      setenv		 NETCDFINCLUDE /softs/netcdf/4.7.4-el6/intel/2018.0.1/intelmpi/2018.0.1/include
-      ```
-
-    Here the module is just adding the netcdf installation directory to PATH and LD_LIBRARY_PATH without
-    setting the compilers!
-    On the contrary, if we execute a similar command on the cluster with properly configured modules, we get:
-
-      ```sh
-      whatis("Description: NetCDF (network Common Data Form) is a set of software libraries
-       and machine-independent data formats that support the creation, access, and sharing of array-oriented
-       scientific data.")
-      whatis("Homepage: https://www.unidata.ucar.edu/software/netcdf/")
-      whatis("URL: https://www.unidata.ucar.edu/software/netcdf/")
-      conflict("netCDF")
-      load("iimpi/2019b")
-      load("HDF5/1.10.5-iimpi-2019b")
-      load("cURL/7.66.0-GCCcore-8.3.0")
-      load("Szip/2.1.1-GCCcore-8.3.0")
-      prepend_path("CPATH","/opt/sw/arch/easybuild/2019b/software/netCDF/4.7.1-iimpi-2019b/include")
-      prepend_path("LD_LIBRARY_PATH","/opt/sw/arch/easybuild/2019b/software/netCDF/4.7.1-iimpi-2019b/lib64")
-      prepend_path("LIBRARY_PATH","/opt/sw/arch/easybuild/2019b/software/netCDF/4.7.1-iimpi-2019b/lib64")
-      ```
-
-    Note the `load` commands that activate the dependencies (intel mpi and hdf5).
-    The line with `load("iimpi/2019b")` will in turn load the module for the C/Fortran compilers.
-
-Since the module is not activating all its dependencies, we have to to manually load them with
-
-```sh
-$ module load compiler/intel/comp_and_lib/2018.1.163
-$ module load intelmpi/5.1.3.181/64
-
-$ mpiifort -v
-
-mpiifort for the Intel(R) MPI Library 5.1.3 for Linux*
-Copyright(C) 2003-2015, Intel Corporation.  All rights reserved.
-ifort version 18.0.1
-```
-
-At this point, we have an environment that provides the intel C/Fortran wrappers that
-are compatible with the C library `netCDF/4.7.1-iimpi-2019b`.
-It should not be that difficult to reuse the expertise acquired
-in this tutorial to build your version of *netcdf-fortran* and *libxc*
-and install the missing libs inside your $HOME/local directory.
-Just remember to load the appropriate modules before executing *configure* and
-set **CC=mpiicc** and **FC=mpiifort** so that the intel version is used.
-
-Now search for the MKL library in the list of modules reported by `module avail`.
-In my particular case, I have:
-
-```
-mkl/11.3.2
-mkl/2017.0.3
-mkl/2018.0.1
-mkl/2019.3.199
-mkl/ilp64/10.3.7.256
-mkl/ilp64/11.0.2.146
-mkl/ilp64/11.1.1.106
-mkl/ilp64/11.2.1.133
-mkl/ilp64/11.2.4.223
-mkl/lp64/10.3.7.256
-mkl/lp64/11.0.2.146
-mkl/lp64/11.1.1.106
-mkl/lp64/11.2.1.133
-mkl/lp64/11.2.4.223
-```
-
-Luckily, there's a version that matches the `2018.0.1` release.
-It we import this module with:
-
-```sh
-module load mkl/2018.0.1
-```
-
-and execute `env` we find:
-
-```sh
-$ env | grep MKL
-MKLROOT=/softs/intel/compilers_and_libraries_2018.1.163/linux/mkl
-MKL_VER=2018.0.1
-```
-
-we discover that the mkl library has set an environment variable we can reuse in our configuration file.
-
-To see what libraries are recommended for a particular use case, specify the parameters in the drop down lists below
-[mkl-link-line-advisor](https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor)
+    It is possible to use MKL with GNU fortran and/or
+-->
 
 ## How to compile ABINIT with support for OpenMP threads
 
@@ -2093,12 +2027,13 @@ On the contrary, answering the questions:
 
 is much more difficult as there are several factors that should be taken into account.
 
-To keep a long story short, one should use OpenMP threads
-when we start to trigger **limitations or bottlenecks in the MPI implementation**,
-especially at the level of the memory requirements or in terms of parallel scalability.
-These problems are usually observed in calculations with big values of [[natom]], [[mpw]], [[nband]].
 
 !!! note
+
+    To keep a long story short, one should use OpenMP threads
+    when we start to trigger **limitations or bottlenecks in the MPI implementation**,
+    especially at the level of the memory requirements or in terms of parallel scalability.
+    These problems are usually observed in calculations with big values of [[natom]], [[mpw]], [[nband]].
 
     As a matter of fact, it does not make sense to compile ABINIT with OpenMP
     if your calculations are relatively small.
@@ -2124,15 +2059,15 @@ enable_openmp="yes"
 
 to the *configure* script via the configuration file.
 This will automatically activate the compilation option needed to enable OpenMP in the ABINIT source code
-(e..g. `-fopenmp` option for *gfortran*) and the CPP variable HAVE_OPENMP in *config.h*.
+(e..g. `-fopenmp` option for *gfortran*) and the CPP variable **HAVE_OPENMP in _config.h_**.
 Note that this option is just part of the story as a significant fraction of the wall-time is spent in the external
 BLAS/FFT routines so **do not expect big speedups if you do not link against threaded libraries**.
 
 If you are building your own software stack for BLAS/LAPACK and FFT, you will have to
 reconfigure with the correct options for the OpenMP version and then issue
 *make and make install* again to build the threaded version.
-Also note that the name of libraries may change.
-FFTW3, for example, ships the OpenMP version in *libfftw3_omp*
+Also note that some libraries may change.
+FFTW3, for example, ships the OpenMP version in **_libfftw3_omp_**
 (see the [official documentation](http://www.fftw.org/fftw3_doc/Installation-and-Supported-Hardware_002fSoftware.html#Installation-and-Supported-Hardware_002fSoftware)) hence the list of libraries in **FFTW3_LIBS** should be changed accordingly.
 
 Life is much easier if you are using intel MKL because in this case
