@@ -210,9 +210,23 @@ contains
       class(lwf_mover_t), intent(inout) :: self
       integer, optional, intent(in) :: mode
       character(len=*), optional, intent(in) :: restart_hist_fname
+      integer :: i
+      real(dp) :: tmp
+      real(dp) :: kpoint(3)
 
       select case(mode)
       case(0)
+         kpoint(:)=[0.5_dp, 0.0_dp, 0.5_dp]
+         do i=1, self%supercell%ncell
+           tmp=0.2*real(exp(cmplx(0.0,two_pi, kind=dp) * &
+                               &dot_product(kpoint, self%supercell%supercell_maker%rvecs(:, i))), kind=dp)
+           self%lwf(i*2-1)=tmp
+           self%lwf(i*2)=0.0
+         enddo
+      case(1)
+         call self%rng%rand_unif_01_array(self%lwf, self%nlwf)
+         self%lwf=(self%lwf-0.5)*0.1
+      case(2)
          self%lwf(:)=0.0
       end select
 

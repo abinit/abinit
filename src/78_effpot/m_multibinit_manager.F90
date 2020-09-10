@@ -519,7 +519,7 @@ contains
        ABI_DATATYPE_ALLOCATE_SCALAR(lwf_mc_t, self%lwf_mover)
     end select
     call self%lwf_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
-    call self%lwf_mover%set_initial_state(mode=1)
+    call self%lwf_mover%set_initial_state(mode=0)
   end subroutine set_lwf_mover
 
 

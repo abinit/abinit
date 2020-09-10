@@ -110,7 +110,7 @@
      ! try to change lwf
      r=self%attempt(self%rng, effpot)
      ! metropolis-hastings
-     if(self%rng%rand_unif_01()< min(1.0_dp, r) .and. abs(self%lwf_new)<0.4 ) then
+     if(self%rng%rand_unif_01()< min(1.0_dp, r) .and. abs(self%lwf_new)<0.5 ) then
         self%naccept=self%naccept+1
         call self%accept()
      else
@@ -174,6 +174,7 @@
      class(lwf_mc_t), intent(inout) :: self
      self%lwf(self%imove)=self%lwf_new
      self%energy=self%energy+self%deltaE
+     !print *, "E:", self%energy/self%supercell%ncell
    end subroutine accept
 
    !----------------------------------------------------------------------
