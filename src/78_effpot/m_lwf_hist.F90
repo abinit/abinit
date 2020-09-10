@@ -53,6 +53,7 @@ module m_lwf_hist
    contains
      procedure :: initialize
      procedure :: finalize
+     procedure :: reset
      procedure :: set_hist
      procedure :: get_hist
   end type lwf_hist_t
@@ -79,6 +80,18 @@ contains
     ABI_SFREE(self%hist)
     ABI_SFREE(self%energy)
   end subroutine finalize
+
+
+  subroutine reset(self, array_to_zero)
+      class(lwf_hist_t), intent(inout) :: self
+      logical :: array_to_zero
+      if(array_to_zero) then
+         self%ihist=1
+         self%hist(:,:)=zero
+         self%energy(:)=zero
+      endif
+    end subroutine reset
+
 
   subroutine set_hist(self, lwf, energy)
     class(lwf_hist_t), target, intent(inout) :: self

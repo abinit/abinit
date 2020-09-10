@@ -229,7 +229,6 @@ contains
 !!***
 
   subroutine reset(self, array_to_zero)
-
     implicit none
     class(spin_hist_t), intent(inout) :: self
     logical :: array_to_zero

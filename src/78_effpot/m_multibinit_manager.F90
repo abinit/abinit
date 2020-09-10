@@ -152,10 +152,11 @@ module m_multibinit_manager
      procedure :: set_lattice_mover
      procedure :: set_lwf_mover
      procedure :: run_spin_dynamics
-     procedure :: run_MvT
+     procedure :: run_spin_varT
      procedure :: run_lattice_dynamics
      procedure :: run_coupled_spin_latt_dynamics
      procedure :: run_lwf_dynamics
+     procedure :: run_lwf_varT
      procedure :: run
      procedure :: run_all
   end type mb_manager_t
@@ -539,7 +540,7 @@ contains
   end subroutine run_spin_dynamics
 
 
-  subroutine run_MvT(self)
+  subroutine run_spin_varT(self)
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%sc_maker%initialize(diag(self%params%ncell))
@@ -547,7 +548,7 @@ contains
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%run_MvT(self%pots, self%filenames(2), energy_table=self%energy_table)
-  end subroutine run_MvT
+  end subroutine run_spin_varT
 
 
   !-------------------------------------------------------------------!
@@ -650,6 +651,23 @@ contains
     call self%lwf_mover%ncfile%finalize()
   end subroutine run_lwf_dynamics
 
+  !-------------------------------------------------------------------!
+  ! Run LWF dynamics
+  !-------------------------------------------------------------------!
+  subroutine run_lwf_varT(self)
+    class(mb_manager_t), intent(inout) :: self
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%fill_supercell()
+    call self%set_movers()
+    call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
+    !call self%lwf_mover%run_varT(self%pots, energy_table=self%energy_table)
+    call self%spin_mover%run_MvT(self%pots, self%filenames(2), energy_table=self%energy_table)
+    call self%lwf_mover%ncfile%finalize()
+  end subroutine run_lwf_varT
+
+
 
 
 
@@ -667,7 +685,7 @@ contains
        if (self%params%spin_var_temperature==0) then
           call self%run_spin_dynamics()
        elseif (self%params%spin_var_temperature==1) then
-          call self%run_MvT()
+          call self%run_spin_varT()
        end if
     ! lattice
     else if (self%params%dynamics>0 .and. self%params%spin_dynamics<=0 .and. self%params%lwf_dynamics<=0) then
@@ -679,7 +697,11 @@ contains
        call self%run_coupled_spin_latt_dynamics()
     ! lwf
     else if(self%params%dynamics<=0 .and. self%params%spin_dynamics<=0 .and. self%params%lwf_dynamics>0) then
-       call self%run_lwf_dynamics()
+       if (self%params%spin_var_temperature==0) then
+          call self%run_lwf_dynamics()
+       else
+          call self%run_lwf_varT()
+       end if
     end if
 
   end subroutine run
