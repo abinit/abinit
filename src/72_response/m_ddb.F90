@@ -3586,7 +3586,8 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
                           matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
                           msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
-   if (chkopt==1)then
+   ! If PAW, we need to call %compare for its side effects.
+   if (chkopt==1 .or. usepaw == 1)then
      ! Compare the current DDB and input DDB information.
      ! In case of an inconsistency, halt the execution.
      call wrtout(std_out, ' compare the current and input DDB information')
@@ -3912,7 +3913,8 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
                           matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
                           msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
-   if (chkopt==1)then
+   ! If PAW, we need to call %compare for its side effects.
+   if (chkopt==1 .or. usepaw == 1)then
      ! Compare the current DDB and input DDB information.
      ! In case of an inconsistency, halt the execution.
      write(msg, '(a)' )' compare the current and input DDB information'

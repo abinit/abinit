@@ -867,8 +867,11 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        NCF_CHECK(crystal%ncwrite(ncid))
 
        if (response == 0) then
+         ! Write Gs bands
          NCF_CHECK(ebands_ncwrite(gs_ebands, ncid))
        else
+         ! Write H1 matrix elements and occupancies.
+         ! Note that GS eigens are not written here.
          call ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
        end if
 
@@ -1346,9 +1349,9 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 !Local variables-------------------------------
 !scalars
  integer :: idx,spin,ikpt,nband_k,ib2,ib1
- integer :: ncerr,occ_varid,h1mat_varid
+ integer :: ncerr,occ_varid,h1mat_varid,eigens_varid
 !arrays
- real(dp),allocatable :: h1mat(:,:,:,:,:)
+ real(dp),allocatable :: h1mat(:,:,:,:,:), fake_eigens(:,:,:)
 
 ! *************************************************************************
 
@@ -1379,6 +1382,7 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 
  NCF_CHECK(nf90_inq_varid(ncid, "occupations", occ_varid))
  NCF_CHECK(nf90_inq_varid(ncid, "h1_matrix_elements", h1mat_varid))
+ NCF_CHECK(nf90_inq_varid(ncid, "eigenvalues", eigens_varid))
 
  ! Write data
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -1386,6 +1390,11 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
  NCF_CHECK_MSG(nf90_put_var(ncid, h1mat_varid, h1mat), "putting h1mat")
 
  ABI_FREE(h1mat)
+
+ ! GS eigenvalues are set to zero.
+ ABI_CALLOC(fake_eigens, (mband,nkpt,nsppol))
+ NCF_CHECK_MSG(nf90_put_var(ncid, eigens_varid, fake_eigens), "putting fake eigens")
+ ABI_FREE(fake_eigens)
 
 end subroutine ncwrite_eigen1_occ
 !!***
