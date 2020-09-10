@@ -1281,6 +1281,20 @@ end subroutine add_matlu
      endif
    endif
  enddo
+ do iatom = 1 , natom
+   lpawu=matlu(iatom)%lpawu
+   if(lpawu/=-1) then
+     !! MAG
+     if(nsppol>1) then
+    ! if(nsppol>1.and.present(itau)) then
+    !   if(itau==1) then
+         write(message,'(8x,a,f12.6)')   'DMFT Cor. El. Mag: ',traceloc(iatom,2)-traceloc(iatom,1)
+         call wrtout(std_out,  message,'COLL')
+    !   endif
+     endif
+
+   endif
+ enddo
  if(.not.present(trace_loc)) then
   ABI_DEALLOCATE(traceloc)
   traceloc => null()
