@@ -1977,7 +1977,7 @@ These are the options I have to select in the
 [mkl-link-line-advisor](https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor)
 to enable this configuration with my software stack:
 
-![](compilation_assets/link_line_advisor2.png)
+![](compilation_assets/link_line_advisor.png)
 
 The options should be self-explanatory.
 Perhaps the tricky part is **Select interface layer** where one should select **32-bit integer**.
