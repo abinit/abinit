@@ -424,7 +424,7 @@ is not a very good idea as the shell will stop working. Can you explain why?
 
     to print only the variables whose name starts with **LD_**
 
-We terminate this section with another tip.
+We conclude this section with another tip.
 From time to time, some compilers complain or do not display important messages
 because **language support is improperly configured** on your computer.
 Should this happen, we recommend to export the two variables:
@@ -1077,7 +1077,7 @@ First of all, download the ABINIT tarball from [this page](https://www.abinit.or
 wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.2.tar.gz
 ```
 
-In this case, we are using version 9.0.2 but you may want to download the
+Here we are using version 9.0.2 but you may want to download the
 latest production version to take advantage of new features and benefit from bug fixes.
 
 Once you got the tarball, uncompress it by typing:
@@ -1359,7 +1359,7 @@ This file tells us that
 - we are building ABINIT with MPI support
 - we have a library implementing the MPI2 specifications
 - our MPI implementation supports parallel MPI-IO. Note that this does not mean that *netcdf* supports MPI-IO.
-  In this example, indeed, **HAVE_NETCDF_MPI is undefined** and this means the library does not have 
+  In this example, indeed, **HAVE_NETCDF_MPI is undefined** and this means the library does not have
   parallel-IO capabilities.
 
 Of course, end users are mainly concerned with the final summary reported
@@ -1578,46 +1578,48 @@ and search for error messages towards the end of the log file.
 For example one can search for the string "C compiler cannot create executables".
 Immediately above this line, we find the following section:
 
-```sh
-configure:12104: checking whether the C compiler works
-configure:12126: /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/bin/mpicc conftest.c  >&5
-/cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_reg_xrc_rcv_qp@IBVERBS_1.1'
-/cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_modify_xrc_rcv_qp@IBVERBS_1.1'
-/cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_open_xrc_domain@IBVERBS_1.1'
-/cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_unreg_xrc_rcv_qp@IBVERBS_1.1'
-/cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_query_xrc_rcv_qp@IBVERBS_1.1'
-/cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_create_xrc_rcv_qp@IBVERBS_1.1'
-/cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_create_xrc_srq@IBVERBS_1.1'
-/cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_close_xrc_domain@IBVERBS_1.1'
-configure:12130: $? = 1
-configure:12168: result: no
-configure: failed program was:
-| /* confdefs.h */
-| #define PACKAGE_NAME "ABINIT"
-| #define PACKAGE_TARNAME "abinit"
-| #define PACKAGE_VERSION "9.1.2"
-| #define PACKAGE_STRING "ABINIT 9.1.2"
-| #define PACKAGE_BUGREPORT "https://bugs.launchpad.net/abinit/"
-| #define PACKAGE_URL ""
-| #define PACKAGE "abinit"
-| #define VERSION "9.1.2"
-| #define ABINIT_VERSION "9.1.2"
-| #define ABINIT_VERSION_MAJOR "9"
-| #define ABINIT_VERSION_MINOR "1"
-| #define ABINIT_VERSION_MICRO "2"
-| #define ABINIT_VERSION_BUILD "20200824"
-| #define ABINIT_VERSION_BASE "9.1"
-| #define HAVE_OS_LINUX 1
-| /* end confdefs.h.  */
-|
-| int
-| main ()
-| {
-|
-|   ;
-|   return 0;
-| }
-```
+??? note "config.log"
+
+    ```sh
+    configure:12104: checking whether the C compiler works
+    configure:12126: /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/bin/mpicc conftest.c  >&5
+    /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_reg_xrc_rcv_qp@IBVERBS_1.1'
+    /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_modify_xrc_rcv_qp@IBVERBS_1.1'
+    /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_open_xrc_domain@IBVERBS_1.1'
+    /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_unreg_xrc_rcv_qp@IBVERBS_1.1'
+    /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_query_xrc_rcv_qp@IBVERBS_1.1'
+    /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_create_xrc_rcv_qp@IBVERBS_1.1'
+    /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_create_xrc_srq@IBVERBS_1.1'
+    /cm/shared/apps/openmpi/1.7.5/intel2013_sp1.1.106/lib/libmpi.so: undefined reference to `ibv_close_xrc_domain@IBVERBS_1.1'
+    configure:12130: $? = 1
+    configure:12168: result: no
+    configure: failed program was:
+    | /* confdefs.h */
+    | #define PACKAGE_NAME "ABINIT"
+    | #define PACKAGE_TARNAME "abinit"
+    | #define PACKAGE_VERSION "9.1.2"
+    | #define PACKAGE_STRING "ABINIT 9.1.2"
+    | #define PACKAGE_BUGREPORT "https://bugs.launchpad.net/abinit/"
+    | #define PACKAGE_URL ""
+    | #define PACKAGE "abinit"
+    | #define VERSION "9.1.2"
+    | #define ABINIT_VERSION "9.1.2"
+    | #define ABINIT_VERSION_MAJOR "9"
+    | #define ABINIT_VERSION_MINOR "1"
+    | #define ABINIT_VERSION_MICRO "2"
+    | #define ABINIT_VERSION_BUILD "20200824"
+    | #define ABINIT_VERSION_BASE "9.1"
+    | #define HAVE_OS_LINUX 1
+    | /* end confdefs.h.  */
+    |
+    | int
+    | main ()
+    | {
+    |
+    |   ;
+    |   return 0;
+    | }
+    ```
 
 The line
 
@@ -1702,7 +1704,7 @@ The ideal solution would be to run the code under the control of the debugger,
 use the backtrace to locate the line of code where the segmentation fault occurs and then
 attach the backtrace to your issue on the forum.
 
-!!! tip
+??? note "how to run gdb"
 
     Using the debugger in sequential is really simple.
     First of all, make sure the code have been compiled with the `-g` option
@@ -1744,7 +1746,7 @@ In what follows, we assume a cluster in which scientific software is managed
 with **modules** and the [EasyBuild](https://easybuild.readthedocs.io/en/latest/index.html) framework.
 Before proceeding with the next steps, it is worth summarizing the most important *module* commands.
 
-!!! tip
+??? note "module commands"
 
     To list the modules installed on the cluster, use:
 
@@ -1797,29 +1799,30 @@ module load intel/2018b
 module load iimpi/2018b
 ```
 
-to load the `2018b` intel MPI [EasyBuild toolchain](https://easybuild.readthedocs.io/en/latest/Common-toolchains.html).
+to load the 2018b intel MPI [EasyBuild toolchain](https://easybuild.readthedocs.io/en/latest/Common-toolchains.html).
 On your cluster, you may need to load different modules but the effect
 at the level of the shell environment should be the same.
-More specifically, `mpiifort` is now in **PATH**
+More specifically, **mpiifort** is now in **PATH** (note how *mpiifort* wraps intel *ifort*):
 
 ```sh
 mpiifort -v
 mpiifort for the Intel(R) MPI Library 2018 Update 3 for Linux*
 Copyright(C) 2003-2018, Intel Corporation.  All rights reserved.
-ifort version 18.0.3  # Note how `mpiifort` wraps intel `ifort`.
+ifort version 18.0.3  
 ```
 
 the directories with the libraries required by the compiler/MPI have been added
 to **LD_LIBRARY_PATH** while **CPATH** stores the locations to search for include file.
-Last but not least, our env should contains [intel-specific variables](https://software.intel.com/content/www/us/en/develop/documentation/mpi-developer-reference-windows/top/environment-variable-reference/compilation-environment-variables.html)
+Last but not least, the env should now define [intel-specific variables](https://software.intel.com/content/www/us/en/develop/documentation/mpi-developer-reference-windows/top/environment-variable-reference/compilation-environment-variables.html)
 whose name starts with `I_`:
 
 ```sh
 $ env | grep I_
 I_MPI_ROOT=/opt/cecisw/arch/easybuild/2018b/software/impi/2018.3.222-iccifort-2018.3.222-GCC-7.3.0-2.30
 ```
-Note that **I_MPI_ROOT** points to the installation directory of intel MPI.
-We can therefore use this environment variable to tell *configure* how to locate our MPI installation:
+
+Since **I_MPI_ROOT** points to the installation directory of intel MPI, 
+we can use this environment variable to tell *configure* how to locate our MPI installation:
 
 ```sh
 with_mpi="${I_MPI_ROOT}"
@@ -1832,7 +1835,7 @@ CXX="mpiicpc"
 # FCFLAGS="-g -O2"
 ```
 
-Optionally, you can use `with_optim_flavor="agreessive` to let *configure* select compilations 
+Optionally, you can use `with_optim_flavor="aggressive` to let *configure* select compilations
 options tuned for performance or set the options explicitly via **FCFLAGS**.
 
 !!! warning
@@ -1858,7 +1861,98 @@ options tuned for performance or set the options explicitly via **FCFLAGS**.
     based on the Intel compilers (**_mpiicc_**, **_mpicpc_**, **_mpiifort_**)
 
 
-In my particular case, `module load intel/2018b` is also setting **MKLROOT**
+If the run *configure* with these options, we should see a section at the beginning
+in which the build system is testing basic capabilities of the Fortran compiler
+If *configure* stops at this level it means there's a severe problem with your toolchain.
+
+```text
+ ==============================================================================
+ === Fortran support                                                        ===
+ ==============================================================================
+
+checking for mpiifort... /opt/cecisw/arch/easybuild/2018b/software/impi/2018.3.222-iccifort-2018.3.222-GCC-7.3.0-2.30/bin64/mpiifort
+checking whether we are using the GNU Fortran compiler... no
+checking whether mpiifort accepts -g... yes
+checking which type of Fortran compiler we have... intel 18.0
+```
+
+Then we have a section in which *configure* tests the MPI implementation:
+
+
+??? note "Multicore architecture support"
+
+    ```text
+    ==============================================================================
+    === Multicore architecture support                                         ===
+    ==============================================================================
+
+    checking whether to enable OpenMP support... no
+    checking whether to enable MPI... yes
+    checking how MPI parameters have been set... yon
+    checking whether the MPI C compiler is set... yes
+    checking whether the MPI C++ compiler is set... yes
+    checking whether the MPI Fortran compiler is set... yes
+    checking for MPI C preprocessing flags...
+    checking for MPI C flags...
+    checking for MPI C++ flags...
+    checking for MPI Fortran flags...
+    checking for MPI linker flags...
+    checking for MPI library flags...
+    checking whether the MPI C API works... yes
+    checking whether the MPI C environment works... yes
+    checking whether the MPI C++ API works... yes
+    checking whether the MPI C++ environment works... yes
+    checking whether the MPI Fortran API works... yes
+    checking whether the MPI Fortran environment works... yes
+    checking whether to build MPI I/O code... auto
+    checking which level of MPI is supported by the Fortran compiler... 2
+    configure: forcing MPI-2 standard level support
+    checking whether the MPI library supports MPI_INTEGER16... yes
+    checking whether the MPI library supports MPI_CREATE_TYPE_STRUCT... yes
+    checking whether the MPI library supports MPI_IBCAST (MPI3)... yes
+    checking whether the MPI library supports MPI_IALLGATHER (MPI3)... yes
+    checking whether the MPI library supports MPI_IALLTOALL (MPI3)... yes
+    checking whether the MPI library supports MPI_IALLTOALLV (MPI3)... yes
+    checking whether the MPI library supports MPI_IGATHERV (MPI3)... yes
+    checking whether the MPI library supports MPI_IALLREDUCE (MPI3)... yes
+    configure:
+    configure: dumping all MPI parameters for diagnostics
+    configure: ------------------------------------------
+    configure:
+    configure: Configure options:
+    configure:
+    configure:   * enable_mpi_inplace = ''
+    configure:   * enable_mpi_io      = ''
+    configure:   * with_mpi           = 'yes'
+    configure:   * with_mpi_level     = ''
+    configure:
+    configure: Internal parameters
+    configure:
+    configure:   * MPI enabled (required)                       : yes
+    configure:   * MPI C compiler is set (required)             : yes
+    configure:   * MPI C compiler works (required)              : yes
+    configure:   * MPI Fortran compiler is set (required)       : yes
+    configure:   * MPI Fortran compiler works (required)        : yes
+    configure:   * MPI environment usable (required)            : yes
+    configure:   * MPI C++ compiler is set (optional)           : yes
+    configure:   * MPI C++ compiler works (optional)            : yes
+    configure:   * MPI-in-place enabled (optional)              : no
+    configure:   * MPI-IO enabled (optional)                    : yes
+    configure:   * MPI configuration type (computed)            : yon
+    configure:   * MPI Fortran level supported (detected)       : 2
+    configure:   * MPI_Get_library_version available (detected) : unknown
+    configure:
+    configure: All required parameters must be set to 'yes'.
+    configure: If not, the configuration and/or the build with
+    configure: MPI support will very likely fail.
+    configure:
+    checking whether to activate GPU support... no
+    ```
+
+So far so good. Our compilers and MPI seem to work so we can proceed with
+the setup of the external libraries.
+
+On my cluster, `module load intel/2018b` had also defined the **MKLROOT** env variable
 
 ```sh
 env | grep MKL
@@ -1874,20 +1968,22 @@ to link with MKL. On other clusters, you may need load an *mkl* module explicitl
 
 Let's now discuss how to configure ABINIT with MKL starting from the simplest cases:
 
-- BLAS and Lapack
-- DFTI for FFT
+- BLAS and Lapack from MKL
+- FFT from MKL DFTI
 - no Scalapack
 - no OpenMP threads.
 
-These are the options I have to select to enable this configuration for my cluster:
+These are the options I have to select in the
+[mkl-link-line-advisor](https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor)
+to enable this configuration with my software stack:
 
 ![](compilation_assets/link_line_advisor2.png)
 
 The options should be self-explanatory.
 Perhaps the tricky part is **Select interface layer** where one should select **32-bit integer**.
 This simply means that we are compiling and linking code in which default integer is 32-bits wide
-(this is the default behaviour in all the compilers I've encountered so far).
-Note how the threading layer is set to **Sequential** (no OpenMP)
+(default behaviour).
+Note how the threading layer is set to **Sequential** (no OpenMP threads)
 and how we chose to **link with MKL libraries explicitly** the get the full
 link line and compiler options.
 
@@ -1897,14 +1993,14 @@ Now we can use these options in our configuration file:
 # BLAS/LAPACK with MKL
 with_linalg_flavor="mkl"
 
-#LINALG_CPPFLAGS="-I${MKLROOT}/include"
+LINALG_CPPFLAGS="-I${MKLROOT}/include"
 LINALG_FCFLAGS="-I${MKLROOT}/include"
-LINAGL_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm -ldl"
+LINALG_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm -ldl"
 
 # FFT from MKL
 with_fft_flavor="dfti"
 
-#FFT_CPPFLAGS="-I${MKLROOT}/include"
+FFT_CPPFLAGS="-I${MKLROOT}/include"
 FFT_FCFLAGS="-I${MKLROOT}/include"
 FFT_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm -ldl"
 ```
@@ -1916,9 +2012,86 @@ FFT_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential 
     the **behaviour is undefined**! Use either MKL or FFTW3 with e.g. *openblas*.
 
 
-If we run *configure* with these options, we should obtain the following output in the XXX section
+If we run *configure* with these options, we should obtain the following output in the
+**Linear algebra support** section:
 
-TODO
+??? note "Linear algebra support"
+
+    ```text
+    ==============================================================================
+    === Linear algebra support                                                 ===
+    ==============================================================================
+
+    checking for the requested linear algebra flavor... mkl
+    checking for the serial linear algebra detection sequence... mkl
+    checking for the MPI linear algebra detection sequence... mkl
+    checking for the MPI acceleration linear algebra detection sequence... none
+    checking how to detect linear algebra libraries... verify
+    checking for BLAS support in the specified libraries... yes
+    checking for AXPBY support in the BLAS libraries... yes
+    checking for GEMM3M in the BLAS libraries... yes
+    checking for mkl_imatcopy in the specified libraries... yes
+    checking for mkl_omatcopy in the specified libraries... yes
+    checking for mkl_omatadd in the specified libraries... yes
+    checking for mkl_set/get_threads in the specified libraries... yes
+    checking for LAPACK support in the specified libraries... yes
+    checking for LAPACKE C API support in the specified libraries... no
+    checking for PLASMA support in the specified libraries... no
+    checking for BLACS support in the specified libraries... no
+    checking for ELPA support in the specified libraries... no
+    checking how linear algebra parameters have been set... env (flavor: kwd)
+    checking for the actual linear algebra flavor... mkl
+    checking for linear algebra C preprocessing flags... none
+    checking for linear algebra C flags... none
+    checking for linear algebra C++ flags... none
+    checking for linear algebra Fortran flags... -I/opt/cecisw/arch/easybuild/2018b/software/imkl/2018.3.222-iimpi-2018b/mkl/include
+    checking for linear algebra linker flags... none
+    checking for linear algebra library flags... -L/opt/cecisw/arch/easybuild/2018b/software/imkl/2018.3.222-iimpi-2018b/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm -ldl
+    configure: WARNING: parallel linear algebra is not available
+    ```
+
+Excellent, *configure* detected a working BLAS/Lapack installation, plus some MKL extensions (*mkl_imatcopy* etc).
+BLACS and Scalapack (parallel linear algebra) have not been detected but this is expected as we haven't asked
+for these libraries in the mkl-link-line-advisor GUI.
+
+This is the section in which *configure* checks the presence of the FFT library
+(DFTI from MKL, goedecker means internal Fortran version).
+
+??? note "Optimized FFT support"
+
+    ```text
+    ==============================================================================
+    === Optimized FFT support                                                  ===
+    ==============================================================================
+
+    checking which FFT flavors to enable... dfti goedecker
+    checking for FFT flavor... dfti
+    checking for FFT C preprocessing flags...
+    checking for FFT C flags...
+    checking for FFT Fortran flags...
+    checking for FFT linker flags...
+    checking for FFT library flags...
+    checking for the FFT flavor to try... dfti
+    checking whether to enable DFTI... yes
+    checking how DFTI parameters have been set... mkl
+    checking for DFTI C preprocessing flags... none
+    checking for DFTI C flags... none
+    checking for DFTI Fortran flags... -I/opt/cecisw/arch/easybuild/2018b/software/imkl/2018.3.222-iimpi-2018b/mkl/include
+    checking for DFTI linker flags... none
+    checking for DFTI library flags... -L/opt/cecisw/arch/easybuild/2018b/software/imkl/2018.3.222-iimpi-2018b/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm -ldl
+    checking whether the DFTI library works... yes
+    checking for the actual FFT flavor to use... dfti
+    ```
+
+The line
+
+```text
+checking whether the DFTI library works... yes
+```
+
+tells us that DFTI has been found and we can link against it although this does not necessarily mean
+that the final executable will work out of the box.
+
 
 !!! tip
 
@@ -1926,6 +2099,16 @@ TODO
     to use a different set of libraries including the so-called **compatibility layer** that allows GCC code
     to call MKL routines.
     Also, **MKL Scalapack requires either Intel MPI or MPICH2**.
+
+
+??? note "Optional Exercise"
+
+     Compiler ABINIT with BLAS/ScalaPack from MKL.
+     Scalapack (or ELPA) may lead to a significant speedup when running GS calculations
+     with large [[nband]]. See also the [[np_slk]] input variable.
+
+
+### How to compile libxc, netcdf4/hdf5 with intel
 
 At this point, one should check whether our cluster provides modules for
 *libxc*, *netcdf-fortran*, *netcdf-c* and *hdf5* **compiled with the same toolchain**.
@@ -1935,19 +2118,36 @@ Hopefully, you will find a pre-existent installation for *netcdf* and *hdf5* (po
 as these libraries are quite common on HPC centers.
 Load these modules to have `nc-config` and `nf-config` in your $PATH and then use the
 `--prefix` option to specify the installation directory as done in the previous examples.
+Unfortunately, *libxc* and *hdf5* do not provide similar tools so you will have to find
+the installation directory for these libs and pass it to *configure*.
 
-You may encounter problems with *libxc* as this library is rather domain-specific
-and not all the HPC centers install it.
-If your cluster does not provide *libxc*, it should not be that difficult
-to reuse the expertise acquired in this tutorial to build
-your version and then install the missing dependencies inside $HOME/local.
-Just remember to:
+<!--
+For libxc and hdf5
+```sh
+with_netcdf="`nc-config --prefix`"
+with_netcdf_fortran="`nf-config --prefix`"
+with_hdf5="`installation_dir_for_hdf5`"
+with_hdf5="${EBROOTHDF5}"
 
-1. load the correct modules for MPI with the associated compilers before configuring
-2. *configure* with **CC=mpiicc** and **FC=mpiifort** so that the intel compilers are used
-3. install the libraries and prepend $HOME/local/lib to LD_LIBRARY_PATH
-4. use the *with_LIBNAME* option in conjunction with $HOME/local/lib in the ac9 file.
-5. run *configure* with the ac9 file.
+# libxc
+with_libxc="${EBROOTLIBXC}"
+```
+-->
+
+!!! tip
+
+    You may encounter problems with *libxc* as this library is rather domain-specific
+    and not all the HPC centers install it.
+    If your cluster does not provide *libxc*, it should not be that difficult
+    to reuse the expertise acquired in this tutorial to build
+    your version and then install the missing dependencies inside $HOME/local.
+    Just remember to:
+
+    1. load the correct modules for MPI with the associated compilers before configuring
+    2. *configure* with **CC=mpiicc** and **FC=mpiifort** so that the intel compilers are used
+    3. install the libraries and prepend $HOME/local/lib to LD_LIBRARY_PATH
+    4. use the *with_LIBNAME* option in conjunction with $HOME/local/lib in the ac9 file.
+    5. run *configure* with the ac9 file.
 
 In the worst case scenario in which neither *netcdf4/hdf5* nor *libxc* are installed, you may want to
 use the **internal fallbacks**.
@@ -1960,23 +2160,6 @@ The procedure goes as follows.
   in the initial configuration file**
 - Finally, reconfigure ABINIT with the fallbacks.
 
-<!--
-At this point, you should have `nc-config` and `nf-config` in $PATH and we can use these executables to
-pass the installation directory to the ABINIT *configure* script.
-Unfortunately, *libxc* does not provide a similar utility so you will need to explicitly pass
-the installation directory to *configure* or, alternatively, use the EasyBuild environment variable `EBROOTLIBXC`.
-
-```sh
-with_netcdf="`nc-config --prefix`"
-with_netcdf_fortran="`nf-config --prefix`"
-with_hdf5="`nf-config --prefix`"
-
-# libxc
-with_libxc="${EBROOTLIBXC}"
-```
-
-**Exercise:**
--->
 
 ## How to compile ABINIT with support for OpenMP threads
 
@@ -2057,7 +2240,7 @@ and then pass these options to the ABINIT build system together with `enable_ope
     export OMP_NUM_THREADS=2
     ```
 
-    either in your *bash_profile* or in the submission script.
+    either in your *bash_profile* or in the submission script (or in both).
     **By default, OpenMP uses all the available CPUs** so it is very easy to overload
     the machine, especially if one uses threads in conjunction with MPI processes.
 
