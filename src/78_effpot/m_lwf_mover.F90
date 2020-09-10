@@ -63,10 +63,12 @@ module m_lwf_mover
    contains
      procedure :: initialize
      procedure :: finalize
+     procedure :: set_temperature
      procedure :: set_params
      procedure :: set_initial_state
      procedure :: run_one_step
      procedure :: run_time
+     procedure :: run_varT
      procedure :: prepare_ncfile
      procedure :: set_ncfile_name
   end type lwf_mover_t
@@ -110,6 +112,12 @@ contains
     self%total_time=params%lwf_ntime*params%lwf_dt
     self%lwf_temperature=params%lwf_temperature
   end subroutine set_params
+
+  subroutine set_temperature(self, temperature)
+    class(lwf_mover_t), intent(inout) :: self
+    real(dp), intent(in) :: temperature
+    self%lwf_temperature=temperature
+  end subroutine set_temperature
 
   subroutine run_one_step(self, effpot, displacement, strain, spin, lwf,  energy_table)
     ! run one step. (For MC also?)
@@ -267,6 +275,124 @@ contains
       endif
     end subroutine set_ncfile_name
 
+
+
+  !!****f* m_lwf_mover/run_varT
+  !!
+  !! NAME
+  !! run_varT
+  !!
+  !! FUNCTION
+  !! run M vs Temperature
+  !!
+  !! INPUTS
+  !! pot: potential
+  !! T_start, Tend, T_nstep
+  !u
+  !! OUTPUT
+  !!
+  !! PARENTS
+!!
+  !! CHILDREN
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
+  !! SOURCE
+  subroutine  run_varT(self, pot, ncfile_prefix, displacement, strain, spin, lwf, energy_table)
+    class(lwf_mover_t), intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: pot
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
+    character(fnlen), intent(inout) :: ncfile_prefix
+    type(hash_table_t), optional, intent(inout) :: energy_table
+    real(dp) :: T_start, T_end
+    integer :: T_nstep
+    !type(spin_ncfile_t) :: spin_ncfile
+    character(len=4) :: post_fname
+    real(dp) :: T, T_step
+    integer :: i, ii
+    !integer :: Tfile, iostat
+    character(len=90) :: msg
+    character(len=4200) :: Tmsg ! to write to var T file
+    character(len=150) :: iomsg
+    character(fnlen) :: Tfname ! file name for output various T calculation
+    !real(dp), allocatable :: Tlist(:), chi_list(:), Cv_list(:), binderU4_list(:)
+    !real(dp), allocatable :: Mst_sub_norm_list(:, :)
+    !real(dp), allocatable ::  Mst_norm_total_list(:)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    if (iam_master) then
+       T_start=self%params%lwf_temperature_start
+       T_end=self%params%lwf_temperature_end
+       T_nstep=self%params%lwf_temperature_nstep
+       !Tfile=get_unit()
+       !Tfname = trim(ncfile_prefix)//'.varT'
+       !iostat=open_file(file=Tfname, unit=Tfile, iomsg=iomsg )
+       if (T_nstep<=1) then
+          T_step=0.0
+       else
+          T_step=(T_end-T_start)/(T_nstep-1)
+       endif
+       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
+            & "Starting temperature dependent calculations. T from ", &
+            & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+    end if
+
+    call xmpi_bcast(T_nstep, 0, comm, ierr)
+    do i=1, T_nstep
+       if(iam_master) then
+          T=T_start+(i-1)*T_step
+          msg=repeat("=", 79)
+          call wrtout(std_out, msg, "COLL")
+          call wrtout(ab_out, msg, "COLL")
+
+          write(msg, "(A13, 5X, ES13.5, A3)") "Temperature: ", T*Ha_K, " K."
+          call wrtout(std_out, msg, "COLL")
+          call wrtout(ab_out,  msg, "COLL")
+
+          call self%hist%reset(array_to_zero=.False.)
+          ! set temperature
+          ! TODO make this into a subroutine set_params
+          self%params%lwf_temperature=T
+       endif
+       call self%set_temperature(temperature=T)
+       if(iam_master) then
+          ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
+          if(i==0) then
+             call self%set_initial_state()
+          !else
+          !   call self%hist%inc1()
+          endif
+
+          write(post_fname, "(I4.4)") i
+          call self%prepare_ncfile( self%params, &
+               & trim(ncfile_prefix)//'_T'//post_fname//'_lwfhist.nc')
+          call self%ncfile%write_one_step(self%hist)
+       endif
+
+       ! run in parallel
+       call self%run_time(pot, displacement=displacement, strain=strain, spin=spin, &
+            & lwf=lwf, energy_table=energy_table)
+
+       if(iam_master) then
+          call self%ncfile%finalize()
+          ! save observables
+          !Tlist(i)=T
+          !chi_list(i)=self%spin_ob%chi
+          !Cv_list(i)=self%spin_ob%Cv
+          !binderU4_list(i)=self%spin_ob%binderU4
+          !Mst_sub_list(:,:,i)=self%spin_ob%Mst_sub(:,:)  ! not useful
+          !Mst_sub_norm_list(:,i)=self%spin_ob%Avg_Mst_sub_norm(:)
+          !Mst_norm_total_list(i)=self%spin_ob%Avg_Mst_norm_total
+       endif
+    end do
+
+  end subroutine run_varT
+  !!***
 
 
 end module m_lwf_mover

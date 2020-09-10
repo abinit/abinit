@@ -138,6 +138,8 @@ module m_multibinit_dataset
   integer :: lwf_ntime
   integer :: lwf_nctime
   integer :: lwf_self_bound_order
+  integer :: lwf_temperature_nstep    ! var temperature number of steps
+  integer :: lwf_var_temperature
 
   ! parameters for spin
   integer :: spin_calc_traj_obs
@@ -197,6 +199,9 @@ module m_multibinit_dataset
   real(dp) :: lwf_mc_avg_amp
   real(dp) :: lwf_temperature
   real(dp) :: lwf_self_bound_coeff
+  real(dp) :: lwf_temperature_start   ! var temperature start
+  real(dp) :: lwf_temperature_end     ! var temperature end
+
 
   !  parameters for spin
   real(dp) :: spin_dt
@@ -418,7 +423,10 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%lwf_temperature=0.0_dp
  multibinit_dtset%lwf_mc_avg_amp=0.0_dp
  multibinit_dtset%lwf_self_bound_coeff=0.0_dp
- 
+ multibinit_dtset%lwf_temperature_start=0.0
+ multibinit_dtset%lwf_temperature_end= 0.0
+ multibinit_dtset%lwf_temperature_nstep= 0
+ multibinit_dtset%lwf_var_temperature=0 
 
 
  multibinit_dtset%spin_calc_traj_obs=0
@@ -1118,7 +1126,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%lwf_self_bound_coeff=dprarr(1)
 
 
- multibinit_dtset%lwf_temperature=325
+ multibinit_dtset%lwf_temperature=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_temperature',tread,'DPR')
  if(tread==1) multibinit_dtset%lwf_temperature=dprarr(1)
  if(multibinit_dtset%lwf_temperature<0)then
@@ -1128,6 +1136,51 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
          &   'Action: correct lwf_temperature in your input file.'
     MSG_ERROR(message)
  end if
+
+multibinit_dtset%lwf_temperature_start=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_temperature_start',tread,'DPR')
+ if(tread==1) multibinit_dtset%lwf_temperature_start=dprarr(1)
+ if(multibinit_dtset%lwf_temperature_start<0.0)then
+    write(message, '(a,f10.1,a,a,a,a,a)' )&
+         &   'lwf_temperature_start is ',multibinit_dtset%lwf_temperature_start,'. The only allowed values',ch10,&
+         &   'are positives values.',ch10,&
+         &   'Action: correct lwf_semperature_start in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%lwf_temperature_end=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_temperature_end',tread,'DPR')
+ if(tread==1) multibinit_dtset%lwf_temperature_end=dprarr(1)
+ if(multibinit_dtset%lwf_temperature_end<0)then
+    write(message, '(a,f10.1,a,a,a,a,a)' )&
+         &   'lwf_temperature_end is ',multibinit_dtset%lwf_temperature_end,'. The only allowed values',ch10,&
+         &   'are positives values.',ch10,&
+         &   'Action: correct lwf_semperature_end in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%lwf_temperature_nstep=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_temperature_nstep',tread,'INT')
+ if(tread==1) multibinit_dtset%lwf_temperature_nstep=intarr(1)
+ if(multibinit_dtset%lwf_temperature_nstep<=0)then
+    write(message, '(a,i0,a,a,a,a)' )&
+         &   'lwf_temperature_nstep is',multibinit_dtset%lwf_temperature_nstep,', while it should be larger than 0',ch10,&
+         &   'Action: correct lwf_temperature_nstep in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%lwf_var_temperature=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_var_temperature',tread,'INT')
+ if(tread==1) multibinit_dtset%lwf_var_temperature=intarr(1)
+ if(multibinit_dtset%lwf_var_temperature/=0.and.multibinit_dtset%lwf_var_temperature/=1)then
+    write(message, '(a,i0,a,a,a,a,a)' )&
+         &   'lwf_var_temperature is',multibinit_dtset%lwf_var_temperature,'. The only allowed values',ch10,&
+         &   'are 0, or 1.',ch10,&
+         &   'Action: correct lwf_var_temperature in your input file.'
+    MSG_ERROR(message)
+ end if
+
+
 
 
 
@@ -2828,6 +2881,11 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(13x,a15,I10.1)')'lwf_nctime',multibinit_dtset%lwf_nctime
     write(nunit,'(8x,a20,I10.1)')'lwf_self_bound_order',multibinit_dtset%lwf_self_bound_order
     write(nunit,'(8x,a20,F10.5)')'lwf_self_bound_coeff',multibinit_dtset%lwf_self_bound_coeff
+    write(nunit, '(6x, a22, I12.1)') 'lwf_var_temperature', multibinit_dtset%lwf_var_temperature
+    write(nunit, '(6x, a22, 5x, F10.5)') 'lwf_temperature_start', multibinit_dtset%lwf_temperature_start
+    write(nunit, '(6x, a22, 5x, F10.5)') 'lwf_temperature_end', multibinit_dtset%lwf_temperature_end
+    write(nunit, '(5x, a23, I12.1)') 'lwf_temperature_nstep', multibinit_dtset%lwf_temperature_nstep
+
  end if
 
  if(multibinit_dtset%spin_dynamics/=0) then
