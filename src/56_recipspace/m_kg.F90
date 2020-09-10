@@ -1250,7 +1250,6 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 end subroutine mkkpgcart
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/mkkin_metdqdq
 !! NAME
 !! mkkin_metdqdq

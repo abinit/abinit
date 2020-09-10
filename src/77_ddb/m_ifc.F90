@@ -2015,7 +2015,8 @@ end subroutine ifc_write
 !! OUTPUT
 !! rsiaf(3,3,ifcout)=list of real space IFCs
 !! sriaf(3,3,ifcout)=list of the short range part of the real space IFCs
-!! vect(3,3,ifcout)=base vectors for local coordinates (longitudinal/transverse
+!! vect(3,3,ifcout)=base vectors for local coordinates (longitudinal/transverse), if ifc_getiaf is able to find
+!!   a third atom not aligned with the two atoms characterizing the IFC. If no, the second and third vectors are set to zero.
 !! indngb(ifcout)=indices in the unit cell of the neighbouring atoms
 !! posngb(3,ifcout)=position of the neighbouring atoms in cartesian coordinates
 !! output file
@@ -2100,20 +2101,22 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
    end do
    if(flag==0)then
      write(message, '(3a)' )&
-&     'Unable to find a third atom not aligned',ch10,&
-&     'with the two selected ones.'
-     MSG_BUG(message)
-   end if
-   vect2(1)=work(1)/scprod**0.5
-   vect2(2)=work(2)/scprod**0.5
-   vect2(3)=work(3)/scprod**0.5
-   vect3(1)=vect1(2)*vect2(3)-vect1(3)*vect2(2)
-   vect3(2)=vect1(3)*vect2(1)-vect1(1)*vect2(3)
-   vect3(3)=vect1(1)*vect2(2)-vect1(2)*vect2(1)
-   if (iout > 0) then
-     write(iout, '(a)' )' Third atom defining local coordinates : '
-     write(iout, '(a,i4,a,i4)' )'     ib = ',ib,'   irpt = ',irpt
-   end if
+&     'Unable to find a third atom not aligned with the two selected ones.',ch10,&
+&     'The local analysis (longitudinal/transverse) will not be done. The two transverse vectors are set to zero.'
+     MSG_WARNING(message)
+     vect2(:)=zero ; vect3(:)=zero
+   else
+     vect2(1)=work(1)/scprod**0.5
+     vect2(2)=work(2)/scprod**0.5
+     vect2(3)=work(3)/scprod**0.5
+     vect3(1)=vect1(2)*vect2(3)-vect1(3)*vect2(2)
+     vect3(2)=vect1(3)*vect2(1)-vect1(1)*vect2(3)
+     vect3(3)=vect1(1)*vect2(2)-vect1(2)*vect2(1)
+     if (iout > 0) then
+       write(iout, '(a)' )' Third atom defining local coordinates : '
+       write(iout, '(a,i4,a,i4)' )'     ib = ',ib,'   irpt = ',irpt
+     end if
+   endif 
  end if
 
  ! Analysis and output of force constants, ordered with respect to the distance from atom ia
@@ -2161,21 +2164,23 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
        if (iout > 0) then
          write(iout, '(a,f9.5)' ) '  Trace         ',trace1+tol10
        end if
-       if(ii/=1)then
-         call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
-       end if
-       if (iout > 0) then
-         write(iout, '(a)' )' Transformation to local coordinates '
-         write(iout, '(a,3f16.6)' ) ' First  local vector :',vect1
-         write(iout, '(a,3f16.6)' ) ' Second local vector :',vect2
-         write(iout, '(a,3f16.6)' ) ' Third  local vector :',vect3
-       end if
-       call ifclo9(rsiaf(:,:,ii),ifcloc,vect1,vect2,vect3)
-       if (iout > 0) then
-         do nu=1,3
-           write(iout, '(1x,3f9.5)' )(ifcloc(mu,nu)+tol10,mu=1,3)
-         end do
-       end if
+       if(flag==1)then
+         if(ii/=1)then
+           call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
+         end if
+         if (iout > 0) then
+           write(iout, '(a)' )' Transformation to local coordinates '
+           write(iout, '(a,3f16.6)' ) ' First  local vector :',vect1
+           write(iout, '(a,3f16.6)' ) ' Second local vector :',vect2
+           write(iout, '(a,3f16.6)' ) ' Third  local vector :',vect3
+         end if
+         call ifclo9(rsiaf(:,:,ii),ifcloc,vect1,vect2,vect3)
+         if (iout > 0) then
+           do nu=1,3
+             write(iout, '(1x,3f9.5)' )(ifcloc(mu,nu)+tol10,mu=1,3)
+           end do
+         end if
+       endif ! flag==1
 
        vect(:,1,ii) = vect1
        vect(:,2,ii) = vect2
@@ -2273,37 +2278,39 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
          write(iout,'(3(f9.5,17x))')1.0,trace2/trace1+tol10,trace3/trace1+tol10 !
        end if
 
-       if(ii/=1)then
-         call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
-       end if
-       if (iout > 0) then
-         write(iout, '(a)' )' Transformation to local coordinates '
-         write(iout, '(a,3f16.6)' )' First  local vector :',vect1
-         write(iout, '(a,3f16.6)' )' Second local vector :',vect2
-         write(iout, '(a,3f16.6)' )' Third  local vector :',vect3
-       end if
-       call ifclo9(rsiaf(:,:,ii),rsloc,vect1,vect2,vect3)
-       call ifclo9(ewiaf1,ewloc,vect1,vect2,vect3)
-       call ifclo9(sriaf(:,:,ii),srloc,vect1,vect2,vect3)
-       if (iout > 0) then
-         do nu=1,3
-           write(iout, '(1x,3(3f9.5,1x))' )&
-&           (rsloc(mu,nu)+tol10,mu=1,3),&
-&           (ewloc(mu,nu)+tol10,mu=1,3),&
-&           (srloc(mu,nu)+tol10,mu=1,3)
-         end do
+       if(flag==1)then
          if(ii/=1)then
-           write(iout, '(a)' )' Ratio with respect to the longitudinal ifc'
-         else
-           write(iout, '(a)' )' Ratio with respect to the (1,1) element'
+           call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
          end if
-         do nu=1,3
-           write(iout, '(1x,3(3f9.5,1x))' )&
-&           (rsloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
-&           (ewloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
-&           (srloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3)
-         end do
-       end if
+         if (iout > 0) then
+           write(iout, '(a)' )' Transformation to local coordinates '
+           write(iout, '(a,3f16.6)' )' First  local vector :',vect1
+           write(iout, '(a,3f16.6)' )' Second local vector :',vect2
+           write(iout, '(a,3f16.6)' )' Third  local vector :',vect3
+         end if
+         call ifclo9(rsiaf(:,:,ii),rsloc,vect1,vect2,vect3)
+         call ifclo9(ewiaf1,ewloc,vect1,vect2,vect3)
+         call ifclo9(sriaf(:,:,ii),srloc,vect1,vect2,vect3)
+         if (iout > 0) then
+           do nu=1,3
+             write(iout, '(1x,3(3f9.5,1x))' )&
+&             (rsloc(mu,nu)+tol10,mu=1,3),&
+&             (ewloc(mu,nu)+tol10,mu=1,3),&
+&             (srloc(mu,nu)+tol10,mu=1,3)
+           end do
+           if(ii/=1)then
+             write(iout, '(a)' )' Ratio with respect to the longitudinal ifc'
+           else
+             write(iout, '(a)' )' Ratio with respect to the (1,1) element'
+           end if
+           do nu=1,3
+             write(iout, '(1x,3(3f9.5,1x))' )&
+&             (rsloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
+&             (ewloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
+&             (srloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3)
+           end do
+         end if
+       endif ! flag==1
 
        vect(:,1,ii) = vect1
        vect(:,2,ii) = vect2

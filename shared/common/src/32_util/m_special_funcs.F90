@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_special_funcs
 !! NAME
 !! m_special_funcs
