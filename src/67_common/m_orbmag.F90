@@ -1340,13 +1340,11 @@ subroutine covar_gamma(atindx1,cg,cgg1,cprj,cprjg1,dtorbmag,dtset,gmet,gprimd,mc
   !Local variables -------------------------
   !scalars
   integer :: cplex,dimffnl,exchn2n3d,getcprj_choice,getcprj_cpopt,getcprj_idir
-  integer :: i4,i5,i6,ia,iatom,iband,ib1,ib2,ider,idir,ii,ikg,ikpt,ilm,ilmn,ipw,istwf_k,itrs
-  integer :: itypat,jb1,jb2,jband,jj,jlmn,kk,klmn
-  integer :: n1dimx,n2dimx,n1dimy,n2dimy,nband_occ
-  integer :: ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nlmn,npw_k_
+  integer :: i4,i5,i6,ia,iband,ider,idir,ikg,ikpt,ilm,ipw,istwf_k,itrs
+  integer :: nband_occ
+  integer :: ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,npw_k_
   integer :: option,shiftbd,smatrix_ddkflag,smatrix_job,tim_fourwf
-  real(dp) :: arg,doti,dotig,dotr,dotrg,ecut_eff,phase,weight_fourwf
-  complex(dpc) :: cpb,cpk,consite
+  real(dp) :: arg,ecut_eff,phase,weight_fourwf
   
   !arrays
   integer :: nattyp_dum(dtset%ntypat)
@@ -4125,7 +4123,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  !Local variables -------------------------
  !scalars
  integer :: cpopt,dimffnl,eeig_size,exchn2n3d
- integer :: iband,ierr,icg,icprj,ider,idir,ikg,ikg1,ikpt,ilm,isppol,istwf_k
+ integer :: ierr,icg,icprj,ider,idir,ikg,ikg1,ikpt,ilm,isppol,istwf_k
  integer :: me,my_nspinor,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn
  integer :: nproc,npw_k,npw_k_,prtvol,sij_opt,spaceComm,tim_getghc,type_calc
  logical :: has_vectornd
