@@ -1606,7 +1606,6 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  my_nsppol=count(my_spintab==1)
 
  rf_Ham%cplex    =cplex
-
  rf_Ham%n4       =gs_Ham%n4
  rf_Ham%n5       =gs_Ham%n5
  rf_Ham%n6       =gs_Ham%n6

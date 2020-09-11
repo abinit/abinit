@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_xc_noncoll
 !! NAME
 !! m_xc_noncoll

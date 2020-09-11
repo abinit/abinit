@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_linalg_interfaces
 !! NAME
 !!  m_linalg_interfaces

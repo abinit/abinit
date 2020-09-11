@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-MODULE m_energies
+module m_energies
 
  use defs_basis
  use m_abicore
@@ -582,7 +582,7 @@ end subroutine energies_eval_eint
 !!
 !! SOURCE
 
-subroutine energies_ncwrite(enes,ncid)
+subroutine energies_ncwrite(enes, ncid)
 
 !Arguments ------------------------------------
 !scalars
@@ -598,25 +598,25 @@ subroutine energies_ncwrite(enes,ncid)
 
 !@energies_type
  ncerr = nctk_defnwrite_dpvars(ncid, [character(len=nctk_slen) :: &
-&  "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
-&  "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
-&  "e_entropy", "entropy", "e_ewald", &
-&  "e_exactX","e_fermie", &
-&  "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
-&  "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
-&  "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd",&
-&  "e_xc", "e_xcdc", "e_xc_vdw",&
-&  "h0","e_zeeman"],&
-!
-&  [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
-&   enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
-&   enes%e_entropy, enes%entropy, enes%e_ewald, &
-&   enes%e_exactX, enes%e_fermie, enes%e_fock, enes%e_fockdc,enes%e_fock0,  enes%e_hartree, &
-&   enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
-&   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
-&   enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
-&   enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
-&   enes%h0,enes%e_zeeman])
+  "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
+  "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
+  "e_entropy", "entropy", "e_ewald", &
+  "e_exactX","e_fermie", &
+  "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
+  "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
+  "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
+  "e_xc", "e_xcdc", "e_xc_vdw", &
+  "h0","e_zeeman"], &
+  [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
+   enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
+   enes%e_entropy, enes%entropy, enes%e_ewald, &
+   enes%e_exactX, enes%e_fermie, &
+   enes%e_fock, enes%e_fockdc,enes%e_fock0,  enes%e_hartree, &
+   enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
+   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
+   enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
+   enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
+   enes%h0,enes%e_zeeman])
 
  NCF_CHECK(ncerr)
 
@@ -627,5 +627,5 @@ subroutine energies_ncwrite(enes,ncid)
 end subroutine energies_ncwrite
 !!***
 
-END MODULE m_energies
+end module m_energies
 !!***

@@ -56,8 +56,8 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
- integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, symv1scf, npert_miss
- real(dp) :: dvdb_qdamp
+ integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, symv1scf, npert_miss, abimem_level
+ real(dp) :: dvdb_qdamp, abimem_limit_mb
  character(len=24) :: codename
  character(len=500) :: command,arg, msg
  character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
@@ -79,8 +79,10 @@ program mrgdv
  ! Initialize memory profiling if it is activated
  ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
  ! write greating,read the file names, etc.

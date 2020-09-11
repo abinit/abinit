@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_numeric_tools
 !! NAME
 !!  m_numeric_tools
@@ -324,7 +323,7 @@ pure function arth_int(start, step, nn)
    end do
 
  case (0)
-   RETURN
+   return
  end select
 
 end function arth_int
@@ -5225,7 +5224,7 @@ end subroutine interpolate_denpot
 !!
 !! SOURCE
 
-subroutine simpson_int(npts,step,values,int_values)
+subroutine simpson_int(npts, step, values, int_values)
 
 !Arguments ------------------------------------
 !scalars

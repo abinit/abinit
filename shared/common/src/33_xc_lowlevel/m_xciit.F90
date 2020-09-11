@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xciit
 !! NAME
 !!  m_xciit

@@ -1155,7 +1155,7 @@ end function g2ifft
 !!
 !! SOURCE
 
-pure subroutine get_gftt(ngfft,kpt,gmet,gsq_max,gfft)
+pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
 
 !Arguments ------------------------------------
 !scalars

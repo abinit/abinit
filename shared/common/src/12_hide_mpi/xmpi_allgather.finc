@@ -27,7 +27,7 @@
 !!  Target: one-dimensional integer arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -43,12 +43,12 @@
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_int(xval,recvbuf,spaceComm,ier)
+subroutine xmpi_allgather_int(xval,recvbuf,comm,ier)
 
 !Arguments-------------------------
  integer,intent(inout) :: xval
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
- integer, intent(in) :: spaceComm
+ integer, intent(in) :: comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -56,10 +56,10 @@ subroutine xmpi_allgather_int(xval,recvbuf,spaceComm,ier)
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
-   call MPI_ALLGATHER(xval,1,MPI_INTEGER,recvbuf,1,MPI_INTEGER,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
+   call MPI_ALLGATHER(xval,1,MPI_INTEGER,recvbuf,1,MPI_INTEGER,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf(1)=xval
  end if
 #else
@@ -78,7 +78,7 @@ end subroutine xmpi_allgather_int
 !!  Target: one-dimensional character(20) arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -94,10 +94,10 @@ end subroutine xmpi_allgather_int
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_char(charval,recvbuf,spaceComm,ier)
+subroutine xmpi_allgather_char(charval,recvbuf,comm,ier)
 
 !Arguments-------------------------
- integer,intent(in)  :: spaceComm
+ integer,intent(in)  :: comm
  integer,intent(out) :: ier
  character(len=20),intent(inout) :: charval
  character(len=20), DEV_CONTARRD intent(inout) :: recvbuf(:)
@@ -105,10 +105,10 @@ subroutine xmpi_allgather_char(charval,recvbuf,spaceComm,ier)
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
-   call MPI_ALLGATHER(charval,20,MPI_CHARACTER,recvbuf,20,MPI_CHARACTER,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
+   call MPI_ALLGATHER(charval,20,MPI_CHARACTER,recvbuf,20,MPI_CHARACTER,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=charval
  end if
 #else
@@ -129,7 +129,7 @@ end subroutine xmpi_allgather_char
 !! INPUTS
 !!  xval= buffer array
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -144,21 +144,21 @@ end subroutine xmpi_allgather_char
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_int1d_1b(xval, nelem, recvbuf, spaceComm, ier)
+subroutine xmpi_allgather_int1d_1b(xval, nelem, recvbuf, comm, ier)
 
 !Arguments-------------------------
  integer(c_int8_t), DEV_CONTARRD intent(in) :: xval(:)
  integer(c_int8_t), DEV_CONTARRD intent(inout) :: recvbuf(:)
- integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(in) :: nelem,comm
  integer ,intent(out) :: ier
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
-   call MPI_ALLGATHER(xval,nelem,MPI_INTEGER1,recvbuf,nelem,MPI_INTEGER1,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
+   call MPI_ALLGATHER(xval,nelem,MPI_INTEGER1,recvbuf,nelem,MPI_INTEGER1,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf(1:nelem)=xval(1:nelem)
  end if
 #else
@@ -178,7 +178,7 @@ end subroutine xmpi_allgather_int1d_1b
 !! INPUTS
 !!  xval= buffer array
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -193,21 +193,21 @@ end subroutine xmpi_allgather_int1d_1b
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_int1d(xval,nelem,recvbuf,spaceComm,ier)
+subroutine xmpi_allgather_int1d(xval,nelem,recvbuf,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
- integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(in) :: nelem,comm
  integer ,intent(out) :: ier
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
-   call MPI_ALLGATHER(xval,nelem,MPI_INTEGER,recvbuf,nelem,MPI_INTEGER,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
+   call MPI_ALLGATHER(xval,nelem,MPI_INTEGER,recvbuf,nelem,MPI_INTEGER,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf(1:nelem)=xval(1:nelem)
  end if
 #else
@@ -227,7 +227,7 @@ end subroutine xmpi_allgather_int1d
 !! INPUTS
 !!  xval= buffer array
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -242,21 +242,21 @@ end subroutine xmpi_allgather_int1d
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_int2d(xval,nelem,recvbuf,spaceComm,ier)
+subroutine xmpi_allgather_int2d(xval,nelem,recvbuf,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:,:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:,:)
- integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(in) :: nelem,comm
  integer ,intent(out) :: ier
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
-   call MPI_ALLGATHER(xval,nelem,MPI_INTEGER,recvbuf,nelem,MPI_INTEGER,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
+   call MPI_ALLGATHER(xval,nelem,MPI_INTEGER,recvbuf,nelem,MPI_INTEGER,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf(:,:)=xval(:,:)
  end if
 #else
@@ -277,7 +277,7 @@ end subroutine xmpi_allgather_int2d
 !! INPUTS
 !!  xval= buffer array
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -292,21 +292,21 @@ end subroutine xmpi_allgather_int2d
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_dp1d(xval,nelem,recvbuf,spaceComm,ier)
+subroutine xmpi_allgather_dp1d(xval,nelem,recvbuf,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
- integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(in) :: nelem,comm
  integer ,intent(out) :: ier
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
-   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
+   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf(1:nelem)=xval(1:nelem)
  end if
 #else
@@ -326,7 +326,7 @@ end subroutine xmpi_allgather_dp1d
 !! INPUTS
 !!  xval= buffer array
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -341,21 +341,21 @@ end subroutine xmpi_allgather_dp1d
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_dp2d(xval,nelem,recvbuf,spaceComm,ier)
+subroutine xmpi_allgather_dp2d(xval,nelem,recvbuf,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:)
- integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(in) :: nelem,comm
  integer ,intent(out)   :: ier
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
-   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
+   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf(:,:)=xval(:,:)
  end if
 #else
@@ -375,7 +375,7 @@ end subroutine xmpi_allgather_dp2d
 !! INPUTS
 !!  xval= buffer array
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -390,21 +390,21 @@ end subroutine xmpi_allgather_dp2d
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_dp3d(xval,nelem,recvbuf,spaceComm,ier)
+subroutine xmpi_allgather_dp3d(xval,nelem,recvbuf,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:)
- integer ,intent(in) :: nelem,spaceComm
- integer ,intent(out)   :: ier
+ integer ,intent(in) :: nelem,comm
+ integer ,intent(out) :: ier
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
-   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
+   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf(:,:,:)=xval(:,:,:)
  end if
 #else
@@ -424,7 +424,7 @@ end subroutine xmpi_allgather_dp3d
 !! INPUTS
 !!  xval= buffer array
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -439,21 +439,21 @@ end subroutine xmpi_allgather_dp3d
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_dp4d(xval,nelem,recvbuf,spaceComm,ier)
+subroutine xmpi_allgather_dp4d(xval,nelem,recvbuf,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:,:)
- integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(in) :: nelem,comm
  integer ,intent(out)   :: ier
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
-   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
+   call MPI_ALLGATHER(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,nelem,MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf(:,:,:,:)=xval(:,:,:,:)
  end if
 #else

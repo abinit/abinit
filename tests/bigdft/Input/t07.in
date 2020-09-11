@@ -44,7 +44,7 @@ nkpt 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
+#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
 #%% files_to_test = 
 #%%   t07.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00

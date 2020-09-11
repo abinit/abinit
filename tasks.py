@@ -80,7 +80,7 @@ def cd(path):
 
 
 @task
-def make(ctx, jobs="auto", touch=False, clean=False):
+def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
     """
     Touch all modified files and recompile the code
 
@@ -88,6 +88,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
         jobs: Use `jobs` threads for make -jNUM
         touch: Touch all changed files
         clean: Issue `make clean` before `make`.
+        binary: Binary to recompile, default: all
     """
     if touch:
         with cd(ABINIT_ROOTDIR):
@@ -105,7 +106,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
         if clean:
             ctx.run("cd src && make clean && cd ..", pty=True)
             ctx.run("cd shared && make clean && cd ..", pty=True)
-        cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
+        cmd = "make -j%d %s > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % (jobs, binary)
         cprint("Executing: %s" % cmd, "yellow")
         results = ctx.run(cmd, pty=True)
         # TODO Check for errors in make.stderr

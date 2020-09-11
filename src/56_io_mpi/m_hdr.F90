@@ -903,12 +903,12 @@ end subroutine hdr_malloc
 !! ebands <type(ebands_t)>=band structure information including Brillouin zone description
 !! codvsn=code version
 !! dtset <type(dataset_type)>=all input variables for this dataset
-!! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
-!! comm_atom=--optional-- MPI communicator over atoms
 !! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !! pertcase=index of the perturbation, or 0 if GS calculation
 !! psps <type(pseudopotential_type)>=all the information about psps
-!! my_atomtab(:)=Index of the atoms (in global numbering ) treated by current proc (Optional)
+!! [my_atomtab(:)]=Index of the atoms (in global numbering ) treated by current proc.
+!! [mpi_atmtab(:)]= indexes of the atoms treated by current proc
+!! [comm_atom]= MPI communicator over atoms
 !!
 !! OUTPUT
 !! hdr <type(hdr_type)>=the header, initialized, and for most part of
@@ -923,8 +923,8 @@ end subroutine hdr_malloc
 !!
 !! SOURCE
 
-subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
-                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
+                    mpi_atmtab, comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
@@ -2866,7 +2866,7 @@ integer function read_first_record(unit, codvsn8, headform, fform, errmsg) resul
 
  ii = index(codvsn6, ".")
  if (ii == 0 .or. ii == 1) then
-   errmsg = sjoin("Cannot find `major.minor` pattern in codvsn:", codvsn6)
+   errmsg = sjoin("Cannot find major.minor pattern in codvsn:", codvsn6)
    ierr = 1; return
  end if
 
@@ -4009,9 +4009,10 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    ! Note, however, that we allow for different FFT meshes and we interpolate the density in the
    ! caller when we are restarting a SCF calculation.
    if (abifile%class == "density" .or. abifile%class == "potential") then
-     write(msg, '(5a)' )&
-       'fft grids must be the same for restart from a ',trim(abifile%class),' file.',ch10,&
-       'Action: change your fft grid or your restart file.'
+     write(msg, '(10a)' )&
+       'FFT grids must be the same to restart from a ',trim(abifile%class),' file.',ch10,&
+       "ngfft from file: ", trim(ltoa(hdr0%ngfft(1:3))), ", from input: ", trim(ltoa(hdr%ngfft(1:3))), ch10, &
+       'Action: change the FFT grid in the input via ngfft or change the restart file.'
      MSG_ERROR(msg)
    end if
    tng=1

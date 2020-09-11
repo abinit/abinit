@@ -3105,12 +3105,12 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
    end if
 
    if (t_exist) then
-!    Note the use of unit numbers 21, 22 and 23
+     !  Note the use of unit numbers 21, 22 and 23
+     ! Open files in sequential mode
      ddkfil(idir1)=20+idir1
      write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk)
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     call wfk_open_read(ddks(idir1),fiwfddk,formeig1,dtset%iomode,ddkfil(idir1),spaceworld)
+     call wrtout([std_out, ab_out], msg)
+     call wfk_open_read(ddks(idir1),fiwfddk,formeig1,dtset%iomode,ddkfil(idir1), xmpi_comm_self)
    end if
  end do
 
@@ -3291,9 +3291,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !In case of electric field ipert1, close the ddk wf files
  do idir1=1,3
-   if (ddkfil(idir1)/=0)then
-     call ddks(idir1)%close()
-   end if
+   if (ddkfil(idir1)/=0) call ddks(idir1)%close()
  end do
 
 !Symmetrize the non-local contributions,

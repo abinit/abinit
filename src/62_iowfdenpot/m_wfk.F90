@@ -1146,7 +1146,7 @@ end function wfk_compare
 !!
 !! SOURCE
 
-subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
+subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, occ_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -2198,7 +2198,7 @@ end subroutine wfk_write_band_block
 !!
 !! SOURCE
 
-subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
+subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, occ_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -2243,7 +2243,6 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
  !  end if
  !end if
 
- !
  ! Look before you leap.
  npw_disk = Wfk%Hdr%npwarr(ik_ibz)
  nspinor_disk = Wfk%nspinor
@@ -2278,7 +2277,7 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
  case (IO_MODE_FORTRAN)
 
    ! Rewind the file to have the correct (k,s) block (if needed)
-   call wfk_seek(Wfk,ik_ibz,spin)
+   call wfk_seek(Wfk, ik_ibz, spin)
 
    ! Read the first record: npw, nspinor, nband_disk
    read(Wfk%fh, err=10, iomsg=errmsg) npw_read, nspinor_read, nband_read
@@ -2297,7 +2296,7 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
    end if
 
    ! The third record: eigenvalues and occupation factors.
-   if (Wfk%formeig==0) then
+   if (Wfk%formeig == 0) then
 
      if (present(eig_k) .or. present(occ_k)) then
        ABI_MALLOC(tmp_eigk, (nband_disk))
@@ -2307,7 +2306,6 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
 
        if (present(eig_k)) eig_k = tmp_eigk
        if (present(occ_k)) occ_k = tmp_occk
-
        ABI_FREE(tmp_eigk)
        ABI_FREE(tmp_occk)
 
@@ -2328,13 +2326,14 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
            read(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
          end if
        end do
+
      else
        do band=1,nband_disk
          read(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
        end do
      end if
 
-   else if (Wfk%formeig==1) then
+   else if (Wfk%formeig == 1) then
      ! Read matrix of size (2*nband_k**2)
      npwso = npw_disk*nspinor_disk
      my_bcount = 0
@@ -2855,7 +2854,7 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0,formeig0=0
+ integer,parameter :: master = 0, formeig0 = 0
  integer :: ik_ibz,spin,my_rank,ierr,iomode,funt,sc_mode,mband
  real(dp) :: cpu, wall, gflops
  type(wfk_t) :: Wfk
@@ -2865,7 +2864,6 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
  call cwtime(cpu, wall, gflops, "start")
  my_rank = xmpi_comm_rank(comm)
  iomode = iomode_from_fname(fname)
- !iomode = IO_MODE_FORTRAN
 
  call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname, ", with iomode:", iomode2str(iomode)))
 
@@ -2873,22 +2871,22 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
    ! Open the file.
    sc_mode = xmpio_single
    funt = get_unit()
-   call wfk_open_read(Wfk,fname,formeig0,iomode,funt,xmpi_comm_self,Hdr_out=Hdr_out)
+   call wfk_open_read(Wfk, fname, formeig0, iomode, funt, xmpi_comm_self, Hdr_out=Hdr_out)
 
    ! Read the eigenvalues and optionally the occupation factors.
-   ABI_MALLOC(eigen, (Wfk%mband,Wfk%nkpt,Wfk%nsppol))
+   ABI_MALLOC(eigen, (Wfk%mband, Wfk%nkpt, Wfk%nsppol))
    eigen = HUGE(zero)
    if (present(occ)) then
-     ABI_MALLOC(occ, (Wfk%mband,Wfk%nkpt,Wfk%nsppol))
+     ABI_MALLOC(occ, (Wfk%mband, Wfk%nkpt, Wfk%nsppol))
      occ = HUGE(zero)
    end if
 
    do spin=1,Wfk%nsppol
      do ik_ibz=1,Wfk%nkpt
        if (present(occ)) then
-         call wfk%read_eigk(ik_ibz,spin,sc_mode,eigen(:,ik_ibz,spin),occ_k=occ(:,ik_ibz,spin))
+         call wfk%read_eigk(ik_ibz, spin, sc_mode, eigen(:,ik_ibz,spin), occ_k=occ(:,ik_ibz,spin))
        else
-         call wfk%read_eigk(ik_ibz,spin,sc_mode,eigen(:,ik_ibz,spin))
+         call wfk%read_eigk(ik_ibz, spin, sc_mode, eigen(:,ik_ibz,spin))
        end if
      end do
    end do
@@ -2902,13 +2900,13 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
    call Hdr_out%bcast(master, my_rank, comm)
    mband = MAXVAL(Hdr_out%nband)
    if (my_rank/=master) then
-     ABI_MALLOC(eigen, (mband,Hdr_out%nkpt,Hdr_out%nsppol))
+     ABI_MALLOC(eigen, (mband, Hdr_out%nkpt, Hdr_out%nsppol))
      if (present(occ)) then
-       ABI_MALLOC(occ, (mband,Hdr_out%nkpt,Hdr_out%nsppol))
+       ABI_MALLOC(occ, (mband, Hdr_out%nkpt, Hdr_out%nsppol))
      end if
    end if
-   call xmpi_bcast(eigen,master,comm,ierr)
-   if (present(occ)) call xmpi_bcast(occ,master,comm,ierr)
+   call xmpi_bcast(eigen, master, comm, ierr)
+   if (present(occ)) call xmpi_bcast(occ, master, comm, ierr)
  end if
 
  call cwtime_report(" wfk_read_eigenvalues", cpu, wall, gflops)
@@ -3158,7 +3156,7 @@ subroutine wfk_seek(Wfk,ik_ibz,spin)
    end if
 
    call mvrecord(Wfk%fh, (recn_wanted - recn_fpt) ,ierr)
-   ABI_CHECK(ierr==0,"error in mvrecord")
+   ABI_CHECK(ierr == 0, "error in mvrecord")
 
    Wfk%f90_fptr = [ik_ibz, spin, REC_NPW]
 
@@ -5288,7 +5286,9 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  call owfk%close()
 
  ! Rename files, keep backup copy of input WFK file.
- ABI_CHECK(clib_rename(my_inpath, strcat(my_inpath, ".bkp")) == 0, "Failed to rename input WFK file.")
+ call delete_file(my_inpath, ierr)
+ ABI_CHECK(ierr == 0, sjoin("Cannot remove OLD file:", my_inpath))
+ !ABI_CHECK(clib_rename(my_inpath, strcat(my_inpath, ".bkp")) == 0, "Failed to rename input WFK file.")
  ABI_CHECK(clib_rename(out_wfkpath, my_inpath) == 0, "Failed to rename output WFK file.")
 
  call cwtime_report(" WFK with fine k-mesh written to file.", cpu, wall, gflops)
