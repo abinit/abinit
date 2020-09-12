@@ -1,4 +1,4 @@
-# ZPR computation at Gamma for MgO. 
+# ZPR computation at the Gamma point for MgO.
 
  nband 30
  ecut 35.0
@@ -15,14 +15,14 @@
  tmesh 0 100 4            # [start, step, num_T] in K
 
  getddb_filepath "teph4zpr_1_DDB"
- ddb_ngqpt 4 4 4          # The code expects to find in the DDB 
+ ddb_ngqpt 4 4 4          # The code expects to find in the DDB
                           # all the IBZ q-points corresponding to a 4x4x4 q-mesh
 
  getdvdb_filepath "teph4zpr_2_DVDB"
  getwfk_filepath "teph4zpr_3o_DS1_WFK"    # 4x4x4 k-mesh with 70 bands
 
 ##############################################
-####                 SECTION: Sigma_nk                 
+####                 SECTION: Sigma_nk
 ##############################################
  nkptgw 1
  kptgw
@@ -65,12 +65,12 @@
 #%% test_chain = teph4zpr_1.in, teph4zpr_2.in, teph4zpr_3.in, teph4zpr_4.in, teph4zpr_5.in, teph4zpr_6.in, teph4zpr_7.in
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
-#%% files_to_test = 
+#%% files_to_test =
 #%%   teph4zpr_4.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = ZPR computation at Gamma for MgO. 
+#%% description = ZPR computation at the Gamma point for MgO.
 #%%<END TEST_INFO>

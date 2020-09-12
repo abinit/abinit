@@ -3,8 +3,9 @@ EXTRA_DIST += \
 	KNOWN_PROBLEMS \
 	PACKAGING \
 	INSTALL_CentOS.md \
+	INSTALL_EasyBuild.md \
 	INSTALL_MacOS.md \
-        INSTALL_Ubuntu.md \
+    INSTALL_Ubuntu.md \
 	INSTALL_gpu.md \
 	RELNOTES \
 	abimkdocs \

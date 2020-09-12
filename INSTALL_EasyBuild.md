@@ -15,7 +15,7 @@ For an introduction to Lmod and Environment Modules,
 see the [Lmod user guide](https://lmod.readthedocs.io/en/latest/index.html).
 
 Note also that EasyBuild configuration files (*easyconfigs*) for different ABINIT versions and different toolchains
-can be found [here](https://github.com/easybuilders/easybuild-easyconfigs/tree/develop/easybuild/easyconfigs/a/ABINIT).
+are available on [github](https://github.com/easybuilders/easybuild-easyconfigs/tree/develop/easybuild/easyconfigs/a/ABINIT).
 If you are not interested in learning how to use EasyBuild,
 feel free to ask your sysadmin to build an ABINIT module using one of the *easyconfigs* already available.
 If, on the other hand, you love learning how to use new tools to facilitate your work
@@ -61,7 +61,7 @@ $ module load ABINIT/8.10.3-intel-2018b
 
 to activate the 8.10.3 executable compiled with the intel toolchain 2018b.
 The bad news is that all the available versions are rather old so
-we have to use EasyBuild command line interface to build a more recent version.
+we have to use the EasyBuild command line interface to build a more recent version.
 
 To build software with EasyBuild, we need the `eb` python script.
 If `eb` is not already in $PATH, you will get the following error message:
@@ -113,7 +113,7 @@ CFGS2=/usr/easybuild/easyconfigs
 ```
 
 Various *easyconfig* files are found for different ABINIT versions
-and different compiler toolchains: `foss 2016b`, `intel 2018a`, etc.
+and different toolchains: `foss 2016b`, `intel 2018a`, etc.
 Note that the output may change depending on the version of EasyBuild installed on your machine as
 these `eb` files are shipped with the EasyBuild installation.
 More recent *easyconfigs* files can be found in the
@@ -121,10 +121,11 @@ More recent *easyconfigs* files can be found in the
 
 !!! important
 
-    Eb typically follow the naming scheme `<name>-<version>[-<toolchain>][<versionsuffix>].eb`.
+    `eb` files typically follow the naming scheme `<name>-<version>[-<toolchain>][<versionsuffix>].eb`.
     The name reflects the fact each easyconfig file is associated to a particular version of the library/application
     and a particular [toolchain](https://easybuild.readthedocs.io/en/latest/Common-toolchains.html).
-    `foss` stands for Free and Open Source Software toolchain based on GCC, OpenMPI, OpenBLAS/LAPACK, ScaLAPACK, and FFTW3
+    For example, `foss` stands for Free and Open Source Software toolchain based on 
+    GCC, OpenMPI, OpenBLAS/LAPACK, ScaLAPACK, and FFTW3
     whereas the `intel` toolchain is based on the intel compilers, MKL and intel MPI.
 
     Applications based on `foss` are relatively easy to build since all the basic building blocks
@@ -152,8 +153,8 @@ releases available on our machine:
 $ module avail
 
 ------------------ Meta Modules ------------------
-   releases/elic-2017b        releases/2016b (S,L)    
-   releases/2016a      (S)    releases/2017b (S)      
+   releases/elic-2017b        releases/2016b (S,L)
+   releases/2016a      (S)    releases/2017b (S)
    releases/2018a (S)         releases/2019b (S,D)    use.own
    releases/2018b (S)         tis/2018.01    (S,L)
 
@@ -163,9 +164,9 @@ $ module avail
 The `(D)` after the name of the module stands for Default.
 It means that EasyBuild uses this release by default.
 
-Since we want to build `9.0.4-foss-2019b.eb` and `2019b` is the default release, 
+Since we want to build `9.0.4-foss-2019b.eb` and `2019b` is the default release,
 we can proceed directly with the next steps.
-If you want to build a recipe associated to a different release e.g. `2016a`, 
+If you want to build a recipe associated to a different release e.g. `2016a`,
 you need to load the associated module before building the code using e.g.:
 
 ```sh
@@ -173,7 +174,7 @@ module load releases/2016a`
 ```
 
 Now invoke `eb` with the name of the easyconfig file and the two options `--dry-run` and `--robot`
-or just `-Dr` if you prefer the short version:
+(or just `-Dr` if you prefer the short version):
 
 ```sh
 eb ABINIT-9.1.0-foss-2019b.eb --robot --dry-run
@@ -187,7 +188,7 @@ To prepend additional directories to search for eb files (like the current direc
 use the syntax `--robot-paths=$PWD`.
 Multiple directories can be specified using `--robot-paths=PATH1:PATH2`
 
-On my machine, I get the following result:
+On my machine, I get the following results:
 
 ```sh
 eb ABINIT-9.1.0-foss-2019b.eb --robot --dry-run
@@ -246,11 +247,11 @@ Dry run: printing build status of easyconfigs and dependencies
 == Temporary directory /tmp/eb-ttdRNl has been removed.
 ```
 
-The output indicates that most of the dependencies are already installed (checked boxes).
-Only *libxc/4.3.4-GCC-8.3.0* and *ABINIT-9.1.0-foss-2019b.eb* must be built from source (unchecked boxes).
+The output indicates that most of the dependencies are already installed (**checked boxes**).
+Only *libxc/4.3.4-GCC-8.3.0* and *ABINIT-9.1.0-foss-2019b.eb* must be built from source (**unchecked boxes**).
 
 Now we can finally build and install ABINIT v9.1.0 with *foss-2019b*
-by executing the same command but without `--dry-run`:
+by executing the same command without `--dry-run`:
 
 ```sh
 eb ABINIT-9.1.0-foss-2019b.eb --robot
@@ -339,7 +340,6 @@ $ tree  ~/.local/easybuild/modules/
 
 Since we need to load modules installed in `~/.local/easybuild/modules/all`,
 we must add this directory to $MODULEPATH.
-
 With a recent version of EasyBuild, issue:
 
 ```sh
@@ -382,7 +382,7 @@ $ abinit -v
 ```
 
 The output of `ldd` shows that the executable is dynamically linked to our version of libxc
-whereas openblas, fftw3, netcdf, hdf5 and MPI are provided by the `2019b` release of `foss` as expected:
+whereas *openblas*, *fftw3*, *netcdf*, *hdf5* and MPI are provided by the `2019b` release of `foss` as expected:
 
 ```sh
 $ ldd `which abinit`
@@ -440,7 +440,7 @@ eb ABINIT-9.1.0-foss-2019b.eb -Dr
 In the previous example we used one of the official easyconfig files shipped with the EasyBuild package.
 There are cases, however, in which we need to perform a customized build.
 For example, we may want to compile the latest stable version of ABINIT recently released,
-use a different release, or maybe we need to activate configuration options that are not present in the official file.
+or use a different release, or maybe we just need to activate configuration options that are not present in the official file.
 In this case, we can simply copy the original easyconfig file,
 change it according to our needs and finally pass this customized file to the `eb` script.
 
@@ -536,14 +536,17 @@ By the same token, one can compile with version `2020a` of the `foss` toolchain 
 
 provided `releases/2020a` is available on our cluster.
 
-Changing `dependencies` or `configopts` requires some basic understanding of the ABINIT build system
+Changing `dependencies` and `configopts` requires some basic understanding of the ABINIT build system
 and of the logic used by EasyBuild to automate the compilation.
+If you need a specialized `eb` file, feel free to contact the ABINIT developers on the forum or the EasyBuild 
+developers to ask for support.
+
+<!--
 Unfortunately, we cannot cover all the possible scenarios so we focus on the simplest case in which
 we want to **extend** the recipe that is we just want to activate support for an optional library
 without changing the other easyconfigs parameters.
 Let's assume, for instance, that we want to build an Abinit version with Wannier90 support.
 
-<!--
 Expert users may want to activate support for optional features that require additional external libraries
 e.g. wannier90, atompaw, etc.
 In this case, one has to list the external library in the `dependencies` section, add the correct configuration

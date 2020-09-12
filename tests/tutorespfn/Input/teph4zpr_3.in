@@ -1,8 +1,7 @@
 # NSCF computation of WFK files with empty states to prepare convergence studies for ZPR calculation
-
  ndtset 3
 
-# Three Gamma-cented k-meshes:
+# Three Gamma-centered k-meshes:
 # 4x4x4 with 70 bands, then 8x8x8 and 12x12x12 with 25 bands.
  nband1  70;  nbdbuf1  10
  nband   25;  nbdbuf   5
@@ -20,9 +19,8 @@
  ecut 35.0
  nstep 150
  iscf -2          # NSCF run
- tolwfr 1e-14     # 1e-18 is the recommended value  
+ tolwfr 1e-14     # 1e-18 is the recommended value
 
- ngfft 30 30 30   # Important: Must use same FFT mesh as the one in DEN.nc
  getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
  structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
@@ -36,7 +34,7 @@
 #%% test_chain = teph4zpr_1.in, teph4zpr_2.in, teph4zpr_3.in, teph4zpr_4.in, teph4zpr_5.in, teph4zpr_6.in, teph4zpr_7.in
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
-#%% files_to_test = 
+#%% files_to_test =
 #%%   teph4zpr_3.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 10
