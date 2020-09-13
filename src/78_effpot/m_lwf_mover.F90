@@ -159,7 +159,7 @@ contains
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-    write(msg, '(A22)') "Lattice dynamic steps:"
+    write(msg, '(A22)') "LWF dynamic steps:"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
     msg=repeat("=", 90)
@@ -306,7 +306,7 @@ contains
     type(hash_table_t), optional, intent(inout) :: energy_table
     real(dp) :: T_start, T_end
     integer :: T_nstep
-    !type(spin_ncfile_t) :: spin_ncfile
+    type(lwf_ncfile_t) :: lwf_ncfile
     character(len=4) :: post_fname
     real(dp) :: T, T_step
     integer :: i, ii
@@ -357,7 +357,6 @@ contains
           call self%hist%reset(array_to_zero=.False.)
           ! set temperature
           ! TODO make this into a subroutine set_params
-          self%params%lwf_temperature=T
        endif
        call self%set_temperature(temperature=T)
        if(iam_master) then

@@ -354,6 +354,9 @@ contains
     end if
     if(self%has_lwf) then
        self%params%lwf_temperature = self%params%lwf_temperature/Ha_K
+       self%params%lwf_temperature_start=self%params%lwf_temperature_start/Ha_K
+       self%params%lwf_temperature_end=self%params%lwf_temperature_end/Ha_K
+
     end if
 
   end subroutine prepare_params
@@ -520,7 +523,7 @@ contains
        ABI_DATATYPE_ALLOCATE_SCALAR(lwf_mc_t, self%lwf_mover)
     end select
     call self%lwf_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
-    call self%lwf_mover%set_initial_state(mode=0)
+    call self%lwf_mover%set_initial_state(mode=self%params%lwf_init_state)
   end subroutine set_lwf_mover
 
 
@@ -661,10 +664,10 @@ contains
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
     call self%set_movers()
-    call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
+    !call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
     !call self%lwf_mover%run_varT(self%pots, energy_table=self%energy_table)
-    call self%spin_mover%run_MvT(self%pots, self%filenames(2), energy_table=self%energy_table)
-    call self%lwf_mover%ncfile%finalize()
+    call self%lwf_mover%run_varT(self%pots, self%filenames(2), energy_table=self%energy_table)
+    !call self%lwf_mover%ncfile%finalize()
   end subroutine run_lwf_varT
 
 
@@ -697,7 +700,7 @@ contains
        call self%run_coupled_spin_latt_dynamics()
     ! lwf
     else if(self%params%dynamics<=0 .and. self%params%spin_dynamics<=0 .and. self%params%lwf_dynamics>0) then
-       if (self%params%spin_var_temperature==0) then
+       if (self%params%lwf_var_temperature==0) then
           call self%run_lwf_dynamics()
        else
           call self%run_lwf_varT()

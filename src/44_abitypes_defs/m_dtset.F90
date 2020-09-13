@@ -3164,8 +3164,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' lw_flexo lw_qdrpl'
  list_vars=trim(list_vars)//' lwf_dt lwf_dynamics lwf_init_state lwf_mc_avg_amp lwf_nctime lwf_ntime'
  list_vars=trim(list_vars)//' lwf_self_bound_coeff lwf_self_bound_order'
- list_vars=trim(list_vars)//' lwf_temperature lwf_temperature_start lwf_temperature_end lwf_temperature_nstep'
- list_vars=trim(list_vars)//' lwf_var_temperature'
+ list_vars=trim(list_vars)//' lwf_temperature lwf_temperature_start lwf_temperature_end'
+ list_vars=trim(list_vars)//' lwf_temperature_nstep lwf_var_temperature'
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
