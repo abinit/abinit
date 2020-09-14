@@ -1880,6 +1880,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbdbuf',tread,'INT')
  if(tread==1)then
    dtset%nbdbuf=intarr(1)
+   !if (dtset%nbdbuf < 0) then
+   !  ABI_CHECK(abs(dtset%nbdbuf) < 100, "abs(nbdbuf) should be < 100")
+   !  dtset%nbdbuf = dtset%nbdbuf * maxval(dtset%nband)
+   !end if
  else
    if(response/=1 .and. dtset%iscf<0)dtset%nbdbuf=2*dtset%nspinor
    if(response==1 .and. 3<=occopt .and. occopt<=8 )dtset%nbdbuf=2*dtset%nspinor
