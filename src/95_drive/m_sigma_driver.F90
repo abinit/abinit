@@ -2738,7 +2738,7 @@ endif
        write(msg,'(a116)')'------------------------------------------------------------------------------------------------------------------'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a116)')' k-point  band      eik0          eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]    vH[NO]-vH[KS]'
+       write(msg,'(a116)')' k-point  band      eik^GS        eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]    vH[NO]-vH[KS]'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        do ib=b1gw,b2gw
