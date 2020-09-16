@@ -2735,24 +2735,25 @@ endif
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      do ikcalc=1,Sigp%nkptgw
-       write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+       write(msg,'(a116)')'------------------------------------------------------------------------------------------------------------------'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a102)')' k-point  band      eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]    vH[NO]-vH[KS]'
+       write(msg,'(a116)')' k-point  band      eik0          eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]    vH[NO]-vH[KS]'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        do ib=b1gw,b2gw
          delta_band_ibik=(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ikcalc,1))+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)&
                         &-old_purex(ib,ikcalc)
          eik_new=real(KS_BSt%eig(ib,ikcalc,1))+real(delta_band_ibik)
-         write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5)') ikcalc,ib,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
+         write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5)') &
+         & ikcalc,ib,real(KS_BSt%eig(ib,ikcalc,1))*Ha_eV,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
          & real(Sr%x_mat(ib,ib,ikcalc,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,real(KS_me%vxcval(ib,ib,ikcalc,1))*Ha_eV, &
          & real(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ikcalc,1))*Ha_eV
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
        enddo
      enddo
-     write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+     write(msg,'(a116)')'------------------------------------------------------------------------------------------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      !
