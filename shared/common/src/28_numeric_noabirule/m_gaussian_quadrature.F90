@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gaussian_quadrature
 !! NAME
 !! m_gaussian_quadrature

@@ -85,8 +85,8 @@ module m_gtermcutoff
  real(dp),save :: gcart_para_,gcart_perp_,gcartx_,gcarty_
  real(dp),save :: xx_,zz_,rcut_
  real(dp),save :: accuracy_
-  
- 
+
+
 contains
 !!***
 
@@ -99,21 +99,21 @@ contains
 !! FUNCTION
 !!   Apply a cut-off term to the 1/G**2-like terms that appears throughout
 !!   the code at the ground-state level as follows: Ewald, NC-PSP, Hartee.
-!!   
+!!
 !! INPUTS
 !!   gsqcut     = cutoff on (k+G)^2 (bohr^-2) (sphere for density and potential) (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
 !!   icutcoul   = Information about the cut-off
 !!   ngfft(18)  = Information on the (fine) FFT grid used for the density.
-!!   nkpt       = Number of k-points in the Brillouin zone 
+!!   nkpt       = Number of k-points in the Brillouin zone
 !!   rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!   vcutgeo(3)= Info on the orientation and extension of the cutoff region.
-!!    
+!!
 !! OUTPUT
 !!   gcutoff  = Cut-off term applied to 1/G**2 terms
 !!
 !! NOTES
-!!  1. In order to incur minimal changes in some portions of the code 
-!!  where a cut-off is needed to be applied, one can work only with 
+!!  1. In order to incur minimal changes in some portions of the code
+!!  where a cut-off is needed to be applied, one can work only with
 !!  the cut-off part of the Coulomb potential, unlike what is done
 !!  in barevcoul module.
 !!  2. Fock term has its own legacy cut-off for the moment.
@@ -127,7 +127,7 @@ contains
 !! SOURCE
 
 subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
- 
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)   :: icutcoul, nkpt
@@ -140,6 +140,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 !Local variables-------------------------------
 !scalars
  integer,parameter  :: N0=1000
+ integer,save :: enough
  integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing
  integer            :: c1,c2,opt_cylinder
  integer            :: n1,n2,n3,nfft
@@ -174,9 +175,9 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nfft=n1*n2*n3
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- 
+
  ! Initialize container
- ABI_ALLOCATE(gvec,(3,MAX(n1,n2,n3))) 
+ ABI_ALLOCATE(gvec,(3,MAX(n1,n2,n3)))
  ABI_ALLOCATE(gpq,(nfft))
  ABI_ALLOCATE(gpq2,(nfft))
  ABI_ALLOCATE(gcutoff,(nfft))
@@ -193,7 +194,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  ! Get the cut-off method info from the input file
  ! Assign method to one of the available cases
- mode='NONE' 
+ mode='NONE'
 
  if (icutcoul==0) mode='SPHERE'
  if (icutcoul==1) mode='CYLINDER'
@@ -201,10 +202,13 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  if (icutcoul==3) mode='CRYSTAL'
  if (icutcoul==4) mode='ERF'
  if (icutcoul==5) mode='ERFC'
- 
- !Print in log info about the cut-off method at every call: 
- write(msg,'(3a)')ch10,' 1/G**2 cut-off applied in the following step : cutoff-mode = ',TRIM(mode)
- call wrtout(std_out,msg)
+
+ !Print in log info about the cut-off method at every call:
+ enough = enough + 1
+ if (enough < 5) then
+   write(msg,'(3a)')ch10,' 1/G**2 cut-off applied in the following step : cutoff-mode = ',TRIM(mode)
+   call wrtout(std_out,msg)
+ end if
  !!!
 
   do i3=1,n3
@@ -221,9 +225,9 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      do i1=1,n1
         ii=i1+i23
         gpq(ii)=gs2+gvec(1,i1)*(gvec(1,i1)*gmet(1,1)+gvecg2p3)
-        if(gpq(ii)>=tol4) then 
+        if(gpq(ii)>=tol4) then
           gpq2(ii) = piinv/gpq(ii)
-        end if 
+        end if
      end do
    end do
  end do
@@ -250,7 +254,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
    CASE('CYLINDER')
 
      test=COUNT(vcutgeo/=zero)
-     ABI_CHECK(test==1,'Wrong cutgeo for cylinder')   
+     ABI_CHECK(test==1,'Wrong cutgeo for cylinder')
 
      ! === From reduced to Cartesian coordinates ===
      call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -258,10 +262,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      a1=rprimd(:,1); b1=two_pi*gprimd(:,1)
      a2=rprimd(:,2); b2=two_pi*gprimd(:,2)
      a3=rprimd(:,3); b3=two_pi*gprimd(:,3)
-    
+
      !ntasks=nfft
-     !call xmpi_split_work(ntasks,comm,my_start,my_stop) 
-        
+     !call xmpi_split_work(ntasks,comm,my_start,my_stop)
+
      !Calculate rcut for each method !
      !
 
@@ -287,7 +291,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
            opt_cylinder=2
            !Check to enter the infinite Rozzi treatment
            if(vcutgeo(3).le.-tol999) then
-             hcyl=tol12 
+             hcyl=tol12
            end if
          end if
        end if
@@ -327,7 +331,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      call wrtout(std_out,msg,'COLL')
 
      SELECT CASE (opt_cylinder)
-     
+
      CASE(1)
 
      ! === Infinite cylinder, interaction is zeroed outside the Wigner-Seitz cell ===
@@ -353,7 +357,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        i23=n1*(i2-1 + n2*(i3-1))
        do i1=1,n1
        ii=i1+i23
-  
+
        gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
        gcartx_=gcart(1) ; gcarty_=gcart(2) ; gcart_para_=ABS(gcart(3))
        gpq(ii)=DOT_PRODUCT(gcart,gcart)
@@ -377,7 +381,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        ! * Factor two comes from the replacement WS -> (1,4) quadrant thanks to symmetries of the integrad.
        !tmp=tmp+quad
        gcutoff(ii)=quad*gpq(ii)/pi
-      
+
        end do !i1
       end do !i2
      end do !i3
@@ -437,7 +441,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
              end if
 
              gcutoff(ii)=quad*gpq(ii)
- 
+
            else if (gcart_perp_==zero.and.gcart_para_==zero) then
              ! Use lim q+G --> 0
              gcutoff(ii)=zero
@@ -486,7 +490,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
          end do !i1
         end do !i2
        end do !i3
-     end if ! case 2 - selecting Rozzi 
+     end if ! case 2 - selecting Rozzi
 
      CASE DEFAULT
       MSG_BUG(sjoin('Wrong value for cylinder method:',itoa(opt_cylinder)))
@@ -526,7 +530,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        else
           rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
        endif
- 
+
        do i3=1,n3
         do i2=1,n2
          i23=n1*(i2-1 + n2*(i3-1))
@@ -542,7 +546,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
          end do !i1
         end do !i2
        end do !i3
-        
+
        !CASE SURFACE 2 - Rozzi
        CASE(2)
 
@@ -569,7 +573,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
            if(gcart_para>tol4) then
              gcutoff(ii)=one+EXP(-gcart_para*rcut_loc)*(gcart_perp/gcart_para*&
-&                        SIN(gcart_perp*rcut_loc)-COS(gcart_perp*rcut_loc)) 
+&                        SIN(gcart_perp*rcut_loc)-COS(gcart_perp*rcut_loc))
            else
              if (ABS(gcart_perp)>tol4) then
                gcutoff(ii)=one-COS(-gcart_perp*rcut_loc)-gcart_perp*rcut_loc*SIN(gcart_perp*rcut_loc)
@@ -581,7 +585,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
          end do !i1
         end do !i2
        end do !i3
-   
+
        CASE DEFAULT
          write(msg,'(a,i3)')' Wrong value of surface method: ',opt_surface
          MSG_BUG(msg)
@@ -595,7 +599,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
     else
         rcut_loc= (three*nkpt*ucvol/four_pi)**(one/three)
     endif
-  
+
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then
           gcutoff(ig)=zero ! @Gamma: initialize quantity in each requiered routine
@@ -603,7 +607,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
           gcutoff(ig)=exp(-pi/(gpq2(ig)*rcut_loc**2))
        end if
      end do  !ig
- 
+
    CASE('ERFC')
 
    ! Calculate rcut for each method ! Same as SPHERE
@@ -623,20 +627,20 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
    CASE('CRYSTAL')
      gcutoff(:)=one ! Neutral cut-off
-     write(msg,'(a)')'CRYSTAL method: no cut-off applied to G**2 while CRYSTAL method is implied!'
-     MSG_WARNING(msg) 
+     !write(msg,'(a)')'CRYSTAL method: no cut-off applied to G**2 while CRYSTAL method is implied!'
+     !MSG_WARNING(msg)
    CASE DEFAULT
      gcutoff=one ! Neutral cut-off
-     write(msg,'(a)')'No cut-off applied to G**2!'
-     MSG_WARNING(msg)
+     !write(msg,'(a)')'No cut-off applied to G**2!'
+     !MSG_WARNING(msg)
  END SELECT
 
- ABI_DEALLOCATE(gvec) 
+ ABI_DEALLOCATE(gvec)
  ABI_DEALLOCATE(gpq)
  ABI_DEALLOCATE(gpq2)
 ! ABI_DEALLOCATE(gcutoff)
- 
-end subroutine termcutoff 
+
+end subroutine termcutoff
 !!***
 
 !----------------------------------------------------------------------

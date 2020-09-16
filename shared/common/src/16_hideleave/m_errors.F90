@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_errors
 !! NAME
 !!  m_errors
@@ -742,7 +741,7 @@ end subroutine die
 !!
 !! SOURCE
 
-subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
+subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit)
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: line, unit
@@ -781,7 +780,7 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
 
  select case (toupper(level))
 
- case ('COMMENT','WARNING')
+ case ('COMMENT', 'WARNING')
 
    write(sbuf,'(8a,i0,7a)')ch10,&
      "--- !",TRIM(level),ch10,&
@@ -797,17 +796,11 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
      "--- !",TRIM(level),ch10,&
      "message: |",ch10,TRIM(indent(my_msg)),ch10
    call wrtout(unit_, sbuf, mode_paral)
-   if (.not.present(NOSTOP)) then
-     call abi_abort(mode_paral,print_config=.FALSE.)
-   end if
+   if (.not.present(NOSTOP)) call abi_abort(mode_paral, print_config=.FALSE.)
 
- ! ERROR' or 'BUG'
  case default
-
+   ! ERROR' or 'BUG'
    if ((.not.present(NOSTOP)).and.(.not.present(NODUMP))) then
-     !call print_kinds()
-     !call xmpi_show_info()
-     !call dump_config(std_out)
      ! Dump the backtrace if the compiler supports it.
      if (m_errors_show_backtrace == 1) call show_backtrace()
    end if
@@ -828,7 +821,7 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
         call lock_and_write(ABI_MPIABORTFILE, sbuf, ierr)
      end if
      ! And now we die!
-     call abi_abort(mode_paral,print_config=.FALSE.)
+     call abi_abort(mode_paral, print_config=.FALSE.)
    end if
 
  end select
@@ -885,7 +878,6 @@ end subroutine set_backtrace_onerr
 
 subroutine show_backtrace()
 
-
 #if defined FC_GNU && defined HAVE_FC_BACKTRACE
   call backtrace()  ! Gfortran extension
 
@@ -920,7 +912,7 @@ end subroutine show_backtrace
 !!
 !! SOURCE
 
-subroutine check_mpi_ierr(ierr,msg,file,line)
+subroutine check_mpi_ierr(ierr, msg, file, line)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ierr

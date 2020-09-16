@@ -33,7 +33,7 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="70  ,370 ,180 ,390 " href="cut3d/index.html" />
 <area shape="rect" coords="70  ,395 ,180 ,420 " href="fold2bloch/index.html" />
 <area shape="rect" coords="70  ,425 ,180 ,445 " href="wannier90/index.html" />
-<area shape="rect" coords="70  ,450 ,180 ,475" href="source_code/index.html" />
+<area shape="rect" coords="70  ,450 ,180 ,475" href="../developers/developers_howto/index.html" />
 <area shape="rect" coords="210  ,135 ,330 ,199 " href="rf1/index.html" />
 <area shape="rect" coords="210  ,210 ,330 ,240 " href="optic/index.html" />
 <area shape="rect" coords="210  ,250 ,330 ,280 " href="rf2/index.html" />
@@ -155,8 +155,8 @@ prerequisite than the tutorials 1 to 4, and that you can do in any order (there 
   * [The tutorial on TDDFT](tddft) deals with the computation of the excitation spectrum of finite systems,
     thanks to the Time-Dependent Density Functional Theory approach, in the Casida formalism.
 
-  * [The tutorial "Source code"](source_code) introduces the user to the development
-    of new functionalities in ABINIT: in this tutorial, one learns how to add a new input variable ...
+  * [The "howto guide for developers"](../developers/developers_howto) introduces the new developer to the development
+    of new functionalities in ABINIT ...
 
 ### DFPT-related tutorials
 **There is an additional group of tutorials on density-functional

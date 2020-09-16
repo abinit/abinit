@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_time
 !! NAME
 !! m_time
@@ -20,16 +19,16 @@
 
 #include "abi_common.h"
 
-MODULE m_time
+module m_time
 
  use defs_basis
  use m_abicore
  use m_errors
  use iso_c_binding
- use m_xmpi
 #if defined HAVE_MPI2
  use mpi
 #endif
+ use m_xmpi
  use m_clib
 
  use m_xpapi,    only: xpapi_flops
@@ -696,14 +695,14 @@ subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
 
 !Local variables-------------------------------
 !scalars
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
 !Check that nn lies in sensible bounds
  if (nn<0.or.nn>TIMER_SIZE) then
-   write(message,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
-   MSG_BUG(message)
+   write(msg,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
+   MSG_BUG(msg)
  end if
 
 !return accumulated time for nn
@@ -803,7 +802,7 @@ end function time_get_papiopt
 !!  option=see comment above
 !!
 !! OUTPUT
-!!  on option=4 :
+!!  on option=4:
 !!    tottim(2,nn)=accumulated time for accumulator nn; otherwise
 !!     tottim is a dummy variable.
 !!    option gives the number of times that the
@@ -840,7 +839,7 @@ end function time_get_papiopt
 !! SOURCE
 !!
 
-subroutine timab(nn,option,tottim)
+subroutine timab(nn, option, tottim)
 
 #ifdef HAVE_PAPI
 #include "f90papi.h"
@@ -855,7 +854,7 @@ subroutine timab(nn,option,tottim)
 !Local variables-------------------------------
 !scalars
  real(dp),save :: cpu,wall
- character(len=500) :: message
+ character(len=500) :: msg
 #ifdef HAVE_PAPI
  integer(C_INT) :: check
  integer(C_LONG_LONG),save :: flops1
@@ -867,13 +866,13 @@ subroutine timab(nn,option,tottim)
 
  if (option==5) timopt=nn
 
-!If timopt was set to zero by a call with option=5, suppress
-!all action of this routine (might as well return at this point !)
+ ! If timopt was set to zero by a call with option=5, suppress
+ ! all action of this routine (might as well return at this point !)
  if(timopt/=0 .and. option/=5)then
    ! Check that nn lies in sensible bounds
    if (nn<1.or.nn>TIMER_SIZE) then
-     write(message,'(a,i0,a,i0)')'  TIMER_SIZE = ',TIMER_SIZE,' but input nn = ',nn
-     MSG_BUG(message)
+     write(msg,'(2(a,i0))')'  TIMER_SIZE = ',TIMER_SIZE,' but input nn = ',nn
+     MSG_BUG(msg)
    end if
 
 #ifdef HAVE_PAPI
@@ -950,12 +949,12 @@ subroutine timab(nn,option,tottim)
 #endif
 
    case default
-     write(message,'(a,i10,a)')'  Input option not valid, =',option,'.'
-     MSG_BUG(message)
+     write(msg,'(a,i10,a)')'  Input option not valid, =',option,'.'
+     MSG_BUG(msg)
    end select
  end if
 
 end subroutine timab
 !!***
 
-END MODULE m_time
+end module m_time

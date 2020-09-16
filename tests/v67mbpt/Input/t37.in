@@ -78,7 +78,6 @@ freqremax4   31 eV
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t37.in, t38.in, t39.in
 #%% [files]
 #%% files_to_test = 

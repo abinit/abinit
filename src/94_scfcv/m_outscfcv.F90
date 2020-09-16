@@ -282,7 +282,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp) :: norm,occ_norm,unocc_norm
  real(dp) :: rate_dum,rate_dum2
  real(dp) :: yp1, ypn, dr
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: fname
 !arrays
  integer, allocatable :: isort(:)
@@ -317,51 +317,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
  call timab(950,1,tsec) ! outscfcv
 
  if ((usecprj==0.or.mcprj==0).and.psps%usepaw==1.and. &
-& (dtset%prtwant==2.or.dtset%prtwant==3.or.dtset%prtnabla>0.or.dtset%prtdos==3 &
-& .or.dtset%kssform==3.or.dtset%pawfatbnd>0.or.dtset%pawprtwf>0)) then
-   write (message,'(5a)')&
+     (dtset%prtwant==2.or.dtset%prtwant==3.or.dtset%prtnabla>0.or.dtset%prtdos==3 &
+     .or.dtset%kssform==3.or.dtset%pawfatbnd>0.or.dtset%pawprtwf>0)) then
+   write (msg,'(5a)')&
 &   'cprj datastructure must be allocated',ch10,&
 &   'with options prtwant=2,3, prtnabla>0, prtdos>3, kssform==3, pawfatbnd>0, pawprtwf>0',ch10,&
 &   'Action: change pawusecp input keyword.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
-
-!Initialize two objects to facilitate the propagation of info.
-!These objects should used more frequently, actually they should
-!become basic objects used in abinit.
-
-!Crystalline structure.
- remove_inv=.false.
- if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
-
- timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
- call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
-   dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
-   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
-   dtset%symrel,dtset%tnons,dtset%symafm)
-
-!Electron band energies.
- bantot= dtset%mband*dtset%nkpt*dtset%nsppol
- ABI_MALLOC(doccde,(bantot))
- doccde=zero
-
- call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
-   hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
-   hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
-
- ABI_FREE(doccde)
-
- ebands%fermie  = results_gs%energies%e_fermie
- e_fermie = results_gs%energies%e_fermie
- ebands%entropy = results_gs%energies%entropy
- !write(std_out,*)"ebands%efermi in outscfcv",ebands%fermie
- !write(std_out,*)"results_gs%energies%e_fermie in outscfcv",e_fermie
- !write(std_out,*)"results_gs%fermie in outscfcv",results_gs%fermie
- !write(std_out,*)"hdr%efermi in outscfcv",hdr%fermie
 
  ! Parameters for MPI-FFT
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); nfft_tot = product(ngfft(1:3))
@@ -383,6 +350,44 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    my_atmtab_allocated = .true.
  end if
 
+ ! Initialize two objects to facilitate the propagation of info.
+ ! These objects should used more frequently, actually they should
+ ! become basic objects used in abinit.
+
+ ! Crystalline structure.
+ remove_inv=.false.
+ if (dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
+
+ timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
+ call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
+   dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
+   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
+   dtset%symrel,dtset%tnons,dtset%symafm)
+
+ ! Electron band energies.
+ bantot= dtset%mband*dtset%nkpt*dtset%nsppol
+ ABI_CALLOC(doccde, (bantot))
+
+ call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+   hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+   hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+
+ ABI_FREE(doccde)
+
+ ebands%fermie  = results_gs%energies%e_fermie
+ e_fermie = results_gs%energies%e_fermie
+ ebands%entropy = results_gs%energies%entropy
+ !write(std_out,*)"ebands%efermi in outscfcv",ebands%fermie
+ !write(std_out,*)"results_gs%energies%e_fermie in outscfcv",e_fermie
+ !write(std_out,*)"results_gs%fermie in outscfcv",results_gs%fermie
+ !write(std_out,*)"hdr%efermi in outscfcv",hdr%fermie
+
+ !if (me == master) then !.and. dtset%occopt == 1) then
+ !  call ebands_print_gaps(ebands, std_out, "KS gaps estimated from k-sampling")
+ !  !call ebands_print_gaps(ebands, ab_out, "KS Gaps")
+ !end if
+
  ! YAML output
  if (me == master) then
    call results_gs%yaml_write(ab_out, crystal, dtset%nstep > 0, info="Summary of ground state results")
@@ -390,6 +395,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !wannier interface
  call timab(951,1,tsec)
+
  if (dtset%prtwant==2) then
 
    call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
@@ -511,8 +517,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      if (prtvol>9) then  ! Check normalisation
        norm = SUM(rhor_paw(:,1))*ucvol/PRODUCT(pawfgr%ngfft(1:3))
        call xmpi_sum(norm,comm_fft,ierr)
-       write(message,'(a,F8.4)') '  PAWDEN - NORM OF DENSITY: ',norm
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,F8.4)') '  PAWDEN - NORM OF DENSITY: ',norm
+       call wrtout(std_out, msg)
      end if
    end if
 
@@ -524,8 +530,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      if (prtvol>9) then  ! Check normalisation
        norm = SUM(rhor_paw_core(:,1))*ucvol/PRODUCT(pawfgr%ngfft(1:3))
        call xmpi_sum(norm,comm_fft,ierr)
-       write(message,'(a,F8.4)') '  ATMDEN - NORM OF CORE DENSITY: ', norm
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,F8.4)') '  ATMDEN - NORM OF CORE DENSITY: ', norm
+       call wrtout(std_out, msg)
      end if
    end if
 
@@ -537,8 +543,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      if (prtvol>9) then ! Check normalisation
        norm = SUM(rhor_paw_val(:,1))*ucvol/PRODUCT(pawfgr%ngfft(1:3))
        call xmpi_sum(norm,comm_fft,ierr)
-       write(message,'(a,F8.4)') '  ATMDEN - NORM OF VALENCE PROTODENSITY: ', norm
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,F8.4)') '  ATMDEN - NORM OF VALENCE PROTODENSITY: ', norm
+       call wrtout(std_out, msg)
      end if
    end if
 
@@ -664,9 +670,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
        norm=SUM(vh1_interp)*ucvol/PRODUCT(ngfft(1:3))
        call xmpi_sum(norm,comm_fft,ierr)
-       write(message,'(a,i6,a,E20.10)') ' sum of Hartree correction term on fft grid of atom : ', iatom, &
-&       ' = ', norm
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,i6,a,E20.10)') ' sum of Hartree correction term on fft grid of atom : ', iatom, ' = ', norm
+       call wrtout(std_out, msg)
 
        if (pawfgrtab(iatom)%nfgd/=0) then
          vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) = &
@@ -696,9 +701,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        end do
 
        call simpson_int(nradint, dr, vh1_interp, vh1_integ)
-       write(message,'(a,i6,a,E20.10)') ' integral of Hartree correction term in sphere of atom: ', iatom, &
+       write(msg,'(a,i6,a,E20.10)') ' integral of Hartree correction term in sphere of atom: ', iatom, &
 &       ' = ', vh1_integ(nradint)*four*pi
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out, msg)
 
        ABI_DEALLOCATE(vh1spl)
        ABI_DEALLOCATE(vh1_corrector)
@@ -952,7 +957,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !  for rhomag:
 !    in collinear case component 1 is total density and 2 is _magnetization_ up-down
 !    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
-  
+
    if (dtset%prtdensph==1.and.dtset%usewvl==0) then
      if(all(dtset%constraint_kind(:)==0))then
        call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
@@ -966,25 +971,25 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
      endif
    end if
-  
+
    if (sum(abs(dtset%zeemanfield)) > tol10) then
      if(nspden==2)then
        e_zeeman = -half*rhomag(1,2)*dtset%zeemanfield(3)
-       write (message, "(a,E20.10,a)") " Collinear magnetization ", rhomag(1,2), &
+       write (msg, "(a,E20.10,a)") " Collinear magnetization ", rhomag(1,2), &
 &            " (in # of spins, without 1/2 for magnetic moment) "
-       call wrtout([std_out, ab_out], message)
+       call wrtout([std_out, ab_out], msg)
      else if(nspden==4)then
        e_zeeman = -half * (dtset%zeemanfield(1)*rhomag(1,2)& ! x
 &                         +dtset%zeemanfield(2)*rhomag(1,3)& ! y
 &                         +dtset%zeemanfield(3)*rhomag(1,4)) ! z
-       write (message, "(a,3E20.10,a)") " Magnetization vector ", rhomag(1,2:4), &
+       write (msg, "(a,3E20.10,a)") " Magnetization vector ", rhomag(1,2:4), &
 &            " (in # of spins, without 1/2 for magnetic moment) "
-       call wrtout([std_out, ab_out], message)
+       call wrtout([std_out, ab_out], msg)
      end if
-!TODO: this quantity should also be calculated in rhotov, and stored in 
+!TODO: this quantity should also be calculated in rhotov, and stored in
 !    results_gs%energies%e_zeeman, but for the moment it comes out 0
-     write (message, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_zeeman, " Ha" 
-     call wrtout([std_out, ab_out], message)
+     write (msg, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_zeeman, " Ha"
+     call wrtout([std_out, ab_out], msg)
    end if
    ABI_SFREE(intgden)
    ABI_SFREE(gr_dum)
@@ -1004,22 +1009,22 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (psps%usepaw==1) then
 !  Output of compensation charge
    if (dtset%nstep>0.or.dtfil%ireadwf/=0) then
-     write(message, '(4a)' )ch10,' PAW TEST:',ch10,&
+     write(msg, '(4a)' )ch10,' PAW TEST:',ch10,&
 &     ' ==== Compensation charge inside spheres ============'
      if (compch_sph>-1.d4.and.compch_fft>-1.d4) &
-&     write(message, '(3a)' ) trim(message),ch10,' The following values must be close to each other ...'
-     if (compch_sph>-1.d4) write(message, '(3a,f22.15)' ) trim(message),ch10,&
+&     write(msg, '(3a)' ) trim(msg),ch10,' The following values must be close to each other ...'
+     if (compch_sph>-1.d4) write(msg, '(3a,f22.15)' ) trim(msg),ch10,&
 &     ' Compensation charge over spherical meshes = ',compch_sph
      if (compch_fft>-1.d4) then
        if (pawfgr%usefinegrid==1) then
-         write(message, '(3a,f22.15)' ) trim(message),ch10,&
+         write(msg, '(3a,f22.15)' ) trim(msg),ch10,&
 &         ' Compensation charge over fine fft grid    = ',compch_fft
        else
-         write(message, '(3a,f22.15)' ) trim(message),ch10,&
+         write(msg, '(3a,f22.15)' ) trim(msg),ch10,&
 &         ' Compensation charge over fft grid         = ',compch_fft
        end if
      end if
-     call wrtout([std_out, ab_out], message)
+     call wrtout([std_out, ab_out], msg)
    end if
 !  Output of pseudopotential strength Dij and augmentation occupancies Rhoij
    call pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
@@ -1063,8 +1068,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (dtset%pawprt_b==0) then
      fname = strcat(dtfil%filnam_ds(4), '_PAWSTAT')
-     if (open_file(fname, message,newunit=tmp_unt,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(message)
+     if (open_file(fname, msg,newunit=tmp_unt,status='unknown',form='formatted') /= 0) then
+       MSG_ERROR(msg)
      end if
      write(tmp_unt,'(5a)') '# This file contains the statistics on the cancellation of',ch10,&
 &     '# the onsite pseudo component of the all-electron wavefunction',ch10,&
@@ -1101,12 +1106,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  call timab(963,2,tsec)
  if(dtset%plowan_compute>0 .and. dtset%plowan_compute<10) then
-   write(message,'(2a,i3)') ch10,&
+   write(msg,'(2a,i3)') ch10,&
 &   ' ====================================================================================== '
-   call wrtout([std_out, ab_out], message)
-   write(message,'(2a,i3)') ch10,&
+   call wrtout([std_out, ab_out], msg)
+   write(msg,'(2a,i3)') ch10,&
 &   ' == Start computation of Projected Local Orbitals Wannier functions == ',dtset%nbandkss
-   call wrtout([std_out, ab_out], message)
+   call wrtout([std_out, ab_out], msg)
 
 !  ==  compute psichi
 
@@ -1126,9 +1131,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%nbandkss/=0) then
    ! Use DMFT to compute wannier function for cRPA calculation.
    if(dtset%usedmft==1) then
-     write(message,'(2a,i3)') ch10,&
+     write(msg,'(2a,i3)') ch10,&
 &     '  Warning: Psichi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
-     call wrtout(std_out,message,'COLL')
+     call wrtout(std_out, msg)
      call init_dmft(dmatpawu,dtset,e_fermie,dtfil%fnameabo_app,&
 &     dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
      call print_dmft(paw_dmft,dtset%pawprtvol)
@@ -1269,9 +1274,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
  if (me == master .and. dtset%prtfsurf == 1) then
    if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
-     message = "Cannot produce BXSF file with Fermi surface, see log file for more info"
-     MSG_WARNING(message)
-     call wrtout(ab_out, message)
+     msg = "Cannot produce BXSF file with Fermi surface, see log file for more info"
+     MSG_WARNING(msg)
+     call wrtout(ab_out, msg)
    end if
  end if ! prtfsurf==1
 
@@ -1279,10 +1284,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (me == master .and. dtset%prtnest>0 .and. dtset%ph_nqpath > 0) then
    call timab(968,1,tsec)
    ierr = ebands_write_nesting(ebands,crystal,dtfil%fnameabo_app_nesting,dtset%prtnest,&
-     dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),message)
+     dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg)
    if (ierr /= 0) then
-     MSG_WARNING(message)
-     call wrtout(ab_out,message,'COLL')
+     MSG_WARNING(msg)
+     call wrtout(ab_out, msg)
    end if
    call timab(968,2,tsec)
  end if ! prtnest=1

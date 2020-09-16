@@ -55,7 +55,7 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
- use m_rta,             only : rta_driver
+ use m_rta,             only : rta_driver, rta_estimate_sigma_erange
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -69,7 +69,7 @@ module m_eph_driver
  use m_efmas,           only : efmasdeg_free_array, efmasval_free_array, efmas_ncread
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
- use m_sigmaph,         only : sigmaph
+ use m_sigmaph,         only : sigmaph, test_phrotation
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
 
@@ -172,7 +172,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  real(dp),parameter :: rifcsph0=zero
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk,use_wfq,use_dvdb
+ logical :: use_wfk, use_wfq, use_dvdb
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, path
  type(hdr_type) :: wfk0_hdr, wfq_hdr
@@ -191,7 +191,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  real(dp),parameter :: k0(3)=zero
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
  real(dp) :: qdrp_cart(3,3,3,dtset%natom)
- real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:), kpt_efmas(:,:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
  type(efmasval_type),allocatable :: efmasval(:,:)
@@ -253,12 +252,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    wfq_path = wfk0_path
    use_wfq = .True.
    write(msg, "(4a)")&
-       "eph_task requires WFQ but neither irdwfq nor getwfq are specified in the input.", ch10, &
-       "Will read WFQ wavefunctions from WFK file:", trim(wfk0_path)
+     "eph_task requires WFQ but neither irdwfq nor getwfq are specified in the input.", ch10, &
+     "Will read WFQ wavefunctions from WFK file:", trim(wfk0_path)
    MSG_COMMENT(msg)
  end if
 
- use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. dtset%eph_task /= 7)
+ use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
 
  if (my_rank == master) then
    if (.not. file_exists(ddb_filepath)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
@@ -336,14 +335,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_wfk) then
    ! Construct crystal and ebands from the GS WFK file.
-   call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm)
+   ebands = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
    call wfk0_hdr%vs_dtset(dtset)
 
    cryst = wfk0_hdr%get_crystal()
    call cryst%print(header="crystal structure from WFK file")
-
-   ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
-   ABI_FREE(gs_eigen)
 
    ! Here we change the GS bands (Fermi level, scissors operator ...)
    ! All the modifications to ebands should be done here.
@@ -352,12 +348,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_wfq) then
    ! Read WFQ and construct ebands on the shifted grid.
-   call wfk_read_eigenvalues(wfq_path, gs_eigen, wfq_hdr, comm)
+   ebands_kq = wfk_read_ebands(wfq_path, comm, out_hdr=wfq_hdr)
    ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against dtset.
    !call wfq_hdr%vs_dtset(dtset)
-   ebands_kq = ebands_from_hdr(wfq_hdr, maxval(wfq_hdr%nband), gs_eigen)
    call wfq_hdr%free()
-   ABI_FREE(gs_eigen)
    call ephtk_update_ebands(dtset, ebands_kq, "Ground state energies (K+Q)")
  end if
 
@@ -445,7 +439,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! TODO: Add support for dipquad and quadquad in abinit
  call ifc_init(ifc, cryst, ddb, &
-   dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+   dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
+   dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
    qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
 
  ABI_FREE(ddb_qshifts)
@@ -613,12 +608,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   if (dtset%eph_task == -4) call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+   ! Compute transport properties only if sigma_erange has been used
+   if (dtset%eph_task == -4 .and. any(abs(dtset%sigma_erange) > zero)) then
+     call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+   end if
 
  case (5, -5)
    ! Interpolate the phonon potential.
-   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, &
-                                   ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
+   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
@@ -627,6 +624,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (7)
    ! Compute phonon-limited RTA from SIGEPH file.
    call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+
+ case (-7)
+   ! Estimate sigma_erange
+   call rta_estimate_sigma_erange(dtset, ebands, comm)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
@@ -645,6 +646,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (nprocs > 1) then
      MSG_WARNING("eph_task in [16, -16] does not support nprocs > 1. Running in sequential...")
    end if
+
+   call test_phrotation(ifc, cryst, dtset%ph_ngqpt, comm)
 
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then

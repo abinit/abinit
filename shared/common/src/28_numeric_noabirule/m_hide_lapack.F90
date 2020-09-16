@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hide_lapack
 !! NAME
 !!  m_hide_lapack

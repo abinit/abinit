@@ -256,10 +256,10 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  From total number of procs, compute all possible distributions
 !  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_RDMFT, RUNL_EPH, RUNL_NONLINEAR])) then ! MRM
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_RDMFT, RUNL_EPH, RUNL_NONLINEAR])) then 
        iexit = 0
    else
-   call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
+     call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
    !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_RDMFT, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
 

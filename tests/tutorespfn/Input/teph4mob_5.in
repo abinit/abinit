@@ -79,12 +79,12 @@ nband 8
 #%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
 #%% [files]
 #%% files_to_test =
-#%%   teph4mob_5.out, tolnlines= 80, tolabs=  140, tolrel=  6.000e-03
+#%%   teph4mob_5.out, tolnlines= 80, tolabs=  600, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH, RTA
 #%% description =
-#%%   E-ph for the mobility in semiconductors
+#%%   E-ph for mobility in semiconductors
 #%%<END TEST_INFO>

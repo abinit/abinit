@@ -1386,6 +1386,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_ecutosc',tread,'ENE')
  if(tread==1) dtset%eph_ecutosc=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_phwinfact',tread,'DPR')
+ if(tread==1) dtset%eph_phwinfact = dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_ngqpt_fine',tread,'INT')
  if(tread==1) dtset%eph_ngqpt_fine=intarr(1:3)
 
