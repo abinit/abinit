@@ -415,6 +415,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call timab(403,2,tsec) ! setup_sigma
  call timab(402,1,tsec) ! Init1
 
+ if (nprocs>Sigp%nbnds) then
+   msg='Impossible to continue when MPI processes is lower than the number of bands [n_procs=max(1,nband)].'
+   MSG_ERROR(msg)
+ end if
+
 !XG090617 Please, do not remove this write, unless you have checked
 !that the code executes correctly on max+g95 (especially, Tv5#70).
 !It is one more a silly write, perhaps needed because the compiler does not treat correctly non-nullified pointers.
