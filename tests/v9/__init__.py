@@ -32,6 +32,7 @@ inp_files = [
 # GW/BSE
 "t21.in", # HF exchange checking q->0 terms
 "t22.in", # AC GW
+"t23.in", # GW 1RDM 
 # DFPT
 "t41.in",
 "t42.in",
