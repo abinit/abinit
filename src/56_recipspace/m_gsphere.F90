@@ -1624,7 +1624,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
  integer :: exchn2n3d,ifound,ig,ii,ish,isym,npw_found,npwave
  integer :: npwwrk,nsh_found,pad=50
  real(dp) :: ecut_found,ecut_trial,eps,scale=1.3_dp
- logical :: found
+ logical :: found,ecut_in
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
@@ -1662,6 +1662,12 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
     'Only one of the two variables ecut',TRIM(tag),' and nsh',TRIM(tag),ch10,&
     'can be non-null Action : modify the value of one of these in input file.'
    MSG_ERROR(msg)
+ end if
+
+ ! If ecut is given as input variable we will use it in the GS and in the GW part
+ ecut_in=.false.
+ if (ecut>tol6) then
+   ecut_in=.true.
  end if
 
  ! Calculate an upper bound for npw.
@@ -1828,7 +1834,9 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
      ABI_FREE(insort)
      ABI_FREE(npw_sh)
    else
-     ecut=ecut_found
+     if (.not.ecut_in) then
+      ecut=ecut_found
+     end if
      npw=npw_found
      nsh=nsh_found
    end if
