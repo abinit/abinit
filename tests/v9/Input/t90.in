@@ -30,7 +30,7 @@ ngkpt        1 1 1
 
 !Miscelaneous
  
- ndtset      4
+ ndtset      2
 
  !NO CUT-OFF
  icutcoul1    3
@@ -39,12 +39,12 @@ ngkpt        1 1 1
  icutcoul2    0
  
  !2D Beigi CUT-OFF
- icutcoul3    2
- vcutgeo3     1 1 0
+ !icutcoul3    2
+ !vcutgeo3     1 1 0
 
  !2D Rozzi CUT-OFF
- icutcoul4    2
- vcutgeo4    -1 1 0
+ !icutcoul4    2
+ !vcutgeo4    -1 1 0
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos    "C.psp8"
