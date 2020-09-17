@@ -135,7 +135,7 @@ end subroutine calc_rdmx
 !! iinfo=print extra information (verbose mode)
 !! weights=array containing the weights used in the quadrature.
 !! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin) 
-!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigmadriver.F90 for more details). 
+!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
 !! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
@@ -230,7 +230,7 @@ end subroutine calc_rdmc
 !! iinfo=print extra information (verbose mode)
 !! weights=array containing the weights used in the quadrature.
 !! nateigv=array containing the natural eigenvectors in columns (nbands,nband,k-point,nspin)
-!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigmadriver.F90 for more details).
+!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details).
 !! occs_ks= array containing the occ numbers for a given k-point occs_ks(nband,k-point).
 !! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
