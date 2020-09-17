@@ -1664,12 +1664,6 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
    MSG_ERROR(msg)
  end if
 
- ! If ecut is given as input variable we will use it in the GS and in the GW part
- ecut_in=.false.
- if (ecut>tol6) then
-   ecut_in=.true.
- end if
-
  ! Calculate an upper bound for npw.
  ! gctr is center of the g-vector sphere
  gctr(:)= [zero,zero,zero]
@@ -1761,11 +1755,12 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
    if(ecut>tol6) then
      ! ecut is given in the input
      if (ecut_found<ecut-0.1) then
+!       write(msg,'(3a,e14.6,9a,e14.6,3a)')&
        write(msg,'(3a,e14.6,9a,e14.6,3a)')&
         'The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
-        'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10,&
-        'This value will be adopted for the calculation.',ch10
-       MSG_WARNING(msg)
+        'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10!,&
+!        'This value will be adopted for the calculation.',ch10
+       MSG_COMMENT(msg)
      end if
      ifound=1
    else if (npw/=0) then
@@ -1834,8 +1829,10 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
      ABI_FREE(insort)
      ABI_FREE(npw_sh)
    else
-     if (.not.ecut_in) then
-      ecut=ecut_found
+     if (ecut<tol6) then
+       ecut=ecut_found
+     else
+       MSG_COMMENT("MRM: ecut and/or ecutwfn was given in the input file and will not be resized.")
      end if
      npw=npw_found
      nsh=nsh_found
