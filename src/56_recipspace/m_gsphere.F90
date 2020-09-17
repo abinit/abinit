@@ -1624,7 +1624,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
  integer :: exchn2n3d,ifound,ig,ii,ish,isym,npw_found,npwave
  integer :: npwwrk,nsh_found,pad=50
  real(dp) :: ecut_found,ecut_trial,eps,scale=1.3_dp
- logical :: found,ecut_in
+ logical :: found
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
