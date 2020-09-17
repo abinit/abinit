@@ -2538,14 +2538,18 @@ endif
      !
      call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
      call print_tot_occ(Sr,Kmesh,QP_BSt)                           
-     if (my_rank==0) then
-       call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs 
-       gw1rdm_fname=dtfil%fnameabo_wfk                                         
-       call Wfd_nato_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)        ! Print WFK file, QP_BSt contains nat. orbs.
-       gw1rdm_fname=dtfil%fnameabo_den
-       call Wfd_nato_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
-       call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&        ! Print DEN file  
-       Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
+     if (my_rank==0 .and. (dtset%prtwf == 1 .or. dtset%prtden == 1)) then
+       call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs
+       if (dtset%prtwf == 1) then 
+         gw1rdm_fname=dtfil%fnameabo_wfk                                         
+         call Wfd_nato_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)      ! Print WFK file, QP_BSt contains nat. orbs.
+       end if
+       call Wfd_nato_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)     ! Construct the density
+       if (dtset%prtden == 1) then 
+         gw1rdm_fname=dtfil%fnameabo_den
+         call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&        ! Print DEN file  
+         Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
+       end if
      end if
      ierr=0
      call xmpi_bcast(gw_rhor(:,:),master,Wfd%comm,ierr)
