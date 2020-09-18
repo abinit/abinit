@@ -1755,7 +1755,6 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
    if(ecut>tol6) then
      ! ecut is given in the input
      if (ecut_found<ecut-0.1) then
-!       write(msg,'(3a,e14.6,9a,e14.6,3a)')&
        write(msg,'(3a,e14.6,9a,e14.6,3a)')&
         'The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
         'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10!,&
