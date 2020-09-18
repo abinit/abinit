@@ -30,21 +30,21 @@ ngkpt        1 1 1
 
 !Miscelaneous
  
- ndtset      3
+ ndtset      4
 
  !NO CUT-OFF
- !icutcoul1    3
+ icutcoul1    3
 
  !SPHERICAL CUT-OFF
  icutcoul2    0
  
  !2D Beigi CUT-OFF
- !icutcoul3    2
- !vcutgeo3     1 1 0
+ icutcoul3    2
+ vcutgeo3     1 1 0
 
  !2D Rozzi CUT-OFF
- !icutcoul4    2
- !vcutgeo4    -1 1 0
+ icutcoul4    2
+ vcutgeo4    -1 1 0
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos    "C.psp8"
@@ -56,7 +56,7 @@ ngkpt        1 1 1
 #%% pre_commands = 
 #%% [files]
 #%% files_to_test = 
-#%%   t90.out, tolnlines = 10, tolabs = 1.0E-6, tolrel = 5.0E-4
+#%%   t90.out, tolnlines = 0, tolabs = 1.0E-7, tolrel = 5.0E-4
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
