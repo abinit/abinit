@@ -29,15 +29,17 @@ module m_nonlop_ylm
  use m_abicore
  use m_errors
 
- use defs_abitypes, only : MPI_type
- use m_geometry,    only : strconv
- use m_kg,          only : ph1d3d, mkkpg
- use m_pawcprj,     only : pawcprj_type
- use m_opernla_ylm, only : opernla_ylm
- use m_opernlb_ylm, only : opernlb_ylm
- use m_opernlc_ylm, only : opernlc_ylm
- use m_opernld_ylm, only : opernld_ylm
- use m_kg,          only : mkkpgcart
+ use defs_abitypes,      only : MPI_type
+ use m_geometry,         only : strconv
+ use m_kg,               only : ph1d3d, mkkpg
+ use m_pawcprj,          only : pawcprj_type
+ use m_opernla_ylm,      only : opernla_ylm
+ use m_opernla_ylm_blas, only : opernla_ylm_blas
+ use m_opernlb_ylm,      only : opernlb_ylm
+ use m_opernlb_ylm_blas, only : opernlb_ylm_blas
+ use m_opernlc_ylm,      only : opernlc_ylm
+ use m_opernld_ylm,      only : opernld_ylm
+ use m_kg,               only : mkkpgcart
 
  implicit none
 
@@ -841,7 +843,10 @@ contains
 
 !      Computation or <p_lmn|c> (and derivatives) for this block of atoms
        if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
-         call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
+!         call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
+!&         ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
+!&         nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
+         call opernla_ylm_blas(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &         ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
 &         nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
        end if
@@ -939,7 +944,11 @@ contains
            if(nloalg(2)<=0) then
              call ph1d3d(ia3,ia4,kgout,matblk,natom,npwout,n1,n2,n3,phkxredout,ph1d,ph3dout)
            end if
-           call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
+!           call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
+!&           d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
+!&           idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
+!&           nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)
+           call opernlb_ylm_blas(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &           d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
 &           idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
 &           nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)

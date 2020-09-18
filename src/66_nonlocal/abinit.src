@@ -33,7 +33,9 @@ sources = [
  "m_opernl.F90",
  "m_vkbr.F90",
  "m_opernla_ylm.F90",
+ "m_opernla_ylm_blas.F90",
  "m_opernlb_ylm.F90",
+ "m_opernlb_ylm_blas.F90",
  "m_opernlc_ylm.F90",
  "m_opernld_ylm.F90",
 ]
