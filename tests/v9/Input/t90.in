@@ -30,10 +30,10 @@ ngkpt        1 1 1
 
 !Miscelaneous
  
- ndtset      2
+ ndtset      3
 
  !NO CUT-OFF
- icutcoul1    3
+ !icutcoul1    3
 
  !SPHERICAL CUT-OFF
  icutcoul2    0
@@ -63,7 +63,6 @@ ngkpt        1 1 1
 #%% authors = B. Guster
 #%% keywords = 
 #%% description = 
-#%%   Test the Coulomb cut-off functionality in the ground state
-#%%   for graphene. For reference, the first data set represents
-#%%   the untruncated system.
+#%%   Test the 0D and 2D Coulomb cut-off functionality 
+#%%   in the ground state  for graphene. 
 #%%<END TEST_INFO>

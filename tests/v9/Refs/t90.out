@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Fri 18 Sep 2020.
-- ( at 01h37 )
+- ( at 13h00 )
   
 - input  file    -> /home/guster/gitrepo/abinit/build/tests/Test_suite/v9_t90/t90.in
 - output file    -> t90.out
@@ -56,6 +56,23 @@ P This job should need less than                      17.245 Mbytes of memory.
 _ WF disk file :      0.115 Mbytes ; DEN or POT disk file :      0.441 Mbytes.
 ================================================================================
 
+
+ DATASET    3 : space group P6/m m m (#191); Bravais hP (primitive hexag.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  3.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       4
+     lnmax =       4     mgfft =     100  mpssoang =       2    mqgrid =    4932
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           5        mffmem =           1         mkmem =           1
+       mpw =        1476          nfft =       57600          nkpt =           1
+================================================================================
+P This job should need less than                      17.245 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.115 Mbytes ; DEN or POT disk file :      0.441 Mbytes.
+================================================================================
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -73,16 +90,17 @@ _ WF disk file :      0.115 Mbytes ; DEN or POT disk file :      0.441 Mbytes.
 -          fftalg         112
          icutcoul1          3
          icutcoul2          0
+         icutcoul3          3
            istwfk        9
               ixc           7
-           jdtset        1    2
+           jdtset        1    2    3
               kpt      5.00000000E-01  5.00000000E-01  5.00000000E-01
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      4.64870000E+00
 P           mkmem           1
             natom           2
             nband           5
-           ndtset           2
+           ndtset           3
             ngfft          24      24     100
              nkpt           1
             nstep          50
@@ -133,6 +151,8 @@ P           mkmem           1
  chkinp: Checking input parameters for consistency, jdtset=   1.
 
  chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   3.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -456,6 +476,158 @@ band_energy         : -3.61071044786683E+00
 - sigma(2 2)=  1.16967072E+02  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)=  5.34421112E+01  sigma(2 1)=  0.00000000E+00
 
+================================================================================
+== DATASET  3 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 1, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1476, }
+cutoff_energies: {ecut:  30.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  4.6487000  0.0000000  0.0000000  G(1)=  0.2151139  0.1241961  0.0000000
+ R(2)= -2.3243500  4.0258923  0.0000000  G(2)=  0.0000000  0.2483921  0.0000000
+ R(3)=  0.0000000  0.0000000 20.0000000  G(3)=  0.0000000  0.0000000  0.0500000
+ Unit cell volume ucvol=  3.7430331E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24 100
+         ecut(hartree)=     30.000   => boxcut(ratio)=   2.02789
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are    2952.000    2952.000
+
+================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -11.938451672510    -1.194E+01 1.782E-02 4.847E+02
+ ETOT  2  -11.974235477764    -3.578E-02 1.426E-06 1.233E+02
+ ETOT  3  -11.974894772236    -6.593E-04 7.265E-07 7.900E+01
+ ETOT  4  -11.975200907812    -3.061E-04 5.162E-07 4.213E+01
+ ETOT  5  -11.975250253523    -4.935E-05 1.023E-07 1.973E+01
+ ETOT  6  -11.975264823151    -1.457E-05 3.234E-08 5.704E+00
+ ETOT  7  -11.975266408240    -1.585E-06 3.051E-09 8.769E-01
+ ETOT  8  -11.975266846829    -4.386E-07 2.000E-09 1.466E-02
+ ETOT  9  -11.975266849939    -3.109E-09 4.671E-12 3.541E-05
+ ETOT 10  -11.975266849952    -1.288E-11 1.569E-13 1.172E-07
+ ETOT 11  -11.975266849955    -3.700E-12 1.353E-14 2.187E-09
+
+ At SCF step   11       vres2   =  2.19E-09 < tolvrs=  1.00E-08 =>converged.
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -1.21260039E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.21260039E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.27029216E-06  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  4.6487000,   0.0000000,   0.0000000, ]
+- [ -2.3243500,   4.0258923,   0.0000000, ]
+- [  0.0000000,   0.0000000,  20.0000000, ]
+lattice_lengths: [   4.64870,    4.64870,   20.00000, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
+lattice_volume:   3.7430331E+02
+convergence: {deltae: -3.700E-12, res2:  2.187E-09, residm:  1.353E-14, diffor: null, }
+etotal    :  -1.19752668E+01
+entropy   :   0.00000000E+00
+fermie    :  -1.38244262E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.21260039E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.21260039E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.27029216E-06, ]
+pressure_GPa:   2.3659E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
+- [  6.6667E-01,   3.3333E-01,   0.0000E+00,  C]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          4.80896562
+    2        2.00000          4.80896562
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   38.999E-16; max=  13.531E-15
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.666666666667      0.333333333333      0.000000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.22999304478617     0.71013681550866     0.00000000000000
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales=  4.648700000000  4.648700000000 20.000000000000 bohr
+              =  2.459986089572  2.459986089572 10.583544171800 angstroms
+ prteigrs : about to open file t90o_DS3_EIG
+ Fermi (or HOMO) energy (hartree) =  -0.13824   Average Vxc (hartree)=  -0.14938
+ Eigenvalues (hartree) for nkpt=   1  k points:
+ kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.5000  0.5000  0.5000 (reduced coord)
+  -0.57235   -0.53922   -0.28682   -0.13824    0.01072
+
+--- !EnergyTerms
+iteration_state     : {dtset: 3, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.02288630257429E+00
+hartree             :  2.56340009027372E+01
+xc                  : -4.24920147572058E+00
+Ewald energy        :  1.60009748836687E+01
+psp_core            :  2.79923743745905E-01
+local_psp           : -5.64064109277594E+01
+non_local_psp       : -1.25744027920137E+00
+total_energy        : -1.19752668499553E+01
+total_energy_eV     : -3.25863583080066E+02
+band_energy         : -3.07328411684103E+00
+...
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -1.21260039E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.21260039E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.27029216E-06  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.3659E+00 GPa]
+- sigma(1 1)= -3.56759293E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -3.56759293E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.73732794E-02  sigma(2 1)=  0.00000000E+00
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -465,23 +637,27 @@ band_energy         : -3.61071044786683E+00
              ecut      3.00000000E+01 Hartree
            etotal1    -1.1975266850E+01
            etotal2    -1.2056860378E+01
+           etotal3    -1.1975266850E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -3.9804067970E-18 -6.8942668071E-18  9.7491848864E-34
                        3.9804067970E-18  6.8942668071E-18 -9.7491848864E-34
+            fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         112
          icutcoul1          3
          icutcoul2          0
+         icutcoul3          3
            istwfk        9
               ixc           7
-           jdtset        1    2
+           jdtset        1    2    3
               kpt      5.00000000E-01  5.00000000E-01  5.00000000E-01
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      4.64870000E+00
 P           mkmem           1
             natom           2
             nband           5
-           ndtset           2
+           ndtset           3
             ngfft          24      24     100
              nkpt           1
             nstep          50
@@ -496,6 +672,8 @@ P           mkmem           1
            strten1    -1.2126003948E-04 -1.2126003948E-04  1.2702921612E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     3.9756306239E-03  3.9756306239E-03  1.8164607446E-03
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten3    -1.2126003948E-04 -1.2126003948E-04  1.2702921612E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
@@ -533,57 +711,59 @@ P           mkmem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          4.0        0.07      0.001
-- Total wall clock time (s,m,h):          4.0        0.07      0.001
+- Total cpu        time (s,m,h):          6.6        0.11      0.002
+- Total wall clock time (s,m,h):          6.6        0.11      0.002
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            4.0, wall_time =            4.0
+- cpu_time =            6.6, wall_time =            6.6
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- stress                         1.708  42.8      1.708  42.8              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             1.695  42.4      1.695  42.4              2      -1.00        1.00       1.00
-- ewald                          1.150  28.8      1.151  28.8              2      -1.00        1.00       1.00
-- fourwf%(pot)                   0.266   6.7      0.261   6.5            658      -1.00        1.02       1.02
-- pspini                         0.246   6.1      0.245   6.1              2      -1.00        1.00       1.00
-- timing timab                   0.141   3.5      0.141   3.5             11      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.079   2.0      0.080   2.0             25      -1.00        0.99       0.99
-- fourdp                         0.043   1.1      0.046   1.2            117      -1.00        0.94       0.94
-- invars2                        0.031   0.8      0.031   0.8              2      -1.00        1.01       1.01
-- nonlop(apply)                  0.030   0.8      0.035   0.9            658      -1.00        0.87       0.87
-- symrhg(no FFT)                 0.027   0.7      0.028   0.7             23      -1.00        0.96       0.96
-- fourwf%(den)                   0.020   0.5      0.022   0.6             92      -1.00        0.93       0.93
-- others (115)                   0.085   2.1      0.087   2.2             -1      -1.00        0.97       0.97
+- stress                         2.939  44.4      2.940  44.4              3      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             2.915  44.1      2.915  44.1              3      -1.00        1.00       1.00
+- ewald                          1.969  29.8      1.969  29.8              3      -1.00        1.00       1.00
+- fourwf%(pot)                   0.467   7.1      0.455   6.9            973      -1.00        1.03       1.03
+- pspini                         0.269   4.1      0.269   4.1              3      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.136   2.1      0.135   2.0             37      -1.00        1.01       1.01
+- timing timab                   0.122   1.8      0.122   1.8             10      -1.00        1.00       1.00
+- fourdp                         0.082   1.2      0.075   1.1            173      -1.00        1.09       1.09
+- nonlop(apply)                  0.059   0.9      0.058   0.9            973      -1.00        1.01       1.01
+- invars2                        0.049   0.7      0.049   0.7              3      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.048   0.7      0.050   0.8             34      -1.00        0.96       0.96
+- fourwf%(den)                   0.037   0.6      0.037   0.6            136      -1.00        1.01       1.01
+- projbd                         0.034   0.5      0.036   0.5           1546      -1.00        0.95       0.95
+- others (114)                   0.113   1.7      0.110   1.7             -1      -1.00        1.03       1.03
 -<END_TIMER>
 -
-- subtotal                       5.522 138.3      5.530 138.5                                  1.00       1.00
+- subtotal                       9.240 139.7      9.220 139.4                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           4.0, wall_time =           4.0
+- cpu_time =           6.6, wall_time =           6.6
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- stress                         1.708  42.8      1.708  42.8              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             1.695  42.4      1.695  42.4              2      -1.00        1.00       1.00
-- ewald                          1.150  28.8      1.151  28.8              2      -1.00        1.00       1.00
-- fourwf%(pot)                   0.266   6.7      0.261   6.5            658      -1.00        1.02       1.02
-- pspini                         0.246   6.1      0.245   6.1              2      -1.00        1.00       1.00
-- timing timab                   0.141   3.5      0.141   3.5             11      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.079   2.0      0.080   2.0             25      -1.00        0.99       0.99
-- fourdp                         0.043   1.1      0.046   1.2            117      -1.00        0.94       0.94
-- invars2                        0.031   0.8      0.031   0.8              2      -1.00        1.01       1.01
-- nonlop(apply)                  0.030   0.8      0.035   0.9            658      -1.00        0.87       0.87
-- symrhg(no FFT)                 0.027   0.7      0.028   0.7             23      -1.00        0.96       0.96
-- fourwf%(den)                   0.020   0.5      0.022   0.6             92      -1.00        0.93       0.93
-- others (115)                   0.085   2.1      0.087   2.2             -1      -1.00        0.97       0.97
+- stress                         2.939  44.4      2.940  44.4              3      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             2.915  44.1      2.915  44.1              3      -1.00        1.00       1.00
+- ewald                          1.969  29.8      1.969  29.8              3      -1.00        1.00       1.00
+- fourwf%(pot)                   0.467   7.1      0.455   6.9            973      -1.00        1.03       1.03
+- pspini                         0.269   4.1      0.269   4.1              3      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.136   2.1      0.135   2.0             37      -1.00        1.01       1.01
+- timing timab                   0.122   1.8      0.122   1.8             10      -1.00        1.00       1.00
+- fourdp                         0.082   1.2      0.075   1.1            173      -1.00        1.09       1.09
+- nonlop(apply)                  0.059   0.9      0.058   0.9            973      -1.00        1.01       1.01
+- invars2                        0.049   0.7      0.049   0.7              3      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.048   0.7      0.050   0.8             34      -1.00        0.96       0.96
+- fourwf%(den)                   0.037   0.6      0.037   0.6            136      -1.00        1.01       1.01
+- projbd                         0.034   0.5      0.036   0.5           1546      -1.00        0.95       0.95
+- others (114)                   0.113   1.7      0.110   1.7             -1      -1.00        1.03       1.03
 -<END_TIMER>
 
-- subtotal                       5.522 138.3      5.530 138.5                                  1.00       1.00
+- subtotal                       9.240 139.7      9.220 139.4                                  1.00       1.00
 
 ================================================================================
 
@@ -668,10 +848,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.0  wall=          4.0
+.Delivered   4 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.6  wall=          6.6
