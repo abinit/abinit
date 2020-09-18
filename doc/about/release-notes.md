@@ -25,9 +25,6 @@ Xavier
 
 **A.1** At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
     by ABINIT have been made, so the backward compatibility of ABINITv9 may be broken. 
-    The present ABINITv9.0 is NOT to be considered a production version. It is a beta release, allowing developers to get feedback
-    from the users. Many features will work correctly, of course. Still, beginners are advised
-    to stick to ABINITv8.10.3 except if ABINITv8.10.3 is not appropriate (or not working) for them.
 
 In particular: 
 
@@ -59,14 +56,17 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
 
 <a name="v9.0.A.3"></a>
 **A.3**  The default values of the following ABINIT input variables have been changed:
-    [[ixcrot]], [[chneut]], [[ntime]], [[symsigma]], [[prtkden]].
+    [[ixcrot]], [[chneut]], [[ntime]], [[prtkden]], [[symsigma]] and [[tolsym]]. In particular the new default value
+    of [[tolsym]], 1e-5, is more in line with the tolerances of other codes, so that for users of such
+    codes, one barrier to the use of ABINIT is removed. By the same token, some bug in the recognition of symmetries
+    has been fixed, when [[tolsym]] is close to the default, see the new tests [[test:v9_15]] and [[test:v9_16]].
 
 **A.4** The initialization of the wavefunctions when [[paral_kgb]]=1 and [[nspinor]]=2 has been changed, since the previous one could prevent the code to converge.
     By M Torrent (MR 562).
 
-**A.5** The input variable xangst has been disabled. Use xcart instead, and specify the unit, namely Angstrom.
+**A.5** The input variable xangst has been disabled. Use [[xcart]] instead, and specify the unit, namely Angstrom.
 
-**A.6** The name of the t-DEP main executable has been changed from `tdep" to `atdep`, in line with [[cite:Romero2020]].
+**A.6** The name of the t-DEP main executable has been changed from `tdep` to `atdep`, in line with [[cite:Romero2020]].
 
 * * *
 
@@ -106,20 +106,35 @@ fully in the Sec. 3.3.2 of [[cite:Gonze2020]], as follows.
 >   band level is available only when computing the full self-energy).
 
 Moreover, the interpolation of the DFPT potential, described in Sec. 3.3.1 of [[cite:Gonze2020]] is fully operational,
-with many tests provided.
+with many tests, and three tutorials provided.
 
-List of tests: [[test:v9_50]], [[test:v9_61]] and [[test:v8_44]].
+List of tests: [[test:v8_44]], [[test:v9_50]], [[test:v9_53]], [[test:v9_56]], [[test:v9_60]], [[test:v9_61]], 
+[[test:eph4mob_1]], [[test:eph4mob_2]], [[test:eph4mob_3]], 
+[[test:eph4mob_4]], 
+[[test:eph4mob_5]], 
+[[test:eph4mob_6]], 
+[[test:eph4mob_7]], 
+[[test:eph4zpr_1]], 
+[[test:eph4zpr_2]], 
+[[test:eph4zpr_3]], 
+[[test:eph4zpr_4]], 
+[[test:eph4zpr_5]], 
+[[test:eph4zpr_6]], 
+[[test:eph4zpr_7]]. 
 
-New input variables: [[dvdb_qcache_mb]], 
+New input variables: [[brav]], [[dvdb_add_lr]], [[dvdb_qcache_mb]], [[dvdb_qdamp]],
+[[dvdb_rspace_cell]], [[eph_doping]],
 [[eph_phrange]], [[eph_tols_idelta]], [[eph_ecutosc]], [[eph_restart]], 
-[[eph_stern]], [[eph_use_ftinterp]],
+[[eph_stern]], [[eph_use_ftinterp]], [[eph_phwinfact]],
 [[getdvdb]], [[getdvdb_filepath]], [[getkerange_filepath]],
+[[getsigeph_filepath]], 
 [[irddvdb]], [[prteliash]], [[sigma_bsum_range]], [[sigma_erange]],
 [[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]].
 
 Note that the new EPH processing unit of ABINIT [[optdriver]]=7 has a different implementation than the one implemented in anaddb.
-A new set of tutorials are in preparation and they will be made available in the forthcoming versions. 
-For further details about the implementation, please consult this [preprint](https://arxiv.org/abs/2002.00630).
+Three new tutorials are availables, [[tutorial:eph_intro]], [[tutorial:eph4mob]] and [[tutorial:eph4zpr]], and supercede the legacy tutorials
+[[tutorial:eph]] and [[tutorial:tdepes]].
+For further details about the implementation and usage, please consult [[cite:Brunin2020]].
 
 By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
 
