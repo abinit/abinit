@@ -17,7 +17,6 @@
  ddb_ngqpt 4 4 4
  getdvdb_filepath "teph4zpr_2_DVDB"
 
-
  ecut 35.0
 
  nshiftk 1

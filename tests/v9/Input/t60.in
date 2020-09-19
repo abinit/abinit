@@ -38,8 +38,7 @@ nband      20
 symsigma  1
 tmesh 0 300 2
 
-# This just to test the rifcsph (use it only if unstable modes around gamma)
-rifcsph
+
 
 # This just to test the restart code when SIGEPH is not present.
 eph_restart 1
@@ -69,6 +68,9 @@ sigma_bsum_range3 2 4
 # Use interpolated DVDB produced in dataset 2
 getdvdb3  2
 eph_ngqpt_fine3 4 4 4
+
+# This just to test the rifcsph (use it only if unstable modes around gamma)
+rifcsph3 10
 
 ############
 # DATASET 4
@@ -137,7 +139,7 @@ getdvdb8  20
 ############
 # DATASET 9
 ############
-# Interpolate DFPT potentials, produce v1qavg file  along q-path
+# Interpolate DFPT potentials, produce v1qavg file along q-path
 eph_task9 15
 getdvdb_filepath9  "t60o_DS20_DVDB"
 

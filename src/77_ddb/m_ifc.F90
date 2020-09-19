@@ -891,6 +891,7 @@ subroutine ifc_print(ifc, header, unit, prtvol)
 
  call wrtout(unt, sjoin(" Mass of the atoms (atomic mass unit): ", ltoa(ifc%amu)))
  call wrtout(unt, sjoin(" Number of real-space points for IFC(R): ", itoa(ifc%nrpt)))
+ call wrtout(std_out, sjoin(" Radius of biggest sphere inscribed in the WS supercell: ", ftoa(ifc%r_inscribed_sphere)))
  call wrtout(unt, " ")
 
  call wrtout(unt, " Q-mesh:")
