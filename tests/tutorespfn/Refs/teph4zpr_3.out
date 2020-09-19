@@ -205,7 +205,7 @@ P           mkmem3         72
             nband1         70
             nband2         25
             nband3         25
-           nbdbuf1         10
+           nbdbuf1          7
            nbdbuf2          5
            nbdbuf3          5
            ndtset           3
@@ -346,14 +346,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  prteigrs : about to open file teph4zpr_3o_DS1_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   3.83E-15  6.65E-16  9.14E-16  8.32E-15  8.43E-16  6.55E-16  3.55E-15  3.70E-15
-  8.06E-16  9.24E-15  4.18E-15  9.91E-16  3.59E-15  6.64E-15  7.42E-15  1.17E-15
+  8.06E-16  9.24E-15  4.18E-15  9.90E-16  3.59E-15  6.64E-15  7.42E-15  1.17E-15
   1.51E-15  9.48E-16  4.03E-15  5.46E-16  5.60E-15  2.28E-15  2.09E-15  3.00E-15
   4.69E-15  1.20E-15  1.14E-15  1.86E-15  1.47E-16  4.93E-16  3.60E-15  3.72E-15
-  5.04E-15  1.65E-15  1.24E-15  1.18E-15  4.71E-15  1.05E-15  2.12E-15  8.16E-15
-  2.37E-15  5.85E-15  8.45E-16  4.30E-15  5.78E-15  8.35E-16  4.27E-15  3.96E-15
-  6.74E-15  7.15E-15  9.88E-15  1.02E-15  1.55E-15  1.74E-15  1.72E-15  3.77E-15
-  9.34E-16  2.06E-15  1.71E-15  6.56E-16  9.82E-16  3.30E-15  1.71E-13  8.10E-13
-  5.05E-13  1.49E-13  1.17E-12  9.21E-12  3.46E-04  5.06E-04
+  5.04E-15  1.65E-15  1.24E-15  1.18E-15  4.71E-15  1.05E-15  2.11E-15  8.16E-15
+  2.37E-15  5.85E-15  8.45E-16  4.31E-15  5.78E-15  8.35E-16  4.27E-15  3.96E-15
+  6.74E-15  7.16E-15  9.88E-15  1.02E-15  1.55E-15  1.74E-15  1.72E-15  3.77E-15
+  9.34E-16  2.06E-15  1.71E-15  6.56E-16  9.82E-16  3.30E-15  1.92E-15  2.96E-15
+  6.52E-15  2.46E-15  1.91E-15  4.22E-14  2.84E-05  3.54E-05
  -2.5001E+00 -1.2774E+00 -1.2774E+00 -1.2774E+00 -4.6171E-01  1.6500E-01
   1.6500E-01  1.6500E-01  3.2959E-01  7.4474E-01  7.4474E-01  7.4474E-01
   8.8070E-01  9.5340E-01  9.5340E-01  1.0390E+00  1.0390E+00  1.0390E+00
@@ -365,17 +365,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   3.1769E+00  3.2660E+00  3.2660E+00  3.2660E+00  3.3011E+00  3.3011E+00
   3.3059E+00  3.3059E+00  3.3059E+00  3.3562E+00  3.3651E+00  3.6314E+00
   3.6314E+00  3.6314E+00  4.1658E+00  4.1658E+00  4.1658E+00  4.2321E+00
-  4.2321E+00  4.3777E+00  4.9236E+00  4.9236E+00
-  prteigrs : nnsclo,ikpt=  150    1 max resid (incl. the buffer)=  5.05535E-04
+  4.2321E+00  4.3777E+00  4.9234E+00  4.9234E+00
+  prteigrs : nnsclo,ikpt=  150    1 max resid (incl. the buffer)=  3.54406E-05
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
   prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  4.96788E-06
   prteigrs : nnsclo,ikpt=  150    3 max resid (incl. the buffer)=  8.06293E-09
-  prteigrs : nnsclo,ikpt=  150    4 max resid (incl. the buffer)=  5.62114E-04
-  prteigrs : nnsclo,ikpt=  150    5 max resid (incl. the buffer)=  8.86230E-05
-  prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  6.35191E-05
-  prteigrs : nnsclo,ikpt=  150    7 max resid (incl. the buffer)=  1.58038E-07
-  prteigrs : nnsclo,ikpt=  150    8 max resid (incl. the buffer)=  2.39403E-04
+  prteigrs : nnsclo,ikpt=  150    4 max resid (incl. the buffer)=  1.84024E-04
+  prteigrs : nnsclo,ikpt=  150    5 max resid (incl. the buffer)=  2.23854E-05
+  prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  7.72688E-06
+  prteigrs : nnsclo,ikpt=  150    7 max resid (incl. the buffer)=  6.70685E-09
+  prteigrs : nnsclo,ikpt=  150    8 max resid (incl. the buffer)=  7.11103E-06
 
 
 --- !ResultsGS
@@ -410,7 +410,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   35.717E-16; max=  98.932E-16
+ Mean square residual over all n,k,spin=   36.415E-16; max=  98.930E-16
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -431,7 +431,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    3.05606    3.05606    3.11251    3.11251    3.11251    3.16818    3.16818    3.16818
    3.17689    3.26603    3.26603    3.26603    3.30108    3.30108    3.30594    3.30594
    3.30594    3.35619    3.36515    3.63142    3.63142    3.63142    4.16575    4.16575
-   4.16575    4.23211    4.23211    4.37771    4.92357    4.92363
+   4.16575    4.23211    4.23211    4.37771    4.92344    4.92345
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -474,7 +474,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  prteigrs : about to open file teph4zpr_3o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   3.83E-15  6.65E-16  9.14E-16  8.32E-15  8.43E-16  6.55E-16  3.55E-15  3.70E-15
-  8.06E-16  9.24E-15  4.18E-15  9.90E-16  3.59E-15  6.64E-15  7.42E-15  1.17E-15
+  8.06E-16  9.24E-15  4.18E-15  9.90E-16  3.59E-15  6.64E-15  7.43E-15  1.17E-15
   1.51E-15  9.48E-16  4.03E-15  5.46E-16  5.60E-15  2.28E-15  2.09E-15  3.00E-15
   4.69E-15
  -2.5001E+00 -1.2774E+00 -1.2774E+00 -1.2774E+00 -4.6171E-01  1.6500E-01
@@ -484,9 +484,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9972E+00
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  9.58001E-07
+  prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  9.58056E-07
   prteigrs : nnsclo,ikpt=  150    4 max resid (incl. the buffer)=  7.97125E-08
-  prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  5.80617E-14
+  prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  5.80616E-14
   prteigrs : nnsclo,ikpt=  150    7 max resid (incl. the buffer)=  2.47819E-04
   prteigrs : nnsclo,ikpt=  150    8 max resid (incl. the buffer)=  4.57513E-06
   prteigrs : nnsclo,ikpt=  150    9 max resid (incl. the buffer)=  1.27672E-05
@@ -598,7 +598,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  prteigrs : about to open file teph4zpr_3o_DS3_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   3.83E-15  6.65E-16  9.14E-16  8.32E-15  8.43E-16  6.55E-16  3.55E-15  3.70E-15
-  8.06E-16  9.24E-15  4.18E-15  9.90E-16  3.59E-15  6.64E-15  7.43E-15  1.17E-15
+  8.06E-16  9.24E-15  4.18E-15  9.90E-16  3.59E-15  6.64E-15  7.42E-15  1.17E-15
   1.51E-15  9.48E-16  4.03E-15  5.46E-16  5.60E-15  2.28E-15  2.09E-15  3.00E-15
   4.69E-15
  -2.5001E+00 -1.2774E+00 -1.2774E+00 -1.2774E+00 -4.6171E-01  1.6500E-01
@@ -608,8 +608,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9972E+00
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  4.71905E-12
-  prteigrs : nnsclo,ikpt=  150    3 max resid (incl. the buffer)=  2.41648E-10
+  prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  4.71915E-12
+  prteigrs : nnsclo,ikpt=  150    3 max resid (incl. the buffer)=  2.41658E-10
   prteigrs : nnsclo,ikpt=  150    5 max resid (incl. the buffer)=  5.91342E-08
   prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  1.17275E-08
   prteigrs : nnsclo,ikpt=  150    8 max resid (incl. the buffer)=  1.60499E-14
@@ -623,7 +623,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=  150   16 max resid (incl. the buffer)=  7.76321E-10
   prteigrs : nnsclo,ikpt=  150   17 max resid (incl. the buffer)=  4.93463E-06
   prteigrs : nnsclo,ikpt=  150   18 max resid (incl. the buffer)=  4.94481E-09
-  prteigrs : nnsclo,ikpt=  150   19 max resid (incl. the buffer)=  3.47135E-03
+  prteigrs : nnsclo,ikpt=  150   19 max resid (incl. the buffer)=  3.47238E-03
   prteigrs : nnsclo,ikpt=  150   20 max resid (incl. the buffer)=  4.48670E-10
   prteigrs : nnsclo,ikpt=  150   21 max resid (incl. the buffer)=  1.22268E-05
   prteigrs : nnsclo,ikpt=  150   22 max resid (incl. the buffer)=  8.81061E-04
@@ -660,7 +660,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=  150   57 max resid (incl. the buffer)=  3.77490E-08
   prteigrs : nnsclo,ikpt=  150   58 max resid (incl. the buffer)=  4.83289E-10
   prteigrs : nnsclo,ikpt=  150   59 max resid (incl. the buffer)=  3.10727E-04
-  prteigrs : nnsclo,ikpt=  150   60 max resid (incl. the buffer)=  4.40076E-08
+  prteigrs : nnsclo,ikpt=  150   60 max resid (incl. the buffer)=  4.40075E-08
   prteigrs : nnsclo,ikpt=  150   61 max resid (incl. the buffer)=  8.12714E-09
   prteigrs : nnsclo,ikpt=  150   62 max resid (incl. the buffer)=  2.96060E-08
   prteigrs : nnsclo,ikpt=  150   63 max resid (incl. the buffer)=  1.44428E-04
@@ -670,7 +670,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=  150   67 max resid (incl. the buffer)=  1.76418E-07
   prteigrs : nnsclo,ikpt=  150   68 max resid (incl. the buffer)=  9.04804E-10
   prteigrs : nnsclo,ikpt=  150   69 max resid (incl. the buffer)=  5.38065E-07
-  prteigrs : nnsclo,ikpt=  150   70 max resid (incl. the buffer)=  5.59894E-08
+  prteigrs : nnsclo,ikpt=  150   70 max resid (incl. the buffer)=  5.59882E-08
   prteigrs : nnsclo,ikpt=  150   71 max resid (incl. the buffer)=  4.17628E-12
 
 
@@ -851,7 +851,7 @@ P           mkmem3         72
             nband1         70
             nband2         25
             nband3         25
-           nbdbuf1         10
+           nbdbuf1          7
            nbdbuf2          5
            nbdbuf3          5
            ndtset           3
@@ -1007,10 +1007,10 @@ P           mkmem3         72
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         50.8  wall=         52.7
+- Proc.   0 individual time (sec): cpu=         52.6  wall=         57.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         50.8  wall=         52.7
++Overall time at end (sec) : cpu=         52.6  wall=         57.2

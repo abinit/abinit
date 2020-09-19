@@ -458,6 +458,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rhoqpmix',tread,'DPR')
  if(tread==1) dtset%rhoqpmix=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rifcsph',tread,'DPR')
+ if(tread==1) dtset%rifcsph=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nfreqim',tread,'INT')
  if(tread==1) dtset%nfreqim=intarr(1)
  if (dtset%cd_customnimfrqs/=0) then
@@ -1880,10 +1883,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbdbuf',tread,'INT')
  if(tread==1)then
    dtset%nbdbuf=intarr(1)
-   !if (dtset%nbdbuf < 0) then
-   !  ABI_CHECK(abs(dtset%nbdbuf) < 100, "abs(nbdbuf) should be < 100")
-   !  dtset%nbdbuf = dtset%nbdbuf * maxval(dtset%nband)
-   !end if
+   ! A negative value is interpreted as percentage of nband
+   if (dtset%nbdbuf < 0) then
+     ABI_CHECK(abs(dtset%nbdbuf) < 100, "abs(nbdbuf) should be < 100")
+     dtset%nbdbuf = max(nint(abs(dtset%nbdbuf) / 100.0_dp * maxval(dtset%nband)), 1)
+   end if
  else
    if(response/=1 .and. dtset%iscf<0)dtset%nbdbuf=2*dtset%nspinor
    if(response==1 .and. 3<=occopt .and. occopt<=8 )dtset%nbdbuf=2*dtset%nspinor

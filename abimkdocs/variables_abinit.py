@@ -2467,12 +2467,12 @@ Variable(
 [[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
 on-the-flight enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
 Useful only when doing cell optimization, e.g. [[optcell]]/=0, usually with [[ionmov]] == 2 or 22.
-Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large), 
+Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large),
 then the recommended value of [[dilatmx]] is 1.05.
 When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
 you need an accurate estimation of the geometry, then make a first
-run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using 
-the newly estimated geometry, with [[chkdilatmx]]=0 and [[dilatmx]] set to 1.05. 
+run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using
+the newly estimated geometry, with [[chkdilatmx]]=0 and [[dilatmx]] set to 1.05.
 If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]]=0 only once.
 
 In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
@@ -10226,8 +10226,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
-[[nband]] bands, are to be considered as part of a buffer. This concept is
-useful in three situations: in non-self-consistent calculations, for the
+[[nband]] bands, are to be considered as part of a buffer.
+A negative value is interpreted as percentage of [[nband]] (added in v9).
+
+This concept is useful in three situations: in non-self-consistent calculations, for the
 determination of the convergence tolerance; for response functions of metals,
 to avoid instabilities, and also when finite electric fields or non-linear
 responses (with electric field perturbations) are considered. For the two
@@ -21788,6 +21790,20 @@ The default value is a compromise between numerical stability and efficiency.
 Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substancial decrease in the number of
 $\kq$ KS states that must be read from file with a subsequent decrease in the memory requirements for the wavefunctions.
 We recommended to perform initial tests to decide whether a value smaller than four can be used.
+""",
+),
+
+Variable(
+    abivarname="rifcsph",
+    varset="eph",
+    vartype="real",
+    topics=['Phonons_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Radius of the Interatomic Force Constant SPHere",
+    added_in_version="9.2.0",
+    text=r"""
+    Same meaning as [[rifcsph@anaddb]]
 """,
 ),
 

@@ -49,7 +49,8 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  teph4zpr_1.in, teph4zpr_2.in, teph4zpr_3.in, teph4zpr_4.in, teph4zpr_5.in, teph4zpr_6.in, teph4zpr_7.in
+#%% test_chain =  teph4zpr_1.in, teph4zpr_2.in, teph4zpr_3.in, teph4zpr_4.in,
+#%%               teph4zpr_5.in, teph4zpr_6.in, teph4zpr_7.in, teph4zpr_8.in
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =

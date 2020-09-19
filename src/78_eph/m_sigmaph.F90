@@ -1403,7 +1403,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            iq_ibz_fine = iq_ibz_k
            if (sigma%symsigma == 0) iq_ibz_fine = sigma%ephwg%lgk%find_ibzimage(qpt)
            ABI_CHECK(iq_ibz_fine /= -1, sjoin("Cannot find q-point in IBZ(k):", ktoa(qpt)))
-           if (sigma%symsigma == 1) then
+           if (abs(sigma%symsigma) == 1) then
               if (.not. all(abs(sigma%qibz_k(:, iq_ibz_fine) - sigma%ephwg%lgk%ibz(:, iq_ibz_fine)) < tol12)) then
                 MSG_ERROR("Mismatch in qpoints.")
               end if
@@ -2126,7 +2126,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Integral over IBZ(k) distributed inside qpt_comm
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
-       if (sigma%symsigma == +1) nq = sigma%nqibz_k
+       if (abs(sigma%symsigma) == +1) nq = sigma%nqibz_k
        call xmpi_split_work(nq, sigma%qpt_comm%value, q_start, q_stop)
 
        do iq_ibz_k=q_start,q_stop
@@ -3813,7 +3813,6 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
          ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"), &
                               velocity(:, band_ks, ikpt, spin), start=[1, iband, ikcalc, spin])
          NCF_CHECK(ncerr)
-
        end do
      end do
    end do
@@ -5026,7 +5025,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
  natom3 = 3 * cryst%natom
  ndiv = 1; if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
 
- ABI_CHECK(sigma%symsigma == 1, "symsigma 0 with tetra not implemented")
+ ABI_CHECK(abs(sigma%symsigma) == 1, "symsigma 0 with tetra not implemented")
 
  if (sigma%imag_only) then
    ! Weights for Im (tetrahedron, eta --> 0)

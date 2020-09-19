@@ -117,7 +117,8 @@ have an additional dependence on the physical temperature T.
     within each degenerate subspace.
     As a consequence, **accidental degeneracies won't be removed when the [[symsigma]] is set to 1.
 
-Note that both the FM and the DW term converge slowly with the number of empty states and the $\qq$-sampling.
+Note that both the FM and the DW term converge slowly with the $\qq$-sampling, and
+the real part of the self-energy requires the inclusions of many empty states.
 In order to accelerate the convergence with the bands, the EPH code can replace the contributions
 given by the high-energy states above a certain band index $M$ with the solution
 of a **non-self-consistent Sternheimer equation** in which only the first $M$ states are required.
@@ -458,7 +459,7 @@ that produces:
 ![](eph4zpr_assets/abiview.png)
 
 The results seem reasonable: the acoustic modes go to zero linearly for $\qq \rightarrow 0$
-as we are dealing with a 3D system, no instabilty is present
+as we are dealing with a 3D system, no instability is present
 and the band dispersion shows the LO-TO splitting typical of polar materials.
 Note, however, that the acoustic sum-rule is automatically enforced by the code so
 it is always a good idea to compare the phonon dispersion with/without [[asr]] as this
@@ -596,24 +597,6 @@ We also use [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or
 The input file is given in:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_3.in %}
-
-The most important section is reported below for your convenience:
-
-```sh
-nband 100
-nbdbuf 10
-ecut 30.0
-
-ngkpt 4 4 4
-nshiftk 1
-shiftk 0 0 0
-
-nstep 150
-tolwfr 1e-15
-iscf -2          # NSCF run from DEN.nc
-
-getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
-```
 
 Note, in particular, the use of [[nbdbuf]].
 As mentioned in the documentation, **the highest energy states require more iterations to convergence**.
@@ -1057,16 +1040,20 @@ Obviously we are still far from convergence but a 12x12x12 $\qq$-mesh is the bes
 It is clear that one should test denser $\qq$-meshes and, last but not least, monitor the behaviour for [[zcut]] --> 0.
 These additional convergence tests cannot be covered in this lesson and they are left as exercise.
 
-<!--
 ## How to compute the spectral function
 
 To compute the spectral function, we need to specify the number of frequencies via [[nfreqsp]]
 The code will compute $A(\omega)$ using a linear frequency mesh centered on the KS eigenvalue
-that extends from enk - Delta, enk + Delta where Delta is specified by [[freqspmax]].
+that covers the range $[e_\nk - \Delta, e_\nk + \Delta with $\Delta$ specified by [[freqspmax]].
 
-nfreqsp 8000
+{% dialog tests/tutorespfn/Input/teph4zpr_8.in %}
+
+```sh
+nfreqsp 301
 freqspmax 8.0 eV
--->
+```
+
+To plot with the 
 
 ## MPI parallelism and memory requirements
 
@@ -1084,7 +1071,7 @@ Fortunately, the code is able to distribute **bands** among the MPI processes in
 hence the memory required for the wavefunctions will scale as [[nband]] / **np_band** where **np_band**
 is the number of MPI processes in the band communicator.
 
-For ZPR calculations the priorities are as follows:
+For ZPR calculations, the priorities are as follows:
 
 1. Use enough *np_band* MPI processes to decrease the memory for the wavefunctions.
    Ideally, *np_band* should divide [[nband]] to distribute the work equally.

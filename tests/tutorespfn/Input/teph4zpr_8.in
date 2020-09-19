@@ -1,32 +1,36 @@
-# Convergence of ZPR wrt nband with the Sternheimer method
+# Computation of spectral function with/without Sternheimer method
 
- ndtset 4
- nband: 10
- nband+ 10
+ ndtset 2
+
+ nfreqsp 201
+ freqspmax 2 eV
+ prtvol 1  # This is for the automatic tests. Do not use in production!
+
+ nband 20
+
+ eph_stern2 1
+ getpot_filepath2 "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
+
+ ngkpt 12 12 12; eph_ngqpt_fine 12 12 12; getwfk_filepath "teph4zpr_3o_DS3_WFK"
+
+ getddb_filepath "teph4zpr_1_DDB"
+ ddb_ngqpt 4 4 4
+ getdvdb_filepath "teph4zpr_2_DVDB"
+
 
  ecut 35.0
 
- ngkpt 4 4 4
  nshiftk 1
  shiftk 0 0 0
+
+ mixprec 1; boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
 
 ##############################################
 ####                 SECTION: eph
 ##############################################
  optdriver 7
  eph_task 4
- ddb_ngqpt 4 4 4
- tmesh 0 100 4            # [start, step, num_T] in K
-
- getddb_filepath "teph4zpr_1_DDB"
- getdvdb_filepath "teph4zpr_2_DVDB"
- getwfk_filepath "teph4zpr_3o_DS1_WFK"
-
- eph_stern 1
- getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
-
- mixprec 1
- boxcutmin 1.1
+ tmesh 0 100 4    # [start, step, num_T] in K
 
  prtphdos 0       # Disable computation of PHDOS to save some time
 
@@ -40,10 +44,10 @@
     8 9
  zcut 0.01 eV
 
- structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
-
  pp_dirpath = "$ABI_PSPDIR"
  pseudos = "O.psp8, Mg-sp-gw.psp8"
+
+ structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -53,11 +57,11 @@
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =
-#%%   teph4zpr_6.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4zpr_8.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = Convergence of ZPR wrt nband with the Sternheimer method
+#%% description = Convergence of ZPR wrt q-sampling with Sternheimer method
 #%%<END TEST_INFO>

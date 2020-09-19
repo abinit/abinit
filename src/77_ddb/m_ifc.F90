@@ -618,6 +618,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (nsphere > 0 .or. abs(rifcsph) > tol10) then
    call wrtout(std_out, ' Apply cutoff on IFCs.')
    call wrtout(std_out, sjoin(" nsphere:", itoa(nsphere), ", rifcsph:", ftoa(rifcsph)))
+   call wrtout(std_out, sjoin(" Radius of biggest sphere inscribed in the WS supercell: ", ftoa(r_inscribed_sphere)))
    call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,rcan,rprim,ifc_tmp%rpt,rcut_min,ifc_tmp%wghatm)
    if (Ifc%asr > 0) then
      call wrtout(std_out, ' Enforcing ASR on cutoffed IFCs.')
@@ -2116,7 +2117,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
        write(iout, '(a)' )' Third atom defining local coordinates : '
        write(iout, '(a,i4,a,i4)' )'     ib = ',ib,'   irpt = ',irpt
      end if
-   endif 
+   endif
  end if
 
  ! Analysis and output of force constants, ordered with respect to the distance from atom ia
