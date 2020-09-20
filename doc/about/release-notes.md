@@ -9,10 +9,10 @@ are relative to modifications/improvements of ABINIT v9.2 with respect to v8.10
 (merge requests up to and including MR636 are taken into account)
 
 The list of contributors includes:
-B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
 J.-B. Charraud, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, 
 B. Guster, G. Hautier, Xu He, N. Helbig, F. Jollet,
-H. Miranda, F. Naccarato, R. Outerov, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Royo,
+H. Miranda, F. Naccarato, R. Outerovitch, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Royo,
 M. Schmitt, M. Stengel, M. Torrent, J. Van Bever, M. Verstraete, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
@@ -28,14 +28,14 @@ Xavier
 
 In particular: 
 
-1. The build system relies on new `.ac9` files (see [B.6](#v9.0.B.6)), superceeding the v8 `.ac` files.
+1. The build system relies on new `.ac9` files (see [B.6](#v9.2.B.6)), superceeding the v8 `.ac` files.
    A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
    to convert from the old `.ac`format to `.ac9`.
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
-as this was not sustainable (see [B.6](#v9.0.B.6)) and nowadays most users install prerequisite libraries themselves.
+as this was not sustainable (see [B.6](#v9.2.B.6)) and nowadays most users install prerequisite libraries themselves.
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
-    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.0.B.9)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
-4. Several default values have been changed, see [A.3](#v9.0.A.3).
+    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.2.B.9)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
+4. Several default values have been changed, see [A.3](#v9.2.A.3).
 
 
 **A.2** 
@@ -54,19 +54,24 @@ The licence allows the authors to put it on the Web.
 
 Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments).
 
-<a name="v9.0.A.3"></a>
+<a name="v9.2.A.3"></a>
 **A.3**  The default values of the following ABINIT input variables have been changed:
     [[ixcrot]], [[chneut]], [[ntime]], [[prtkden]], [[symsigma]] and [[tolsym]]. In particular the new default value
     of [[tolsym]], 1e-5, is more in line with the tolerances of other codes, so that for users of such
     codes, one barrier to the use of ABINIT is removed. By the same token, some bug in the recognition of symmetries
     has been fixed, when [[tolsym]] is close to the default, see the new tests [[test:v9_15]] and [[test:v9_16]].
 
+    By X. Gonze (MR 689 and others)
+
 **A.4** The initialization of the wavefunctions when [[paral_kgb]]=1 and [[nspinor]]=2 has been changed, since the previous one could prevent the code to converge.
     By M Torrent (MR 562).
 
 **A.5** The input variable xangst has been disabled. Use [[xcart]] instead, and specify the unit, namely Angstrom.
 
-**A.6** The name of the t-DEP main executable has been changed from `tdep` to `atdep`, in line with [[cite:Romero2020]].
+**A.6** Work is on-going concerning the Coulomb singularity treatment, see [D.32](#v9.2.D.32). The usage of the input variable [[icutcoul]] is changing. 
+For the time being, use [[gw_icutcoul]] instead.
+
+**A.7** The name of the t-DEP main executable has been changed from `tdep` to `atdep`, in line with [[cite:Romero2020]].
 
 * * *
 
@@ -186,9 +191,9 @@ At the practical level, see [[cite:Romero2020]]:
 >   norm-conserving pseudopotentials without non-linear core corrections, and the LDA
 >   functional.
 
-A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]],
-as well as a specific topic.
+A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]].
 
+See the [[topic:longwave]]. The relevant input variable is [[optdriver]]==10.
 New input variables have been defined: [[lw_flexo]], [[lw_qdrpl]], [[prepalw]], [[flexoflag@anaddb]],
 [[dipquad@anaddb]], [[quadquad@anaddb]]. 
 
@@ -241,7 +246,7 @@ By T. Cavignac, B. Amadon and O. Gingras.
 **B.4** Spin model within Multibinit 
 
 The new capabilities of Multibinit within ABINITv9 are described
-fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also Sec. [D.1](#v9.0.D.1).
+fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also Sec. [D.1](#v9.2.D.1).
 In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonze2020]], is available, as follows.
 
 >Multibinit implements the most commonly used model for spin systems, 
@@ -306,7 +311,7 @@ New input variables: [[chrgat]], [[constraint_kind]], [[ratsm]].
 
 By X. Gonze.
 
-<a name="v9.0.B.6"></a>
+<a name="v9.2.B.6"></a>
 **B.6** Large modifications of the build system 
 
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
@@ -398,7 +403,7 @@ List of new input variables that rely on this feature:
 
 By M. Giantomassi
 
-<a name="v9.0.B.9"></a>
+<a name="v9.2.B.9"></a>
 **B.9** YAML sections in the output file 
 
 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
@@ -465,7 +470,7 @@ By M. Giantomassi.
 In the description of input variables (e.g. files abimkdocs/variables_abinit.py), a new field `added_in_version` has been introduced,
 for example,
 
-     added_in_version="9.0.0"
+     added_in_version="9.2.0"
 
 or, for variables introduced prior to v9,
 
@@ -514,9 +519,17 @@ See https://gitlab.abinit.org/pouillon/abinit/-/issues/33 .
 
 By Y. Pouillon (MR 619)
 
+**C.9** Reorganisation of the tests/Psps_for_tests directory, in preparation of the beautification.
+Clarification on which pseudopotentials are of recent format, and which are legacy pseudopotentials.
+Preparation of beautification.
+
+By X. Gonze (MR 683)
+
+By Y. Pouillon (MR 619)
+
 * * *
 
-<a name="v9.0.D.1"></a>
+<a name="v9.2.D.1"></a>
 ### **D.**  Other changes (or on-going developments, not yet finalized)
 
 **D.1**  Miscellaneous improvements of Multibinit (lattice part)
@@ -554,6 +567,9 @@ Also, not all of these are documented, or only partly documented (e.g. variable 
 - [[tolmxf@multibinit|tolmxf]] 
 - ts_option@multibinit, NOT TESTED, NOT DOCUMENTED
 
+Finally, several input variables of the main ABINIT application are also reused for Multibinit, without modification
+of meaning, like [[atfix]] and related input variables, or [[tolmxf]].
+
 By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
 
@@ -567,10 +583,10 @@ By J. Zwanziger (MR 469, 500, 545, 588)
 
 By M. Giantomassi
 
+**D.4** Speed-up of susceptibility matrix calculations and GW analytic continuation calculations. 
+See the new input variable [[gwaclowrank]] and new test [[test:v9_22]].
 
-**D.4** Test linear electro-optical coefficient, tutorespfn [[test:optic_5]].
-
-By N. Pike (MR 575).
+By F. Bruneval (MR 687).
 
 **D.5** NCPP Wavefunction mixing with Variational Energy
 and minor improvements to prepare PAW+Hybrid variational energy.
@@ -699,16 +715,42 @@ enable_crpa_optim and enable_crpa_no_optim
 
 By R. Outerov and B. Amadon (MR622).
 
+<a name="v9.2.D.32"></a>
 **D.32** Work on refactoring the Coulomb interaction part of ABINIT.
 
-By B. Guster, M. Giantomassi and X. Gonze (MR 627&633).
+New input variables [[fock_icutcoul]], and [[gw_icutcoul]], that should superceed [[icutcoul]].
+New test added for the mini-Brillouin Zone integration, [[gw_icutcoul]]=14, 15, 16, see [[test:v9_21]].
+
+By B. Guster, M. Giantomassi, F. Bruneval and X. Gonze (MR 627, 633, 673, 679, 686).
 
 **D.33** New TB2J python script to compute the superexchange (J) and the Dzyaloshinskii-Moriya (DMI) interactions. The script can be found in [http://gitlab.abinit.org/xuhe/TB2J](http://gitlab.abinit.org/xuhe/TB2J) with doc and tutorials. The script is interfaced with wannier90 and use the w90 output files. The J calculation works in production, the DMI is much more sensitive to disentanglement noise and have to be use with care. An article is under construction to describe the method and its implementation. The script can deliver input data file for the spin model of Multibinit.
 
 By He Xu, M. Verstraete and E. Bousquet
 
-**D.34** Miscellaneous additional bug fixes and improvements of documentation.
-L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
+**D.34** Test linear electro-optical coefficient, tutorespfn [[test:optic_5]].
+
+By N. Pike (MR 575).
+
+
+**D.35** Optic: print spin-decomposition when applicable. 
+Fixed reflectivity screwed results. Test more thoroughly optics (incl. interfacing using NetCDF),
+see new tests [[test:v9_05]] to [[test:v9_14]]
+
+By X. Gonze (MR 654, 674).
+
+**D.36** Fixed DFPT+PAW+GGA+usexcnhat=1+q<> bug, and also add new related tests
+[[test:v9_41]] and [[test:v9_42]].
+
+By M. Torrent and X. Gonze (MR 657).
+
+**D.37** Update PAW tutorial
+
+By F. Jollet (MR 652, 653).
+
+
+**D.37** Miscellaneous additional bug fixes, improvements of documentation including for the build system.
+G. Antonius, L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, 
+F. Jollet, R. Outerovitch, N. Pike, Y Pouillon, M. Royo, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
 
 
 * * *
