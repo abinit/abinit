@@ -28,7 +28,7 @@ latt_taut = 80
 #%% authors = X. He 
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read netcdf and run lattice dynamics using Berendsen NVT (dynamics=103)
+#%%   Read netcdf and run lattice dynamics using Berendsen NVT (dynamics=103)
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.
 #%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90

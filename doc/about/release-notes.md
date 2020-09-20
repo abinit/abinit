@@ -28,21 +28,21 @@ Xavier
 
 In particular: 
 
-1. The build system relies on new `.ac9` files (see [B.5](#v9.0.B.5)), superceeding the v8 `.ac` files.
+1. The build system relies on new `.ac9` files (see [B.6](#v9.0.B.6)), superceeding the v8 `.ac` files.
    A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
    to convert from the old `.ac`format to `.ac9`.
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
-as this was not sustainable (see [B.5](#v9.0.B.5)) and nowadays most users install prerequisite libraries themselves.
+as this was not sustainable (see [B.6](#v9.0.B.6)) and nowadays most users install prerequisite libraries themselves.
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
-    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.0.B.8)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
+    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.0.B.9)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
 4. Several default values have been changed, see [A.3](#v9.0.A.3).
 
 
 **A.2** 
 A new account of the ABINIT effort has been published in Computer Phys. Comm. [[cite:Gonze2020]]
 It provides description of several new features.
-A version of this paper that is not formatted for Computer Phys. Comm.  
-[is also available](https://www.abinit.org/sites/default/files/ABINIT20.pdf).
+A version of this paper that is not formatted 
+for Computer Phys. Comm. [is also available](https://www.abinit.org/sites/default/files/ABINIT20.pdf).
 The licence allows the authors to put it on the Web.
 
 A second new account of the ABINIT effort has been published in J. Chem. Phys. [[cite:Romero2020]].
@@ -199,7 +199,7 @@ or Massimiliano Stengel (mstengel@icmab.es) before start using it.
 By M. Royo, M. Stengel, M. Giantomassi.
 
 
-**B.2** DFT+DMFT
+**B.3** DFT+DMFT
 
 The new capabilities of ABINITv9 related to DFT+DMFT calculations are described
 fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
@@ -238,7 +238,7 @@ Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 By T. Cavignac, B. Amadon and O. Gingras.
 
 
-**B.3** Spin model within Multibinit 
+**B.4** Spin model within Multibinit 
 
 The new capabilities of Multibinit within ABINITv9 are described
 fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also Sec. [D.1](#v9.0.D.1).
@@ -259,9 +259,11 @@ Many new input variables are present.
 Not all these new input variables are present in automatic tests, though, in this beta-release. 
 These "non-tested" input variables are indicated below with 'NT'.
 This will be completed for the production version v9.2 .
-List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23]], [[test:v9_81]], and [[test:v9_82]].
+List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23]], [[test:v9_81]], [[test:v9_82]],
+[[test:v9_86]], [[test:v9_87]].
 
 New input variables tested and documented: 
+[[slc_coupling@multibinit|slc_coupling]],
 [[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]], 
 [[spin_damping@multibinit|spin_damping]], 
 [[spin_init_orientation@multibinit|spin_init_orientation]], 
@@ -278,16 +280,17 @@ New input variables tested and documented:
 [[spin_temperature_nstep@multibinit|spin_temperature_nstep]], 
 [[spin_var_temperature@multibinit|spin_var_temperature]], 
 [[spin_write_traj@multibinit|spin_write_traj]].
-Additionnal new input variables:
-[[slc_coupling@multibinit|slc_coupling]](NT),
+Additionnal new input variables, still to be tested and/or documented:
 spin_calc_correlation_obs (NT and not documented), 
 spin_calc_traj_obs (NT and not documented), 
-[[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT). 
+[[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT), 
+spin_tolavg (NT and not documented), 
+spin_tolvar (NT and not documented), 
 
 By Xu He, N. Helbig, J. Bieder, E. Bousquet, Ph. Ghosez, M. Verstraete
 
 
-**B.4** Constrained DFT
+**B.5** Constrained DFT
 
 Constrained Density-Functional Theory (see [[topic:ConstrainedDFT]]) is available,
 with a new algorithm allowing to impose the constraints to arbitrary precision,
@@ -296,15 +299,15 @@ or a combination thereof for different atoms. The constraints are smeared spheri
 with ajustable sphere radius, centered on atoms. The algorithms has been demonstrated for norm-conserving pseudopotentials
 as well as PAW. Forces and derivatives with respect to the constraints 
 are available (i.e. magnetic torque for the non-collinear spin case).
-Stresses are still to be coded, will be available in ABINITv9.2.
+Stresses are still to be coded, will be available in ABINITv9.4.
 
 New tests: v8#24-29, v8#95-97 and v9#1-3.
 New input variables: [[chrgat]], [[constraint_kind]], [[ratsm]].
 
 By X. Gonze.
 
-<a name="v9.0.B.5"></a>
-**B.5** Large modifications of the build system 
+<a name="v9.0.B.6"></a>
+**B.6** Large modifications of the build system 
 
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
 Fully documented example files can be found in doc/build/config-examples.
@@ -320,7 +323,7 @@ The build system also can make suggestions to the user, to complete its *.ac9 fi
 
 By Y. Pouillon and JM Beuken
 
-**B.6** New command line interface
+**B.7** New command line interface
 
 There is a new (**recommended**) command line interface to run ABINIT, without the "files" file.
 The new syntax is:
@@ -369,7 +372,7 @@ See tests [[test:v8_52]] for a standard analysis of the DDB file and
 By M. Giantomassi (MR 586).
 
 
-**B.7** Reading strings from the input file
+**B.8** Reading strings from the input file
 
 A new mechanism to read strings enclosed between **double quotation marks** from the input file has been activated. 
 So, many new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
@@ -395,8 +398,8 @@ List of new input variables that rely on this feature:
 
 By M. Giantomassi
 
-<a name="v9.0.B.8"></a>
-**B.8** YAML sections in the output file 
+<a name="v9.0.B.9"></a>
+**B.9** YAML sections in the output file 
 
 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
 At present there is a YAML section for the components of the total energy, the GS results including forces and stresses as well as a YAML section for GW calculations, and some YAML sections giving information about the iteration status.
@@ -410,7 +413,7 @@ See related information in Sec. 5.5 of [[cite:Gonze2020]].
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
 
 
-**B.9** New approach to define crystalline structures in the Abinit input
+**B.10** New approach to define crystalline structures in the Abinit input
 
 The new variable [[structure]] can be used to initialize the lattice vectors 
 and the atomic positions **from an external file**.
@@ -423,7 +426,7 @@ See the documentation for the syntax and limitations.
 By M. Giantomassi.
 
 
-**B.10** New capabilities of abipy and abiflows 
+**B.11** New capabilities of abipy and abiflows 
 
 The abipy and abiflows projects have been significantly extended.
 See Sec. 6 of [[cite:Gonze2020]], as well as the [gallery of plotting scripts](http://abinit.github.io/abipy/gallery/index.html) &nbsp;
@@ -521,26 +524,35 @@ By Y. Pouillon (MR 619)
 Miscellaneous improvements have been made to the lattice part of Multibinit.
 See the new input variables below, also see the Sec. 4.1.1 of [[cite:Gonze2020]].
 
-New tests: [[test:v8_38]], [[test:v8_94]], [[test:v8_98]], [[test:v8_99]], [[test:v9_83]],  [[test:v9_84]], and [[test:v9_85]]. 
+New tests: [[test:v8_38]], [[test:v8_94]], [[test:v8_98]], [[test:v8_99]], 
+[[test:v8_101]],
+[[test:v8_102]],
+[[test:v8_103]],
+[[test:v9_83]],  [[test:v9_84]], [[test:v9_85]]. 
 New input variables are listed below.
-Not all these new input variables are present in automatic tests, though, in this beta-release.
-These "non-tested" input variables are indicated below with 'NT'.
+Not all these new input variables are present in automatic tests, though.
 Also, not all of these are documented, or only partly documented (e.g. variable type, acronym, default, but no more).
-This will be completed for the production version v9.2 .
 
 - [[analyze_anh_pot@multibinit|analyze_anh_pot]] 
-- fit_SPC_maxS@multibinit (NT)
-- fit_iatom@multibinit [[test:paral_81]], [[test:paral_82]], [[test:v8_13]], [[test:v8_14]], but not documented. 
+- [[dyn_chksym@multibinit|dyn_chksym]] 
+- [[dyn_tolsym@multibinit|dyn_tolsym]] 
+- fit_EFS@multibinit, [[test:v8_103]] NOT DOCUMENTED
+- [[fit_iatom@multibinit|fit_iatom]] 
+- [[fit_SPC_maxS@multibinit|fit_SPC_maxS]] 
 - latt_compressibility@multibinit, NOT TESTED, NOT DOCUMENTED
 - [[latt_friction@multibinit|latt_friction]] 
 - latt_mask@multibinit, NOT TESTED, NOT DOCUMENTED
-- [[latt_taup@multibinit|latt_taup]] Despite the link, NOT TESTED, only partly DOCUMENTED
-- [[latt_taut@multibinit|latt_taut]] Despite the link only partly DOCUMENTED
+- [[latt_taup@multibinit|latt_taup]] NOT TESTED
+- [[latt_taut@multibinit|latt_taut]] 
 - [[opt_coeff@multibinit|opt_coeff]]
 - [[opt_effpot@multibinit|opt_effpot]]
 - [[opt_ncoeff@multibinit|opt_ncoeff]]
-- prt_names, NOT TESTED, NOT DOCUMENTED
-- [[test_effpot@multibinit|test_effpot]] v8#98
+- sel_EFS@multibinit, [[test:v8_103]] NOT DOCUMENTED
+- [[strfact@multibinit|strfact]] 
+- [[test_effpot@multibinit|test_effpot]] 
+- [[test_prt_ph@multibinit|test_prt_ph]] 
+- [[tolmxf@multibinit|tolmxf]] 
+- ts_option@multibinit, NOT TESTED, NOT DOCUMENTED
 
 By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
@@ -734,13 +746,13 @@ Xavier
 
 In particular: 
 
-1. The build system relies on new `.ac9` files (see [B.5](#v9.0.B.5)), superceeding the v8 `.ac` files.
+1. The build system relies on new `.ac9` files (see [B.6](#v9.0.B.6)), superceeding the v8 `.ac` files.
    A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
    to convert from the old `.ac`format to `.ac9`.
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
-as this was not sustainable (see [B.5](#v9.0.B.5)) and nowadays most users install prerequisite libraries themselves.
+as this was not sustainable (see [B.6](#v9.0.B.6)) and nowadays most users install prerequisite libraries themselves.
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
-    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.0.B.8)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
+    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.9](#v9.0.B.9)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
 4. Several default values have been changed, see [A.3](#v9.0.A.3).
 
 
@@ -887,7 +899,7 @@ or Massimiliano Stengel (mstengel@icmab.es) before start using it.
 By M. Royo, M. Stengel, M. Giantomassi.
 
 
-**B.2** DFT+DMFT
+**B.3** DFT+DMFT
 
 The new capabilities of ABINITv9 related to DFT+DMFT calculations are described
 fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
@@ -926,7 +938,7 @@ Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 By T. Cavignac, B. Amadon and O. Gingras.
 
 
-**B.3** Spin model within Multibinit 
+**B.4** Spin model within Multibinit 
 
 The new capabilities of Multibinit within ABINITv9 are described
 fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also Sec. [D.1](#v9.0.D.1).
@@ -975,7 +987,7 @@ spin_calc_traj_obs (NT and not documented),
 By Xu He, N. Helbig, J. Bieder, E. Bousquet, Ph. Ghosez, M. Verstraete
 
 
-**B.4** Constrained DFT
+**B.5** Constrained DFT
 
 Constrained Density-Functional Theory (see [[topic:ConstrainedDFT]]) is available,
 with a new algorithm allowing to impose the constraints to arbitrary precision,
@@ -991,8 +1003,8 @@ New input variables: [[chrgat]], [[constraint_kind]], [[ratsm]].
 
 By X. Gonze.
 
-<a name="v9.0.B.5"></a>
-**B.5** Large modifications of the build system 
+<a name="v9.0.B.6"></a>
+**B.6** Large modifications of the build system 
 
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
 Fully documented example files can be found in doc/build/config-examples.
@@ -1008,7 +1020,7 @@ The build system also can make suggestions to the user, to complete its *.ac9 fi
 
 By Y. Pouillon and JM Beuken
 
-**B.6** New command line interface
+**B.7** New command line interface
 
 There is a new (**recommended**) command line interface to run ABINIT, without the "files" file.
 The new syntax is:
@@ -1057,7 +1069,7 @@ See tests [[test:v8_52]] for a standard analysis of the DDB file and
 By M. Giantomassi (MR 586).
 
 
-**B.7** Reading strings from the input file
+**B.8** Reading strings from the input file
 
 A new mechanism to read strings enclosed between **double quotation marks** from the input file has been activated. 
 So, many new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
@@ -1083,8 +1095,8 @@ List of new input variables that rely on this feature:
 
 By M. Giantomassi
 
-<a name="v9.0.B.8"></a>
-**B.8** YAML sections in the output file 
+<a name="v9.0.B.9"></a>
+**B.9** YAML sections in the output file 
 
 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
 At present there is a YAML section for the components of the total energy, the GS results including forces and stresses as well as a YAML section for GW calculations, and some YAML sections giving information about the iteration status.
@@ -1098,7 +1110,7 @@ See related information in Sec. 5.5 of [[cite:Gonze2020]].
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
 
 
-**B.9** New approach to define crystalline structures in the Abinit input
+**B.10** New approach to define crystalline structures in the Abinit input
 
 The new variable [[structure]] can be used to initialize the lattice vectors 
 and the atomic positions **from an external file**.
@@ -1111,7 +1123,7 @@ See the documentation for the syntax and limitations.
 By M. Giantomassi.
 
 
-**B.10** New capabilities of abipy and abiflows 
+**B.11** New capabilities of abipy and abiflows 
 
 The abipy and abiflows projects have been significantly extended.
 See Sec. 6 of [[cite:Gonze2020]], as well as the [gallery of plotting scripts](http://abinit.github.io/abipy/gallery/index.html) &nbsp;
