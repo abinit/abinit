@@ -526,8 +526,6 @@ Preparation of beautification.
 
 By X. Gonze (MR 683)
 
-By Y. Pouillon (MR 619)
-
 * * *
 
 <a name="v9.2.D.1"></a>
@@ -717,7 +715,7 @@ enable_crpa_optim and enable_crpa_no_optim
 By R. Outerov and B. Amadon (MR622).
 
 <a name="v9.2.D.32"></a>
-**D.32** Work on refactoring the Coulomb interaction part of ABINIT.
+**D.32** On-going work on refactoring the Coulomb interaction part of ABINIT.
 
 New input variables [[fock_icutcoul]], and [[gw_icutcoul]], that should superceed [[icutcoul]].
 New test added for the mini-Brillouin Zone integration, [[gw_icutcoul]]=14, 15, 16, see [[test:v9_21]].
