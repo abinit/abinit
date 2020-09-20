@@ -71,7 +71,8 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
 **A.6** Work is on-going concerning the Coulomb singularity treatment, see [D.32](#v9.2.D.32). The usage of the input variable [[icutcoul]] is changing. 
 For the time being, use [[gw_icutcoul]] instead.
 
-**A.7** The name of the t-DEP main executable has been changed from `tdep` to `atdep`, in line with [[cite:Romero2020]].
+**A.7** The name of the t-DEP main executable has been changed from `tdep` to `atdep`, in line with [[cite:Romero2020]]. 
+By J. Bieder (MR 642, 641).
 
 * * *
 
@@ -663,9 +664,9 @@ By M Torrent (MR 557)
 By Wei Chen (MR 546)
 
 **D.20** Upgrade versions of libraries used with ABINIT.
-Upgrade atompaw to 4.1.0.6. Upgrade Libxc to 4+.
+Upgrade atompaw to 4.1.0.6. Upgrade Libxc to 4+. Prepare the interface to LibXC 5 and a bit of LibXC 6.
 
-By M. Torrent, JM Beuken (MR 532, 470, 465, 441)
+By M. Torrent, JM Beuken (MR 649, 532, 470, 465, 441)
 
 **D.21** Write yaml file for fatbands (phonopy format) with a-TDEP
 
@@ -725,7 +726,7 @@ By B. Guster, M. Giantomassi, F. Bruneval and X. Gonze (MR 627, 633, 673, 679, 6
 
 **D.33** New TB2J python script to compute the superexchange (J) and the Dzyaloshinskii-Moriya (DMI) interactions. The script can be found in [http://gitlab.abinit.org/xuhe/TB2J](http://gitlab.abinit.org/xuhe/TB2J) with doc and tutorials. The script is interfaced with wannier90 and use the w90 output files. The J calculation works in production, the DMI is much more sensitive to disentanglement noise and have to be use with care. An article is under construction to describe the method and its implementation. The script can deliver input data file for the spin model of Multibinit.
 
-By He Xu, M. Verstraete and E. Bousquet
+By He Xu, M. Verstraete and E. Bousquet (MR 639).
 
 **D.34** Test linear electro-optical coefficient, tutorespfn [[test:optic_5]].
 
@@ -745,7 +746,11 @@ By M. Torrent and X. Gonze (MR 657).
 
 **D.37** Update PAW tutorial
 
-By F. Jollet (MR 652, 653).
+By F. Jollet (MR 643, 645, 652, 653).
+
+**D.38** Nonlinear xc preliminary
+
+By L. Baguet (MR 650).
 
 
 **D.37** Miscellaneous additional bug fixes, improvements of documentation including for the build system.
