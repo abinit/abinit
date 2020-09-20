@@ -2,14 +2,14 @@
 authors: GB, MG
 ---
 
-# Phonon-limited mobility in AlAs
+# Phonon-limited mobility 
 
 This tutorial shows how to compute phonon-limited carrier mobilities in semiconductors within
-the relaxation time approximation (RTA).
+the relaxation time approximation (RTA), taking the specific case of GaAs as an example.
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
-It goes without saying that one should have read the [introduction page for the EPH code](eph_intro) 
+The user should have read the [introduction tutorial for the EPH code](eph_intro) 
 before running these examples.
 
 This lesson should take about 1.5 hour.

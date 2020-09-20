@@ -1,3 +1,763 @@
+## v9.2
+  
+Version 9.2, released on September 30, 2020.
+List of changes with respect to version 8.10.
+
+Many thanks to the contributors to the ABINIT project between
+October 2018 and September 2020. These release notes
+are relative to modifications/improvements of ABINIT v9.2 with respect to v8.10
+(merge requests up to and including MR636 are taken into account)
+
+The list of contributors includes:
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
+J.-B. Charraud, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, 
+B. Guster, G. Hautier, Xu He, N. Helbig, F. Jollet,
+H. Miranda, F. Naccarato, R. Outerovitch, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Royo,
+M. Schmitt, M. Stengel, M. Torrent, J. Van Bever, M. Verstraete, J. Zwanziger.
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings.
+
+**A.1** At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
+    by ABINIT have been made, so the backward compatibility of ABINITv9 may be broken. 
+
+In particular: 
+
+1. The build system relies on new `.ac9` files (see [B.6](#v9.2.B.6)), superceeding the v8 `.ac` files.
+   A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
+   to convert from the old `.ac`format to `.ac9`.
+2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
+as this was not sustainable (see [B.6](#v9.2.B.6)) and nowadays most users install prerequisite libraries themselves.
+3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
+    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.2.B.9)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
+4. Several default values have been changed, see [A.3](#v9.2.A.3).
+
+
+**A.2** 
+A new account of the ABINIT effort has been published in Computer Phys. Comm. [[cite:Gonze2020]]
+It provides description of several new features.
+A version of this paper that is not formatted 
+for Computer Phys. Comm. [is also available](https://www.abinit.org/sites/default/files/ABINIT20.pdf).
+The licence allows the authors to put it on the Web.
+
+A second new account of the ABINIT effort has been published in J. Chem. Phys. [[cite:Romero2020]].
+The scope of this second paper is different from the first one. It is more a survey of ABINIT, 
+focusing on its specific capabilities. Still, it contains also some description of some new features.
+A version of this paper that is not formatted for J. Chem. Phys. 
+[is also available](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
+The licence allows the authors to put it on the Web.
+
+Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments).
+
+<a name="v9.2.A.3"></a>
+**A.3**  The default values of the following ABINIT input variables have been changed:
+    [[ixcrot]], [[chneut]], [[ntime]], [[prtkden]], [[symsigma]] and [[tolsym]]. In particular the new default value
+    of [[tolsym]], 1e-5, is more in line with the tolerances of other codes, so that for users of such
+    codes, one barrier to the use of ABINIT is removed. By the same token, some bug in the recognition of symmetries
+    has been fixed, when [[tolsym]] is close to the default, see the new tests [[test:v9_15]] and [[test:v9_16]].
+
+    By X. Gonze (MR 689 and others)
+
+**A.4** The initialization of the wavefunctions when [[paral_kgb]]=1 and [[nspinor]]=2 has been changed, since the previous one could prevent the code to converge.
+    By M Torrent (MR 562).
+
+**A.5** The input variable xangst has been disabled. Use [[xcart]] instead, and specify the unit, namely Angstrom.
+
+**A.6** Work is on-going concerning the Coulomb singularity treatment, see [D.32](#v9.2.D.32). The usage of the input variable [[icutcoul]] is changing. 
+For the time being, use [[gw_icutcoul]] instead.
+
+**A.7** The name of the t-DEP main executable has been changed from `tdep` to `atdep`, in line with [[cite:Romero2020]]. 
+By J. Bieder (MR 642, 641).
+
+* * *
+
+### **B.** Most noticeable achievements
+
+**B.1** Electron-phonon interaction (mobilities in the self-energy relaxation time approximation, 
+temperature-dependent electronic band structures including the zero-point renormalization, etc.)
+
+The new capabilities of ABINITv9 related to electron-phonon calculations are described 
+fully in the Sec. 3.3.2 of [[cite:Gonze2020]], as follows.
+
+>   In abinit v9, it is possible to compute the EPH self-energy
+>   in the Kohn–Sham representation using the EPH matrix
+>   elements. The code employs optimized algorithms to compute
+>   either the full self-energy (needed for QP corrections and spectral
+>   functions) or just the imaginary part that is then used to evaluate
+>   mobilities within the self-energy relaxation time approximation
+>   (SERTA). The computation of the mobility is fully
+>   integrated inside abinit, and is an automatic output of the
+>   computation of the imaginary part of the self-energy, bypassing
+>   the need to post-process results. When computing the full self-energy,
+>   it is possible to reduce the number of empty states
+>   required for convergence by using the first-order wavefunctions
+>   obtained by solving the relevant Sternheimer equation. 
+>
+>   In the case of lifetime computations, the code takes advantage of the
+>   tetrahedron method to filter contributing q-points, a double-grid
+>   integration technique to accelerate the convergence at marginal
+>   additional computational cost, and samples the relevant regions
+>   in the Brillouin zone contributing to transport properties thus
+>   leading to a significant reduction of the computational effort.
+>   Crystalline symmetries are used throughout the code in order to
+>   reduce the number of k- and q-points that must be explicitly
+>   included in the integrals. To achieve good parallel efficiently, the
+>   most CPU demanding parts are parallelized with MPI employing a
+>   distribution schemes over k/q-points, perturbations and bands (the
+>   band level is available only when computing the full self-energy).
+
+Moreover, the interpolation of the DFPT potential, described in Sec. 3.3.1 of [[cite:Gonze2020]] is fully operational,
+with many tests, and three tutorials provided.
+
+List of tests: [[test:v8_44]], [[test:v9_50]], [[test:v9_53]], [[test:v9_56]], [[test:v9_60]], [[test:v9_61]], 
+[[test:eph4mob_1]], [[test:eph4mob_2]], [[test:eph4mob_3]], 
+[[test:eph4mob_4]], 
+[[test:eph4mob_5]], 
+[[test:eph4mob_6]], 
+[[test:eph4mob_7]], 
+[[test:eph4zpr_1]], 
+[[test:eph4zpr_2]], 
+[[test:eph4zpr_3]], 
+[[test:eph4zpr_4]], 
+[[test:eph4zpr_5]], 
+[[test:eph4zpr_6]], 
+[[test:eph4zpr_7]]. 
+
+New input variables: [[brav]], [[dvdb_add_lr]], [[dvdb_qcache_mb]], [[dvdb_qdamp]],
+[[dvdb_rspace_cell]], [[eph_doping]],
+[[eph_phrange]], [[eph_tols_idelta]], [[eph_ecutosc]], [[eph_restart]], 
+[[eph_stern]], [[eph_use_ftinterp]], [[eph_phwinfact]],
+[[getdvdb]], [[getdvdb_filepath]], [[getkerange_filepath]],
+[[getsigeph_filepath]], 
+[[irddvdb]], [[prteliash]], [[sigma_bsum_range]], [[sigma_erange]],
+[[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]].
+
+Note that the new EPH processing unit of ABINIT [[optdriver]]=7 has a different implementation than the one implemented in anaddb.
+Three new tutorials are availables, [[tutorial:eph_intro]], [[tutorial:eph4mob]] and [[tutorial:eph4zpr]], and supercede the legacy tutorials
+[[tutorial:eph]] and [[tutorial:tdepes]].
+For further details about the implementation and usage, please consult [[cite:Brunin2020]].
+
+By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
+
+**B.2** Flexoelectricity and dynamical quadrupoles
+
+A new driver has been included in abinit that allows one to compute 
+4 spatial dispersion tensorial quantities: the clamped-ion flexoelectric tensor, the dynamical quadrupoles, 
+the first moment of IFC matrix and the first moment of the piezoelectric force response tensor. 
+Precalculation of ground state, first and second (d2_dkdk) order response functions is required. 
+After execution, the driver creates a 3rd order energy derivative database file 
+that is used by anaddb to compute the mixed and lattice-mediated flexoelectric tensors 
+or to include the dipole-quadrupole and quadrupole-quadrupole electrostatic interactions 
+in the calculation of the dynamical matrix.
+
+See the complementary description
+in the Sec. V. D of [[cite:Romero2020]], with underlying theory and test calculations
+presented in [[cite:Royo2019]]. 
+
+At the practical level, see [[cite:Romero2020]]: 
+
+>   In this way, both perturbations are generalized to finite q, as
+>   is already the case for atomic displacements. This enables us
+>   to carry out an analytical third order derivative of the energy
+>   with respect to two of the standard perturbations, and to the
+>   momentum q, which directly provides the sought-after spatial
+>   dispersion tensors. Remarkably, by virtue of the 2n+1 theorem,
+>   the third-order energies are computed in one shot using
+>   precalculated first-order response functions to the standard
+>   perturbations, without the necessity of self-consistently computing
+>   any response function to a perturbation gradient. After
+>   execution, the long-wave DFPT routines generate a derivative
+>   database that is subsequently used by post-processing tools
+>   implemented in ANADDB to compute and print the different
+>   contributions to the FxE tensor.
+
+>   The dynamical quadrupoles are the spatial dispersion counterparts of the Born effective charges,
+>   and can be used in lattice dynamics calculations
+>   to improve the prevalent dipole-dipole treatment of the
+>   long-range interactions. The ANADDB routines that carry
+>   out the process of interpolating the dynamical matrix following
+>   Ref. 34 have been adapted to incorporate the dipole-quadrupole
+>   and quadrupole-quadrupole electrostatic interactions
+>   derived in Ref. 102. This new functionality results in a
+>   faster convergence of the phonon bands calculation with respect
+>   to the density of q points and, in some materials, represents
+>   the only route to obtain the correct sound velocities.
+
+>   Currently, the implementation is restricted to the use of
+>   norm-conserving pseudopotentials without non-linear core corrections, and the LDA
+>   functional.
+
+A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]].
+
+See the [[topic:longwave]]. The relevant input variable is [[optdriver]]==10.
+New input variables have been defined: [[lw_flexo]], [[lw_qdrpl]], [[prepalw]], [[flexoflag@anaddb]],
+[[dipquad@anaddb]], [[quadquad@anaddb]]. 
+
+This capability is still under development and not completely stable.
+Interested users are strongly recommended to contact Miquel Royo (mroyo@icmab.es)
+or Massimiliano Stengel (mstengel@icmab.es) before start using it.   
+
+By M. Royo, M. Stengel, M. Giantomassi.
+
+
+**B.3** DFT+DMFT
+
+The new capabilities of ABINITv9 related to DFT+DMFT calculations are described
+fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
+
+>   The DFT+DMFT parallelism was improved for large
+>   systems. In particular, it is now possible to parallelize the calculation
+>   on both k-points and bands/g-vectors by using the input
+>   variable [[paral_kgb]] = 1 and related input variables.
+>
+>   Two new approaches to CT-QMC have been added to
+>   solve the AIM. In the first one, the density–density CT-QMC code
+>   available in abinit [[cite:Gonze2016]], [[cite:Bieder2014]] was generalized in order to take into
+>   account off-diagonal elements of the hybridization function. This
+>   implementation is activated with the input variable [[dmft_solv]]
+>   = 8. Spin–orbit coupling calculations are possible, but using a
+>   real valued imaginary time hybridization function. This solver was
+>   used in Refs. [[cite:Amadon2015]], [[cite:Amadon2016]].
+>
+>   In the second approach, we use the Toolbox for Research
+>   on Interacting Quantum System (TRIQS)library [[cite:Parcollet2015]], which is an
+>   open-source project that provides a framework for many-body
+>   quantum physics and more specifically for strongly-correlated
+>   electronic systems. TRIQS provides an open source implementation
+>   of the continuous-time hybridization expansion quantum
+>   impurity solver (CT-HYB) [[cite:Seth2016]], considered a state-of-the art
+>   solver for multi-orbital AIM. An interface between abinit and
+>   the impurity solver TRIQS/CT-HYB is now available and will make
+>   use of the independent progress made by the TRIQS library. <...>
+
+Also, the DMFT k-resolved spectral function is available (MR 529, 490).
+
+List of tests: [[test:paral_84]], [[test:paral_86]], [[test:paral_99]], [[test:v8_01]].
+New input variables: [[dmft_charge_prec]] and [[dmft_kspectral_func]] (test to be provided for the latter). 
+Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
+
+By T. Cavignac, B. Amadon and O. Gingras.
+
+
+**B.4** Spin model within Multibinit 
+
+The new capabilities of Multibinit within ABINITv9 are described
+fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also Sec. [D.1](#v9.2.D.1).
+In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonze2020]], is available, as follows.
+
+>Multibinit implements the most commonly used model for spin systems, 
+>via the Heisenberg Hamiltonian including magnetic exchange and Dzyaloshinskii Moriya interactions. 
+>Single ion anisotropy and dipole–dipole interactions are also included, 
+>and all terms bear a very strong similarity to the quadratic part of the lattice model Hamiltonian.
+>A number of open source spin dynamics codes already exist, such as UPPASD, VAMPIR, OOMF; 
+>the distinguishing features of multibinit are the integration with abinit,
+>to fit parameters, and the simultaneous dynamics with other
+>degrees of freedom (in particular using the inter-atomic force constants). 
+
+A tutorial for the multibinit spin model has been written, [[tutorial:spin_model]].
+
+Many new input variables are present.
+Not all these new input variables are present in automatic tests, though, in this beta-release. 
+These "non-tested" input variables are indicated below with 'NT'.
+This will be completed for the production version v9.2 .
+List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23]], [[test:v9_81]], [[test:v9_82]],
+[[test:v9_86]], [[test:v9_87]].
+
+New input variables tested and documented: 
+[[slc_coupling@multibinit|slc_coupling]],
+[[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]], 
+[[spin_damping@multibinit|spin_damping]], 
+[[spin_init_orientation@multibinit|spin_init_orientation]], 
+[[spin_init_qpoint@multibinit|spin_init_qpoint]],
+[[spin_init_rotate_axis@multibinit|spin_init_rotate_axis]], 
+[[spin_init_state@multibinit|spin_init_state]], 
+[[spin_ntime_pre@multibinit|spin_ntime_pre]], 
+[[spin_projection_qpoint@multibinit|spin_projection_qpoint]], 
+[[spin_sia_add@multibinit|spin_sia_add]],
+[[spin_sia_k1amp@multibinit|spin_sia_k1amp]], 
+[[spin_sia_k1dir@multibinit|spin_sia_k1dir]], 
+[[spin_temperature_start@multibinit|spin_temperature_start]], 
+[[spin_temperature_end@multibinit|spin_temperature_end]],
+[[spin_temperature_nstep@multibinit|spin_temperature_nstep]], 
+[[spin_var_temperature@multibinit|spin_var_temperature]], 
+[[spin_write_traj@multibinit|spin_write_traj]].
+Additionnal new input variables, still to be tested and/or documented:
+spin_calc_correlation_obs (NT and not documented), 
+spin_calc_traj_obs (NT and not documented), 
+[[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT), 
+spin_tolavg (NT and not documented), 
+spin_tolvar (NT and not documented), 
+
+By Xu He, N. Helbig, J. Bieder, E. Bousquet, Ph. Ghosez, M. Verstraete
+
+
+**B.5** Constrained DFT
+
+Constrained Density-Functional Theory (see [[topic:ConstrainedDFT]]) is available,
+with a new algorithm allowing to impose the constraints to arbitrary precision,
+whether it relates to the charge, magnetization, magnetization direction, or magnetisation size,
+or a combination thereof for different atoms. The constraints are smeared spherical integrals
+with ajustable sphere radius, centered on atoms. The algorithms has been demonstrated for norm-conserving pseudopotentials
+as well as PAW. Forces and derivatives with respect to the constraints 
+are available (i.e. magnetic torque for the non-collinear spin case).
+Stresses are still to be coded, will be available in ABINITv9.4.
+
+New tests: v8#24-29, v8#95-97 and v9#1-3.
+New input variables: [[chrgat]], [[constraint_kind]], [[ratsm]].
+
+By X. Gonze.
+
+<a name="v9.2.B.6"></a>
+**B.6** Large modifications of the build system 
+
+The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
+Fully documented example files can be found in doc/build/config-examples.
+A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
+   to convert from the old `.ac`format to `.ac9`.
+
+The build system of ABINITv9 does not build anymore the (hard and soft) dependencies (Linalg, NetCDF4, HDF, LibXC, Wannier90, ...), as this was not sustainable.
+Three libraries are now mandatory: linalg, NetCDF4/HDF5 and LibXC. Failing to link to them will prevent building ABINIT.
+The other libraries are optional, there will only be a warning if they are not available.
+If the user does not provide the path to these libraries,
+the build system will try to find them in the "usual" directories, and inform the user that it has done so.
+The build system also can make suggestions to the user, to complete its *.ac9 file.
+
+By Y. Pouillon and JM Beuken
+
+**B.7** New command line interface
+
+There is a new (**recommended**) command line interface to run ABINIT, without the "files" file.
+The new syntax is:
+
+    abinit run.abi
+
+or
+
+    abinit run.abi > run.log 2> run.err &
+
+where `run.abi` is the Abinit input file that now provides all the information related to pseudos 
+and the prefixes that were previously passed via the "files" file. For comparison, the old syntax is
+
+    abinit < run.files > run.log 2> run.err &      ! This is the old syntax
+
+A file extension for the input file is highly recommended (in this example we use `.abi`)
+as by default the parser will use the string before the file extension as root to build the prefixes 
+for the input/output/temporary files.
+
+The user can specify the name of the main output file thanks to the [[output_file]] input variable,
+the list of pseudopotentials thanks to the [[pseudos]] input variable and the directory where 
+all pseudos are located with [[pp_dirpath]].
+The prefix for other input, output or temporary files can be specified with [[indata_prefix]], [[outdata_prefix]] and 
+[[tmpdata_prefix]], respectively. 
+A default set of prefixes computed from the basename of the input file is used if
+these variables are not specified in the input.
+
+For some examples, see tests [[test:v8_90]], [[test:v7_45]], and [[test:v5_54]]. See also [[topic:Control]]. 
+
+A similar command line interface can also be used for the anaddb code.
+In this case, the relevant variables are: 
+[[output_file@anaddb]], [[ddb_filepath@anaddb]], [[ddk_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
+
+The new syntax is:
+
+    anaddb run.in > run.log 2> run.err &
+
+See tests [[test:v8_52]] for a standard analysis of the DDB file and 
+[[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+
+!!! important
+
+    The old "files file" interface is still operational although deprecated and will be **REMOVED** in Abinit v10.
+
+
+By M. Giantomassi (MR 586).
+
+
+**B.8** Reading strings from the input file
+
+A new mechanism to read strings enclosed between **double quotation marks** from the input file has been activated. 
+So, many new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
+that were expecting numerical values such as the `get*` and `ird*` variables.
+The goal is to encourange a new approach for performing ABINIT calculations in which multiple datasets 
+and `get*` variables are replaced by indipendent input files that are connected together via file paths.
+
+List of new input variables that rely on this feature:
+
+- [[getddb_filepath]], an alternative to [[getddb]] or [[irdddb]], see test [[test:v9_60]]
+- [[getden_filepath]], an alternative to [[getden]] or [[irdden]], see test [[test:v8_36]] and [[test:v8_41]]
+- [[getscr_filepath]], an alternative to [[getscr]] or [[irdscr]], see test [[test:v67mbpt_51]]
+- [[getwfkfine_filepath]], an alternative to [[getwfkfine]] or [[irdwfkfine]], see tests [[test:v9_55]], [[test:v9_56]]
+- [[getwfk_filepath]], an alternative to [[getwfk]] or [[irdwfk]], see test [[test:v9_60]]
+- [[getwfq_filepath]], an alternative to [[getwfq]] or [[irdwfq]], see test [[test:v7_98]]
+- [[getkerange_filepath]], see test [[test:v9_60]]
+- [[getpot_filepath]], see test [[test:v8_44]]
+- [[pseudos]], [[indata_prefix]], [[outdata_prefix]], [[tmpdata_prefix]], [[output_file]], see test [[test:v9_04]]
+- [[pp_dirpath]]: cannot be tested  EXPLICITLY because system dependent but used by runtests.py when generating the input file. 
+- [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
+  See tests [[test:v8_52]] for a standard analysis of the DDB file and 
+  [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
+
+By M. Giantomassi
+
+<a name="v9.2.B.9"></a>
+**B.9** YAML sections in the output file 
+
+YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
+At present there is a YAML section for the components of the total energy, the GS results including forces and stresses as well as a YAML section for GW calculations, and some YAML sections giving information about the iteration status.
+<!--
+Example of tests: paral#86, v67mbpt#2. See the input variable use_yaml (TO BE DOCUMENTED).
+-->
+At the occasion of the development of this capability, and its adaptation to the test farm, the
+perl script fldiff.pl has been replaced by a Python version.
+See related information in Sec. 5.5 of [[cite:Gonze2020]].
+
+By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
+
+
+**B.10** New approach to define crystalline structures in the Abinit input
+
+The new variable [[structure]] can be used to initialize the lattice vectors 
+and the atomic positions **from an external file**.
+Variables such as [[natom]], [[ntypat]], [[typat]] and [[znucl]] are automatically initialized
+and need not to be specified in the ABINIT input.
+At present, the code can read netcdf files produced by ABINIT (`GSR.nc`, `WFK.nc`, `DEN.nc`, `HIST.nc`)
+and POSCAR files in VASP-5 format.
+See the documentation for the syntax and limitations.
+
+By M. Giantomassi.
+
+
+**B.11** New capabilities of abipy and abiflows 
+
+The abipy and abiflows projects have been significantly extended.
+See Sec. 6 of [[cite:Gonze2020]], as well as the [gallery of plotting scripts](http://abinit.github.io/abipy/gallery/index.html) &nbsp;
+and the [gallery of abipy workflows](http://abinit.github.io/abipy/flow_gallery/index.html) &nbsp;.
+
+By M. Giantomassi, G. Petretto, F. Naccarato.
+
+
+* * *
+
+### **C.** Changes for the developers (incluses information about compilers)
+
+**C.1** A python script to help ABINIT developers and development.
+
+The new python script abisrc.py located in the top directory of the ABINIT package has been developed.
+It has superceded abilint.py in the makemake procedure. 
+
+Try
+
+    ./abisrc.py --help
+
+then follow the suggestions, to get info about files, directories, interfaces, to visualize
+dependencies of the ABINIT subroutines, etc.
+
+Note that there are dependencies of abisrc.py, to be installed prior being able to use some of its capabilities.
+Use:
+
+    pip install -r requirements.txt --user
+
+to install the dependencies in user mode.
+
+By M. Giantomassi.
+
+**C.2** New characteristics of input variables
+
+In the description of input variables (e.g. files abimkdocs/variables_abinit.py), a new field `added_in_version` has been introduced,
+for example,
+
+     added_in_version="9.2.0"
+
+or, for variables introduced prior to v9,
+
+     added_in_version="before_v9"
+
+**C.2** Test farm: new and obsolete bots
+
+* Bots introduced in the test farm: atlas_gnu_9.1_openmpi, buda2_gnu_8.2_cuda, cronos2_gnu_7.4_paral.
+* Bots upgraded: abiref_gnu_5.3_* to abiref_gnu_9.2_* ; abiref_nag_6.2_openmpi to
+    abiref_nag_7.0_openmpi; bob_gnu_5.3_openmp to bob_gnu_7.5_openmp; buda2_gnu_8.1_mpich3 
+    to buda2_gnu_8.2_mpich3; graphene_gnu_6.4_macports to graphene_gnu_9.2_macports; max2_gnu_5.3_* to max2_gnu_6.5_*; ubu_gnu_5.3_openmpi to ubu_gnu_9.2_openmpi.
+* Bots removed: atlas_gnu_7.2_fb.ac (no nightly test of the fallbacks anymore), cronos_gnu_5.3_paral(remplaced by cronos2), inca_gnu_6.3_py3k (inca too old), tikal_gnu_* (tikal too old).
+Working also on a cronos-cronos2 cluster.
+
+By JM Beuken
+
+**C.3** Supported compilers
+
+* gfort (GNU) compiler: v9 newly supported, v4 obsolete
+* ifort (INTEL) compiler: v19 newly supported.
+* NAG 7.0 instead of 6.2
+
+By JM Beuken
+
+**C.4** Unitary ttransposer#1 . Test of the transposer for linear algebra to KGB parallelisation.
+
+By J. Bieder.
+
+**C.5** Linkchecker has been reenabled, only for internal link checking.
+
+By JM Beuken (MR 513).
+
+**C.6** Enable the generation of a HTML side-by-side diff on the test farm when fldiff fails with a line count error and it was not caused by a crash of Abinit. The diff algorithms uses a specialized heuristic to improve line synchronization and prevent weird matching.
+
+By Th. Cavignac (MR 526)
+
+**C.7** Split of the source tree (ongoing).
+
+In order to improve modularity, the source tree must be split in two parts, one for low-level routines, largely independent of ABINIT,
+and one for more specific routines to ABINIT. The low-level routines should become a separate library, with its own build system and make. 
+At present the low-level library have been moved out of src, inside the shared/common/src directory.
+See related information in Sec. 5.4 of [[cite:Gonze2020]].
+
+**C.8** New FFT specifications for the build system
+See https://gitlab.abinit.org/pouillon/abinit/-/issues/33 .
+
+By Y. Pouillon (MR 619)
+
+**C.9** Reorganisation of the tests/Psps_for_tests directory, in preparation of the beautification.
+Clarification on which pseudopotentials are of recent format, and which are legacy pseudopotentials.
+Preparation of beautification.
+
+By X. Gonze (MR 683)
+
+* * *
+
+<a name="v9.2.D.1"></a>
+### **D.**  Other changes (or on-going developments, not yet finalized)
+
+**D.1**  Miscellaneous improvements of Multibinit (lattice part)
+
+Miscellaneous improvements have been made to the lattice part of Multibinit.
+See the new input variables below, also see the Sec. 4.1.1 of [[cite:Gonze2020]].
+
+New tests: [[test:v8_38]], [[test:v8_94]], [[test:v8_98]], [[test:v8_99]], 
+[[test:v8_101]],
+[[test:v8_102]],
+[[test:v8_103]],
+[[test:v9_83]],  [[test:v9_84]], [[test:v9_85]]. 
+New input variables are listed below.
+Not all these new input variables are present in automatic tests, though.
+Also, not all of these are documented, or only partly documented (e.g. variable type, acronym, default, but no more).
+
+- [[analyze_anh_pot@multibinit|analyze_anh_pot]] 
+- [[dyn_chksym@multibinit|dyn_chksym]] 
+- [[dyn_tolsym@multibinit|dyn_tolsym]] 
+- fit_EFS@multibinit, [[test:v8_103]] NOT DOCUMENTED
+- [[fit_iatom@multibinit|fit_iatom]] 
+- [[fit_SPC_maxS@multibinit|fit_SPC_maxS]] 
+- latt_compressibility@multibinit, NOT TESTED, NOT DOCUMENTED
+- [[latt_friction@multibinit|latt_friction]] 
+- latt_mask@multibinit, NOT TESTED, NOT DOCUMENTED
+- [[latt_taup@multibinit|latt_taup]] NOT TESTED
+- [[latt_taut@multibinit|latt_taut]] 
+- [[opt_coeff@multibinit|opt_coeff]]
+- [[opt_effpot@multibinit|opt_effpot]]
+- [[opt_ncoeff@multibinit|opt_ncoeff]]
+- sel_EFS@multibinit, [[test:v8_103]] NOT DOCUMENTED
+- [[strfact@multibinit|strfact]] 
+- [[test_effpot@multibinit|test_effpot]] 
+- [[test_prt_ph@multibinit|test_prt_ph]] 
+- [[tolmxf@multibinit|tolmxf]] 
+- ts_option@multibinit, NOT TESTED, NOT DOCUMENTED
+
+Finally, several input variables of the main ABINIT application are also reused for Multibinit, without modification
+of meaning, like [[atfix]] and related input variables, or [[tolmxf]].
+
+By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
+
+
+**D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
+including parallelization over k points of the Chern number calculation.
+New test [[test:v8_39]].
+
+By J. Zwanziger (MR 469, 500, 545, 588)
+
+**D.3** Calculation of Debye-Waller tensor. New test [[test:v8_58]].
+
+By M. Giantomassi
+
+**D.4** Speed-up of susceptibility matrix calculations and GW analytic continuation calculations. 
+See the new input variable [[gwaclowrank]] and new test [[test:v9_22]].
+
+By F. Bruneval (MR 687).
+
+**D.5** NCPP Wavefunction mixing with Variational Energy
+and minor improvements to prepare PAW+Hybrid variational energy.
+New test [[test:v7_73]], simple system for testing Hartree-Fock and the SCF algorithms.
+
+By X. Gonze (MR 434, 444, 445).
+
+**D.6** New weight distribution of the Fourier components of the force constants.
+Test tolerance in the new integration weights, tests [[test:v8_52]], [[test:v8_53]], [[test:v8_54]].
+
+By H. Miranda and M. Giantomassi
+
+**D.7** Test calculation of velocity matrix elements (DDK) with
+ optdriver 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]].
+
+By M. Giantomassi
+
+**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
+
+By M. Torrent (MR502).
+
+**D.9** Test wannier90 interface with [[nsppol]]=2 and [[nspden]]=2, [[test:wannier90_04]].
+
+By Xu He
+
+**D.10** Mixed precision for FFT transforms. New input variable [[mixprec]]
+see [[test:v8_44]], [[test:v9_57]], [[test:v9_60]], and [[test:v9_61]].
+
+From M. Giantomassi (MR491).
+
+**D.11** Multibinit has been interfaced with scale-up,
+[[https://www.secondprinciples.unican.es]]
+
+By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
+
+**D.12** The following units are now also allowed in input files:
+
+- S Sec Second  for the ABINIT input file;
+- nm (for nanometer)  for the ABINIT and ANADDB input files.
+
+**D.13** a-TDEP utility:
+added [[guide:a-TDEP|A-TDEP user guide]],
+[[topic:a-TDEP|a-TDEP topic]], and corresponding input variable documentation.
+References: [[pdf:a-TDEP_Paper|a-TDEP paper]].
+Also, see Sec. 4.2 of [[cite:Gonze2020]].
+
+By F. Bottin, J. Bouchet, J. Bieder (MR491,422).
+
+**D.14** Improvements of NLO calculations.
+Optimize memory allocation. In particular for [[usepead]] = 1.
+Write Raman susceptibilities to netcdf in anaddb.
+
+By G. Petretto  (MR 599).
+
+**D.15** MetaGGA + PAW in progress.
+All internal and unit tests are OK. The implementation seems close to the end. Still need to perform physical tests.
+
+By M. Torrent and J.-B. Charraud (MR 587, 558, 625).
+
+**D.16** Implementation of an alternate version of MPI reductions valid when the number of data exceeds 2^32.
+
+By M. Torrent (MR 587)
+
+**D.17** Build system and src support for llvm (clang/flang) and ARM (armflang/armclang/armpl).
+
+By M Torrent (MR 571)
+
+**D.18** Improvement of core WF reading (optics + electron-positron)
+
+By M Torrent (MR 557)
+
+**D.19** Fix bootstrap kernel convergence issues
+
+By Wei Chen (MR 546)
+
+**D.20** Upgrade versions of libraries used with ABINIT.
+Upgrade atompaw to 4.1.0.6. Upgrade Libxc to 4+. Prepare the interface to LibXC 5 and a bit of LibXC 6.
+
+By M. Torrent, JM Beuken (MR 649, 532, 470, 465, 441)
+
+**D.21** Write yaml file for fatbands (phonopy format) with a-TDEP
+
+By J. Bieder (MR510)
+
+**D.22** Write polarization vectors in GSR.nc.
+
+By H. Miranda (MR 462).
+
+**D.23** Updated user interface of Raman_spec.py . Added one section to tutorial NLO to describe use of Raman_spec.py.
+
+By N. Pike (MR 460, MR 581)
+
+**D.24** XML format for core wavefunctions
+
+By F. Jollet (MR 423)
+
+**D.25** Wavefunction prediction for molecular dynamics.
+
+By F. Jollet (MR 412)
+
+**D.26** Added a preview for the toptic_4.in file in the optic tutorial.
+
+By F. Goudreault (MR 408)
+
+**D.27** Improve ELPA detection; make abinit compatible with ELPA2019
+
+By M. Torrent (MR 626)
+
+**D.28** Upgrade of [[tutorial:base3]] and [[tutorial:basepar]].
+
+By X. Gonze (MR628)
+
+**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+
+By M. Verstraete (MR630)
+
+**D.30** The ABINIT input variable [[supercell_latt]] is documented. 
+See also [[test:v8_94]].
+
+By X. Gonze
+
+**D.31** New implementation of the cRPA (to compute U and J in DFT+U or DFT+DMFT) 
+that can consider any subset of orbitals in the system.
+Compilation was a bit long on certain compilers, so new keywords have been added to the build system:
+enable_crpa_optim and enable_crpa_no_optim
+
+By R. Outerov and B. Amadon (MR622).
+
+<a name="v9.2.D.32"></a>
+**D.32** On-going work on refactoring the Coulomb interaction part of ABINIT.
+
+New input variables [[fock_icutcoul]], and [[gw_icutcoul]], that should superceed [[icutcoul]].
+New test added for the mini-Brillouin Zone integration, [[gw_icutcoul]]=14, 15, 16, see [[test:v9_21]].
+
+By B. Guster, M. Giantomassi, F. Bruneval and X. Gonze (MR 627, 633, 673, 679, 686).
+
+**D.33** New TB2J python script to compute the superexchange (J) and the Dzyaloshinskii-Moriya (DMI) interactions. The script can be found in [http://gitlab.abinit.org/xuhe/TB2J](http://gitlab.abinit.org/xuhe/TB2J) with doc and tutorials. The script is interfaced with wannier90 and use the w90 output files. The J calculation works in production, the DMI is much more sensitive to disentanglement noise and have to be use with care. An article is under construction to describe the method and its implementation. The script can deliver input data file for the spin model of Multibinit.
+
+By He Xu, M. Verstraete and E. Bousquet (MR 639).
+
+**D.34** Test linear electro-optical coefficient, tutorespfn [[test:optic_5]].
+
+By N. Pike (MR 575).
+
+
+**D.35** Optic: print spin-decomposition when applicable. 
+Fixed reflectivity screwed results. Test more thoroughly optics (incl. interfacing using NetCDF),
+see new tests [[test:v9_05]] to [[test:v9_14]]
+
+By X. Gonze (MR 654, 674).
+
+**D.36** Fixed DFPT+PAW+GGA+usexcnhat=1+q<> bug, and also add new related tests
+[[test:v9_41]] and [[test:v9_42]].
+
+By M. Torrent and X. Gonze (MR 657).
+
+**D.37** Update PAW tutorial
+
+By F. Jollet (MR 643, 645, 652, 653).
+
+**D.38** Nonlinear xc preliminary
+
+By L. Baguet (MR 650).
+
+
+**D.37** Miscellaneous additional bug fixes, improvements of documentation including for the build system.
+G. Antonius, L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, 
+F. Jollet, R. Outerovitch, N. Pike, Y Pouillon, M. Royo, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
+
+
+* * *
+
 ## v9.0
   
 Version 9.0, released on March 29, 2020.
@@ -31,13 +791,13 @@ Xavier
 
 In particular: 
 
-1. The build system relies on new `.ac9` files (see [B.5](#v9.0.B.5)), superceeding the v8 `.ac` files.
+1. The build system relies on new `.ac9` files (see [B.6](#v9.0.B.6)), superceeding the v8 `.ac` files.
    A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
    to convert from the old `.ac`format to `.ac9`.
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
-as this was not sustainable (see [B.5](#v9.0.B.5)) and nowadays most users install prerequisite libraries themselves.
+as this was not sustainable (see [B.6](#v9.0.B.6)) and nowadays most users install prerequisite libraries themselves.
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
-    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.0.B.8)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
+    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.9](#v9.0.B.9)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
 4. Several default values have been changed, see [A.3](#v9.0.A.3).
 
 
@@ -184,7 +944,7 @@ or Massimiliano Stengel (mstengel@icmab.es) before start using it.
 By M. Royo, M. Stengel, M. Giantomassi.
 
 
-**B.2** DFT+DMFT
+**B.3** DFT+DMFT
 
 The new capabilities of ABINITv9 related to DFT+DMFT calculations are described
 fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
@@ -223,7 +983,7 @@ Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 By T. Cavignac, B. Amadon and O. Gingras.
 
 
-**B.3** Spin model within Multibinit 
+**B.4** Spin model within Multibinit 
 
 The new capabilities of Multibinit within ABINITv9 are described
 fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also Sec. [D.1](#v9.0.D.1).
@@ -272,7 +1032,7 @@ spin_calc_traj_obs (NT and not documented),
 By Xu He, N. Helbig, J. Bieder, E. Bousquet, Ph. Ghosez, M. Verstraete
 
 
-**B.4** Constrained DFT
+**B.5** Constrained DFT
 
 Constrained Density-Functional Theory (see [[topic:ConstrainedDFT]]) is available,
 with a new algorithm allowing to impose the constraints to arbitrary precision,
@@ -288,8 +1048,8 @@ New input variables: [[chrgat]], [[constraint_kind]], [[ratsm]].
 
 By X. Gonze.
 
-<a name="v9.0.B.5"></a>
-**B.5** Large modifications of the build system 
+<a name="v9.0.B.6"></a>
+**B.6** Large modifications of the build system 
 
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
 Fully documented example files can be found in doc/build/config-examples.
@@ -305,7 +1065,7 @@ The build system also can make suggestions to the user, to complete its *.ac9 fi
 
 By Y. Pouillon and JM Beuken
 
-**B.6** New command line interface
+**B.7** New command line interface
 
 There is a new (**recommended**) command line interface to run ABINIT, without the "files" file.
 The new syntax is:
@@ -354,7 +1114,7 @@ See tests [[test:v8_52]] for a standard analysis of the DDB file and
 By M. Giantomassi (MR 586).
 
 
-**B.7** Reading strings from the input file
+**B.8** Reading strings from the input file
 
 A new mechanism to read strings enclosed between **double quotation marks** from the input file has been activated. 
 So, many new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
@@ -380,8 +1140,8 @@ List of new input variables that rely on this feature:
 
 By M. Giantomassi
 
-<a name="v9.0.B.8"></a>
-**B.8** YAML sections in the output file 
+<a name="v9.0.B.9"></a>
+**B.9** YAML sections in the output file 
 
 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
 At present there is a YAML section for the components of the total energy, the GS results including forces and stresses as well as a YAML section for GW calculations, and some YAML sections giving information about the iteration status.
@@ -395,7 +1155,7 @@ See related information in Sec. 5.5 of [[cite:Gonze2020]].
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
 
 
-**B.9** New approach to define crystalline structures in the Abinit input
+**B.10** New approach to define crystalline structures in the Abinit input
 
 The new variable [[structure]] can be used to initialize the lattice vectors 
 and the atomic positions **from an external file**.
@@ -408,7 +1168,7 @@ See the documentation for the syntax and limitations.
 By M. Giantomassi.
 
 
-**B.10** New capabilities of abipy and abiflows 
+**B.11** New capabilities of abipy and abiflows 
 
 The abipy and abiflows projects have been significantly extended.
 See Sec. 6 of [[cite:Gonze2020]], as well as the [gallery of plotting scripts](http://abinit.github.io/abipy/gallery/index.html) &nbsp;

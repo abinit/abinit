@@ -14,7 +14,7 @@ Further details concerning the implementation are given in [[cite:Gonze2019]] an
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties
 in particular phonons, Born effective charges and the high-frequency dielectric tensor $\ee^\infty$".
-It goes without saying that one should have read the [introduction page for the EPH code](eph_intro)
+The user should have read the [introduction tutorial for the EPH code](eph_intro)
 before running these examples.
 
 This lesson should take about 1.5 hour.

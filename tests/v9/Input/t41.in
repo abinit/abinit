@@ -40,9 +40,7 @@ natom 1
 typat 1           # This atom is of type 1, that is, Fe
 xred              # This keyword indicate that the location of the atoms
    0.0  0.0  0.0  # will follow, one triplet of number for each atom
- # Triplet giving the REDUCED coordinate of atom 1.
-
-  # Triplet giving the REDUCED coordinate of atom 1.
+                  # Triplet giving the REDUCED coordinate of atom 1.
 ntypat 1
 znucl 26
 

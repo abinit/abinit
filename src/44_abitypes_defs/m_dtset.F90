@@ -47,7 +47,7 @@ MODULE m_dtset
 !! FUNCTION
 !! The dataset_type structured datatype gather all the input variables,
 !! except those that are labelled NOT INTERNAL.
-!! For one dataset, it is initialized in driver.f, and will not change
+!! For one dataset, it is initialized in driver.F90, and will not change
 !! at all during the treatment of the dataset.
 !! The "evolving" input variables are also stored, with their
 !! name appended with _orig, to make clear that this is the original
@@ -74,7 +74,6 @@ MODULE m_dtset
 type, public :: dataset_type
 
 ! Integer
- integer :: iomode
  integer :: accuracy
  integer :: adpimd
  integer :: autoparal
@@ -235,6 +234,7 @@ type, public :: dataset_type
  integer :: imgwfstor
  integer :: inclvkb = 2
  integer :: intxc
+ integer :: iomode
  integer :: ionmov
  integer :: iprcel
  integer :: iprcfc
