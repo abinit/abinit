@@ -2117,7 +2117,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Compute Debye-Waller term
      ! =========================
      if (.not. sigma%imag_only) then
-       call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller term within rigid ion approx...")
+       call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller within rigid ion approximation...")
        ! Collect gkq0_atm inside qpt_comm
        ! In principle it's sufficient to broadcast from itreated_q0 inside qpt_comm
        ! Yet, q-points are not equally distributed so this synch is detrimental.

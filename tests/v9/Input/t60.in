@@ -38,8 +38,6 @@ nband      20
 symsigma  1
 tmesh 0 300 2
 
-
-
 # This just to test the restart code when SIGEPH is not present.
 eph_restart 1
 

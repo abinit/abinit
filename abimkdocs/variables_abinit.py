@@ -21803,7 +21803,7 @@ Variable(
     mnemonics="Radius of the Interatomic Force Constant SPHere",
     added_in_version="9.2.0",
     text=r"""
-    Same meaning as [[rifcsph@anaddb]]
+Same meaning as [[rifcsph@anaddb]]
 """,
 ),
 

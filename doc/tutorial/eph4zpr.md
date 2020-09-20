@@ -89,7 +89,7 @@ State-of-the-art implementations approximate the DW contribution with
 \end{equation}
 
 where $g_{mn\nu}^{2,\DW}(\kk,\qq)$ is an effective matrix element that, within the **rigid-ion approximation**,
-can be expressed in terms of the standard first-order $\gkq$ matrix elements by exployting the invariance 
+can be expressed in terms of the standard first-order $\gkq$ matrix elements by exploiting the invariance 
 of the QP energies under infinitesimal translation [[cite:Giustino2017]].
 
 At the level of the implementation, the number of bands in the two sums is defined by [[nband]]
@@ -1042,9 +1042,10 @@ These additional convergence tests cannot be covered in this lesson and they are
 
 ## How to compute the spectral function
 
-To compute the spectral function, we need to specify the number of frequencies via [[nfreqsp]]
-The code will compute $A(\omega)$ using a linear frequency mesh centered on the KS eigenvalue
-that covers the range $[e_\nk - \Delta, e_\nk + \Delta with $\Delta$ specified by [[freqspmax]].
+To compute the spectral function, we need to specify the number of frequencies via [[nfreqsp]].
+The code will compute $A(\omega)$ on a linear frequency mesh centered on the KS eigenvalue
+that spans the interval $[\ee_\nk - \Delta, \ee_\nk + \Delta]$ with $\Delta$ given by [[freqspmax]].
+The number of points is enforced to be odd.
 
 {% dialog tests/tutorespfn/Input/teph4zpr_8.in %}
 
@@ -1053,7 +1054,38 @@ nfreqsp 301
 freqspmax 8.0 eV
 ```
 
-To plot with the 
+To plot the spectral function $A_\nk(\ww) in an easy way, we use the AbiPy to to extract the data from the netcdf file.
+We do it in two different ways: 
+
+- using a small python script that calls the AbiPy API
+- using ipython and abiopen.py to interact with the netcdf file
+
+The python script is:
+
+```python
+#!/usr/bin/env python
+
+import sys 
+from abipy.abilab import abiopen
+
+# Get file name from command line and open the file
+filepath = sys.argv[1]
+abifile = abiopen(filepath)
+
+# Plot Sigma(omega), A(omega) and QP solution
+abifile.plot_qpsolution_skb(spin=0, kpoint=[0, 0, 0], band=4)
+```
+
+Alternatively, one can directly use `abiopen.py` to open the SIGEPH.nc file inside the iptyhon terminal
+
+```ipython
+%matplotlib
+abifile.plot_qpsolution_skb(spin=0, kpoint=[0, 0, 0], band=4)
+```
+
+The advantage of the second approach is that you can interact with the python object in an interactive environment.
+The first approach is more powerfull if you need a programmatic API to automate operations.
+
 
 ## MPI parallelism and memory requirements
 
