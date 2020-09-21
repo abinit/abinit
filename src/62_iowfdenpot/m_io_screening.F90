@@ -162,7 +162,7 @@ MODULE m_io_screening
   integer :: awtr
   ! Input variable (time-reversal symmetry in RPA expression)
 
-  integer :: icsing
+  integer :: icutcoul
   ! Input variable (Coulomb singularity treatment)
 
   integer :: gwcomp
@@ -1182,7 +1182,7 @@ subroutine hscr_copy(Hscr_in,Hscr_cp)
 
 ! HSCR_NEW
  hscr_cp%awtr      =  hscr_in%awtr
- hscr_cp%icutcoul  =  hscr_in%iutcoulc
+ hscr_cp%icutcoul  =  hscr_in%icutcoul
  hscr_cp%vcutgeo   =  hscr_in%vcutgeo
  hscr_cp%gwcomp    =  hscr_in%gwcomp
  hscr_cp%gwgamma   =  hscr_in%gwgamma
