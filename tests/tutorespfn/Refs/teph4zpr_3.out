@@ -1,6 +1,6 @@
 
 .Version 9.2.0 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu8.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 12 Sep 2020.
-- ( at 00h08 )
+.Starting date : Mon 21 Sep 2020.
+- ( at 03h49 )
   
-- input  file    -> /Users/gmatteo/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7/teph4zpr_3.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8/teph4zpr_3.in
 - output file    -> teph4zpr_3.out
 - root for input  files -> teph4zpr_3i
 - root for output files -> teph4zpr_3o
@@ -310,8 +310,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     35.000   => boxcut(ratio)=   2.11446
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -325,8 +325,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
              2   -4.371486
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -351,7 +351,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.69E-15  1.20E-15  1.14E-15  1.86E-15  1.47E-16  4.93E-16  3.60E-15  3.72E-15
   5.04E-15  1.65E-15  1.24E-15  1.18E-15  4.71E-15  1.05E-15  2.11E-15  8.16E-15
   2.37E-15  5.85E-15  8.45E-16  4.31E-15  5.78E-15  8.35E-16  4.27E-15  3.96E-15
-  6.74E-15  7.16E-15  9.88E-15  1.02E-15  1.55E-15  1.74E-15  1.72E-15  3.77E-15
+  6.74E-15  7.15E-15  9.88E-15  1.02E-15  1.55E-15  1.74E-15  1.72E-15  3.77E-15
   9.34E-16  2.06E-15  1.71E-15  6.56E-16  9.82E-16  3.30E-15  1.92E-15  2.96E-15
   6.52E-15  2.46E-15  1.91E-15  4.22E-14  2.84E-05  3.54E-05
  -2.5001E+00 -1.2774E+00 -1.2774E+00 -1.2774E+00 -4.6171E-01  1.6500E-01
@@ -375,7 +375,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=  150    5 max resid (incl. the buffer)=  2.23854E-05
   prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  7.72688E-06
   prteigrs : nnsclo,ikpt=  150    7 max resid (incl. the buffer)=  6.70685E-09
-  prteigrs : nnsclo,ikpt=  150    8 max resid (incl. the buffer)=  7.11103E-06
+  prteigrs : nnsclo,ikpt=  150    8 max resid (incl. the buffer)=  7.11104E-06
 
 
 --- !ResultsGS
@@ -391,7 +391,7 @@ lattice_volume:   1.2975866E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.893E-15, diffor:  0.000E+00, }
 etotal    :  -7.60561380E+01
 entropy   :   0.00000000E+00
-fermie    :   1.64996202E-01
+fermie    :   1.64996200E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -404,8 +404,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          8.36806441
-    2        2.00000          6.28070882
+    1        2.00000          8.36806442
+    2        2.00000          6.28070878
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -474,7 +474,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  prteigrs : about to open file teph4zpr_3o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   3.83E-15  6.65E-16  9.14E-16  8.32E-15  8.43E-16  6.55E-16  3.55E-15  3.70E-15
-  8.06E-16  9.24E-15  4.18E-15  9.90E-16  3.59E-15  6.64E-15  7.43E-15  1.17E-15
+  8.06E-16  9.24E-15  4.18E-15  9.90E-16  3.59E-15  6.64E-15  7.42E-15  1.17E-15
   1.51E-15  9.48E-16  4.03E-15  5.46E-16  5.60E-15  2.28E-15  2.09E-15  3.00E-15
   4.69E-15
  -2.5001E+00 -1.2774E+00 -1.2774E+00 -1.2774E+00 -4.6171E-01  1.6500E-01
@@ -484,9 +484,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9972E+00
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  9.58056E-07
+  prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  9.58119E-07
   prteigrs : nnsclo,ikpt=  150    4 max resid (incl. the buffer)=  7.97125E-08
-  prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  5.80616E-14
+  prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  5.80583E-14
   prteigrs : nnsclo,ikpt=  150    7 max resid (incl. the buffer)=  2.47819E-04
   prteigrs : nnsclo,ikpt=  150    8 max resid (incl. the buffer)=  4.57513E-06
   prteigrs : nnsclo,ikpt=  150    9 max resid (incl. the buffer)=  1.27672E-05
@@ -494,13 +494,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=  150   11 max resid (incl. the buffer)=  6.33794E-12
   prteigrs : nnsclo,ikpt=  150   12 max resid (incl. the buffer)=  7.19665E-06
   prteigrs : nnsclo,ikpt=  150   14 max resid (incl. the buffer)=  1.40719E-07
-  prteigrs : nnsclo,ikpt=  150   16 max resid (incl. the buffer)=  2.37563E-07
-  prteigrs : nnsclo,ikpt=  150   18 max resid (incl. the buffer)=  1.73822E-07
+  prteigrs : nnsclo,ikpt=  150   16 max resid (incl. the buffer)=  2.37562E-07
+  prteigrs : nnsclo,ikpt=  150   18 max resid (incl. the buffer)=  1.73818E-07
   prteigrs : nnsclo,ikpt=  150   19 max resid (incl. the buffer)=  1.63649E-09
-  prteigrs : nnsclo,ikpt=  150   20 max resid (incl. the buffer)=  3.74035E-05
+  prteigrs : nnsclo,ikpt=  150   20 max resid (incl. the buffer)=  3.74034E-05
   prteigrs : nnsclo,ikpt=  150   22 max resid (incl. the buffer)=  7.64704E-10
   prteigrs : nnsclo,ikpt=  150   23 max resid (incl. the buffer)=  1.02278E-05
-  prteigrs : nnsclo,ikpt=  150   24 max resid (incl. the buffer)=  2.10809E-06
+  prteigrs : nnsclo,ikpt=  150   24 max resid (incl. the buffer)=  2.10810E-06
   prteigrs : nnsclo,ikpt=  150   25 max resid (incl. the buffer)=  4.93054E-06
   prteigrs : nnsclo,ikpt=  150   26 max resid (incl. the buffer)=  1.91955E-06
   prteigrs : nnsclo,ikpt=  150   27 max resid (incl. the buffer)=  2.36355E-06
@@ -520,7 +520,7 @@ lattice_volume:   1.2975866E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.905E-15, diffor:  0.000E+00, }
 etotal    :  -7.60561380E+01
 entropy   :   0.00000000E+00
-fermie    :   1.64996202E-01
+fermie    :   1.64996200E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -533,8 +533,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          8.36806441
-    2        2.00000          6.28070882
+    1        2.00000          8.36806442
+    2        2.00000          6.28070878
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -608,8 +608,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9972E+00
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  4.71915E-12
-  prteigrs : nnsclo,ikpt=  150    3 max resid (incl. the buffer)=  2.41658E-10
+  prteigrs : nnsclo,ikpt=  150    2 max resid (incl. the buffer)=  4.71922E-12
+  prteigrs : nnsclo,ikpt=  150    3 max resid (incl. the buffer)=  2.41671E-10
   prteigrs : nnsclo,ikpt=  150    5 max resid (incl. the buffer)=  5.91342E-08
   prteigrs : nnsclo,ikpt=  150    6 max resid (incl. the buffer)=  1.17275E-08
   prteigrs : nnsclo,ikpt=  150    8 max resid (incl. the buffer)=  1.60499E-14
@@ -623,13 +623,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=  150   16 max resid (incl. the buffer)=  7.76321E-10
   prteigrs : nnsclo,ikpt=  150   17 max resid (incl. the buffer)=  4.93463E-06
   prteigrs : nnsclo,ikpt=  150   18 max resid (incl. the buffer)=  4.94481E-09
-  prteigrs : nnsclo,ikpt=  150   19 max resid (incl. the buffer)=  3.47238E-03
+  prteigrs : nnsclo,ikpt=  150   19 max resid (incl. the buffer)=  3.47104E-03
   prteigrs : nnsclo,ikpt=  150   20 max resid (incl. the buffer)=  4.48670E-10
-  prteigrs : nnsclo,ikpt=  150   21 max resid (incl. the buffer)=  1.22268E-05
+  prteigrs : nnsclo,ikpt=  150   21 max resid (incl. the buffer)=  1.22269E-05
   prteigrs : nnsclo,ikpt=  150   22 max resid (incl. the buffer)=  8.81061E-04
   prteigrs : nnsclo,ikpt=  150   23 max resid (incl. the buffer)=  4.81860E-09
   prteigrs : nnsclo,ikpt=  150   24 max resid (incl. the buffer)=  1.75375E-03
-  prteigrs : nnsclo,ikpt=  150   25 max resid (incl. the buffer)=  6.25817E-03
+  prteigrs : nnsclo,ikpt=  150   25 max resid (incl. the buffer)=  6.25818E-03
   prteigrs : nnsclo,ikpt=  150   26 max resid (incl. the buffer)=  7.37791E-09
   prteigrs : nnsclo,ikpt=  150   27 max resid (incl. the buffer)=  2.60676E-05
   prteigrs : nnsclo,ikpt=  150   29 max resid (incl. the buffer)=  2.25783E-08
@@ -637,40 +637,40 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=  150   32 max resid (incl. the buffer)=  2.50585E-09
   prteigrs : nnsclo,ikpt=  150   33 max resid (incl. the buffer)=  5.90980E-06
   prteigrs : nnsclo,ikpt=  150   35 max resid (incl. the buffer)=  8.50218E-08
-  prteigrs : nnsclo,ikpt=  150   36 max resid (incl. the buffer)=  8.19277E-06
+  prteigrs : nnsclo,ikpt=  150   36 max resid (incl. the buffer)=  8.19290E-06
   prteigrs : nnsclo,ikpt=  150   37 max resid (incl. the buffer)=  9.44087E-10
   prteigrs : nnsclo,ikpt=  150   38 max resid (incl. the buffer)=  5.16700E-10
   prteigrs : nnsclo,ikpt=  150   39 max resid (incl. the buffer)=  9.46998E-04
-  prteigrs : nnsclo,ikpt=  150   40 max resid (incl. the buffer)=  6.47053E-10
+  prteigrs : nnsclo,ikpt=  150   40 max resid (incl. the buffer)=  6.47052E-10
   prteigrs : nnsclo,ikpt=  150   41 max resid (incl. the buffer)=  1.29395E-07
-  prteigrs : nnsclo,ikpt=  150   42 max resid (incl. the buffer)=  6.85408E-07
+  prteigrs : nnsclo,ikpt=  150   42 max resid (incl. the buffer)=  6.85409E-07
   prteigrs : nnsclo,ikpt=  150   44 max resid (incl. the buffer)=  3.01901E-04
   prteigrs : nnsclo,ikpt=  150   45 max resid (incl. the buffer)=  9.57598E-08
   prteigrs : nnsclo,ikpt=  150   46 max resid (incl. the buffer)=  1.02684E-05
   prteigrs : nnsclo,ikpt=  150   47 max resid (incl. the buffer)=  4.06113E-05
-  prteigrs : nnsclo,ikpt=  150   48 max resid (incl. the buffer)=  9.12047E-05
+  prteigrs : nnsclo,ikpt=  150   48 max resid (incl. the buffer)=  9.12048E-05
   prteigrs : nnsclo,ikpt=  150   49 max resid (incl. the buffer)=  7.10181E-10
   prteigrs : nnsclo,ikpt=  150   50 max resid (incl. the buffer)=  3.32698E-08
   prteigrs : nnsclo,ikpt=  150   51 max resid (incl. the buffer)=  1.04535E-06
-  prteigrs : nnsclo,ikpt=  150   52 max resid (incl. the buffer)=  4.80023E-08
+  prteigrs : nnsclo,ikpt=  150   52 max resid (incl. the buffer)=  4.80021E-08
   prteigrs : nnsclo,ikpt=  150   53 max resid (incl. the buffer)=  3.06182E-06
-  prteigrs : nnsclo,ikpt=  150   54 max resid (incl. the buffer)=  4.69431E-05
+  prteigrs : nnsclo,ikpt=  150   54 max resid (incl. the buffer)=  4.69430E-05
   prteigrs : nnsclo,ikpt=  150   55 max resid (incl. the buffer)=  7.78793E-09
   prteigrs : nnsclo,ikpt=  150   56 max resid (incl. the buffer)=  1.22223E-06
   prteigrs : nnsclo,ikpt=  150   57 max resid (incl. the buffer)=  3.77490E-08
   prteigrs : nnsclo,ikpt=  150   58 max resid (incl. the buffer)=  4.83289E-10
   prteigrs : nnsclo,ikpt=  150   59 max resid (incl. the buffer)=  3.10727E-04
   prteigrs : nnsclo,ikpt=  150   60 max resid (incl. the buffer)=  4.40075E-08
-  prteigrs : nnsclo,ikpt=  150   61 max resid (incl. the buffer)=  8.12714E-09
+  prteigrs : nnsclo,ikpt=  150   61 max resid (incl. the buffer)=  8.12715E-09
   prteigrs : nnsclo,ikpt=  150   62 max resid (incl. the buffer)=  2.96060E-08
   prteigrs : nnsclo,ikpt=  150   63 max resid (incl. the buffer)=  1.44428E-04
   prteigrs : nnsclo,ikpt=  150   64 max resid (incl. the buffer)=  7.41018E-11
   prteigrs : nnsclo,ikpt=  150   65 max resid (incl. the buffer)=  1.34172E-08
   prteigrs : nnsclo,ikpt=  150   66 max resid (incl. the buffer)=  2.44499E-06
   prteigrs : nnsclo,ikpt=  150   67 max resid (incl. the buffer)=  1.76418E-07
-  prteigrs : nnsclo,ikpt=  150   68 max resid (incl. the buffer)=  9.04804E-10
-  prteigrs : nnsclo,ikpt=  150   69 max resid (incl. the buffer)=  5.38065E-07
-  prteigrs : nnsclo,ikpt=  150   70 max resid (incl. the buffer)=  5.59882E-08
+  prteigrs : nnsclo,ikpt=  150   68 max resid (incl. the buffer)=  9.04805E-10
+  prteigrs : nnsclo,ikpt=  150   69 max resid (incl. the buffer)=  5.38063E-07
+  prteigrs : nnsclo,ikpt=  150   70 max resid (incl. the buffer)=  5.59884E-08
   prteigrs : nnsclo,ikpt=  150   71 max resid (incl. the buffer)=  4.17628E-12
 
 
@@ -687,7 +687,7 @@ lattice_volume:   1.2975866E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.984E-15, diffor:  0.000E+00, }
 etotal    :  -7.60561380E+01
 entropy   :   0.00000000E+00
-fermie    :   1.64996202E-01
+fermie    :   1.64996200E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -700,8 +700,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          8.36806441
-    2        2.00000          6.28070882
+    1        2.00000          8.36806442
+    2        2.00000          6.28070878
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1007,10 +1007,10 @@ P           mkmem3         72
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         52.6  wall=         57.2
+- Proc.   0 individual time (sec): cpu=         60.8  wall=         62.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         52.6  wall=         57.2
++Overall time at end (sec) : cpu=         60.8  wall=         62.5

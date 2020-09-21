@@ -1,6 +1,6 @@
 
 .Version 9.2.0 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu8.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 19 Sep 2020.
-- ( at 17h16 )
+.Starting date : Mon 21 Sep 2020.
+- ( at 03h50 )
   
-- input  file    -> /Users/gmatteo/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7/teph4zpr_5.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8/teph4zpr_5.in
 - output file    -> teph4zpr_5.out
 - root for input  files -> teph4zpr_5i
 - root for output files -> teph4zpr_5o
@@ -237,26 +237,26 @@ meta: {optdriver: 7, eph_task: 4, }
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
-       1               1       -0.085936        0.000000
+       1               1       -0.085945        0.000000
        1               2        0.000000        0.000000
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
-       2               2       -0.085936        0.000000
-       2               3        0.000000        0.000000
-       3               1        0.000000        0.000000
-       3               2        0.000000        0.000000
-       3               3       -0.085936        0.000000
+       2               2       -0.085945        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.085945        0.000000
 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.040882E+00    0.000000E+00   -4.520014E-19
-         1         2    0.000000E+00    2.040882E+00   -4.520014E-19
-         1         3    0.000000E+00    0.000000E+00    2.040882E+00
-         2         1   -2.040882E+00    0.000000E+00    4.520014E-19
-         2         2    0.000000E+00   -2.040882E+00    4.520014E-19
-         2         3    0.000000E+00    0.000000E+00   -2.040882E+00
+         1         1    2.040887E+00   -1.659033E-16   -1.658285E-16
+         1         2   -1.659033E-16    2.040887E+00    1.659781E-16
+         1         3    1.659033E-16    1.659033E-16    2.040887E+00
+         2         1   -2.040887E+00    1.659033E-16    1.658285E-16
+         2         2    1.659033E-16   -2.040887E+00   -1.659781E-16
+         2         3   -1.659033E-16   -1.659033E-16   -2.040887E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4zpr_1_DDB
 - Cannot find quadrupole tensor in DDB file: teph4zpr_1_DDB
@@ -329,18 +329,18 @@ meta: {optdriver: 7, eph_task: 4, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.3115137659E-02 (at units)
+ Average speed of sound partial sums:     0.3115170319E-02 (at units)
 -                                   =           6.8150 [km/s]
 
- Debye frequency from partial sums:     0.2398365949E-02 (Ha)
--                                 =     0.1578048987E+02 (THz)
--Debye temperature from partial sums:     0.7573431682E+03 (K)
+ Debye frequency from partial sums:     0.2398391094E-02 (Ha)
+-                                 =     0.1578065532E+02 (THz)
+-Debye temperature from partial sums:     0.7573511083E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4zpr_5o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -354,8 +354,8 @@ meta: {optdriver: 7, eph_task: 4, }
              2   -4.371486
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -534,26 +534,26 @@ meta: {optdriver: 7, eph_task: 4, }
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
-       1               1       -0.085936        0.000000
+       1               1       -0.085945        0.000000
        1               2        0.000000        0.000000
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
-       2               2       -0.085936        0.000000
-       2               3        0.000000        0.000000
-       3               1        0.000000        0.000000
-       3               2        0.000000        0.000000
-       3               3       -0.085936        0.000000
+       2               2       -0.085945        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.085945        0.000000
 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.040882E+00    0.000000E+00   -4.520014E-19
-         1         2    0.000000E+00    2.040882E+00   -4.520014E-19
-         1         3    0.000000E+00    0.000000E+00    2.040882E+00
-         2         1   -2.040882E+00    0.000000E+00    4.520014E-19
-         2         2    0.000000E+00   -2.040882E+00    4.520014E-19
-         2         3    0.000000E+00    0.000000E+00   -2.040882E+00
+         1         1    2.040887E+00   -1.659033E-16   -1.658285E-16
+         1         2   -1.659033E-16    2.040887E+00    1.659781E-16
+         1         3    1.659033E-16    1.659033E-16    2.040887E+00
+         2         1   -2.040887E+00    1.659033E-16    1.658285E-16
+         2         2    1.659033E-16   -2.040887E+00   -1.659781E-16
+         2         3   -1.659033E-16   -1.659033E-16   -2.040887E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4zpr_1_DDB
 - Cannot find quadrupole tensor in DDB file: teph4zpr_1_DDB
@@ -626,12 +626,12 @@ meta: {optdriver: 7, eph_task: 4, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.3115137659E-02 (at units)
+ Average speed of sound partial sums:     0.3115170319E-02 (at units)
 -                                   =           6.8150 [km/s]
 
- Debye frequency from partial sums:     0.2398365949E-02 (Ha)
--                                 =     0.1578048987E+02 (THz)
--Debye temperature from partial sums:     0.7573431682E+03 (K)
+ Debye frequency from partial sums:     0.2398391094E-02 (Ha)
+-                                 =     0.1578065532E+02 (THz)
+-Debye temperature from partial sums:     0.7573511083E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4zpr_5o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
@@ -799,26 +799,26 @@ meta: {optdriver: 7, eph_task: 4, }
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
-       1               1       -0.085936        0.000000
+       1               1       -0.085945        0.000000
        1               2        0.000000        0.000000
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
-       2               2       -0.085936        0.000000
-       2               3        0.000000        0.000000
-       3               1        0.000000        0.000000
-       3               2        0.000000        0.000000
-       3               3       -0.085936        0.000000
+       2               2       -0.085945        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.085945        0.000000
 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.040882E+00    0.000000E+00   -4.520014E-19
-         1         2    0.000000E+00    2.040882E+00   -4.520014E-19
-         1         3    0.000000E+00    0.000000E+00    2.040882E+00
-         2         1   -2.040882E+00    0.000000E+00    4.520014E-19
-         2         2    0.000000E+00   -2.040882E+00    4.520014E-19
-         2         3    0.000000E+00    0.000000E+00   -2.040882E+00
+         1         1    2.040887E+00   -1.659033E-16   -1.658285E-16
+         1         2   -1.659033E-16    2.040887E+00    1.659781E-16
+         1         3    1.659033E-16    1.659033E-16    2.040887E+00
+         2         1   -2.040887E+00    1.659033E-16    1.658285E-16
+         2         2    1.659033E-16   -2.040887E+00   -1.659781E-16
+         2         3   -1.659033E-16   -1.659033E-16   -2.040887E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4zpr_1_DDB
 - Cannot find quadrupole tensor in DDB file: teph4zpr_1_DDB
@@ -891,12 +891,12 @@ meta: {optdriver: 7, eph_task: 4, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.3115137659E-02 (at units)
+ Average speed of sound partial sums:     0.3115170319E-02 (at units)
 -                                   =           6.8150 [km/s]
 
- Debye frequency from partial sums:     0.2398365949E-02 (Ha)
--                                 =     0.1578048987E+02 (THz)
--Debye temperature from partial sums:     0.7573431682E+03 (K)
+ Debye frequency from partial sums:     0.2398391094E-02 (Ha)
+-                                 =     0.1578065532E+02 (THz)
+-Debye temperature from partial sums:     0.7573511083E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4zpr_5o_DS3_PHDOS.nc
 --------------------------------------------------------------------------------
@@ -1207,10 +1207,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.2  wall=         10.4
+- Proc.   0 individual time (sec): cpu=         24.1  wall=         25.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.2  wall=         10.4
++Overall time at end (sec) : cpu=         24.1  wall=         25.9
