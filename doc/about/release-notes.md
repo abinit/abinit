@@ -563,11 +563,11 @@ Also, not all of these are documented, or only partly documented (e.g. variable 
 - [[strfact@multibinit|strfact]] 
 - [[test_effpot@multibinit|test_effpot]] 
 - [[test_prt_ph@multibinit|test_prt_ph]] 
-- tolmxf@multibinit|tolmxf   MG: :THIS VARIABLES DOES NOT EXIST
+- tolmxf@multibinit, NOT DOCUMENTED
 - ts_option@multibinit, NOT TESTED, NOT DOCUMENTED
 
 Finally, several input variables of the main ABINIT application are also reused for Multibinit, without modification
-of meaning, like [[iatfix]] and related input variables, or [[tolmxf]].
+of meaning, like [[iatfix]], [[natfix]] and related input variables, or [[tolmxf]].
 
 By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
