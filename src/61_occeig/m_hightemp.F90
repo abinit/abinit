@@ -311,8 +311,13 @@ contains
     ! Arrays
     real(dp),dimension(:),allocatable :: valueseel
 
+    !temp
+    real(dp) :: fn,minocc
+    real(dp),dimension(:),allocatable :: valuese
+
+
     ! *********************************************************************
-    step=1e-2
+    step=1e-1
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
     gamma=(fermie-this%e_shiftfactor)/tsmear
     this%e_kin_freeel=zero
@@ -349,7 +354,6 @@ contains
         if (ii>1) then
           this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
         end if
-        write(0,*) sigma,this%e_shiftfactor,dble(this%bcut),this%gcut,simpson(step,valueseel)
         ABI_DEALLOCATE(valueseel)
 
         ! Change Fermi-Dirac integral lower bound.
@@ -371,10 +375,63 @@ contains
       else
         xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       end if
+
+      !TEMPORARY
+      ! ix=dble(this%bcut)
+      ! ii=0
+      ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+      ! minocc=tol16
+      ! do while(fn>minocc)
+      !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+      !   ii=ii+1
+      !   ix=ix+step
+      ! end do
+      ! ABI_ALLOCATE(valuese,(ii))
+      ! ix=dble(this%bcut)
+      ! ii=0
+      ! fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+      ! do while(fn>minocc)
+      !   fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+      !   ii=ii+1
+      !   valuese(ii)=2*fn*hightemp_e_heg(ix,this%ucvol)
+      !   ix=ix+step
+      ! end do
+      ! if (ii>1) then
+      !   this%e_kin_freeel=this%e_kin_freeel+simpson(step,valuese)
+      ! end if
+      ! ABI_DEALLOCATE(valuese)
+      !END TEMPORARY
     else if(this%version==2) then
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
+
+      !TEMPORARY
+      ! ix=this%ebcut
+      ! ii=0
+      ! fn=fermi_dirac(ix,fermie,tsmear)
+      ! minocc=tol16
+      ! do while(fn>minocc)
+      !   fn=fermi_dirac(ix,fermie,tsmear)
+      !   ii=ii+1
+      !   ix=ix+step
+      ! end do
+      ! ABI_ALLOCATE(valuese,(ii))
+      ! ix=this%ebcut
+      ! ii=0
+      ! fn=fermi_dirac(ix,fermie,tsmear)
+      ! do while(fn>minocc)
+      !   fn=fermi_dirac(ix,fermie,tsmear)
+      !   ii=ii+1
+      !   valuese(ii)=fn*hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)*&
+      !   & (ix-this%e_shiftfactor)
+      !   ix=ix+step
+      ! end do
+      ! if (ii>1) then
+      !   this%e_kin_freeel=this%e_kin_freeel+simpson(step,valuese)
+      ! end if
+      ! ABI_DEALLOCATE(valuese)
+      !END TEMPORARY
     end if
-    ! write(0,*) this%e_kin_freeel,factor*djp32(xcut,gamma),this%e_kin_freeel+factor*djp32(xcut,gamma)
+
     this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
 
     ! Computation of edc_kin_freeel
@@ -413,7 +470,7 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: ii
-    real(dp) :: ix,step,fn
+    real(dp) :: ix,step,fn,minocc
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
 
@@ -427,7 +484,8 @@ contains
       ix=dble(this%bcut)
       ii=0
       fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      do while(fn>tol14)
+      minocc=tol16
+      do while(fn>minocc)
         fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
         ii=ii+1
         ix=ix+step
@@ -436,7 +494,7 @@ contains
       ix=dble(this%bcut)
       ii=0
       fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
-      do while(fn>tol14)
+      do while(fn>minocc)
         fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
         ii=ii+1
         valuesent(ii)=2*(fn*log(fn)+(1.-fn)*log(1.-fn))
@@ -451,7 +509,8 @@ contains
       ix=this%ebcut
       ii=0
       fn=fermi_dirac(ix,fermie,tsmear)
-      do while(fn>tol14)
+      minocc=tol16
+      do while(fn>minocc)
         fn=fermi_dirac(ix,fermie,tsmear)
         ii=ii+1
         ix=ix+step
@@ -461,7 +520,7 @@ contains
       ix=this%ebcut
       ii=0
       fn=fermi_dirac(ix,fermie,tsmear)
-      do while(fn>tol14)
+      do while(fn>minocc)
         fn=fermi_dirac(ix,fermie,tsmear)
         ii=ii+1
         valuesent(ii)=(fn*log(fn)+(1.-fn)*log(1.-fn))*&
@@ -524,7 +583,7 @@ contains
 
     ! *********************************************************************
     unit=96+mpi_enreg%me
-    
+
     ! Debug : Priting Eigenvalues, Kinetic and PW grid if requested
     if(this%prt_cg.and.(mpi_enreg%me==mpi_enreg%me_kpt)) then
 
@@ -1245,6 +1304,10 @@ contains
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesnel
 
+    !temp
+    real(dp) :: fn,minocc
+    real(dp),dimension(:),allocatable :: valuesn
+
     ! *********************************************************************
 
     step=1e-1
@@ -1279,8 +1342,60 @@ contains
       else
         xcut=hightemp_e_heg(dble(bcut),ucvol)/tsmear
       end if
+
+      !TEMPORARY
+      ! ix=dble(bcut)
+      ! ii=0
+      ! fn=fermi_dirac(hightemp_e_heg(ix,ucvol)+e_shiftfactor,fermie,tsmear)
+      ! minocc=tol16
+      ! do while(fn>minocc)
+      !   fn=fermi_dirac(hightemp_e_heg(ix,ucvol)+e_shiftfactor,fermie,tsmear)
+      !   ii=ii+1
+      !   ix=ix+step
+      ! end do
+      ! ABI_ALLOCATE(valuesn,(ii))
+      ! ix=dble(bcut)
+      ! ii=0
+      ! fn=fermi_dirac(hightemp_e_heg(ix,ucvol)+e_shiftfactor,fermie,tsmear)
+      ! do while(fn>minocc)
+      !   fn=fermi_dirac(hightemp_e_heg(ix,ucvol)+e_shiftfactor,fermie,tsmear)
+      !   ii=ii+1
+      !   valuesn(ii)=2*fn
+      !   ix=ix+step
+      ! end do
+      ! if (ii>1) then
+      !   nelect=nelect+simpson(step,valuesn)
+      ! end if
+      ! ABI_DEALLOCATE(valuesn)
+      !END TEMPORARY
     else if(version==2) then
       xcut=(ebcut-e_shiftfactor)/tsmear
+
+      !TEMPORARY
+      ! ix=ebcut
+      ! ii=0
+      ! fn=fermi_dirac(ix,fermie,tsmear)
+      ! minocc=tol16
+      ! do while(fn>minocc)
+      !   fn=fermi_dirac(ix,fermie,tsmear)
+      !   ii=ii+1
+      !   ix=ix+step
+      ! end do
+      ! ABI_ALLOCATE(valuesn,(ii))
+      ! ix=ebcut
+      ! ii=0
+      ! fn=fermi_dirac(ix,fermie,tsmear)
+      ! do while(fn>minocc)
+      !   fn=fermi_dirac(ix,fermie,tsmear)
+      !   ii=ii+1
+      !   valuesn(ii)=fn*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+      !   ix=ix+step
+      ! end do
+      ! if (ii>1) then
+      !   nelect=nelect+simpson(step,valuesn)
+      ! end if
+      ! ABI_DEALLOCATE(valuesn)
+      !END TEMPORARY
     end if
     nelect=nelect+factor*djp12(xcut,gamma)
   end subroutine hightemp_get_nfreeel
