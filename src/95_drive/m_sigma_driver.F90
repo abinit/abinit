@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM include: hartre from m_spacepar, density matrix module, and Gaussian quadrature one
  use m_spacepar,      only : hartre
- use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene,print_tot_occ 
+ use m_gwrdm,         only : calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene,print_tot_occ 
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -222,7 +222,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,coef_hyb 
+ real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ec_gm,coef_hyb 
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -2392,7 +2392,10 @@ endif
 
  else
    if (gwcalctyp==21 .and. gw1rdm>0) then  ! MRM allocate the 1-RDM correction info if gwcalctyp=21 and gw1rdm>0
-     if (Sigp%nsppol/=1) MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
+     if (Sigp%nsppol/=1) then
+       MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
+       ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented for Sigp%nsppol==1
+     end if
      ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
      ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
@@ -2413,6 +2416,8 @@ endif
          nateigv(ib,ib,ikcalc,1)=cone
        enddo  
      enddo
+     ! MRM Initialize Galitskii-Migdal correlation energy accumulator
+     ec_gm=0.0_dp 
      ! MRM prepare arrays for the imaginary freq. integration of Sigma_c(iw)
      order_int=Sigp%nomegasi 
      write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
@@ -2430,7 +2435,7 @@ endif
      wmin=zero
      wmax=one
      call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
-     weights(:)=weights(:)/(one-freqs(:))**two      ! Cubature library scheme. Same freqs and weights as:
+     weights(:)=weights(:)/(one-freqs(:))**two      ! Same freqs and weights as
      freqs(:)=freqs(:)/(cone-freqs(:))              ! get_frequencies_and_weights_legendre
      !Form complex frequencies from 0 to iInf and print them in the log file
      do ifreqs=1,order_int
@@ -2452,14 +2457,14 @@ endif
 !       Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
-        call calc_rdmx(ib1,ib2,ikcalc,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
+        call calc_rdmx(ib1,ib2,ikcalc,verbose,potk,dm1k,QP_BSt)          ! Only restricted closed-shell calcs 
 !       Update the full 1RDM with the exchange corrected one for this k-point
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
-!       Compute NAT ORBS for exchange corrected 1-RDM?
+!       Compute NAT ORBS for exchange corrected 1-RDM
         do ib1dm=ib1,ib2
-          dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ikcalc,1) ! Only restricted calcs 
+          dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ikcalc,1) ! Only restricted closed-shell calcs 
         enddo
-        call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0) ! Only restricted calcs 
+        call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0)          ! Only restricted closed-shell calcs 
       end if 
    end do
 
@@ -2499,20 +2504,22 @@ endif
          end if
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
-       ! MRM compute 1-RDM correction and update dm1
+       ! MRM compute 1-RDM correction, update dm1, and compute Galitskii-Migdal Ec.
        if (gwcalctyp==21 .and. gw1rdm>0) then
          dm1k=czero 
+         ! Update the dm1 with the corr. contribution?
          if (x1rdm/=1) then
-           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
+           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted closed-shell calcs 
+           ec_gm=ec_gm+calc_Ec_GM_k(ib1,ib2,nomega_sigc,ikcalc,Sr,weights,sigcme_k,QP_BSt,Kmesh)! Only restrcited closed-shell calcs
          end if
 !        Update the full 1RDM with the GW corrected one for this k-point
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
          dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
 !        Compute nat orbs and occ numbers at k-point ikcalc
          if (x1rdm/=1) then
-           call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,1) ! Only restricted calcs 
+           call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,1) ! Only restricted closed-shell calcs 
          else
-           call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0) ! Only restricted calcs 
+           call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0) ! Only restricted closed-shell calcs 
          endif
        end if
        ABI_DEALLOCATE(sigcme_k)
@@ -2761,7 +2768,7 @@ endif
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      !
-     ! Print the updated Vee[HF-like] energy
+     ! Print the updated Vee[SD] and Vee[GM] energies
      !
      call xmpi_barrier(Wfd%comm)
      eh_energy=me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
@@ -2771,16 +2778,25 @@ endif
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a46)')' Vee[HF-like] energy obtained using GW 1-RDM:'
+     write(msg,'(a40)')' Vee[SD] energy obtained using GW 1-RDM:'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Eh[GW]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Eh[SD]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Ex[GW]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Ex[SD]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Vee[GW]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a28)')' Vee[GM] = Vee[SD] + Ec[GM]:'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Ec[GW]     = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Vee[GM]    = : ',(ex_energy+eh_energy+ec_gm),' Ha ,',(ex_energy+eh_energy+ec_gm)*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'

@@ -41,10 +41,97 @@ module m_gwrdm
  private :: no2ks,ks2no
 !!***
  
- public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene,print_tot_occ 
+ public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene,print_tot_occ 
 !!***
 
 contains
+!!***
+
+!!****f* ABINIT/Calc_Ec_GM_k
+!! NAME
+!! calc_Ec_GM_k
+!!
+!! FUNCTION
+!! Calculate Galitskii-Migdal corr. energy integrated in the Imaginary axis Ec = 1/pi \sum_i \int Gii(iv)*Sigma_c,ii(iv) + cc. dv
+!!
+!! INPUTS
+!! ib1=min band for given k
+!! ib2=max band for given k.
+!! nomega_sigc=number of omegas (w) in the imaginary axis (iw) used in the quadrature.
+!! kpoint=k-point where the Galitskii-Migdal contribution is used. 
+!! weights=array containing the weights used in the quadrature.
+!! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin) 
+!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
+!! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
+!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
+!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
+!! Sr=sigma_t (see the definition of this structured datatype)
+!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
+!!
+!! OUTPUT
+!! Compute the Galitskii-Migdal corr energy contribution of this k-point 
+!! 
+!! PARENTS
+!!  m_sigma_driver.f90
+!! CHILDREN
+!! SOURCE
+
+function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) result(Ec_GM_k)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: Ec_GM_k
+ integer,intent(in) :: ib1,ib2,nomega_sigc,kpoint
+ type(ebands_t),target,intent(in) :: BSt
+ type(sigma_t),intent(in) :: Sr
+ type(kmesh_t),intent(in) :: kmesh
+!arrays
+ real(dp),intent(in) :: weights(:)
+ complex(dpc),intent(in) :: sigcme_k(:,:,:,:)
+!Local variables ------------------------------
+!scalars
+ real(dp), parameter :: pi=3.141592653589793238462643383279502884197
+ real(dp) :: tol8
+ character(len=500) :: msg
+ integer :: ib1dm,iquad
+ real(dp) :: wtk,ec_gm_sum,spin_fact
+ complex(dpc) :: denominator,fact,division,ec_integrated
+!arrays
+!************************************************************************
+
+ DBG_ENTER("COLL")
+
+ ec_gm_sum=czero
+ spin_fact=2.0_dp
+ fact=spin_fact*cmplx(1.0_dp/(2.0_dp*pi),0.0_dp)
+ tol8=1.0e-8
+ wtk=kmesh%wt(kpoint)
+ write(msg,'(a25,f10.5)')'wtk used in calc_Ec_GM_k:',wtk
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+ if (ib1/=1) then
+   MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was not included in bdgw interval. 
+   Restart the calculation starting bdgw from 1.")
+ else
+   do ib1dm=ib1,ib2
+     ec_integrated=0.0_dpc
+     do iquad=1,nomega_sigc
+       denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))
+       if (abs(denominator)>tol8) then
+         ! Sigma_pp/[(denominator)] + [Sigma_pp/[(denominator)]]^*  
+          division=sigcme_k(iquad,ib1dm,ib1dm,1)/denominator
+          ec_integrated=ec_integrated+weights(iquad)*(division+conjg(division))
+       end if
+     end do
+     ec_gm_sum=ec_gm_sum+real(fact*ec_integrated)
+   end do
+ endif
+ Ec_GM_k=wtk*ec_gm_sum
+
+ DBG_EXIT("COLL")
+
+end function calc_Ec_GM_k
 !!***
 
 !!****f* ABINIT/calc_rdmx
@@ -59,7 +146,7 @@ contains
 !! ib2=max band for given k.
 !! kpoint=k-point where the density matrix is updated. 
 !! iinfo=print extra information (verbose mode)
-!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigmadriver.F90 for more details). 
+!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
 !! pot=Self-energy-Potential difference, matrix size (i,j), where i and j belong to k.
 !! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
@@ -85,13 +172,13 @@ subroutine calc_rdmx(ib1,ib2,kpoint,iinfo,pot,dm1,BSt)
 !scalars
  character(len=500) :: msg,msg2
  integer :: ib1dm,ib2dm
- real(dp) :: sgn_spin,tol8
+ real(dp) :: spin_fact,tol8
 !arrays
 !************************************************************************
 
  DBG_ENTER("COLL")
  tol8=1.0e-8
- sgn_spin=2.0d0
+ spin_fact=2.0d0
  msg2='Sx-Vxc '
 
  !call printdm1(1,10,pot) ! Uncomment for debug 
@@ -108,7 +195,7 @@ subroutine calc_rdmx(ib1,ib2,kpoint,iinfo,pot,dm1,BSt)
  do ib1dm=ib1,ib2-1  
    do ib2dm=ib1dm+1,ib2
      if ((BSt%occ(ib1dm,kpoint,1)>tol8) .and. (BSt%occ(ib2dm,kpoint,1)<tol8)) then
-       dm1(ib1dm,ib2dm)=sgn_spin*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,kpoint,1)-BSt%eig(ib2dm,kpoint,1)+tol8)
+       dm1(ib1dm,ib2dm)=spin_fact*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,kpoint,1)-BSt%eig(ib2dm,kpoint,1)+tol8)
        ! Dji = Dij^*
        dm1(ib2dm,ib1dm)=conjg(dm1(ib1dm,ib2dm))
      end if
@@ -162,7 +249,7 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
 !Local variables ------------------------------
 !scalars
  real(dp), parameter :: pi=3.141592653589793238462643383279502884197
- real(dp) :: tol8
+ real(dp) :: tol8,spin_fact
  character(len=500) :: msg,msg2
  integer :: ib1dm,ib2dm,iquad 
  complex(dpc) :: denominator,fact,division,dm1_mel
@@ -172,25 +259,22 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
  DBG_ENTER("COLL")
 
  msg2='Sc     '
- fact=cmplx(1.0d0/pi,0.0d0)
+ spin_fact=2.0_dp
+ fact=spin_fact*cmplx(1.0_dp/(2.0_dp*pi),0.0_dp)
  tol8=1.0e-8
 
  if (iinfo==0) then
    write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
    call wrtout(std_out,msg,'COLL')
-   !call wrtout(ab_out,msg,'COLL')
    write(msg,'(a11,i5,a8,i5,a5,i5,a7)')'from band ',ib1,' to band',ib2,' with',nomega_sigc,' omegas'
    call wrtout(std_out,msg,'COLL')
-   !call wrtout(ab_out,msg,'COLL')
    write(msg,'(a11,5x,*(f17.5))')'First omega',Sr%omega_i(1)
    call wrtout(std_out,msg,'COLL')
-   !call wrtout(ab_out,msg,'COLL')
    write(msg,'(a11,5x,*(f17.5))')'Last  omega',Sr%omega_i(nomega_sigc)
    call wrtout(std_out,msg,'COLL')
-   !call wrtout(ab_out,msg,'COLL')
  end if
 
- dm1=0.0d0
+ dm1(:,:)=0.0d0
  do ib1dm=ib1,ib2  
    do ib2dm=ib1dm,ib2 
      dm1_mel=0.0d0
