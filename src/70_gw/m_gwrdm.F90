@@ -111,8 +111,8 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
  call wrtout(ab_out,msg,'COLL')
 
  if (ib1/=1) then
-   MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was not included in bdgw interval. 
-   Restart the calculation starting bdgw from 1.")
+   MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was not included in bdgw interval.& 
+   &Restart the calculation starting bdgw from 1.")
  else
    do ib1dm=ib1,ib2
      ec_integrated=0.0_dpc
