@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 18 Sep 2020.
-- ( at 14h36 )
+.Starting date : Mon 21 Sep 2020.
+- ( at 15h23 )
   
 - input  file    -> /home/guster/gitrepo/abinit/build/tests/Test_suite/v9_t90/t90.in
 - output file    -> t90.out
@@ -899,55 +899,55 @@ P           mkmem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         10.4        0.17      0.003
-- Total wall clock time (s,m,h):         10.4        0.17      0.003
+- Total cpu        time (s,m,h):         12.6        0.21      0.004
+- Total wall clock time (s,m,h):         12.7        0.21      0.004
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           10.4, wall_time =           10.4
+- cpu_time =           12.6, wall_time =           12.7
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- ewald                          4.480  43.3      4.479  43.2              4      -1.00        1.00       1.00
-- stress                         3.609  34.8      3.609  34.8              4      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             3.580  34.6      3.581  34.6              4      -1.00        1.00       1.00
-- fourwf%(pot)                   0.573   5.5      0.566   5.5           1334      -1.00        1.01       1.01
-- pspini                         0.262   2.5      0.262   2.5              4      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.170   1.6      0.169   1.6             51      -1.00        1.00       1.00
-- timing timab                   0.149   1.4      0.149   1.4             11      -1.00        1.00       1.00
-- fourdp                         0.094   0.9      0.091   0.9            239      -1.00        1.04       1.04
-- invars2                        0.074   0.7      0.074   0.7              4      -1.00        1.00       1.00
-- nonlop(apply)                  0.066   0.6      0.068   0.7           1334      -1.00        0.97       0.97
-- symrhg(no FFT)                 0.059   0.6      0.057   0.6             47      -1.00        1.04       1.04
-- others (116)                   0.242   2.3      0.256   2.5             -1      -1.00        0.95       0.95
+- ewald                          5.569  44.1      5.570  44.0              4      -1.00        1.00       1.00
+- stress                         4.393  34.8      4.394  34.7              4      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             4.360  34.5      4.360  34.5              4      -1.00        1.00       1.00
+- fourwf%(pot)                   0.705   5.6      0.725   5.7           1334      -1.00        0.97       0.97
+- pspini                         0.308   2.4      0.309   2.4              4      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.199   1.6      0.201   1.6             51      -1.00        0.99       0.99
+- timing timab                   0.120   0.9      0.120   0.9             10      -1.00        1.00       1.00
+- fourdp                         0.113   0.9      0.098   0.8            239      -1.00        1.16       1.16
+- invars2                        0.086   0.7      0.087   0.7              4      -1.00        0.98       0.98
+- nonlop(apply)                  0.082   0.7      0.084   0.7           1334      -1.00        0.98       0.98
+- symrhg(no FFT)                 0.072   0.6      0.075   0.6             47      -1.00        0.96       0.96
+- others (116)                   0.292   2.3      0.293   2.3             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                      13.357 129.0     13.361 129.0                                  1.00       1.00
+- subtotal                      16.299 129.1     16.316 128.9                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          10.4, wall_time =          10.4
+- cpu_time =          12.6, wall_time =          12.7
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- ewald                          4.480  43.3      4.479  43.2              4      -1.00        1.00       1.00
-- stress                         3.609  34.8      3.609  34.8              4      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             3.580  34.6      3.581  34.6              4      -1.00        1.00       1.00
-- fourwf%(pot)                   0.573   5.5      0.566   5.5           1334      -1.00        1.01       1.01
-- pspini                         0.262   2.5      0.262   2.5              4      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.170   1.6      0.169   1.6             51      -1.00        1.00       1.00
-- timing timab                   0.149   1.4      0.149   1.4             11      -1.00        1.00       1.00
-- fourdp                         0.094   0.9      0.091   0.9            239      -1.00        1.04       1.04
-- invars2                        0.074   0.7      0.074   0.7              4      -1.00        1.00       1.00
-- nonlop(apply)                  0.066   0.6      0.068   0.7           1334      -1.00        0.97       0.97
-- symrhg(no FFT)                 0.059   0.6      0.057   0.6             47      -1.00        1.04       1.04
-- others (116)                   0.242   2.3      0.256   2.5             -1      -1.00        0.95       0.95
+- ewald                          5.569  44.1      5.570  44.0              4      -1.00        1.00       1.00
+- stress                         4.393  34.8      4.394  34.7              4      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             4.360  34.5      4.360  34.5              4      -1.00        1.00       1.00
+- fourwf%(pot)                   0.705   5.6      0.725   5.7           1334      -1.00        0.97       0.97
+- pspini                         0.308   2.4      0.309   2.4              4      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.199   1.6      0.201   1.6             51      -1.00        0.99       0.99
+- timing timab                   0.120   0.9      0.120   0.9             10      -1.00        1.00       1.00
+- fourdp                         0.113   0.9      0.098   0.8            239      -1.00        1.16       1.16
+- invars2                        0.086   0.7      0.087   0.7              4      -1.00        0.98       0.98
+- nonlop(apply)                  0.082   0.7      0.084   0.7           1334      -1.00        0.98       0.98
+- symrhg(no FFT)                 0.072   0.6      0.075   0.6             47      -1.00        0.96       0.96
+- others (116)                   0.292   2.3      0.293   2.3             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                      13.357 129.0     13.361 129.0                                  1.00       1.00
+- subtotal                      16.299 129.1     16.316 128.9                                  1.00       1.00
 
 ================================================================================
 
@@ -1032,10 +1032,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.4  wall=         10.4
+- Proc.   0 individual time (sec): cpu=         12.6  wall=         12.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.4  wall=         10.4
++Overall time at end (sec) : cpu=         12.6  wall=         12.7
