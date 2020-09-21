@@ -563,7 +563,7 @@ Also, not all of these are documented, or only partly documented (e.g. variable 
 - [[strfact@multibinit|strfact]] 
 - [[test_effpot@multibinit|test_effpot]] 
 - [[test_prt_ph@multibinit|test_prt_ph]] 
-- [[tolmxf@multibinit|tolmxf]] 
+- tolmxf@multibinit, NOT DOCUMENTED
 - ts_option@multibinit, NOT TESTED, NOT DOCUMENTED
 
 Finally, several input variables of the main ABINIT application are also reused for Multibinit, without modification
