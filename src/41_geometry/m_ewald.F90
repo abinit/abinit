@@ -355,8 +355,8 @@ if(icutcoul.eq.1) then
  ABI_DEALLOCATE(gcutoff) 
 
 !DEBUG
-write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
-write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac
+!write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
+!write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac
 !ENDDEBUG
 
 !Length scale grads handled with stress tensor, ewald2

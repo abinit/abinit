@@ -7,7 +7,7 @@
 
 
 !Unit cell
- acell    2*4.6487  20.0
+ acell    2*4.6487    20.0
  angdeg   90.0  90.0  120.0
  ntypat   1  
  natom    2  
@@ -21,7 +21,7 @@ kptopt       1
 ngkpt        1 1 1
 
 !Convergence parameters
- ecut   30
+ ecut   6.0
  tolvrs 1.d-8
  nstep  50
 
