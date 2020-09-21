@@ -567,7 +567,7 @@ Also, not all of these are documented, or only partly documented (e.g. variable 
 - ts_option@multibinit, NOT TESTED, NOT DOCUMENTED
 
 Finally, several input variables of the main ABINIT application are also reused for Multibinit, without modification
-of meaning, like [[atfix]] and related input variables, or [[tolmxf]].
+of meaning, like [[iatfix]], [[natfix]] and related input variables, or [[tolmxf]].
 
 By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
