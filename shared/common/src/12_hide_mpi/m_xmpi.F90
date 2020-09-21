@@ -881,13 +881,17 @@ subroutine xmpi_abort(comm,mpierr,msg,exit_status)
 
  inquire(std_out, opened=testopen)
  if (testopen) then
+#if defined HAVE_FC_FLUSH
    call flush(std_out)
+#endif
    close(std_out)
  end if
 
  inquire(ab_out,opened=testopen)
  if (testopen) then
+#if defined HAVE_FC_FLUSH
    call flush(ab_out)
+#endif
    close(ab_out)
  end if
 

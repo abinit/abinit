@@ -2,9 +2,9 @@
 
  ndtset 3
 
- ngkpt1 4 4 4;    eph_ngqpt_fine1 4 4 4;    getwfk_filepath1 "teph4zpr_3o_DS1_WFK"
- ngkpt2 8 8 8;    eph_ngqpt_fine2 8 8 8;    getwfk_filepath2 "teph4zpr_3o_DS2_WFK"
- ngkpt3 12 12 12; eph_ngqpt_fine3 12 12 12; getwfk_filepath3 "teph4zpr_3o_DS3_WFK"
+ ngkpt1 4 4 4    eph_ngqpt_fine1 4 4 4    getwfk_filepath1 "teph4zpr_3o_DS1_WFK"
+ ngkpt2 8 8 8    eph_ngqpt_fine2 8 8 8    getwfk_filepath2 "teph4zpr_3o_DS2_WFK"
+ ngkpt3 12 12 12 eph_ngqpt_fine3 12 12 12 getwfk_filepath3 "teph4zpr_3o_DS3_WFK"
 
  getddb_filepath "teph4zpr_1_DDB"
  ddb_ngqpt 4 4 4
@@ -20,7 +20,7 @@
  nshiftk 1
  shiftk 0 0 0
 
- mixprec 1; boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
+ mixprec 1 boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
 
 ##############################################
 ####                 SECTION: eph

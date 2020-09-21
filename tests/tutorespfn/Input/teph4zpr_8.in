@@ -11,7 +11,7 @@
  eph_stern2 1
  getpot_filepath2 "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
 
- ngkpt 12 12 12; eph_ngqpt_fine 12 12 12; getwfk_filepath "teph4zpr_3o_DS3_WFK"
+ ngkpt 12 12 12 eph_ngqpt_fine 12 12 12 getwfk_filepath "teph4zpr_3o_DS3_WFK"
 
  getddb_filepath "teph4zpr_1_DDB"
  ddb_ngqpt 4 4 4
@@ -22,7 +22,7 @@
  nshiftk 1
  shiftk 0 0 0
 
- mixprec 1; boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
+ mixprec 1 boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
 
 ##############################################
 ####                 SECTION: eph

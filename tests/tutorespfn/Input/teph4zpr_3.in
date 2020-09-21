@@ -1,14 +1,14 @@
 # NSCF computation of WFK files with empty states to prepare convergence studies for ZPR calculation
  ndtset 3
 
- nband1  70;  nbdbuf1 -10 # A negative value means 10% of nband
- nband   25;  nbdbuf   5
+ nband1  70 nbdbuf1 -10 # A negative value means 10% of nband
+ nband   25 nbdbuf   5
 
 # Three Gamma-centered k-meshes:
 # 4x4x4 with 70 bands, then 8x8x8 and 12x12x12 with 25 bands.
  ngkpt1 4 4 4
- ngkpt2 8 8 8;     getwfk2 -1  # Read previous WFK file to speedup NSCF run.
- ngkpt3 12 12 12;  getwfk3 -1
+ ngkpt2 8 8 8     getwfk2 -1  # Read previous WFK file to speedup NSCF run.
+ ngkpt3 12 12 12  getwfk3 -1
 
  nshiftk 1
  shiftk 0 0 0
