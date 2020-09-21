@@ -1,4 +1,4 @@
-[submodule "tests/modules_with_data/test_submodule"]
-	path = tests/modules_with_data/test_submodule
-	url = git://github.com/gmatteo/test_submodule.git
+[submodule "tests/modules_with_data/mgo_eph_zpr"]
+	path = tests/modules_with_data/mgo_eph_zpr
+	url = git://github.com/abinit/mgo_eph_zpr.git
 	branch = master

@@ -135,7 +135,7 @@ New input variables: [[brav]], [[dvdb_add_lr]], [[dvdb_qcache_mb]], [[dvdb_qdamp
 [[getdvdb]], [[getdvdb_filepath]], [[getkerange_filepath]],
 [[getsigeph_filepath]], 
 [[irddvdb]], [[prteliash]], [[sigma_bsum_range]], [[sigma_erange]],
-[[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]].
+[[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]], [[rifcsph]].
 
 Note that the new EPH processing unit of ABINIT [[optdriver]]=7 has a different implementation than the one implemented in anaddb.
 Three new tutorials are availables, [[tutorial:eph_intro]], [[tutorial:eph4mob]] and [[tutorial:eph4zpr]], and supercede the legacy tutorials
@@ -202,7 +202,7 @@ This capability is still under development and not completely stable.
 Interested users are strongly recommended to contact Miquel Royo (mroyo@icmab.es)
 or Massimiliano Stengel (mstengel@icmab.es) before start using it.   
 
-By M. Royo, M. Stengel, M. Giantomassi.
+By M. Royo, M. Stengel
 
 
 **B.3** DFT+DMFT
@@ -563,11 +563,11 @@ Also, not all of these are documented, or only partly documented (e.g. variable 
 - [[strfact@multibinit|strfact]] 
 - [[test_effpot@multibinit|test_effpot]] 
 - [[test_prt_ph@multibinit|test_prt_ph]] 
-- [[tolmxf@multibinit|tolmxf]] 
+- tolmxf@multibinit|tolmxf   MG: :THIS VARIABLES DOES NOT EXIST
 - ts_option@multibinit, NOT TESTED, NOT DOCUMENTED
 
 Finally, several input variables of the main ABINIT application are also reused for Multibinit, without modification
-of meaning, like [[atfix]] and related input variables, or [[tolmxf]].
+of meaning, like [[iatfix]] and related input variables, or [[tolmxf]].
 
 By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 

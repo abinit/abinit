@@ -104,7 +104,7 @@ have an additional dependence on the physical temperature T.
 
 !!! important
 
-    The EPH code takes advantage of time-reversal (if any) and spatial symmetries to reduce the BZ integration
+    The EPH code takes advantage of time-reversal and spatial symmetries (see [[kptopt]] to reduce the BZ integration
     to an appropriate irreducible wedge, $\text{IBZ}_k$, defined by the little group of the $\kk$-point i.e.
     the set of point group operations of the crystal that leave the $\kk$-point invariant
     within a reciprocal lattice vector $\GG$.
@@ -329,7 +329,7 @@ structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 ```
 
 where the `abifile` prefix tells ABINIT that the lattice parameters and atomic positions
-should be extracted from an ABINIT binary file e.g. HIST.nc, DEL.nc, GSR.nc 
+should be extracted from an ABINIT binary file e.g. HIST.nc, DEN.nc, GSR.nc, etc.
 (other formats are supported as well, see documentation).
 
 <!--
@@ -337,7 +337,7 @@ The majority of the netcdf files contain info about the crystalline structure.
 The syntax is `abitk COMMAND FILE`.
 -->
 To print the crystalline structure to terminal, use the *abitk* Fortran executable
-shipped with the ABINIT package and use the `crystal_print` command:
+shipped with the ABINIT package with the `crystal_print` command:
 
 ```md
 abitk crystal_print MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
@@ -421,7 +421,7 @@ that lists the **relative paths** of the **partial DDB files**.
 
 Since we are dealing with a polar material, it is worth checking whether our final DDB contains
 Born effective charges and the electronic dielectric tensor.
-Instead of running *anaddb* or *abinit* and then checking the output file, we can simply use:
+Instead of running *anaddb* or *abinit* and then checking the output file, we can simply use |abiopen|:
 
 ```sh
 abiopen MgO_eph_zpr/flow_zpr_mgo/w1//outdata/out_DDB -p
@@ -444,7 +444,7 @@ Has (all) internal strain terms: False
 Has (all) piezoelectric terms: False
 ```
 
-We can also invoke *anaddb* directly from python to have a quick look at the phonon dispersion with:
+We can also invoke *anaddb* directly from python to have a quick look at the phonon dispersion:
 
 ```text
 abiview.py ddb MgO_eph_zpr/flow_zpr_mgo/w1//outdata/out_DDB
@@ -454,13 +454,14 @@ nqsmall = 10, ndivsm = 20;
 asr = 2, chneut = 1, dipdip = 1, lo_to_splitting = automatic, dos_method = tetra
 ```
 
-that produces:
+that produces the following figures:
 
 ![](eph4zpr_assets/abiview.png)
 
 The results seem reasonable: the acoustic modes go to zero linearly for $\qq \rightarrow 0$
 as we are dealing with a 3D system, no instability is present
 and the band dispersion shows the LO-TO splitting typical of polar materials.
+
 Note, however, that the acoustic sum-rule is automatically enforced by the code so
 it is always a good idea to compare the phonon dispersion with/without [[asr]] as this
 is an indirect indicator of the convergence/reliability of our calculations.
@@ -503,13 +504,13 @@ and the following input file:
 !!! tip
 
     The number at the end of the POT file corresponds to the (*idir*, *ipert*) pertubation for that
-    particular $\qq$-point. The sequential *pertcase* index is computed as:
+    particular $\qq$-point. The *pertcase* index is computed as:
 
     ```fortran
     pertcase = idir + ipert
     ```
 
-    where *idir* species the direction ([1, 2, 3]) and *ipert* specifies the perturbation type:
+    where *idir* gives the direction ([1, 2, 3]) and *ipert* specifies the perturbation type:
 
     - *ipert* in [1, ..., *natom*] corresponds to atomic perturbations (reduced directions)
     - *ipert* = *natom* + 1 corresponds d/dk  (reduced directions)
@@ -571,7 +572,7 @@ the code prints a lists with the atomic perturbations that have been merged in t
 
 The term **symmetric** means that this particular *(idir, ipert)* perturbation
 can be reconstructed by symmetry from the other **independent** entries with the same $\qq$-point.
-If all the independent entries are available, the code prints following message at the end of the output file:
+If all the independent entries are available, the code prints the following message at the end of the output file:
 
 ```md
  All the independent perturbations are available
@@ -647,7 +648,12 @@ Let's now discuss the meaning of the different variables in more detail.
 We use [[optdriver]] 7 to enter the EPH code while [[eph_task]] 4 activates
 the computation of the full self-energy (real + imaginary part).
 The paths to the external files (**DDB**, **WFK**, **DVDB**) are specified
-with the three variables [[getddb_filepath]], [[getwfk_filepath]], and [[getdvdb_filepath]].
+with the three variables:
+
+- [[getddb_filepath]]
+- [[getwfk_filepath]]
+- [[getdvdb_filepath]].
+
 This is an excerpt of the input file:
 
 ```sh
@@ -905,21 +911,23 @@ to accelerate the convergence.
 
     Change the input file to use [[mixprec]] 1 and [[boxcutmin]] 1.1.
     Rerun the calculation and compare with the previous results.
-    Do you see significant differences? What about the wall-time?
+    Do you see significant differences? What about the wall-time and the memory allocated for the potentials?
 
 ## How to reduce the number of bands with the Sternheimer method
 
 This section discusses how to use the Sternheimer method to accelerate the convergence with [[nband]].
 To activate the Sternheimer approach, we need to set [[eph_stern]] to 1
-and use the [[getpot_filepath]] input variable to specify the external file with the GS KS potential.
-This file is produced at the end of the GS calculations provided we set [[prtpot]] to 1 in the input file.
+and use [[getpot_filepath]] to specify the external file with the GS KS potential.
+This file is produced at the end of the GS calculations provided [[prtpot]] is set to 1 in the input file.
 
 !!! important
 
     The Sternheimer equation is solved non-self-consistently using max [[nline]] NSCF iterations
     and the solver stops when the first-order wavefunction is converged within [[tolwfr]].
     Default values for these two variables are provided if not specified by the user in the input file.
-    The code aborts if the solver cannot converge.
+    **The code aborts if the solver cannot converge**.
+    This may happen if the first [[nband]] states are not well separated from the remaining high-energy states.
+    Increasing [[nband]] should solve the problem.
 
 From the user's point of view, the Sternheimer method requires to add
 the following section to our initial input:
@@ -935,7 +943,7 @@ An example of input file is provided in:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_6.in %}
 
-in which we perform four calculations with different values of [[nband]]:
+that performs four calculations with different values of [[nband]]:
 
 ```sh
 ndtset 4
@@ -943,7 +951,7 @@ nband: 10
 nband+ 10
 ```
 
-to monitor the convergence of the QP corrections.
+in order to monitor the convergence of the QP corrections.
 
 Run the calculation with:
 
@@ -955,7 +963,8 @@ that produces the following output file:
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_6.out %}
 
-To analyze the convergence behavior, pass the SIGEPH files to the |abicomp| script:
+To analyze the convergence behavior, pass the SIGEPH files to the |abicomp| script and use the 
+`sigpeh` command:
 
 ```sh
 abicomp.py sigeph teph4zpr_6o_DS*_SIGEPH.nc -e
@@ -963,7 +972,7 @@ abicomp.py sigeph teph4zpr_6o_DS*_SIGEPH.nc -e
 
 ![](eph4zpr_assets/qpgaps_6o.png)
 
-Now the convergence is much better. Note the different scale on the y-axis.
+Now the convergence is much better. **Note the different scale on the y-axis**.
 <!--
 and the ZPR is converged with 1 meV for nband ??
 This is the value one should obtain when summing all the bands up to maximum number of plane-waves [[mpw]].
@@ -995,9 +1004,9 @@ This is the value one should obtain when summing all the bands up to maximum num
 In the previous sections, we found that XXX bands with the Sternheimer method are enough to converge.
 -->
 In this part of the tutorial, we fix this value for *nband* and perform a convergence study
-wrt to the $\qq$-sampling
-Unfortunately, we won't be able to fully convergence the results but at least
-you will get an idea on how to perform this kind of convergence studies.
+for the $\qq$-sampling
+Unfortunately, we won't be able to fully convergence the results but, at least,
+you will get an idea on how to perform this kind of convergence study.
 
 In the third input *teph4zpr_7.in*, we have computed WFK files on different $\kk$-meshes
 and a relatively small number of empty states (XXX).
@@ -1019,11 +1028,11 @@ Run the calculation, as usual, with:
 abinit teph4zpr_7.in > teph4zpr_7.log 2> err &
 ```
 
-to produce the following output file:
+The output file is reported here for your convenience:
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_7.out %}
 
-Now we can use
+Now use:
 
 ```sh
 abicomp.py sigeph teph4zpr_7o_DS*_SIGEPH.nc -e
@@ -1042,23 +1051,28 @@ These additional convergence tests cannot be covered in this lesson and they are
 
 ## How to compute the spectral function
 
-To compute the spectral function, we need to specify the number of frequencies via [[nfreqsp]].
-The code will compute $A(\omega)$ on a linear frequency mesh centered on the KS eigenvalue
-that spans the interval $[\ee_\nk - \Delta, \ee_\nk + \Delta]$ with $\Delta$ given by [[freqspmax]].
-The number of points is enforced to be odd.
+To compute the spectral function $A_\nk(\ww)$, we need to specify the number of frequencies via [[nfreqsp]].
+The code will compute $A(\ww)$ on a linear frequency mesh centered on the KS eigenvalue
+that spans the interval $[\ee_\nk - \Delta, \ee_\nk + \Delta]$ with $\Delta$ given by [[freqspmax]]
+(an odd number of points is enforced by the code).
 
-{% dialog tests/tutorespfn/Input/teph4zpr_8.in %}
+In a nutshell, one should add e.g.:
 
 ```sh
 nfreqsp 301
-freqspmax 8.0 eV
+freqspmax 1.0 eV
 ```
 
-To plot the spectral function $A_\nk(\ww) in an easy way, we use the AbiPy to to extract the data from the netcdf file.
-We do it in two different ways: 
+An example of input file is available here:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_8.in %}
+
+To plot the spectral function $A_\nk(\ww) in an easy way, we use AbiPy 
+to extract the data from the netcdf file.
+We cant do it in two different ways: 
 
 - using a small python script that calls the AbiPy API
-- using ipython and abiopen.py to interact with the netcdf file
+- using the |abiopen| script and |ipython| and to interact with the netcdf file
 
 The python script is:
 
@@ -1073,18 +1087,19 @@ filepath = sys.argv[1]
 abifile = abiopen(filepath)
 
 # Plot Sigma(omega), A(omega) and QP solution
-abifile.plot_qpsolution_skb(spin=0, kpoint=[0, 0, 0], band=4)
+abifile.plot_qpsolution_skb(spin=0, kpoint=(0, 0, 0), band=4)
 ```
 
 Alternatively, one can directly use `abiopen.py` to open the SIGEPH.nc file inside the iptyhon terminal
 
 ```ipython
 %matplotlib
-abifile.plot_qpsolution_skb(spin=0, kpoint=[0, 0, 0], band=4)
+
+abifile.plot_qpsolution_skb(spin=0, kpoint=(0, 0, 0), band=4)
 ```
 
 The advantage of the second approach is that you can interact with the python object in an interactive environment.
-The first approach is more powerfull if you need a programmatic API to automate operations.
+The first approach is more powerful if you need a programmatic API to automate operations.
 
 
 ## MPI parallelism and memory requirements
