@@ -62,7 +62,6 @@ program atdep
   use m_ifc,              only : ifc_type
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
-  use m_dynmat,           only : ftifc_r2q, ftifc_q2r, asrif9
   use m_tdep_abitypes,    only : tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ifc
   use m_tdep_psij,        only : tdep_calc_psijfcoeff, tdep_calc_psijtot, tdep_calc_alpha_gamma, tdep_write_gruneisen
   use m_tdep_phij,        only : tdep_calc_phijfcoeff, tdep_calc_pijfcoeff, tdep_build_phijNN, tdep_calc_dij, tdep_write_dij, &

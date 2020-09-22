@@ -63,17 +63,23 @@ module m_spmat_NDCOO
      type(real_array_type) :: val       ! The value array
      logical :: is_sorted = .False.     ! If the matrix is sorted by index
      logical :: is_unique = .False.     ! If the matrix is made unique (no entry could have same index).
+     logical :: is_pair_grouped = .False. ! If the matrix entries are grouped by first two indices
+     type(int_array_type) :: pair_1list ! first index of the pair
+     type(int_array_type) :: pair_2list ! second index of the pair
+     type(int_array_type) :: pair_startend ! start and end matrix index of each group
+
    contains
      procedure :: initialize
      procedure :: finalize
      procedure :: add_entry             ! add one entry
      procedure :: remove_zeros          ! remove entries which are (or close to ) zero
      procedure :: sort_indices          ! sort the matrix by indices
-     procedure :: sum_duplicates        ! remove duplicate indexes by adding them up
+     procedure :: sum_duplicates        ! remove duplicate indices by adding them up
      procedure :: get_val_inz           ! get the z'th value.
      procedure :: get_ind_inz           ! get the z'th indices.
      procedure :: get_ind               ! get the indices for all in a dimension
      procedure :: group_by_1dim         ! group the matrix by first dimension
+     procedure :: group_by_pair         ! group the matrix by first two dimensions
      procedure :: mv1vec                ! multiply vector, return NDCOO entity with one dimension less
      procedure :: mv2vec                ! multiply 2 vectors, return NDCOO entity with two dimensions less
      procedure :: vec_product2d         ! multiply 2d matrix with one vector, return vector
@@ -99,6 +105,8 @@ contains
     self%nnz=0
     self%is_sorted=.False.
     self%is_unique=.False.
+    self%is_pair_grouped = .False.
+
   end subroutine initialize
 
   !-------------------------------------------------------------------!
@@ -110,6 +118,13 @@ contains
     self%nnz=0
     self%is_sorted=.False.
     self%is_unique=.False.
+    if((self%is_pair_grouped)) then
+      !self%pair_1list%finalize()
+      !self%pair_2list%finalize()
+      !self%pair_startend%finalize()
+    endif
+    self%is_pair_grouped = .False.
+
     if (allocated(self%mshape)) then
        ABI_DEALLOCATE(self%mshape)
     endif
@@ -134,6 +149,7 @@ contains
     call self%val%push(val)
     self%is_sorted=.False.
     self%is_unique=.False.
+    self%is_pair_grouped=.False.
   end subroutine add_entry
 
 
@@ -295,6 +311,64 @@ contains
   end subroutine group_by_1dim
 
   !-------------------------------------------------------------------!
+  ! Group the sparse matrix by first two indices
+  !> Output:
+  !> ngroup: number of groups
+  !> ilist: list of one index of the pair (array(ngroup))
+  !> jlist: list of other index of the pair (array(ngroup)) 
+  !> ijstartend: start and end of each group (array(ngroup+1))
+  !>           The starts will be ijstartend(1:ngroup)
+  !>           The ends will be ijstartend(2: ngroup+1)-1
+  !-------------------------------------------------------------------!
+
+  subroutine group_by_pair(self)
+    class(ndcoo_mat_t), intent(inout) :: self
+
+    integer :: i, ii, ij, ngroup
+!    type(int_array_type) :: i1, j1, startend
+
+    if((self%is_pair_grouped)) return
+
+    if (.not. (self%is_unique))  then
+      call self%sum_duplicates()
+    end if
+    if (self%nnz<1) then
+
+    else if (self%nnz==1) then
+      i=1
+      ii=self%ind%data(1,i)
+      ij=self%ind%data(2,i)
+      call self%pair_1list%push(ii)
+      call self%pair_2list%push(ij)
+      call self%pair_startend%push(1)
+      call self%pair_startend%push(2)
+    else
+      i=1
+      ii=self%ind%data(1,i)
+      ij=self%ind%data(2,i)
+      call self%pair_1list%push(ii)
+      call self%pair_2list%push(ij)
+      call self%pair_startend%push(i)
+      do i=2, self%nnz
+        ii=self%ind%data(1,i)
+        ij=self%ind%data(2,i)
+        if(ii == self%ind%data(1, i-1) .and. ij == self%ind%data(2, i-1)) then
+          cycle
+        else
+          call self%pair_1list%push(ii)
+          call self%pair_2list%push(ij)
+          call self%pair_startend%push(i)
+        end if
+      end do
+      call self%pair_startend%push(self%nnz+1)
+    end if
+    
+    self%is_pair_grouped = .true.
+
+  end subroutine group_by_pair
+
+
+  !-------------------------------------------------------------------!
   ! Get the indices of the dim'th dimension
   ! Input:
   !   dim: dimension
@@ -413,19 +487,32 @@ contains
   ! which returns a vecor
   ! res_r = \sum_ijk M_{ijkr} V_i V_j V_k
   ! i, j, k, r can be in any order.
-  subroutine vec_product4d(self, iv, veci, jv, vecj, kv, veck, rv, res)
+  subroutine vec_product4d(self, veci, vecj, kv, veck, rv, res)
     class(ndcoo_mat_t), intent(inout) :: self
     real(dp), intent(in) :: veci(:), vecj(:), veck(:)
-    integer ,intent(in) :: iv, jv, kv, rv               !
+    integer ,intent(in) :: kv, rv
     real(dp), intent(inout) :: res(:)
-    integer :: iind, iiv, ijv, ikv, irv
-    do iind =1 , self%nnz
-      iiv=self%ind%data(iv, iind)
-      ijv=self%ind%data(jv, iind)
-      ikv=self%ind%data(kv, iind)
-      irv=self%ind%data(rv, iind)
-      res(irv) = res(irv) + self%val%data(iind) * veci(iiv)*vecj(ijv)*veck(ikv)
-    end do
+
+    integer :: iind, iiv, ijv, ikv, irv, igroup, istart, iend
+    real(dp) :: scalprod
+
+    if(.not.(self%is_pair_grouped)) then
+      call self%group_by_pair()
+    endif
+ 
+    do igroup = 1, self%pair_1list%size
+      !precalculate scalar product of first and second columns for each group
+      istart=self%pair_startend%data(igroup)
+      iend=self%pair_startend%data(igroup+1)-1
+      iiv=self%pair_1list%data(igroup)
+      ijv=self%pair_2list%data(igroup)
+      scalprod=veci(iiv)*vecj(ijv)
+      do iind=istart, iend
+        ikv=self%ind%data(kv, iind)
+        irv=self%ind%data(rv, iind)
+        res(irv) = res(irv) + self%val%data(iind) * veck(ikv)* scalprod
+      end do
+    enddo
   end subroutine vec_product4d
 
 

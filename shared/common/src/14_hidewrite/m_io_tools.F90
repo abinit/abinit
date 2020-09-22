@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_tools
 !! NAME
 !!  m_io_tools
@@ -44,6 +43,7 @@ MODULE m_io_tools
  public :: isncfile           ! .TRUE. if we have a NETCDF file.
  public :: iomode_from_fname  ! Automatic selection of the IO mode based on the file extension.
  public :: iomode2str         ! Convert iomode to string
+ public :: enforce_fortran_io ! Set the value of enforce_fortran_io__
  public :: mvrecord           ! Moves forward or backward in a Fortran binary file by nn records.
  public :: open_file          ! Helper function to open a file in sequential mode with improved error handling.
  public :: close_unit         ! Helper function to close a Fortran unit with improved error handling.
@@ -91,6 +91,9 @@ MODULE m_io_tools
 
   integer,parameter :: IO_NO_AVAILABLE_UNIT  =-1   ! No units are available for Fortran I/O
   integer,parameter :: IO_FILE_NOT_ASSOCIATED=-2   ! File is not associated with any unit
+
+  ! Enforce IO_MODE_FORTRAN in iomode_from_fname
+  logical,save,protected :: enforce_fortran_io__ = .False.
 
 CONTAINS  !===========================================================
 !!***
@@ -240,22 +243,21 @@ subroutine delete_file(fname,ierr)
  logical :: exists
 ! *********************************************************************
 
- ierr=0
+ ierr = 0
 
- inquire(file=fname,exist=exists)
+ inquire(file=fname, exist=exists)
 
  if (.not.exists) then
-   ierr=111
+   ierr = 111
    write(std_out,*)" Asked to delete not existent file: ",TRIM(fname)
-   RETURN
+   return
  end if
 
  if (is_open_fname(fname)) then
    tmp_unt = get_unit_from_fname(fname)
    if (tmp_unt == IO_FILE_NOT_ASSOCIATED) then
     write(std_out,*) "File is opened but no associated unit found!"
-    ierr=112
-    RETURN
+    ierr = 112; return
    end if
    close(tmp_unt)
  else
@@ -263,8 +265,8 @@ subroutine delete_file(fname,ierr)
  end if
 
  ! Now close the file.
- open(unit=tmp_unt,file=trim(fname),status="OLD",iostat=ierr)
- if (ierr==0) close(unit=tmp_unt,status="DELETE",iostat=ierr)
+ open(unit=tmp_unt, file=trim(fname), status="OLD", iostat=ierr)
+ if (ierr==0) close(unit=tmp_unt, status="DELETE", iostat=ierr)
 
 end subroutine delete_file
 !!***
@@ -324,7 +326,7 @@ logical function is_open_unit(unit)
  integer,intent(in) :: unit
 ! *********************************************************************
 
- inquire(unit=unit,opened=is_open_unit)
+ inquire(unit=unit, opened=is_open_unit)
 
 end function is_open_unit
 !!***
@@ -902,12 +904,11 @@ end function isncfile
 !!
 !! SOURCE
 
-pure function iomode_from_fname(fname) result(iomode)
+pure integer function iomode_from_fname(fname) result(iomode)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: fname
- integer :: iomode
 
 ! *************************************************************************
 
@@ -919,9 +920,37 @@ pure function iomode_from_fname(fname) result(iomode)
 #else
    iomode = IO_MODE_FORTRAN
 #endif
+
+   if (enforce_fortran_io__) iomode = IO_MODE_FORTRAN
  end if
 
 end function iomode_from_fname
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_io_tools/enforce_fortran_io
+!! NAME
+!! enforce_fortran_io
+!!
+!! FUNCTION
+!!  Set the value of the enforce_fortran__ global variable.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine enforce_fortran_io(bool)
+
+!Arguments ------------------------------------
+!scalars
+ logical,intent(in) :: bool
+
+! *************************************************************************
+
+ enforce_fortran_io__ = bool
+
+end subroutine enforce_fortran_io
 !!***
 
 !----------------------------------------------------------------------

@@ -48,7 +48,7 @@ optcell =  2  # Relaxation of the cell (0 nothing,1 only acell (uniform), 2 acel
 #%% authors = M. M. Schmitt
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%        Impose p4mbm symmetr to relaxation with broyden algoritm and and effective potential in 
-#%%        mMultibinit
+#%%        Impose p4mbm symmetry to relaxation with Broyden algoritm and effective potential in 
+#%%        Multibinit
 #%% topics = LatticeModel,DynamicsMultibinit
 #%%<END TEST_INFO>

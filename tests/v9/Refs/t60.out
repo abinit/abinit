@@ -1,5 +1,5 @@
 
-.Version 9.1.5 of ABINIT 
+.Version 9.1.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 13 Jul 2020.
-- ( at 03h51 )
+.Starting date : Thu 13 Aug 2020.
+- ( at 17h45 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
@@ -208,6 +208,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
         boxcutmin      1.10000000E+00
         ddb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
+    eph_phwinfact1     1.10000000E+00
+    eph_phwinfact2     1.10000000E+00
+    eph_phwinfact3     1.10000000E+00
+    eph_phwinfact4     1.10000000E+00
+    eph_phwinfact5     1.10000000E+00
+    eph_phwinfact6     3.90000000E+00
+    eph_phwinfact7     1.10000000E+00
+    eph_phwinfact8     1.10000000E+00
+    eph_phwinfact9     1.10000000E+00
+    eph_phwinfact10    1.10000000E+00
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -467,11 +477,11 @@ meta: {optdriver: 7, eph_task: 4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -523,6 +533,22 @@ meta: {optdriver: 7, eph_task: 4, }
 
    2.47252491E-01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.026     3.173     3.366     5.170
+
 
 
  Number of bands in e-ph self-energy sum: 20
@@ -588,9 +614,22 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  QP_gap - KS_gap:   -0.183 (OTMS:   -0.235)
  
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -19.735  -19.856   -0.121   -0.165   -0.041    0.729   -0.734    0.569    0.000    0.000
+   2  -0.193   -0.075    0.118    0.190   -0.082    0.621   -0.646    0.836   19.542   19.781
+   3  -0.193   -0.075    0.118    0.190   -0.082    0.621   -0.646    0.836    0.000    0.000
+   4  -0.193   -0.075    0.118    0.190   -0.082    0.621   -0.646    0.836    0.000    0.000
+   5   8.342    8.219   -0.123   -0.126   -0.002    0.976   -0.007   -0.119    8.536    8.295
+   6  22.864   22.846   -0.017   -0.024   -0.041    0.718   -0.787    0.763   14.521   14.627
+   7  22.864   22.846   -0.017   -0.024   -0.041    0.718   -0.787    0.763    0.000    0.000
+   8  22.864   22.846   -0.017   -0.024   -0.041    0.718   -0.787    0.763    0.000    0.000
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ QP gap:    8.295 (OTMS:    8.220)
+ QP_gap - KS_gap:   -0.241 (OTMS:   -0.316)
+ 
+============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.234  -19.361   -0.127   -0.220   -0.137    0.578   -0.526    0.306    0.000    0.000
@@ -605,6 +644,22 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
  QP gap:   10.516 (OTMS:   10.537)
  QP_gap - KS_gap:    0.075 (OTMS:    0.095)
+ 
+============================================================================================
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -19.234  -19.368   -0.134   -0.243   -0.149    0.553   -0.805    0.562    0.000    0.000
+   2  -2.697   -2.497    0.200    0.227   -0.015    0.880   -0.589    0.816   16.537   16.871
+   3  -0.415   -0.548   -0.133   -0.155   -0.116    0.855   -0.917    0.762    2.282    1.950
+   4  -0.415   -0.548   -0.133   -0.155   -0.116    0.855   -0.917    0.762    0.000    0.000
+   5  10.027   10.004   -0.023   -0.024   -0.004    0.962   -0.095    0.071   10.441   10.551
+   6  15.827   15.796   -0.031    0.122   -0.961   -0.251   -0.632    0.755    5.800    5.792
+   7  17.971   18.286    0.315    0.402   -0.028    0.784    0.077    0.325    2.144    2.490
+   8  17.971   18.286    0.315    0.402   -0.028    0.784    0.077    0.325    0.000    0.000
+ 
+ KS gap:   10.441 (assuming bval:4 ==> bcond:5)
+ QP gap:   10.551 (OTMS:   10.573)
+ QP_gap - KS_gap:    0.110 (OTMS:    0.132)
  
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
@@ -622,6 +677,23 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
  QP gap:   15.387 (OTMS:   15.406)
  QP_gap - KS_gap:    0.229 (OTMS:    0.249)
+ 
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -18.981  -18.857    0.124    0.199   -0.076    0.622   -0.367    0.566    0.000    0.000
+   2  -3.149   -3.160   -0.011   -0.014   -0.027    0.808   -0.671    0.658   15.833   15.697
+   3  -1.171   -1.439   -0.268   -0.278   -0.034    0.965   -0.895    0.618    1.978    1.721
+   4  -1.171   -1.439   -0.268   -0.278   -0.034    0.965   -0.895    0.618    0.000    0.000
+   5  13.987   14.072    0.085    0.100   -0.019    0.843   -1.054    1.155   15.158   15.511
+   6  15.747   12.126   -3.620   -0.835   -0.804    4.337   -0.624   -0.211    1.760   -1.945
+   7  16.382   16.306   -0.076   -0.144   -0.093    0.530    0.049   -0.193    0.635    4.179
+   8  19.258   19.564    0.306    0.365   -0.025    0.839   -0.377    0.742    2.876    3.258
+   9  19.258   19.564    0.306    0.365   -0.025    0.839   -0.377    0.742    0.000    0.000
+ 
+ KS gap:   15.158 (assuming bval:4 ==> bcond:5)
+ QP gap:   15.511 (OTMS:   15.536)
+ QP_gap - KS_gap:    0.353 (OTMS:    0.378)
  
 ============================================================================================
 
@@ -688,11 +760,11 @@ meta: {optdriver: 7, eph_task: 5, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -784,11 +856,11 @@ meta: {optdriver: 7, eph_task: 4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -807,6 +879,22 @@ meta: {optdriver: 7, eph_task: 4, }
 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.026     3.173     3.366     5.170
+
 
 
  Number of bands in e-ph self-energy sum: 3
@@ -872,9 +960,22 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  QP_gap - KS_gap:   -0.213 (OTMS:   -0.316)
  
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -19.735  -19.743   -0.007   -0.007   -0.004    0.965   -0.673    0.665    0.000    0.000
+   2  -0.193    0.005    0.198    0.316   -0.124    0.626    0.316    0.000   19.542   19.747
+   3  -0.193    0.005    0.198    0.316   -0.124    0.626    0.316    0.000    0.000    0.000
+   4  -0.193    0.005    0.198    0.316   -0.124    0.626    0.316    0.000    0.000    0.000
+   5   8.342    8.268   -0.074   -0.075   -0.002    0.985    0.144   -0.220    8.536    8.264
+   6  22.864   22.866    0.002    0.002   -0.000    1.000    0.002   -0.000   14.521   14.597
+   7  22.864   22.866    0.002    0.002   -0.000    1.000    0.002   -0.000    0.000    0.000
+   8  22.864   22.866    0.002    0.002   -0.000    1.000    0.002   -0.000    0.000    0.000
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ QP gap:    8.264 (OTMS:    8.145)
+ QP_gap - KS_gap:   -0.272 (OTMS:   -0.391)
+ 
+============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.234  -19.240   -0.006   -0.006   -0.002    0.980   -0.354    0.348    0.000    0.000
@@ -889,6 +990,22 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
  QP gap:   13.302 (OTMS:   10.305)
  QP_gap - KS_gap:    2.861 (OTMS:   -0.136)
+ 
+============================================================================================
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -19.234  -19.237   -0.003   -0.003   -0.004    0.963   -0.685    0.682    0.000    0.000
+   2  -2.697   -2.990   -0.293   -0.275   -0.209    1.067   -0.275    0.000   16.537   16.247
+   3  -0.415   -1.714   -1.300    0.156   -0.288   -8.328    0.156   -0.000    2.282    1.275
+   4  -0.415   -1.714   -1.300    0.156   -0.288   -8.328    0.156   -0.000    0.000    0.000
+   5  10.027   10.022   -0.005   -0.005   -0.002    0.983    0.187   -0.191   10.441   11.736
+   6  15.827   15.831    0.004    0.004   -0.000    1.000    0.004   -0.000    5.800    5.809
+   7  17.971   17.979    0.008    0.008   -0.001    0.989    0.211   -0.203    2.144    2.148
+   8  17.971   17.979    0.008    0.008   -0.001    0.989    0.211   -0.203    0.000    0.000
+ 
+ KS gap:   10.441 (assuming bval:4 ==> bcond:5)
+ QP gap:   11.736 (OTMS:   10.281)
+ QP_gap - KS_gap:    1.295 (OTMS:   -0.161)
  
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
@@ -906,6 +1023,23 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
  QP gap:   15.179 (OTMS:   15.194)
  QP_gap - KS_gap:    0.021 (OTMS:    0.036)
+ 
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -18.981  -18.998   -0.017   -0.017   -0.004    0.962   -0.689    0.672    0.000    0.000
+   2  -3.149   -3.284   -0.135   -0.163   -0.022    0.827   -0.163    0.000   15.833   15.715
+   3  -1.171   -1.183   -0.012   -0.023   -0.151    0.538   -0.023   -0.000    1.978    2.100
+   4  -1.171   -1.183   -0.012   -0.023   -0.151    0.538   -0.023   -0.000    0.000    0.000
+   5  13.987   13.988    0.001    0.001   -0.000    1.000    0.001   -0.000   15.158   15.172
+   6  15.747   15.716   -0.031   -0.032   -0.002    0.985    0.258   -0.289    1.760    1.727
+   7  16.382   16.304   -0.078   -0.080   -0.001    0.986    0.254   -0.334    0.635    0.588
+   8  19.258   19.260    0.002    0.002   -0.000    1.000    0.002   -0.000    2.876    2.956
+   9  19.258   19.260    0.002    0.002   -0.000    1.000    0.002   -0.000    0.000    0.000
+ 
+ KS gap:   15.158 (assuming bval:4 ==> bcond:5)
+ QP gap:   15.172 (OTMS:   15.182)
+ QP_gap - KS_gap:    0.014 (OTMS:    0.024)
  
 ============================================================================================
 
@@ -973,11 +1107,11 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -996,6 +1130,22 @@ meta: {optdriver: 7, eph_task: -4, }
 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.026     3.173     3.366     5.170
+
 
 
  Number of bands in e-ph self-energy sum: 9
@@ -1060,9 +1210,20 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   1 -19.735    0.002    140.7    0.000
+   2  -0.193    0.001    241.9   19.542
+   3  -0.193    0.001    241.9    0.000
+   4  -0.193    0.001    241.9    0.000
+   5   8.342    0.000 999999.0    8.536
+   6  22.864    0.091      3.6   14.521
+   7  22.864    0.091      3.6    0.000
+   8  22.864    0.091      3.6    0.000
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1 -19.234    1.708      0.2    0.000
@@ -1077,13 +1238,27 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   1 -19.234    1.882      0.2    0.000
+   2  -2.697    0.097      3.4   16.537
+   3  -0.415    0.187      1.8    2.282
+   4  -0.415    0.187      1.8    0.000
+   5  10.027    0.047      7.0   10.441
+   6  15.827    0.208      1.6    5.800
+   7  17.971    0.888      0.4    2.144
+   8  17.971    0.888      0.4    0.000
+ 
+ KS gap:   10.441 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1 -18.981    0.000 999999.0    0.000
    2  -3.149    0.000   4359.5   15.833
    3  -1.171    0.117      2.8    1.978
    4  -1.171    0.117      2.8    0.000
-   5  13.987    0.005     67.8   15.158
+   5  13.987    0.005     67.5   15.158
    6  15.747    0.190      1.7    1.760
    7  16.382    0.102      3.2    0.635
    8  19.258    0.183      1.8    2.876
@@ -1092,74 +1267,21 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-
- Entering transport RTA computation driver.
-- Reading carrier lifetimes from: t60o_DS4_SIGEPH.nc
-
-
-
-  >>>> For spin  1
-   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
-
- Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
-
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
- Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 314
- From emin:  -0.2 to emax:   8.3 (eV)
- Number of k-points in the IBZ: 3
- edos%ief == 0 --> Cannot print quantities at the Fermi level.
-
-
- Transport (RTA) calculation results:
-
- Cartesian component of SERTA mobility tensor: xx
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            0.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
- Cartesian component of SERTA mobility tensor: yy
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            0.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
- Cartesian component of SERTA mobility tensor: zz
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            0.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
-
-
- Cartesian component of MRTA mobility tensor: xx
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            0.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
- Cartesian component of MRTA mobility tensor: yy
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            0.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
- Cartesian component of MRTA mobility tensor: zz
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            0.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
-
-
-
-- Writing RTA transport results to: t60o_DS4_RTA.nc
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   1 -18.981    0.061      5.4    0.000
+   2  -3.149    0.000   4130.8   15.833
+   3  -1.171    0.147      2.2    1.978
+   4  -1.171    0.147      2.2    0.000
+   5  13.987    0.007     47.3   15.158
+   6  15.747    0.273      1.2    1.760
+   7  16.382    0.146      2.3    0.635
+   8  19.258    0.280      1.2    2.876
+   9  19.258    0.280      1.2    0.000
+ 
+ KS gap:   15.158 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1224,11 +1346,11 @@ meta: {optdriver: 7, eph_task: -5, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -1320,11 +1442,11 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -1343,6 +1465,22 @@ meta: {optdriver: 7, eph_task: -4, }
 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.026     3.173     3.366     5.170
+
 
 
  Number of bands in e-ph self-energy sum: 4
@@ -1403,13 +1541,25 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2  -0.193    0.001    242.2    0.000
+   3  -0.193    0.001    242.2    0.000
+   4  -0.193    0.001    242.2    0.000
+   5   8.342    0.000 999999.0    8.536
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    3  -0.415    0.150      2.2    0.000
    4  -0.415    0.150      2.2    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   3  -0.415    0.185      1.8    0.000
+   4  -0.415    0.185      1.8    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -1417,13 +1567,11 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
@@ -1544,11 +1692,11 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -1567,6 +1715,22 @@ meta: {optdriver: 7, eph_task: -4, }
 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.026     3.173     3.366     5.170
+
 
 
  Number of bands in e-ph self-energy sum: 4
@@ -1627,13 +1791,25 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   2  -0.193    0.001    247.1    0.000
+   3  -0.193    0.001    247.1    0.000
+   4  -0.193    0.001    247.1    0.000
+   5   8.342    0.000 999999.0    8.536
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.415    0.147      2.2    0.000
-   4  -0.415    0.147      2.2    0.000
+   3  -0.415    0.140      2.4    0.000
+   4  -0.415    0.140      2.4    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   3  -0.415    0.166      2.0    0.000
+   4  -0.415    0.166      2.0    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -1641,13 +1817,11 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
@@ -1768,11 +1942,11 @@ meta: {optdriver: 7, eph_task: 4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -1791,6 +1965,22 @@ meta: {optdriver: 7, eph_task: 4, }
 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.026     3.173     3.366     5.170
+
 
 
  Number of bands in e-ph self-energy sum: 3
@@ -1856,40 +2046,86 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
  QP_gap - KS_gap:   -0.212 (OTMS:   -0.314)
  
 ============================================================================================
- No more than 1 temperatures are written to the main output file.
- Please use SIGEPH.nc file and AbiPy to analyze the results.
-
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -19.735  -19.743   -0.007   -0.008   -0.004    0.965   -0.673    0.665    0.000    0.000
+   2  -0.193    0.003    0.196    0.313   -0.124    0.628    0.313    0.000   19.542   19.746
+   3  -0.193    0.003    0.196    0.313   -0.124    0.628    0.313    0.000    0.000    0.000
+   4  -0.193    0.003    0.196    0.313   -0.124    0.628    0.313    0.000    0.000    0.000
+   5   8.342    8.269   -0.074   -0.075   -0.002    0.985    0.145   -0.220    8.536    8.266
+   6  22.864   22.866    0.002    0.002   -0.000    1.000    0.002   -0.000   14.521   14.597
+   7  22.864   22.866    0.002    0.002   -0.000    1.000    0.002   -0.000    0.000    0.000
+   8  22.864   22.866    0.002    0.002   -0.000    1.000    0.002   -0.000    0.000    0.000
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ QP gap:    8.266 (OTMS:    8.148)
+ QP_gap - KS_gap:   -0.270 (OTMS:   -0.388)
+ 
+============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.234  -19.240   -0.006   -0.006   -0.002    0.980   -0.355    0.348    0.000    0.000
-   2  -2.697   -2.964   -0.267   -0.240   -0.192    1.109   -0.240    0.000   16.537   16.276
-   3  -0.415   -4.443   -4.028    0.136   -0.248  -29.682    0.136   -0.000    2.282   -1.479
-   4  -0.415   -4.443   -4.028    0.136   -0.248  -29.682    0.136   -0.000    0.000    0.000
-   5  10.027   10.027   -0.000   -0.000   -0.001    0.991    0.096   -0.096   10.441   14.469
+   1 -19.234  -19.240   -0.006   -0.006   -0.002    0.981   -0.354    0.348    0.000    0.000
+   2  -2.697   -2.963   -0.266   -0.239   -0.191    1.112   -0.239    0.000   16.537   16.277
+   3  -0.415   -4.498   -4.083    0.136   -0.248  -30.011    0.136   -0.000    2.282   -1.535
+   4  -0.415   -4.498   -4.083    0.136   -0.248  -30.011    0.136   -0.000    0.000    0.000
+   5  10.027   10.026   -0.000   -0.000   -0.001    0.991    0.096   -0.096   10.441   14.524
    6  15.827   15.829    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.803
-   7  17.971   17.979    0.009    0.009   -0.001    0.994    0.110   -0.101    2.144    2.150
-   8  17.971   17.979    0.009    0.009   -0.001    0.994    0.110   -0.101    0.000    0.000
+   7  17.971   17.979    0.008    0.009   -0.001    0.994    0.110   -0.101    2.144    2.150
+   8  17.971   17.979    0.008    0.009   -0.001    0.994    0.110   -0.101    0.000    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
- QP gap:   14.469 (OTMS:   10.306)
- QP_gap - KS_gap:    4.028 (OTMS:   -0.136)
+ QP gap:   14.524 (OTMS:   10.305)
+ QP_gap - KS_gap:    4.083 (OTMS:   -0.136)
+ 
+============================================================================================
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -19.234  -19.236   -0.002   -0.002   -0.004    0.963   -0.685    0.682    0.000    0.000
+   2  -2.697   -2.987   -0.290   -0.271   -0.208    1.069   -0.271    0.000   16.537   16.249
+   3  -0.415   -2.024   -1.609    0.155   -0.283  -10.350    0.155   -0.000    2.282    0.964
+   4  -0.415   -2.024   -1.609    0.155   -0.283  -10.350    0.155   -0.000    0.000    0.000
+   5  10.027   10.022   -0.004   -0.004   -0.002    0.983    0.187   -0.191   10.441   12.046
+   6  15.827   15.831    0.004    0.004   -0.000    1.000    0.004   -0.000    5.800    5.808
+   7  17.971   17.979    0.008    0.009   -0.001    0.989    0.211   -0.203    2.144    2.149
+   8  17.971   17.979    0.008    0.009   -0.001    0.989    0.211   -0.203    0.000    0.000
+ 
+ KS gap:   10.441 (assuming bval:4 ==> bcond:5)
+ QP gap:   12.046 (OTMS:   10.282)
+ QP_gap - KS_gap:    1.604 (OTMS:   -0.160)
  
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -18.981  -18.997   -0.016   -0.016   -0.002    0.980   -0.358    0.342    0.000    0.000
    2  -3.149   -3.267   -0.118   -0.140   -0.020    0.843   -0.140    0.000   15.833   15.730
-   3  -1.171   -1.191   -0.020   -0.035   -0.116    0.580   -0.035   -0.000    1.978    2.076
-   4  -1.171   -1.191   -0.020   -0.035   -0.116    0.580   -0.035   -0.000    0.000    0.000
+   3  -1.171   -1.191   -0.020   -0.035   -0.116    0.579   -0.035   -0.000    1.978    2.075
+   4  -1.171   -1.191   -0.020   -0.035   -0.116    0.579   -0.035   -0.000    0.000    0.000
    5  13.987   13.988    0.001    0.001   -0.000    1.000    0.001   -0.000   15.158   15.179
    6  15.747   15.727   -0.020   -0.020   -0.001    0.992    0.132   -0.152    1.760    1.739
-   7  16.382   16.327   -0.056   -0.056   -0.001    0.993    0.127   -0.183    0.635    0.600
+   7  16.382   16.327   -0.055   -0.056   -0.001    0.993    0.127   -0.183    0.635    0.600
    8  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    2.876    2.933
    9  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
  
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
  QP gap:   15.179 (OTMS:   15.194)
  QP_gap - KS_gap:    0.021 (OTMS:    0.036)
+ 
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -18.981  -18.998   -0.017   -0.017   -0.004    0.962   -0.690    0.672    0.000    0.000
+   2  -3.149   -3.282   -0.133   -0.161   -0.022    0.827   -0.161    0.000   15.833   15.716
+   3  -1.171   -1.183   -0.012   -0.023   -0.148    0.536   -0.023   -0.000    1.978    2.099
+   4  -1.171   -1.183   -0.012   -0.023   -0.148    0.536   -0.023   -0.000    0.000    0.000
+   5  13.987   13.988    0.001    0.001   -0.000    1.000    0.001   -0.000   15.158   15.171
+   6  15.747   15.716   -0.031   -0.031   -0.002    0.985    0.258   -0.289    1.760    1.728
+   7  16.382   16.304   -0.078   -0.079   -0.001    0.986    0.255   -0.334    0.635    0.588
+   8  19.258   19.260    0.002    0.002   -0.000    1.000    0.002   -0.000    2.876    2.956
+   9  19.258   19.260    0.002    0.002   -0.000    1.000    0.002   -0.000    0.000    0.000
+ 
+ KS gap:   15.158 (assuming bval:4 ==> bcond:5)
+ QP gap:   15.171 (OTMS:   15.182)
+ QP_gap - KS_gap:    0.013 (OTMS:    0.024)
  
 ============================================================================================
 
@@ -1956,11 +2192,11 @@ meta: {optdriver: 7, eph_task: 15, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -2051,11 +2287,11 @@ meta: {optdriver: 7, eph_task: -15, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.243619E-17
+         1         2   -2.245748E-17    1.040868E+00    2.247876E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.243619E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.247876E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -2092,6 +2328,16 @@ meta: {optdriver: 7, eph_task: -15, }
         boxcutmin      1.10000000E+00
         ddb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
+    eph_phwinfact1     1.10000000E+00
+    eph_phwinfact2     1.10000000E+00
+    eph_phwinfact3     1.10000000E+00
+    eph_phwinfact4     1.10000000E+00
+    eph_phwinfact5     1.10000000E+00
+    eph_phwinfact6     3.90000000E+00
+    eph_phwinfact7     1.10000000E+00
+    eph_phwinfact8     1.10000000E+00
+    eph_phwinfact9     1.10000000E+00
+    eph_phwinfact10    1.10000000E+00
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -2391,10 +2637,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.9  wall=         21.4
+- Proc.   0 individual time (sec): cpu=         17.8  wall=         27.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.9  wall=         21.4
+.Delivered  23 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.8  wall=         27.5

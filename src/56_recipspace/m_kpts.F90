@@ -37,7 +37,7 @@ module m_kpts
  use m_time,           only : cwtime, cwtime_report
  use m_copy,           only : alloc_copy
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
- use m_fstrings,       only : sjoin, itoa, ltoa
+ use m_fstrings,       only : sjoin, itoa, ltoa, ktoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_symkpt,         only : symkpt, symkpt_new
@@ -140,7 +140,7 @@ end function kpts_timrev_from_kptopt
 !! SOURCE
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
+                                  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -487,8 +487,6 @@ end function symkchk
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
 !!  comm=MPI communicator.
-!!  [exit_loop]: if present and True, exit the loop over k-points in the sphere as soon as the lenght**2 of the
-!!    difference vector is smaller than tol12. Default: False
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT
@@ -522,14 +520,14 @@ end function symkchk
 !!
 !! SOURCE
 
-subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
-                  exit_loop, use_symrec) ! optional
+subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppoldbl, symafm, symmat, timrev, comm, &
+                  use_symrec) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt1,nkpt2,nsym,sppoldbl,timrev,comm
  real(dp),intent(out) :: dksqmax
- logical,optional,intent(in) :: use_symrec, exit_loop
+ logical,optional,intent(in) :: use_symrec
 !arrays
  integer,intent(in) :: symafm(nsym),symmat(3,3,nsym)
  integer,intent(out) :: indkk(nkpt2*sppoldbl,6)
@@ -702,7 +700,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
          ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
          do itimrev=0,timrev_used
            do isym=1,nsym_used
-           !do itimrev=0,timrev_used
 
              ! Select magnetic characteristic of symmetries
              if (isppol == 1 .and. symafm(isym) == -1) cycle
@@ -747,13 +744,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
                ! Note that in this condition, each coordinate is tested separately, without squaring.
                ! So, it is a much stronger condition than dksqmn < tol12
                if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done = 1
-
-               ! This line leads to a significant speedup for dense meshes but ~30 tests fail after this change.
-               if (present(exit_loop)) then
-                 if (exit_loop) then
-                   if (dksq < tol12) ikpt2_done = 1
-                 end if
-               end if
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
@@ -1404,7 +1394,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 #endif
 
  else if(kptopt==3)then
-   ABI_CALLOC(bz2ibz_smap, (6, nkpt_fullbz))
+   ABI_ICALLOC(bz2ibz_smap, (6, nkpt_fullbz))
    bz2ibz_smap(1,:) = [(ii,ii=1,nkpt_fullbz)]
    bz2ibz_smap(2,:) = 1 !isym
    nkpt_computed=nkpt_fullbz

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sort
 !! NAME
 !! m_sort
@@ -74,7 +73,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine sort_dp(n,list,iperm,tol)
+subroutine sort_dp(n, list, iperm, tol)
 
 !Arguments ------------------------------------
 !scalars

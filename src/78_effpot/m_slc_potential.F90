@@ -49,6 +49,7 @@ module  m_slc_potential
      type(ndcoo_mat_t) :: niuv_sc          ! parameter values linquad term
      type(ndcoo_mat_t) :: oiju_sc          ! parameter values quadlin term
      type(ndcoo_mat_t) :: tijuv_sc         ! parameter values biquad term
+     type(ndcoo_mat_t) :: tuvij_sc         ! same as tijuv but sorted differently
 
      ! magnetic moments
      real(dp), allocatable :: ms(:)
@@ -124,6 +125,7 @@ contains
     endif 
     if(self%has_biquad) then
       call self%tijuv_sc%finalize()
+      call self%tuvij_sc%finalize()
       call self%tuvref%finalize()
     endif
 
@@ -302,6 +304,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if(iam_master) then
        call self%tijuv_sc%add_entry(ind=[i,j,u,v],val=val)
+       call self%tuvij_sc%add_entry(ind=[u,v,i,j],val=val)
     endif
   end subroutine add_tijuv_term
 
@@ -356,7 +359,7 @@ contains
       endif
       if(self%has_biquad) then
         b1(:) = 0.0d0
-        call self%tijuv_sc%vec_product4d(1, sp, 3, disp, 4, disp, 2, b1)
+        call self%tuvij_sc%vec_product4d(disp, disp, 3, sp, 4, b1)
         bslc(:) = bslc(:) + beta*b1(:)
       endif
       btmp = reshape(bslc, (/ 3, self%nspin /))
@@ -426,7 +429,7 @@ contains
       if(self%has_biquad) then
         f1(:) = 0.0d0
         eterm = 0.0d0
-        call self%tijuv_sc%vec_product4d(1, sp, 2, sp, 3, disp, 4, f1)
+        call self%tijuv_sc%vec_product4d(sp, sp, 3, disp, 4, f1)
         fslc(:) = fslc(:) + beta*f1(:)
         eterm = - 0.5_dp*beta*dot_product(f1, disp)
         ! add contributions from reference spin structure

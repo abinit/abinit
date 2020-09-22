@@ -47,7 +47,7 @@ MODULE m_dtset
 !! FUNCTION
 !! The dataset_type structured datatype gather all the input variables,
 !! except those that are labelled NOT INTERNAL.
-!! For one dataset, it is initialized in driver.f, and will not change
+!! For one dataset, it is initialized in driver.F90, and will not change
 !! at all during the treatment of the dataset.
 !! The "evolving" input variables are also stored, with their
 !! name appended with _orig, to make clear that this is the original
@@ -74,7 +74,6 @@ MODULE m_dtset
 type, public :: dataset_type
 
 ! Integer
- integer :: iomode
  integer :: accuracy
  integer :: adpimd
  integer :: autoparal
@@ -235,6 +234,7 @@ type, public :: dataset_type
  integer :: imgwfstor
  integer :: inclvkb = 2
  integer :: intxc
+ integer :: iomode
  integer :: ionmov
  integer :: iprcel
  integer :: iprcfc
@@ -620,7 +620,8 @@ type, public :: dataset_type
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
  real(dp) :: dtion
- real(dp) :: dvdb_qcache_mb = 1024.0_dp
+ !real(dp) :: dvdb_qcache_mb = 1024.0_dp
+ real(dp) :: dvdb_qcache_mb = zero
  real(dp) :: dvdb_qdamp = 0.1_dp
  real(dp) :: ecut
  real(dp) :: ecuteps
@@ -863,7 +864,7 @@ type, public :: dataset_type
  real(dp) :: eph_fsmear = 0.01_dp
  real(dp) :: eph_fsewin = 0.04_dp
  real(dp) :: eph_ecutosc = zero
- !real(dp) :: eph_alpha_gmin = zero !sqrt(5)
+ real(dp) :: eph_phwinfact = 1.1_dp
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  integer :: eph_phrange(2) = 0
 
@@ -1387,7 +1388,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ecutosc        = dtin%eph_ecutosc
- !dtout%eph_alpha_gmin     = dtin%eph_alpha_gmin
+ dtout%eph_phwinfact      = dtin%eph_phwinfact
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
  dtout%eph_restart        = dtin%eph_restart
@@ -2937,6 +2938,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
    else
      if (ecutmax(3)>zero) dtsets(idtset)%ecut=ecutmax(3)
    end if
+
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
  end do
@@ -2949,14 +2951,14 @@ end subroutine macroin
 !! macroin2
 !!
 !! FUNCTION
-!! Treat "macro" input variables, that can :
+!! Treat "macro" input variables, that can:
 !! - initialize several other input variables for one given dataset
 !! - initialize several other input variables for a set of datasets.
 !! Note that the treatment of these different types of macro input variables is different.
 !! Documentation of such input variables is very important, including the
 !! proper echo, in the output file, of what such input variables have done.
 !!
-!! Important information : all the "macro" input variables should be properly
+!! Important information: all the "macro" input variables should be properly
 !! identifiable to be so, and it is proposed to make them start with the string "macro".
 !!
 !! INPUTS
@@ -2975,7 +2977,7 @@ end subroutine macroin
 !!
 !! SOURCE
 
-subroutine macroin2(dtsets,ndtset_alloc)
+subroutine macroin2(dtsets, ndtset_alloc)
 
 !Arguments ------------------------------------
 !scalars
@@ -2990,7 +2992,7 @@ subroutine macroin2(dtsets,ndtset_alloc)
 !******************************************************************
 
  do idtset=1,ndtset_alloc
-!  Set first PAW+U atom to perform atomic level shift
+   ! Set first PAW+U atom to perform atomic level shift
    if (dtsets(idtset)%typat(1)==0) cycle
    pawujat=dtsets(idtset)%pawujat
    pawujat=pawujat-count(dtsets(idtset)%lpawu( dtsets(idtset)%typat( 1:pawujat ))<0)
@@ -3003,6 +3005,15 @@ subroutine macroin2(dtsets,ndtset_alloc)
        dtsets(idtset)%atvshift(:,2,pawujat)=0_dp
      end if
    end if ! macro_uj
+
+   if (dtsets(idtset)%optdriver == RUNL_EPH) then
+     if (dtsets(idtset)%eph_stern == 1) then
+       ! Default values for the Sternheimer method in the EPH code if not provided.
+       if (dtsets(idtset)%tolwfr == zero) dtsets(idtset)%tolwfr = tol16
+       if (dtsets(idtset)%nline <= 4) dtsets(idtset)%nline = 100
+     end if
+   end if
+
  end do
 
 end subroutine macroin2
@@ -3095,11 +3106,11 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
- list_vars=trim(list_vars)//' eph_np_pqbks'
-  ! XG20200321, please provide testing for eph_np_pqbks
-  ! Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
-  ! and all the tests in the paral and mpiio directory are done with a single input file
-  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
+ ! XG20200321, please provide testing for eph_np_pqbks
+ ! MG: Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
+ ! and all the tests in the paral and mpiio directory are done with a single input file
+ ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
+ list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
@@ -3158,7 +3169,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' kberry kpt kptbounds kptgw'
  list_vars=trim(list_vars)//' kptnrm kptopt kptrlatt kptrlen kssform'
 !L
- list_vars=trim(list_vars)//' latt_friction latt_taut latt_taup latt_compressibility latt_mask'
+ list_vars=trim(list_vars)//' latt_friction latt_taut'
+! list_vars=trim(list_vars)//' latt_taup latt_compressibility latt_mask'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
  list_vars=trim(list_vars)//' lw_flexo lw_qdrpl'
@@ -3243,7 +3255,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' slc_coupling'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
- list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
+ !list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
+ list_vars=trim(list_vars)//' spin_calc_thermo_obs'
  list_vars=trim(list_vars)//' spin_damping'
  list_vars=trim(list_vars)//' spin_dipdip spin_dt spin_dynamics '
  list_vars=trim(list_vars)//' spin_init_orientation spin_init_qpoint spin_init_rotate_axis spin_init_state'
@@ -3251,8 +3264,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spin_n1l spin_n2l spin_projection_qpoint'
  list_vars=trim(list_vars)//' spin_sia_add spin_sia_k1amp spin_sia_k1dir'
  list_vars=trim(list_vars)//' spin_temperature spin_temperature_end'
- list_vars=trim(list_vars)//' spin_temperature_nstep spin_temperature_start spin_tolavg'
- list_vars=trim(list_vars)//' spin_tolvar spin_var_temperature spin_write_traj'
+ list_vars=trim(list_vars)//' spin_temperature_nstep spin_temperature_start'
+ list_vars=trim(list_vars)//' spin_tolavg spin_tolvar'
+ list_vars=trim(list_vars)//' spin_var_temperature spin_write_traj'
  list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'

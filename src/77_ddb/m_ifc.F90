@@ -171,7 +171,7 @@ MODULE m_ifc
 
    real(dp),allocatable :: dyewq0(:,:,:)
      ! dyewq0(3,3,natom)
-     ! Atomic self-interaction correction to the dynamical matrix (only when dipdip=1).
+     ! Atomic self-interaction correction to the dynamical matrix (only when dipdip = 1).
 
    real(dp),allocatable :: zeff(:,:,:)
      ! zeff(3,3,natom)
@@ -198,7 +198,7 @@ MODULE m_ifc
    real(dp),allocatable :: dynmat(:,:,:,:,:,:)
      ! dynmat(2,3,natom,3,natom,nqbz))
      ! dynamical matrices relative to the q points of the B.Z. sampling
-     ! Note that the long-range dip-dip part has been removed if dipdip=1
+     ! Note that the long-range dip-dip part has been removed if dipdip = 1
      ! Moreover the array is multiplied by a phase shift in mkifc9.
 
    !real(dp),allocatable :: dynmat_lr(:,:,:,:,:,:)
@@ -426,7 +426,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%rprim = ddb%rprim
  Ifc%gprim = ddb%gprim
  Ifc%acell = ddb%acell
- Ifc%ewald_option = 0; if (dipdip<0) Ifc%ewald_option = 1 !HM TODO: expose this in the init?
+ Ifc%ewald_option = 0; if (dipdip < 0) Ifc%ewald_option = 1 !HM TODO: expose this in the init?
 
  ! Check if the rprim are coherent with the choice used in the interatomic forces generation
  call chkrp9(Ifc%brav,rprim)
@@ -439,10 +439,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
    if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-               Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+               Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
    else
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-               Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
+               Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option)
    end if
 
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
@@ -541,10 +541,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      sumg0=0
      if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-                 Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+                 Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
      else
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-                 Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
+                 Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option)
      end if
      call q0dy3_apply(natom,dyewq0,dyew)
      plus=0
@@ -629,7 +629,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! In the case of effective potential, we need to keep all the points
  Ifc%nrpt = 0
  do irpt=1,ifc_tmp%nrpt
-   if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) Ifc%nrpt = Ifc%nrpt+1
+   if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) Ifc%nrpt = Ifc%nrpt + 1
  end do
 
  ABI_CALLOC(Ifc%atmfrc,(3,natom,3,natom,Ifc%nrpt))
@@ -926,7 +926,7 @@ end subroutine ifc_print
 !!  phfrq(3*natom) = Phonon frequencies in Hartree
 !!  displ_cart(2,3,natom,3*natom) = Phonon displacement in Cartesian coordinates
 !!  [out_d2cart(2,3,3*natom,3,3*natom)] = The (interpolated) dynamical matrix for this q-point
-!!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix in Cartesian coords..
+!!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix in Cartesian coords.
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
@@ -1102,7 +1102,7 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
 
  if (ifc%dipdip == 1.or.ifc%dipquad == 1.or.ifc%quadquad == 1) then
    ! Add the gradient of the non-analytical part.
-   ! Note that we dddq is in cartesian cordinates.
+   ! Note that dddq is in cartesian cordinates.
    ! For the time being, the gradient is computed with finite difference and step hh.
    ! TODO: should generalize ewald9 to compute dq.
    !enough = enough + 1
@@ -2015,7 +2015,8 @@ end subroutine ifc_write
 !! OUTPUT
 !! rsiaf(3,3,ifcout)=list of real space IFCs
 !! sriaf(3,3,ifcout)=list of the short range part of the real space IFCs
-!! vect(3,3,ifcout)=base vectors for local coordinates (longitudinal/transverse
+!! vect(3,3,ifcout)=base vectors for local coordinates (longitudinal/transverse), if ifc_getiaf is able to find
+!!   a third atom not aligned with the two atoms characterizing the IFC. If no, the second and third vectors are set to zero.
 !! indngb(ifcout)=indices in the unit cell of the neighbouring atoms
 !! posngb(3,ifcout)=position of the neighbouring atoms in cartesian coordinates
 !! output file
@@ -2100,20 +2101,22 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
    end do
    if(flag==0)then
      write(message, '(3a)' )&
-&     'Unable to find a third atom not aligned',ch10,&
-&     'with the two selected ones.'
-     MSG_BUG(message)
-   end if
-   vect2(1)=work(1)/scprod**0.5
-   vect2(2)=work(2)/scprod**0.5
-   vect2(3)=work(3)/scprod**0.5
-   vect3(1)=vect1(2)*vect2(3)-vect1(3)*vect2(2)
-   vect3(2)=vect1(3)*vect2(1)-vect1(1)*vect2(3)
-   vect3(3)=vect1(1)*vect2(2)-vect1(2)*vect2(1)
-   if (iout > 0) then
-     write(iout, '(a)' )' Third atom defining local coordinates : '
-     write(iout, '(a,i4,a,i4)' )'     ib = ',ib,'   irpt = ',irpt
-   end if
+&     'Unable to find a third atom not aligned with the two selected ones.',ch10,&
+&     'The local analysis (longitudinal/transverse) will not be done. The two transverse vectors are set to zero.'
+     MSG_WARNING(message)
+     vect2(:)=zero ; vect3(:)=zero
+   else
+     vect2(1)=work(1)/scprod**0.5
+     vect2(2)=work(2)/scprod**0.5
+     vect2(3)=work(3)/scprod**0.5
+     vect3(1)=vect1(2)*vect2(3)-vect1(3)*vect2(2)
+     vect3(2)=vect1(3)*vect2(1)-vect1(1)*vect2(3)
+     vect3(3)=vect1(1)*vect2(2)-vect1(2)*vect2(1)
+     if (iout > 0) then
+       write(iout, '(a)' )' Third atom defining local coordinates : '
+       write(iout, '(a,i4,a,i4)' )'     ib = ',ib,'   irpt = ',irpt
+     end if
+   endif 
  end if
 
  ! Analysis and output of force constants, ordered with respect to the distance from atom ia
@@ -2161,21 +2164,23 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
        if (iout > 0) then
          write(iout, '(a,f9.5)' ) '  Trace         ',trace1+tol10
        end if
-       if(ii/=1)then
-         call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
-       end if
-       if (iout > 0) then
-         write(iout, '(a)' )' Transformation to local coordinates '
-         write(iout, '(a,3f16.6)' ) ' First  local vector :',vect1
-         write(iout, '(a,3f16.6)' ) ' Second local vector :',vect2
-         write(iout, '(a,3f16.6)' ) ' Third  local vector :',vect3
-       end if
-       call ifclo9(rsiaf(:,:,ii),ifcloc,vect1,vect2,vect3)
-       if (iout > 0) then
-         do nu=1,3
-           write(iout, '(1x,3f9.5)' )(ifcloc(mu,nu)+tol10,mu=1,3)
-         end do
-       end if
+       if(flag==1)then
+         if(ii/=1)then
+           call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
+         end if
+         if (iout > 0) then
+           write(iout, '(a)' )' Transformation to local coordinates '
+           write(iout, '(a,3f16.6)' ) ' First  local vector :',vect1
+           write(iout, '(a,3f16.6)' ) ' Second local vector :',vect2
+           write(iout, '(a,3f16.6)' ) ' Third  local vector :',vect3
+         end if
+         call ifclo9(rsiaf(:,:,ii),ifcloc,vect1,vect2,vect3)
+         if (iout > 0) then
+           do nu=1,3
+             write(iout, '(1x,3f9.5)' )(ifcloc(mu,nu)+tol10,mu=1,3)
+           end do
+         end if
+       endif ! flag==1
 
        vect(:,1,ii) = vect1
        vect(:,2,ii) = vect2
@@ -2185,11 +2190,10 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
 
    else if(Ifc%dipdip==1)then
 
-!DEBUG
-!    write(iout,'(a)')
-!    write(iout,'(a)')' Enter dipdip section, for debugging'
-!    write(iout,'(a)')
-!ENDDEBUG
+     !write(iout,'(a)')
+     !write(iout,'(a)')' Enter dipdip section, for debugging'
+     !write(iout,'(a)')
+
      ! Get the Coulomb part
      do jj=1,3
        rdiff(jj)=ra(jj)-posngb(jj,ii)
@@ -2274,37 +2278,39 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
          write(iout,'(3(f9.5,17x))')1.0,trace2/trace1+tol10,trace3/trace1+tol10 !
        end if
 
-       if(ii/=1)then
-         call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
-       end if
-       if (iout > 0) then
-         write(iout, '(a)' )' Transformation to local coordinates '
-         write(iout, '(a,3f16.6)' )' First  local vector :',vect1
-         write(iout, '(a,3f16.6)' )' Second local vector :',vect2
-         write(iout, '(a,3f16.6)' )' Third  local vector :',vect3
-       end if
-       call ifclo9(rsiaf(:,:,ii),rsloc,vect1,vect2,vect3)
-       call ifclo9(ewiaf1,ewloc,vect1,vect2,vect3)
-       call ifclo9(sriaf(:,:,ii),srloc,vect1,vect2,vect3)
-       if (iout > 0) then
-         do nu=1,3
-           write(iout, '(1x,3(3f9.5,1x))' )&
-&           (rsloc(mu,nu)+tol10,mu=1,3),&
-&           (ewloc(mu,nu)+tol10,mu=1,3),&
-&           (srloc(mu,nu)+tol10,mu=1,3)
-         end do
+       if(flag==1)then
          if(ii/=1)then
-           write(iout, '(a)' )' Ratio with respect to the longitudinal ifc'
-         else
-           write(iout, '(a)' )' Ratio with respect to the (1,1) element'
+           call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
          end if
-         do nu=1,3
-           write(iout, '(1x,3(3f9.5,1x))' )&
-&           (rsloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
-&           (ewloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
-&           (srloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3)
-         end do
-       end if
+         if (iout > 0) then
+           write(iout, '(a)' )' Transformation to local coordinates '
+           write(iout, '(a,3f16.6)' )' First  local vector :',vect1
+           write(iout, '(a,3f16.6)' )' Second local vector :',vect2
+           write(iout, '(a,3f16.6)' )' Third  local vector :',vect3
+         end if
+         call ifclo9(rsiaf(:,:,ii),rsloc,vect1,vect2,vect3)
+         call ifclo9(ewiaf1,ewloc,vect1,vect2,vect3)
+         call ifclo9(sriaf(:,:,ii),srloc,vect1,vect2,vect3)
+         if (iout > 0) then
+           do nu=1,3
+             write(iout, '(1x,3(3f9.5,1x))' )&
+&             (rsloc(mu,nu)+tol10,mu=1,3),&
+&             (ewloc(mu,nu)+tol10,mu=1,3),&
+&             (srloc(mu,nu)+tol10,mu=1,3)
+           end do
+           if(ii/=1)then
+             write(iout, '(a)' )' Ratio with respect to the longitudinal ifc'
+           else
+             write(iout, '(a)' )' Ratio with respect to the (1,1) element'
+           end if
+           do nu=1,3
+             write(iout, '(1x,3(3f9.5,1x))' )&
+&             (rsloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
+&             (ewloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
+&             (srloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3)
+           end do
+         end if
+       endif ! flag==1
 
        vect(:,1,ii) = vect1
        vect(:,2,ii) = vect2
@@ -2742,7 +2748,7 @@ end subroutine ifc_printbxsf
 !! SOURCE
 
 subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
-&  qnrml2, ncid, phfrq2l, polarity2l) ! optional arguments
+                                     qnrml2, ncid, phfrq2l, polarity2l) ! optional arguments
 
 !Arguments ------------------------------------
  integer,intent(in) :: nph2l

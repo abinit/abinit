@@ -33,7 +33,7 @@ latt_friction=0.1
 #%% authors = X. He 
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read netcdf and run lattice dynamics using Langevin NVT (dynamics=102)
+#%%   Read netcdf and run lattice dynamics using Langevin NVT (dynamics=102)
 #%%   need to run multibinit --F03 to use the new implementation.
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.

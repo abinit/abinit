@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_htetra
 !! NAME
 !! m_htetra
@@ -877,7 +876,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  integer function compute_hash(tetra,t) result(ihash)
    class(htetra_t),intent(in) :: tetra
    integer,intent(in) :: t(4)
-   ihash = mod(sum(t),tetra%nbuckets)+1
+   ihash = mod(sum(t), tetra%nbuckets) + 1
    ! TODO: should use a more general hash function that supports more buckets
    ! Something like:
    ! id = t(1)*nk3+t(2)*nk2+t(3)*nk1+t(4)
@@ -1289,7 +1288,6 @@ pure subroutine get_onetetra_blochl(eig, energies, nene, bcorr, tweight, dweight
      exit
    end if
 
-   !
    !  if we have a fully degenerate tetrahedron,
    !  1) the tweight is a Heaviside (step) function, which is correct above, but
    !  2) the dweight should contain a Dirac function
@@ -1299,13 +1297,12 @@ pure subroutine get_onetetra_blochl(eig, energies, nene, bcorr, tweight, dweight
 end subroutine get_onetetra_blochl
 !!***
 
-!!****f* m_htetra/get_ontetra_lambinvigneron
+!!****f* m_htetra/get_onetetra_lambinvigneron
 !! NAME
-!! get_ontetra_lambinvigneron
+!! get_onetetra_lambinvigneron
 !!
 !! FUNCTION
-!!  Compute the complex weights according to:
-!!  P. Lambin and J.P. Vigneron, Phys. Rev. B 29, 3430 (1984)
+!!  Compute the complex weights according to: P. Lambin and J.P. Vigneron, Phys. Rev. B 29, 3430 (1984)
 !!  This routine is adapted from tdep where it was implemented
 !!  by Olle Hellman, all credits go to him
 !!
@@ -1319,17 +1316,24 @@ end subroutine get_onetetra_blochl
 !!
 !! SOURCE
 
-pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
+!pure
+subroutine get_onetetra_lambinvigneron(eig, z, cw)
+
     ! dispersion values at the corners of the tetrahedron
     real(dp), intent(in) :: eig(4)
-    ! energy to evaulate the weights at
+    ! energy to evaluate the weights at
     complex(dp), intent(in) :: z
     ! complex weights
     complex(dp), intent(out) :: cw(4)
     complex(dp) :: EZ1,EZ2,EZ3,EZ4
+    real(dp) :: tol = tol14
+    !real(dp) :: tol = tol10
+    !real(dp) :: tol = tol6
     real(dp) :: Emin,Emax,Zdist
     real(dp) :: E12,E13,E14,E23,E24,E34
     real(dp) :: a,b,c,d,e,f
+    complex(dp) zmE(4), verli(4) !, verm(4)
+    !integer :: ii, jj
 
     cw = zero
 
@@ -1338,6 +1342,7 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
     Emax=eig(4)
 
     ! First the complex energy differences
+    zmE = z - eig(:)
     EZ1=z-eig(1)
     EZ2=z-eig(2)
     EZ3=z-eig(3)
@@ -1357,40 +1362,69 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
     E23=eig(3)-eig(2)
     E24=eig(4)-eig(2)
     E34=eig(4)-eig(3)
-    a=zero; if ( E12 .gt. tol14 ) a=one/E12
-    b=zero; if ( E13 .gt. tol14 ) b=one/E13
-    c=zero; if ( E14 .gt. tol14 ) c=one/E14
-    d=zero; if ( E23 .gt. tol14 ) d=one/E23
-    e=zero; if ( E24 .gt. tol14 ) e=one/E24
-    f=zero; if ( E34 .gt. tol14 ) f=one/E34
+    a=zero; if ( E12 .gt. tol ) a=one/E12
+    b=zero; if ( E13 .gt. tol ) b=one/E13
+    c=zero; if ( E14 .gt. tol ) c=one/E14
+    d=zero; if ( E23 .gt. tol ) d=one/E23
+    e=zero; if ( E24 .gt. tol ) e=one/E24
+    f=zero; if ( E34 .gt. tol ) f=one/E34
 
     ! Now get the actual weights
     ! e1=e2=e3=e4
-    if ( E12+E23+E34 .lt. tol14 ) then
+    if ( E12+E23+E34 .lt. tol ) then
+#if 0
+        !print *, "e1=e2=e3=e4"
         cw(1)=0.25_dp/EZ1
         cw(2)=0.25_dp/EZ2
         cw(3)=0.25_dp/EZ3
         cw(4)=0.25_dp/EZ4
-    !    e2=e3=e4
-    elseif ( E23+E34 .lt. tol14 ) then
+#else
+        call SIM0TWOI(cw, VERLI, z-eig)
+#endif
+    !    e2=e3=e4  ! diff wrt simteta
+    elseif ( E23+E34 .lt. tol ) then
+#if 0
+        !print *, "e2=e3=e4"
         cw(1)=-a - (3*a**2*EZ2)*half + 3*a**3*EZ1*EZ2 + 3*a**4*EZ1**2*EZ2*Log(EZ2/EZ1)
         cw(2)=-a - (3*a**2*EZ2)*half + 3*a**3*EZ1*EZ2 + 3*a**4*EZ1**2*EZ2*Log(EZ2/EZ1)
         cw(3)=-a - (3*a**2*EZ2)*half + 3*a**3*EZ1*EZ2 + 3*a**4*EZ1**2*EZ2*Log(EZ2/EZ1)
         cw(4)=-a*third + (a**2*EZ1)*half - a**3*EZ1**2 + a**4*EZ1**3*Log(EZ2/EZ1)
+#else
+        call SIM0TWOI(cw, VERLI, z-eig)
+#endif
+
     ! e1=e2=e3
-    elseif ( E12+E23 .lt. tol14 ) then
+    elseif ( E12+E23 .lt. tol ) then
+#if 0
+        !print *, "e1=e2=e3" ! diff wrt simteta
         cw(1)=f*third - (EZ4*f**2)*half + EZ4**2*f**3 + EZ4**3*f**4*Log(EZ4/EZ3)
         cw(2)=f*third - (EZ4*f**2)*half + EZ4**2*f**3 + EZ4**3*f**4*Log(EZ4/EZ3)
         cw(3)=f*third - (EZ4*f**2)*half + EZ4**2*f**3 + EZ4**3*f**4*Log(EZ4/EZ3)
         cw(4)=-f + (3*EZ3*f**2)*half - 3*EZ3*EZ4*f**3 + 3*EZ3*EZ4**2*f**4*Log(EZ3/EZ4)
+#else
+        call SIM0TWOI(cw, VERLI, z-eig)
+#endif
     ! e1=e2 e3=e4
-    elseif ( E12+E34 .lt. tol14 ) then
+    elseif ( E12+E34 .lt. tol ) then
+#if 0
+        !print *, "e1=e2 e3=e4"    ! FIXME This is Buggy, does not work even with parabolic dispersion
         cw(1)=-d - (3*d**2*EZ2)*half + 3*d**3*EZ2*EZ3 + 3*d**4*EZ2*EZ3**2*Log(EZ2/EZ3)
         cw(2)=-d - (3*d**2*EZ2)*half + 3*d**3*EZ2*EZ3 + 3*d**4*EZ2*EZ3**2*Log(EZ2/EZ3)
         cw(3)=d - (3*d**2*EZ3)*half - 3*d**3*EZ2*EZ3 + 3*d**4*EZ2**2*EZ3*Log(EZ3/EZ2)
         cw(4)=d - (3*d**2*EZ3)*half - 3*d**3*EZ2*EZ3 + 3*d**4*EZ2**2*EZ3*Log(EZ3/EZ2)
+#else
+        !cw(1) = nine * EZ3**2 * EZ2 / E23**4 * log(EZ2/EZ3) * EZ2 * (EZ3 -E23)/E23**3 - one/E23
+        !cw(2) = cw(1)
+        !cw(3) = nine * EZ2**2 * EZ3 / E23**4 * log(EZ3/EZ2) * EZ3 * (EZ2 +E23)/E23**3 + one/E23
+        !cw(4) = cw(3)
+        call SIM0TWOI(cw, VERLI, z-eig)
+        !cw = zero
+#endif
+
     !       e3=e4
-    elseif ( E34 .lt. tol14 ) then
+    elseif ( E34 .lt. tol ) then
+        !print *, "e3=e4"
+#if 0
         cw(1)=-(a*b**2*EZ1**2*(-1 + (a*EZ2 + 2*b*EZ3)*Log(EZ1))) + a**2*d**2*EZ2**3*Log(EZ2) - &
                 b**2*d*EZ3**2*(1 + (2*b*EZ1 + d*EZ2)*Log(EZ3))
         cw(2)=a**2*b**2*EZ1**3*Log(EZ1) - a*d**2*EZ2**2*(1 + (a*EZ1 - 2*d*EZ3)*Log(EZ2)) - &
@@ -1399,8 +1433,13 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
              (b**2*EZ1**2 + b*d*EZ1*EZ2 + d**2*EZ2**2)*Log(EZ3))
         cw(4)=a*b**3*EZ1**3*Log(EZ1) - a*d**3*EZ2**3*Log(EZ2) + b*d*EZ3*(half + b*EZ1 + d*EZ2 + &
              (b**2*EZ1**2 + b*d*EZ1*EZ2 + d**2*EZ2**2)*Log(EZ3))
+#else
+        call SIM0TWOI(cw, VERLI, z-eig)
+#endif
     !    e2=e3
-    elseif ( E23 .lt. tol14 ) then
+    elseif ( E23 .lt. tol ) then
+#if 0
+        !print *, "e2=e3"
         cw(1)=-(a**2*c*EZ1**2*(-1 + (2*a*EZ2 + c*EZ4)*Log(EZ1))) + &
                 a**2*e*EZ2**2*(1 + (2*a*EZ1 - e*EZ4)*Log(EZ2)) + c**2*e**2*EZ4**3*Log(EZ4)
         cw(2)=a**3*c*EZ1**3*Log(EZ1) - &
@@ -1409,8 +1448,14 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
               a*e*EZ2*(half + a*EZ1 - e*EZ4 + (a**2*EZ1**2 - a*e*EZ1*EZ4 + e**2*EZ4**2)*Log(EZ2)) + c*e**3*EZ4**3*Log(EZ4)
         cw(4)=a**2*c**2*EZ1**3*Log(EZ1) - &
               a*e**2*EZ2**2*(1 + (a*EZ1 - 2*e*EZ4)*Log(EZ2)) - c*e**2*EZ4**2*(1 + (c*EZ1 + 2*e*EZ2)*Log(EZ4))
+#else
+        call SIM0TWOI(cw, VERLI, z-eig)
+#endif
+
     ! e1=e2
-    elseif ( E12 .lt. tol14 ) then
+    elseif ( E12 .lt. tol ) then
+        !print *, "e1=e2"
+#if 0
         cw(1)=b*c*EZ1*(half - b*EZ3 - c*EZ4 + (b**2*EZ3**2 + b*c*EZ3*EZ4 + c**2*EZ4**2)*Log(EZ1)) - &
               b**3*EZ3**3*f*Log(EZ3) + c**3*EZ4**3*f*Log(EZ4)
         cw(2)=b*c*EZ1*(half - b*EZ3 - c*EZ4 + (b**2*EZ3**2 + b*c*EZ3*EZ4 + c**2*EZ4**2)*Log(EZ1)) - &
@@ -1419,18 +1464,46 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
                 b**2*EZ3**2*f*(1 + (2*b*EZ1 - EZ4*f)*Log(EZ3)) + c**2*EZ4**3*f**2*Log(EZ4)
         cw(4)=-(b*c**2*EZ1**2*(-1 + (b*EZ3 + 2*c*EZ4)*Log(EZ1))) + &
                 b**2*EZ3**3*f**2*Log(EZ3) - c**2*EZ4**2*f*(1 + (2*c*EZ1 + EZ3*f)*Log(EZ4))
+#else
+        call SIM0TWOI(cw, VERLI, z-eig)
+#endif
     ! e1<e2<e3<e4
     else
+        !print *, "e1<e2<e3<e4"
+#if 0
         cw(1)=a**2*d*e*EZ2**3*Log(EZ2/EZ1) - b**2*d*EZ3**3*f*Log(EZ3/EZ1) + c*(a*b*EZ1**2 + c*e*EZ4**3*f*Log(EZ4/EZ1))
         cw(2)=a**2*b*c*EZ1**3*Log(EZ1/EZ2) - b*d**2*EZ3**3*f*Log(EZ3/EZ2) + e*(-(a*d*EZ2**2) + c*e*EZ4**3*f*Log(EZ4/EZ2))
         cw(3)=a*b**2*c*EZ1**3*Log(EZ1/EZ3) - a*d**2*e*EZ2**3*Log(EZ2/EZ3) + f*(b*d*EZ3**2 + c*e*EZ4**3*f*Log(EZ4/EZ3))
         cw(4)=a*b*c**2*EZ1**3*Log(EZ1/EZ4) - a*d*e**2*EZ2**3*Log(EZ2/EZ4) + f*(-(c*e*EZ4**2) + b*d*EZ3**3*f*Log(EZ3/EZ4))
+#else
+        !do ii=1,4
+        !  cw(ii) = zme(ii) ** 2 / prod_wo(ii)
+        !  do jj=1,4
+        !    if (jj == ii) cycle
+        !    cw(ii) = cw(ii) + (zme(jj)**3 / prod_wo(jj) * log(zme(jj) / zme(ii)) / (eig(ii) - eig(jj)))
+        !  end do
+        !end do
+
+        call SIM0TWOI(cw, VERLI, z-eig)
+#endif
     endif
 
     ! HM:check this
-    cw = cw * two
+    !cw = cw * two
 
-end subroutine get_ontetra_lambinvigneron
+ contains
+ pure real(dp) function prod_wo(ii)
+    integer,intent(in) :: ii
+    integer  :: kk
+
+    prod_wo = one
+    do kk=1,4
+       if (kk == ii) cycle
+       prod_wo = prod_wo * (eig(kk) - eig(ii))
+    end do
+ end function prod_wo
+
+end subroutine get_onetetra_lambinvigneron
 !!***
 
 !!****f* m_htetra/get_ontetratra_lambinvigneron_imag
@@ -1453,7 +1526,7 @@ end subroutine get_ontetra_lambinvigneron
 !!
 !! SOURCE
 
-pure subroutine get_ontetetra_lambinvigneron_imag(eig,energies,nene,wt)
+pure subroutine get_onetetetra_lambinvigneron_imag(eig, energies, nene, wt)
 
  ! dispersion values at the corners of the tetrahedron
  real(dp), intent(in), dimension(4) :: eig
@@ -1551,7 +1624,7 @@ pure subroutine get_ontetetra_lambinvigneron_imag(eig,energies,nene,wt)
  end do
  wt = wt*4.0_dp
 
-end subroutine get_ontetetra_lambinvigneron_imag
+end subroutine get_onetetetra_lambinvigneron_imag
 !!***
 
 !----------------------------------------------------------------------
@@ -1617,8 +1690,8 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
  tetra_total = tetra%tetra_total(ik_ibz)
  do itetra=1,tetra_count
 
-   call htetra_get_ibz(tetra,ik_ibz,itetra,tetra_mibz)
-   tweight = one*tetra_mibz(0)/tetra_total
+   call htetra_get_ibz(tetra, ik_ibz, itetra, tetra_mibz)
+   tweight = one*tetra_mibz(0) / tetra_total
    do isummit=1,4
      ! Get mapping of each summit to eig_ibz
      ind_ibz(isummit) = tetra_mibz(isummit)
@@ -1626,7 +1699,6 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
    end do
 
    ! Sort energies before calling get_onetetra_blochl
-   !call sort_tetra(4, eig, ind_ibz, tol14)
    call sort_4tetra(eig, ind_ibz)
 
    ! HM: Here we should only compute what we will use!
@@ -1634,7 +1706,7 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
    case(0:1)
      call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
    case(2)
-     call get_ontetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
+     call get_onetetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
      tweight_tmp = zero
    end select
 
@@ -1724,6 +1796,8 @@ end subroutine htetra_get_onewk
 !!  weights(nw,2) = integration weights for
 !!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
 !!    for a given (band, k-point, spin).
+!!  [erange(2)]: if present, weights are computed with an approximated asyntotic expression if
+!!   real(z) is outside of this interval and with tetra if inside.
 !!
 !! PARENTS
 !!
@@ -1732,7 +1806,7 @@ end subroutine htetra_get_onewk
 !!
 !! SOURCE
 
-subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz, eig_ibz, opt, cweights)
+subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz, eig_ibz, opt, cweights, erange)
 
 !Arguments ------------------------------------
 !scalars
@@ -1741,6 +1815,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  class(htetra_t), intent(inout) :: tetra
 !arrays
  complex(dp),intent(in) :: zvals(nz)
+ real(dp),optional,intent(in) :: erange(2)
  real(dp),intent(in) :: eig_ibz(nkibz)
  complex(dp),intent(out) :: cweights(nz)
 
@@ -1750,7 +1825,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  real(dp) :: tweight
 !arrays
  integer  :: ind_ibz(4),tetra_mibz(0:4)
- real(dp) :: eig(4)
+ real(dp) :: eig(4), my_erange(2)
  complex(dp) :: verm(4), cw(4), verli(4)
 ! *********************************************************************
 
@@ -1762,13 +1837,15 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
    MSG_ERROR(sjoin("Invalid opt:", itoa(opt)))
  end if
 
+ my_erange = [-huge(one), huge(one)]; if (present(erange)) my_erange = erange
+
  ! For each tetrahedron that belongs to this k-point
  tetra_count = tetra%tetra_count(ik_ibz)
  tetra_total = tetra%tetra_total(ik_ibz)
  do itetra=1,tetra_count
 
-   call htetra_get_ibz(tetra,ik_ibz,itetra,tetra_mibz)
-   tweight = one*tetra_mibz(0)/tetra_total
+   call htetra_get_ibz(tetra, ik_ibz, itetra, tetra_mibz)
+   tweight = one * tetra_mibz(0) / tetra_total
    do isummit=1,4
      ! Get mapping of each summit to eig_ibz
      ind_ibz(isummit) = tetra_mibz(isummit)
@@ -1777,17 +1854,22 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
 
    ! Loop over frequencies
    do iz=1,nz
-     select case(opt)
-     case(1)
-       verm = zvals(iz) - eig
-       call SIM0TWOI(cw, VERLI, VERM)
-     case(2)
-       call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
-     end select
+
+     if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
+       select case(opt)
+       case(1)
+         verm = zvals(iz) - eig
+         call SIM0TWOI(cw, VERLI, VERM)
+       case(2)
+         call get_onetetra_lambinvigneron(eig, zvals(iz), cw)
+       end select
+     else
+       cw = (one / (zvals(iz) - eig)) / four !* tetra%vv
+     end if
 
      do isummit=1,4
        if (ind_ibz(isummit) /= ik_ibz) cycle
-       cweights(iz) = cweights(iz) + cw(isummit) *tweight*max_occ
+       cweights(iz) = cweights(iz) + cw(isummit) * tweight * max_occ
        ! HM: This exit is important, avoids summing the same contribution more than once
        exit
      end do
@@ -1831,12 +1913,12 @@ subroutine htetra_get_delta_mask(tetra, eig_ibz, wvals, nw, nkpt, kmask, comm)
    if (mod(ihash,nprocs) /= my_rank) cycle
 
    ! For each tetrahedron
-   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
    do itetra=1,tetra_count
 
      ! Get mapping of each summit to eig_ibz
      do isummit=1,4
-       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit, itetra)
        eig(isummit) = eig_ibz(ind_ibz(isummit))
      end do
 
@@ -1844,8 +1926,8 @@ subroutine htetra_get_delta_mask(tetra, eig_ibz, wvals, nw, nkpt, kmask, comm)
      emin = minval(eig)
      emax = maxval(eig)
 
-     ! Check if any value in wvals is betwen emin and emax
-     contrib = 0; if (any(emin<wvals.and.wvals<emax)) contrib = 1
+     ! Check if any value in wvals is between emin and emax
+     contrib = 0; if (any(emin < wvals .and. wvals < emax)) contrib = 1
 
      ! Compute the union
      do isummit=1,4
@@ -1922,15 +2004,15 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
 
  ! For each bucket of tetrahedra
  do ihash=1,tetra%nbuckets
-   if (mod(ihash,nprocs) /= my_rank) cycle
+   if (mod(ihash, nprocs) /= my_rank) cycle
 
    ! For each tetrahedron
-   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
    do itetra=1,tetra_count
 
      ! Get mapping of each summit to eig_ibz
      do isummit=1,4
-       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit, itetra)
        eig(isummit) = eig_ibz(ind_ibz(isummit))
      end do
 
@@ -1942,16 +2024,16 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
      case(0:1)
        call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
      case(2)
-       call get_ontetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
+       call get_onetetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
        tweight_tmp = zero
      end select
 
      ! Acumulate the contributions
-     multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
+     multiplicity = tetra%unique_tetra(ihash)%indexes(0, itetra)
      do isummit=1,4
        ik_ibz = ind_ibz(isummit)
-       dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:)*multiplicity*max_occ
-       tweight(:,ik_ibz) = tweight(:,ik_ibz) + tweight_tmp(isummit,:)*multiplicity*max_occ
+       dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:) * multiplicity * max_occ
+       tweight(:,ik_ibz) = tweight(:,ik_ibz) + tweight_tmp(isummit,:) * multiplicity * max_occ
      end do
    end do ! itetra
  end do
@@ -1960,12 +2042,12 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
  select case(tetra%opt)
  case(1)
    do ik_ibz=1,tetra%nkibz
-     dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%tetra_total(ik_ibz)/tetra%nkbz
-     tweight(:,ik_ibz) = tweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%tetra_total(ik_ibz)/tetra%nkbz
+     dweight(:,ik_ibz) = dweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%tetra_total(ik_ibz) / tetra%nkbz
+     tweight(:,ik_ibz) = tweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%tetra_total(ik_ibz) / tetra%nkbz
    end do
  case(2)
-   dweight = dweight*tetra%vv/4.0_dp
-   tweight = tweight*tetra%vv/4.0_dp
+   dweight = dweight*tetra%vv / 4.0_dp
+   tweight = tweight*tetra%vv / 4.0_dp
  end select
 
  call xmpi_sum(dweight, comm, ierr)
@@ -2002,9 +2084,7 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
  integer :: tetra_count, itetra, isummit, ihash
 !arrays
  integer :: ind_ibz(4)
- real(dp) :: eig(4)
- real(dp) :: wvals(nw)
- real(dp) :: dweight_tmp(4,nw),tweight_tmp(4,nw)
+ real(dp) :: eig(4), wvals(nw), dweight_tmp(4,nw),tweight_tmp(4,nw)
 
 ! *********************************************************************
 
@@ -2033,7 +2113,7 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
      case(0:1)
        call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
      case(2)
-       call get_ontetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
+       call get_onetetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
      end select
 
      ! Acumulate the contributions
@@ -2081,17 +2161,16 @@ end subroutine htetra_wvals_weights_delta
 !!
 !! SOURCE
 
-subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
-  bcorr,tweight,dweight,comm)
+subroutine htetra_blochl_weights(tetra, eig_ibz, enemin, enemax, max_occ, nw, nkpt, bcorr, tweight, dweight, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nw,nkpt,bcorr,comm
  class(htetra_t), intent(in) :: tetra
- real(dp) ,intent(in) :: enemax,enemin,max_occ
+ integer,intent(in) :: nw,nkpt, bcorr, comm
+ real(dp) ,intent(in) :: enemax, enemin, max_occ
 !arrays
  real(dp) ,intent(in) :: eig_ibz(nkpt)
- real(dp) ,intent(out) :: dweight(nw,nkpt),tweight(nw,nkpt)
+ real(dp) ,intent(out) :: dweight(nw,nkpt), tweight(nw,nkpt)
 
 !Local variables-------------------------------
  real(dp) :: wvals(nw)
@@ -2111,10 +2190,20 @@ end subroutine htetra_blochl_weights
 !!  htetra_blochl_weights_wvals_zinv
 !!
 !! FUNCTION
-!!   The same as htetra_get_onewk_wvals_zinv but looping over tetrahedra
-!!   which is more efficient
+!!  The same as htetra_get_onewk_wvals_zinv but looping over tetrahedra
+!!  which is more efficient
 !!
 !! INPUTS
+!! nz: Number of frequencies
+!! zvals(nw): z-values
+!! max_occ=maximal occupation number (2 for nsppol=1, 1 for nsppol=2)
+!! nkpt=number of irreducible kpoints
+!! zinv_opt:
+!!   1 for S. Kaprzyk routines,
+!!   2 for Lambin-Vigneron.
+!!  [erange(2)]: if present, weights are computed with a standard quadrature method if
+!!     real(z) is outside of this interval and with tetra if inside.
+!! comm=MPI communicator
 !!
 !! OUTPUT
 !!
@@ -2124,34 +2213,38 @@ end subroutine htetra_blochl_weights
 !!
 !! SOURCE
 
-subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cweight,comm)
+subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, zinv_opt, cweight, comm, erange)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nz,nkpt,opt,comm
+ integer,intent(in) :: nz, nkpt, zinv_opt, comm
  class(htetra_t), intent(in) :: tetra
  real(dp) ,intent(in) :: max_occ
 !arrays
- real(dp) ,intent(in) :: eig_ibz(nkpt)
+ real(dp),intent(in) :: eig_ibz(nkpt)
+ real(dp),optional,intent(in) :: erange(2)
  complex(dp),intent(in)  :: zvals(nz)
- complex(dp),intent(out) :: cweight(nz,nkpt)
+ complex(dp),intent(out) :: cweight(nz, nkpt)
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,iz,multiplicity,nprocs,my_rank,ierr
+ integer :: ik_ibz, iz, multiplicity, nprocs, my_rank, ierr, ii, jj, kk, esumk
  integer :: tetra_count, itetra, isummit, ihash
 !arrays
  integer :: ind_ibz(4)
- real(dp) :: eig(4)
- complex(dp) :: cw(4), verli(4), verm(4)
+ real(dp) :: eig(4), my_erange(2)
+ complex(dp) :: cw(4), verli(4), verm(4), aw(4), bw(4) !, cw_lw(4)
+ real(dp) :: rwg(nz, 4)
 ! *********************************************************************
 
- cweight = zero
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ cweight = zero
+
+ my_erange = [-huge(one), huge(one)]; if (present(erange)) my_erange = erange
 
  ! For each bucket of tetrahedra
  do ihash=1,tetra%nbuckets
-   if (mod(ihash,nprocs) /= my_rank) cycle
+   if (mod(ihash, nprocs) /= my_rank) cycle
 
    ! For each tetrahedron that belongs to this k-point
    tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
@@ -2164,25 +2257,78 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
      end do
 
      ! Get multiplicity
-     multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
+     multiplicity = tetra%unique_tetra(ihash)%indexes(0, itetra)
 
+     ! Sort energies before calling get_onetetra_lambinvigneron
+     ! SIM0TWOI does not require sorted energies but since we call the routine
+     ! to fix get_onetetra_lambinvigneron we need to sort here.
+     call sort_4tetra(eig, ind_ibz)
+
+if (zinv_opt == 1) then
      ! Loop over frequencies
      do iz=1,nz
+
        ! Get tetrahedron weights
-       select case(opt)
-       case(1)
-         verm = zvals(iz) - eig
-         call SIM0TWOI(cw, VERLI, VERM)
-       case(2)
-         call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
-       end select
+       if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
+
+         select case(zinv_opt)
+         case(1)
+           verm = zvals(iz) - eig
+           call SIM0TWOI(cw, VERLI, VERM)
+
+           !call get_onetetra_lambinvigneron(eig, zvals(iz), cw_lw)
+           !if (any(abs(real(cw_lw(:)) / (real(cw(:)))) > 1.1)) then
+           !  do ierr=1,4
+           !    !write(std_out, *) "simte vs lw:", cw(ierr), cw_lw(ierr)
+           !    write(std_out, *) "cw_lw / (simtet)", cw_lw(ierr) / (cw(ierr))
+           !  end do
+           !end if
+
+         case(2)
+           call get_onetetra_lambinvigneron(eig, zvals(iz), cw)
+         end select
+
+       else
+         ! Use asymptotic expansion of integral for large z.
+         aw = (eig + sum(eig)) / five
+         do ii=1,4
+           bw(ii) = zero
+           do jj=1,4
+             if (jj == ii) cycle
+             esumk = zero
+             do kk=1,4
+               if (kk == jj) cycle
+               esumk = esumk + (eig(kk) - eig(jj)) ** 2
+             end do
+             bw(ii) = bw(ii) + three * (eig(jj) - eig(ii)) ** 2 + esumk
+           end do
+         end do
+         bw = bw / 300_dp
+         cw = one / (zvals(iz) - aw - bw / zvals(iz)) / four
+         !This for naive integration
+         !cw = (one / (zvals(iz) - eig)) / four
+       end if
 
        ! Accumulate contributions
        do isummit=1,4
          ik_ibz = ind_ibz(isummit)
-         cweight(iz,ik_ibz) = cweight(iz,ik_ibz) + cw(isummit)*multiplicity*max_occ
+         cweight(iz, ik_ibz) = cweight(iz, ik_ibz) + cw(isummit) * multiplicity * max_occ
        end do
+
      end do ! iz
+
+else
+       call get_onetetra_ppart_lv(nz, real(zvals), eig, rwg)
+
+       do iz=1,nz
+         ! Accumulate contributions
+         do isummit=1,4
+           ik_ibz = ind_ibz(isummit)
+           cweight(iz, ik_ibz) = cweight(iz, ik_ibz) + rwg(iz, isummit) * multiplicity * max_occ
+         end do
+       end do
+endif
+
    end do ! itetra
  end do
 
@@ -2190,17 +2336,16 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
  select case(tetra%opt)
  case(1)
    do ik_ibz=1,tetra%nkibz
-     cweight(:,ik_ibz) = cweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
+     cweight(:,ik_ibz) = cweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%nkbz / tetra%tetra_total(ik_ibz)
    end do
  case(2)
-   cweight = cweight*tetra%vv
+   cweight = cweight * tetra%vv
  end select
 
  call xmpi_sum(cweight, comm, ierr)
 
 end subroutine htetra_weights_wvals_zinv
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -2210,11 +2355,9 @@ end subroutine htetra_weights_wvals_zinv
 !!
 !! FUNCTION
 !!  Sort double precision array list(4) into ascending numerical order
-!!  while making corresponding rearrangement of the integer
-!!  array iperm.
+!!  while making corresponding rearrangement of the integer array iperm.
 !!
-!!  Taken from:
-!!  https://stackoverflow.com/questions/6145364/sort-4-number-with-few-comparisons
+!!  Taken from: https://stackoverflow.com/questions/6145364/sort-4-number-with-few-comparisons
 !!
 !! INPUTS
 !!  list(4) intent(inout) list of double precision numbers to be sorted
@@ -2237,14 +2380,10 @@ pure subroutine sort_4tetra(list, perm)
  real(dp), intent(inout) :: list(4)
 
 !Local variables-------------------------------
- integer :: ia,ib,ic,id
- integer :: ilow1,ilow2,ihigh1,ihigh2
- integer :: ilowest,ihighest
- integer :: imiddle1,imiddle2
- real(dp) :: va,vb,vc,vd
- real(dp) :: vlow1,vlow2,vhigh1,vhigh2
- real(dp) :: vlowest,vhighest
- real(dp) :: vmiddle1,vmiddle2
+ integer :: ia,ib,ic,id,ilow1,ilow2,ihigh1,ihigh2
+ integer :: ilowest,ihighest,imiddle1,imiddle2
+ real(dp) :: va,vb,vc,vd,vlow1,vlow2,vhigh1,vhigh2
+ real(dp) :: vlowest,vhighest,vmiddle1,vmiddle2
 
  va = list(1); ia = perm(1)
  vb = list(2); ib = perm(2)
@@ -2284,11 +2423,11 @@ pure subroutine sort_4tetra(list, perm)
  endif
 
  if (vmiddle1 < vmiddle2) then
-     list = [vlowest,vmiddle1,vmiddle2,vhighest]
-     perm = [ilowest,imiddle1,imiddle2,ihighest]
+     list = [vlowest, vmiddle1, vmiddle2, vhighest]
+     perm = [ilowest, imiddle1, imiddle2, ihighest]
  else
-     list = [vlowest,vmiddle2,vmiddle1,vhighest]
-     perm = [ilowest,imiddle2,imiddle1,ihighest]
+     list = [vlowest, vmiddle2, vmiddle1, vhighest]
+     perm = [ilowest, imiddle2, imiddle1, ihighest]
  endif
 
 end subroutine sort_4tetra
@@ -2313,10 +2452,8 @@ pure subroutine sort_4tetra_int(list)
  integer, intent(inout) :: list(4)
 
 !Local variables-------------------------------
- integer :: va,vb,vc,vd
- integer :: vlow1,vlow2,vhigh1,vhigh2
- integer :: vlowest,vhighest
- integer :: vmiddle1,vmiddle2
+ integer :: va,vb,vc,vd, vlow1,vlow2,vhigh1,vhigh2
+ integer :: vlowest,vhighest, vmiddle1,vmiddle2
 
  va = list(1)
  vb = list(2)
@@ -2348,12 +2485,325 @@ pure subroutine sort_4tetra_int(list)
  endif
 
  if (vmiddle1 < vmiddle2) then
-     list = [vlowest,vmiddle1,vmiddle2,vhighest]
+     list = [vlowest, vmiddle1, vmiddle2, vhighest]
  else
-     list = [vlowest,vmiddle2,vmiddle1,vhighest]
+     list = [vlowest, vmiddle2, vmiddle1, vhighest]
  endif
 
 end subroutine sort_4tetra_int
+!!***
+
+!!****f* m_htetra/get_onetetra_ppart_lv
+!! NAME
+!! get_onetetra_ppart_lv
+!!
+!! FUNCTION
+!!  Compute the complex weights according to: P. Lambin and J.P. Vigneron, Phys. Rev. B 29, 3430 (1984)
+!!
+!! INPUTS
+!!  nw
+!!  wvals: energy to evaluate the weights at
+!!  eig: eigenvalues at the corners of the tetrahedron
+!!
+!! OUTPUT
+!!  rwg(nw, 4)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure subroutine get_onetetra_ppart_lv(nw, wvals, eig, rwg)
+
+ integer,intent(in) :: nw
+ real(dp), intent(in) :: wvals(nw), eig(4)
+ real(dp), intent(out) :: rwg(nw, 4)
+
+!Local variables-------------------------------
+ integer :: ii, iw !jj,
+ real(dp),parameter :: tol = tol14
+ !real(dp),parameter :: tol = tol20
+ !real(dp),parameter :: tol = tol30
+ real(dp) :: D12,D13,D14,D23,D24,D34
+ real(dp) :: e10, e20, e30, e31, e32, e21
+ real(dp) :: inv_e10, inv_e21, inv_e20, inv_e30, inv_e31, inv_e32
+ real(dp) :: E0(nw), E1(nw), E2(nw), E3(nw)
+
+! *********************************************************************
+
+ ! Then the energy differences, for the coefficients. Must always be positive, I hope.
+ D12 = eig(2) - eig(1)
+ D13 = eig(3) - eig(1)
+ D14 = eig(4) - eig(1)
+ D23 = eig(3) - eig(2)
+ D24 = eig(4) - eig(2)
+ D34 = eig(4) - eig(3)
+
+ ! Now get the actual weights
+ ! Notations
+ !  eij = e_i - e_j
+ !  Ej = E - e_j
+
+ e10 = huge(one);  e20 = huge(one);  e30 = huge(one);
+ e31 = huge(one);  e32 = huge(one);  e21 = huge(one)
+ inv_e10 = huge(one);  inv_e21 = huge(one);  inv_e20 = huge(one)
+ inv_e30 = huge(one);  inv_e31 = huge(one);  inv_e32 = huge(one)
+
+ E0 = wvals(:) - eig(1)
+ E1 = wvals(:) - eig(2)
+ E2 = wvals(:) - eig(3)
+ E3 = wvals(:) - eig(4)
+
+#if 0
+ where (abs(E0) < tol1)
+   E0 = tol1
+ end where
+ where (abs(E1) < tol1)
+   E1 = tol1
+ end where
+ where (abs(E2) < tol1)
+   E2 = tol1
+ end where
+ where (abs(E3) < tol1)
+   E3 = tol1
+ end where
+#endif
+
+ ! e1=e2=e3=e4
+ if (D12 + D23 + D34 < tol) then
+   do ii=1,4
+     !rwg(:, ii) = 0.25_dp / (wvals - eig(ii))
+     rwg(:, ii) = 0.25_dp / E0
+   end do
+
+ ! e2=e3=e4
+ else if (D23 + D34 < tol) then
+   e10 = eig(2) - eig(1); inv_e10 = one / e10
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       three * E0(iw)**2 * E1(iw) * inv_e10**4 * log(abs(E1(iw) / E0(iw))) &
+       + 1.5_dp * E1(iw) * (two * E0(iw) + e10) * inv_e10**3 + inv_e10
+   end do
+
+   do iw=1,nw
+     rwg(iw, 2) = &
+       E0(iw) ** 3 * inv_e10**4 * log(abs(E0(iw) / E1(iw))) &
+       - (six * E0(iw)**2 + three * E0(iw) * e10 + two * e10**2) * inv_e10**3 / six
+   end do
+   rwg(:,3) = rwg(:,2)
+   rwg(:,4) = rwg(:,2)
+
+   !rwg = zero
+
+ ! e1=e2=e3
+ else if (D12 + D23 < tol) then
+
+   e30 = eig(4) - eig(1); inv_e30 = one / e30
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       E3(iw)**3 * inv_e30**4 * log(abs(E3(iw) / E0(iw))) &
+       + (six * E3(iw)**2 - three * E3(iw) * e30 + two * e30**2) * inv_e30**3 / six
+   end do
+   rwg(:,2) = rwg(:,1)
+   rwg(:,3) = rwg(:,1)
+
+   do iw=1,nw
+     rwg(iw, 4) = &
+       three * E0(iw) * E3(iw)**2 * inv_e30**4 * log(abs(E0(iw) / E3(iw))) &
+       - 1.5_dp * E0(iw) * (two * E3(iw) - e30) * inv_e30**3 - inv_e30
+   end do
+
+   !rwg = zero
+
+ ! e1=e2 < e3=e4
+ else if (D12 + D34 < tol) then
+
+   e20 = eig(3) - eig(1); inv_e20 = one / e20
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       three * E0(iw) * E2(iw)**2 * inv_e20**4 * log(abs(E0(iw) / E2(iw))) &
+       - 1.5_dp * E0(iw) * (two * E2(iw) - e20) * inv_e20**3 - inv_e20
+   end do
+   rwg(:,2) = rwg(:,1)
+
+   do iw=1,nw
+     rwg(iw, 3) = &
+       three * E0(iw)** 2 * E2(iw) * inv_e20**4 * log(abs(E2(iw) / E0(iw))) &
+       + 1.5_dp * E2(iw) * (two * E0(iw) + e20) * inv_e20**3 + inv_e20
+   end do
+   rwg(:,4) = rwg(:,3)
+
+   !rwg = zero
+
+ ! e3=e4
+ else if (D34 < tol) then
+
+   e10 = eig(2) - eig(1); inv_e10 = one / e10
+   e20 = eig(3) - eig(1); inv_e20 = one / e20
+   e21 = eig(3) - eig(2); inv_e21 = one / e21
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       E0(iw)**2 * inv_e20**2 * inv_e10  &
+       * (one + (-two * E2(iw) * inv_e20 - E1(iw) * inv_e10) * log(abs(E0(iw)))) &
+       - E2(iw)**2 * inv_e20**2 * inv_e21 &
+       * (one + (two * E0(iw) * inv_e20 + E1(iw) * inv_e21) * log(abs(E2(iw)))) &
+       + E1(iw)**3 * inv_e10**2 * inv_e21**2 * log(abs(E1(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 2) = &
+       -E1(iw)**2 * inv_e21**2 * inv_e10  &
+       * (one + (-two * E2(iw) * inv_e21 + E0(iw) * inv_e10) * log(abs(E1(iw)))) &
+       - E2(iw)**2 * inv_e21**2 * inv_e20 &
+       * (one + (two * E1(iw) * inv_e21 + E0(iw) * inv_e20) * log(abs(E2(iw)))) &
+       + E0(iw)**3 * inv_e10**2 * inv_e20**2 * log(abs(E0(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 3) = &
+       +E0(iw)**3 * inv_e10 * inv_e20**3 * log(abs(E0(iw))) &
+       -E1(iw)**3 * inv_e10 * inv_e21**3 * log(abs(E1(iw))) &
+       +E2(iw) * inv_e20 * inv_e21 &
+       * (half + E0(iw) * inv_e20 + E1(iw) * inv_e21  &
+         +(E0(iw)**2 * inv_e20**2 + E1(iw)**2 * inv_e21**2 + &
+           E0(iw) * E1(iw) * inv_e20 * inv_e21) * log(abs(E2(iw))))
+   end do
+
+   rwg(:,4) = rwg(:,3)
+
+   !rwg = zero
+
+ ! e2=e3
+ else if (D23 < tol) then
+
+   e10 = eig(2) - eig(1); inv_e10 = one / e10
+   e30 = eig(4) - eig(1); inv_e30 = one / e30
+   e31 = eig(4) - eig(2); inv_e31 = one / e31
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       E0(iw)**2 * inv_e10**2 * inv_e30 &
+       * (one - (two * E1(iw) * inv_e10 + E3(iw) * inv_e30) * log(abs(E0(iw)))) &
+       + E1(iw)**2 * inv_e10**2 * inv_e31 &
+       * (one + (+two * E0(iw) * inv_e10 - E3(iw) * inv_e31) * log(abs(E1(iw)))) &
+       + E3(iw)**3 * inv_e30**2 * inv_e31**2 * log(abs(E3(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 2) = &
+        E0(iw)**3 * inv_e30 * inv_e10**3 * log(abs(E0(iw))) &
+       + E3(iw)**3 * inv_e30 * inv_e31**3 * log(abs(E3(iw))) &
+       - E1(iw) * inv_e10 * inv_e31  &
+       * (half + E0(iw) * inv_e10 - E3(iw) * inv_e31 + &
+         (E0(iw)**2 * inv_e10**2 + E3(iw)**2 * inv_e31**2 - E0(iw) * E3(iw) * inv_e10 * inv_e31) * log(abs(E1(iw))))
+   end do
+   rwg(:,3) = rwg(:,2)
+
+   do iw=1,nw
+     rwg(iw, 4) = &
+       -E3(iw)**2 * inv_e31**2 * inv_e30 &
+       * (one + (two * E1(iw) * inv_e31 + E0(iw) * inv_e30) * log(abs(E3(iw)))) &
+       - E1(iw)**2 * inv_e31**2 * inv_e10 &
+       * (one + (-two * E3(iw) * inv_e31 + E0(iw) * inv_e10) * log(abs(E1(iw)))) &
+       + E0(iw)**3 * inv_e30**2 * inv_e10**2 * log(abs(E0(iw)))
+   end do
+
+   !rwg = zero
+
+ ! e1=e2
+ else if (D12 < tol) then
+
+   e20 = eig(3) - eig(1); inv_e20 = one / e20
+   e30 = eig(4) - eig(1); inv_e30 = one / e30
+   e32 = eig(4) - eig(3); inv_e32 = one / e32
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+        -E2(iw)**3 * inv_e32 * inv_e20**3 * log(abs(E2(iw))) &
+       + E3(iw)**3 * inv_e32 * inv_e30**3 * log(abs(E3(iw))) &
+       + E0(iw) * inv_e20 * inv_e30  &
+       * (half - E2(iw) * inv_e20 - E3(iw) * inv_e30 + &
+         (E2(iw)**2 * inv_e20**2 + E3(iw)**2 * inv_e30**2 + E2(iw) * E3(iw) * inv_e20 * inv_e30) * log(abs(E0(iw))))
+   end do
+   rwg(:,2) = rwg(:,1)
+
+   do iw=1,nw
+     rwg(iw, 3) = &
+        E2(iw)**2 * inv_e20**2 * inv_e32 &
+        * (one + (two * E0(iw) * inv_e20 - E3(iw) * inv_e32) * log(abs(E2(iw)))) &
+        + E0(iw)**2 * inv_e20**2 * inv_e30 &
+        * (one - (two * E2(iw) * inv_e20 + E3(iw) * inv_e30) * log(abs(E0(iw))))  &
+        + (E3(iw)**3 * inv_e32**2 * inv_e30**2 * log(abs(E3(iw))))
+   end do
+   ! This was wrong due to a misplaced parantes
+   !rwg(:,3) = zero
+
+   do iw=1,nw
+     rwg(iw, 4) = &
+       -E3(iw)**2 * inv_e30**2 * inv_e32 &
+       * (one + (two * E0(iw) * inv_e30 + E2(iw) * inv_e32) * log(abs(E3(iw)))) &
+       + E0(iw)**2 * inv_e30**2 * inv_e20 &
+       * (one - (two * E3(iw) * inv_e30 + E2(iw) * inv_e20) * log(abs(E0(iw)))) &
+       + (E2(iw)**3 * inv_e32**2 * inv_e20**2 * log(abs(E2(iw))))
+   end do
+
+   !rwg = zero
+
+ ! e1<e2<e3<e4
+ else
+
+   e10 = eig(2) - eig(1); inv_e10 = one / e10
+   e20 = eig(3) - eig(1); inv_e20 = one / e20
+   e21 = eig(3) - eig(2); inv_e21 = one / e21
+   e30 = eig(4) - eig(1); inv_e30 = one / e30
+   e31 = eig(4) - eig(2); inv_e31 = one / e31
+   e32 = eig(4) - eig(3); inv_e32 = one / e32
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       E0(iw)**2 * inv_e10 * inv_e20 * inv_e30 &
+       * (one - (E1(iw) * inv_e10 + E2(iw) * inv_e20 + E3(iw) * inv_e30) * log(abs(E0(iw)))) &
+       + E1(iw)**3 * inv_e10**2 * inv_e21 * inv_e31 * log(abs(E1(iw))) &
+       - E2(iw)**3 * inv_e20**2 * inv_e21 * inv_e32 * log(abs(E2(iw))) &
+       + E3(iw)**3 * inv_e30**2 * inv_e31 * inv_e32 * log(abs(E3(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 2) = &
+       -E1(iw)**2 * inv_e10 * inv_e21 * inv_e31 &
+       * (one + (E0(iw) * inv_e10 - E2(iw) * inv_e21 - E3(iw) * inv_e31) * log(abs(E1(iw)))) &
+       + E0(iw)**3 * inv_e10**2 * inv_e20 * inv_e30 * log(abs(E0(iw))) &
+       - E2(iw)**3 * inv_e20 * inv_e21**2 * inv_e32 * log(abs(E2(iw))) &
+       + E3(iw)**3 * inv_e30 * inv_e31**2 * inv_e32 * log(abs(E3(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 3) = &
+       E2(iw)**2 * inv_e20 * inv_e21 * inv_e32 &
+       * (one + (E0(iw) * inv_e20 + E1(iw) * inv_e21 - E3(iw) * inv_e32) * log(abs(E2(iw)))) &
+       + E0(iw)**3 * inv_e10 * inv_e20**2 * inv_e30 * log(abs(E0(iw))) &
+       - E1(iw)**3 * inv_e10 * inv_e21**2 * inv_e31 * log(abs(E1(iw))) &
+       + E3(iw)**3 * inv_e30 * inv_e31 * inv_e32**2 * log(abs(E3(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 4) = &
+       -E3(iw)**2 * inv_e30 * inv_e31 * inv_e32 &
+       * (one + (E0(iw) * inv_e30 + E1(iw) * inv_e31 + E2(iw) * inv_e32) * log(abs(E3(iw)))) &
+       + E0(iw)**3 * inv_e10 * inv_e20 * inv_e30**2 * log(abs(E0(iw))) &
+       - E1(iw)**3 * inv_e10 * inv_e21 * inv_e31**2 * log(abs(E1(iw))) &
+       + E2(iw)**3 * inv_e20 * inv_e21 * inv_e32**2 * log(abs(E2(iw)))
+   end do
+   !rwg = zero
+
+ end if
+
+end subroutine get_onetetra_ppart_lv
 !!***
 
 end module m_htetra
