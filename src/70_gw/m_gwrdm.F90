@@ -94,19 +94,18 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
  real(dp) :: tol8
  character(len=500) :: msg
  integer :: ib1dm,iquad
- real(dp) :: wtk,ec_gm_sum,spin_fact
- complex(dpc) :: denominator,fact,division,ec_integrated
+ real(dp) :: ec_integrated,spin_fact,fact
+ complex(dpc) :: denominator!,division
 !arrays
 !************************************************************************
 
  DBG_ENTER("COLL")
 
- ec_gm_sum=czero
+ ec_integrated=0.0_dp
  spin_fact=2.0_dp
- fact=spin_fact*cmplx(1.0_dp/(2.0_dp*pi),0.0_dp)
+ fact=spin_fact*(1.0_dp/(2.0_dp*pi))
  tol8=1.0e-8
- wtk=kmesh%wt(kpoint)
- write(msg,'(a26,f10.5)')' wtk used in calc_Ec_GM_k:',wtk
+ write(msg,'(a26,f10.5)')' wtk used in calc_Ec_GM_k:',kmesh%wt(kpoint)
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
@@ -115,19 +114,18 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
    &Restart the calculation starting bdgw from 1.")
  else
    do ib1dm=ib1,ib2
-     ec_integrated=czero
      do iquad=1,nomega_sigc
        denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))
        if (abs(denominator)>tol8) then
-         ! Sigma_pp/[(denominator)] + [Sigma_pp/[(denominator)]]^*  
-          division=sigcme_k(iquad,ib1dm,ib1dm,1)/denominator
-          ec_integrated=ec_integrated+weights(iquad)*(division+conjg(division))
+         ! Sigma_pp/[(denominator)] + [Sigma_pp/[(denominator)]]^* = 2 Re [Sigma_pp/denominator]
+          !division=sigcme_k(iquad,ib1dm,ib1dm,1)/denominator
+          !ec_integrated=ec_integrated+weights(iquad)*real(division+conjg(division))
+          ec_integrated=ec_integrated+weights(iquad)*2.0_dp*real(sigcme_k(iquad,ib1dm,ib1dm,1)/denominator)
        end if
      end do
-     ec_gm_sum=ec_gm_sum+real(fact*ec_integrated)
    end do
  endif
- Ec_GM_k=wtk*ec_gm_sum
+ Ec_GM_k=kmesh%wt(kpoint)*fact*ec_integrated
 
  DBG_EXIT("COLL")
 
