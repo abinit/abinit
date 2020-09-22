@@ -21,8 +21,8 @@ kptopt       1
 ngkpt        1 1 1
 
 !Convergence parameters
- ecut   6.0
- tolvrs 1.d-8
+ ecut   36.0
+ tolvrs 1.d-10
  nstep  50
 
 !XC used
