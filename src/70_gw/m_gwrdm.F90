@@ -106,7 +106,7 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
  fact=spin_fact*cmplx(1.0_dp/(2.0_dp*pi),0.0_dp)
  tol8=1.0e-8
  wtk=kmesh%wt(kpoint)
- write(msg,'(a25,f10.5)')'wtk used in calc_Ec_GM_k:',wtk
+ write(msg,'(a26,f10.5)')' wtk used in calc_Ec_GM_k:',wtk
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
