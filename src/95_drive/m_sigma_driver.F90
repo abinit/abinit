@@ -2793,7 +2793,7 @@ endif
      write(msg,'(a28)')' Vee[GM] = Vee[SD] + Ec[GM]:'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Ec[GW]     = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Ec[GM]     = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Vee[GM]    = : ',(ex_energy+eh_energy+ec_gm),' Ha ,',(ex_energy+eh_energy+ec_gm)*Ha_eV,' eV'
