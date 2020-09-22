@@ -7,7 +7,7 @@ authors: MG
 This tutorial explains how to compute the electron self-energy due to phonons, obtain the zero-point
 renormalization (ZPR) of the band gap and temperature-dependent band energies within the harmonic approximation.
 We start with a very brief overview of the many-body formalism in the context of the electron-phonon (e-ph) interaction.
-Then we discuss how to evaluate the e-ph self-energy and perform typical convergence studies 
+Then we discuss how to evaluate the e-ph self-energy and perform typical convergence studies
 using the polar semiconductor MgO as example.
 Further details concerning the implementation are given in [[cite:Gonze2019]] and [[cite:Romero2020]].
 
@@ -89,7 +89,7 @@ State-of-the-art implementations approximate the DW contribution with
 \end{equation}
 
 where $g_{mn\nu}^{2,\DW}(\kk,\qq)$ is an effective matrix element that, within the **rigid-ion approximation**,
-can be expressed in terms of the standard first-order $\gkq$ matrix elements by exploiting the invariance 
+can be expressed in terms of the standard first-order $\gkq$ matrix elements by exploiting the invariance
 of the QP energies under infinitesimal translation [[cite:Giustino2017]].
 
 At the level of the implementation, the number of bands in the two sums is defined by [[nband]]
@@ -104,7 +104,7 @@ have an additional dependence on the physical temperature T.
 
 !!! important
 
-    The EPH code takes advantage of time-reversal and spatial symmetries (see [[kptopt]] to reduce the BZ integration
+    The EPH code takes advantage of time-reversal and spatial symmetries to reduce the BZ integration
     to an appropriate irreducible wedge, $\text{IBZ}_k$, defined by the little group of the $\kk$-point i.e.
     the set of point group operations of the crystal that leave the $\kk$-point invariant
     within a reciprocal lattice vector $\GG$.
@@ -115,10 +115,10 @@ have an additional dependence on the physical temperature T.
     to 0 for testing purposes.
     Note that when [[symsigma]] is set to 1, the code performs a final average of the QP results
     within each degenerate subspace.
-    As a consequence, **accidental degeneracies won't be removed when the [[symsigma]] is set to 1.
+    As a consequence, **accidental degeneracies won't be removed** when [[symsigma]] is set to 1.
 
-Note that both the FM and the DW term converge slowly with the $\qq$-sampling, and
-the real part of the self-energy requires the inclusions of many empty states.
+Note that both the FM and the DW term converge slowly with the $\qq$-sampling.
+Moreover, the real part of the self-energy requires the inclusions of many empty states.
 In order to accelerate the convergence with the bands, the EPH code can replace the contributions
 given by the high-energy states above a certain band index $M$ with the solution
 of a **non-self-consistent Sternheimer equation** in which only the first $M$ states are required.
@@ -129,7 +129,7 @@ This approximation is justified when the bands above $M$ are **sufficiently high
 to the $n\kk$ states that must be corrected.
 The Sternheimer approach requires the specification of [[eph_stern]] and [[getpot_filepath]].
 The parameter M corresponds to the [[nband]] input variable that, obviously,
-**cannot be larger than the number of bands stored in the WFK file** 
+**cannot be larger than the number of bands stored in the WFK file**
 (the code will abort if this condition is not fulfilled).
 
 ### Quasi-particle corrections due to e-ph coupling
@@ -137,8 +137,8 @@ The parameter M corresponds to the [[nband]] input variable that, obviously,
 Strictly speaking, the quasi-particle (QP) excitations are defined by the solution(s)
 in the complex plane of the equation $$ z = \ee_\nk + \Sigma_\nk^{\text{e-ph}}(z) $$
 provided the non-diagonal components of the e-ph self-energy can be neglected.
-In practice, the problem is usually simplified by seeking **approximated** solutions
-**along the real axis** following two different approaches:
+In practice, the problem is usually simplified by seeking **approximated solutions along the real axis**
+following two different approaches:
 
 1. **on-the-mass-shell**
 2. **linearized QP equation**.
@@ -170,11 +170,11 @@ A_\nk(\ww) =
 -\dfrac{1}{\pi} \dfrac{\Im \Sigma_\nk(\ww)} {(\ww - \ee_\nk - \Re \Sigma_\nk(\ww)) ^ 2 + \Im \Sigma_\nk(\ww) ^ 2}
 $$
 
-obtained from the Dyson equation $G = G_o + G_o \Sigma G$.
 Since $A_\nk(\ww)$ integrates to 1,
 values of $Z_\nk$ in the [0.7, 1] range usually indicate the presence of a well-defined QP excitation
-that is accompanied by some background and, possibly, additional satellites.
-Values of $Z_\nk$ greater than one are clearly unphysical and their interpretation requires
+that may be accompanied by some **background** and, possibly, additional **satellites**.
+Values of $Z_\nk$ greater than one are clearly unphysical and signal the breakdown of the linearized QP equation.
+The interpretation of the results requires
 a careful analysis of $A_\nk(\ww)$ and/or additional convergence tests.
 
 !!! important
@@ -183,12 +183,12 @@ a careful analysis of $A_\nk(\ww)$ and/or additional convergence tests.
     the on-the-mass-shell approach provides results that are closer to those obtained
     with more advanced techniques based on the cumulant expansion [[cite:Nery2018]].
 
-The ZPR of the excitation energy is defined as the difference between the QP energy evaluated at T = 0 
+The ZPR of the excitation energy is defined as the difference between the QP energy evaluated at T = 0
 and the bare KS energy.
-In a similar way, one defines the ZPR of the gap as the difference between the QP band gap at T = 0 
+In a similar way, one defines the ZPR of the gap as the difference between the QP band gap at T = 0
 and the KS gap.
 
-It is worth to stress that the EPH code can compute QP corrections only for $\nk$ states 
+It is worth to stress that the EPH code can compute QP corrections only for $\nk$ states
 that are present in the input WFK file (a similar requirement is present in the $GW$ code as well).
 As a consequence, the $\kk$-mesh ([[ngkpt]], [[nshiftk]], [[shiftk]]) for the WFK file
 should be chosen carefully especially if the band edges are not located at high-symmetry $\kk$-points.
@@ -308,7 +308,7 @@ Since this is the first tutorial that uses precomputed output files,
 it is worth explaining how to use the terminal and command line utilities such as *ncdump*, *abitk* and |AbiPy| scripts
 to extract useful information from the pre-computed files before moving to EPH calculations.
 
-First of all, most of the netcdf files produced by ABINIT store the input file in string format 
+First of all, most of the netcdf files produced by ABINIT store the input file in string format
 in the **input_string** netcdf variable.
 This variable may be useful if you need to know the input variables used to produce that particular output file.
 To print the value of **input_string** inside the terminal, use the *ncdump* utility and the syntax:
@@ -795,7 +795,7 @@ Initial ab-initio q-mesh:
 	ngqpt: [4 4 4], with nqibz: 8
 q-mesh for self-energy integration (eph_ngqpt_fine): [4 4 4]
 k-mesh for electrons:
-	mpdivs: [4 4 4] with shifts [[0. 0. 0.]] and kptopt: 1
+	mpdivs: [4 4 4] with shifts [0. 0. 0.] and kptopt: 1
 Number of bands included in e-ph self-energy sum: 30
 zcut: 0.00037 (Ha), 0.010 (eV)
 Number of temperatures: 4, from 0.0 to 300.0 (K)
@@ -830,7 +830,7 @@ that produces:
 ![](eph4zpr_assets/qpgaps_4o.png)
 
 On the left, we have the direct gap at $\Gamma$ ad a function of T while the OTMS results are shown in the right panel.
-In both cases, the direct band gap **decreases with increasing temperature** 
+In both cases, the direct band gap **decreases with increasing temperature**
 (remember that MgO is a direct gap semiconductor).
 This is the so-called Varshni's effect that is observed in many (but not all) semiconductors.
 
@@ -963,7 +963,7 @@ that produces the following output file:
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_6.out %}
 
-To analyze the convergence behavior, pass the SIGEPH files to the |abicomp| script and use the 
+To analyze the convergence behavior, pass the SIGEPH files to the |abicomp| script and use the
 `sigpeh` command:
 
 ```sh
@@ -1067,9 +1067,9 @@ An example of input file is available here:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_8.in %}
 
-To plot the spectral function $A_\nk(\ww) in an easy way, we use AbiPy 
+To plot the spectral function $A_\nk(\ww) in an easy way, we use AbiPy
 to extract the data from the netcdf file.
-We cant do it in two different ways: 
+We cant do it in two different ways:
 
 - using a small python script that calls the AbiPy API
 - using the |abiopen| script and |ipython| and to interact with the netcdf file
@@ -1079,7 +1079,7 @@ The python script is:
 ```python
 #!/usr/bin/env python
 
-import sys 
+import sys
 from abipy.abilab import abiopen
 
 # Get file name from command line and open the file

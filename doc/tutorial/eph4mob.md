@@ -5,7 +5,7 @@ authors: GB, MG
 # Phonon-limited mobility 
 
 This tutorial shows how to compute phonon-limited carrier mobilities in semiconductors within
-the relaxation time approximation (RTA), taking the specific case of GaAs as an example.
+the relaxation time approximation (RTA), taking the specific case of AsAs as an example.
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
@@ -17,7 +17,7 @@ This lesson should take about 1.5 hour.
 ## Formalism
 
 Before starting, it is worth summarizing the most important equations implemented in the code.
-For a more detailed description of the ABINIT implementation, please consult [[cite:Brunin2020]].
+For a more detailed description of the ABINIT implementation, please consult [[cite:Brunin2020b]].
 
 Our goal is to find an approximated solution to the linearized
 Boltzmann transport equation (BTE) [[cite:Ashcroft1976]] within the relaxation time approximation.
@@ -62,8 +62,8 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
 !!! important
 
     Note that this formalism does not take into account contributions to the lifetime given by
-    other scattering processes such as defects, ionized impurities in doped semiconductors, e-e interaction, 
-    grain boundary scattering etc.
+    other scattering processes such as **defects, ionized impurities in doped semiconductors, e-e interaction, 
+    grain boundary scattering etc**.
     These effects may be relevant depending on the system and/or the temperature under investigation
     but they are not treated in this tutorial as here we mainly focus on room temperature and non-degenerate 
     semiconductors, conditions in which e-ph scattering is one of the most important contributions.
@@ -244,7 +244,7 @@ mrgdv < teph4mob_3.in
 
 We now have all the phonon-related files needed to compute the mobility.
 The DDB will be used to Fourier interpolate the phonon frequencies on an **arbitrarily** dense $\qq$-mesh while
-the DVDB will be used to Fourier interpolate the DFPT scattering potentials [[cite:Brunin2020]].
+the DVDB will be used to Fourier interpolate the DFPT scattering potentials [[cite:Brunin2020b]].
 The only ingredient that is still missing is the WFK file with the GS wavefunctions on the dense $\kk$-mesh.
 
 !!! warning
@@ -370,7 +370,7 @@ Let's discuss the meaning of the e-ph variables in more details:
     
 <!--In this tutorial, we will use the same dense $\kk$- and $\qq$-meshes.
 As a rule of thumb, a $\qq$-mesh twice as dense in each direction as the $\kk$-mesh,
-is needed to achieve fast convergence of the integrals [[cite:Brunin2020]].
+is needed to achieve fast convergence of the integrals [[cite:Brunin2020b]].
 In this case, [[ngkpt]] = [[eph_ngqpt_fine]], but the use of [[sigma_ngkpt]]
 allows to downsample the $\kk$-mesh used for the integration and it should be set to half
 the values of [[ngkpt]].
@@ -582,7 +582,7 @@ Once the energy window has been set, we can start to converge the mobility with 
 dense $\kk$- and $\qq$-meshes.
 As a rule of thumb, a $\qq$-mesh twice as dense in each direction as the $\kk$-mesh,
 is needed to obtain accurate values for the linewidth and achieve fast convergence 
-of the integrals in $\kk$-space [[cite:Brunin2020]].
+of the integrals in $\kk$-space [[cite:Brunin2020b]].
 In this case, [[ngkpt]] = [[eph_ngqpt_fine]], but the use of [[sigma_ngkpt]]
 allows to downsample the $\kk$-mesh used for the integration and it should be set to half
 the values of [[ngkpt]].

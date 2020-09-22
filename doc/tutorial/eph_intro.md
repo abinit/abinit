@@ -50,7 +50,7 @@ The take-home message is that one should always converge carefully both electron
 before moving to EPH computations.
 
 For further information about the difference between EPH and ANADDB, see also [[cite:Gonze2019]].
-Further details about the EPH implementation are available in [[cite:Brunin2020]].
+Further details about the EPH implementation are available in [[cite:Brunin2020b]].
 
 ## EPH workflow
 
@@ -259,7 +259,7 @@ The DVDB file stores $\partial_{\kappa\alpha,\qq} v^\KS(\rr)$
 for all the $\qq$-points in the IBZ and all the irreducible atomic perturbations.
 More rigorously, we should say that the DVDB file stores the local part of the DFPT potential
 (variation of the Hartree + XC + local part of the pseudo)
-but this is a rather technical point discussed in more detail in [[cite:Brunin2020]] that is not relevant
+but this is a rather technical point discussed in more detail in [[cite:Brunin2020b]] that is not relevant
 for the present discussion so we do not elaborate more on this.
 
 !!! important
