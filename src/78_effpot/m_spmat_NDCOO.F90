@@ -324,7 +324,7 @@ contains
   subroutine group_by_pair(self)
     class(ndcoo_mat_t), intent(inout) :: self
 
-    integer :: i, ii, ij, ngroup
+    integer :: i, ii, ij
 !    type(int_array_type) :: i1, j1, startend
 
     if((self%is_pair_grouped)) return
