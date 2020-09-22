@@ -211,7 +211,7 @@ _WEBSITE = None
 
 class Website(object):
     """
-    This object is a singleton. It stores all the information required to generated the HTML documentation
+    This object is a singleton. It stores all the information required to generate the HTML documentation
     (input variables, test suite, bibtex entries).
     It also provides methods such as `get_wikilink` that will be invoked by the python markdown parser
     to implement extensions to the standard markdown syntax.
@@ -1341,7 +1341,7 @@ The bibtex file is available [here](../abiref.bib).
         html_vars = ""
         for char, group in sort_and_groupby(list(allvars.items()), key=lambda t: t[0][0].upper()):
             lis = "\n".join("<li>{link}</li>".format(
-                link=var.internal_link(self, page_rpath, label=var.abivarname, cls="small-grey-link")) for _, var in group)
+                link=var.internal_link(self, page_rpath, label=var.abivarname, cls="small-grey-link")) for _, var in sorted(group))
 
         #for char, group in sort_and_groupby(allvars, key=lambda t: t[0][0].upper()):
         #    group = list(group)
@@ -1381,8 +1381,9 @@ The bibtex file is available [here](../abiref.bib).
 
 ## All variables
 
-See aim, anaddb or optic for the subset of input variables for the executables AIM(Bader), ANADDB and OPTIC.
-Such input variables are specifically labelled @aim, @anaddb, or @optic in the input variable database.
+See aim, anaddb, atdep, multibinit or optic for the subset of input variables for the executables 
+AIM(Bader), ANADDB, ATDEP, MULTIBINIT and OPTIC.
+Such input variables are specifically labelled @aim, @anaddb, @atdep, @multibinit or @optic in the input variable database.
 Enter any string to search in the database. Clicking without any request will give all variables.
 
 {search_form}
