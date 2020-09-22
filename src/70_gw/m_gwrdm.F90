@@ -115,7 +115,7 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
    &Restart the calculation starting bdgw from 1.")
  else
    do ib1dm=ib1,ib2
-     ec_integrated=0.0_dpc
+     ec_integrated=czero
      do iquad=1,nomega_sigc
        denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))
        if (abs(denominator)>tol8) then
