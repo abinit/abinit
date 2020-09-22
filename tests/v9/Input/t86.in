@@ -21,7 +21,7 @@ spin_temperature = 50
 spin_ntime =10000
 spin_nctime=10
 spin_dt= 2.41888e-16 s #e-15 s
-spin_qpoint = 0.5 0.5 0.5
+spin_projection_qpoint = 0.5 0.5 0.5
 spin_write_traj=1
 spin_damping=0.0
 
