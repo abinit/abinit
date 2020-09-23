@@ -119,9 +119,9 @@ contains
     self%is_sorted=.False.
     self%is_unique=.False.
     if((self%is_pair_grouped)) then
-      !self%pair_1list%finalize()
-      !self%pair_2list%finalize()
-      !self%pair_startend%finalize()
+      call self%pair_1list%finalize()
+      call self%pair_2list%finalize()
+      call self%pair_startend%finalize()
     endif
     self%is_pair_grouped = .False.
 
