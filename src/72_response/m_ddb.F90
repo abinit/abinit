@@ -4735,12 +4735,12 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
            index = idir1+ 3*((ipert1-1)+ddb%mpert*((idir2-1)+3*(ipert2-1)))
            !if(ddb%flg(idir1,ipert1,idir2,ipert2,q1)/=1)then
            if(ddb%flg(index,q1)/=1)then
-             write(msg, '(a,a,a,i0,a,a,a,4i0,a,a,a,a)' )&
-             'Information are missing in the DDB.',ch10,&
-             'In block',q1,' the following element is missing :',ch10,&
-             'idir1,ipert1,idir2,ipert2=',idir1,ipert1,idir2,ipert2,ch10,&
-             'Action: add the required information in the DDB,',ch10,&
-             'or modify your input file.'
+             write(msg, '(a,a,a,i0,a,a,a,4(i0,1x),a,a,a,a)' )&
+             'Elements are missing in the DDB.',ch10,&
+             'In block iq1: ',q1,' the following element is missing: ',ch10,&
+             '(idir1, ipert1, idir2, ipert2): ',idir1,ipert1,idir2,ipert2,ch10,&
+             'Action: add the required information in the DDB with mrgddb,',ch10,&
+             'and/or check that all irreducible perturbations have been computed.'
              MSG_ERROR(msg)
            end if
          end do

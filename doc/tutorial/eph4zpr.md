@@ -1093,11 +1093,19 @@ abifile.plot_qpsolution_skb(spin=0, kpoint=[0, 0, 0], band=4)
 ```
 
 Alternatively, one can directly use `abiopen.py` to open the SIGEPH.nc file inside the iptyhon terminal
+Execute:
+
+```
+abiopen.py teph4zpr_8o_DS1_SIGEPH.nc
+```
+
+to open the file in the ipython shell and then issue:
+
 
 ```ipython
 %matplotlib
 
-abifile.plot_qpsolution_skb(spin=0, kpoint=[0, 0, 0], band=4)
+abifile.plot_qpsolution_skb(spin=0, kpoint=[0, 0, 0], band=5)
 ```
 
 The advantage of the second approach is that you can interact with the python object in an interactive environment.
