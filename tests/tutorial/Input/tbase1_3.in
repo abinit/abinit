@@ -62,7 +62,7 @@ diemac 2.0        # Although this is not mandatory, it is worth to
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "01h.pspgth"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

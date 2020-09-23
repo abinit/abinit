@@ -47,7 +47,7 @@
  wtk  1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -539,7 +539,7 @@ end subroutine vee2udens_hu
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! PARENTS
-!!      hubbard_one,qmc_prep_ctqmc
+!!      m_forctqmc,m_hubbard_one
 !!
 !! CHILDREN
 !!      wrtout
@@ -1675,7 +1675,7 @@ end subroutine vee_slm2ylm_hu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!      wrtout

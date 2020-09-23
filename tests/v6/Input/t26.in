@@ -31,7 +31,7 @@ nband  1
 nstep 20
 ntypat  2
 toldff  2.0d-6
-typat  1 2  # Treat the two atoms as inequivalent, in order ot be able to fix the position of one of them, and not the other.
+typat  1 2  # Treat the two atoms as inequivalent, in order to be able to fix the position of one of them, and not the other.
 znucl 1 1
 
 kptopt 1
@@ -43,7 +43,7 @@ ngkpt 4 4 4
  mep_solver  0
  mep_mxstep 100.
 
- pp_dirpath "$ABI_PSPDIR"
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
  pseudos "1h.pspnc, 1h.pspnc"
 
 #%%<BEGIN TEST_INFO>

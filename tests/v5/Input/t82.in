@@ -39,7 +39,7 @@ natom 2
 xred 3*0 3*1/4
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

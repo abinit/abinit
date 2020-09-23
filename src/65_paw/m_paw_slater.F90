@@ -857,7 +857,7 @@ end subroutine paw_sigxcore
 !!    for each type of atom.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout

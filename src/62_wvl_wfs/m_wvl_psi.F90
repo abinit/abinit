@@ -79,10 +79,10 @@ contains
 !!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      calculate_energy_and_gradient,hpsitopsi,pawcprj_alloc,wrtout
+!!      calculatetailcorrection,dcopy,wrtout,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -213,10 +213,10 @@ end subroutine wvl_hpsitopsi
 !! NOTES
 !!
 !! PARENTS
-!!      afterscfloop,rhotov,setvtr,vtorho
+!!      m_afterscfloop,m_rhotov,m_setvtr,m_vtorho
 !!
 !! CHILDREN
-!!      psitohpsi,total_energies,wrtout,wvl_vtrial_abi2big,wvl_vxc_abi2big
+!!      calculatetailcorrection,dcopy,wrtout,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -340,10 +340,10 @@ end subroutine wvl_psitohpsi
 !! NOTES
 !!
 !! PARENTS
-!!      forstr,vtorho
+!!      m_forstr,m_vtorho
 !!
 !! CHILDREN
-!!      nonlocal_forces,wrtout,xmpi_sum
+!!      calculatetailcorrection,dcopy,wrtout,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -438,7 +438,7 @@ end subroutine wvl_nl_gradient
 !! NOTES
 !!
 !! PARENTS
-!!      afterscfloop
+!!      m_afterscfloop
 !!
 !! CHILDREN
 !!      calculatetailcorrection,dcopy,wrtout,xmpi_allgatherv

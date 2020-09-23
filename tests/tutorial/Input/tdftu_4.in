@@ -59,7 +59,7 @@ dmatpawu
      0.00000   -0.00010    0.00000    0.00010    0.11580
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml"
+ pseudos "Pseudodojo_paw_pbe_standard/Ni.xml, Pseudodojo_paw_pbe_standard/O.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -42,7 +42,7 @@ upawu  8.0 0.0 eV
 jpawu  0.8 0.0 eV
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml"
+ pseudos "Pseudodojo_paw_pbe_standard/Ni.xml, Pseudodojo_paw_pbe_standard/O.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

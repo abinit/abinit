@@ -87,7 +87,7 @@ contains
 !!  useupf=1 if UPF file.
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -164,7 +164,7 @@ end subroutine test_xml_xmlpaw_upf
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -251,7 +251,7 @@ end subroutine psps_init_global
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -516,7 +516,7 @@ end subroutine psps_init_from_dtset
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver,m_ddb_hdr
+!!      m_ddb_hdr,m_driver
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -736,7 +736,7 @@ end subroutine psps_copy
 !!  Only writing
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -943,7 +943,7 @@ end subroutine psps_print
 !!   path=File name.
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1235,7 +1235,7 @@ end subroutine psp2params_free
 !!  has_tvale=True if the atomic valence density is available.
 !!
 !! PARENTS
-!!      m_psps,pspini
+!!      m_pspini,m_psps
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1281,7 +1281,7 @@ end subroutine nctab_init
 !! Free memory allocated in nctab_t
 !!
 !! PARENTS
-!!      m_psps,pspini
+!!      m_pspini,m_psps
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1364,7 +1364,7 @@ end subroutine nctab_copy
 !!  nctab%d2ncdq0
 !!
 !! PARENTS
-!!      psp8in,psp9in
+!!      m_psp8,m_psp9
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1435,7 +1435,7 @@ end subroutine nctab_eval_tvalespl
 !!  nctab%dncdq0
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1508,7 +1508,7 @@ end subroutine nctab_eval_tcorespl
 !! mixtabs(ntypalch)=NC tables describing the alchemical pseudos
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init

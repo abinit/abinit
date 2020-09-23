@@ -339,10 +339,9 @@ CONTAINS  !=====================================================================
 !! paw_dmft  = structure of data for dmft
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -537,10 +536,9 @@ end subroutine init_sc_dmft
 !!
 !!
 !! PARENTS
-!!      outscfcv,vtorho
+!!      m_outscfcv,m_vtorho
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 !!
@@ -903,7 +901,6 @@ end subroutine init_dmft
 !!      m_green,m_paw_dmft
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 !!
@@ -961,7 +958,6 @@ end subroutine construct_nwli_dmft
 !!      m_paw_dmft
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 !!
@@ -1248,10 +1244,9 @@ end subroutine construct_nwlo_dmft
 !! OUTPUT
 !!
 !! PARENTS
-!!      outscfcv,vtorho
+!!      m_outscfcv,m_vtorho
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1313,10 +1308,9 @@ end subroutine destroy_dmft
 !! OUTPUT
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1368,10 +1362,9 @@ end subroutine destroy_sc_dmft
 !! OUTPUT
 !!
 !! PARENTS
-!!      outscfcv,vtorho
+!!      m_outscfcv,m_vtorho
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1460,10 +1453,9 @@ end subroutine print_dmft
 !! OUTPUT
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1526,10 +1518,9 @@ end subroutine print_sc_dmft
 !! OUTPUT
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1589,10 +1580,9 @@ end subroutine saveocc_dmft
 !!  paw_dmft: occnd
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1671,7 +1661,7 @@ end subroutine readocc_dmft
 !!  paw_dmft: bandc_proc, use_bandc
 !!
 !! PARENTS
-!!      init_sc_dmft
+!!      m_paw_dmft
 !!
 !! CHILDREN
 !!
@@ -1720,7 +1710,7 @@ end subroutine init_sc_dmft_paralkgb
 !! OUTPUT
 !!
 !! PARENTS
-!!      destroy_sc_dmft
+!!      m_paw_dmft
 !!
 !! CHILDREN
 !!

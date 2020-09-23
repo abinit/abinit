@@ -33,7 +33,7 @@
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "50sn.pspnc"
+ pseudos "PseudosTM_pwteter/50sn.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -47,7 +47,7 @@
 #%% keywords = NC
 #%% authors = Unknown
 #%% description = 
-#%%   Isolated tin atom, with 50sn.pspnc pseudopotential (Troullier-Martins),
+#%%   Isolated tin atom, with PseudosTM_pwteter/50sn.pspnc pseudopotential (Troullier-Martins),
 #%%   to be compared with the result of test 32.
 #%%   The size of the box is 12x12x12, One k-point (1/4 1/4 1/4) is used.
 #%%   8 elements of symmetry are present. The cut-off is 14 Hartree.

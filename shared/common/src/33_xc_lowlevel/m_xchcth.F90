@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xchcth
 !! NAME
 !!  m_xchcth
@@ -87,7 +86,7 @@ contains
 !! Response function not coded yet, but part of it are already present
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
 !!      invcb

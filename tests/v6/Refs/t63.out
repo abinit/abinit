@@ -351,8 +351,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      7.718   => boxcut(ratio)=   2.07907
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

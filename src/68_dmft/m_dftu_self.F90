@@ -79,7 +79,7 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      impurity_solve,spectral_function
+!!      m_dmft
 !!
 !! CHILDREN
 !!      pawpupot,wrtout

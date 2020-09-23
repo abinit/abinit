@@ -124,11 +124,10 @@ contains
 !! is constant throughout run.
 !!
 !! PARENTS
-!!      bethe_salpeter,eph,gstate,nonlinear,respfn,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_eph_driver,m_gstate,m_longwave,m_nonlinear
+!!      m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
-!!      nctab_free,nctab_init,nctab_mixalch,pawtab_set_flags,pspatm,pspcor
-!!      psps_ncwrite,psps_print,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -660,7 +659,7 @@ end subroutine pspini
 !!  ecore=resulting psion-psion energy in Hartrees
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!
@@ -794,14 +793,9 @@ end subroutine pspcor
 !!  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
-!!      nctab_eval_tcorespl,pawpsp_17in,pawpsp_7in,pawpsp_bcast
-!!      pawpsp_read_header_xml,pawpsp_read_pawheader,pawpsp_wvl,psp10in,psp1in
-!!      psp2in,psp3in,psp5in,psp6in,psp8in,psp9in,psp_dump_outputs
-!!      psxml2abheader,test_xml_xmlpaw_upf,timab,upf2abinit,wrtout
-!!      wvl_descr_psp_fill
 !!
 !! SOURCE
 
@@ -1368,7 +1362,7 @@ end subroutine pspatm
 !! (to be filled)
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
 !!

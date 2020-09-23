@@ -94,10 +94,9 @@ contains
 !!   List of empty strings if we are legacy "files file" mode. Allocated here, caller should free memory.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      get_ndevice,intagm
 !!
 !! SOURCE
 
@@ -117,10 +116,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
- integer :: treads, use_gpu_cuda, ierr
+ integer :: treads, use_gpu_cuda
  real(dp) :: cpus
  character(len=500) :: msg
- character(len=fnlen) :: pp_dirpath, shell_var
+ character(len=fnlen) :: pp_dirpath
  character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
  character(len=len(string)) :: geo_string
  type(geo_t) :: geo
@@ -481,14 +480,15 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  pp_dirpath = ""
  call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'pp_dirpath', tread, 'KEY', key_value=pp_dirpath)
  if (tread == 1) then
-   if (pp_dirpath(1:1) == "$") then
-     shell_var = pp_dirpath(2:)
-     call get_environment_variable(shell_var, pp_dirpath, status=ierr)
-     if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
-     if (ierr == +1) MSG_ERROR(sjoin(shell_var, "variable is not defined!"))
-     if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
-     call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
-   end if
+!! XG2020_07_20 Now, the replacement of environment variables is done at the level of the parser
+!  if (pp_dirpath(1:1) == "$") then
+!    shell_var = pp_dirpath(2:)
+!    call get_environment_variable(shell_var, pp_dirpath, status=ierr)
+!    if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
+!    if (ierr == +1) MSG_ERROR(sjoin(shell_var, "variable is not defined!"))
+!    if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
+!    call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
+!  end if
    if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
  end if
 
@@ -684,9 +684,9 @@ end subroutine invars0
 !!  mx<ab_dimensions>=datatype storing the maximal dimensions. Partly initialized in input.
 !!
 !! PARENTS
+!!      m_common
 !!
 !! CHILDREN
-!!      indefo1,invars1
 !!
 !! SOURCE
 
@@ -892,7 +892,7 @@ end subroutine invars1m
 !!   some of which are given a default value here.
 !!
 !! PARENTS
-!!      invars1m
+!!      m_invars1
 !!
 !! CHILDREN
 !!
@@ -1100,11 +1100,9 @@ end subroutine indefo1
 !! They should be kept consistent with defaults of the same variables provided to the invars routines.
 !!
 !! PARENTS
-!!      invars1m
+!!      m_invars1
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,chkint_ge,ingeo,inkpts,inqpt,intagm,inupper
-!!      invacuum,mkrdim,wrtout
 !!
 !! SOURCE
 
@@ -2011,7 +2009,7 @@ end subroutine invars1
 !! provided the value does not depend on runtime conditions.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
 !!
@@ -2056,7 +2054,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
  dtsets(0)%ptgroupma=0
  dtsets(0)%spgroup=0
  dtsets(0)%shiftk(:,:)=half
- dtsets(0)%tolsym=tol8
+!XG20200801 Changed the default value. This default value is also defined in m_ingeo.F90 . Must be coherent !
+!dtsets(0)%tolsym=tol8
+ dtsets(0)%tolsym=tol5
  dtsets(0)%znucl(:)=zero
  dtsets(0)%ucrpa=0
  dtsets(0)%usedmft=0
@@ -2228,6 +2228,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%fockdownsampling(:)=1
+   dtsets(idtset)%fock_icutcoul=3
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%friction=0.001_dp
    dtsets(idtset)%frzfermi=0
@@ -2248,9 +2249,15 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      dtsets(idtset)%gw_qlwl(2,1)=0.00002_dp
      dtsets(idtset)%gw_qlwl(3,1)=0.00003_dp
    end if
+   dtsets(idtset)%gw_frqim_inzgrid=0
+   dtsets(idtset)%gw_frqre_inzgrid=0
+   dtsets(idtset)%gw_frqre_tangrid=0
+   dtsets(idtset)%gw_invalid_freq=0
+   dtsets(idtset)%gw_icutcoul=6
+   dtsets(idtset)%gw_qprange=0
+   dtsets(idtset)%gw_sigxcore=0
    dtsets(idtset)%gw_sctype = GWSC_one_shot
    dtsets(idtset)%gw_toldfeig=0.1/Ha_eV
-
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
@@ -2283,8 +2290,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      dtsets(idtset)%iatsph(:)=0
    end if
    dtsets(idtset)%iboxcut=0
-   dtsets(idtset)%icsing=6
-   dtsets(idtset)%icutcoul=6
+   dtsets(idtset)%icutcoul=3
    dtsets(idtset)%ieig2rf=0
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%intxc=0
@@ -2381,6 +2387,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !
    !nline
    dtsets(idtset)%nline=4
+
    if(dtsets(idtset)%usewvl==1 .and. .not. wvl_bigdft) then
      if(dtsets(idtset)%usepaw==1) then
        dtsets(idtset)%nline=4
@@ -2489,7 +2496,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtkpt = -1
    dtsets(idtset)%prtwf=1; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
-   !if (dtset%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
+   !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    do ii=1,dtsets(idtset)%natom,1
      dtsets(idtset)%prtatlist(ii)=ii
    end do
@@ -2563,6 +2570,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
+
    dtsets(idtset)%tsmear=0.01_dp
 !  U
    dtsets(idtset)%ucrpa_bands(:)=-1
@@ -2578,7 +2586,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%useylm=0
 !  V
    dtsets(idtset)%vacnum = -1
-   dtsets(idtset)%vcutgeo(:)=zero
+   dtsets(idtset)%vcutgeo(3)=zero
    dtsets(idtset)%vdw_nfrag = 1
 #if defined DEV_YP_VDWXC
    dtsets(idtset)%vdw_df_acutmin = vdw_defaults%acutmin
@@ -2637,6 +2645,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ziontypat(:)=zero
 
    dtsets(idtset)%bs_loband=0
+
+   !if (dtsets(idtset)%optdriver == RUNL_EPH) then
+   !  dtsets(idtset)%mixprec = 1
+   !  dtsets(idtset)%boxcutmin = 1.1_dp
+   !end if
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
 ! They might be initialized somewhereelse, I don't know.

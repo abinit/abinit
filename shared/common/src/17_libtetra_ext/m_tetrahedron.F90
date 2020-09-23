@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_tetrahedron
 !! NAME
 !! m_tetrahedron
@@ -131,10 +130,10 @@ contains
 !! deallocate tetrahedra pointers if needed
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_epjdos
-!!      m_fstab,m_gruneisen,m_phgamma,m_phonons,thmeig,wfk_analyze
+!!      m_epweights,m_phgamma,m_thmeig,m_unittests
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -187,10 +186,10 @@ end subroutine destroy_tetra
 !!  tetra%vv = tetrahedron volume divided by full BZ volume
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_fstab,m_kpts,m_phonons
-!!      thmeig
+!!      m_epweights,m_phgamma,m_thmeig,m_unittests
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -556,9 +555,9 @@ end subroutine init_tetra
 !!  Output is written to file.
 !!
 !! PARENTS
-!!      gstate,wfk_analyze
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -656,9 +655,10 @@ end subroutine tetra_write
 !!  dtweightde(nkpt,nene) = derivative of tweight wrt energy
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,thmeig
+!!      m_epweights,m_thmeig
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -708,9 +708,10 @@ end subroutine get_tetra_weight
 !! Same API as get_tetra_weight but output weights here have shape (nene, nkpt)
 !!
 !! PARENTS
-!!      m_fstab,m_phonons,m_tetrahedron
+!!      m_tetrahedron,m_unittests
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -833,8 +834,10 @@ end subroutine tetra_blochl_weights
 !!  dtweightde(nkpt,nene1,nene2) = derivative of tweight wrt energy
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1328,6 +1331,7 @@ end subroutine get_dbl_tetra_weight
 !!      m_tetrahedron
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1467,6 +1471,7 @@ end function tetralib_has_mpi
 !!      m_tetrahedron
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1853,9 +1858,9 @@ end subroutine get_onetetra_
 !!    for a given (band, k-point, spin).
 !!
 !! PARENTS
-!!      m_ebands,m_epjdos,m_gruneisen,m_phgamma
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1936,6 +1941,7 @@ end subroutine tetra_get_onewk
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -2031,6 +2037,7 @@ end subroutine tetra_get_onewk_wvals
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 

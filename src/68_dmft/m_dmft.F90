@@ -93,16 +93,12 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      check_fourier_green,compute_energy,compute_green,compute_dftu_energy
-!!      data4entropydmft_setdc,data4entropydmft_sethu,dc_self,destroy_energy
-!!      destroy_green,destroy_hu,destroy_self,diff_oper,dyson,fermi_green
-!!      icip_green,impurity_solve,init_energy,init_green,init_hu
-!!      initialize_self,integrate_green,local_ks_green,make_qmcshift_self
-!!      new_self,print_self,printocc_green,psichi_renormalization,rw_self
-!!      m_spectral_function,timab,wrtout
+!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
+!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
+!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -584,9 +580,9 @@ end subroutine dmft_solve
 !!      m_dmft
 !!
 !! CHILDREN
-!!      copy_green,destroy_green_tau,flush_unit,fourier_green,m_hubbard_one
-!!      init_green_tau,integrate_green,dftu_self,print_green,print_matlu
-!!      printocc_green,qmc_prep_ctqmc,timab,trace_oper,wrtout
+!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
+!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
+!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -847,10 +843,12 @@ end subroutine impurity_solve
 !! NOTES
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
-!!      add_matlu,copy_green,destroy_green,init_green,inverse_oper,timab,wrtout
+!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
+!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
+!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -970,7 +968,7 @@ end subroutine dyson
 !!
 !! CHILDREN
 !!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dyson,hubbard_one,init_green,initialize_self,dftu_self,print_green
+!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
 !!      rw_self,wrtout
 !!
 !! SOURCE

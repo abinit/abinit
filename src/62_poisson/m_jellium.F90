@@ -75,7 +75,7 @@ contains
 !!   updated initial electronic density
 !!
 !! PARENTS
-!!      extraprho,gstate,setvtr
+!!      m_extraprho,m_gstate,m_setvtr
 !!
 !! CHILDREN
 !!      fourdp

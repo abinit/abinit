@@ -207,10 +207,10 @@ CONTAINS  !===========================================================
 !!  string= contains on output the content of the file, ready for parsing.
 !!
 !! PARENTS
-!!      abinit,m_ab7_invars_f90,ujdet
+!!      m_common,m_dtfil,ujdet
 !!
 !! CHILDREN
-!!      importxyz,instrng,intagm,inupper,xmpi_bcast
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -250,11 +250,12 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
    ! Might import data from xyz file(s) into string
    ! Need string_raw to deal properly with xyz filenames
+   ! TODO: This capabilty can now be implemented via the structure:"xyx:path" variable
    lenstr_noxyz = lenstr
    call importxyz(lenstr,string_raw,string,strlen)
 
    ! Make sure we don't have unmatched quotation marks
-   if (mod(char_count(string, '"'), 2) /= 0) then
+   if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
      MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
    end if
 
@@ -280,7 +281,12 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  end if
 
  ! Save input string in global variable so that we can access it in ntck_open_create
+ ! XG20200720 : Why not saving string ? string_raw is less processed than string ...
+ ! MG: Because the string will be use by python or users to recreate an input file.
+ ! and input file in lower-case is nicer
  INPUT_STRING = string_raw
+
+ !write(std_out,'(a)')string(:lenstr)
 
 end subroutine parsefile
 !!***
@@ -313,9 +319,10 @@ end subroutine parsefile
 !!  errcod, =0 for success, 1,2 for ini, inr failure resp.
 !!
 !! PARENTS
-!!      adini,inarray
+!!      m_bader,m_parser
 !!
 !! CHILDREN
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -512,11 +519,15 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit
+ integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
+ integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign
  logical :: include_found, ex
+!arrays
+ integer :: bs(2)
  character(len=1) :: string1
  character(len=3) :: string3
  character(len=500) :: filnam_inc,msg
+ character(len=fnlen) :: shell_var, shell_value
  character(len=fnlen+20) :: line
  character(len=strlen),pointer :: string_inc
 
@@ -609,6 +620,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
 
    ! Checks that nothing is left beyond fnlen
    if(ii>fnlen)then
+     !write(std_out, *)"line: `", line(1:fnlen+20), "`"
      do ij=fnlen+1,ii
        if(line(ij:ij)/=' ')then
          write(msg,'(3a,i0,3a,i0,3a)' ) &
@@ -749,8 +761,78 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  nline1=iline-1
  close (unit=input_unit)
 
+!DEBUG
+!    write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
+!ENDDEBUG
+
+!Substitute environment variables, if any
+ b1=0
+ do
+   b1=b1+1
+   b1 = index(string(b1:lenstr), '$')
+   if(b1==0 .or. b1>=lenstr)exit
+   !Identify delimiter, either a '"', or a "'", or a blank, or a /
+   b2=index(string(b1+1:lenstr),'"')
+   b3=index(string(b1+1:lenstr),"'")
+   if(b3/=0 .and. b3<b2)b2=b3
+   b3=index(string(b1+1:lenstr),' ')
+   if(b3/=0 .and. b3<b2)b2=b3
+   b3=index(string(b1+1:lenstr),'/')
+   if(b3/=0 .and. b3<b2)b2=b3
+   if(b2/=0)then
+     shell_var=string(b1+1:b1+b2-1)
+!DEBUG
+!write(std_out,'(a,a)')' shell_var=',shell_var(:b2-1)
+!ENDDEBUG
+     call get_environment_variable(shell_var(:b2-1),shell_value,status=ierr,length=len_val)
+     if (ierr == -1) MSG_ERROR(sjoin(shell_var(:b2-1), "is present but value of environment variable is too long"))
+     if (ierr == +1) MSG_ERROR(sjoin(shell_var(:b2-1), "environment variable is not defined!"))
+     if (ierr == +2) MSG_ERROR(sjoin(shell_var(:b2-1), "used in input file but processor does not support environment variables"))
+     call wrtout(std_out, sjoin(shell_var(:b2-1), " found in environment, with value ",shell_value(:len_val)))
+     string(1:lenstr-(b2-b1)+len_val)=string(1:b1-1)//shell_value(:len_val)//string(b1+b2:lenstr)
+     lenstr=lenstr-(b2-b1)+len_val
+   endif
+ enddo
+!DEBUG
+!write(std_out,'(a)')string(:lenstr)
+!ENDDEBUG
+
+!Identify concatenate string '" // "' with an arbitrary number of blanks before and after the //
+!Actually, at this stage, there is no consecutive blanks left...
+ do
+   b1 = index(string(1:lenstr), '//')
+   if(b1/=0)then
+     !See whether there are preceeding and following '"'
+     do sign=-1,1,2
+       isign=(1+sign)/2  !  0 for minus sign, 1 for plus sign
+       do ii=1,lenstr
+         shift=-ii+isign*(1+2*ii)  !  -ii for minus sign,  1+ii for plus sign
+         if( (isign==0 .and. b1+shift<1) .or. (isign==1 .and. b1+shift>lenstr) )then
+           bs(isign+1)=0 ; exit
+         endif
+         if (string(b1+shift:b1+shift)=='"') then
+           bs(isign+1)=shift ; exit
+         else if (string(b1+shift:b1+shift)/=' ') then
+           bs(isign+1)=0 ; exit
+         endif
+       enddo
+       if(bs(isign+1)==0)exit
+     enddo
+     if(bs(1)==0 .or. bs(2)==0)exit
+     !the two shifts have been found, they give delimiters of the '" // "' chain
+     string(1:lenstr-4)=string(1:b1+bs(1)-1)//string(b1+bs(2)+1:lenstr)
+     lenstr=lenstr+bs(1)-1-bs(2)
+   else
+     exit
+   endif
+ enddo
+
+!DEBUG
+!write(std_out,'(a,a)')' incomprs : 2, string=',string(:lenstr)
+!ENDDEBUG
+
  ! Make sure we don't have unmatched quotation marks
- if (mod(char_count(string, '"'), 2) /= 0) then
+ if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
    MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
  end if
 
@@ -758,7 +840,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
 
  write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
  call wrtout(std_out,msg)
- !write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
+ !write(std_out, "(3a)")"string after instrng:", ch10, string(:lenstr)
 
  DBG_EXIT("COLL")
 
@@ -784,9 +866,10 @@ end subroutine instrng
 !!  string=same character string with ASCII (decimal) 0-31 replaced by 32.
 !!
 !! PARENTS
-!!      incomprs
+!!      m_parser
 !!
 !! CHILDREN
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -846,10 +929,10 @@ end subroutine inreplsp
 !!                    remaining tabs have been replaced by blanks
 !!
 !! PARENTS
-!!      importxyz,instrng
+!!      m_parser
 !!
 !! CHILDREN
-!!      inreplsp
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -864,6 +947,7 @@ subroutine incomprs(string,length)
  character(len=1) :: blank=' '
 !scalars
  integer :: bb,f1,ii,jj,kk,l1,lbef,lcut,lold,stringlen
+!arrays
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -1037,12 +1121,12 @@ end subroutine incomprs
 !!
 !!
 !! PARENTS
-!!      ingeo,ingeobld,inkpts,inqpt,invacuum,invars0,invars1,invars2
-!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_parser
-!!      m_multibinit_dataset,m_scup_dataset,macroin,mpi_setup,parsefile,ujdet
+!!      m_anaddb_dataset,m_band2eps_dataset,m_dtfil,m_dtset,m_ingeo,m_inkpts
+!!      m_invars1,m_invars2,m_mpi_setup,m_multibinit_dataset,m_parser
+!!      m_scup_dataset,ujdet
 !!
 !! CHILDREN
-!!      appdig,inarray,inupper,wrtout
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -1624,7 +1708,7 @@ end subroutine intagm
 !! PARENTS
 !!
 !! CHILDREN
-!!      intagm
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -1755,7 +1839,7 @@ end subroutine intagm_img_1D
 !! PARENTS
 !!
 !! CHILDREN
-!!      intagm
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -1909,10 +1993,10 @@ end subroutine intagm_img_2D
 !!   b1=absolute location in string of blank which follows the token (will be modified in the execution)
 !!
 !! PARENTS
-!!      intagm
+!!      m_parser
 !!
 !! CHILDREN
-!!      inread,wrtout
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2089,10 +2173,10 @@ end subroutine inarray
 !!   the string (with upper case) from the input file, to which the xyz data are appended to it
 !!
 !! PARENTS
-!!      m_ab7_invars_f90,parsefile
+!!      m_parser
 !!
 !! CHILDREN
-!!      append_xyz,incomprs,wrtout
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2211,10 +2295,10 @@ end subroutine importxyz
 !!  string*(strln)=string of characters  (upper case) to which the xyz data are appended
 !!
 !! PARENTS
-!!      importxyz
+!!      m_parser
 !!
 !! CHILDREN
-!!      atomdata_from_symbol,wrtout
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2390,10 +2474,10 @@ end subroutine append_xyz
 !! for the time being, at most 3 conditions are allowed.
 !!
 !! PARENTS
-!!      chkinp
+!!      m_chkinp
 !!
 !! CHILDREN
-!!      wrtout
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2528,10 +2612,10 @@ end subroutine chkdpr
 !!  Conditional cases (examples to be provided - see chkinp.f for the time being)
 !!
 !! PARENTS
-!!      chkinp
+!!      m_chkinp
 !!
 !! CHILDREN
-!!      chkint_prt
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2614,10 +2698,10 @@ end subroutine chkint
 !! for the time being, at most 3 conditions are allowed.
 !!
 !! PARENTS
-!!      chkinp,m_psps
+!!      m_chkinp,m_psps
 !!
 !! CHILDREN
-!!      chkint_prt
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2699,10 +2783,10 @@ end subroutine chkint_eq
 !! for the time being, at most 3 conditions are allowed.
 !!
 !! PARENTS
-!!      chkinp,invars1
+!!      m_chkinp,m_invars1
 !!
 !! CHILDREN
-!!      chkint_prt
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2785,10 +2869,10 @@ end subroutine chkint_ge
 !! for the time being, at most 3 conditions are allowed.
 !!
 !! PARENTS
-!!      chkinp
+!!      m_chkinp
 !!
 !! CHILDREN
-!!      chkint_prt
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2873,10 +2957,10 @@ end subroutine chkint_le
 !! for the time being, at most 3 conditions are allowed.
 !!
 !! PARENTS
-!!      chkinp
+!!      m_chkinp
 !!
 !! CHILDREN
-!!      chkint_prt
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2979,10 +3063,10 @@ end subroutine chkint_ne
 !!  Conditional cases (examples to be provided - see chkinp.f for the time being)
 !!
 !! PARENTS
-!!      chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne
+!!      m_parser
 !!
 !! CHILDREN
-!!      wrtout
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -3137,10 +3221,10 @@ end subroutine chkint_prt
 !!  (only writing)
 !!
 !! PARENTS
-!!      outvar_a_h,outvar_i_n,outvar_o_z,pawuj_det,prttagm_images
+!!      m_outvar_a_h,m_outvar_i_n,m_outvar_o_z,m_parser,m_paw_uj
 !!
 !! CHILDREN
-!!      appdig,write_var_netcdf
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -3481,10 +3565,10 @@ end subroutine prttagm
 !!  (only writing)
 !!
 !! PARENTS
-!!      outvar_a_h,outvar_i_n,outvar_o_z
+!!      m_outvar_a_h,m_outvar_i_n,m_outvar_o_z
 !!
 !! CHILDREN
-!!      appdig,prttagm,write_var_netcdf
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -3666,9 +3750,10 @@ end subroutine prttagm_images
 !!  Abort if variable name is not recognized.
 !!
 !! PARENTS
-!!      chkvars,m_anaddb_dataset
+!!      m_anaddb_dataset,m_dtset
 !!
 !! CHILDREN
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -4221,6 +4306,11 @@ end function geo_from_poscar_unit
 !! FUNCTION
 !!  Print Abinit variables corresponding to POSCAR
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!      intagm,intagm_img
+!!
 !! SOURCE
 
 subroutine geo_print_abivars(self, unit)
@@ -4344,6 +4434,11 @@ end function geo_from_netcdf_path
 !! FUNCTION
 !!  Brodcast object
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!      intagm,intagm_img
+!!
 !! SOURCE
 
 subroutine geo_bcast(self, master, comm)
@@ -4385,6 +4480,11 @@ end subroutine geo_bcast
 !! FUNCTION
 !!  Allocate memory once %natom and %ntypat are know
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!      intagm,intagm_img
+!!
 !! SOURCE
 
 subroutine geo_malloc(self)
@@ -4407,6 +4507,11 @@ end subroutine geo_malloc
 !!
 !! FUNCTION
 !!  Free memory.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -4443,6 +4548,12 @@ end subroutine geo_free
 !! rprim(3,3)=dimensionless real space primitive translations
 !!
 !! FUNCTION
+!!
+!! PARENTS
+!!      m_ingeo,m_parser
+!!
+!! CHILDREN
+!!      intagm,intagm_img
 !!
 !! SOURCE
 

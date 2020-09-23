@@ -38,7 +38,7 @@ zcut               0.15 eV # complex shift to avoid divergences in the continued
 
 ecutwfn 8.0               # Cutoff for the wavefunction.
 inclvkb 2
-icutcoul 3                # Legacy value
+gw_icutcoul 3                # Legacy value
 
 # VARIABLES COMMON TO THE DIFFERENT DATASETS
 
@@ -71,7 +71,7 @@ diemac 12.0
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

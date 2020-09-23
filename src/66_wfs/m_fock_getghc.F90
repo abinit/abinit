@@ -25,7 +25,6 @@ module m_fock_getghc
 
  use defs_basis
  use m_abicore
- use m_dtset
  use m_errors
  use m_xmpi
  use m_fock
@@ -91,12 +90,10 @@ contains
 !!   * all the data for the occupied states (cgocc_bz) are the same as those for the current states (cg)
 !!
 !! PARENTS
-!!      fock2ACE,forstrnps,getghc
+!!      m_fock_getghc,m_forstr,m_getghc
 !!
 !! CHILDREN
-!!      bare_vqg,dotprod_g,fftpac,fourdp,fourwf,hartre,load_kprime_hamiltonian
-!!      matr3inv,nonlop,pawdijhat,pawmknhat_psipsi,sphereboundary,strfock,timab
-!!      xmpi_sum
+!!      dotprod_g
 !!
 !! SOURCE
 
@@ -105,7 +102,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !Arguments ------------------------------------
 ! Scalars
  type(MPI_type),intent(in) :: mpi_enreg
- type(dataset_type) :: dtset
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
  type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
@@ -316,7 +312,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    call timab(1515,1,tsec)
    qvec_j(:)=gs_ham%kpt_k(:)-fockbz%kptns_bz(:,jkpt)
    qeq0=(qvec_j(1)**2+qvec_j(2)**2+qvec_j(3)**2<1.d-15)
-   call bare_vqg(qvec_j,fockcommon%gsqcut,dtset%icutcoul,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
+   call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
 &   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
    call timab(1515,2,tsec)
 
@@ -805,14 +801,10 @@ end subroutine fock_getghc
 !! if optfor=1, fock%fock_common%forces
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
-!!      dotprod_g,fock_getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free
-!!      pawcprj_get,pawcprj_reorder,prep_bandfft_tabs,timab,xmpi_sum,zpotrf
-!!      ztrtrs
+!!      dotprod_g
 !!
 !! SOURCE
 
@@ -1217,7 +1209,7 @@ end subroutine fock2ACE
 !!   * all the data for the occupied states (cgocc_bz) are the same as those for the current states (cg)
 !!
 !! PARENTS
-!!      getghc
+!!      m_getghc
 !!
 !! CHILDREN
 !!      dotprod_g

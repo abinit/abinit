@@ -141,7 +141,7 @@ contains
 !!                contains a non-symmorphic fractional translation.
 !!
 !! PARENTS
-!!      sigma,wfk_analyze
+!!      m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -567,7 +567,7 @@ end subroutine classify_bands
 !!  Note that atom a might be in a cell different from the initial one. No wrapping is done.
 !!
 !! PARENTS
-!!      classify_bands
+!!      m_classify_bands
 !!
 !! CHILDREN
 !!

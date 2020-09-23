@@ -49,7 +49,7 @@ diemac 1.0
 diemix 0.5
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "26fe.pspnc"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -110,7 +110,7 @@
  wtk   1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "01h.pspgth, 8o.pspnc, 14si.pspnc"
+ pseudos "PseudosGTH_pwteter/01h.pspgth, PseudosTM_pwteter/8o.pspnc, PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

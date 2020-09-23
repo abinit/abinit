@@ -37,13 +37,14 @@ module m_sigtk
  use m_nctk
  use m_hdr
  use m_dtset
+ use m_krank
 
  use m_fstrings,     only : sjoin, ltoa, strcat, itoa, ftoa
  use m_io_tools,     only : open_file
  use defs_datatypes, only : ebands_t, pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
  use m_pawtab,       only : pawtab_type
- use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
+ use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
 
  implicit none
 
@@ -77,8 +78,12 @@ contains  !=====================================================
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 
@@ -156,8 +161,12 @@ end subroutine sigtk_kcalc_from_nkptgw
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 
@@ -253,8 +262,12 @@ end subroutine sigtk_kcalc_from_qprange
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 
@@ -348,8 +361,12 @@ end subroutine sigtk_kcalc_from_gaps
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 
@@ -375,6 +392,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  real(dp) :: cmin, vmax, ee, dksqmax
  logical :: assume_gap
  character(len=500) :: msg
+ type(krank_t) :: krank
 !arrays
  integer :: kptrlatt(3,3), unts(1)
  integer,allocatable :: ib_work(:,:,:), sigmak2ebands(:), indkk(:,:)
@@ -409,10 +427,13 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
     ! Map tmp_kcalc to ebands%kpts
     timrev = kpts_timrev_from_kptopt(ebands%kptopt)
-    ABI_MALLOC(indkk, (tmp_nkpt,  6))
 
-    call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, tmp_kcalc, ebands%nkpt, tmp_nkpt, cryst%nsym, &
-                1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+    ABI_MALLOC(indkk, (6, tmp_nkpt))
+
+    krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+    call krank%get_mapping(tmp_nkpt, tmp_kcalc, dksqmax, cryst%gmet, indkk, &
+                           cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
+    call krank%free()
 
     if (dksqmax > tol12) then
       write(msg, '(a,es16.6,2a)' )&
@@ -422,7 +443,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     end if
 
     ABI_MALLOC(sigmak2ebands, (tmp_nkpt))
-    sigmak2ebands = indkk(:, 1)
+    sigmak2ebands = indkk(1, :)
     ABI_FREE(tmp_kcalc)
     ABI_FREE(indkk)
 
@@ -553,8 +574,12 @@ end subroutine sigtk_kcalc_from_erange
 !!  comm: MPI communicator.
 !!
 !! PARENTS
+!!      m_wfk_analyze
 !!
 !! CHILDREN
+!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
+!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
+!!      wrtout
 !!
 !! SOURCE
 

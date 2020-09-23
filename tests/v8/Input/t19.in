@@ -39,7 +39,7 @@
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "8o.pspnc"
+ pseudos "PseudosTM_pwteter/8o.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

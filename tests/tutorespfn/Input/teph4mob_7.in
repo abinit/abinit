@@ -88,7 +88,7 @@ nband 8
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi, 33as.pspnc"
+ pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -96,9 +96,9 @@ nband 8
 #%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
 #%% [files]
 #%% files_to_test =
-#%%   teph4mob_7.out, tolnlines= 57, tolabs=  30, tolrel= 0.03;
+#%%   teph4mob_7.out, tolnlines= 57, tolabs=  80, tolrel= 0.05;
 #%%   teph4mob_7o_DS1_SERTA_KAPPA, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_MRTA_KAPPA, tolnlines= 50, tolabs= 1.2e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_KAPPA, tolnlines= 50, tolabs= 1.5e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_MRTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
@@ -111,5 +111,5 @@ nband 8
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH, RTA
 #%% description =
-#%%   E-ph for the mobility in semiconductors
+#%%   E-ph for mobility in semiconductors
 #%%<END TEST_INFO>

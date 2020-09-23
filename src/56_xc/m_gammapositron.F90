@@ -83,10 +83,10 @@ contains
 !!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
 !!
 !! PARENTS
-!!      gammapositron_fft,poslifetime,posratecore
+!!      m_gammapositron,m_positron
 !!
 !! CHILDREN
-!!      invcb
+!!      gammapositron,xcden
 !!
 !! SOURCE
 
@@ -299,7 +299,7 @@ end subroutine gammapositron
 !!  (call mkdenpos routine before entering this one)
 !!
 !! PARENTS
-!!      posdoppler,poslifetime
+!!      m_positron
 !!
 !! CHILDREN
 !!      gammapositron,xcden

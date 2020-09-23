@@ -391,8 +391,8 @@ CONTAINS  !=====================================================================
 !!  Kmesh<kmesh_t>=Datatype gathering information on the k point sampling.
 !!
 !! PARENTS
-!!      cchi0q0_intraband,gwls_hamiltonian,m_bz_mesh,mlwfovlp_qp,mrgscr
-!!      setup_bse,setup_bse_interp,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_bz_mesh,m_chi0,m_gwls_hamiltonian,m_mlwfovlp_qp
+!!      m_screening_driver,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -555,8 +555,8 @@ end subroutine kmesh_init
 !! Kmesh<kmesh_t>=The datatype to be freed.
 !!
 !! PARENTS
-!!      bethe_salpeter,cchi0q0_intraband,gwls_hamiltonian,m_shirley,mlwfovlp_qp
-!!      mrgscr,screening,sigma
+!!      m_bethe_salpeter,m_chi0,m_gwls_hamiltonian,m_mlwfovlp_qp
+!!      m_screening_driver,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -611,8 +611,8 @@ end subroutine kmesh_free
 !!  Only printing.
 !!
 !! PARENTS
-!!      gwls_hamiltonian,mrgscr,setup_bse,setup_bse_interp,setup_screening
-!!      setup_sigma
+!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
+!!      mrgscr
 !!
 !! CHILDREN
 !!
@@ -877,11 +877,10 @@ end subroutine setup_k_rotation
 !! [isirred]=.TRUE. if the k-point belongs to IBZ.
 !!
 !! PARENTS
-!!      calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_ucrpa,cchi0,cchi0q0
-!!      cchi0q0_intraband,cohsex_me,debug_tools,exc_build_block,exc_build_ham
-!!      m_dyson_solver,m_ppmodel,m_screen,m_screening,m_shirley,m_vcoul,m_wfd
-!!      paw_symcprj,prep_calc_ucrpa,random_stopping_power,read_plowannier
-!!      setup_bse,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_calc_ucrpa,m_chi0,m_cohsex,m_dyson_solver
+!!      m_exc_build,m_paw_sym,m_plowannier,m_ppmodel,m_prep_calc_ucrpa
+!!      m_read_plowannier,m_screen,m_screening,m_screening_driver,m_sigc
+!!      m_sigma_driver,m_sigx,m_vcoul,m_wfd,m_wfd_optic
 !!
 !! CHILDREN
 !!
@@ -945,7 +944,7 @@ end subroutine get_bz_item
 !!  Add mapping ibz2bz, ibz2star
 !!
 !! PARENTS
-!!      paw_symcprj
+!!      m_paw_sym
 !!
 !! CHILDREN
 !!
@@ -994,7 +993,7 @@ end subroutine get_IBZ_item
 !!  nfound= the number of points in the BZ that are equal to k1-k2 (should be 1 if everything is OK)
 !!
 !! PARENTS
-!!      cchi0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1328,7 +1327,7 @@ end function bz_mesh_isirred
 !! Kmesh<kmesh_t>=Object gathering info on the sampling of the Brillouin zone.
 !!
 !! PARENTS
-!!      m_shirley,setup_bse,setup_bse_interp
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!
@@ -1664,7 +1663,7 @@ end subroutine identk
 !!  opt_ng0(3)=Minimal reduced components of the G0 vectors to account for umklapps.
 !!
 !! PARENTS
-!!      setup_bse,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -1857,7 +1856,7 @@ end subroutine getkptnorm_bycomponent
 !!    contain the path in reduced coordinates.
 !!
 !! PARENTS
-!!      m_bz_mesh,m_nesting,m_phonons,mkph_linwid
+!!      m_bz_mesh,m_elphon,m_nesting,m_phonons
 !!
 !! CHILDREN
 !!
@@ -1966,8 +1965,8 @@ end subroutine make_path
 !!  Qmesh<kmesh_t>=datatype gathering information on the q point sampling.
 !!
 !! PARENTS
-!!      gwls_hamiltonian,mrgscr,setup_bse,setup_bse_interp,setup_screening
-!!      setup_sigma
+!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
+!!      mrgscr
 !!
 !! CHILDREN
 !!
@@ -2222,8 +2221,8 @@ end subroutine findq
 !!  g0(3)=reciprocal space vector, to be used in igfft
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,m_gkk,m_phpi
-!!      m_sigma,prep_calc_ucrpa
+!!      m_cohsex,m_exc_build,m_gkk,m_phpi,m_prep_calc_ucrpa,m_sigc,m_sigma
+!!      m_sigx
 !!
 !! CHILDREN
 !!
@@ -2404,7 +2403,7 @@ end subroutine findqg0
 !!   must be considered in the calculation of \chi_o, 0 otherwise
 !!
 !! PARENTS
-!!      cchi0q0_intraband,setup_screening,sigma
+!!      m_chi0,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -2818,7 +2817,7 @@ end subroutine littlegroup_free_1D
 !!  Only printing
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
+!!      m_chi0,m_cohsex,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!
@@ -3050,7 +3049,6 @@ end function kpath_new
 !!  Free memory allocated in the object
 !!
 !! PARENTS
-!!      m_ebands,m_gruneisen,m_ifc,m_phgamma,m_phonons,wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -3092,7 +3090,6 @@ end subroutine kpath_free
 !!  Only printing
 !!
 !! PARENTS
-!!      m_ebands,m_gruneisen,m_phgamma
 !!
 !! CHILDREN
 !!

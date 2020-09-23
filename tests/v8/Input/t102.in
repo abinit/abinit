@@ -1,5 +1,5 @@
 ##############################################################################
-#Test for multibinit. Impose atom constraines for relaxation
+#Test for multibinit. Impose atom constraints for relaxation
 ##############################################################################
 
 #---------------------------------------------------------------
@@ -55,6 +55,6 @@ iatfixz = 6 9 10
 #%% authors = M. M. Schmitt
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%         Impose a few random constraines to relaxation with broyden and effective potential
+#%%         Impose a few random constraints to relaxation with Broyden and effective potential
 #%% topics = LatticeModel,DynamicsMultibinit
 #%%<END TEST_INFO>

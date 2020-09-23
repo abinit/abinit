@@ -124,7 +124,8 @@ end subroutine epsilon_k_model
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy,gwls_DielectricArray,gwls_GenerateEpsilon
+!!      m_gwls_ComputeCorrelationEnergy,m_gwls_DielectricArray
+!!      m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!      epsilon_k_model
@@ -273,7 +274,7 @@ end subroutine setup_Pk_model
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy
+!!      m_gwls_ComputeCorrelationEnergy
 !!
 !! CHILDREN
 !!      epsilon_k_model
@@ -323,7 +324,7 @@ end subroutine cleanup_Pk_model
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_model_polarisability
+!!      m_gwls_model_polarisability
 !!
 !! CHILDREN
 !!      epsilon_k_model
@@ -362,7 +363,7 @@ end subroutine Pk_model
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_model_polarisability
+!!      m_gwls_model_polarisability
 !!
 !! CHILDREN
 !!      epsilon_k_model
@@ -623,7 +624,7 @@ end subroutine Pk_model_implementation_1
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_GenerateEpsilon
+!!      m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!      epsilon_k_model

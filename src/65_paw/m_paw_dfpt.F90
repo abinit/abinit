@@ -135,11 +135,9 @@ CONTAINS  !=====================================================================
 !!      paw_ij1(natom)%diju(cplex_a*lmn2_size)=DFT+U contribution to Dij^(j1)
 !!
 !! PARENTS
-!!      dfpt_nstpaw,newfermie1
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_pert
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawdensities,pawdijhartree,pawxc_dfpt
-!!      pawxcm_dfpt,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -489,13 +487,9 @@ end subroutine pawdfptenergy
 !!   several data are gathered and no more distributed inside this routine.
 !!
 !! PARENTS
-!!      d2frnl,etotfor,forstr
+!!      m_d2frnl,m_forstr,m_scfcv_core
 !!
 !! CHILDREN
-!!      pawgrnl_convert,destroy_distribfft,dfpt_atm2fft,free_my_atmtab
-!!      get_my_atmtab,init_distribfft_seq,metric,pawexpiqr,pawfgrtab_free
-!!      pawfgrtab_gather,pawfgrtab_nullify,pawgylm,pawrfgd_fft,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,stresssym,xmpi_sum
 !!
 !! SOURCE
 
@@ -1950,6 +1944,11 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !!  mu4(4) = input : array with index for the second derivative of gylm
 !!           output: the 4 indexes for the calculation of the second derivative of gylm
 !!
+!! PARENTS
+!!      m_paw_dfpt
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
@@ -2035,7 +2034,7 @@ end subroutine pawgrnl
 !! atom type.
 !!
 !! PARENTS
-!!      berryphase_new
+!!      m_berryphase_new
 !!
 !! CHILDREN
 !!

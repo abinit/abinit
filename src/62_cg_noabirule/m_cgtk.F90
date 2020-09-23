@@ -73,13 +73,13 @@ contains
 !!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) !*ndat),
 !!
 !! PARENTS
-!!      m_phgamma,m_sigmaph,m_wfk
+!!      m_sigmaph,m_wfd,m_wfk
 !!
 !! NOTES
 !!  Inspired to wfconv.
 !!
 !! CHILDREN
-!!      getph,getspinrot,mati3inv,ph1d3d,sphere
+!!      sphere
 !!
 !! SOURCE
 
@@ -236,8 +236,10 @@ end subroutine cgtk_rotate
 !!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) = Workspace array
 !!
 !! PARENTS
+!!      m_wfd
 !!
 !! CHILDREN
+!!      sphere
 !!
 !! SOURCE
 

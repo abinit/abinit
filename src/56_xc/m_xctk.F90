@@ -83,8 +83,8 @@ contains
 !!    in electrons/bohr**5 (in case of meta GGA)
 !!
 !! PARENTS
-!!      afterscfloop,dfpt_mkvxcgga,dfpt_mkvxcstrgga,gammapositron_fft
-!!      rhohxcpositron,rhotoxc
+!!      m_afterscfloop,m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_electronpositron
+!!      m_gammapositron,m_rhotoxc
 !!
 !! CHILDREN
 !!      fourdp,phase,ptabs_fourdp,timab
@@ -385,7 +385,7 @@ end subroutine xcden
 !!   the gradient of vxctau (gvxctau) which will be computed here in vxctau(:,:,2:4).
 !!
 !! PARENTS
-!!      dfpt_mkvxcgga,dfpt_mkvxcstrgga,rhotoxc
+!!      m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_newvtr,m_rhotoxc
 !!
 !! CHILDREN
 !!      fourdp,phase,ptabs_fourdp,timab

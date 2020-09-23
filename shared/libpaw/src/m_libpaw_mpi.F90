@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_libpaw_mpi
 !! NAME
 !!  m_libpaw_mpi
@@ -200,7 +199,7 @@ CONTAINS  !===========================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -349,7 +348,7 @@ end function xpaw_mpi_comm_size
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -397,7 +396,7 @@ end subroutine xpaw_mpi_barrier
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -441,7 +440,7 @@ end subroutine xpaw_mpi_wait
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -488,7 +487,7 @@ end subroutine xpaw_mpi_waitall
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -538,7 +537,7 @@ end subroutine xpaw_mpi_iprobe
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -585,7 +584,7 @@ end subroutine xpaw_mpi_allgather_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -632,7 +631,7 @@ end subroutine xpaw_mpi_allgather_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -679,7 +678,7 @@ end subroutine xpaw_mpi_allgather_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -730,7 +729,7 @@ end subroutine xpaw_mpi_allgather_dp3d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -786,7 +785,7 @@ end subroutine xpaw_mpi_allgatherv_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -842,7 +841,7 @@ end subroutine xpaw_mpi_allgatherv_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -902,7 +901,7 @@ end subroutine xpaw_mpi_allgatherv_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -958,7 +957,7 @@ end subroutine xpaw_mpi_scatterv_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1014,7 +1013,7 @@ end subroutine xpaw_mpi_scatterv_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1071,7 +1070,7 @@ end subroutine xpaw_mpi_scatterv_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1123,7 +1122,7 @@ end subroutine xpaw_mpi_alltoall_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1173,7 +1172,7 @@ end subroutine xpaw_mpi_alltoall_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1227,7 +1226,7 @@ end subroutine xpaw_mpi_alltoall_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1288,7 +1287,7 @@ end subroutine xpaw_mpi_alltoallv_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1346,7 +1345,7 @@ end subroutine xpaw_mpi_alltoallv_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1403,7 +1402,7 @@ end subroutine xpaw_mpi_alltoallv_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1446,7 +1445,7 @@ end subroutine xpaw_mpi_bcast_int
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1491,7 +1490,7 @@ end subroutine xpaw_mpi_bcast_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 subroutine xpaw_mpi_bcast_dp1d(xval,master,spaceComm,ier)
@@ -1537,7 +1536,7 @@ end subroutine xpaw_mpi_bcast_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1584,7 +1583,7 @@ end subroutine xpaw_mpi_bcast_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1636,7 +1635,7 @@ end subroutine xpaw_mpi_bcast_dp3d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1686,7 +1685,7 @@ end subroutine xpaw_mpi_gather_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1737,7 +1736,7 @@ end subroutine xpaw_mpi_gather_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1791,7 +1790,7 @@ end subroutine xpaw_mpi_gather_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1848,7 +1847,7 @@ end subroutine xpaw_mpi_gatherv_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1905,7 +1904,7 @@ end subroutine xpaw_mpi_gatherv_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -1965,7 +1964,7 @@ end subroutine xpaw_mpi_gatherv_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2017,7 +2016,7 @@ subroutine xpaw_mpi_recv_int1d(xval,source,tag,spaceComm,ier)
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2069,7 +2068,7 @@ end subroutine xpaw_mpi_recv_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2121,7 +2120,7 @@ end subroutine xpaw_mpi_recv_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2175,7 +2174,7 @@ end subroutine xpaw_mpi_recv_dp3d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2227,7 +2226,7 @@ subroutine xpaw_mpi_irecv_int1d(xval,source,tag,spaceComm,request,ierr)
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2280,7 +2279,7 @@ end subroutine xpaw_mpi_irecv_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2332,7 +2331,7 @@ end subroutine xpaw_mpi_irecv_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2381,7 +2380,7 @@ subroutine xpaw_mpi_send_int1d(xval,dest,tag,spaceComm,ier)
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2430,7 +2429,7 @@ end subroutine xpaw_mpi_send_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2479,7 +2478,7 @@ end subroutine xpaw_mpi_send_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2530,7 +2529,7 @@ end subroutine xpaw_mpi_send_dp3d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2580,7 +2579,7 @@ subroutine xpaw_mpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2630,7 +2629,7 @@ end subroutine xpaw_mpi_isend_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2684,7 +2683,7 @@ end subroutine xpaw_mpi_isend_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2742,7 +2741,7 @@ end subroutine xpaw_mpi_exch_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2800,7 +2799,7 @@ end subroutine xpaw_mpi_exch_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2858,7 +2857,7 @@ end subroutine xpaw_mpi_exch_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2914,7 +2913,7 @@ end subroutine xpaw_mpi_exch_dp3d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -2970,7 +2969,7 @@ end subroutine xpaw_mpi_sum_int
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -3027,7 +3026,7 @@ end subroutine xpaw_mpi_sum_int1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -3084,7 +3083,7 @@ end subroutine xpaw_mpi_sum_dp1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 
@@ -3141,7 +3140,7 @@ end subroutine xpaw_mpi_sum_dp2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_allreduce,mpi_comm_size
+!!      mpi_allreduce,mpi_attr_get,mpi_comm_size
 !!
 !! SOURCE
 

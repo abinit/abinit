@@ -140,8 +140,8 @@ contains
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      calc_vhxc_me,energy,m_kxc,nonlinear,nres2vres,odamix,prcref,prcref_PMA
-!!      respfn,rhotov,scfcv,setvtr,xchybrid_ncpp_cc
+!!      m_dft_energy,m_forstr,m_kxc,m_longwave,m_nonlinear,m_odamix,m_prcref
+!!      m_respfn_driver,m_rhotov,m_scfcv_core,m_setvtr,m_vhxc_me,m_xchybrid
 !!
 !! CHILDREN
 !!      get_xclevel
@@ -227,7 +227,7 @@ end subroutine xcdata_init
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      invars2,m_xcdata,setup_sigma
+!!      m_invars2,m_sigma_driver,m_xcdata
 !!
 !! CHILDREN
 !!      get_xclevel
@@ -310,7 +310,7 @@ end subroutine get_xclevel
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      calc_vhxc_me,invars2
+!!      m_invars2,m_vhxc_me
 !!
 !! CHILDREN
 !!      get_xclevel

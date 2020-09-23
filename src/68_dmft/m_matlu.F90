@@ -136,7 +136,7 @@ CONTAINS  !=====================================================================
 !!  maltu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!
 !! PARENTS
-!!      m_datafordmft,hubbard_one,m_green,m_matlu,m_oper,qmc_prep_ctqmc
+!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper,m_self
 !!
 !! CHILDREN
 !!
@@ -195,7 +195,7 @@ end subroutine init_matlu
 !!  maltu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!
 !! PARENTS
-!!      m_green,m_matlu
+!!      m_forctqmc,m_green,m_matlu,m_self
 !!
 !! CHILDREN
 !!
@@ -259,7 +259,7 @@ end subroutine zero_matlu
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_datafordmft,hubbard_one,m_green,m_matlu,m_oper,qmc_prep_ctqmc
+!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper,m_self
 !!
 !! CHILDREN
 !!
@@ -305,8 +305,8 @@ end subroutine destroy_matlu
 !!  maltu2 <type(matlu_type)>= density matrix matlu2 in the local orbital basis and related variables
 !!
 !! PARENTS
-!!      m_datafordmft,hubbard_one,m_green,m_matlu,m_oper,m_self,qmc_prep_ctqmc
-!!      spectral_function
+!!      m_datafordmft,m_dmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper
+!!      m_self
 !!
 !! CHILDREN
 !!
@@ -384,8 +384,8 @@ end subroutine copy_matlu
 !! OUTPUT
 !!
 !! PARENTS
-!!      compute_levels,m_datafordmft,hubbard_one,impurity_solve,m_green,m_matlu
-!!      m_oper,m_self,psichi_renormalization,qmc_prep_ctqmc
+!!      m_datafordmft,m_dmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper
+!!      m_self
 !!
 !! CHILDREN
 !!
@@ -563,8 +563,7 @@ end subroutine print_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      compute_levels,m_datafordmft,hybridization_asymptotic_coefficient,m_green
-!!      psichi_renormalization,qmc_prep_ctqmc
+!!      m_datafordmft,m_forctqmc,m_green
 !!
 !! CHILDREN
 !!
@@ -909,7 +908,7 @@ end subroutine print_matlu
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_datafordmft,m_green,m_oper,qmc_prep_ctqmc
+!!      m_datafordmft,m_forctqmc,m_green,m_oper
 !!
 !! CHILDREN
 !!
@@ -1022,8 +1021,7 @@ end subroutine diff_matlu
 !!  maltu3 <type(matlu_type)>= density matrix matlu3, sum/substract matlu1 and matlu2
 !!
 !! PARENTS
-!!      dyson,hybridization_asymptotic_coefficient,m_green
-!!      psichi_renormalization,qmc_prep_ctqmc
+!!      m_datafordmft,m_dmft,m_forctqmc,m_green
 !!
 !! CHILDREN
 !!
@@ -1331,7 +1329,7 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_matlu,psichi_renormalization
+!!      m_datafordmft,m_matlu
 !!
 !! CHILDREN
 !!
@@ -1451,7 +1449,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      hubbard_one,qmc_prep_ctqmc
+!!      m_forctqmc,m_hubbard_one,m_self
 !!
 !! CHILDREN
 !!
@@ -1937,7 +1935,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      hubbard_one,qmc_prep_ctqmc
+!!      m_forctqmc,m_hubbard_one,m_self
 !!
 !! CHILDREN
 !!
@@ -2157,7 +2155,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      m_green,m_self,qmc_prep_ctqmc
+!!      m_forctqmc,m_green,m_self
 !!
 !! CHILDREN
 !!
@@ -2226,7 +2224,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!
@@ -2332,7 +2330,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      compute_levels
+!!      m_datafordmft
 !!
 !! CHILDREN
 !!
@@ -2425,7 +2423,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      m_oper,qmc_prep_ctqmc
+!!      m_forctqmc,m_oper
 !!
 !! CHILDREN
 !!
@@ -2626,7 +2624,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc,m_hubbard_one
 !!
 !! CHILDREN
 !!
@@ -2771,7 +2769,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!
@@ -2840,7 +2838,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!
@@ -2917,7 +2915,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!

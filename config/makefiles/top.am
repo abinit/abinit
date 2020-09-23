@@ -2,12 +2,33 @@
 EXTRA_DIST += \
 	KNOWN_PROBLEMS \
 	PACKAGING \
-	README_MacOSX.md \
-        README_Ubuntu.md \
-	README_gpu.md \
-	README_xlf.md \
+	INSTALL_CentOS.md \
+	INSTALL_MacOS.md \
+        INSTALL_Ubuntu.md \
+	INSTALL_gpu.md \
 	RELNOTES \
+	abimkdocs \
+	abimkdocs_plugin \
+	abimkdocs_tests \
+	abinit_theme \
+	abisrc.py \
+	abisrc_requirements.txt \
 	autogen.sh \
+	doc/tests \
+	doc/theory/a-TDEP/a-TDEP_Guide.pdf \
+	doc/theory/a-TDEP/a-TDEP_Paper.pdf \
+	doc/topics/documents/elphon_manual.pdf \
+	doc/topics/documents/geometry.pdf \
+	doc/topics/documents/gwa.pdf \
+	doc/topics/documents/howto_chebfi.pdf \
+	doc/topics/documents/hybrids-2017.pdf \
+	doc/topics/documents/noncol.pdf \
+	mkdocs.yml \
+	mksite.py \
+	requirements.txt \
+	scripts \
+	setup.cfg \
+	tasks.py \
 	wipeout.sh \
 	upgrade-build-config-file.sh
 
@@ -37,22 +58,22 @@ check-local:
 
 # Set of internal tests
 test_fast:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_fast.files >& testin_fast.stdout && cat testin_fast_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_fast.in >& testin_fast.stdout && cat testin_fastt_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_v1:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_v1.files >& testin_v1.stdout && cat testin_v1_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_v1.in >& testin_v1.stdout && cat testin_v1t_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_v5:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_v5.files >& testin_v5.stdout && cat testin_v5_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_v5.in >& testin_v5.stdout && cat testin_v5t_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_bigdft:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_bigdft.files >& testin_bigdft.stdout && cat testin_bigdft_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_bigdft.in >& testin_bigdft.stdout && cat testin_bigdftt_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_libxc:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_libxc.files >& testin_libxc.stdout && cat testin_libxc_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_libxc.in >& testin_libxc.stdout && cat testin_libxct_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK *abo* *o_* *t_STATUS*
 
 test_wannier90:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_wannier90.files >& testin_wannier90.stdout && cat testin_wannier90_tmp_STATUS  && rm -f abinit *DDB *EIG *out* *nc *WFK *DEN *chk *eig *mmn *amn
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_wannier90.in >& testin_wannier90.stdout && cat testin_wannier90t_STATUS  && rm -f abinit *DDB *EIG *out* *nc *WFK *DEN *chk *eig *mmn *amn *abo* *o_* *t_STATUS*
 
 tests_in:
 	$(MAKE) test_fast test_v1 test_v5 test_libxc test_wannier90 
@@ -158,7 +179,7 @@ dist-lite: distdir
 bin_prep:
 	rm -fr abinitbin-$(VERSION) abinitbin.tar abinitbin_seq-$(VERSION)* abinitbin_seqpar-$(VERSION)*
 	mkdir abinitbin-$(VERSION)
-	tar -cvf abinitbin.tar AUTHORS COPYING INSTALL KNOWN_PROBLEMS NEWS README* RELNOTES THANKS src \
+	tar -cvf abinitbin.tar AUTHORS COPYING INSTALL* KNOWN_PROBLEMS NEWS README* RELNOTES THANKS src \
             doc scripts developers tests/Psps* tests/v*/Input tests/tutorial tests/paral tests/buil* tests/Scripts tests/cpu \
             tests/tutorespfn tests/bigdft tests/netcdf tests/libxc tests/wannier90 tests/atompaw tests/mpiio tests/psml
 	mv abinitbin.tar abinitbin-$(VERSION)
