@@ -13,7 +13,7 @@ Further details concerning the implementation are given in [[cite:Gonze2019]] an
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties
-in particular phonons, Born effective charges and the high-frequency dielectric tensor $\ee^\infty$".
+in particular phonons, Born effective charges and the high-frequency dielectric tensor $\ee^\infty$.
 The user should have read the [introduction tutorial for the EPH code](eph_intro)
 before running these examples.
 
@@ -213,10 +213,10 @@ This the most flexible approach but it requires the specification of three varia
 know the positions of the CBM/VBM.
 Alternatively, one can use [[gw_qprange]] or [[sigma_erange]].
 <!--
+although *sigma_erange* is usually employed for transport calculations with [[eph_task]] = -4.
 Note that [[gw_qprange]] is mainly used to compute all the corrections for the occupied states plus
 some conduction states
 -->
-although *sigma_erange* is usually employed for transport calculations with [[eph_task]] = -4.
 
 !!! important
 
@@ -234,7 +234,7 @@ A typical workflow for ZPR calculations involves the following steps:
 2. **DFPT calculations** for all the IBZ $\qq$-points corresponding to the *ab-initio* [[ddb_ngqpt]] mesh
    that will be used to perform the Fourier interpolation of the dynamical matrix and of the DFPT potentials.
    In the simplest case, one uses a $\qq$-mesh that is equal to the GS $\kk$-mesh (sub-meshes are also fine)
-   and the DFPT calculations can directly start from the WFK produced in step #1
+   and the DFPT calculations can directly start from the WFK produced in step #1.
    Remember to compute $\epsilon^{\infty}$, $Z^*$ (polar materials) and the dynamical quadrupoles
    $Q^*$ as these quantities are needed for an accurate interpolation of phonon frequencies and DFPT potentials.
 
@@ -260,36 +260,38 @@ and a POT file with the GS KS potential required to solve the Sternheimer equati
 If *git* is installed on your machine, one can easily fetch the entire repository with:
 
 ```sh
-git clone TODO
+git clone https://github.com/abinit/MgO_eph_zpr.git
 ```
 
 Alternatively, use *wget*:
 
 ```sh
-wget TODO
+wget https://github.com/abinit/MgO_eph_zpr/archive/master.zip
 ```
 
 or *curl*:
 
 ```sh
-curl TODO
+curl -L https://github.com/abinit/MgO_eph_zpr/archive/master.zip -o master.zip
 ```
 
 or simply copy the tarball by clicking the "download button" available in the github web page.
+
+Then unzip the file and rename the directory:
+
+```sh
+unzip master.zip
+mv MgO_eph_zpr-master MgO_eph_zpr
+```
 
 !!! warning
 
     The directory with the precomputed files must be located in the same working directory
     in which you will be executing the tutorial.
 
-The |AbiPy| script used to executed the DFPT part is available here:
+The |AbiPy| script used to executed the DFPT part is available 
+[here](https://github.com/abinit/MgO_eph_zpr/blob/master/run_zpr_mgo.py).
 
-{% dialog tests/modules_with_data/MgO_eph_zpr/run_zpr_mgo.py  %}
-
-<!--
-In a nutshell:
-To produce these files, we used the experimental parameters for hexagonal $MgB_2$ (a = 5.8317 and c/a= 1.1419)
--->
 Note that several parameters have been tuned to reach a reasonable **compromise between accuracy
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
 More specifically, we use norm-conserving pseudopotentials with a cutoff energy [[ecut]]
@@ -1013,11 +1015,11 @@ and a relatively small number of empty states (XXX).
 We can finally use the other WFK files generated in *teph4zpr_3.in* to perform ZPR calculations.
 
 ```sh
- ndtset 3
+ndtset 3
 
- ngkpt1 4 4 4;    eph_ngqpt_fine1 4 4 4;    getwfk_filepath1 "teph4zpr_3o_DS1_WFK"
- ngkpt2 8 8 8;    eph_ngqpt_fine2 8 8 8;    getwfk_filepath2 "teph4zpr_3o_DS2_WFK"
- ngkpt3 12 12 12; eph_ngqpt_fine3 12 12 12; getwfk_filepath3 "teph4zpr_3o_DS3_WFK"
+ngkpt1 4 4 4    eph_ngqpt_fine1 4 4 4    getwfk_filepath1 "teph4zpr_3o_DS1_WFK"
+ngkpt2 8 8 8    eph_ngqpt_fine2 8 8 8    getwfk_filepath2 "teph4zpr_3o_DS2_WFK"
+ngkpt3 12 12 12 eph_ngqpt_fine3 12 12 12 getwfk_filepath3 "teph4zpr_3o_DS3_WFK"
 ```
 
 {% dialog tests/tutorespfn/Input/teph4zpr_7.in %}
@@ -1053,8 +1055,8 @@ These additional convergence tests cannot be covered in this lesson and they are
 
 To compute the spectral function $A_\nk(\ww)$, we need to specify the number of frequencies via [[nfreqsp]].
 The code will compute $A(\ww)$ on a linear frequency mesh centered on the KS eigenvalue
-that spans the interval $[\ee_\nk - \Delta, \ee_\nk + \Delta]$ with $\Delta$ given by [[freqspmax]]
-(an odd number of points is enforced by the code).
+that spans the interval $[\ee_\nk - \Delta, \ee_\nk + \Delta]$ with $\Delta$ given by [[freqspmax]].
+An odd number of frequency points is enforced by the code.
 
 In a nutshell, one should add e.g.:
 
@@ -1067,9 +1069,9 @@ An example of input file is available here:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_8.in %}
 
-To plot the spectral function $A_\nk(\ww) in an easy way, we use AbiPy
+To plot the spectral function $A_\nk(\ww)$ in an easy way, use AbiPy
 to extract the data from the netcdf file.
-We cant do it in two different ways:
+We can do it in two different ways:
 
 - using a small python script that calls the AbiPy API
 - using the |abiopen| script and |ipython| and to interact with the netcdf file
@@ -1087,15 +1089,23 @@ filepath = sys.argv[1]
 abifile = abiopen(filepath)
 
 # Plot Sigma(omega), A(omega) and QP solution
-abifile.plot_qpsolution_skb(spin=0, kpoint=(0, 0, 0), band=4)
+abifile.plot_qpsolution_skb(spin=0, kpoint=[0, 0, 0], band=4)
 ```
 
 Alternatively, one can directly use `abiopen.py` to open the SIGEPH.nc file inside the iptyhon terminal
+Execute:
+
+```
+abiopen.py teph4zpr_8o_DS1_SIGEPH.nc
+```
+
+to open the file in the ipython shell and then issue:
+
 
 ```ipython
 %matplotlib
 
-abifile.plot_qpsolution_skb(spin=0, kpoint=(0, 0, 0), band=4)
+abifile.plot_qpsolution_skb(spin=0, kpoint=[0, 0, 0], band=5)
 ```
 
 The advantage of the second approach is that you can interact with the python object in an interactive environment.
@@ -1120,11 +1130,16 @@ is the number of MPI processes in the band communicator.
 
 For ZPR calculations, the priorities are as follows:
 
-1. Use enough *np_band* MPI processes to decrease the memory for the wavefunctions.
+1. Use enough *np_band* MPI processes to **decrease the memory for the wavefunctions**.
    Ideally, *np_band* should divide [[nband]] to distribute the work equally.
+   The maximum number of MPI procs that can used for this level is [[nband]] but
+   let's not exaggerate. Keep some procs for the other MPI levels that are usually more efficient in
+   terms of wall-time.
+<!--
    Note that the band parallelism is beneficial also when the Sternheimer method is used
    as the solver will operate on MPI-distributed bands.
    Perhaps the parallel efficiency won't be perfect but the memory for the wavefunctions will continue to scale.
+-->
 
 2. Once the memory for the wavefunctions reaches a reasonable level, activate the parallelism
    over perturbations to decrease the memory for $W(\rr, \RR, 3\times\text{natom})$.

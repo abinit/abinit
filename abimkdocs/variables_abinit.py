@@ -3820,6 +3820,7 @@ Variable(
 Number of electrons per unit cell to be added/subtracted to the initial value computed
 from the pseudopotentials and the unit cell.
 Can be used to simulate doping within the rigid band approximation.
+Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
 See also [[eph_doping]] to specify the same quantity in terms of charge/cm^3
 """,
 ),
@@ -21763,6 +21764,7 @@ Variable(
 Gives the doping charge in units of |e_charge| / cm^3.
 Negative for n-doping, positive for p-doping.
 Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
+Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
 """,
 ),
 

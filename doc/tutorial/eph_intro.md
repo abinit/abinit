@@ -137,8 +137,6 @@ The use of the different sub-drivers is discussed in more detail in the speciali
 * [ZPR and T-dependent band structures](eph4zpr)
 
 <!--
-* [Phonon-limited mobilities](eph4mob)
-* [ZPR and T-dependent band structures](eph4zpr)
 * [Isotropic superconductivity in metals](eph4isotc)
 -->
 
@@ -163,6 +161,8 @@ More specifically, in EPH the name of the DDB file is specified by
     present due to numerical inaccuracies) is reasonable.
     By the same token, make sure that no vibrational instabilty is present before
     embarking on big EPH calculations.
+    If the spectrum present instabilities around $\Gamma$ due to a Fourier interpolation 
+    done with coarse $\qq$-sampling, you may try to use [[rifcsph]].
 
 ### Variables for phonon DOS
 
@@ -468,9 +468,9 @@ to the DFPT computation.
 Since the EPH code does not need the first order change of the wavefunctions (1WF files)
 we suggest to avoid the output of these files by using [[prtwf]] = -1 in the DFPT part
 as these files are quite large and the overall space on disk scales as **nqpt × 3 × natom**.
-When [[prtwf]] is set to -1, the DFPT code writes the 1WF only if the DFPT SCF cycle is not converged
+When [[prtwf]] is set to -1, the DFPT code writes the 1WF file only if the DFPT SCF cycle is not converged
 so that one can still restart from these wavefunctions if needed
-(restarting a DFPT run from the 1WF file is more effective than restarting from the first order density).
+(restarting a DFPT run from the first order wavefunctions is more effective than restarting from the first order density).
 
 
 ## Star-function interpolation of the KS eigenvalues
@@ -592,7 +592,7 @@ abitk skw_compare IBZ_GSR.nc KPATH_GSR.nc
 
 as only KS energies are needed for the SKW interpolation.
 
-To compare the bands with AbiPy, use the *abicomp.py* script:
+To compare the bands with AbiPy, use the |abicomp| script with the `ebands` command:
 
 ```sh
 abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot
@@ -601,8 +601,7 @@ abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot
 If the fit is not satisfactory, you may want to try one of the following options (in order of importance):
 
 1. Increase the ab-initio mesh in **IBZ_WFK**.
-   You may also want to shift the $\kk$-mesh to get closer to the band edge.
-2. Increase the value of `lpratio`
+2. Increase the value of *lpratio*
 3. Play with *rcut* and *rsigma* to damp the oscillations in the interpolant
 
 Note that it is sometimes difficult to get completely rid of spurious oscillations

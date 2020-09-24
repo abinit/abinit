@@ -5,7 +5,7 @@ authors: GB, MG
 # Phonon-limited mobility 
 
 This tutorial shows how to compute phonon-limited carrier mobilities in semiconductors within
-the relaxation time approximation (RTA), taking the specific case of AsAs as an example.
+the relaxation time approximation (RTA), taking the specific case of AlAs as an example.
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
@@ -288,7 +288,6 @@ The file *\$ABI_TUTORESPFN/Input/teph4mob_4.in* is an example of such computatio
 It consists of two parts: the first one (dataset 1) computes the GS wavefunctions,
 and the second one (datasets 2-3) computes the dense WFK that will be used to evaluate the mobility.
 We also compute a denser WFK file that will be used with the double-grid method explained later.
-
 As we want to compute the mobility of electrons in the conduction band, 
 we need to include enough conduction bands in the computation of the WFK ([[nband]] = 8).
 
@@ -307,8 +306,7 @@ abinit teph4mob_4.in > teph4mob_4.log 2> err &
 ## Calculation of the mobility
 
 The computation of the mobility requires different convergence studies.
-We will explain them and their need in the following.
-Let us first explain the different parameters in a standard mobility computation.
+Let us first explain the different parameters required for a standard mobility computation.
 The file *\$ABI_TUTORESPFN/Input/teph4mob_5.in* is an example of such computation.
 
 {% dialog tests/tutorespfn/Input/teph4mob_5.in %}
@@ -322,12 +320,6 @@ getwfk_filepath "teph4mob_4o_DS2_WFK"
 getddb_filepath "teph4mob_2_DDB"
 getdvdb_filepath "teph4mob_3_DVDB"
 ```
-
-<!--
-In this tutorial, the prefix of the external file is constructed from the name of the input file 
-that produced the file and the dataset index.
-In real life, you may want to use more explicitative names such as 444_DDB etc.
--->
 
 Now copy the input file in the *Work_eph4mob* directory, and run the code with:
 
@@ -348,15 +340,16 @@ Let's discuss the meaning of the e-ph variables in more details:
   The code aborts with an error if [[ngkpt]] is not the same as the one found in the 
   input WFK file. At present, multiple shifts ([[nshiftk]] > 1) are not supported.
 
-* [[occopt]] 3 is required to correctly compute the
-  location of the Fermi level using the Fermi-Dirac occupation function as we are dealing with the
-  physical temperature and not a fictitious broadening for integration purposes.
-
 * [[ddb_ngqpt]] defines the initial $\qq$-grid used for the DFPT computation (4×4×4 in this example)
 
 * [[eph_ngqpt_fine]] defines the dense $\qq$-mesh where the scattering potentials are interpolated
   and the e-ph matrix elements are computed. 
 
+* We work within the rigid band model and introduce a small electron-doping: [[eph_doping]] = -2.26e+16 
+  that corresponds to [[eph_extrael]] 1e-6.
+  Now how to set [[occopt]] to 3 to correctly compute the
+  location of the Fermi level using the Fermi-Dirac occupation function as we are dealing with the
+  physical temperature and not a fictitious broadening for integration purposes.
 
 !!! warning
 
@@ -402,6 +395,7 @@ we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ elect
     For the initial convergence studies, we suggest to start from a relatively small number
     of temperatures **covering the range of interest**. 
     The T-mesh can be densified aftwerwards while keeping the same range once converged parameters are found.
+
     Note also that transport properties at low temperatures are much more difficult to converge as the
     derivative of the Fermi-Dirac distribution is strongly peaked around the Fermi level and hence 
     a very dense sampling is needed to convergence the BZ integrals.
@@ -410,7 +404,7 @@ we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ elect
 
 The [[sigma_erange]] variable defines the energy window, below the VBM and above the
 CBM where the lifetimes will be computed.
-Since the BTE contains a derivative of the Fermi-Dirac occupation function centered on the Fermi level,
+Since the BTE contains the derivative of the Fermi-Dirac occupation function centered on the Fermi level,
 it is possible to filter the $\kk$-points that will contribute to the mobility and compute
 the lifetimes for these $\kk$-points only. 
 The value of the derivative, indeed, decreases rapidly
@@ -425,8 +419,8 @@ Hopefully, in the next version this parameter will be automatically computed by 
 We can now examine the log file in detail.
 After the standard output of the input variables, the code reports the different parameters 
 used for the treatment of the long-range part of the DFPT potentials: 
-the Born effective charges, the dielectric constant, and the quadrupolar tensor.
-Make sure to have all of them in order to have an
+the Born effective charges, the high-frequency dielectric constant and the dynamical quadrupole tensor.
+Make sure to have all of them in order to obtain an
 accurate interpolation of the scattering potentials, see discussion in [[cite:Brunin2020]].
 
 !!! important
@@ -524,10 +518,10 @@ Note that the transport driver is automatically executed after the EPH run.
 You can also run the transport driver in standalone mode by setting [[eph_task]] 7, 
 provided you already have the lifetimes in an external SIGEPH.nc file that be specified via [[getsigeph_filepath]].
 This task is relatively fast even in serial execution although some parts 
-(in particular the computation of DOS-like quantities) can benefit from MPI parallelism.
+(in particular the computation of DOS-like quantities) can benefit from MPI.
 
-Now that you know how to obtain the mobility in a semiconductor for given $\kk$- and $\qq$-meshes,
-we can give more details about convergence studies and discuss additional tricks that can be exploited
+Now that we know how to obtain the mobility in a semiconductor for given $\kk$- and $\qq$-meshes,
+we can give more details about convergence studies and discuss additional tricks
 to decrease significantly the computational cost.
 
 ### Convergence w.r.t. the energy range
@@ -703,8 +697,9 @@ Just set [[eph_restart]] to 1 in the input file and rerun the job
 !!! important
 
     There is no harm in setting [[eph_restart]] to 1 from the begining but keep in mind that
-    the code will overwrite the SIGEPH.nc if the file is completed so we do not recommended 
-    to use this option in MultiDataset mode.
+    the code will restart the calculation from scratch if all the $\kk$-points in the SIGEPH.nc have 
+    been computed (a backup copy is kept). 
+    So we do not recommended the use of this option in MultiDataset mode.
 
 ### Transport calculation from SIGEPH.nc
 
@@ -743,24 +738,30 @@ and you want to boost the calculation.
 ### How to reduce the memory requirements
 
 As mentioned above, the memory should scale with the number of MPI processors used for the $\qq$-point and
-the perturbation distribution.
+the perturbation communicators.
 However, there might be tricky systems in which you start to experience memory shortage that
-prevents you from running with several MPI processes.
+prevents you from running with many MPI processes.
 This problems should show up for very dense $\kk$/$\qq$ meshes.
-As a rule of thumb, calculations with meshes denser than e.g 200x200x200 start to be very memory demanding
-and become much slower because several algorithms and tables related to the BZ sampling will start to dominate.
+As a rule of thumb, mobility calculations with meshes denser than e.g 200x200x200 start to be very memory demanding
+and the execution will slow down because several algorithms and internal tables for the BZ sampling 
+and the tetrahedron method start to dominate.
+The double grid technique helps mitigate this bottleneck.
+In some cases, you may try to reduce slightly the value of [[sigma_erange]] to reduce the memory requirements.
 
-The code allocates a relatively small buffer to store the Bloch states involved in transport but unfortunately
-the $\kk$-points are not easy to distribute with MPI.
-To reduce the size of this part, one may opt for an internal buffer in single precision.
-This option is enabled by using `enable_gw_dpc="no"` at configure time (note that this is the default behaviour).
+Note also that the EPH code allocates a relatively small buffer to store the Bloch states involved 
+in transport calculations but unfortunately the $\kk$-points are not easy to distribute with MPI.
+Moreover the size of this array depends on the electronic dispersion:
+systems with several relatively flat bands around the band edges require more memory.
+To reduce the memory for the wavefunctions, the code uses internal buffers in single precision.
+This option is enabled at configure time by using `enable_gw_dpc="no"` (this is the default behaviour).
 
 If these tricks do not solve your problem, consider using OpenMP threads.
 The code is not optimized for OpenMP but a few threads may be useful to avoid replicating memory at the MPI level.
 As a rule of thumb, 2-4 OpenMP threads should be OK provided you link with threaded FFT and BLAS libraries.
 
-Last but not least, do not use datasets: large arrays allocated for $\kk$-points and the size depends on [[ndtset]].
-Never ever use multiple datasets for big EPH calculations. You have been warned!
+Last but not least, **do not use datasets**: split the calculation into different input files 
+and optimize the number of MPI processes according to the dimension of the problem.
+You have been warned!
 
 ### How to compute only the k-points close to the band edges
 

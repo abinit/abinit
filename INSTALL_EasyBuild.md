@@ -440,7 +440,7 @@ eb ABINIT-9.1.0-foss-2019b.eb -Dr
 In the previous example we used one of the official easyconfig files shipped with the EasyBuild package.
 There are cases, however, in which we need to perform a customized build.
 For example, we may want to compile the latest stable version of ABINIT recently released,
-or use a different release, or maybe we just need to activate configuration options that are not present in the official file.
+or use a different version, or maybe we just need to activate configuration options that are not present in the official file.
 In this case, we can simply copy the original easyconfig file,
 change it according to our needs and finally pass this customized file to the `eb` script.
 
@@ -540,15 +540,3 @@ Changing `dependencies` and `configopts` requires some basic understanding of th
 and of the logic used by EasyBuild to automate the compilation.
 If you need a specialized `eb` file, feel free to contact the ABINIT developers on the forum or the EasyBuild 
 developers to ask for support.
-
-<!--
-Unfortunately, we cannot cover all the possible scenarios so we focus on the simplest case in which
-we want to **extend** the recipe that is we just want to activate support for an optional library
-without changing the other easyconfigs parameters.
-Let's assume, for instance, that we want to build an Abinit version with Wannier90 support.
-
-Expert users may want to activate support for optional features that require additional external libraries
-e.g. wannier90, atompaw, etc.
-In this case, one has to list the external library in the `dependencies` section, add the correct configuration
-options to `configopts` and make sure that `eb` can find an easyconfig file that can be used to build the library.
--->
