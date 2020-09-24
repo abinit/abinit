@@ -11,7 +11,7 @@ ntime = 10000
 nctime = 10
 dtion = 10
 
-spin_dynamics=2   # Also Langevin NVT
+spin_dynamics=2   # Langevin NVT
 spin_init_state = 1
 spin_init_orientation = 0.0 0.0 1.0
 spin_init_qpoint = 0.5 0.5 0.5
@@ -33,7 +33,7 @@ slc_coupling = 0010 # activate only Oiju terms
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF
-#%% exclude_builders = .*_intel_19.0_.*, .*_nag_7.0_.*, buda2_intel_17.0_openmpi
+#%% exclude_builders =  .*_nag_7.0_.*
 #%% system_xml = t83.nc
 #%% exec_args = --F03
 #%% [files]
@@ -49,5 +49,4 @@ slc_coupling = 0010 # activate only Oiju terms
 #%%   Disabled on nag@alps because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.
 #%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
-#%%   Temporarily disabled on higgs_intel_19.0_serial for strange segfault
 #%%<END TEST_INFO>
