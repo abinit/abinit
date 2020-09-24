@@ -23,7 +23,7 @@ are readily available in the ANADDB version once support in the DFPT part is imp
 On the other hand, this post-processing approach implies that the number of $\kk/\qq$-points in the e-ph matrix elements
 is **automatically fixed at the level of the DFPT run**.
 In other words, if you want to compute phonon-limited mobilities with e.g. a 90×90×90 $\kk$- and $\qq$-mesh,
-you need to perform DFPT calculations with the same sampling thus rendering the computation quite heavy.
+you need to perform DFPT calculations with the same sampling thus rendering the computation almost impossible.
 In principle, it is possible to use tricks such as a linear interpolation of the e-ph matrix elements
 to densify the sampling, but in order to get a decent interpolation one usually needs initial BZ meshes
 that are significantly denser than the ones needed to converge the DFPT part alone.
@@ -32,7 +32,7 @@ As a matter of fact, electrons, phonons and e-ph properties **present completely
 In silicon, for instance, a 9×9×9 mesh both for phonons and electrons is enough to converge
 the electron density and the vibrational spectrum [[cite:Petretto2018]].
 On the contrary, the phonon-limited mobility of Si requires a 45×45×45 $\kk$-grid and a 90×90×90 $\qq$-grid
-to reach a 5% relative error [[cite:Brunin2020]].
+to reach a 5% relative error [[cite:Brunin2020b]].
 Roughly speaking, an explicit computation of phonons in Si with a 90×90×90 $\qq$-mesh
 requires around 20000 × 3 × [[natom]] DFPT calculations
 so you can easily get an idea of the cost of a fully ab-initio evaluation of the e-ph matrix elements
@@ -43,9 +43,8 @@ while Bloch states are computed non-self-consistently on arbitrarily dense $\kk$
 As a net result, the three problems (electrons, phonons and electron-phonon) are now
 **partly decoupled** and can be converged separately.
 Keep in mind, however, that the fact that one can easily densify the $\qq$-sampling in the EPH code does not
-mean that one can use under-converged values for the GS/DFPT part.
-Indeed, the quality of the ingredients used for the interpolation depends on the initial $\kk$- and $\qq$-meshes
-and this is the reason why we said that the three problems are partly decoupled.
+mean that one can use under-converged values for the ground-state (GS) and DFPT parts.
+Indeed, the quality of the interpolation depends on the initial $\kk$- and $\qq$-meshes.
 The take-home message is that one should always converge carefully both electronic and vibrational properties
 before moving to EPH computations.
 
@@ -64,12 +63,12 @@ Each DFPT run produces a (partial) DDB file with a portion of the full dynamical
 as well as POT files with the first-order derivative of the KS potential (referred to as the DFPT potential below).
 The partial POT files are merged with the **mrgdv** utility to produce a
 single **DVDB file** (Derivatives of V($\rr$) DataBase).
-As usual, the partial DDB files are merged with **mrgddb**.
+As usual, the partial DDB files are merged with **mrgddb** (see [the second tutorial on DFPT](rf2)).
 
 The EPH driver (blue box) receives in input the total DDB and the DVDB as well as a GS WFK file that is usually
 produced with a different $\kk$-mesh (in some cases, even with a different number of bands
 when high-energy empty states are needed).
-These ingredients are then used to compute e-ph matrix elements and the associated physical properties.
+These ingredients are then used to compute (interpolate) e-ph matrix elements and the associated physical properties.
 <!--
 The $\kk$-mesh in the WFK file must be commensurate with the $\qq$-mesh in the DVDB file
 -->
@@ -104,9 +103,8 @@ The following physical properties can be computed:
 
 * Imaginary part of the e-ph self-energy at the KS energy (**eph_task -4**) that gives access to:
 
-    * e-ph scattering rates
     * Phonon-limited carrier mobility, electrical conductivity and Seebeck coefficient
-    * Phonon-limited carrier mean free path and relaxation times
+    * Phonon-limited carrier mean free path and relaxation times (or scattering rates)
     * All the calculations above can be done as a function of temperature and doping, for nonpolar and polar materials.
 
 <!--
@@ -121,7 +119,7 @@ and bands (the band level is available only when computing the full self-energy)
 Features available in ANADDB that are not yet supported by EPH
 -->
 
-At the time of writing ( |today| ), the following features are **not yet supported** by EPH:
+At the time of writing ( |today|), the following features are **not yet supported** by EPH:
 
 * PAW calculations
 * Spin-orbit coupling
@@ -137,6 +135,7 @@ The use of the different sub-drivers is discussed in more detail in the speciali
 
 * [Phonon-limited mobilities](eph4mob)
 * [ZPR and T-dependent band structures](eph4zpr)
+
 <!--
 * [Isotropic superconductivity in metals](eph4isotc)
 -->
@@ -146,11 +145,11 @@ The use of the different sub-drivers is discussed in more detail in the speciali
 Since phonon frequencies and displacements are needed for e-ph calculations, it is not surprising
 that some of the ANADDB features related to the treatment of the dynamical matrix
 are integrated in the EPH code as well.
-In many cases, EPH uses the same name as in ANADDB especially for important variables
+In many cases, the variables names are the same in EPH and ANADDB especially for important variables
 such as [[dipdip]], [[asr]], and [[chneut]].
 There are however important differences with respect to the ANADDB input file.
 More specifically, in EPH the name of the DDB file is specified by
-[[getddb_filepath]] whereas the $\qq$-mesh associated to the DDB file is given by [[ddb_ngqpt]].
+[[getddb_filepath]] whereas the DFPT $\qq$-mesh associated to the DDB file is given by [[ddb_ngqpt]].
 **These two variables are mandatory** when performing EPH calculations.
 
 !!! important
@@ -200,15 +199,19 @@ so that the number of points in each segment is proportional to the length of th
 The computation of the phonon band structure can be deactivated by setting [[prtphbands]] = 0.
 The final results are stored in the **PHBST.nc** file (same format at the one produced by ANADDB).
 
-A typical section for phonon band structure looks like
+For instance, the section for the phonon band structure could look like
 
 ```sh
 prtphbands 1
-ph_nqpath
-ph_qpath
+ph_nqpath 5
+ph_qpath 0.0 0.0 0.0 # Gamma
+         1/2 0.0 1/2  # X
+         1/2 1/4 3/4  # W
+         3/8 3/8 3/4  # K
+         0.0 0.0 0.0  # Gamma
 ```
 
-The obtain the list of high-symmetry q-points, one can use the `abistruct.py` script provided by |AbiPy|:
+To obtain the list of high-symmetry q-points, one can use the `abistruct.py` script provided by |AbiPy|:
 
 ```sh
 abistruct.py kpath in_DDB
@@ -254,7 +257,7 @@ is given by:
 where ${e}_{\kappa\alpha,\nu}(\qq)$ is the $\alpha$-th Cartesian component of the phonon eigenvector
 for the atom $\kappa$ in the unit cell, $M_\kappa$ its atomic mass and
 $\partial_{\kappa\alpha,\qq} v^\KS(\rr)$ is the first-order derivative of the KS potential
-that can be obtained with DFPT by solving **self-consistently** a system of Sternheimer equations for a given
+that can be obtained with DFPT by solving self-consistently a system of Sternheimer equations for a given
 $(\kappa\alpha, \qq)$ perturbation [[cite:Gonze1997]] [[cite:Baroni2001]].
 
 The DVDB file stores $\partial_{\kappa\alpha,\qq} v^\KS(\rr)$
@@ -287,7 +290,7 @@ to compute the $\qq \rightarrow \RR$ Fourier transform
     \partial_{\kappa\alpha\qq}{v^{\text{scf}}}(\rr),
 \end{equation}
 
-where the sum is over the BZ $\qq$-points belonging to the ab-initio [[ddb_ngqpt]] grid.
+where the sum is over the $N_\qq$ BZ $\qq$-points belonging to the ab-initio [[ddb_ngqpt]] grid.
 <!--
 and $\partial_{\kappa\alpha\qq}{v^{\text{scf}}}$ represents the (lattice-periodic) first order derivative
 of the local part of the KS potential associated to atom $\kappa$ along the Cartesian direction $\alpha$.
@@ -314,7 +317,7 @@ On the contrary, a special numerical treatment is needed in semiconductors and i
 long-ranged (LR) **dipolar** and **quadrupolar** fields in $\RR$-space.
 These LR terms determine a non-analytic behaviour of the scattering potentials
 in the long-wavelength limit $\qq \rightarrow 0$ [[cite:Vogl1976]].
-To handle the LR part, EPH uses an approach that is similar in spirit to the one employed
+To handle the LR part, the EPH code uses an approach that is similar in spirit to the one employed
 for the Fourier interpolation of the dynamical matrix [[cite:Gonze1997]].
 
 The idea is relatively simple.
@@ -368,6 +371,11 @@ The expression for the LR model including both dipole and quadrupole terms reads
 \label{eq:LRpot}
 \end{equation}
 
+!!! important
+	The computation of the dynamical quadrupoles tensor within the DFPT framework will be made available in a future release,
+	together with a specific tutorial. Once it is computed and stored in the DDB,
+	the EPH code reads it automatically and uses it for the LR model. 
+
 <!--
 TODO: Discuss more the integration with the DFPT part.
 -->
@@ -411,7 +419,7 @@ physical results [[cite:Brunin2020]].
 
 Each sub-driver implements specialized techniques to accelerate the calculation and reduce the memory requirements.
 Here we focus on the techniques that are common to the different EPH sub-drivers.
-Additional tricks specific to the particular value of [[eph_task]] are discussed in more detail in the associated lesson.
+Additional tricks specific to the particular value of [[eph_task]] are discussed in more detail in the associated lessons.
 
 First of all, note that the memory requirements for the $W_{\kappa\alpha}(\rr,\RR)$ array
 scales as [[nfft]] × product([[ddb_ngqpt]]).
@@ -488,7 +496,7 @@ are supposed to give negligible contribution to the final physical results?
 The answer is yes provided we are able to predict in some easy way and with reasonable accuracy the
 KS eigenvalues $\ee_\nk$ **without actually solving the KS equations**.
 
-The aproach used in the EPH code is based on the star-function interpolation by Shankland-Koelling-Wood Fourier (SKW)
+The aproach used in the EPH code is based on the star-function interpolation by Shankland-Koelling-Wood (SKW)
 with the improvements described in [[cite:Pickett1988]].
 In this method, the single-particle energies are expressed in terms of the (symmetrized) Fourier sum
 
@@ -582,7 +590,7 @@ If you prefer, it is possible to replace WFK files with GSR.nc file as in
 abitk skw_compare IBZ_GSR.nc KPATH_GSR.nc
 ```
 
-as only KS energies are needed for the SKW interpolation:
+as only KS energies are needed for the SKW interpolation.
 
 To compare the bands with AbiPy, use the |abicomp| script with the `ebands` command:
 
@@ -606,7 +614,7 @@ All these wavevectors will be recomputed afterwards with KS-DFT and possible osc
 or artifacts will disappear in the ab-initio results.
 
 In a nutshell, you need to **make sure that the SKW bands are reasonably close** to the ab-initio results
-especially in the region around the band edge for semiconductors or around the Fermi level for metals.
+especially in the region around the band edges for semiconductors or around the Fermi level for metals.
 Small deviations between SKW and ab-initio bands can always be accounted for by increasing the value
 of [[sigma_erange]] used for generating the KERANGE.nc file.
 
