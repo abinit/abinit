@@ -613,6 +613,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          cond_string(1)='dmft_solv' ; cond_values(1)=5
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,2*dt%dmftqmc_l,iout)
        end if
+       cond_string(1)='dmft_solv' ; cond_values(1)=5
+       cond_string(2)='dmft_solv' ; cond_values(2)=8
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_histo',dt%dmftctqmc_histo,2,(/0,1/),iout)
        if (dt%dmft_entropy>=1) then
          cond_string(1)='dmft_solv' ; cond_values(1)=5
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,3,iout)

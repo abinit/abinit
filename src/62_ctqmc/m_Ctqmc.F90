@@ -114,6 +114,9 @@ TYPE, PUBLIC :: Ctqmc
   INTEGER _PRIVATE :: opt_order = 0
 ! nb of segments max for analysis
 
+  INTEGER _PRIVATE :: opt_histo = 0
+! Enable histograms
+
   INTEGER _PRIVATE :: opt_noise = 0
 ! compute noise
 
@@ -736,9 +739,11 @@ SUBROUTINE Ctqmc_allocateOpt(this)
     this%measPerturbation = 0.d0
   END IF
 
-  FREEIF(this%occup_histo_time)
-  MALLOC(this%occup_histo_time,(1:this%flavors+1))
-  this%occup_histo_time= 0.d0
+  IF ( this%opt_histo .GT. 0 ) THEN
+    FREEIF(this%occup_histo_time)
+    MALLOC(this%occup_histo_time,(1:this%flavors+1))
+    this%occup_histo_time= 0.d0
+  END IF
 
   IF ( this%opt_noise .EQ. 1 ) THEN
     IF ( ALLOCATED(this%measNoiseG) ) THEN
@@ -1381,7 +1386,7 @@ END SUBROUTINE Ctqmc_computeF
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmc_run(this,opt_order,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
+SUBROUTINE Ctqmc_run(this,opt_order,opt_histo,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
 
 
 #ifdef HAVE_MPI1
@@ -1390,6 +1395,7 @@ include 'mpif.h'
 !Arguments ------------------------------------
   TYPE(Ctqmc), INTENT(INOUT)           :: this
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_order
+  INTEGER, OPTIONAL, INTENT(IN   )  :: opt_histo
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_movie
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_analysis
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_check
@@ -1424,6 +1430,8 @@ include 'mpif.h'
     this%opt_analysis = opt_analysis
   IF ( PRESENT ( opt_order ) ) &
     this%opt_order = opt_order 
+  IF ( PRESENT ( opt_histo ) ) &
+    this%opt_histo = opt_histo 
   IF ( PRESENT ( opt_noise ) ) THEN
     this%opt_noise = opt_noise 
   END IF
@@ -1590,8 +1598,9 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
   modNoise2      = this%modNoise2
   modGlobalMove  = this%modGlobalMove(1)
   sp1            = this%samples+1
-  this%occup_histo_time= 0.d0
-
+  IF ( this%opt_histo .GT. 0 ) THEN
+    this%occup_histo_time= 0.d0
+  END IF
   old_percent    = 0
 
   MALLOC(updated_swap,(1:flavors))
@@ -1666,7 +1675,9 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
     END IF
 
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
-      CALL ImpurityOperator_occup_histo_time(this%Impurity,this%occup_histo_time)
+      IF ( this%opt_histo .GT. 0 ) THEN
+        CALL ImpurityOperator_occup_histo_time(this%Impurity,this%occup_histo_time)
+      ENDIF
     ENDIF
 
     IF ( MOD(isweep, modNoise1) .EQ. 0 ) THEN
@@ -2360,7 +2371,9 @@ include 'mpif.h'
 
 
   this%measDE(:,:) = this%measDE(:,:) * DBLE(this%measurements) /(DBLE(this%sweeps)*this%beta)
-  this%occup_histo_time(:) = this%occup_histo_time(:) / INT(this%sweeps/this%measurements)
+  IF ( this%opt_histo .GT. 0 ) THEN
+    this%occup_histo_time(:) = this%occup_histo_time(:) / INT(this%sweeps/this%measurements)
+  END IF
  ! write(6,*) "=== Histogram of occupations for complete simulation ====",INT(this%sweeps/this%measurements)
  ! sumh=0
  ! do n1=1,this%flavors+1
@@ -2546,8 +2559,10 @@ include 'mpif.h'
                      MPI_DOUBLE_PRECISION, MPI_SUM, this%MY_COMM, ierr)
     CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%runTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
              this%MY_COMM, ierr)
-    CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
-             this%MY_COMM, ierr)
+    IF ( this%opt_histo .GT. 0 ) THEN
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               this%MY_COMM, ierr)
+    END IF
 #endif
 
   
@@ -2631,15 +2646,17 @@ include 'mpif.h'
   FREE(alpha)
   FREE(beta)
 
-  write(6,*) "=== Histogram of occupations for complete simulation  ===="
- ! write(6,*) "sumh over procs", sumh
-  sumh=0
-  do n1=1,this%flavors+1
-     write(6,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)/float(this%size)
-     sumh=sumh+this%occup_histo_time(n1)/float(this%size)
-  enddo
-     write(6,'(a,f10.4)') " all" , sumh
-  write(6,*) "================================="
+  IF ( this%opt_histo .GT. 0 ) THEN
+    write(6,*) "=== Histogram of occupations for complete simulation  ===="
+   ! write(6,*) "sumh over procs", sumh
+    sumh=0
+    do n1=1,this%flavors+1
+       write(6,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)/float(this%size)
+       sumh=sumh+this%occup_histo_time(n1)/float(this%size)
+    enddo
+       write(6,'(a,f10.4)') " all" , sumh
+    write(6,*) "================================="
+  ENDIF
 
 END SUBROUTINE Ctqmc_getResult
 !!***
@@ -3562,7 +3579,9 @@ SUBROUTINE Ctqmc_destroy(this)
 !#ifdef CTCtqmc_ANALYSIS
   FREEIF(this%measCorrelation)
   FREEIF(this%measPerturbation)
-  FREEIF(this%occup_histo_time)
+  IF ( this%opt_histo .GT. 0 ) THEN
+    FREEIF(this%occup_histo_time)
+  ENDIF
   FREEIF(this%measN)
   FREEIF(this%measDE)
   FREEIF(this%mu)

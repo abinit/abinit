@@ -2192,6 +2192,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmftctqmc_gmove  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_grnns',tread,'INT')
        if(tread==1) dtset%dmftctqmc_grnns  =intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_histo',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_histo  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_meas',tread,'INT')
        if(tread==1) dtset%dmftctqmc_meas   =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_mrka',tread,'INT')

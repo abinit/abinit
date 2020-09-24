@@ -2178,6 +2178,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_check =0
    dtsets(idtset)%dmftctqmc_correl=0
    dtsets(idtset)%dmftctqmc_grnns =0
+   dtsets(idtset)%dmftctqmc_histo =0
    dtsets(idtset)%dmftctqmc_meas  =1
    dtsets(idtset)%dmftctqmc_mrka  =0
    dtsets(idtset)%dmftctqmc_mov   =0

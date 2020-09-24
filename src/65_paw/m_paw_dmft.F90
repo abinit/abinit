@@ -146,6 +146,10 @@ MODULE m_paw_dmft
   ! CTQMC: compute green function noise for each imaginary time
   ! 0 : nothing, 1 : activated
 
+  integer :: dmftctqmc_histo
+  ! CTQMC: Enables histogram of occupations.
+  ! 0 : nothing, 1 enabled
+
   integer :: dmftctqmc_meas
   ! CTQMC: every each dmftctqmc_meas step energy is measured
   ! Speed up caltion about 10% for dmftctqmc_meas = 2
@@ -743,6 +747,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmftctqmc_mrka  =dtset%dmftctqmc_mrka
  paw_dmft%dmftctqmc_mov   =dtset%dmftctqmc_mov
  paw_dmft%dmftctqmc_order =dtset%dmftctqmc_order
+ paw_dmft%dmftctqmc_histo =dtset%dmftctqmc_histo
  paw_dmft%dmftctqmc_triqs_nleg =dtset%dmftctqmc_triqs_nleg
 
  if ( paw_dmft%dmft_solv >= 4 ) then
@@ -883,6 +888,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
        call CtqmcInterface_setOpts(paw_dmft%hybrid(iatom),&
                                    opt_Fk      =1,&
 &                                  opt_order   =paw_dmft%dmftctqmc_order ,&
+&                                  opt_histo   =paw_dmft%dmftctqmc_histo ,&
 &                                  opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &                                  opt_analysis=paw_dmft%dmftctqmc_correl,&
 &                                  opt_check   =paw_dmft%dmftctqmc_check ,&

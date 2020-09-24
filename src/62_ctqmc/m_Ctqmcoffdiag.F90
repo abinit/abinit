@@ -139,6 +139,9 @@ TYPE Ctqmcoffdiag
   INTEGER :: opt_order = 0
 ! nb of segments max for analysis
 
+  INTEGER :: opt_histo = 0
+! Enable histo calc.
+
   INTEGER :: opt_noise = 0
 ! compute noise
 
@@ -764,9 +767,11 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
     op%meas_fullemptylines = 0.d0
   END IF
 
-  FREEIF(op%occup_histo_time)
-  MALLOC(op%occup_histo_time,(1:op%flavors+1))
-  op%occup_histo_time= 0.d0
+  IF ( op%opt_histo .GT. 0 ) THEN
+    FREEIF(op%occup_histo_time)
+    MALLOC(op%occup_histo_time,(1:op%flavors+1))
+    op%occup_histo_time= 0.d0
+  END IF
 
   IF ( op%opt_noise .EQ. 1 ) THEN
     IF ( ALLOCATED(op%measNoiseG) ) THEN
@@ -1785,7 +1790,7 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_run(op,opt_order,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
+SUBROUTINE Ctqmcoffdiag_run(op,opt_order,opt_histo,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
 
 
 #ifdef HAVE_MPI1
@@ -1794,6 +1799,7 @@ include 'mpif.h'
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag), INTENT(INOUT)           :: op
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_order
+  INTEGER, OPTIONAL, INTENT(IN   )  :: opt_histo
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_movie
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_analysis
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_check
@@ -1828,6 +1834,8 @@ include 'mpif.h'
     op%opt_analysis = opt_analysis
   IF ( PRESENT ( opt_order ) ) &
     op%opt_order = opt_order 
+  IF ( PRESENT ( opt_histo ) ) &
+    op%opt_histo = opt_histo 
   IF ( PRESENT ( opt_noise ) ) THEN
     op%opt_noise = opt_noise 
   END IF
@@ -2003,7 +2011,9 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   modNoise2      = op%modNoise2
   modGlobalMove  = op%modGlobalMove(1)
   sp1            = op%samples+1
-  op%occup_histo_time= 0.d0
+  IF ( op%opt_histo .GT. 0 ) THEN
+    op%occup_histo_time= 0.d0
+  END IF
 
   old_percent    = 0
 
@@ -2094,7 +2104,9 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
     END IF
 
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
-      CALL ImpurityOperator_occup_histo_time(op%Impurity,op%occup_histo_time)
+      IF ( op%opt_histo .GT. 0 ) THEN
+        CALL ImpurityOperator_occup_histo_time(op%Impurity,op%occup_histo_time)
+      END IF
     ENDIF
 
     IF ( MOD(isweep, modNoise1) .EQ. 0 ) THEN
@@ -3233,8 +3245,10 @@ include 'mpif.h'
 
   op%measDE(:,:) = op%measDE(:,:) * DBLE(op%measurements) /(DBLE(op%sweeps)*op%beta)
 
+  IF ( op%opt_histo .GT. 0 ) THEN
+    op%occup_histo_time(:) = op%occup_histo_time(:) / INT(op%sweeps/op%measurements)
+  END IF
 ! HISTO before MPI_SUM
-!  op%occup_histo_time(:) = op%occup_histo_time(:) / INT(op%sweeps/op%measurements)
 !  write(6,*) "=== Histogram of occupations for complete simulation 3 ====",INT(op%sweeps/op%measurements)
 !  sumh=0
 !  do n1=1,op%flavors+1
@@ -3430,8 +3444,10 @@ include 'mpif.h'
              op%MY_COMM, ierr)
     CALL MPI_ALLREDUCE(op%Greens%signvaluemeas, signvaluemeassum , 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
-    CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+    IF ( op%opt_histo .GT. 0 ) THEN
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
+    END IF
     CALL MPI_ALLREDUCE(MPI_IN_PLACE, sumh, 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
     IF ( op%opt_order .GT. 0 ) THEN
@@ -3538,15 +3554,17 @@ include 'mpif.h'
   END IF
   FREE(alpha)
   FREE(beta)
-  write(6,*) "=== Histogram of occupations for complete simulation  ===="
- ! write(6,*) "sumh over procs", sumh
-  sumh=0
-  do n1=1,op%flavors+1
-     write(6,'(i4,f10.4)')  n1-1, op%occup_histo_time(n1)/float(nbprocs)
-     sumh=sumh+op%occup_histo_time(n1)/float(nbprocs)
-  enddo
-     write(6,'(a,f10.4)') " all" , sumh
-  write(6,*) "================================="
+  IF ( op%opt_histo .GT. 0 ) THEN
+    write(6,*) "=== Histogram of occupations for complete simulation  ===="
+ !   write(6,*) "sumh over procs", sumh
+    sumh=0
+    do n1=1,op%flavors+1
+       write(6,'(i4,f10.4)')  n1-1, op%occup_histo_time(n1)/float(nbprocs)
+       sumh=sumh+op%occup_histo_time(n1)/float(nbprocs)
+    enddo
+       write(6,'(a,f10.4)') " all" , sumh
+    write(6,*) "================================="
+  END IF
 
 END SUBROUTINE Ctqmcoffdiag_getResult
 !!***
@@ -4754,7 +4772,9 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   FREEIF(op%measPerturbation)
   FREEIF(op%meas_fullemptylines)
   FREEIF(op%measN)
-  FREEIF(op%occup_histo_time)
+  IF ( op%opt_histo .GT. 0 ) THEN
+    FREEIF(op%occup_histo_time)
+  END IF
   FREEIF(op%measDE)
   FREEIF(op%mu)
   FREEIF(op%hybri_limit)

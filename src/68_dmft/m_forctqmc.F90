@@ -1257,6 +1257,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call CtqmcInterface_setOpts(hybrid,&
        opt_Fk      =opt_fk,&
 &       opt_order   =paw_dmft%dmftctqmc_order ,&
+&       opt_histo   =paw_dmft%dmftctqmc_histo ,&
 &       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &       opt_analysis=paw_dmft%dmftctqmc_correl,&
 &       opt_check   =paw_dmft%dmftctqmc_check ,&
@@ -1276,6 +1277,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call CtqmcoffdiagInterface_setOpts(hybridoffdiag,&
        opt_Fk      =opt_fk,&
 &       opt_order   =paw_dmft%dmftctqmc_order ,&
+&       opt_histo   =paw_dmft%dmftctqmc_histo ,&
 &       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &       opt_analysis=paw_dmft%dmftctqmc_correl,&
 &       opt_check   =paw_dmft%dmftctqmc_check ,&
