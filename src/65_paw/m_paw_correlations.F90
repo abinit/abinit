@@ -46,6 +46,7 @@ MODULE m_paw_correlations
 
 !public procedures.
  public :: pawpuxinit   ! Initialize some data for PAW+U/PAW+LocalExactExchange/PAW+DMFT
+ public :: calc_vee     ! Compute vee for DFT+U
  public :: pawuenergy   ! Compute contributions to energy for PAW+U
  public :: pawxenergy   ! Compute contributions to energy for PAW+[local exact exchange]
  public :: setnoccmmp   ! Compute DFT+U density matrix nocc_{m,m_prime} or impose it
@@ -429,106 +430,13 @@ CONTAINS  !=====================================================================
      if (usepawu/=0) then
        lpawu=lcur
 
-!      a. compute F(k)
-!      ---------------------------------------------
-       ABI_ALLOCATE(fk,(lpawu+1))
-       fk(1)=pawtab(itypat)%upawu
-!      cf Slater Physical Review 165, p 665 (1968) [[cite:Slater1958]]
-!      write(std_out,*) "f4of2_sla",pawtab(itypat)%f4of2_sla
-       if(lpawu==0) then
-         fk(1)=fk(1)
-       else if(lpawu==1) then
-         fk(2)=pawtab(itypat)%jpawu*5._dp
-       else if(lpawu==2) then
-!        f4of2=0._dp
-         if(pawtab(itypat)%f4of2_sla<-0.1_dp)  then
-           f4of2=0.625_dp
-           pawtab(itypat)%f4of2_sla=f4of2
-         else
-           f4of2=pawtab(itypat)%f4of2_sla
-         end if
-         fk(2)=pawtab(itypat)%jpawu*14._dp/(One+f4of2)
-         fk(3)=fk(2)*f4of2
-!        if(abs(pawprtvol)>=2) then
-         write(message,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
-&         "Slater parameters F^0, F^2, F^4 are",fk(1),fk(2),fk(3)
-         call wrtout(std_out,message,'COLL')
-!        end if
-       else if(lpawu==3) then
-         f4of2=0.6681_dp
-         f6of2=0.4943_dp
-         if(pawtab(itypat)%f4of2_sla<-0.1_dp)  then
-           f4of2=0.6681_dp
-           pawtab(itypat)%f4of2_sla=f4of2
-         else
-           f4of2=pawtab(itypat)%f4of2_sla
-         end if
-         if(pawtab(itypat)%f6of2_sla<-0.1_dp)  then
-           f6of2=0.4943_dp
-           pawtab(itypat)%f6of2_sla=f6of2
-         else
-           f6of2=pawtab(itypat)%f6of2_sla
-         end if
-         fk(2)=pawtab(itypat)%jpawu*6435._dp/(286._dp+195._dp*f4of2+250._dp*f6of2)
-         fk(3)=fk(2)*f4of2
-         fk(4)=fk(2)*f6of2
-         write(std_out,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
-&         "Slater parameters F^0, F^2, F^4, F^6 are",fk(1),fk(2),fk(3),fk(4)
-       else
-         write(message, '(a,i0,2a)' )&
-&         ' lpawu=',lpawu,ch10,&
-&         ' lpawu not equal to 0 ,1 ,2 or 3 is not allowed'
-         MSG_ERROR(message)
-       end if
-
-!      b. Compute ak and vee.
-!      ---------------------------------------------
        if (allocated(pawtab(itypat)%vee)) then
          ABI_DEALLOCATE(pawtab(itypat)%vee)
        end if
        sz1=2*lpawu+1
        ABI_ALLOCATE(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
-       pawtab(itypat)%vee=zero
-       lmpawu=(lpawu-1)**2+2*(lpawu-1)+1  ! number of m value below correlated orbitals
-       klm0u=lmpawu*(lmpawu+1)/2          ! value of klmn just below correlated orbitals
-!      --------- 4 loops for interaction matrix
-       do m1=-lpawu,lpawu
-         m11=m1+lpawu+1
-         do m2=-lpawu,m1
-           m21=m2+lpawu+1
-!          klma= number of pair before correlated orbitals +
-!          number of pair for m1 lower than correlated orbitals
-!          (m1+lpawu+1)*(lpawu-1) + number of pairs for correlated orbitals
-!          before (m1,m2) + number of pair for m2 lower than current value
-           klma=klm0u+m11*lmpawu+(m11-1)*m11/2+m21
-           do m3=-lpawu,lpawu
-             m31=m3+lpawu+1
-             do m4=-lpawu,m3
-               m41=m4+lpawu+1
-               klmb=klm0u+m31*lmpawu+(m31-1)*m31/2+m41
-!              --------- loop on k=1,2,3 (4 if f orbitals)
-               do kyc=1,2*lpawu+1,2
-                 lkyc=kyc-1
-                 lmkyc=(lkyc+1)*(lkyc)+1
-                 ak=zero
-                 do mkyc=-lkyc,lkyc,1
-                   isela=pawang%gntselect(lmkyc+mkyc,klma)
-                   iselb=pawang%gntselect(lmkyc+mkyc,klmb)
-                   if (isela>0.and.iselb>0) ak=ak +pawang%realgnt(isela)*pawang%realgnt(iselb)
-                 end do
-!                ----- end loop on k=1,2,3 (4 if f orbitals)
-                 ak=ak/(two*dble(lkyc)+one)
-                 pawtab(itypat)%vee(m11,m31,m21,m41)=ak*fk(lkyc/2+1)+pawtab(itypat)%vee(m11,m31,m21,m41)
-               end do  !kyc
-               pawtab(itypat)%vee(m11,m31,m21,m41)=pawtab(itypat)%vee(m11,m31,m21,m41)*four_pi
-               pawtab(itypat)%vee(m21,m31,m11,m41)=pawtab(itypat)%vee(m11,m31,m21,m41)
-               pawtab(itypat)%vee(m11,m41,m21,m31)=pawtab(itypat)%vee(m11,m31,m21,m41)
-               pawtab(itypat)%vee(m21,m41,m11,m31)=pawtab(itypat)%vee(m11,m31,m21,m41)
-             end do
-           end do
-         end do
-       end do
-       ABI_DEALLOCATE(fk)
+       call calc_vee(pawtab(itypat)%f4of2_sla,pawtab(itypat)%f6of2_sla,pawtab(itypat)%jpawu,&
+&       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee)
 
      !  testu=0
      !  write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
@@ -852,6 +760,174 @@ CONTAINS  !=====================================================================
 
 !----------------------------------------------------------------------
 
+!!****f* m_paw_correlations/calc_vee
+!! NAME
+!! calc_vee
+!!
+!! FUNCTION
+!!
+!! Compute matrix elements of coulomb interaction (see PRB vol.52 5467) [[cite:Liechenstein1995]]
+!!    (angular part computed from Gaunt coefficients)
+!!
+!! INPUTS
+!1  f4of2_sla= Ratio of Slater integrals.
+!1  f6of2_sla= Ratio of Slater integrals.
+!!  jpawu= value of J
+!!  lpawu= value of l on which DFT+U applies
+!!  upawu= value of U
+!!
+!! OUTPUT
+!!  vee(2*lpawu+1,:,:,:)=matrix of the screened interaction for correlated orbitals
+!!
+!! PARENTS
+!!      pawpuxinit
+!!
+!! CHILDREN
+!!      poisson,simp_gen,wrtout
+!!
+!! SOURCE
+
+ subroutine calc_vee(f4of2_sla,f6of2_sla,jpawu,lpawu,pawang,upawu,vee)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lpawu
+ real(dp),intent(in) :: upawu,jpawu
+ real(dp),intent(inout) :: f4of2_sla,f6of2_sla
+ type(pawang_type), intent(in) :: pawang
+!arrays
+ real(dp),intent(out) :: vee(2*lpawu+1,2*lpawu+1,2*lpawu+1,2*lpawu+1)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: il,isela,iselb
+ integer :: klm0u,klma,klmb,kyc,lkyc
+ integer :: lmkyc,lmpawu
+ integer :: m1,m11,m2,m21,m3,m31,m4,m41
+ integer :: mkyc,sz1
+ real(dp) :: ak,f4of2,f6of2
+ character(len=500) :: message
+!arrays
+ real(dp),allocatable :: fk(:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+
+!  Select only atoms with +U
+   if(lpawu/=-1) then
+
+!    ======================================================================
+!    C-PAW+U: Matrix elements of coulomb interaction (see PRB vol.52 5467) [[cite:Liechenstein1995]]
+!    1. angular part computed from Gaunt coefficients
+!    --------------------------------------------------------------------
+!      a. compute F(k)
+!      ---------------------------------------------
+       ABI_ALLOCATE(fk,(lpawu+1))
+       fk(1)=upawu
+!      cf Slater Physical Review 165, p 665 (1968) [[cite:Slater1958]]
+!      write(std_out,*) "f4of2_sla",pawtab(itypat)%f4of2_sla
+       if(lpawu==0) then
+         fk(1)=fk(1)
+       else if(lpawu==1) then
+         fk(2)=jpawu*5._dp
+       else if(lpawu==2) then
+!        f4of2=0._dp
+         if(f4of2_sla<-0.1_dp)  then
+           f4of2=0.625_dp
+           f4of2_sla=f4of2
+         else
+           f4of2=f4of2_sla
+         end if
+         fk(2)=jpawu*14._dp/(One+f4of2)
+         fk(3)=fk(2)*f4of2
+!        if(abs(pawprtvol)>=2) then
+         write(message,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
+&         "Slater parameters F^0, F^2, F^4 are",fk(1),fk(2),fk(3)
+         call wrtout(std_out,message,'COLL')
+!        end if
+       else if(lpawu==3) then
+         f4of2=0.6681_dp
+         f6of2=0.4943_dp
+         if(f4of2_sla<-0.1_dp)  then
+           f4of2=0.6681_dp
+           f4of2_sla=f4of2
+         else
+           f4of2=f4of2_sla
+         end if
+         if(f6of2_sla<-0.1_dp)  then
+           f6of2=0.4943_dp
+           f6of2_sla=f6of2
+         else
+           f6of2=f6of2_sla
+         end if
+         fk(2)=jpawu*6435._dp/(286._dp+195._dp*f4of2+250._dp*f6of2)
+         fk(3)=fk(2)*f4of2
+         fk(4)=fk(2)*f6of2
+         write(std_out,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
+&         "Slater parameters F^0, F^2, F^4, F^6 are",fk(1),fk(2),fk(3),fk(4)
+       else
+         write(message, '(a,i0,2a)' )&
+&         ' lpawu=',lpawu,ch10,&
+&         ' lpawu not equal to 0 ,1 ,2 or 3 is not allowed'
+         MSG_ERROR(message)
+       end if
+
+!      b. Compute ak and vee.
+!      ---------------------------------------------
+      ! if (allocated(vee)) then
+      !   ABI_DEALLOCATE(vee)
+      ! end if
+       sz1=2*lpawu+1
+      ! ABI_ALLOCATE(vee,(sz1,sz1,sz1,sz1))
+       vee=zero
+       lmpawu=(lpawu-1)**2+2*(lpawu-1)+1  ! number of m value below correlated orbitals
+       klm0u=lmpawu*(lmpawu+1)/2          ! value of klmn just below correlated orbitals
+!      --------- 4 loops for interaction matrix
+       do m1=-lpawu,lpawu
+         m11=m1+lpawu+1
+         do m2=-lpawu,m1
+           m21=m2+lpawu+1
+!          klma= number of pair before correlated orbitals +
+!          number of pair for m1 lower than correlated orbitals
+!          (m1+lpawu+1)*(lpawu-1) + number of pairs for correlated orbitals
+!          before (m1,m2) + number of pair for m2 lower than current value
+           klma=klm0u+m11*lmpawu+(m11-1)*m11/2+m21
+           do m3=-lpawu,lpawu
+             m31=m3+lpawu+1
+             do m4=-lpawu,m3
+               m41=m4+lpawu+1
+               klmb=klm0u+m31*lmpawu+(m31-1)*m31/2+m41
+!              --------- loop on k=1,2,3 (4 if f orbitals)
+               do kyc=1,2*lpawu+1,2
+                 lkyc=kyc-1
+                 lmkyc=(lkyc+1)*(lkyc)+1
+                 ak=zero
+                 do mkyc=-lkyc,lkyc,1
+                   isela=pawang%gntselect(lmkyc+mkyc,klma)
+                   iselb=pawang%gntselect(lmkyc+mkyc,klmb)
+                   if (isela>0.and.iselb>0) ak=ak +pawang%realgnt(isela)*pawang%realgnt(iselb)
+                 end do
+!                ----- end loop on k=1,2,3 (4 if f orbitals)
+                 ak=ak/(two*dble(lkyc)+one)
+                 vee(m11,m31,m21,m41)=ak*fk(lkyc/2+1)+vee(m11,m31,m21,m41)
+               end do  !kyc
+               vee(m11,m31,m21,m41)=vee(m11,m31,m21,m41)*four_pi
+               vee(m21,m31,m11,m41)=vee(m11,m31,m21,m41)
+               vee(m11,m41,m21,m31)=vee(m11,m31,m21,m41)
+               vee(m21,m41,m11,m31)=vee(m11,m31,m21,m41)
+             end do
+           end do
+         end do
+       end do
+       ABI_DEALLOCATE(fk)
+   endif 
+
+ end subroutine calc_vee
+!!***
+
+!----------------------------------------------------------------------
 !!****f* m_paw_correlations/pawuenergy
 !! NAME
 !! pawuenergy

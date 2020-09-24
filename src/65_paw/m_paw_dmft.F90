@@ -91,6 +91,10 @@ MODULE m_paw_dmft
   integer :: dmftcheck
   ! Check various part of the implementation
 
+  integer :: dmft_entropy
+  ! = 0: do not compute entropy
+  ! = 1: compute entropy
+
   integer :: dmft_log_freq
   ! = 0: do not use log frequencies
   ! = 1: use log frequencies
@@ -226,6 +230,9 @@ MODULE m_paw_dmft
 
   integer  :: use_fixed_self
 
+  integer :: ientropy
+  ! activate evaluation of terms for alternative calculation of entropy in DMFT
+
   real(dp) :: edmft
 
   real(dp) :: dmft_charge_prec
@@ -247,6 +254,14 @@ MODULE m_paw_dmft
   ! DMFT cycle (integrate_green) => ichargeloc_cv
 
   real(dp) :: fermie
+
+  real(dp) :: u_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
+
+  real(dp) :: j_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
 
 
   real(dp) :: fermie_dft
@@ -630,6 +645,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%natom=dtset%natom
  paw_dmft%temp=dtset%tsmear!*unit_e
  paw_dmft%dmft_iter=dtset%dmft_iter
+ paw_dmft%dmft_entropy=dtset%dmft_entropy
  paw_dmft%dmft_kspectralfunc=dtset%dmft_kspectralfunc
  paw_dmft%dmft_dc=dtset%dmft_dc
  !paw_dmft%idmftloop=0
@@ -638,6 +654,11 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
  paw_dmft%dmft_lcpr = dtset%dmft_tollc
  paw_dmft%dmft_charge_prec = dtset%dmft_charge_prec
+
+! for entropy (alternate external calculation)
+ paw_dmft%ientropy  =  1
+ paw_dmft%u_for_s   =  4.1_dp
+ paw_dmft%j_for_s   =  0.5_dp
 
 !=======================
 !==  Fixed self for input

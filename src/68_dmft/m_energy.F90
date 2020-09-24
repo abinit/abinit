@@ -804,6 +804,7 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  integer :: nocc,nsploop,prt_pawuenergy
  real(dp) :: upawu,jpawu
  real(dp) :: edftumdcdc,edftumdc,e_ee,e_dc,e_dcdc,xe1,xe2
+ real(dp) :: edftumdc_for_s,edftumdcdc_for_s,e_ee_for_s,e_dc_for_s,e_dcdc_for_s
  character(len=500) :: message
 ! arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
@@ -915,8 +916,15 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 &                    dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,&
 &                    u_dmft=upawu,j_dmft=jpawu)
 
-     energies_dmft%e_dc(iatom)=e_dc-xe1
-     energies_dmft%e_hu_dftu(iatom)=e_ee-xe2
+     if(paw_dmft%ientropy==1) then
+       call pawuenergy(iatom,edftumdc_for_s,edftumdcdc_for_s,noccmmp,nocctot,prt_pawuenergy,pawtab_,&
+&                      dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee_for_s,e_dc=e_dc_for_s,e_dcdc=e_dcdc_for_s,&
+&                      u_dmft=paw_dmft%u_for_s/Ha_eV,j_dmft=paw_dmft%j_for_s/Ha_eV)
+     endif
+
+
+     energies_dmft%e_dc(iatom)=e_dc-xe1 ! probably wrong but not used
+     energies_dmft%e_hu_dftu(iatom)=e_ee-xe2 ! idem
 
      ABI_DEALLOCATE(noccmmp)
      ABI_DEALLOCATE(nocctot)
@@ -925,8 +933,14 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 
 ! - gather results
 ! -----------------------------------------------------------------------
- energies_dmft%e_dc_tot=e_dc ! todo_ab: here or not ?
+ energies_dmft%e_dc_tot=e_dc ! this is the onlu quantity used after.
  energies_dmft%e_hu_dftu_tot=e_ee
+ if(paw_dmft%ientropy==1) then
+   write(message,'(a,3(f14.10,3x))') "For entropy calculation E_dc_tot, u_for_s, j_for,s", e_dc_for_s,paw_dmft%u_for_s,paw_dmft%j_for_s
+   call wrtout(std_out,message,'COLL')
+   write(message,'(a,3(f14.10,3x))') "Reference   calculation E_dc_tot, upawu  , jpawu  ", e_dc,upawu*Ha_eV,jpawu*Ha_eV
+   call wrtout(std_out,message,'COLL')
+ endif
 
 end subroutine compute_dftu_energy
 !!***
