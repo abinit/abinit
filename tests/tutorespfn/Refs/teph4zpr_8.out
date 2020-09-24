@@ -1,5 +1,5 @@
 
-.Version 9.2.0 of ABINIT 
+.Version 9.2.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 21 Sep 2020.
-- ( at 03h52 )
+.Starting date : Thu 24 Sep 2020.
+- ( at 20h24 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8/teph4zpr_8.in
 - output file    -> teph4zpr_8.out
@@ -453,9 +453,9 @@ meta: {optdriver: 7, eph_task: 4, }
  Number of q-points in the IBZ: 72
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
- No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
- List of K-points for self-energy corrections:
+ Including all final {mk+q} states inside energy window: [4.347 9.112 ] [eV]
+ List of k-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
 
  === MPI parallelism ===
@@ -730,9 +730,9 @@ meta: {optdriver: 7, eph_task: 4, }
  Number of q-points in the IBZ: 72
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
- No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
- List of K-points for self-energy corrections:
+ Including all final {mk+q} states inside energy window: [4.347 9.112 ] [eV]
+ List of k-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
 
  === MPI parallelism ===
@@ -1010,10 +1010,10 @@ P           mkmem          72
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         37.5  wall=         39.0
+- Proc.   0 individual time (sec): cpu=         37.9  wall=         39.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.5  wall=         39.0
++Overall time at end (sec) : cpu=         37.9  wall=         39.0
