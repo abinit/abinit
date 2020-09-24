@@ -1705,7 +1705,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
  integer,allocatable :: list(:),indngb(:)
  real(dp) :: invdlt(3,3),ra(3),xred(3),dielt(3,3)
  real(dp),allocatable :: dist(:,:,:),wkdist(:),rsiaf(:,:,:),sriaf(:,:,:),vect(:,:,:)
- real(dp),allocatable :: posngb(:,:)
+ real(dp),allocatable :: posngb(:,:),wghia(:)
  real(dp) :: gprimd(3,3),rprimd(3,3)
 
 ! *********************************************************************
@@ -1810,7 +1810,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
      nctkarr_t('ifc_atoms_indices', "i", "natifc"),&
      nctkarr_t('ifc_neighbours_indices', "i", "ifcout, natifc"),&
      nctkarr_t('ifc_distances', "dp", "ifcout, natifc "),&
-     nctkarr_t('ifc_matrix_cart_coord', "dp", "number_of_cartesian_directions,number_of_cartesian_directions, ifcout, natifc")])
+     nctkarr_t('ifc_matrix_cart_coord', "dp", "number_of_cartesian_directions,number_of_cartesian_directions, ifcout, natifc"),&
+     nctkarr_t('ifc_atoms_cart_coord', "dp", "number_of_cartesian_directions,ifcout, natifc"),&
+     nctkarr_t('ifc_weights', "dp", "ifcout, natifc")])
    NCF_CHECK(ncerr)
 
    if (Ifc%dipdip==1) then
@@ -1835,6 +1837,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
  ABI_MALLOC(vect,(3,3,ifcout1))
  ABI_MALLOC(indngb,(ifcout1))
  ABI_MALLOC(posngb,(3,ifcout1))
+ ABI_MALLOC(wghia,(ifcout1))
 
  iatifc=0
 
@@ -1881,6 +1884,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
        do ii=1,ifcout1
          ib = indngb(ii)
          irpt = (list(ii)-1)/Ifc%natom+1
+         wghia(ii) = Ifc%wghatm(ia,ib,irpt)
          ! limit printing to maximum distance for tdep
          if (wkdist(ii) > maxdist_tdep) cycle
 
@@ -1918,6 +1922,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
          NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=[1,iatifc],count=[ifcout1,1]))
          ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord"), rsiaf, start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
          NCF_CHECK(ncerr)
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_cart_coord"), posngb, start=[1,1,iatifc], count=[3,ifcout1,1]))
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_weights"), wghia, start=[1,iatifc], count=[ifcout1,1]))
+
          if (Ifc%dipdip==1) then
            ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord_short_range"), sriaf, &
              start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
@@ -1975,6 +1982,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
  ABI_FREE(dist)
  ABI_FREE(list)
  ABI_FREE(wkdist)
+ ABI_FREE(wghia)
 
 #ifdef HAVE_NETCDF
 contains
