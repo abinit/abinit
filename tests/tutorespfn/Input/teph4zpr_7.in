@@ -1,20 +1,20 @@
 # Convergence of ZPR wrt q-sampling with Sternheimer method
 
  ndtset 3
+ nband 20
 
  ngkpt1 4 4 4    eph_ngqpt_fine1 4 4 4    getwfk_filepath1 "teph4zpr_3o_DS1_WFK"
  ngkpt2 8 8 8    eph_ngqpt_fine2 8 8 8    getwfk_filepath2 "teph4zpr_3o_DS2_WFK"
  ngkpt3 12 12 12 eph_ngqpt_fine3 12 12 12 getwfk_filepath3 "teph4zpr_3o_DS3_WFK"
 
+ eph_stern 1
+ getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
+ # nline tolwfr
+ 
  getddb_filepath "teph4zpr_1_DDB"
  ddb_ngqpt 4 4 4
  getdvdb_filepath "teph4zpr_2_DVDB"
 
- eph_stern 1
- getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
- # nline tolwfr
-
- nband 20
  ecut 35.0
 
  nshiftk 1

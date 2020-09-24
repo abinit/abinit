@@ -1,6 +1,3 @@
 [submodule "tests/modules_with_data/MgO_eph_zpr"]
 	path = tests/modules_with_data/MgO_eph_zpr
 	url = git://github.com/abinit/MgO_eph_zpr.git
-[submodule "MgO_eph_zpr"]
-	path = MgO_eph_zpr
-	url = https://github.com/abinit/MgO_eph_zpr.git
