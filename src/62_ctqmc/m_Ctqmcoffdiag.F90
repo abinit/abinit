@@ -259,6 +259,9 @@ TYPE Ctqmcoffdiag
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: measPerturbation 
 ! opt_order,nflavor
 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occup_histo_time
+! nflavor
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: meas_fullemptylines
 ! opt_order,nflavor
 
@@ -760,6 +763,10 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
     MALLOC(op%meas_fullemptylines,(2,1:op%flavors))
     op%meas_fullemptylines = 0.d0
   END IF
+
+  FREEIF(op%occup_histo_time)
+  MALLOC(op%occup_histo_time,(1:op%flavors+1))
+  op%occup_histo_time= 0.d0
 
   IF ( op%opt_noise .EQ. 1 ) THEN
     IF ( ALLOCATED(op%measNoiseG) ) THEN
@@ -1996,6 +2003,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   modNoise2      = op%modNoise2
   modGlobalMove  = op%modGlobalMove(1)
   sp1            = op%samples+1
+  op%occup_histo_time= 0.d0
 
   old_percent    = 0
 
@@ -2084,6 +2092,10 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
         indDensity = indDensity+1
       END IF
     END IF
+
+    IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
+      CALL ImpurityOperator_occup_histo_time(op%Impurity,op%occup_histo_time)
+    ENDIF
 
     IF ( MOD(isweep, modNoise1) .EQ. 0 ) THEN
       !modNext = isweep + modNoise2
@@ -3071,7 +3083,7 @@ include 'mpif.h'
   INTEGER                                       :: ierr
 #endif
   INTEGER                                       :: sizeoper,nbprocs,myrank
-  DOUBLE PRECISION                              :: inv_size
+  DOUBLE PRECISION                              :: inv_size,sumh
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
@@ -3220,6 +3232,16 @@ include 'mpif.h'
   last = sp1
 
   op%measDE(:,:) = op%measDE(:,:) * DBLE(op%measurements) /(DBLE(op%sweeps)*op%beta)
+
+! HISTO before MPI_SUM
+!  op%occup_histo_time(:) = op%occup_histo_time(:) / INT(op%sweeps/op%measurements)
+!  write(6,*) "=== Histogram of occupations for complete simulation 3 ====",INT(op%sweeps/op%measurements)
+!  sumh=0
+!  do n1=1,op%flavors+1
+!     write(6,'(i4,f10.4)')  n1-1, op%occup_histo_time(n1)
+!     sumh=sumh+op%occup_histo_time(n1)
+!  enddo
+!  write(6,*) "=================================",sumh
 
   n1 = op%measNoise(1)%tail
   n2 = op%measNoise(2)%tail
@@ -3408,6 +3430,10 @@ include 'mpif.h'
              op%MY_COMM, ierr)
     CALL MPI_ALLREDUCE(op%Greens%signvaluemeas, signvaluemeassum , 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
+    CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+             op%MY_COMM, ierr)
+    CALL MPI_ALLREDUCE(MPI_IN_PLACE, sumh, 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+             op%MY_COMM, ierr)
     IF ( op%opt_order .GT. 0 ) THEN
       CALL MPI_ALLREDUCE(op%meas_fullemptylines, fullempty, 2*flavors, MPI_DOUBLE_PRECISION, MPI_SUM, &
                op%MY_COMM, ierr)
@@ -3512,6 +3538,15 @@ include 'mpif.h'
   END IF
   FREE(alpha)
   FREE(beta)
+  write(6,*) "=== Histogram of occupations for complete simulation 4 ===="
+ ! write(6,*) "sumh over procs", sumh
+  sumh=0
+  do n1=1,op%flavors+1
+     write(6,'(i4,f10.4)')  n1-1, op%occup_histo_time(n1)/float(nbprocs)
+     sumh=sumh+op%occup_histo_time(n1)/float(nbprocs)
+  enddo
+     write(6,'(a,f10.4)') " all" , sumh
+  write(6,*) "================================="
 
 END SUBROUTINE Ctqmcoffdiag_getResult
 !!***
@@ -4719,6 +4754,7 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   FREEIF(op%measPerturbation)
   FREEIF(op%meas_fullemptylines)
   FREEIF(op%measN)
+  FREEIF(op%occup_histo_time)
   FREEIF(op%measDE)
   FREEIF(op%mu)
   FREEIF(op%hybri_limit)

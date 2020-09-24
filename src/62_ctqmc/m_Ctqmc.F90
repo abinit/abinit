@@ -217,6 +217,9 @@ TYPE, PUBLIC :: Ctqmc
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) _PRIVATE :: measPerturbation 
 ! opt_order,nflavor
 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occup_histo_time
+! nflavor
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) _PRIVATE :: measCorrelation 
 ! segment,antisegment,nflavor,nflavor
 
@@ -732,6 +735,10 @@ SUBROUTINE Ctqmc_allocateOpt(this)
     MALLOC(this%measPerturbation,(1:this%opt_order,1:this%flavors))
     this%measPerturbation = 0.d0
   END IF
+
+  FREEIF(this%occup_histo_time)
+  MALLOC(this%occup_histo_time,(1:this%flavors+1))
+  this%occup_histo_time= 0.d0
 
   IF ( this%opt_noise .EQ. 1 ) THEN
     IF ( ALLOCATED(this%measNoiseG) ) THEN
@@ -1583,6 +1590,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
   modNoise2      = this%modNoise2
   modGlobalMove  = this%modGlobalMove(1)
   sp1            = this%samples+1
+  this%occup_histo_time= 0.d0
 
   old_percent    = 0
 
@@ -1656,6 +1664,10 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
         END IF
       END IF
     END IF
+
+    IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
+      CALL ImpurityOperator_occup_histo_time(this%Impurity,this%occup_histo_time)
+    ENDIF
 
     IF ( MOD(isweep, modNoise1) .EQ. 0 ) THEN
       !modNext = isweep + modNoise2
@@ -2239,7 +2251,7 @@ include 'mpif.h'
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
 #endif
-  DOUBLE PRECISION                              :: inv_size
+  DOUBLE PRECISION                              :: inv_size,sumh
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
   TYPE(FFTHyb) :: FFTmrka
 
@@ -2346,7 +2358,16 @@ include 'mpif.h'
   END DO
   last = sp1
 
+
   this%measDE(:,:) = this%measDE(:,:) * DBLE(this%measurements) /(DBLE(this%sweeps)*this%beta)
+  this%occup_histo_time(:) = this%occup_histo_time(:) / INT(this%sweeps/this%measurements)
+  write(6,*) "=== Histogram of occupations for complete simulation ====",INT(this%sweeps/this%measurements)
+  sumh=0
+  do n1=1,this%flavors+1
+     write(6,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)
+     sumh=sumh+this%occup_histo_time(n1)
+  enddo
+  write(6,*) "=================================",sumh
 
   n1 = this%measNoise(1)%tail
   n2 = this%measNoise(2)%tail
@@ -2525,6 +2546,8 @@ include 'mpif.h'
                      MPI_DOUBLE_PRECISION, MPI_SUM, this%MY_COMM, ierr)
     CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%runTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
              this%MY_COMM, ierr)
+    CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_MAX, &
+             this%MY_COMM, ierr)
 #endif
 
   
@@ -2607,6 +2630,13 @@ include 'mpif.h'
   END IF
   FREE(alpha)
   FREE(beta)
+  write(6,*) "=== Histogram of occupations for complete simulation 2 ===="
+  sumh=0
+  do n1=1,this%flavors+1
+     write(6,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)
+     sumh=sumh+this%occup_histo_time(n1)
+  enddo
+  write(6,*) "=================================",sumh
 
 END SUBROUTINE Ctqmc_getResult
 !!***
@@ -3529,6 +3559,7 @@ SUBROUTINE Ctqmc_destroy(this)
 !#ifdef CTCtqmc_ANALYSIS
   FREEIF(this%measCorrelation)
   FREEIF(this%measPerturbation)
+  FREEIF(this%occup_histo_time)
   FREEIF(this%measN)
   FREEIF(this%measDE)
   FREEIF(this%mu)
