@@ -5,7 +5,8 @@ authors: GB, MG
 # Phonon-limited mobility 
 
 This tutorial shows how to compute phonon-limited carrier mobilities in semiconductors within
-the relaxation time approximation (RTA), taking the specific case of AlAs as an example.
+the relaxation time approximation (RTA) or the momentum relaxation time approximation (MRTA), 
+taking the specific case of AlAs as an example.
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
@@ -20,7 +21,8 @@ Before starting, it is worth summarizing the most important equations implemente
 For a more detailed description of the ABINIT implementation, please consult [[cite:Brunin2020b]].
 
 Our goal is to find an approximated solution to the linearized
-Boltzmann transport equation (BTE) [[cite:Ashcroft1976]] within the relaxation time approximation.
+Boltzmann transport equation (BTE) [[cite:Ashcroft1976]] within the RTA/MRTA.
+Let us first focus on the RTA. 
 If what follows, we will be working within the so-called
 self-energy relaxation time approximation (SERTA) [[cite:Giustino2017]].
 The SERTA is more accurate than the constant relaxation time approximation (CRTA) as the
@@ -28,7 +30,7 @@ microscopic e-ph scattering mechanism is now included thus leading to carrier li
 that depend on the band index $n$ and the wavevector $\kk$.
 Keep in mind, however, that the SERTA is still an approximation and that a more rigorous approach would require
 to solve the BTE iteratively and/or the inclusion of many-body effects at different levels.
-For a review of the different possible approaches see the review paper by [[cite:Ponce2020]].
+For a review of the different possible approaches see the review paper [[cite:Ponce2020]].
 
 In the SERTA, the transport linewidth is given by
 the imaginary part of the electron-phonon (e-ph) self-energy evaluated at the KS energy [[cite:Giustino2017]].
@@ -58,6 +60,20 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
     2 \lim_{\eta \rightarrow 0^+} \Im\{\Sigma^\FM_{n\kk}(\enk)\}.
 \label{eq:fanlifetime}
 \end{align}
+
+In the MRTA, the back-scattering is included by writing the electron lifetimes as
+
+\begin{equation}
+\begin{split}
+    \frac{1}{\tau_{n\kk}} & =
+                2 \pi \sum_{m,\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} |\gkkp|^2 \left( 1 - \frac{\vnk \cdot \vmkq}{|\vnk|^2} \right) \\
+                & \times \left[ (n_\qnu + f_{m\kk+\qq})
+                                \delta(\enk - \emkq  + \wqnu) \right.\\
+                & \left. + (n_\qnu + 1 - f_{m\kk+\qq})
+                                \delta(\enk - \emkq  - \wqnu ) \right].
+\end{split}
+\label{eq:mrta}
+\end{equation}
 
 !!! important
 
@@ -119,7 +135,7 @@ At zero total carrier concentration, the Fermi level $\ef$ is located inside the
 A typical computation of mobilities requires different steps that are summarized 
 in the [introduction page for the EPH code](eph_intro).
 Here we only describe the e-ph related part, i.e the blue-box in the workflow presented in the previous page.
-For this purpose, we use [[eph_task]] **-4** to obtain only the imaginary part of the SE at the KS energy 
+For this purpose, we use [[eph_task]] **-4** to compute only the imaginary part of the SE at the KS energy 
 and explain other important aspects related to this kind of calculation.
 
 <!--
@@ -176,8 +192,8 @@ For more details about this first step, please refer to the first and second tut
 
 !!! important
 
-    Since AlAs is a **polar semiconductor**, we need to compute with DFPT the Born effective charges $Z^*$
-    as well and the static dielectric tensor $\ee^\infty$.
+    Since AlAs is a **polar semiconductor**, we need to compute with DFPT the Born effective charges $\bm{Z}^*$
+    as well and the static dielectric tensor $\bm{\ee}^\infty$.
     These quantities are then used to treat the long-range (LR) part of the dynamical matrix in
     the Fourier interpolation of the phonon frequencies.
     As discussed in the EPH introduction, these quantities are also needed for the Fourier 
@@ -254,7 +270,7 @@ The only ingredient that is still missing is the WFK file with the GS wavefuncti
     and the value of the band gap(s).
     Note also that there are several parts of the EPH code in which it is assumed that no vibrational instability
     is present so you should **always look at the phonon spectrum computed by the code**.
-    Don't expect to get meaningful results if imaginary phonon frequencies 
+    Do not expect to get meaningful results if imaginary phonon frequencies 
     (a.k.a **negative frequencies**) are present.
 
 
@@ -273,7 +289,7 @@ However, the mobility strongly depends on the BZ sampling and a convergence stud
 **increasing** the $\kk$-mesh density, as well as the $\qq$-mesh.
 A dense $\qq$-mesh is needed to obtain converged values for the lifetimes, whereas a dense $\kk$-sampling 
 is needed to have enough points in the electron/hole pockets when computing the transport coefficients.
-This study is explained later and left as excercise.
+This study is explained later and left as an excercise.
 It should be clear that systems with small effective masses (e.g GaAs)
 require very dense homogeneous $\kk$-meshes to describe the pockets.
 
@@ -301,7 +317,8 @@ abinit teph4mob_4.in > teph4mob_4.log 2> err &
 
     In the last part of the tutorial, we explain how to avoid the NSCF computation 
     for all the $\kk$-points in the IBZ and produce a partial WFK file containing 
-    only the wavevectors relevant for transport properties.
+    only the wavevectors relevant for transport properties. This is important for 
+    dense meshes but could also be used for any mesh by default.
 
 ## Calculation of the mobility
 
@@ -336,7 +353,7 @@ Let's discuss the meaning of the e-ph variables in more details:
 * [[eph_task]] -4 tells ABINIT that we only need the imaginary part
   of the e-ph self-energy at the KS energy, which directly gives the quasi-particle lifetimes due to e-ph scattering.
 
-* The homogeneous $\kk$-mesh corresponding to the WFK file is specified by [[ngkpt]] 24 24 24.
+* The homogeneous mesh corresponding to the WFK file is specified by [[ngkpt]] 24 24 24.
   The code aborts with an error if [[ngkpt]] is not the same as the one found in the 
   input WFK file. At present, multiple shifts ([[nshiftk]] > 1) are not supported.
 
@@ -345,22 +362,39 @@ Let's discuss the meaning of the e-ph variables in more details:
 * [[eph_ngqpt_fine]] defines the dense $\qq$-mesh where the scattering potentials are interpolated
   and the e-ph matrix elements are computed. 
 
-* We work within the rigid band model and introduce a small electron-doping: [[eph_doping]] = -2.26e+16 
-  that corresponds to [[eph_extrael]] 1e-6.
-  Now how to set [[occopt]] to 3 to correctly compute the
-  location of the Fermi level using the Fermi-Dirac occupation function as we are dealing with the
-  physical temperature and not a fictitious broadening for integration purposes.
-
 !!! warning
 
     [[ngkpt]] and [[eph_ngqpt_fine]] should be commensurate.
     More specifically, [[ngkpt]] must be a multiple of the $\qq$-mesh ([[eph_ngqpt_fine]])
     because the WFK should contain all the $\kk$- and $\qq$-points.
-    In most cases, [[ngkpt]] = [[eph_ngqpt_fine]]. 
+    In most cases, [[ngkpt]] = [[eph_ngqpt_fine]].
     It is however possible to use fewer $\qq$-points.
     Note that [[ngkpt]] does not necessarily correspond to the $\kk$-mesh used for the computation of
     transport quantities, see the following discussion.
-    
+
+* We work within the rigid band model and introduce a small electron-doping: [[eph_doping]] = -1e+15 
+  that corresponds to 1e15 electrons per cm$^3$.
+  To obtain results that are representative of the intrinsic mobility,
+  we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$.
+  Alternatively, one  can use [[eph_extrael]] or [[eph_fermie]]).
+  We also set [[occopt]] to 3 to correctly compute the
+  location of the Fermi level using the Fermi-Dirac occupation function as we are dealing with the
+  physical temperature and not a fictitious broadening for integration purposes.
+
+* The list of temperatures for which the mobility is computed is specified by [[tmesh]].
+
+!!! tip
+
+    The computational cost increases with the number of temperatures although not necessarily in a linear fashion.
+    For the initial convergence studies, we suggest to start from a relatively small number
+    of temperatures **covering the range of interest**.
+    The T-mesh can be densified aftwerwards while keeping the same range once converged parameters are found.
+
+    Note also that transport properties at low temperatures are more difficult to converge as the
+    derivative of the Fermi-Dirac distribution is strongly peaked around the Fermi level and hence
+    a very dense sampling is needed to converge the BZ integrals.
+    In a nutshell, avoid low temperatures unless you are really interested in this region.
+
 <!--In this tutorial, we will use the same dense $\kk$- and $\qq$-meshes.
 As a rule of thumb, a $\qq$-mesh twice as dense in each direction as the $\kk$-mesh,
 is needed to achieve fast convergence of the integrals [[cite:Brunin2020b]].
@@ -372,49 +406,32 @@ Possible exceptions are systems with very small effective masses (e.g. GaAs) in 
 a very dense $\kk$-sampling is needed to sample the electron (hole) pocket.
 In this case, using the same sampling for electrons and phonons may be enough to converge.-->
 
-We will use the tetrahedron integration method [[cite:Blochl1994]] to obtain the lifetimes 
-(integration over the $\qq$-mesh). 
-This allows to efficiently filter out the $\qq$-points that do not contribute to the lifetimes. 
-Indeed, only a small fraction of the $\qq$-points belonging to the $\qq$-mesh
-are compatible with energy and momentum conservation for a given $\kk$-point.
-All the other $\qq$-points can be filtered out.
-The use of the tetrahedron method is automatically activated when [[eph_task]] is set to -4.
-It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended 
-as the calculation will become significantly slower.
+* By default, we use the tetrahedron integration method [[cite:Blochl1994]] to obtain the lifetimes 
+  (integration over the $\qq$-mesh). 
+  This allows to efficiently filter out the $\qq$-points that do not contribute to the lifetimes. 
+  Indeed, only a small fraction of the $\qq$-points belonging to the $\qq$-mesh
+  are compatible with energy and momentum conservation for a given $\kk$-point.
+  All the other $\qq$-points can be filtered out.
+  The use of the tetrahedron method is automatically activated when [[eph_task]] is set to -4.
+  It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended 
+  as the calculation will become significantly slower.
 
-The list of temperatures for which the mobility is computed is specified by [[tmesh]] in Kelvin units.
-The free carrier concentration is specified by [[eph_doping]] in |electron_charge| / cm^3 units 
-so negative values for electron-doping, positive values for hole doping.
-Alternatively, one  can use [[eph_extrael]] or [[eph_fermie]]).
-To obtain results that are representative of the intrinsic mobility,
-we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$.
 
-!!! tip
-
-    The computational cost increases with the number of temperatures although not necessarly in a linear fashion.
-    For the initial convergence studies, we suggest to start from a relatively small number
-    of temperatures **covering the range of interest**. 
-    The T-mesh can be densified aftwerwards while keeping the same range once converged parameters are found.
-
-    Note also that transport properties at low temperatures are much more difficult to converge as the
-    derivative of the Fermi-Dirac distribution is strongly peaked around the Fermi level and hence 
-    a very dense sampling is needed to convergence the BZ integrals.
-    In a nutshell, avoid low temperatures unless you are really interested in this region.
-    
-
-The [[sigma_erange]] variable defines the energy window, below the VBM and above the
-CBM where the lifetimes will be computed.
-Since the BTE contains the derivative of the Fermi-Dirac occupation function centered on the Fermi level,
-it is possible to filter the $\kk$-points that will contribute to the mobility and compute
-the lifetimes for these $\kk$-points only. 
-The value of the derivative, indeed, decreases rapidly
-as we go further from the Fermi level. Only the states close to the band edges contribute.
-This additional filtering technique allows one to compute only a few percents of all the lifetimes.
-**This variable should be subject to a convergence study**, as explained in the next section.
+* The [[sigma_erange]] variable defines the energy window, below the VBM and above the
+  CBM where the lifetimes will be computed.
+  Since the BTE contains the derivative of the Fermi-Dirac occupation function centered on the Fermi level,
+  it is possible to filter the $\kk$-points that will contribute to the mobility and compute
+  the lifetimes for these $\kk$-points only. 
+  The value of the derivative, indeed, decreases rapidly
+  as we go further from the Fermi level. Only the states close to the band edges contribute.
+  This additional filtering technique allows one to compute only a few percents of all the lifetimes.
+  **This variable should be subject to a convergence study**, as explained in the next section.
 <!--
 A value of 0.2 eV represents a good starting point for further analysis.
 Hopefully, in the next version this parameter will be automatically computed by the code.
 -->
+
+* [[boxcutmin]] and [[mixprec]] are used to accelerate the computation, see [the introductory tutorial](eph_intro).
 
 We can now examine the log file in detail.
 After the standard output of the input variables, the code reports the different parameters 
@@ -426,46 +443,56 @@ accurate interpolation of the scattering potentials, see discussion in [[cite:Br
 !!! important
 
     At present ( |today| ), the inclusion of the dynamical quadrupoles in the EPH code 
-    is not available in the public version so you should have the following in the log file:*
+    is not available in the public version so you should have the following in the log file:
 
     ```sh
     Have dielectric tensor: yes
     Have Born effective charges: yes
     Have quadrupoles: no
+    Have electric field: no
     ```
 
 The code then outputs different quantities. 
-The first one is the location of the Fermi level that will be used to compute the lifetimes. 
-You can check that it is far enough from the band
-edges so that the computed mobility can be considered as intrinsic.
-
-```sh
-Valence Maximum:   2.3564 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-Conduction minimum:   3.5254 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-Fermi level:  3.0878 (eV)
-```
-
-ABINIT also finds the list of $\kk$-point belonging to the dense mesh that
-are located within the energy window:
+For instance, ABINIT finds the list of $\kk$-points belonging to the dense mesh that
+are located within the energy window ([[sigma_erange]]):
 
 ```sh
 Found 3 k-points within erange:  0.000  0.150  (eV)
-min(nbcalc_ks): 1 MAX(nbcalc_ks): 1
+```
+Over the initial 413 $\kk$-points in the IBZ, only 3 will be computed!
+
+The location of the Fermi level for all temperatures that will be used to compute the lifetimes
+is computed and printed afterwards. 
+You can check that it is far enough from the band
+edges so that the computed mobility can be considered as intrinsic:
+the values of D_v and D_c should be large enough compared to kT.
+
+```sh
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.521     1.165     0.004
+  64.0     0.006     3.475     1.118     0.051
+ 123.0     0.011     3.428     1.071     0.098
+ 182.0     0.016     3.379     1.023     0.146
+ 241.0     0.021     3.328     0.972     0.197
+ 300.0     0.026     3.274     0.918     0.251
 ```
 
-Over the initial 413 $\kk$-points in the IBZ, only 3 will be computed!
 ABINIT then reads the WFK file and interpolates the potentials to compute the e-ph matrix elements.
 The use of the tetrahedron method allows for the filtering of the $\qq$-points:
 
 ```sh
-qpoints_oracle: calculation of tau_nk will need: 39 q-points in the IBZ. (nqibz_eff / nqibz):   9.4 [%]
+  qpoints_oracle: calculation of tau_nk will need: 15 q-points in the IBZ. (nqibz_eff / nqibz):   3.6 [%]
 ```
 
 Again, this leads to a significant speed-up of the computation.
+
 Once this is done, the code starts looping over the 3 $\kk$-points for which the lifetimes are needed.
 
-```md
-Computing self-energy matrix elements for k-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00] [ 1 / 3 ]
+```sh
+  Computing self-energy matrix elements for k-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00] [ 1 / 3 ]
 ```
 
 You can find various information for each $\kk$-point, such as:
@@ -481,12 +508,12 @@ You can find various information for each $\kk$-point, such as:
 Finally, we have the results for the lifetimes (TAU) in the *teph4mob_5.out* file:
 
 ```sh
-K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
-    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-	5   3.573    0.000  31553.2    0.000
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  36639.9    0.000
 ```
 
-Only the first temperature is printed in the output file, but all the results are stored in the SIGEPH.nc file.
+Keep in mind that all the results are stored in the SIGEPH.nc file.
 
 !!! tip
 
@@ -499,26 +526,44 @@ Only the first temperature is printed in the output file, but all the results ar
 
 ![](eph4mob_assets/linewidths.png)
 
-At the end of the *.out* and *.log* files, the mobility is printed:
+At the end of the *.out* and *.log* files, the mobility is printed 
+for the three principal Cartesian directions, all temperatures and 
+in the SERTA and MRTA.
 
 ```sh
-Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.72            0.00
-          123.00        0.23E+17        0.00E+00          346.73            0.00
-          182.00        0.23E+17        0.00E+00          424.55            0.00
-          241.00        0.23E+17        0.00E+00          420.01            0.00
-          300.00        0.23E+17        0.00E+00          364.31            0.00
+ Cartesian component of SERTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.76            0.00
+          123.00        0.10E+16        0.00E+00          356.24            0.00
+          182.00        0.10E+16        0.00E+00          435.51            0.00
+          241.00        0.10E+16        0.00E+00          433.89            0.00
+          300.00        0.10E+16        0.25E+05          379.06            0.00
 ```
 
 The temperature is first given then the electron and hole densities followed by electron and hole mobilities.
 In this example, we consider only electrons and this explains why the values for holes are zero.
 Note that the transport driver is automatically executed after the EPH run.
+In this case, the difference between the SERTA and the MRTA is not very large:
 
-You can also run the transport driver in standalone mode by setting [[eph_task]] 7, 
-provided you already have the lifetimes in an external SIGEPH.nc file that be specified via [[getsigeph_filepath]].
-This task is relatively fast even in serial execution although some parts 
-(in particular the computation of DOS-like quantities) can benefit from MPI.
+```sh
+ Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.67            0.00
+          123.00        0.10E+16        0.00E+00          374.94            0.00
+          182.00        0.10E+16        0.00E+00          470.73            0.00
+          241.00        0.10E+16        0.00E+00          469.55            0.00
+          300.00        0.10E+16        0.25E+05          411.23            0.00
+```
+
+This might be different in other materials, or if the calculations are better converged (they are not at all converged here).
+
+!!! tip
+	You can also run the transport driver in standalone mode by setting [[eph_task]] 7, 
+	provided you already have the lifetimes in an external SIGEPH.nc file that be specified via [[getsigeph_filepath]].
+	This task is relatively fast even in serial execution although some parts 
+	(in particular the computation of DOS-like quantities) can benefit from MPI.
 
 Now that we know how to obtain the mobility in a semiconductor for given $\kk$- and $\qq$-meshes,
 we can give more details about convergence studies and discuss additional tricks
@@ -528,15 +573,15 @@ to decrease significantly the computational cost.
 
 The first convergence study consists in determining the energy range around the band edge
 to be used for the computation of $\tau_{n\kk}$.
-We can do that by performing mobility computations with fixed $\kk$- and $\qq$-mesh
-and increasing [[sigma_erange]] energy window.
+We can do that by performing mobility computations with fixed $\kk$- and $\qq$-meshes
+and increasing [[sigma_erange]].
 
 !!! tip
 
     The code can compute both electron and hole mobilities in a single run 
     but this is not the recommended procedure as the $\qq$-point filtering is expected to be less efficient.
     Moreover electrons and holes may require a different $\kk$-sampling to convergence depending on the dispersion
-    of the bands. As a consequence, we suggest to compute electrons and hole with different input files.
+    of the bands. As a consequence, we suggest to compute electrons and holes with different input files.
 
 The file *$\$ABI_TUTORESPFN/Input/teph4mob_6.in* is an example of such computation.
 
@@ -559,9 +604,10 @@ Note that you should perform this convergence study with a $\kk$-mesh that is al
 capture the band dispersion correctly.
 In this case, we are using a 24×24×24 mesh, which is not very dense for such computations.
 This means that, when increasing [[sigma_erange]], sometimes
-no additional $\kk$-point is included and the sampling is too coarse 
+no additional $\kk$-point is included and the sampling is too coarse. 
 This is the case for the first three datasets (3 $\kk$-points), and the last two datasets (6 $\kk$-points).
 If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
+For instance, in Silicon, a 45×45×45 $\kk$-mesh could be used to determine [[sigma_erange]].
 
 <!-- 
 TODO: Discuss how to dope the system! 
@@ -570,7 +616,7 @@ In principle, one can run a single calculation with relatively large sigma_erang
 the window in the RTA part. This trick however is not yet implemented.
 -->
 
-### Convergence w.r.t. the k- and q-meshes
+### Convergence w.r.t. the $\kk$- and $\qq$-meshes
 
 Once the energy window has been set, we can start to converge the mobility with respect to the
 dense $\kk$- and $\qq$-meshes.
@@ -595,7 +641,7 @@ The two possibilities are:
 
 1. Run a computation with:
 
-       * [[ngkpt]] 90 90 90, [[nshiftk]] 1 and [[shiftk]] 0 0 0
+       * [[ngkpt]] 90 90 90 ([[nshiftk]] 1 and [[shiftk]] 0 0 0)
        * [[eph_ngqpt_fine]] 90 90 90,
        * [[sigma_ngkpt]] 45 45 45.
 
@@ -604,7 +650,7 @@ The two possibilities are:
 
 2. Run a computation with:
 
-      * [[ngkpt]] 90 90 90, [[nshiftk]] 1 and [[shiftk]] 0 0 0
+      * [[ngkpt]] 90 90 90, ([[nshiftk]] 1 and [[shiftk]] 0 0 0)
       * [[eph_ngqpt_fine]] 90 90 90,
       * [[sigma_ngkpt]] 90 90 90.
 
@@ -625,13 +671,13 @@ You should obtain something like this, for $T$ = 300 K:
 Note that in order to get sensible results, one should use a denser DFPT $\qq$-mesh (around 9×9×9),
 and a larger cutoff energy [[ecut]].
 The inputs of this tutorial have been tuned to make the computations quite fast,
-but the final results are quite far from convergence.
+but the final results are far from convergence.
 In real studies, one should perform convergence tests to find suitable parameters.
 
 ### Double-grid technique
 
 Another possibility to improve the results without increasing the computation time significantly
-is the double-grid (DG) technique.
+is the double-grid (DG) technique [[cite:Brunin2020b]].
 In this case, a coarse sampling is used for the $\kk$-mesh and the $\qq$-mesh for the e-ph matrix elements,
 but a finer mesh is used for the phonon absorption/emission terms.
 This technique allows one to better capture these processes, while computing the e-ph 
@@ -647,7 +693,7 @@ You can specify the path to the fine WFK file using [[getwfkfine_filepath]] as i
 getwfkfine_filepath "teph4mob_4o_DS3_WFK"
 ```
 
-The file *$\$ABI_TUTORESPFN/Input/teph4mob_7.in* is an example of such computation.
+The file *$\$ABI_TUTORESPFN/Input/teph4mob_7.in* (first dataset) is an example of such computation.
 
 {% dialog tests/tutorespfn/Input/teph4mob_7.in %}
 
@@ -664,14 +710,14 @@ coarse:                24          24          24
 fine:                  48          48          48
 ```
 
-The mobility obtained at 300 K is 157.59 cm$^2$/V/s.
-Using a 48×48×48 $\qq$-mesh for the matrix elements as well would give 96.38.
-The result is indeed improved, since using a 24×24×24 mesh both for electrons and phonons gives 364.31.
+The SERTA mobility obtained at 300 K is 163.84 cm$^2$/V/s.
+Using a 48×48×48 $\qq$-mesh for the matrix elements as well would give 96.97 (using [[sigma_ngkpt]] 24 24 24).
+The result is indeed improved, since using a 24×24×24 mesh both for electrons and phonons gives 379.06.
 You can also use a finer mesh, but always a multiple of the initial coarse mesh
 (in this case, 72×72×72, 96×96×96, etc).
 However, we found that there is very little use to go beyond a mesh three times as dense as the coarse one.
-Using a 72×72×72 fine mesh for the energies gives a mobility of 149.87 cm$^2$/V/s,
-and a 96×96×96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rather limited.
+Using a 72×72×72 fine mesh for the energies gives a mobility of 152.30 cm$^2$/V/s,
+and a 96×96×96 mesh leads to 149.38 cm$^2$/V/s: the improvement is indeed rather limited.
 
 !!! important
 
@@ -681,7 +727,7 @@ and a 96×96×96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rath
     This may happen if there are multiple equivalent pockets and thus many intra-valley scattering channels 
     to be considered.
     In this case the computation of $\tau_\nk$ may require several minutes (2-10) per $\kk$-point and calculations 
-    performed with the same $\kk$- and $\qq$-mesh starts to be expensive when the BZ sampling gets denser.
+    performed with the same $\kk$- and $\qq$-mesh start to be expensive when the BZ sampling gets denser.
 
 
 ### In-place restart
@@ -705,7 +751,7 @@ Just set [[eph_restart]] to 1 in the input file and rerun the job
 
 The routine that computes carrier mobilites is automatically invoked when [[eph_task]] -4
 and a *RTA.nc* file with the final results is produced.
-There are however cases in which one would like to compute mobilities starting from an pre-existent
+There are however cases in which one would like to compute mobilities starting from a pre-existent
 SIGEPH.nc file without performing a full calculation from scratch.
 In this case, one can use [[eph_task]] 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
 The advanced input variable [[transport_ngkpt]] can be use to downsample 
@@ -741,7 +787,7 @@ As mentioned above, the memory should scale with the number of MPI processors us
 the perturbation communicators.
 However, there might be tricky systems in which you start to experience memory shortage that
 prevents you from running with many MPI processes.
-This problems should show up for very dense $\kk$/$\qq$ meshes.
+This problem should show up for very dense $\kk$/$\qq$ meshes.
 As a rule of thumb, mobility calculations with meshes denser than e.g 200x200x200 start to be very memory demanding
 and the execution will slow down because several algorithms and internal tables for the BZ sampling 
 and the tetrahedron method start to dominate.
@@ -763,7 +809,7 @@ Last but not least, **do not use datasets**: split the calculation into differen
 and optimize the number of MPI processes according to the dimension of the problem.
 You have been warned!
 
-### How to compute only the k-points close to the band edges
+### How to compute the WFK only for the k-points close to the band edges
 
 <!-- part of the discussion can be moved to the eph_intro as SKW will be used also in phgamma -->
 
@@ -839,7 +885,9 @@ This WKF file can then be used in the EPH code to compute mobilites.
 For further examples see [[test:v9_57]], and [[test:v9_61]].
 Also note that the two tests cannot be executed in multidataset mode with a single input file.
 Finally, keep in mind that the quality of the interpolation depends on the initial coarse $\kk$-mesh.
-So we recommended, to look at the interpolant.
+So we recommended, to look at the interpolant, see the end of [the introductory tutorial](eph_intro).
 It is also a good idea to use an energy window that is larger than the one that will be employed 
 to compute the mobility in the EPH code.
+As a rule of thumb, increase [[sigma_erange]] by 0.15 eV when computing the KERANGE.nc file. 
+This should be however tested in each case.
 <!--as well as the position of the band edges-->
