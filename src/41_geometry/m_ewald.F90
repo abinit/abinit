@@ -346,7 +346,7 @@ if(icutcoul.eq.1) then
  fac=pi*ch**2.0_dp/(2.0_dp*eta*ucvol)
  
 !Finally assemble Ewald energy, eew
- if(icutcoul.eq.2) then
+ if(icutcoul.ne.3) then
    eew=sumg+sumr-chsq*reta/sqrt(pi)
  else
    eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
