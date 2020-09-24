@@ -748,10 +748,9 @@ By F. Jollet (MR 643, 645, 652, 653).
 By L. Baguet (MR 650).
 
 
-**D.37** Miscellaneous additional bug fixes, improvements of documentation including for the build system.
+**D.39** Miscellaneous additional bug fixes, improvements of documentation including for the build system.
 G. Antonius, L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze,
 F. Jollet, R. Outerovitch, N. Pike, Y Pouillon, M. Royo, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
-
 
 * * *
 
