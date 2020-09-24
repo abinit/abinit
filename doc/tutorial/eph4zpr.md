@@ -1091,7 +1091,7 @@ to extract the data from the netcdf file.
 We can do it in two different ways:
 
 - using a small python script that calls the AbiPy API
-- using the |abiopen| script and |ipython| and to interact with the netcdf file
+- using |abiopen| to interact with the netcdf file inside |ipython|
 
 <!--
 The advantage of the second approach is that you can interact with the python object in an interactive environment.
@@ -1202,7 +1202,7 @@ robot.plot_selfenergy_conv(spin=0, kpoint=0, band=7)
 ```
 
 to produce the below figure with the real part, the imaginary part of the self-energy and the
-spectral function obtained with the different formulations:
+spectral function obtained with the different approaches:
 
 ![](eph4zpr_assets/Aw_empty_vs_stern.png)
 
@@ -1210,17 +1210,17 @@ Note the following:
 
 (i) The imaginary part of $\Sigma_\nk(\ww)$ is not affected by the Sternheimer method as long
     as we explicitly include enough [[nband]] bands around the $\nk$ state to account
-    for phonon absorption/emission with the full dynamical self-energy integral.
+    for phonon absorption/emission with the full dynamical self-energy.
 
 (ii) The real part of $\Sigma_\nk(\ww)$ obtained with the two methods differ but
      the results should be interpreted with a crytical eye.
-     The Sternheimer method, indeed, is designed to accelerate the convergence of 
-     $\Sigma(\ee^\KS_\nk)$ wrt [[nband]] but cannot exactly reproduce the behaviour of 
+     The Sternheimer method, indeed, is designed to accelerate the convergence of
+     $\Sigma(\ee^\KS_\nk)$ wrt [[nband]] but cannot exactly reproduce the behaviour of
      $\Sigma(\ww)$ at large frequencies since it is a static approximation.
      In other words, once the two approaches are properly converged one should see
-     that the real part of the two self-energies agree around the bare KS eigenvalue 
+     that the real part of the two self-energies agree around the bare KS eigenvalue
      and that the two curves stars to deviate at large $\ww$.
-     This test is left as additional excercise for volunteers. 
+     This test is left as additional excercise for volunteers.
 
 For additional examples, see this
 [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/sigeph/lesson_sigeph.ipynb)
