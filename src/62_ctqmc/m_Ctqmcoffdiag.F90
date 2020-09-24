@@ -3538,7 +3538,7 @@ include 'mpif.h'
   END IF
   FREE(alpha)
   FREE(beta)
-  write(6,*) "=== Histogram of occupations for complete simulation 4 ===="
+  write(6,*) "=== Histogram of occupations for complete simulation  ===="
  ! write(6,*) "sumh over procs", sumh
   sumh=0
   do n1=1,op%flavors+1

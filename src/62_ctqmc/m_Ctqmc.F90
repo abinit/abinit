@@ -2361,13 +2361,13 @@ include 'mpif.h'
 
   this%measDE(:,:) = this%measDE(:,:) * DBLE(this%measurements) /(DBLE(this%sweeps)*this%beta)
   this%occup_histo_time(:) = this%occup_histo_time(:) / INT(this%sweeps/this%measurements)
-  write(6,*) "=== Histogram of occupations for complete simulation ====",INT(this%sweeps/this%measurements)
-  sumh=0
-  do n1=1,this%flavors+1
-     write(6,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)
-     sumh=sumh+this%occup_histo_time(n1)
-  enddo
-  write(6,*) "=================================",sumh
+ ! write(6,*) "=== Histogram of occupations for complete simulation ====",INT(this%sweeps/this%measurements)
+ ! sumh=0
+ ! do n1=1,this%flavors+1
+ !    write(6,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)
+ !    sumh=sumh+this%occup_histo_time(n1)
+ ! enddo
+ ! write(6,*) "=================================",sumh
 
   n1 = this%measNoise(1)%tail
   n2 = this%measNoise(2)%tail
@@ -2546,7 +2546,7 @@ include 'mpif.h'
                      MPI_DOUBLE_PRECISION, MPI_SUM, this%MY_COMM, ierr)
     CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%runTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
              this%MY_COMM, ierr)
-    CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_MAX, &
+    CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              this%MY_COMM, ierr)
 #endif
 
@@ -2630,13 +2630,16 @@ include 'mpif.h'
   END IF
   FREE(alpha)
   FREE(beta)
-  write(6,*) "=== Histogram of occupations for complete simulation 2 ===="
+
+  write(6,*) "=== Histogram of occupations for complete simulation  ===="
+ ! write(6,*) "sumh over procs", sumh
   sumh=0
   do n1=1,this%flavors+1
-     write(6,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)
-     sumh=sumh+this%occup_histo_time(n1)
+     write(6,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)/float(this%size)
+     sumh=sumh+this%occup_histo_time(n1)/float(this%size)
   enddo
-  write(6,*) "=================================",sumh
+     write(6,'(a,f10.4)') " all" , sumh
+  write(6,*) "================================="
 
 END SUBROUTINE Ctqmc_getResult
 !!***
