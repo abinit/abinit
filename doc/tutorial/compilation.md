@@ -182,7 +182,7 @@ cd $HOME && mkdir local
 
     The **&&** syntax is used to chain commands together, such that the next command is executed if and only
     if the preceding command exited without errors (or, more accurately, exits with a return code of 0).
-    We wil use this trick a lot in the other examples to reduce the number of lines we have to type
+    We will use this trick a lot in the other examples to reduce the number of lines we have to type
     in the terminal so that one can easily cut and paste the examples in the terminal.
 
 
@@ -308,7 +308,7 @@ Files ending with `.so` are **shared libraries** (`.so` stands for shared object
 `.a` files are **static libraries**.
 When compiling source code that relies on external libraries, the name of the library
 (without the *lib* prefix and the file extension) as well as the directory where the library is located must be passed
-to the linker when building the executable.
+to the linker.
 
 The name of the library is usually specified with the `-l` option while the directory is given by `-L`.
 According to these simple rules, in order to compile source code that uses BLAS/LAPACK routines,
@@ -326,7 +326,7 @@ We will use a similar syntax to help the ABINIT *configure* script locate the ex
     **Dynamic is the default behaviour** on several Linux distributions so we assume dynamic linking
     in what follows.
 
-If you are compiling C or Fortran code requiring include files with the declaration of prototypes and the definition
+If you are compiling C or Fortran code that requires include files with the declaration of prototypes and the definition
 of named constants, you will need to specify the location of the **include files** via the `-I` option.
 In this case, the previous options should be augmented by:
 
@@ -338,15 +338,15 @@ This approach is quite common for C code where `.h` files must be included to co
 It is less common for modern Fortran code in which include files are usually replaced by `.mod` files
 *i.e.* Fortran module files produced by the compiler whose location is usually specified via the `-J` option.
 Still, the `-I` option for include files is valuable also when compiling Fortran applications as libraries
-such as FFTW and MKL rely on (Fortran) include files whose location should be passed to the compiler
+such as FFTW and MKL that rely on (Fortran) include files whose location should be passed to the compiler
 via `-I` instead of `-J`,
 see also the official [gfortran documentation](https://gcc.gnu.org/onlinedocs/gfortran/Directory-Options.html#Directory-Options).
 
-Don't worry if this rather technical point is not clear to you.
+Do not worry if this rather technical point is not clear to you.
 Any external library has its own requirements and peculiarities and the ABINIT build system provides several options
 to automate the detection of external dependencies and the final linkage.
 The most important thing is that you are now aware that the compilation of ABINIT requires
-the correct specification of `-L`, `-l` for libraries `-I` for include files and `-J` for Fortran modules.
+the correct specification of `-L`, `-l` for libraries, `-I` for include files, and `-J` for Fortran modules.
 We will elaborate more on this topic when we discuss the configuration options supported by the ABINIT build system.
 
 <!--
@@ -402,13 +402,14 @@ Note how `/home/gmatteo/local/bin` has been **prepended** to the previous value 
 From now on, we can invoke any executable located in $HOME/local/bin by just typing
 its **base name** in the shell without having to the type the full path.
 
-Using:
+!!! warning
+	Using:
 
-```sh
-export PATH=$HOME/local/bin
-```
+	```sh
+	export PATH=$HOME/local/bin
+	```
 
-is not a very good idea as the shell will stop working. Can you explain why?
+	is not a very good idea as the shell will stop working. Can you explain why?
 
 !!! tip
 
@@ -711,7 +712,8 @@ make -j2
 make check && make install
 ```
 
-Once the installation is completed, you should obtain this message.
+Once the installation is completed, you should obtain this message
+(possibly not the last message, you might have to look for it).
 
 ```sh
 ----------------------------------------------------------------------
@@ -1016,7 +1018,7 @@ To inspect the features activated in our Fortran library, use `nf-config` instea
 
 ```sh
 which nf-config
-~/local/bin/nf-config
+/home/gmatteo/local/bin/nf-config
 
 # installation directory
 nf-config --prefix
@@ -1132,7 +1134,7 @@ LIBXC_LIBS
             Library flags for LibXC.
 ```
 
-According to what we seen during the compilation of *libxc*, one should pass to
+According to what we have seen during the compilation of *libxc*, one should pass to
 *configure* the following options:
 
 ```sh
@@ -1197,7 +1199,7 @@ the `configure` script is located in the top level directory of the package.
     This tricks allow us to reduce the amount of typing
     and have configuration files that can be easily reused for other machines.
 
-This an example of configuration file in which we use the high-level interface
+This is an example of configuration file in which we use the high-level interface
 (`with_LIBNAME=dirpath`) as much as possible, except for linalg and FFTW3.
 The explicit value of *LIBNAME_LIBS* and *LIBNAME_FCFLAGS* is also reported in the commented sections.
 
@@ -1655,10 +1657,10 @@ because it does not know how to deal with your software stack.
 In both cases, **_config.log_ is key to pinpoint the problem** and sometimes you will find that
 the problem is rather simple to solve.
 For instance, you are using a Fortran module files produced by *gfortran* while trying to compile with the
-intel compiler or perhaps you are trying to use modules produced by a different version of the same compiler!.
+intel compiler or perhaps you are trying to use modules produced by a different version of the same compiler.
 Perhaps you forgot to add the include directory required by an external library and the compiler
 cannot find the include file or maybe there is a typo in the configuration options.
-The take home message is that several mistakes can be detected by just **inspecting the log messages**
+The take-home message is that several mistakes can be detected by just **inspecting the log messages**
 reported in *configure.log* if you know how to search for them.
 
 **Compilation-time errors** are usually due to syntax errors, portability issues or
@@ -1704,7 +1706,7 @@ The ideal solution would be to run the code under the control of the debugger,
 use the backtrace to locate the line of code where the segmentation fault occurs and then
 attach the backtrace to your issue on the forum.
 
-??? note "how to run gdb"
+??? note "How to run gdb"
 
     Using the debugger in sequential is really simple.
     First of all, make sure the code have been compiled with the `-g` option
