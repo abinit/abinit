@@ -225,7 +225,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer,allocatable :: ks_vbik(:,:),ks_occ_idx(:,:),qp_vbik(:,:),nband(:,:)
  integer,allocatable :: nq_spl(:),nlmn_atm(:),gw_gfft(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),k0(3),qtmp(3),rmet(3,3),rprimd(3,3),tsec(2),strsxc(6)
- real(dp),allocatable :: igwene(:,:,:),chi0_sumrule(:),ec_rpa(:),rspower(:)
+ real(dp),allocatable :: igwene(:,:,:),chi0_sumrule(:),ec_rpa(:),ec_gm(:),rspower(:)
  real(dp),allocatable :: nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:)
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhor_p(:,:),rhor_kernel(:,:),taur(:,:)
  real(dp),allocatable :: z(:),zw(:),grchempottn(:,:),grewtn(:,:),grvdw(:,:),kxc(:,:),qmax(:)
@@ -1223,16 +1223,19 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call write_screening("polarizability",unt_susc,Dtset%iomode,Ep%npwe,Ep%nomega,iqcalc,chi0)
    end if
 
-!  Calculate the RPA functional correlation energy if the polarizability on a
+!  Calculate the Galitskii-Migdal and RPA functionals for the correlation energy if the polarizability on a
 !  Gauss-Legendre mesh along imaginary axis is available
    if (Ep%analytic_continuation .and. Dtset%gwrpacorr>0 ) then
      if (is_first_qcalc) then
        ABI_MALLOC(ec_rpa,(Dtset%gwrpacorr))
+       ABI_MALLOC(ec_gm,(Dtset%gwrpacorr))
        ec_rpa(:)=zero
+       ec_gm(:)=zero
      end if
-     call calc_rpa_functional(Dtset%gwrpacorr,label,iqibz,Ep,Vcp,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa)
+     call calc_rpa_functional(Dtset%gwrpacorr,label,iqibz,Ep,Vcp,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa,ec_gm)
      if (label==Ep%nqcalc) then
        ABI_FREE(ec_rpa)
+       ABI_FREE(ec_gm)
      end if
    end if
 
@@ -2539,7 +2542,7 @@ end subroutine random_stopping_power
 !! calc_rpa_functional
 !!
 !! FUNCTION
-!!  Routine used to calculate the RPA approximation to the correlation energy
+!!  Routine used to calculate the Galitskii-Migdal and RPA approximations to the correlation energy
 !!  from the irreducible polarizability.
 !!
 !! INPUTS
@@ -2560,7 +2563,7 @@ end subroutine random_stopping_power
 !!
 !! SOURCE
 
-subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa)
+subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa,ec_gm)
 
  use m_hide_lapack, only : xginv, xheev
 
@@ -2573,13 +2576,13 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
  type(em1params_t),intent(in) :: Ep
 !arrays
  real(dp),intent(in) :: gmet(3,3)
- real(dp),intent(inout) :: ec_rpa(gwrpacorr)
+ real(dp),intent(inout) :: ec_rpa(gwrpacorr),ec_gm(gwrpacorr)
  complex(gwpc),intent(inout) :: chi0(Ep%npwe,Ep%npwe,Ep%nomega)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig1,ig2,ilambda,io,master,rank,nprocs,unt,ierr
- real(dp) :: ecorr
+ real(dp) :: ecorr,ecorr_gm
  real(dp) :: lambda
  logical :: qeq0
  character(len=500) :: msg
@@ -2634,6 +2637,9 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
        ec_rpa(:) = ec_rpa(:) &
 &         - zw(io-1) / ( z(io-1) * z(io-1) ) &
 &              * Qmesh%wt(iq) * (-log( 1.0_dp-eig(ig1) )  - eig(ig1) ) / (2.0_dp * pi )
+       ec_gm(:) = ec_gm(:) &
+&         - zw(io-1) / ( z(io-1) * z(io-1) ) &
+&              * Qmesh%wt(iq) * ( eig(ig1) / ( 1.0_dp-eig(ig1) ) - eig(ig1) ) / (2.0_dp * pi )
      end do
      ABI_DEALLOCATE(eig)
 
@@ -2666,6 +2672,8 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
        end do
 
      end do ! ilambda
+     
+     ! Galitskii-Migdal energy in the lambda numerical case TODO
 
    end if ! exact or numerical integration over the coupling constant
 
@@ -2677,9 +2685,11 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
  if(iqcalc==Ep%nqcalc) then
 
    call xmpi_sum_master(ec_rpa,master,spaceComm,ierr)
+   call xmpi_sum_master(ec_gm,master,spaceComm,ierr)
 
    if(rank==master) then
      ecorr = sum( zlw(:)*ec_rpa(:) )
+     ecorr_gm = sum( zlw(:)*ec_gm(:) )
      if (open_file(dtfil%fnameabo_rpa, msg, newunit=unt) /=0) then
        MSG_ERROR(msg)
      end if
@@ -2694,6 +2704,16 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
        end do
+     end if
+     if(gwrpacorr==1) then ! exact integration over the coupling constant
+       write(unt,'(a,(2x,f14.8))') '#GM',ecorr_gm
+       write(msg,'(2a,(2x,f14.8))') ch10,' Galitskii-Migdal energy [Ha] :',ecorr_gm
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(unt,'(a1)') ' '
+       write(msg,'(a1)') ' '
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
      end if
      close(unt)
    end if
