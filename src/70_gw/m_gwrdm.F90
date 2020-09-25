@@ -27,7 +27,6 @@ module m_gwrdm
  use m_time
  use m_wfd           
  use m_hdr
- use m_melemts
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
                              get_bz_item, has_IBZ_item, find_qmesh
@@ -41,18 +40,18 @@ module m_gwrdm
  private :: no2ks,ks2no
 !!***
  
- public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene,print_tot_occ 
+ public :: calc_Ex_GM_k,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,print_tot_occ 
 !!***
 
 contains
-!!***
 
-!!****f* ABINIT/Calc_Ec_GM_k
+!!***
+!!****f* ABINIT/Calc_Ex_GM_k
 !! NAME
-!! calc_Ec_GM_k
+!! calc_Ex_GM_k
 !!
 !! FUNCTION
-!! Calculate Galitskii-Migdal corr. energy integrated in the Imaginary axis Ec = 1/pi \sum_i \int Gii(iv)*Sigma_c,ii(iv) + cc. dv
+!! Calculate Galitskii-Migdal exchange. energy integrated in the Imaginary axis Ec = 1/pi \sum_i \int Gii(iv)*Sigma_x,ii + cc. dv
 !!
 !! INPUTS
 !! ib1=min band for given k
@@ -69,8 +68,93 @@ contains
 !! Kmesh <kmesh_t>=Structure describing the k-point sampling.
 !!
 !! OUTPUT
-!! Compute the Galitskii-Migdal corr energy contribution of this k-point 
+!! Compute the Galitskii-Migdal exchange energy contribution of this k-point 
 !! 
+!! PARENTS
+!!  m_sigma_driver.f90
+!! CHILDREN
+!! SOURCE
+
+function calc_Ex_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,BSt,Kmesh) result(Ex_GM_k)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: Ex_GM_k
+ integer,intent(in) :: ib1,ib2,nomega_sigc,kpoint
+ type(ebands_t),target,intent(in) :: BSt
+ type(sigma_t),intent(in) :: Sr
+ type(kmesh_t),intent(in) :: kmesh
+!arrays
+ real(dp),intent(in) :: weights(:)
+!Local variables ------------------------------
+!scalars
+ real(dp), parameter :: pi=3.141592653589793238462643383279502884197
+ real(dp) :: tol8
+ character(len=500) :: msg
+ integer :: ibdm,iquad
+ real(dp) :: ex_integrated,spin_fact,fact
+ complex(dpc) :: denominator!,division
+!arrays
+!************************************************************************
+
+ DBG_ENTER("COLL")
+
+ ex_integrated=0.0_dp
+ spin_fact=2.0_dp
+ fact=spin_fact*(1.0_dp/(2.0_dp*pi))
+ tol8=1.0e-8
+ write(msg,'(a26,f10.5)')' wtk used in calc_Ex_GM_k:',kmesh%wt(kpoint)
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+ if (ib1/=1) then
+   MSG_WARNING("Unable to compute the Galitskii-Migdal exchange energy because the first band was not included in bdgw interval.& 
+   &Restart the calculation starting bdgw from 1.")
+ else
+   do ibdm=ib1,ib2
+     do iquad=1,nomega_sigc
+       denominator=(Sr%omega_i(iquad)-BSt%eig(ibdm,kpoint,1))
+       if (abs(denominator)>tol8) then
+         ! Sigma_pp/[(denominator)] + [Sigma_pp/[(denominator)]]^* = 2 Re [Sigma_pp/denominator]
+          !division=Sr%x_mat(ibdm,ibdm,kpoint,1)/denominator
+          !ex_integrated=ex_integrated+weights(iquad)&
+          !&*real(division*exp(-aimag(Sr%omega_i(iquad))*0.0001)+conjg(division)*exp(aimag(Sr%omega_i(iquad))*0.0001))
+          ex_integrated=ex_integrated+weights(iquad)*2.0_dp*real(Sr%x_mat(ibdm,ibdm,kpoint,1)/denominator)
+       end if
+     end do
+   end do
+ endif
+ Ex_GM_k=kmesh%wt(kpoint)*fact*ex_integrated
+
+ DBG_EXIT("COLL")
+
+end function calc_Ex_GM_k
+!!***
+
+!!****f* ABINIT/Calc_Ec_GM_k
+!! NAME
+!! calc_Ec_GM_k
+!!
+!! FUNCTION
+!! Calculate Galitskii-Migdal corr. energy integrated in the Imaginary axis Ec = 1/pi \sum_i \int Gii(iv)*Sigma_c,ii(iv) + cc. dv
+!!
+!! INPUTS
+!! ib1=min band for given k
+!! ib2=max band for given k.
+!! nomega_sigc=number of omegas (w) in the imaginary axis (iw) used in the quadrature.
+!! kpoint=k-point where the Galitskii-Migdal contribution is used.
+!! weights=array containing the weights used in the quadrature.
+!! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin)
+!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details).
+!! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
+!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
+!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
+!! Sr=sigma_t (see the definition of this structured datatype)
+!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
+!!
+!! OUTPUT
+!! Compute the Galitskii-Migdal corr energy contribution of this k-point
+!!
 !! PARENTS
 !!  m_sigma_driver.f90
 !! CHILDREN
@@ -93,7 +177,7 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
  real(dp), parameter :: pi=3.141592653589793238462643383279502884197
  real(dp) :: tol8
  character(len=500) :: msg
- integer :: ib1dm,iquad
+ integer :: ibdm,iquad
  real(dp) :: ec_integrated,spin_fact,fact
  complex(dpc) :: denominator!,division
 !arrays
@@ -113,14 +197,14 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
    MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was not included in bdgw interval.& 
    &Restart the calculation starting bdgw from 1.")
  else
-   do ib1dm=ib1,ib2
+   do ibdm=ib1,ib2
      do iquad=1,nomega_sigc
-       denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))
+       denominator=(Sr%omega_i(iquad)-BSt%eig(ibdm,kpoint,1))
        if (abs(denominator)>tol8) then
          ! Sigma_pp/[(denominator)] + [Sigma_pp/[(denominator)]]^* = 2 Re [Sigma_pp/denominator]
-          !division=sigcme_k(iquad,ib1dm,ib1dm,1)/denominator
+          !division=sigcme_k(iquad,ibdm,ibdm,1)/denominator
           !ec_integrated=ec_integrated+weights(iquad)*real(division+conjg(division))
-          ec_integrated=ec_integrated+weights(iquad)*2.0_dp*real(sigcme_k(iquad,ib1dm,ib1dm,1)/denominator)
+          ec_integrated=ec_integrated+weights(iquad)*2.0_dp*real(sigcme_k(iquad,ibdm,ibdm,1)/denominator)
        end if
      end do
    end do
@@ -544,65 +628,6 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  MSG_COMMENT("Hdr_sigma npw and ngfft correctly updated")
 
 end subroutine update_hdr_bst
-!!***
-
-!!****f* ABINIT/me_get_haene
-!! NAME
-!! me_get_haene
-!!
-!! FUNCTION
-!! Compute the Hartree energy
-!!
-!! INPUTS
-!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
-!! Sr=sigma_t (see the definition of this structured datatype)
-!! bands=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
-!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
-!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
-!! Mels
-!!  %vhartr=matrix elements of $v_H$.
-!!
-!! OUTPUT
-!! Compute the Hartree energy on eh_energy
-!!
-!! PARENTS
-!!  m_sigma_driver.f90
-!! CHILDREN
-!! SOURCE
-
-pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
-
-!Arguments ------------------------------------
-!scalars
- real(dp) :: eh_energy
- type(sigma_t),intent(in) :: sigma
- type(kmesh_t),intent(in) :: kmesh
- type(ebands_t),intent(in) :: bands
- type(melements_t),intent(in) :: Mels
-!Local variables-------------------------------
-!scalars
- integer :: ik,ib,spin
- real(dp) :: wtk,occ_bks
-
-! *************************************************************************
-
- eh_energy=zero
-
- do spin=1,sigma%nsppol
-   do ik=1,sigma%nkibz
-     wtk = kmesh%wt(ik)
-     do ib=sigma%b1gw,sigma%b2gw
-       occ_bks = bands%occ(ib,ik,spin)
-       if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
-         eh_energy=eh_energy+occ_bks*wtk*Mels%vhartree(ib,ib,ik,spin)
-       end if
-     end do
-   end do
- end do
-
- eh_energy=half*eh_energy
-
-end function me_get_haene
 !!***
 
 !!****f* ABINIT/print_tot_occ

@@ -32,6 +32,7 @@ MODULE m_sigma
  use iso_c_binding
  use m_nctk
  use m_yaml
+ use m_melemts
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -219,6 +220,7 @@ MODULE m_sigma
  public  :: sigma_init                  ! Initialize the object
  public  :: sigma_free                  ! Deallocate memory
  public  :: sigma_get_exene             ! Compute exchange energy.
+ public  :: mels_get_haene              ! Compute hartree energy.
  public  :: sigma_ncwrite               ! Write data in netcdf format.
  public  :: write_sigma_header
  public  :: write_sigma_results
@@ -1149,6 +1151,68 @@ pure function sigma_get_exene(sigma,kmesh,bands) result(ex_energy)
  end do
 
 end function sigma_get_exene
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/mels_get_haene
+!! NAME
+!! mels_get_haene
+!!
+!! FUNCTION
+!! Compute the Hartree energy
+!!
+!! INPUTS
+!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
+!! Sr=sigma_t (see the definition of this structured datatype)
+!! bands=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
+!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
+!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
+!! Mels
+!!  %vhartr=matrix elements of $v_H$.
+!!
+!! OUTPUT
+!! Compute the Hartree energy on eh_energy
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function mels_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: eh_energy
+ type(sigma_t),intent(in) :: sigma
+ type(kmesh_t),intent(in) :: kmesh
+ type(ebands_t),intent(in) :: bands
+ type(melements_t),intent(in) :: Mels
+!Local variables-------------------------------
+!scalars
+ integer :: ik,ib,spin
+ real(dp) :: wtk,occ_bks
+
+! *************************************************************************
+
+ eh_energy=zero
+
+ do spin=1,sigma%nsppol
+   do ik=1,sigma%nkibz
+     wtk = kmesh%wt(ik)
+     do ib=sigma%b1gw,sigma%b2gw
+       occ_bks = bands%occ(ib,ik,spin)
+       if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
+         eh_energy=eh_energy+occ_bks*wtk*Mels%vhartree(ib,ib,ik,spin)
+       end if
+     end do
+   end do
+ end do
+
+ eh_energy=half*eh_energy
+
+end function mels_get_haene
 !!***
 
 !----------------------------------------------------------------------

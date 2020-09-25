@@ -74,7 +74,7 @@ module m_sigma_driver
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
  use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
  use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
-                             write_sigma_header, write_sigma_results
+                             mels_get_haene, write_sigma_header, write_sigma_results
  use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
  use m_melemts,       only : melflags_reset, melements_print, melements_free, melflags_t, melements_t, melements_zero
@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM include: hartre from m_spacepar, density matrix module, and Gaussian quadrature one
  use m_spacepar,      only : hartre
- use m_gwrdm,         only : calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene,print_tot_occ 
+ use m_gwrdm,         only : calc_Ex_GM_k,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,print_tot_occ 
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -222,7 +222,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ec_gm,coef_hyb 
+ real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ec_gm,ex_gm,coef_hyb 
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -2416,7 +2416,8 @@ endif
          nateigv(ib,ib,ikcalc,1)=cone
        enddo  
      enddo
-     ! MRM Initialize Galitskii-Migdal correlation energy accumulator
+     ! MRM Initialize Galitskii-Migdal exchange and correlation energy accumulator
+     ex_gm=0.0_dp 
      ec_gm=0.0_dp 
      ! MRM prepare arrays for the imaginary freq. integration of Sigma_c(iw)
      order_int=Sigp%nomegasi 
@@ -2509,8 +2510,8 @@ endif
          dm1k=czero 
          ! Update the dm1 with the corr. contribution?
          if (x1rdm/=1) then
-           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted closed-shell calcs 
-           ec_gm=ec_gm+calc_Ec_GM_k(ib1,ib2,nomega_sigc,ikcalc,Sr,weights,sigcme_k,QP_BSt,Kmesh)! Only restrcited closed-shell calcs
+           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs 
+           ec_gm=ec_gm+calc_Ec_GM_k(ib1,ib2,nomega_sigc,ikcalc,Sr,weights,sigcme_k,QP_BSt,Kmesh) ! Only restricted closed-shell calcs
          end if
 !        Update the full 1RDM with the GW corrected one for this k-point
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2675,8 +2676,8 @@ endif
       ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
          call xmpi_barrier(Wfd%comm)
          do ib=b1gw,b2gw
-           old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ikcalc,1)            ! Save old <i|K[KS]|i> from the GS calc. for Delta eik
-           new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)  ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
+           old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ikcalc,1)              ! Save old alpha*<i|K[KS]|i> from the GS calc. for Delta eik
+           new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)    ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
          enddo
        else
          do ib=b1gw,b2gw
@@ -2713,6 +2714,11 @@ endif
            Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)=mat2rot(ib1dm,ib2dm)
          end do
        end do
+       if(coef_hyb>tol8) then
+         Sr%x_mat(:,:,ikcalc,1)=Sr%x_mat(:,:,ikcalc,1)/coef_hyb ! Produce <i|K[NO]|i> from alpha*<i|K[NO]|i>
+         ex_gm=ex_gm+calc_Ex_GM_k(ib1,ib2,nomega_sigc,ikcalc,Sr,weights,QP_BSt,Kmesh) ! Only restricted closed-shell calcs
+                                                                                      ! Warning: Using <KS_i|K[NO]|KS_j> in GM exchange energy.
+       end if
        ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>
        do ib1dm=1,ib2-ib1+1
          do ib2dm=1,ib2-ib1+1
@@ -2771,7 +2777,7 @@ endif
      ! Print the updated Vee[SD] and Vee[GM] energies
      !
      call xmpi_barrier(Wfd%comm)
-     eh_energy=me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
+     eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
      write(msg,'(a1)')' '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2781,22 +2787,27 @@ endif
      write(msg,'(a40)')' Vee[SD] energy obtained using GW 1-RDM:'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Eh[SD]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Eh[SD]       = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Ex[SD]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Ex[SD]       = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Vee[SD]      = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a28)')' Vee[GM] = Vee[SD] + Ec[GM]:'
+     if(coef_hyb>tol8) then
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a,2(es16.6,a))')' Ex[GM.Sx_no] = : ',ex_gm,' Ha ,',ex_gm*Ha_eV,' eV'
+     end if
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Ec[GM]     = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Ec[GM]       = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Vee[GM]    = : ',(ex_energy+eh_energy+ec_gm),' Ha ,',(ex_energy+eh_energy+ec_gm)*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Vee[GM]      = : ',(ex_energy+eh_energy+ec_gm),' Ha ,',(ex_energy+eh_energy+ec_gm)*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
