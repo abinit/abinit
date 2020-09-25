@@ -57,16 +57,15 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_cg(cg,ckpt,ecut,eig_k,ek_k,exchn2n3d,fnameabo,istwfk,kg_k,kpt,&
-  & mcg,mpi_enreg,mpw,nband,nkpt,npw_k,nsppol,rprimd)
+  subroutine hightemp_prt_cg(cg,ckpt,eig_k,ek_k,fnameabo,kg_k,kpt,&
+  & mcg,mpi_enreg,nband,nkpt,npw_k,rprimd)
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: ckpt,mcg,mpw,nkpt,npw_k,nsppol,exchn2n3d
-    real(dp),intent(in) :: ecut
+    integer,intent(in) :: ckpt,mcg,nkpt,npw_k
     type(MPI_type),intent(inout) :: mpi_enreg
     character(len=*),intent(in) :: fnameabo
     ! Arrays
-    integer,intent(in) :: istwfk(nkpt),kg_k(3,npw_k),nband(nkpt)
+    integer,intent(in) :: kg_k(3,npw_k),nband(nkpt)
     real(dp),intent(in) :: kpt(3,nkpt),rprimd(3,3)
     real(dp),intent(in) :: cg(2,mcg)
     real(dp),intent(in) :: eig_k(nband(ckpt)),ek_k(nband(ckpt))
@@ -218,7 +217,6 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: iband,iibandpp,mpierr
-    integer :: ii,jj,kk,nlmn,n1dim,n2dim
     real(dp) :: mod2cprj
     ! Arrays
     real(dp) :: cprj_red(2,mband)

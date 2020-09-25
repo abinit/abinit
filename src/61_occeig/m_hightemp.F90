@@ -189,7 +189,6 @@ contains
   !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
   !! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
   !! mband=maximum number of bands
-  !! mpi_enreg=information about MPI parallelization
   !! nband(nkpt*nsppol)=desired number of bands at each k point
   !! nkpt=number of k points
   !! nsppol=1 for unpolarized, 2 for spin-polarized
@@ -203,13 +202,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,mpi_enreg,nband,nkpt,nsppol,wtk)
+  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,nband,nkpt,nsppol,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
     integer,intent(in) :: mband,nkpt,nsppol
-    type(MPI_type), intent(inout) :: mpi_enreg
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
@@ -359,9 +357,9 @@ contains
     ! Arrays
     real(dp),dimension(:),allocatable :: valueseel
 
-    !temp
-    real(dp) :: fn,minocc
-    real(dp),dimension(:),allocatable :: valuese
+    ! Debugging purpose
+    ! real(dp) :: fn,minocc
+    ! real(dp),dimension(:),allocatable :: valuese
 
 
     ! *********************************************************************
@@ -605,7 +603,6 @@ contains
   !! gprimd(3,3)=dimensional reciprocal space primitive translations
   !! icg=shift to be applied on the location of data in the array cg
   !! ikpt=number of the k-point
-  !! isppol=1 for unpolarized, 2 for spin-polarized
   !! istwf_k=parameter that describes the storage of wfs
   !! kg_k(3,npw)=integer coordinates of G vectors in basis sphere
   !! kinpw(npw_k)=(modified) kinetic energy for each plane wave (Hartree)
@@ -627,12 +624,12 @@ contains
   !!
   !! SOURCE
   subroutine compute_pw_avg_std(this,cg,eig_k,ek_k,fnameabo,&
-  & gprimd,icg,ikpt,isppol,istwf_k,kg_k,kinpw,kpt,mcg,mpi_enreg,nband_k,&
+  & gprimd,icg,ikpt,istwf_k,kg_k,kinpw,kpt,mcg,mpi_enreg,nband_k,&
   & nkpt,npw_k,nspinor,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: icg,ikpt,isppol,istwf_k,mcg,nband_k,nkpt,npw_k,nspinor
+    integer,intent(in) :: icg,ikpt,istwf_k,mcg,nband_k,nkpt,npw_k,nspinor
     real(dp),intent(in) :: wtk
     class(hightemp_type),intent(inout) :: this
     type(MPI_type),intent(in) :: mpi_enreg
@@ -644,7 +641,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: blocksize,iband,iblock,iblocksize,ierr,ipw,nblockbd,unit
+    integer :: blocksize,iband,iblock,iblocksize,ipw,nblockbd,unit
     real(dp) :: kpg1,kpg2,kpg3,tmp_std
     character(len=50) :: filenameoutpw
     ! Arrays
@@ -1337,8 +1334,7 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: bdtot_index,blocksize,iband,iblock,iblocksize
-    integer :: ikpt,isppol,mpierr,nband_k,nblockbd,npw_k
-    integer :: ii
+    integer :: ikpt,isppol,nband_k,nblockbd,npw_k
     real(dp) :: ar
     ! Arrays
     integer,allocatable :: kg_k(:,:)
@@ -1384,7 +1380,7 @@ contains
       end do
     end do
 
-    call hightemp%compute_e_shiftfactor(eigen,eknk,mband,mpi_enreg,&
+    call hightemp%compute_e_shiftfactor(eigen,eknk,mband,&
     & nband,nkpt,nsppol,wtk)
 
     ABI_DEALLOCATE(eknk)
@@ -1433,9 +1429,9 @@ contains
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesnel
 
-    !temp
-    real(dp) :: fn,minocc
-    real(dp),dimension(:),allocatable :: valuesn
+    ! Debugging purpose
+    ! real(dp) :: fn,minocc
+    ! real(dp),dimension(:),allocatable :: valuesn
 
     ! *********************************************************************
 
@@ -1594,7 +1590,6 @@ contains
     integer :: band_index,iband,ii,ikpt,isppol,nband_k,temp_unit
     real(dp) :: ucvol,pressure
     character(len=200) :: fnameabo_eigocc
-    character(len=39) :: kind_of_output
     character(len=500) :: msg
     ! Arrays
     real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)

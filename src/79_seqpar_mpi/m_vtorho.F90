@@ -361,7 +361,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  logical :: do_last_ortho,wvlbigdft=.false.
  real(dp) :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
- real(dp) :: freeden_part
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
  character(len=500) :: message
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
@@ -958,7 +957,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      contributions to kinetic energy, nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
-&       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,hightemp,&
+&       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
@@ -969,12 +968,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(associated(hightemp)) then
          if(hightemp%version==1) then
            call hightemp%compute_pw_avg_std(cg,eig_k,ek_k,dtfil%filnam_ds(4),&
-&           gprimd,icg,ikpt,isppol,istwf_k,kg_k,kinpw,dtset%kptns,mcg,mpi_enreg,nband_k,&
+&           gprimd,icg,ikpt,istwf_k,kg_k,kinpw,dtset%kptns,mcg,mpi_enreg,nband_k,&
 &           dtset%nkpt,npw_k,my_nspinor,dtset%wtk(ikpt))
          else if((hightemp%version==2).and.(hightemp%prt_cg)) then
-           call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
-&           dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
-&           dtset%nkpt,npw_k,dtset%nsppol,rprimd)
+           call hightemp_prt_cg(cg,ikpt,eig_k,ek_k,dtfil%filnam_ds(4),&
+&           kg_k,dtset%kptns,mcg,mpi_enreg,dtset%nband,&
+&           dtset%nkpt,npw_k,rprimd)
          end if
        end if
        call timab(985,1,tsec)
@@ -1230,7 +1229,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(hightemp)) then
-       call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+       call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
      end if
 
