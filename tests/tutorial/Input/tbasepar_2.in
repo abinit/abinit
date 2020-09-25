@@ -31,12 +31,14 @@
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/26fe.8.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = tbasepar_2.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files= HGH/26fe.8.hgh
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -31,6 +31,9 @@ acell 3*3.840 Angstr
 toldfe 1.e-10
 xred 0 0 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "77Ir.GGA.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -40,7 +43,6 @@ xred 0 0 0
 #%%   t06o_DS1_DOS_AT0001, tolnlines = 100, tolabs = 2.0e-4, tolrel = 1.0e-4;
 #%%   t06o_DS2_DOS_AT0001, tolnlines = 100, tolabs = 2.0e-4, tolrel = 1.0e-4;
 #%%   t06o_DS3_DOS_AT0001, tolnlines = 116, tolabs = 2.0e-4, tolrel = 1.0e-4
-#%% psp_files = 77Ir.GGA.fhi
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

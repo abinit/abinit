@@ -95,7 +95,7 @@ jdtset  11
 #%% [files]
 #%% files_to_test = 
 #%%   t78.out, tolnlines=  0, tolabs=  5.757e-08, tolrel=  1.001e+00, fld_options=-easy
-#%% psp_files= 13al.pspnc, 33as.pspnc 
+#%% psp_files= PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

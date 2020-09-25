@@ -128,12 +128,10 @@ contains
 !!      has been transfered to its child eltxccore.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      atm2fft,dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxcstr,dotprod_vn,eltxccore
-!!      fourdp,metric,paw_spline,pawpsp_cg,pawrad_free,pawrad_init,pawtab_free
-!!      pawtab_nullify,redgr,timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -153,12 +151,12 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  integer,intent(in) :: atindx(dtset%natom),nattyp(dtset%ntypat),ngfft(18)
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(in) :: nhat(nfft,dtset%nspden*psps%usepaw)
- real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),rprimd(3,3)
+ real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden),xccc3d(n3xccc)
  real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(in),target :: rhor(nfft,dtset%nspden)
  real(dp),intent(inout) :: kxc(nfft,nkxc)
- real(dp),intent(out) :: eltfrxc(6+3*dtset%natom,6)
+ real(dp),intent(out) :: eltfrxc(6+3*dtset%natom,6),rprimd(3,3)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
 
 !Local variables-------------------------------
@@ -528,7 +526,8 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_tmp2,dummy_in,gmet,gprimd,&
 &       dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
 &       optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&       dummy_in,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2,&
+&       dtset%rcut,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,&
+&       vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2,&
 &       comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &       paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 
@@ -589,7 +588,8 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
          call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_test2,dummy_in,gmet,gprimd,&
 &         dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
 &         optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab_test,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&         dummy_in,corstr,dummy6,ucvol,psps%usepaw,vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2)
+&         dtset%rcut,dummy_in,rprimd,corstr,dummy6,ucvol,psps%usepaw,&
+&         vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2)
          ABI_DEALLOCATE(vxc10_coreg)
          ABI_DEALLOCATE(vxc_coreg)
          ABI_DEALLOCATE(vxc1is_coreg)
@@ -703,7 +703,7 @@ end subroutine dfpt_eltfrxc
 !! Note that this routine is related to the mkcore.f routine
 !!
 !! PARENTS
-!!      dfpt_eltfrxc
+!!      m_dfpt_elt
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
@@ -723,10 +723,10 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 !arrays
  integer,intent(in) :: typat(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: rprimd(3,3),vxc10_core(nfft),vxc1is_core(nfft)
+ real(dp),intent(in) :: vxc10_core(nfft),vxc1is_core(nfft)
  real(dp),intent(in) :: vxc_core(nfft),xccc1d(n1xccc,6,ntypat)
  real(dp),intent(in) :: xcccrc(ntypat),xred(3,natom)
- real(dp),intent(inout) :: eltfrxc(6+3*natom,6)
+ real(dp),intent(inout) :: eltfrxc(6+3*natom,6),rprimd(3,3)
 
 !Local variables-------------------------------
 !scalars
@@ -1044,10 +1044,10 @@ end subroutine eltxccore
 !!   to the elastic tensor and internal strain.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      ptabs_fourdp,timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1389,10 +1389,10 @@ end subroutine dfpt_eltfrloc
 !!                    elastic tensor
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      d2kindstr2,metric,sphereboundary,timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1575,9 +1575,10 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 !! x = (ecut- unmodified energy)/ecutsm.
 !!
 !! PARENTS
-!!      dfpt_eltfrkin
+!!      m_dfpt_elt
 !!
 !! CHILDREN
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1739,10 +1740,10 @@ end subroutine dfpt_eltfrkin
 !! *based largely on hartre.f
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      metric,ptabs_fourdp,timab,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1949,10 +1950,10 @@ end subroutine dfpt_eltfrhar
 !! elteew(6+3*natom,6)=2nd derivatives of Ewald energy wrt strain
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,timab,wrtout,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2370,7 +2371,7 @@ end subroutine elt_ewald
 !!    second energy derivative wrt xred(3,natom), Hartrees.
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
@@ -2665,7 +2666,7 @@ end subroutine dfpt_ewald
 !!    second energy derivative wrt xred(3,natom), Hartrees.
 !!
 !! PARENTS
-!!      respfn
+!!      m_longwave
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
@@ -3003,7 +3004,7 @@ end subroutine dfpt_ewalddq
 !!    sumed over second atomic sublattice.
 !!
 !! PARENTS
-!!      respfn
+!!      m_longwave
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum

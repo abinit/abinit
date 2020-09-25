@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h20 )
+.Starting date : Sat  1 Aug 2020.
+- ( at 18h08 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t74/t74.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Test_suite/v5_t74/t74.in
 - output file    -> t74.out
 - root for input  files -> t74i
 - root for output files -> t74o
@@ -88,6 +88,7 @@ P           mkmem           2
                        0  1  0   1  0  0   0  0  1       0  1  0  -1  0  0   0  0  1
                        0 -1  0  -1  0  0   0  0  1       0 -1  0   1  0  0   0  0  1
            toldfe      1.00000000E-11 Hartree
+           tolsym      1.00000000E-08
            tsmear      5.00000000E-03 Hartree
             typat      1  1  1  1  1  1  1  1
               wtk        0.50000    0.50000
@@ -150,8 +151,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.08026
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/79au.1.hgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/79au.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosHGH_pwteter/79au.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosHGH_pwteter/79au.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Au,  from PRB58, 3641 (1998)
 - 79.00000   1.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -402,6 +403,7 @@ P           mkmem           2
                        0  1  0   1  0  0   0  0  1       0  1  0  -1  0  0   0  0  1
                        0 -1  0  -1  0  0   0  0  1       0 -1  0   1  0  0   0  0  1
            toldfe      1.00000000E-11 Hartree
+           tolsym      1.00000000E-08
            tsmear      5.00000000E-03 Hartree
             typat      1  1  1  1  1  1  1  1
               wtk        0.50000    0.50000
@@ -521,10 +523,10 @@ P           mkmem           2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         11.8  wall=         11.9
+- Proc.   0 individual time (sec): cpu=         12.2  wall=         35.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.8  wall=         11.9
+.Delivered   5 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=         12.2  wall=         35.2

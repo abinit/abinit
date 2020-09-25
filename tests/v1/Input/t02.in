@@ -46,11 +46,13 @@
  znucl 13.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/13al.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files=13al.pspgth
 #%% files_to_test = t02.out, tolnlines=  1, tolabs=  1.001e-09, tolrel=  1.100e-04
 #%% [paral_info]
 #%% max_nprocs = 2

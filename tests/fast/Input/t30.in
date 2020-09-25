@@ -79,13 +79,15 @@
        0.125  0.125  0.125
  znucl 14.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t30.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -65,13 +65,15 @@
  znucl 13.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t46.out  ,tolnlines = 2, tolabs = 2.0e-10, tolrel = 9e-10
-#%% psp_files = 13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

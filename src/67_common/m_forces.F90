@@ -165,11 +165,10 @@ contains
 !! * Note the use of "symrec" in the symmetrization expression above.
 !!
 !! PARENTS
-!!      etotfor,forstr
+!!      m_forstr,m_scfcv_core
 !!
 !! CHILDREN
-!!      atm2fft,constrf,dgemv,fourdp,fred2fcart,fresid,fresidrsp,metric,mkcore
-!!      mkcore_alt,mkcore_wvl,mklocl,sygrad,timab,xchybrid_ncpp_cc,zerosym
+!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -201,12 +200,12 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  real(dp),intent(in) :: grchempottn(3,dtset%natom),grcondft(3,dtset%natom),grewtn(3,dtset%natom)
  real(dp),intent(in) :: grvdw(3,ngrvdw),grnl(3*dtset%natom)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
- real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden),vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: fcart(3,dtset%natom),forold(3,dtset%natom)
  real(dp),intent(inout) :: vresid(nfft,dtset%nspden),xred(3,dtset%natom)
  real(dp),intent(out) :: favg(3),fred(3,dtset%natom),gresid(3,dtset%natom)
- real(dp),intent(out) :: grhf(3,dtset%natom)
+ real(dp),intent(out) :: grhf(3,dtset%natom),rprimd(3,3)
  real(dp),intent(inout) :: grxc(3,dtset%natom)
  real(dp),intent(out) :: synlgr(3,dtset%natom)
  type(pawrad_type),intent(in) :: pawrad(ntypat*psps%usepaw)
@@ -305,7 +304,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &     eltfrn_dum,gauss_dum,gmet,gprimd,&
 &     grxc,grl,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
-&     rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
+&     dtset%rcut,rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    end if
@@ -327,7 +326,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &     eltfrn_dum,gauss_dum,gmet,gprimd,&
 &     grxctau,grl_dum,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
-&     rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
+&     dtset%rcut,rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
      grxc(:,:)=grxc(:,:)+grxctau(:,:)
@@ -450,7 +449,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  else if (dtset%usewvl==0.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) then
    call fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,&
 &   mpi_enreg,psps%mqgrid_vl,nattyp,nfft,ngfft,ntypat,psps,pawtab,ph1d,&
-&   psps%qgrid_vl,ucvol,psps%usepaw,vresid,psps%zionpsp,psps%znuclpsp)
+&   psps%qgrid_vl,rprimd,ucvol,psps%usepaw,vresid,psps%zionpsp,psps%znuclpsp)
  else
    gresid(:,:)=zero
  end if
@@ -672,9 +671,10 @@ end subroutine forces
 !! Note the use of "symrec" in the symmetrization expression above.
 !!
 !! PARENTS
-!!      forces
+!!      m_forces
 !!
 !! CHILDREN
+!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -763,15 +763,15 @@ end subroutine sygrad
 !! gresid(3,natom)=forces due to the residual of the potential
 !!
 !! PARENTS
-!!      forces
+!!      m_forces
 !!
 !! CHILDREN
-!!      atm2fft,fourdp,wrtout
+!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
 subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqgrid,nattyp,nfft,&
-&          ngfft,ntypat,psps,pawtab,ph1d,qgrid,ucvol,usepaw,vresid,zion,znucl)
+&          ngfft,ntypat,psps,pawtab,ph1d,qgrid,rprimd,ucvol,usepaw,vresid,zion,znucl)
 
 !Arguments ------------------------------------
 !scalars
@@ -784,6 +784,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  integer,intent(in) :: atindx1(dtset%natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(in) :: qgrid(mqgrid),vresid(nfft,dtset%nspden),zion(ntypat)
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(in) :: znucl(ntypat)
  real(dp),intent(out) :: gresid(3,dtset%natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
@@ -836,8 +837,8 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 & dummy_out5,gauss,gmet,gprimd,gresid,dummy_out6,gsqcut,mgfft,&
 & mqgrid,dtset%natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-& psps,pawtab,ph1d,qgrid,dummy3,dummy_in1,strn_dummy6,strv_dummy6,ucvol,usepaw,vresg,vresg,vresg,dummy2,dummy_in2,&
-& comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+& psps,pawtab,ph1d,qgrid,dummy3,dtset%rcut,dummy_in1,rprimd,strn_dummy6,strv_dummy6,ucvol,usepaw,&
+& vresg,vresg,vresg,dummy2,dummy_in2,comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 & paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 
 !In case of nspden>=2, has to apply 1/2 factor
@@ -896,10 +897,10 @@ end subroutine fresidrsp
 !! So they have to be considered as a first step before a comprehensive parallelization of this routine.
 !!
 !! PARENTS
-!!      forces,prcref,prcref_PMA,scfcv
+!!      m_forces,m_prcref,m_scfcv_core
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,mean_fftr,pre_gather,pre_scatter
+!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -1517,7 +1518,7 @@ end subroutine fresid
 !! TODO
 !!
 !! PARENTS
-!!      forces
+!!      m_forces
 !!
 !! CHILDREN
 !!      dposv,prtxvf,wrtout,xred2xcart

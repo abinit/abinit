@@ -23,10 +23,10 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,dvdb_free,dvdb_init
-!!      dvdb_list_perts,dvdb_merge_files,dvdb_print,dvdb_test_ftinterp
-!!      dvdb_test_v1complete,dvdb_test_v1rsym,get_command_argument,herald
-!!      prompt,wrtout,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,dvdb%free,dvdb%list_perts
+!!      dvdb%open_read,dvdb%print,dvdb%qdownsample,dvdb_merge_files
+!!      dvdb_test_ftinterp,dvdb_test_v1complete,dvdb_test_v1rsym
+!!      get_command_argument,herald,ngfft_seq,prompt,wrtout,xmpi_init
 !!
 !! SOURCE
 
@@ -56,8 +56,8 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
- integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, symv1scf
- real(dp) :: dvdb_qdamp
+ integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, symv1scf, npert_miss, abimem_level
+ real(dp) :: dvdb_qdamp, abimem_limit_mb
  character(len=24) :: codename
  character(len=500) :: command,arg, msg
  character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
@@ -79,8 +79,10 @@ program mrgdv
  ! Initialize memory profiling if it is activated
  ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
  ! write greating,read the file names, etc.
@@ -161,7 +163,7 @@ program mrgdv
 
      dvdb = dvdb_new(dvdb_filepath, comm)
      if (prtvol > 0) call dvdb%print(prtvol=prtvol)
-     call dvdb%list_perts([-1, -1, -1])
+     call dvdb%list_perts([-1, -1, -1], npert_miss)
      call dvdb%free()
 
    case ("test_v1comp", "test_v1complete")
@@ -200,7 +202,7 @@ program mrgdv
      call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:, 1))
      call dvdb%open_read(ngfftf, xmpi_comm_self)
      if (prtvol > 0) call dvdb%print(prtvol=prtvol)
-     call dvdb%list_perts([-1,-1,-1], unit=std_out)
+     call dvdb%list_perts([-1,-1,-1], npert_miss, unit=std_out)
      call dvdb%qdownsample(dump_file, ngqpt, comm)
      call dvdb%free()
 

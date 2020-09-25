@@ -77,9 +77,11 @@ contains
 !!
 !!
 !! PARENTS
-!!      multibinit
 !!
 !! CHILDREN
+!!      crystal%free,ifc%free,ifc_init_fromfile,random_number,random_seed
+!!      strain_apply,strain_init,thermal_supercell_free,thermal_supercell_make
+!!      var2hist,wrtout,xcart2xred
 !!
 !! SOURCE
 

@@ -432,18 +432,20 @@ meta: {optdriver: 8, wfk_task: 5, }
 - Reading GS states from WFK file: t59o_DS1_WFK
 --------------------------------------------------------------------------------
 
-Computation of velocity matrix elements (ddk)
+ Computation of velocity matrix elements (DDK)
 
-Parameters extracted from Abinit header:
-ecut:     20.0
-nkpt:    10
-mband:   10
-nsppol:  1
-nspinor: 1
-useylm:  0
-inclvkb: 0
+ Parameters extracted from the Abinit header:
+    ecut:     20.0
+    nkpt:    10
+    mband:   10
+    nsppol:  1
+    nspinor: 1
+    useylm:  0
+    inclvkb: 0
+    bmin: 1, bmax: 10
+    Computing diagonal and off-diagonal matrix elements
+    Between band index bmin: 1, bmax: 10
 
-- Writing file: t59o_DS2NEW_EVK.nc
 
 Writing velocity matrix elements (only diagonal terms, real part) for testing purpose:
 For spin:  1, ikbz:  1  , kpt: [-1.2500E-01, -2.5000E-01,  0.0000E+00]
@@ -514,18 +516,20 @@ meta: {optdriver: 8, wfk_task: 5, }
 - Reading GS states from WFK file: t59o_DS1_WFK
 --------------------------------------------------------------------------------
 
-Computation of velocity matrix elements (ddk)
+ Computation of velocity matrix elements (DDK)
 
-Parameters extracted from Abinit header:
-ecut:     20.0
-nkpt:    10
-mband:   10
-nsppol:  1
-nspinor: 1
-useylm:  0
-inclvkb: 2
+ Parameters extracted from the Abinit header:
+    ecut:     20.0
+    nkpt:    10
+    mband:   10
+    nsppol:  1
+    nspinor: 1
+    useylm:  0
+    inclvkb: 2
+    bmin: 1, bmax: 10
+    Computing diagonal and off-diagonal matrix elements
+    Between band index bmin: 1, bmax: 10
 
-- Writing file: t59o_DS3NEW_EVK.nc
 
 Writing velocity matrix elements (only diagonal terms, real part) for testing purpose:
 For spin:  1, ikbz:  1  , kpt: [-1.2500E-01, -2.5000E-01,  0.0000E+00]
@@ -613,18 +617,20 @@ meta: {optdriver: 8, wfk_task: 5, }
 
 --------------------------------------------------------------------------------
 
-Computation of velocity matrix elements (ddk)
+ Computation of velocity matrix elements (DDK)
 
-Parameters extracted from Abinit header:
-ecut:     20.0
-nkpt:    10
-mband:   10
-nsppol:  1
-nspinor: 1
-useylm:  1
-inclvkb: 2
+ Parameters extracted from the Abinit header:
+    ecut:     20.0
+    nkpt:    10
+    mband:   10
+    nsppol:  1
+    nspinor: 1
+    useylm:  1
+    inclvkb: 2
+    bmin: 1, bmax: 10
+    Computing diagonal and off-diagonal matrix elements
+    Between band index bmin: 1, bmax: 10
 
-- Writing file: t59o_DS4NEW_EVK.nc
 
 Writing velocity matrix elements (only diagonal terms, real part) for testing purpose:
 For spin:  1, ikbz:  1  , kpt: [-1.2500E-01, -2.5000E-01,  0.0000E+00]

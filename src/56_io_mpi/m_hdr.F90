@@ -747,6 +747,7 @@ end function abifile_from_fform
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -793,6 +794,7 @@ end subroutine check_fform
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -843,6 +845,7 @@ end subroutine test_abifiles
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -900,27 +903,28 @@ end subroutine hdr_malloc
 !! ebands <type(ebands_t)>=band structure information including Brillouin zone description
 !! codvsn=code version
 !! dtset <type(dataset_type)>=all input variables for this dataset
-!! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
-!! comm_atom=--optional-- MPI communicator over atoms
 !! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !! pertcase=index of the perturbation, or 0 if GS calculation
 !! psps <type(pseudopotential_type)>=all the information about psps
-!! my_atomtab(:)=Index of the atoms (in global numbering ) treated by current proc (Optional)
+!! [my_atomtab(:)]=Index of the atoms (in global numbering ) treated by current proc.
+!! [mpi_atmtab(:)]= indexes of the atoms treated by current proc
+!! [comm_atom]= MPI communicator over atoms
 !!
 !! OUTPUT
 !! hdr <type(hdr_type)>=the header, initialized, and for most part of
 !!   it, contain its definite values, except for evolving variables
 !!
 !! PARENTS
-!!      dfpt_looppert,gstate,nonlinear,respfn,setup_bse,setup_screening
-!!      setup_sigma
+!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_lw,m_gstate,m_longwave
+!!      m_nonlinear,m_respfn_driver,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
-subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
-                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
+                    mpi_atmtab, comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
@@ -1010,14 +1014,9 @@ end subroutine hdr_init
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      bethe_salpeter,conducti_nc,conducti_paw,conducti_paw_core,cut3d
-!!      dfpt_looppert,dfptnl_loop,elphon,emispec_paw,eph,finddistrproc,gstate
-!!      initaim,inpgkk,inwffil,ioprof,linear_optics_paw,m_bse_io,m_cut3d,m_ddk
-!!      m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfd,m_wfk,macroave
-!!      mrggkk,mrgscr,nonlinear,optic,read_el_veloc,read_gkk,respfn,screening
-!!      sigma,wfk_analyze
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1093,9 +1092,10 @@ end subroutine hdr_free
 !!  The present version deals with versions of the header up to 56.
 !!
 !! PARENTS
-!!      dfpt_looppert,m_io_kss,m_io_screening,m_wfk,optic
+!!      m_ddk,m_dfpt_looppert,m_io_kss,m_io_screening,m_wfd,m_wfk,optic
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1289,9 +1289,10 @@ end function hdr_get_nelect_from_occ
 !!   it, contain its definite values, except for evolving variables
 !!
 !! PARENTS
-!!      m_hdr,m_wfk
+!!      m_hdr,m_sigtk,m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1500,10 +1501,11 @@ end subroutine hdr_init_lowlvl
 !!  fform=Kind of the array in the file (0 signals an error)
 !!
 !! PARENTS
-!!      conducti_paw,conducti_paw_core,cut3d,emispec_paw,finddistrproc,ioprof
-!!      linear_optics_paw,m_ddk,m_ioarr,m_wfd,m_wfk
+!!      abitk,cut3d,ioprof,m_common,m_conducti,m_ioarr,m_mpi_setup,m_paw_optics
+!!      m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1582,9 +1584,9 @@ end subroutine hdr_read_from_fname
 !!  Only writing.
 !!
 !! PARENTS
-!!      m_ioarr,m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1762,6 +1764,7 @@ end subroutine hdr_mpio_skip
 !!      m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1891,6 +1894,7 @@ end subroutine hdr_bsize_frecords
 !! PARENTS
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -1999,6 +2003,7 @@ end subroutine hdr_io_wfftype
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2060,9 +2065,10 @@ end subroutine hdr_io_int
 !!   Activate new header, avoid printing tons of lines with occupations.
 !!
 !! PARENTS
-!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_wfd,m_wfk,mrggkk,rchkgsheader
+!!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2232,6 +2238,7 @@ end subroutine hdr_echo
 !! PARENTS
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2282,6 +2289,7 @@ end subroutine hdr_skip_int
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2438,10 +2446,9 @@ end subroutine hdr_skip_wfftype
 !!   it, contain its definite values, except for evolving variables
 !!
 !! PARENTS
-!!      afterscfloop,dfpt_looppert,dfpt_scfcv,gstate,nonlinear,respfn,scfcv
-!!      setup_bse,setup_screening,setup_sigma
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2515,9 +2522,9 @@ end subroutine hdr_update
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      elphon,initaim,m_dvdb,m_hdr,m_io_screening,m_ioarr,m_wfk,optic,read_gkk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -2741,7 +2748,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    hdr%codvsn=list_tmp(1:8)
    do ipsp=2,npsp+1
      list_tmp =list_char(ipsp)
-     hdr%title(ipsp-1) =list_tmp(1:fnlen)
+     hdr%title(ipsp-1) =list_tmp(1:min(fnlen,132))
    end do
    do ipsp=npsp+2,2*npsp+1
      hdr%md5_pseudos(ipsp-npsp-1) = list_char(ipsp)(1:md5_slen)
@@ -2859,7 +2866,7 @@ integer function read_first_record(unit, codvsn8, headform, fform, errmsg) resul
 
  ii = index(codvsn6, ".")
  if (ii == 0 .or. ii == 1) then
-   errmsg = sjoin("Cannot find `major.minor` pattern in codvsn:", codvsn6)
+   errmsg = sjoin("Cannot find major.minor pattern in codvsn:", codvsn6)
    ierr = 1; return
  end if
 
@@ -2903,10 +2910,11 @@ end function read_first_record
 !! The file is supposed to be open already
 !!
 !! PARENTS
-!!      elphon,initaim,inpgkk,m_bse_io,m_cut3d,m_dvdb,m_hdr,m_io_screening
-!!      m_ioarr,macroave,mrggkk,rchkgsheader,read_gkk
+!!      m_bader,m_bse_io,m_cut3d,m_dvdb,m_elphon,m_hdr,m_io_screening,m_ioarr
+!!      m_iogkk,macroave,mrggkk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3027,9 +3035,11 @@ end subroutine hdr_fort_read
 !!  fform=kind of the array in the file. if the reading fails, return fform=0
 !!
 !! PARENTS
-!!      initaim,inwffil,m_ddk,m_dvdb,m_hdr,m_io_screening,m_ioarr,macroave
+!!      m_bader,m_common,m_dvdb,m_hdr,m_inkpts,m_inwffil,m_io_screening,m_ioarr
+!!      m_wfk,macroave,optic
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3230,9 +3240,9 @@ end subroutine hdr_ncread
 !! The file is supposed to be open already
 !!
 !! PARENTS
-!!      m_bse_io,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,mrggkk,outgkk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3362,7 +3372,7 @@ end function hdr_backspace
 !! FUNCTION
 !! This subroutine deals with the output of the hdr_type structured variables in ETSF+NETCDF fornat.
 !! It handles variables according to the ETSF format, whenever possible and uses new variables
-!!  when not available in the ETSF format.
+!! when not available in the ETSF format.
 !!
 !! INPUTS
 !!  fform=kind of the array in the file
@@ -3463,7 +3473,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    ])
    NCF_CHECK(ncerr)
 
-   ! Define states section. TODO: write smearing_scheme
+   ! Define states section.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("number_of_states", "int", "number_of_kpoints, number_of_spins"), &
      nctkarr_t("eigenvalues", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
@@ -3670,7 +3680,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    "nelect", "charge"],[hdr%nelect, hdr%charge])
  NCF_CHECK(ncerr)
 
- ! FIXME: in etsf_io the number of electrons is declared as integer!!!
+ ! NB: In etsf_io the number of electrons is declared as integer.
+ ! We use abinit nelect to store the value as real(dp).
  NCF_CHECK(nf90_put_var(ncid, vid("number_of_electrons"), nint(hdr%nelect)))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt_orig"), hdr%kptrlatt_orig))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt"), hdr%kptrlatt))
@@ -3703,6 +3714,7 @@ end function hdr_ncwrite
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3742,6 +3754,7 @@ end subroutine hdr_set_occ
 !!      m_hdr
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3849,9 +3862,10 @@ end subroutine hdr_get_occ3d
 !!   (I) the energy cutoff for the double (fine) grid     (tdg)
 !!
 !! PARENTS
-!!      inwffil,m_ddk,m_io_screening,m_ioarr,m_wfk
+!!      m_inwffil,m_io_screening,m_ioarr,m_wfk
 !!
 !! CHILDREN
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -3995,9 +4009,10 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    ! Note, however, that we allow for different FFT meshes and we interpolate the density in the
    ! caller when we are restarting a SCF calculation.
    if (abifile%class == "density" .or. abifile%class == "potential") then
-     write(msg, '(5a)' )&
-       'fft grids must be the same for restart from a ',trim(abifile%class),' file.',ch10,&
-       'Action: change your fft grid or your restart file.'
+     write(msg, '(10a)' )&
+       'FFT grids must be the same to restart from a ',trim(abifile%class),' file.',ch10,&
+       "ngfft from file: ", trim(ltoa(hdr0%ngfft(1:3))), ", from input: ", trim(ltoa(hdr%ngfft(1:3))), ch10, &
+       'Action: change the FFT grid in the input via ngfft or change the restart file.'
      MSG_ERROR(msg)
    end if
    tng=1
@@ -4738,10 +4753,9 @@ end function hdr_compare
 !!  Only check
 !!
 !! PARENTS
-!!      eph,setup_bse,setup_screening,setup_sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      wrtout
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 
@@ -4936,10 +4950,10 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!  ierr=increased by one if values differ
 !!
 !! PARENTS
-!!      hdr_vs_dtset
+!!      m_hdr
 !!
 !! CHILDREN
-!!      wrtout
+!!      crystal_init,wrtout
 !!
 !! SOURCE
 

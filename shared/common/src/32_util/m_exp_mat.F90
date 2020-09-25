@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exp_mat
 !! NAME
 !!  m_exp_mat

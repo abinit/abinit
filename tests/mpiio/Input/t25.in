@@ -36,11 +36,13 @@
  fftalg 401 # XG20160213 Although this is announced to be the default with paral_kgb 1 , 
             # removing this line leads to problems with the automatic tests. To be clarified. See KNOWN_PROBLEM 802.1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 6c_lda.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

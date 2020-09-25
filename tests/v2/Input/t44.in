@@ -54,13 +54,15 @@
        3*-0.227d0
  znucl 33.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "33as.SGS_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t44.out, tolnlines = 8, tolabs = 1.10e-05, tolrel = 4.0e-04, fld_options = -medium
-#%% psp_files = 33as.SGS_mod 
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

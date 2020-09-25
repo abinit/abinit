@@ -489,6 +489,7 @@ TESTCNF_KEYWORDS = {
                                                            ),
     "psp_files"      : (_str2list,        "", "files", "List of pseudopotential files (located in the Psps_for_tests directory)."),
     "extra_inputs"   : (_str2list,        "", "files", "List of extra input files."),
+    "use_git_submodule"   : (str,        "", "files", "Take input files from git submodule in ~/abinit/tests/modules_with_data/."),
     # [shell]
     "pre_commands"   : (_str2cmds, "", "shell", "List of commands to execute before starting the test"),
     "post_commands"  : (_str2cmds, "", "shell", "List of commands to execute after the test is completed"),
@@ -1421,6 +1422,17 @@ class BaseTest(object):
 
         self._authors_snames = set(second_names)
 
+        if self.executable == "abinit" and self.psp_files and not self.use_files_file:
+            raise RuntimeError("""
+In: %s
+
+The `psp_files` entry in the TEST_INFO section is needed only if `use_files_file = 'yes'`
+In all the other cases use the Abinit input variables:
+
+pseudos "foo.psp8, bar.psp8"
+pp_dirpath $ABI_PSPDIR
+""" % self.inp_fname )
+
     def __repr__(self):
         return self.full_id
 
@@ -1788,12 +1800,16 @@ class BaseTest(object):
             compilers.append(compiler)
             slaves.append(host)
 
-        # Find the slave and compare the name of the compiler.
+        # Find the slave
+        # Use short hostname i.e. the toke before '.' so alps.pcml.ucl.ac.be becomes alps
         try:
-            idx = slaves.index(self.build_env.hostname)
+            #idx = slaves.index(self.build_env.hostname)
+            short_hostname = self.build_env.hostname.split('.', 1)[0]
+            idx = slaves.index(short_hostname)
         except ValueError:
             return False
 
+        # Compare the name of the compiler.
         return compilers[idx] == self.build_env.fortran_compiler.name
 
     def skip_buildbot_builder(self):
@@ -1906,6 +1922,22 @@ class BaseTest(object):
             self.cprint(msg, status2txtcolor[self._status])
             can_run = False
 
+        if self.use_git_submodule:
+            # Create link in workdir pointing to ~abinit/tests/modules_with_data/MODULE_DIRNAME
+            dst = os.path.join(self.workdir, self.use_git_submodule)
+            src = os.path.join(self.abenv.tests_dir, "modules_with_data", self.use_git_submodule)
+
+            if not os.path.exists(os.path.join(src, "README.md")):
+                self._status = "skipped"
+                msg = self.full_id + ": Skipped:\n\tThis test requires files in the git submodule:\n\t\t%s\n" % src
+                msg += "\tbut cannot find README.md file in dir\n"
+                msg += "\tUse:\n\t\t`git submodule init && git submodule update --recursive --remote`\n\tto fetch the last version from the remote url."
+                self.cprint(msg, status2txtcolor[self._status])
+                can_run = False
+            else:
+                if not os.path.exists(dst):
+                    os.symlink(src, dst)
+
         self.run_etime = 0.0
 
         if can_run:
@@ -1996,27 +2028,34 @@ class BaseTest(object):
                 # Print message for users running the test suite on their machine
                 # if the test failed and we have exclusion rules on the ABINIT testfarm.
                 if status == "failed" and (self.exclude_hosts or self.exclude_builders):
-                    print("\tTest %s failed but note that the feature being tested is not portable" % self.full_id)
-                    print("\tas this test is partly disabled on the Abinit testfarm.")
-                    if self.exclude_hosts: print("\texclude_hosts:", self.exclude_hosts)
-                    if self.exclude_builders: print("\texclude_builder:", self.exclude_builders)
+                    cprint("\tTest `%s` with keywords: `%s` failed." % (self.full_id, str(self.keywords)), color="yellow")
+                    cprint("\tNote however that this feature is not portable", color="yellow")
+                    cprint("\tand this test is partly disabled on the Abinit testfarm.", color="yellow")
+                    if self.exclude_hosts: cprint("\t\texclude_hosts: %s" % str(self.exclude_hosts), color="yellow")
+                    if self.exclude_builders: cprint("\t\texclude_builder: %s" % str(self.exclude_builders), color="yellow")
+
+                if status == "failed" and self.use_git_submodule:
+                    cprint("\tTest %s failed. Note, however, that this requires external files in %s" % (
+                          self.full_id, self.use_git_submodule), color="yellow")
+                    cprint("\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url.",
+                           color="yellow")
 
             # Check if the test is expected to fail.
             if runner.retcode == 124:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "Test has reached timeout and has been killed by SIGTERM"
+                msg = self.full_id + " Test has reached timeout and has been killed by SIGTERM"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode == 137:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "Test has reached timeout and has been killed by SIGKILL"
+                msg = self.full_id + " Test has reached timeout and has been killed by SIGKILL"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
-                msg = (self.full_id + "Test was not expected to fail but subprocesses returned retcode: %s" % runner.retcode)
+                msg = (self.full_id + " Test was not expected to fail but subprocesses returned retcode: %s" % runner.retcode)
                 self.cprint(msg, status2txtcolor["failed"])
 
             # If pedantic, stderr must be empty unless the test is expected to fail!
@@ -2196,7 +2235,12 @@ class BaseTest(object):
                         os.remove(entry)
                     except OSError:
                         pass
+                elif os.path.islink(entry):
+                    # directory is a link.
+                    pass
                 else:
+                    # real directory that should be removed
+                    # At present no test copies directories so we leave this raise.
                     raise NotImplementedError("Found directory: %s in workdir!!" % entry)
 
     def patch(self, patcher=None):
@@ -2540,38 +2584,15 @@ class AbinitTest(BaseTest):
         if 'output_file = "' not in line:
             app('output_file = "%s"' % (self.id + ".out"))
 
-        # This is needed for ATOMPAW as the pseudo will be generated at runtime.
-        #dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
-        #if dirname is not None:
-        #    app('pp_dirpath = "%s"' % (dirname))
-        #    app('pseudos = "%s"' % (",".join(pp_names)))
-        #else:
-        #    app('pseudos = "%s"' % (",\n".join(pp_names)))
-
-        # This is to check whether the parser supports "long strings"
-        #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
-
-        # Need to add pseudopotential info to input.
-        if 'pseudos = ' not in line:
-            app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
-
-        #pp_paths = self.get_pseudo_paths()
-        #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
-        #app('pp_dirpath = "$ABI_PSPDIR"')
-        #app('pp_dirpath = %s' % self.abenv.psps_dir)
-
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
         o_prefix = self.output_prefix if self.output_prefix else self.id + "o"
         # FIXME: Use temp prefix and change iofn
         t_prefix = self.id  + "t"
 
-        if 'indata_prefix = ' not in line:
-            app('indata_prefix = "%s"' % i_prefix)
-        if 'outdata_prefix = ' not in line:
-            app('outdata_prefix = "%s"' % o_prefix)
-        if 'tmpdata_prefix = ' not in line:
-            app('tmpdata_prefix = "%s"' % t_prefix)
+        if 'indata_prefix = ' not in line: app('indata_prefix = "%s"' % i_prefix)
+        if 'outdata_prefix = ' not in line: app('outdata_prefix = "%s"' % o_prefix)
+        if 'tmpdata_prefix = ' not in line: app('tmpdata_prefix = "%s"' % t_prefix)
 
         app("# end runtests.py section\n\n")
 

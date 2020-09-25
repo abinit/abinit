@@ -45,7 +45,7 @@ istwfk *1
 
 #For all the dataset
 nsym 0
-icutcoul 6
+gw_icutcoul 6
 symsigma 0
 
 #----------------------------------------------------------------------------
@@ -149,13 +149,15 @@ dmft_solv3 2         # usefull to avoid supplementary variables in the input fil
  mqgrid5 300        # Reduced but fine at least for SrVO3
  mqgriddg5 300
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
 #%% files_to_test = t79.out, tolnlines=17, tolabs=1.5e-3, tolrel= 8.0e-3, fld_options = -medium
-#%% psp_files= 23v.paw, 38sr.paw, 8o.paw 
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

@@ -57,7 +57,7 @@ For instance, `--with-mpi-prefix` in normalized form becomes `with_mpi_prefix`.
 Examples of configuration files for clusters can be found in the [abiconfig package](https://github.com/abinit/abiconfig).
 A detailed description of the configuration options supported by the build system is given in this guide by Marc:
 
-<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf"
+<embed src="https://school2019.abinit.org/images/lectures/abischool2019_installing_abinit_lecture.pdf"
 type="application/pdf" width="100%" height="480px">
 
 Once the build is completed, it is a good idea to check whether the executable works as expected
@@ -130,7 +130,7 @@ Wait for the error e.g. SIGSEGV, then print the **backtrace** with:
 
 !!! tip
 
-    Remeber to compile the code with the `-g` option. Avoid debugging code compiled with -O3.
+    Remember to compile the code with the `-g` option. Avoid debugging code compiled with -O3.
     In some tricky cases, you may need to resort to -O0 or use Fortran `print` statements to avoid miscompilation.
 
 
@@ -138,6 +138,16 @@ For a more complete introduction to *gdb*, we suggest this youtube tutorial:
 
 <iframe width="1384" height="629" src="https://www.youtube.com/embed/bWH-nL7v5F4" frameborder="0"
 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<!--
+How to use LLDB
+
+$ lldb ../../../src/98_main/abinit
+(lldb) target create "../../../src/98_main/abinit"
+Current executable set to '../../../src/98_main/abinit' (x86_64).
+(lldb) settings set target.input-path t85.in
+(lldb) run
+-->
 
 <!--
 ## Basic conventions

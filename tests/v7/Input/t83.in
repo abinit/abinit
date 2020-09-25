@@ -72,6 +72,9 @@
 # test_chain = t83.in, t84.in  to be added when python script will be enabled
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/8o.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -80,7 +83,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t83.out, tolnlines = 7, tolabs = 1.1e-3, tolrel = 2.0e-4, fld_options = -medium
-#%% psp_files = 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

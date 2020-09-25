@@ -205,7 +205,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!
 !! PARENTS
-!!      m_melemts,sigma
+!!      m_melemts,m_sigma_driver
 !!
 !! CHILDREN
 !!      my_select_melements
@@ -296,7 +296,7 @@ end subroutine melflags_copy
 !!  See side effects
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      my_select_melements
@@ -428,7 +428,7 @@ end subroutine my_select_melements
 !!  Mels=The initialized database with dimensions and allocated memory.
 !!
 !! PARENTS
-!!      calc_vhxc_me
+!!      m_vhxc_me
 !!
 !! CHILDREN
 !!      my_select_melements
@@ -555,7 +555,7 @@ end subroutine melements_init
 !!  All arrays whose flag is 2, are filled assuming an Hermitian operator.
 !!
 !! PARENTS
-!!      calc_vhxc_me
+!!      m_vhxc_me
 !!
 !! CHILDREN
 !!      my_select_melements
@@ -644,7 +644,7 @@ end subroutine melements_herm
 !!  In output the corresponding flas is set to 2.
 !!
 !! PARENTS
-!!      calc_vhxc_me
+!!      m_vhxc_me
 !!
 !! CHILDREN
 !!      my_select_melements
@@ -711,7 +711,7 @@ end subroutine melements_mpisum
 !!  Only writing
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      my_select_melements
@@ -874,7 +874,7 @@ end subroutine melements_print
 !!  Mels= All arrays elements connecting states belonging to different irreps are set to zero.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      my_select_melements

@@ -54,13 +54,15 @@
  tolwfr  1.e-28
  znucl  14
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t16.out, tolnlines = 0, tolabs = 1.100e-07, tolrel = 4.000e-04, fld_options = -medium
-#%% psp_files = 14si.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

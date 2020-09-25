@@ -58,13 +58,15 @@
    0.5 0.5 0.5
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/3li.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t92.out, tolnlines = 2, tolabs = 1.10e-09, tolrel = 2.000e-04, fld_options =  
-#%% psp_files = 3li.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

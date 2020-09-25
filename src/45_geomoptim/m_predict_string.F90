@@ -92,7 +92,7 @@ contains
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
-!!      predictimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!      gather_array_img,get_geometry_img,mep_rk4,mep_steepest,spline,splint

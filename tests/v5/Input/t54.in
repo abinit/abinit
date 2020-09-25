@@ -65,13 +65,15 @@ diemac 12.0       # Although this is not mandatory, it is worth to
                   # is described in the "dielng" input variable section.
                   # Here, we follow the prescription for bulk silicon.
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14Si_pade-q4"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t54.out, tolnlines = 3, tolabs = 5.000e-10, tolrel = 4.000e-10
-#%% psp_files = 14Si_pade-q4
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

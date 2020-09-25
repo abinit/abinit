@@ -43,6 +43,9 @@
  typat  5*1
  znucl 42.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/42mo.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -51,7 +54,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t56.out, tolnlines = 3, tolabs = 1.100e-06, tolrel = 2.000e-05
-#%% psp_files = 42mo.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

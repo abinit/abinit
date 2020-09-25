@@ -60,12 +60,14 @@ accuracy7 6
 
   pawecutdg 15
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al.GGA_PBE-Atompaw3.1-paw.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t64.out, tolnlines=149, tolabs=6.00e-05, tolrel=2.00e-05
-#%% psp_files= Al.GGA_PBE-JTH-paw.xml
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

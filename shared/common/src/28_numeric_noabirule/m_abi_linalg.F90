@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abi_linalg
 !! NAME
 !!  m_abi_linalg
@@ -258,7 +257,7 @@ CONTAINS  !===========================================================
 !! comm_scalapack= global communicator to be used in case of Scalapack
 !!
 !! PARENTS
-!!      compute_kgb_indicator,driver
+!!      m_driver,m_mpi_setup
 !!
 !! CHILDREN
 !!
@@ -417,7 +416,7 @@ CONTAINS  !===========================================================
 !! INPUTS
 !!
 !! PARENTS
-!!      abi_linalg_init
+!!      m_abi_linalg
 !!
 !! CHILDREN
 !!
@@ -633,7 +632,7 @@ CONTAINS  !===========================================================
 !! INPUTS
 !!
 !! PARENTS
-!!      compute_kgb_indicator,driver
+!!      m_driver,m_mpi_setup
 !!
 !! CHILDREN
 !!

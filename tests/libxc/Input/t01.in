@@ -81,6 +81,9 @@ typat 1
 wtk 1 znucl 2
 xred 3*0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02he.bare"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -88,7 +91,6 @@ xred 3*0
 #%% [files]
 #%% files_to_test = 
 #%%   t01.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  -medium
-#%% psp_files = 02he.bare
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

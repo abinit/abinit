@@ -104,10 +104,10 @@ contains
 !!  computation, so that their values if choice=1 or choice=2 will differ.
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
-!!      mkrdim,prtocc,prttagm,prttagm_images,xred2xcart
+!!      appdig
 !!
 !! SOURCE
 
@@ -1564,7 +1564,7 @@ contains
 !!  (only writing)
 !!
 !! PARENTS
-!!      outvar_o_z
+!!      m_outvar_o_z
 !!
 !! CHILDREN
 !!      appdig

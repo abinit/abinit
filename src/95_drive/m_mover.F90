@@ -185,20 +185,10 @@ contains
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      gstate,mover_effpot
+!!      m_gstate,m_mover_effpot
 !!
 !! CHILDREN
-!!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare_and_copy
-!!      abihist_free,abihist_init,abimover_fin,abimover_ini
-!!      chkdilatmx,crystal_init,dtfil_init_time
-!!      effective_potential_evaluate,erlxconv,fcart2fred,fconv,hist2var
-!!      initylmg,matr3inv,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
-!!      pred_diisrelax,pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin
-!!      pred_lbfgs,pred_lotf,pred_moldyn,pred_nose,pred_simple,pred_srkna14
-!!      pred_steepdesc,pred_velverlet,pred_verlet,prtxfase,read_md_hist
-!!      scfcv_run,status,symmetrize_xred,var2hist,vel2hist,write_md_hist
-!!      wrt_moldyn_netcdf,wrtout,wvl_mkrho,wvl_wfsinp_reformat,xfh_update
-!!      xmpi_barrier,xmpi_isum,xmpi_wait
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1033,10 +1023,10 @@ contains
 !!  at output : iexit=  0 if not below tolerance, 1 if below tolerance
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
-!!      wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1151,10 +1141,10 @@ end subroutine fconv
 !!  argout(sizeout)=description
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
-!!      wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1247,10 +1237,10 @@ end subroutine mover
 !!  (only writing)
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
-!!      gettag,wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1511,10 +1501,10 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !!  tag = The string to put for each atom
 !!
 !! PARENTS
-!!      prtxfase
+!!      m_mover
 !!
 !! CHILDREN
-!!      gettag,wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1569,10 +1559,10 @@ subroutine gettag(atlist,index,natom,prtallatoms,tag)
 !!  tag = The string to put for aech atom
 !!
 !! PARENTS
-!!      prtxfase
+!!      m_mover
 !!
 !! CHILDREN
-!!      gettag,wrtout
+!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1652,7 +1642,7 @@ end subroutine prtxfase
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
 !!      metric,wrtout,xcart2xred,xred2xcart

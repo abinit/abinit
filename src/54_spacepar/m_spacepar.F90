@@ -36,6 +36,7 @@ module m_spacepar
  use defs_abitypes,     only : MPI_type
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
+ use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
  use m_fft,             only : zerosym, fourdp
 
@@ -80,8 +81,10 @@ contains
 !!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
 !!
 !! PARENTS
+!!      m_scfcv_core
 !!
 !! CHILDREN
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -316,35 +319,32 @@ end subroutine make_vectornd
 !!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  divgq0= [optional argument] value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
 !!
 !! OUTPUT
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
 !!
 !! PARENTS
-!!      dfpt_rhotov,dfptnl_loop,energy,fock_getghc,m_kxc,nonlinear,nres2vres
-!!      odamix,prcref,prcref_PMA,respfn,rhotov,setup_positron,setvtr,tddft
+!!      m_dfpt_rhotov,m_dft_energy,m_fock_getghc,m_forstr,m_kxc,m_nonlinear
+!!      m_odamix,m_pead_nl_loop,m_positron,m_prcref,m_respfn_driver,m_rhotov
+!!      m_setvtr,m_tddft
 !!
 !! CHILDREN
-!!      fourdp,metric,ptabs_fourdp,timab,zerosym
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
-subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
-&  divgq0,qpt) ! Optional argument
+subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
+                 &rcut,rhog,rprimd,vcutgeo,vhartr,&
+                 &qpt) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,izero,nfft
- real(dp),intent(in) :: gsqcut
-! REMEMBER to define the V_Coulomb type first before you uncomment this
-! For the moment we will leave optional the choice of cut-off technique 
-! type(vcoul_type), intent(in), optional :: icutcoul 
+ integer,intent(in) :: cplex,icutcoul,izero,nfft,nkpt
+ real(dp),intent(in) :: gsqcut,rcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
- real(dp),intent(inout),optional :: divgq0
+ real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft),vcutgeo(3)
  real(dp),intent(in),optional :: qpt(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
@@ -355,13 +355,14 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05,me_fft,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol,rcut
+ real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol
  character(len=500) :: message
 !arrays
  integer :: id(3)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),qpt_(3),rmet(3,3),tsec(2)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: gq(:,:),work1(:,:)
 
 ! *************************************************************************
@@ -415,6 +416,10 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
    MSG_ERROR(message)
  end if
 
+ !Initialize Gcut-off array from m_gtermcutoff
+ !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3))) 
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+
  ! In order to speed the routine, precompute the components of g+q
  ! Also check if the booked space was large enough...
  ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
@@ -430,37 +435,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 
  ABI_ALLOCATE(work1,(2,nfft))
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
-
- ! If there is a special treatment for the Coulomb singularity: 
- ! Calculate it here only once before entering the loop over the grid points
-  if (PRESENT(divgq0)) then
-   rcut = (three*nfft*ucvol/four_pi)**(one/three)
-
-! SELECT CASE (singularity_mode)
-
-!   CASE('SPHERE') ! 0D 
-   ! Treatment of the divergence at the Gamma point
-   ! Spencer-Alavi scheme !!! ATT: Other methods will be gradually included
-   ! I am not completely convinced that this should be purely attributed to Spencer-Alavi  2008
-   ! since in Rozzi et al. 2006 they propose the same treatment for 0D case
-   divgq0 = two_pi*rcut**two
-
-!   CASE('CYLINDER') ! According to Rozzi et al 2006
-!     divgq0 = -pi*rcut**two*(2*log(rcut)-1)
-
-!   CASE('SURFACE') ! According to Rozzi et al 2006
-!     divgq0 = -two_pi*rcut**two
-
-!   CASE DEFAULT
-!     
-!     DEBUG
-!       call wrtout(std_out,"!!!No divergence treatment chosen!!!")
-!     ENDDEBUG
-
-! END SELECT
- 
- end if 
-
 
  ! Triple loop on each dimension
  do i3=1,n3
@@ -485,11 +459,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
          ii1=2
          work1(re,1+i23)=zero
          work1(im,1+i23)=zero
-         ! If the value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq is given, use it
-         if (PRESENT(divgq0)) then
-           work1(re,1+i23)=rhog(re,1+i23)*divgq0*piinv
-           work1(im,1+i23)=rhog(im,1+i23)*divgq0*piinv
-         end if
        end if
 
        ! Final inner loop on the first dimension (note the lower limit)
@@ -507,7 +476,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
              ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
            end if
 
-           den=piinv/gs
+           den=piinv/gs*gcutoff(ii)
            work1(re,ii)=rhog(re,ii)*den
            work1(im,ii)=rhog(im,ii)*den
          else
@@ -554,6 +523,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  ! Fourier Transform Vhartree. Vh in reciprocal space was stored in work1
  call fourdp(cplex,work1,vhartr,1,mpi_enreg,nfft,1,ngfft,0)
 
+ ABI_DEALLOCATE(gcutoff) 
  ABI_DEALLOCATE(work1)
 
  call timab(10,2,tsec)
@@ -585,10 +555,10 @@ end subroutine hartre
 !!  ar=mean value
 !!
 !! PARENTS
-!!      dfpt_vtowfk,energy,forstrnps,vtowfk
+!!      m_dfpt_vtowfk,m_dft_energy,m_forstr,m_vtowfk
 !!
 !! CHILDREN
-!!      xmpi_sum
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -803,7 +773,7 @@ end subroutine meanvalue_g
 !!  laplacerdfuncg_out TO BE DESCRIBED SB 090901
 !!
 !! PARENTS
-!!      frskerker1,frskerker2,moddiel_csrb,prcrskerker1,prcrskerker2
+!!      m_frskerker1,m_frskerker2,m_prcref
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp
@@ -981,10 +951,10 @@ end subroutine laplacian
 !!  frredgr(nfft,3)= reduced gradient of input function (same units as frin)
 !!
 !! PARENTS
-!!      dfpt_eltfrxc
+!!      m_dfpt_elt
 !!
 !! CHILDREN
-!!      fourdp
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1131,10 +1101,10 @@ end subroutine redgr
 !!   potential in real space,
 !!
 !! PARENTS
-!!      dfpt_nselt,dfpt_nstpaw,dfpt_rhotov
+!!      m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      fourdp,metric,ptabs_fourdp
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1326,11 +1296,11 @@ end subroutine hartrestr
 !! applied on the system, only the total density is generated in G space
 !!
 !! PARENTS
-!!      dfpt_mkrho,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,m_dvdb,mkrho
-!!      suscep_stat,vtorho,vtorhorec,vtorhotf,wfd_mkrho
+!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dvdb,m_mkrho
+!!      m_suscep_stat,m_vtorho,m_vtorhorec,m_vtorhotf,m_wfd
 !!
 !! CHILDREN
-!!      fourdp,matr3inv,ptabs_fourdp,symredcart,timab,xmpi_sum
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1848,10 +1818,10 @@ end subroutine symrhg
 !!  phnons(2,n1*n2*n3,(nspden/nsppol)-3*(nspden/4))=phases associated with nonsymmorphic translations
 !!
 !! PARENTS
-!!      m_ab7_kpoints,setsym,wfd_mkrho
+!!      m_ab7_kpoints,m_spacepar,m_wfd
 !!
 !! CHILDREN
-!!      sort_int,wrtout
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -2236,14 +2206,10 @@ end subroutine irrzg
 !!  rhor1_eq(cplex*nfft,nspden) = symmetric density in real space for equivalent perturbation
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      fourdp
-!!
-!! TODO
-!!  This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
-!!  Moreover one should take linear combinations of symmetrical components
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -2420,10 +2386,11 @@ end subroutine rotate_rho
 !! nsppol and nspden are needed in case of (anti)ferromagnetic symmetry operations
 !!
 !! PARENTS
-!!      dfpt_looppert,gstate,m_dvdb,nonlinear,respfn,scfcv
+!!      m_dfpt_looppert,m_dfpt_lw,m_dvdb,m_gstate,m_longwave,m_nonlinear
+!!      m_respfn_driver,m_scfcv_core
 !!
 !! CHILDREN
-!!      chkgrp,irrzg,mati3inv,symatm,symdet,timab
+!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 

@@ -29,13 +29,15 @@ xcart -0.2 -0.3 -2.8
        0.2  0.3  2.8
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/12mg.2.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t92.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 12mg.psphgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -59,9 +59,9 @@ module m_sigma_driver
  use m_fft_mesh,      only : get_gftt, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
+ use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, ebands_get_valence_idx, ebands_get_bandenergy,&
                              ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
-                             enclose_degbands, get_gaps, gaps_t
+                             ebands_enclose_degbands, ebands_get_gaps, gaps_t
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
@@ -155,7 +155,7 @@ contains
 !!  Output is written on the main abinit output file. Some results are stored in external files
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! NOTES
 !!
@@ -175,29 +175,9 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
-!!      calc_sigc_me,calc_sigx_me,calc_ucrpa,calc_vhxc_me,chkpawovlp
-!!      classify_bands,cohsex_me,denfgr,destroy_mpi_enreg
-!!      ebands_copy,ebands_free,ebands_interpolate_kpath,ebands_report_gap
-!!      ebands_update_occ,em1results_free,energies_init,esymm_free
-!!      fftdatar_write,fourdp,get_gftt,getph,gsph_free,hdr_free
-!!      init_distribfft_seq,initmpi_seq,kmesh_free,kxc_ada,kxc_driver
-!!      littlegroup_free,littlegroup_init,melements_free,melements_print
-!!      melements_zero,melflags_reset,metric,mkdump_er,mkrdim,nhatgrid
-!!      paw_an_free,paw_an_init,paw_an_nullify,paw_check_symcprj,paw_dijhf
-!!      paw_gencond,paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_print
-!!      paw_mkdijexc_core,paw_pwaves_lmn_free,paw_pwaves_lmn_init,paw_qpscgw
-!!      pawcprj_alloc,pawcprj_free,pawdenpot,pawdij,pawfgr_destroy,pawfgr_init
-!!      pawfgrtab_free,pawfgrtab_init,pawfgrtab_print,pawinit,pawmknhat,pawprt
-!!      pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy
-!!      pawrhoij_free,pawtab_get_lsize,pawtab_print,ppm_free,ppm_init
-!!      prep_calc_ucrpa,print_ngfft,prtrhomxmn,pspini,rdgw,rdqps,read_rhor
-!!      setsym_ylm,setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask
-!!      sigma_free,sigma_init,sigma_tables,sigparams_free,solve_dyson,symdij
-!!      symdij_all,test_charge,timab,updt_m_ks_to_qp,vcoul_free
-!!      wfd_change_ngfft,wfd_copy,wfd_distribute_bands,wfd_free,wfd_get_cprj
-!!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
-!!      wfd_test_ortho,write_sigma_header,write_sigma_results,wrqps,wrtout
-!!      xmpi_barrier,xmpi_bcast,xmpi_sum
+!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
+!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
+!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
 !!
 !! SOURCE
 
@@ -453,7 +433,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(qp_vbik,(KS_BSt%nkpt,KS_BSt%nsppol))
 
  !call ebands_update_occ(KS_BSt,Dtset%spinmagntarget,prtvol=0)
- ks_vbik(:,:) = get_valence_idx(KS_BSt)
+ ks_vbik(:,:) = ebands_get_valence_idx(KS_BSt)
 
  ! ============================
  ! ==== PAW initialization ====
@@ -1165,7 +1145,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Compute QP occupation numbers.
    call wrtout(std_out,'sigma: calculating QP occupation numbers:','COLL')
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=0)
-   qp_vbik(:,:) = get_valence_idx(QP_BSt)
+   qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
 
 !  #ifdef DEV_HAVE_SCGW_SYM
    ! Calculate the irreducible representations of the new QP amplitdues.
@@ -1352,10 +1332,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
    call wrtout(ab_out,msg,'COLL')
    write(msg,'(5a,f9.4,3a,es21.14,2a,es21.14)')ch10,&
-&   ' QP results after the unitary transformation in the KS subspace: ',ch10,ch10,&
-&   '  Number of electrons    = ',qp_rhog(1,1)*Cryst%ucvol,ch10,ch10,&
-&   '  QP Band energy    [Ha] = ',get_bandenergy(QP_BSt),ch10,&
-&   '  QP Hartree energy [Ha] = ',ehartree
+    ' QP results after the unitary transformation in the KS subspace: ',ch10,ch10,&
+    '  Number of electrons    = ',qp_rhog(1,1)*Cryst%ucvol,ch10,ch10,&
+    '  QP Band energy    [Ha] = ',ebands_get_bandenergy(QP_BSt),ch10,&
+    '  QP Hartree energy [Ha] = ',ehartree
    call wrtout(ab_out,msg,'COLL')
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
    call wrtout(ab_out,msg,'COLL')
@@ -2456,7 +2436,7 @@ endif
 
      ! Recalculate new occupations and Fermi level.
      call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
-     qp_vbik(:,:) = get_valence_idx(QP_BSt)
+     qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
 
      write(msg,'(2a,3x,2(es16.6,a))')ch10,' New Fermi energy : ',QP_BSt%fermie,' Ha ,',QP_BSt%fermie*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
@@ -2681,9 +2661,12 @@ end subroutine sigma
 !! comm=MPI communicator.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
+!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
+!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
+!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
 !!
 !! SOURCE
 
@@ -3064,12 +3047,12 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! spinmagntarget is passed to fermi.F90 to fix the problem with newocc in case of magnetic metals
  call ebands_update_occ(KS_BSt,Dtset%spinmagntarget,prtvol=0)
 
- gap_err = get_gaps(KS_BSt, gaps)
+ gaps = ebands_get_gaps(KS_BSt, gap_err)
  call gaps%print(unit=std_out)
  call ebands_report_gap(KS_BSt, unit=std_out)
 
  ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
- val_indeces = get_valence_idx(KS_BSt)
+ val_indeces = ebands_get_valence_idx(KS_BSt)
 
  ! Create Sigma header
  ! TODO Fix problems with symmorphy and k-points
@@ -3233,7 +3216,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      do ikcalc=1,Sigp%nkptgw
 
        if (has_IBZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikibz,G0)) then
-         call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
+         call ebands_enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
             "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",isppol,ch10,&
@@ -3241,7 +3224,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
            MSG_COMMENT(msg)
          end if
        else
-         MSG_ERROR(sjoin('k-point', ktoa(Sigp%kptgw(:,ikcalc)), 'not in IBZ'))
+         write(msg,'(3a)')&
+&         ' not in the list of k points treated in the preparatory SCF run.',ch10,' Change kptgw, or shiftk of previous run.'
+         MSG_ERROR(sjoin('k-point', ktoa(Sigp%kptgw(:,ikcalc)),trim(msg)))
        end if
 
      end do
@@ -3262,7 +3247,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ABI_MALLOC(Sigp%kptgw2bz,(Sigp%nkptgw))
  !
  !=== Check if the k-points are in the BZ ===
- !FB TODO Honestly the code is not able to treat k-points, which are not in the IBZ.
+ !FB TODO Honestly the code is not able to treat k-points, which are not in the input list of points in the IBZ.
  !This extension should require to change the code in different places.
  !Therefore, one should by now prevent the user from calculating sigma for a k-point not in the IBZ.
 
@@ -3271,7 +3256,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      !found = has_IBZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikcalc2bz,G0)
      Sigp%kptgw2bz(ikcalc) = ikcalc2bz
    else
-     MSG_ERROR(sjoin('k-point:', ktoa(Sigp%kptgw(:,ikcalc)), 'not in the kbz set'))
+     write(msg,'(3a)')&
+&     ' not in the list of k points treated in the preparatory SCF run.',ch10,' Change kptgw, or shiftk of previous run.'
+     MSG_ERROR(sjoin('k-point:', ktoa(Sigp%kptgw(:,ikcalc)),trim(msg)))
    end if
  end do
 
@@ -3455,7 +3442,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  do ivcoul_init=1,nvcoul_init
    rcut = Dtset%rcut
-   icutcoul_eff=Dtset%icutcoul
+   icutcoul_eff=Dtset%gw_icutcoul
    Sigp%sigma_mixing=one
    if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
      if(abs(Dtset%hyb_mixing)>tol8)then
@@ -3651,9 +3638,12 @@ end subroutine setup_sigma
 !!  that are used to select the matrix elements of the self-energy that have to be calculated.
 !!
 !! PARENTS
-!!      setup_sigma,sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
+!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
+!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
+!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
 !!
 !! SOURCE
 
@@ -3835,9 +3825,12 @@ end subroutine sigma_tables
 !! ierr=Exit status.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
+!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
+!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
+!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
 !!
 !! SOURCE
 
@@ -3984,11 +3977,12 @@ end subroutine sigma_bksmask
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_unpack,pawrhoij_symrhoij,wfd_pawrhoij,wrtout
+!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
+!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
 !!
 !! SOURCE
 

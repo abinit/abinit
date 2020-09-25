@@ -71,7 +71,7 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      impurity_solve,spectral_function
+!!      m_dmft
 !!
 !! CHILDREN
 !!      combin,destroy_green,init_green,wrtout
@@ -394,7 +394,7 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      hubbard_one
+!!      m_hubbard_one
 !!
 !! CHILDREN
 !!      combin,destroy_green,init_green,wrtout

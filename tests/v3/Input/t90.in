@@ -7,7 +7,6 @@ t90o_SCR    # Output file (should not exist)
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgscr
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t87.in, t88.in, t89.in, t90.in, t91.in
 #%% [files]
 #%% files_to_test=t90.stdout, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00

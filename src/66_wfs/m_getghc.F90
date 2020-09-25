@@ -116,11 +116,11 @@ contains
 !!  cwaveprj(natom,my_nspinor*(1+cpopt)*ndat)= wave function projected on nl projectors (PAW only)
 !!
 !! PARENTS
-!!      cgwf,chebfi,dfpt_cgwf,gwls_hamiltonian,ks_ddiago,lobpcgwf,m_io_kss
-!!      m_rf2,mkresi,multithreaded_getghc
+!!      m_cgwf,m_chebfi,m_dfpt_cgwf,m_dft_energy,m_getghc,m_gwls_hamiltonian
+!!      m_io_kss,m_ksdiago,m_lobpcgwf_old,m_orbmag,m_rf2
 !!
 !! CHILDREN
-!!      fourwf
+!!      getghc,mkl_set_num_threads,omp_set_nested
 !!
 !! SOURCE
 
@@ -793,10 +793,10 @@ end subroutine getghc
 !! integrated into that code, to simplify maintenance
 !!
 !! PARENTS
-!!      getghc
+!!      m_getghc
 !!
 !! CHILDREN
-!!      fourwf
+!!      getghc,mkl_set_num_threads,omp_set_nested
 !!
 !! SOURCE
 
@@ -1047,10 +1047,10 @@ end subroutine getghc_nucdip
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      getghc
+!!      m_getghc
 !!
 !! CHILDREN
-!!      fourwf
+!!      getghc,mkl_set_num_threads,omp_set_nested
 !!
 !! SOURCE
 
@@ -1349,10 +1349,10 @@ end subroutine getghc_mGGA
 !!  gsc(2,mgsc)= <g|S|Cnk> or <g|S^(1)|Cnk> (S=overlap)
 !!
 !! PARENTS
-!!      dfpt_vtowfk
+!!      m_dfpt_vtowfk,m_dfptnl_pert
 !!
 !! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,timab,xmpi_sum
+!!      getghc,mkl_set_num_threads,omp_set_nested
 !!
 !! SOURCE
 
@@ -1538,7 +1538,7 @@ end subroutine getgsc
 !!  cwaveprj(natom,my_nspinor*(1+cpopt)*ndat)= wave function projected on nl projectors (PAW only)
 !!
 !! PARENTS
-!!      m_lobpcgwf,prep_getghc
+!!      m_lobpcgwf,m_prep_kgb
 !!
 !! CHILDREN
 !!      getghc,mkl_set_num_threads,omp_set_nested

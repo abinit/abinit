@@ -37,7 +37,7 @@ module m_kpts
  use m_time,           only : cwtime, cwtime_report
  use m_copy,           only : alloc_copy
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
- use m_fstrings,       only : sjoin, itoa, ltoa
+ use m_fstrings,       only : sjoin, itoa, ltoa, ktoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_symkpt,         only : symkpt, symkpt_new
@@ -131,15 +131,16 @@ end function kpts_timrev_from_kptopt
 !!  [bz2ibz(6,nkbz)]=Mapping BZ --> IBZ
 !!
 !! PARENTS
-!!      m_dvdb,m_ebands,m_gruneisen,m_ifc,m_kpts,m_phgamma,m_phonons,m_sigmaph
+!!      abitk,m_dvdb,m_ebands,m_ephwg,m_gruneisen,m_ifc,m_kpts,m_phgamma
+!!      m_phonons,m_sigmaph,m_sigtk,m_unittests
 !!
 !! CHILDREN
-!!      getkgrid,kpts_ibz_from_kptrlatt,listkk
+!!      wrtout
 !!
 !! SOURCE
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
+                                  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -156,7 +157,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: iout0 = 0, chksymbreak0 = 0, iscf2=2
+ integer,parameter :: iout0 = 0, chksymbreak0 = 0, iscf2 = 2
  integer :: my_nshiftk
  real(dp) :: kptrlen
 !arrays
@@ -169,7 +170,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
  ! Copy kptrlatt and shifts because getkgrid can change them
  ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
- ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be between 1 and", itoa(MAX_NSHIFTK)))
+ ABI_CHECK_IRANGE(nshiftk, 1, MAX_NSHIFTK, "Invalid value of nshiftk")
  my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
  my_kptrlatt = kptrlatt
 
@@ -486,8 +487,6 @@ end function symkchk
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
 !!  comm=MPI communicator.
-!!  [exit_loop]: if present and True, exit the loop over k-points in the sphere as soon as the lenght**2 of the
-!!    difference vector is smaller than tol12. Default: False
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT
@@ -512,22 +511,23 @@ end function symkchk
 !!  the comparison of the squared lengths of the separate vectors.
 !!
 !! PARENTS
-!!      initberry,initorbmag,inwffil,m_dvdb,m_ebands,m_eprenorms,m_exc_diago
-!!      m_fock,m_fstab,m_haydock,m_ifc,m_kpts,m_phgamma,m_sigmaph,mlwfovlp_qp
+!!      m_berryphase_new,m_dvdb,m_ebands,m_eph_double_grid,m_ephwg,m_eprenorms
+!!      m_exc_diago,m_fock,m_fstab,m_haydock,m_inwffil,m_lgroup,m_mlwfovlp_qp
+!!      m_orbmag,m_phgamma,m_rta,m_sigmaph,m_sigtk,m_unittests
 !!
 !! CHILDREN
-!!      sort_dp,timab
+!!      wrtout
 !!
 !! SOURCE
 
-subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
-                  exit_loop, use_symrec) ! optional
+subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppoldbl, symafm, symmat, timrev, comm, &
+                  use_symrec) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt1,nkpt2,nsym,sppoldbl,timrev,comm
  real(dp),intent(out) :: dksqmax
- logical,optional,intent(in) :: use_symrec, exit_loop
+ logical,optional,intent(in) :: use_symrec
 !arrays
  integer,intent(in) :: symafm(nsym),symmat(3,3,nsym)
  integer,intent(out) :: indkk(nkpt2*sppoldbl,6)
@@ -542,6 +542,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  integer :: isppol,isym,itimrev,jkpt1,jsym,jtime
  integer :: nsym_used,timrev_used
  real(dp) :: dksq,dksqmn,lk2,llarger,ldiff,lsmaller,ltrial,min_l
+ !real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
 !arrays
  integer :: dkint(3),jdkint(3),k1int(3),k2int(3)
@@ -554,6 +555,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 ! *************************************************************************
 
  call timab(1021, 1, tsec)
+ !call cwtime(cpu, wall, gflops, "start")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -570,35 +572,33 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 
  ! Precompute the length of the kpt1 vectors, also taking into account possible umklapp vectors
  l3 = (2*limit+1)**3
- ABI_CALLOC(lkpg1,(l3*nkpt1))
- ABI_CALLOC(lkpg1_sorted,(l3*nkpt1))
- ABI_ALLOCATE(isort,(l3*nkpt1))
+ ABI_CALLOC(lkpg1, (l3*nkpt1))
+ ABI_CALLOC(lkpg1_sorted, (l3*nkpt1))
+ ABI_MALLOC(isort, (l3*nkpt1))
  isort = 0
 
  call xmpi_split_work(nkpt1, comm, isk_start, isk_stop)
  !write(std_out,*)' List of kpt1 vectors'; write(std_out,*)' Length of the kpt1 vectors:'
 
+!$OMP PARALLEL DO PRIVATE(k1, k1int, kpg1, ikpg1)
  do ikpt1=isk_start,isk_stop
- !do ikpt1=1,nkpt1
-   !if (mod(ikpt1, nprocs) /= my_rank) cycle  ! MPI parallelism
-   k1(:)=kptns1(:,ikpt1)
-   !write(std_out,*)ikpt1,k1(:)
-   k1int(:)=nint(k1(:)+tol12)
-   k1(:)=k1(:)-k1int(:)
-   do ig1=-limit,limit
-     kpg1(1)=k1(1)+ig1
+   k1(:) = kptns1(:,ikpt1)  !; write(std_out,*)ikpt1,k1(:)
+   k1int(:) = nint(k1(:) + tol12)
+   k1(:) = k1(:) - k1int(:)
+   do ig3=-limit,limit
+     kpg1(3) = k1(3) + ig3
      do ig2=-limit,limit
-       kpg1(2)=k1(2)+ig2
-       do ig3=-limit,limit
-         kpg1(3)=k1(3)+ig3
+       kpg1(2) = k1(2) + ig2
+       do ig1=-limit,limit
+         kpg1(1) = k1(1) + ig1
 
-         ikpg1 = ig1+limit+1 + (2*limit+1)*(ig2+limit) + (2*limit+1)**2*(ig3+limit) + l3*(ikpt1-1)
+         ikpg1 = ig1 + limit + 1 + (2*limit+1)*(ig2+limit) + (2*limit+1)**2*(ig3+limit) + l3*(ikpt1-1)
          ! Compute the norm of the vector (also taking into account possible umklapp)
-         lkpg1(ikpg1)=sqrt(gmet(1,1)*kpg1(1)**2+gmet(2,2)*kpg1(2)**2 + &
-                           gmet(3,3)*kpg1(3)**2+two*(gmet(2,1)*kpg1(2)*kpg1(1) + &
-                           gmet(3,2)*kpg1(3)*kpg1(2)+gmet(3,1)*kpg1(3)*kpg1(1)))
-         lkpg1_sorted(ikpg1)=lkpg1(ikpg1)
-         isort(ikpg1)=ikpg1
+         lkpg1(ikpg1) = sqrt(gmet(1,1)*kpg1(1)**2+gmet(2,2)*kpg1(2)**2 + &
+                             gmet(3,3)*kpg1(3)**2+two*(gmet(2,1)*kpg1(2)*kpg1(1) + &
+                             gmet(3,2)*kpg1(3)*kpg1(2)+gmet(3,1)*kpg1(3)*kpg1(1)))
+         lkpg1_sorted(ikpg1) = lkpg1(ikpg1)
+         isort(ikpg1) = ikpg1
          !write(std_out,*)' ikpt1,ig1,ig2,ig3,lkpg1=',ikpt1,ig1,ig2,ig3,lkpg1(ikpg1)
        end do
      end do
@@ -606,19 +606,21 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  end do
 
  if (nprocs > 1) then
-   call xmpi_sum(lkpg1, comm, ierr)
    call xmpi_sum(lkpg1_sorted, comm, ierr)
+   call xmpi_sum(lkpg1, comm, ierr)
    call xmpi_sum(isort, comm, ierr)
  end if
+ !call cwtime_report(" listkk_loop1", cpu, wall, gflops)
 
- call sort_dp(l3*nkpt1,lkpg1_sorted,isort,tol12)
- ! From "precompute" to "sort_dp" represents more thatn 50% of the overall wall time for large meshes.
+ call sort_dp(l3*nkpt1, lkpg1_sorted, isort, tol12)
+ ! From "precompute" to "sort_dp" represents more than 50% of the overall wall time for large meshes.
+ !call cwtime_report(" listkk_sort", cpu, wall, gflops)
 
  !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
  !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
  !do ii=1,l3*nkpt1
- !ikpt1=(isort(ii)-1)/l3+1
- !write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
+ !  ikpt1=(isort(ii)-1)/l3+1
+ !  write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
  !enddo
 
  dksqmax = zero
@@ -634,7 +636,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2
      isk = ikpt2 + (isppol-1)*nkpt2
-     !if (mod(isk, nprocs) /= my_rank) cycle  ! MPI parallelism
      if (isk < isk_start .or. isk > isk_stop) cycle
 
      ikpt2_done=0
@@ -699,7 +700,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
          ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
          do itimrev=0,timrev_used
            do isym=1,nsym_used
-           !do itimrev=0,timrev_used
 
              ! Select magnetic characteristic of symmetries
              if (isppol == 1 .and. symafm(isym) == -1) cycle
@@ -744,13 +744,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
                ! Note that in this condition, each coordinate is tested separately, without squaring.
                ! So, it is a much stronger condition than dksqmn < tol12
                if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done = 1
-
-               ! This line leads to a significant speedup for dense meshes but ~30 tests fail after this change.
-               if (present(exit_loop)) then
-                 if (exit_loop) then
-                   if (dksq < tol12) ikpt2_done = 1
-                 end if
-               end if
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
@@ -836,9 +829,9 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
    end do ! ikpt2
  end do ! isppol
 
- ABI_DEALLOCATE(isort)
- ABI_DEALLOCATE(lkpg1)
- ABI_DEALLOCATE(lkpg1_sorted)
+ ABI_FREE(isort)
+ ABI_FREE(lkpg1)
+ ABI_FREE(lkpg1_sorted)
 
  indkk = transpose(tmp_indkk)
  ABI_FREE(tmp_indkk)
@@ -849,6 +842,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  end if
 
  call timab(1021, 2, tsec)
+ !call cwtime_report(" listkk_end", cpu, wall, gflops)
 
 end subroutine listkk
 !!***
@@ -898,11 +892,11 @@ end subroutine listkk
 !! [nkpthf] = number of k points in the full BZ, for the Fock operator.
 !!
 !! PARENTS
-!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
-!!      nonlinear,testkgrid,thmeig
+!!      m_ab7_kpoints,m_bz_mesh,m_elphon,m_getshell,m_inkpts,m_kpts,m_nonlinear
+!!      m_thmeig
 !!
 !! CHILDREN
-!!      mati3inv,matr3inv,metric,smallprim,smpbz,symkpt
+!!      wrtout
 !!
 !! SOURCE
 
@@ -937,7 +931,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,shiftk,symafm,symrel,vacuum,wtk_tmp,indkpt,bz2ibz_smap,&
    fullbz,nkpthf,kpthf,downsampling)
 
- if (nkpt>0) then
+ if (nkpt > 0) then
    kpt(:,1:nkpt) = kpt_tmp(:,1:nkpt)
    wtk(1:nkpt)   = wtk_tmp(1:nkpt)
  end if
@@ -996,11 +990,10 @@ end subroutine getkgrid
 !! [nkpthf] = number of k points in the full BZ, for the Fock operator.
 !!
 !! PARENTS
-!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
-!!      nonlinear,testkgrid,thmeig
+!!      m_kpts
 !!
 !! CHILDREN
-!!      mati3inv,matr3inv,metric,smallprim,smpbz,symkpt
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1065,7 +1058,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    do isym=1,nsym
      if(symafm(isym)==1 .or. kptopt==4)nsym_used=nsym_used+1
    end do
-   ABI_ALLOCATE(symrec,(3,3,nsym_used))
+   ABI_MALLOC(symrec,(3,3,nsym_used))
    nsym_used=0
    do isym=1,nsym ! Get the symmetry matrices in terms of reciprocal basis
      if(symafm(isym)==1 .or. kptopt==4)then
@@ -1076,7 +1069,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  else if (kptopt==2) then
    !Use only the time-reversal
    nsym_used=1
-   ABI_ALLOCATE(symrec,(3,3,1))
+   ABI_MALLOC(symrec,(3,3,1))
    symrec(1:3,1:3,1)=0
    do ii=1,3
      symrec(ii,ii,1)=1
@@ -1085,20 +1078,20 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  kptrlatt2(:,:)=kptrlatt(:,:)
  nshiftk2=nshiftk
- ABI_ALLOCATE(shiftk2,(3,MAX_NSHIFTK))
- ABI_ALLOCATE(shiftk3,(3,MAX_NSHIFTK))
+ ABI_MALLOC(shiftk2,(3,MAX_NSHIFTK))
+ ABI_MALLOC(shiftk3,(3,MAX_NSHIFTK))
  shiftk2(:,:)=shiftk(:,:)
 
 !Find a primitive k point lattice, if possible, by decreasing the number of shifts.
  if(nshiftk2/=1)then
 
-   do ! Loop to be repeated if there has been a successful reduction of nshiftk2
-
-     ABI_ALLOCATE(deltak,(3,nshiftk2))
-     ABI_ALLOCATE(repetition_factor,(nshiftk2))
-     ABI_ALLOCATE(generator,(nshiftk2))
-     ABI_ALLOCATE(belong_chain,(nshiftk2))
-     ABI_ALLOCATE(number_in_chain,(nshiftk2))
+   do
+     ! Loop to be repeated if there has been a successful reduction of nshiftk2
+     ABI_MALLOC(deltak,(3,nshiftk2))
+     ABI_MALLOC(repetition_factor,(nshiftk2))
+     ABI_MALLOC(generator,(nshiftk2))
+     ABI_MALLOC(belong_chain,(nshiftk2))
+     ABI_MALLOC(number_in_chain,(nshiftk2))
 
      decreased=0
      deltak(1,1:nshiftk2)=shiftk2(1,1:nshiftk2)-shiftk2(1,1)
@@ -1247,11 +1240,11 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
        if(decreased==1)exit
      end do ! iprime
 
-     ABI_DEALLOCATE(belong_chain)
-     ABI_DEALLOCATE(deltak)
-     ABI_DEALLOCATE(number_in_chain)
-     ABI_DEALLOCATE(repetition_factor)
-     ABI_DEALLOCATE(generator)
+     ABI_FREE(belong_chain)
+     ABI_FREE(deltak)
+     ABI_FREE(number_in_chain)
+     ABI_FREE(repetition_factor)
+     ABI_FREE(generator)
 
      if(decreased==0 .or. nshiftk2==1)exit
 
@@ -1341,7 +1334,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  brav=1
  mkpt=nkptlatt*nshiftk2
 
- ABI_ALLOCATE(spkpt,(3,mkpt))
+ ABI_MALLOC(spkpt,(3,mkpt))
  option=0
  if(iout/=0)option=1
 
@@ -1361,12 +1354,12 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  if(kptopt==1 .or. kptopt==2 .or. kptopt==4)then
 
-   ABI_ALLOCATE(indkpt,(nkpt_fullbz))
-   ABI_ALLOCATE(kpt_fullbz,(3,nkpt_fullbz))
-   ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
+   ABI_MALLOC(indkpt,(nkpt_fullbz))
+   ABI_MALLOC(kpt_fullbz,(3,nkpt_fullbz))
+   ABI_MALLOC(bz2ibz_smap, (6, nkpt_fullbz))
 #if 1
-   ABI_ALLOCATE(wtk_fullbz,(nkpt_fullbz))
-   ABI_ALLOCATE(wtk_folded,(nkpt_fullbz))
+   ABI_MALLOC(wtk_fullbz,(nkpt_fullbz))
+   ABI_MALLOC(wtk_folded,(nkpt_fullbz))
 
    kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
    wtk_fullbz(1:nkpt_fullbz)=1.0_dp/dble(nkpt_fullbz)
@@ -1377,8 +1370,8 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    call symkpt(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
 &   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded,bz2ibz_smap,xmpi_comm_self)
 
-   ABI_DEALLOCATE(symrec)
-   ABI_DEALLOCATE(wtk_fullbz)
+   ABI_FREE(symrec)
+   ABI_FREE(wtk_fullbz)
 
    !do ikpt=1,nkpt_fullbz
    !  write(*,*) ikpt, indkpt(ikpt), bz2ibz_smap(1,ikpt), indkpt(bz2ibz_smap(1,ikpt))
@@ -1391,7 +1384,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    call symkpt_new(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
 &   nkpt_computed,nsym_used,symrec,timrev,bz2ibz_smap,xmpi_comm_self)
 
-   ABI_DEALLOCATE(symrec)
+   ABI_FREE(symrec)
    ABI_CALLOC(wtk_folded,(nkpt_fullbz))
    do ii=1,nkpt_fullbz
     ikpt = indkpt(bz2ibz_smap(1,ii))
@@ -1401,7 +1394,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 #endif
 
  else if(kptopt==3)then
-   ABI_CALLOC(bz2ibz_smap, (6, nkpt_fullbz))
+   ABI_ICALLOC(bz2ibz_smap, (6, nkpt_fullbz))
    bz2ibz_smap(1,:) = [(ii,ii=1,nkpt_fullbz)]
    bz2ibz_smap(2,:) = 1 !isym
    nkpt_computed=nkpt_fullbz
@@ -1441,10 +1434,10 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
      ! Returns list of k-points in the Full BZ.
      ABI_MOVE_ALLOC(kpt_fullbz,fullbz)
    else
-     ABI_DEALLOCATE(kpt_fullbz)
+     ABI_FREE(kpt_fullbz)
    end if
 
-   ABI_DEALLOCATE(wtk_folded)
+   ABI_FREE(wtk_folded)
 
  else if(kptopt==3)then
 
@@ -1455,18 +1448,18 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
    if (present(fullbz)) then
      ! Returns list of k-points in the Full BZ.
-     ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))
+     ABI_MALLOC(fullbz,(3,nkpt_fullbz))
      fullbz = spkpt(:,1:nkpt_fullbz)
    end if
 
  end if
 
- ABI_DEALLOCATE(spkpt)
+ ABI_FREE(spkpt)
  kptrlatt(:,:)=kptrlatt2(:,:)
  nshiftk=nshiftk2
  shiftk(:,1:nshiftk)=shiftk2(:,1:nshiftk)
- ABI_DEALLOCATE(shiftk2)
- ABI_DEALLOCATE(shiftk3)
+ ABI_FREE(shiftk2)
+ ABI_FREE(shiftk3)
 
 end subroutine getkgrid_low
 !!***
@@ -1499,10 +1492,9 @@ end subroutine getkgrid_low
 !! TODO: This routine should be removed
 !!
 !! PARENTS
-!!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_kpt_fullbz,get_rank_1kpt,mati3inv,mkkptrank
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1585,10 +1577,10 @@ end subroutine get_full_kgrid
 !!  kpt_fullbz(3,nkpt_fullbz)=kpoints in full brillouin zone
 !!
 !! PARENTS
-!!      get_full_kgrid,invars2
+!!      m_kpts
 !!
 !! CHILDREN
-!!      mati3det,matr3inv,wrap2_pmhalf
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1755,11 +1747,11 @@ end subroutine get_kpt_fullbz
 !!  R.A. Evarestov and V.P. Smirnov, Phys. Stat. Sol. (b) 119, 9 (1983) [[cite:Evarestov1983]]
 !!
 !! PARENTS
-!!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,initorbmag,m_fstab,m_ifc
-!!      m_tdep_abitypes
+!!      m_berryphase_new,m_elphon,m_fstab,m_harmonic_thermo,m_ifc,m_kpts
+!!      m_orbmag,m_tdep_abitypes
 !!
 !! CHILDREN
-!!      matr3inv,wrap2_pmhalf,wrtout
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1934,9 +1926,9 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    end do
 
    if(present(downsampling))then
-     ABI_ALLOCATE(found1,(boundmin(2):boundmax(2),boundmin(3):boundmax(3)))
-     ABI_ALLOCATE(found2,(boundmin(1):boundmax(1),boundmin(3):boundmax(3)))
-     ABI_ALLOCATE(found3,(boundmin(1):boundmax(1),boundmin(2):boundmax(2)))
+     ABI_MALLOC(found1,(boundmin(2):boundmax(2),boundmin(3):boundmax(3)))
+     ABI_MALLOC(found2,(boundmin(1):boundmax(1),boundmin(3):boundmax(3)))
+     ABI_MALLOC(found3,(boundmin(1):boundmax(1),boundmin(2):boundmax(2)))
      found1=0 ; found2=0 ; found3=0
    end if
 
@@ -2024,15 +2016,15 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    nkpt=nn-1
 
    if(present(downsampling))then
-     ABI_DEALLOCATE(found1)
-     ABI_DEALLOCATE(found2)
-     ABI_DEALLOCATE(found3)
+     ABI_FREE(found1)
+     ABI_FREE(found2)
+     ABI_FREE(found3)
    end if
 
    if(nkpt/=nkptlatt*nshiftk)then
      write(msg, '(a,i0,3a,i0,a)' )&
-&     'The number of k points ',nkpt,' is not equal to',ch10,&
-&     'nkptlatt*nshiftk which is ',nkptlatt*nshiftk,'.'
+     'The number of k points ',nkpt,' is not equal to',ch10,&
+     'nkptlatt*nshiftk which is ',nkptlatt*nshiftk,'.'
      MSG_BUG(msg)
    end if
 
@@ -2317,10 +2309,10 @@ end subroutine smpbz
 !! Note that kptopt is always =1 in this routine.
 !!
 !! PARENTS
-!!      inkpts,m_ab7_kpoints
+!!      m_ab7_kpoints,m_inkpts
 !!
 !! CHILDREN
-!!      getkgrid,abi_abort,matr3inv,metric,smallprim,wrtout,xmpi_abort
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2522,13 +2514,13 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 
  if(prtkpt/=0)then
    write(msg,'(a,a,a,a,a,a,a,a)' )ch10,&
-&   ' testkgrid : will perform the analysis of a series of k-grids.',ch10,&
-&   '  Note that kptopt=1 in this analysis, irrespective of its input value.',ch10,ch10,&
-&   ' Grid#    kptrlatt         shiftk         kptrlen       nkpt  iset',ch10
+     ' testkgrid : will perform the analysis of a series of k-grids.',ch10,&
+     '  Note that kptopt=1 in this analysis, irrespective of its input value.',ch10,ch10,&
+     ' Grid#    kptrlatt         shiftk         kptrlen       nkpt  iset',ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(iout,msg,'COLL')
-   ABI_ALLOCATE(grid_list,(mkpt_list))
-   ABI_ALLOCATE(kptrlen_list,(mkpt_list))
+   ABI_MALLOC(grid_list,(mkpt_list))
+   ABI_MALLOC(kptrlen_list,(mkpt_list))
    grid_list(:)=0
    kptrlen_list(:)=0.0_dp
  end if
@@ -2561,8 +2553,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
    nkpt=0 ; nkpt_current=0 ; iscf=1 ; iset=1
    kptrlen_current=0.0_dp
    mult1=0 ; mult2=0 ; mult3=0 ; init_mult=1
-   ABI_ALLOCATE(kpt,(3,nkpt))
-   ABI_ALLOCATE(wtk,(nkpt))
+   ABI_MALLOC(kpt,(3,nkpt))
+   ABI_MALLOC(wtk,(nkpt))
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !  Loop on different grids, the upper limit is only to avoid an infinite loop
@@ -2879,8 +2871,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 
    end do ! igrid=1,1000
 
-   ABI_DEALLOCATE(kpt)
-   ABI_DEALLOCATE(wtk)
+   ABI_FREE(kpt)
+   ABI_FREE(wtk)
 
    kptrlatt(:,:)=kptrlatt_current(:,:)
    shiftk(:,:)=shiftk_current(:,:)
@@ -2996,7 +2988,7 @@ end subroutine testkgrid
 !!  Do not use this routine, it is obsolete and should be replaced by make_path in m_bz_mesh.
 !!
 !! PARENTS
-!!      inkpts
+!!      m_inkpts
 !!
 !! CHILDREN
 !!      wrtout

@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-MODULE m_energies
+module m_energies
 
  use defs_basis
  use m_abicore
@@ -40,7 +40,7 @@ MODULE m_energies
  private
 
 !public parameter
- integer, public, parameter :: n_energies=37
+ integer, public, parameter :: n_energies=38
   ! Number of energies stored in energies datastructure
 
 !!***
@@ -180,6 +180,9 @@ MODULE m_energies
   real(dp) :: h0=zero
    ! h0=e_kinetic+e_localpsp+e_nlpsp_vfock
 
+  real(dp) :: e_zeeman=zero
+   ! Zeeman spin times magnetic field contribution to the XC energy
+
  end type energies_type
 
 !public procedures.
@@ -208,8 +211,8 @@ CONTAINS !===========================================================
 !!   energies <type(energies_type)>=values to initialise
 !!
 !! PARENTS
-!!      bethe_salpeter,gstate,m_electronpositron,m_results_gs,scfcv,screening
-!!      setup_positron,sigma
+!!      m_bethe_salpeter,m_electronpositron,m_gstate,m_positron,m_results_gs
+!!      m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -262,6 +265,7 @@ subroutine energies_init(energies)
  energies%e_xcdc        = zero
  energies%e_xc_vdw      = zero
  energies%h0            = zero
+ energies%e_zeeman      = zero
 
 end subroutine energies_init
 !!***
@@ -283,7 +287,7 @@ end subroutine energies_init
 !!   energies_out <type(energies_type)>=output values
 !!
 !! PARENTS
-!!      afterscfloop,m_electronpositron,m_results_gs,setup_positron
+!!      m_afterscfloop,m_electronpositron,m_positron,m_results_gs
 !!
 !! CHILDREN
 !!
@@ -337,6 +341,7 @@ end subroutine energies_init
  energies_out%e_xcdc               = energies_in%e_xcdc
  energies_out%e_xc_vdw             = energies_in%e_xc_vdw
  energies_out%h0                   = energies_in%h0
+ energies_out%e_zeeman             = energies_in%e_zeeman
 
 end subroutine energies_copy
 !!***
@@ -420,6 +425,7 @@ end subroutine energies_copy
    energies_array(35)=energies%e_xcdc
    energies_array(36)=energies%e_xc_vdw
    energies_array(37)=energies%h0
+   energies_array(38)=energies%e_zeeman
  end if
 
  if (option==-1) then
@@ -460,6 +466,7 @@ end subroutine energies_copy
    energies%e_xcdc               = energies_array(35)
    energies%e_xc_vdw             = energies_array(36)
    energies%h0                   = energies_array(37)
+   energies%e_zeeman             = energies_array(38)
  end if
 
 end subroutine energies_to_array
@@ -494,7 +501,7 @@ end subroutine energies_to_array
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_entropyDMFT,prtene
+!!      m_common,m_entropyDMFT
 !!
 !! CHILDREN
 !!
@@ -598,7 +605,7 @@ end subroutine energies_eval_eint
 !!
 !! SOURCE
 
-subroutine energies_ncwrite(enes,ncid)
+subroutine energies_ncwrite(enes, ncid)
 
 !Arguments ------------------------------------
 !scalars
@@ -623,7 +630,7 @@ subroutine energies_ncwrite(enes,ncid)
 &  "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
 &  "e_paw", "e_pawdc", "e_shiftfactor", "e_sicdc", "e_vdw_dftd",&
 &  "e_xc", "e_xcdc", "e_xc_vdw",&
-&  "h0"],&
+&  "h0", "e_zeeman"],&
 !
 &  [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
 &   enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
@@ -634,7 +641,7 @@ subroutine energies_ncwrite(enes,ncid)
 &   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
 &   enes%e_paw, enes%e_pawdc, enes%e_shiftfactor, enes%e_sicdc, enes%e_vdw_dftd,&
 &   enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
-&   enes%h0])
+&   enes%h0,enes%e_zeeman])
 
  NCF_CHECK(ncerr)
 
@@ -645,5 +652,5 @@ subroutine energies_ncwrite(enes,ncid)
 end subroutine energies_ncwrite
 !!***
 
-END MODULE m_energies
+end module m_energies
 !!***

@@ -134,16 +134,7 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      complete_gamma,complete_gamma_tr,copy_kptrank,d2c_weights,ebands_free
-!!      ebands_update_occ,eliashberg_1d,elph_ds_clean,elph_k_procs
-!!      elph_tr_ds_clean,ep_fs_weights,ep_setupqpt,ftgam,ftgam_init
-!!      get_all_gkk2,get_all_gkq,get_all_gkr,get_fs_bands,get_nv_fs_en
-!!      get_nv_fs_temp,get_rank,get_tau_k,get_veloc_tr,hdr_bcast
-!!      hdr_fort_read,hdr_free,integrate_gamma,integrate_gamma_tr
-!!      integrate_gamma_tr_lova,mka2f,mka2f_tr,mka2f_tr_lova,mka2fqgrid
-!!      mkfskgrid,mknesting,mkph_linwid,mkqptequiv,order_fs_kpts,outelph
-!!      printvtk,rchkgsheader,read_el_veloc,symkpt,timein,wrap2_pmhalf,wrtout
-!!      xmpi_bcast
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -1415,10 +1406,10 @@ end subroutine elphon
 !!  only write
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      bfactor,destroy_kptrank,mkkptrank,wrtout
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -1772,10 +1763,10 @@ end subroutine outelph
 !!          should be the same for all kpts
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      hdr_echo,hdr_fort_read
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -1848,10 +1839,10 @@ end subroutine rchkGSheader
 !!    an FS kpt can not be found in the gkk file.
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank,mkkptrank,sort_int,wrap2_pmhalf,wrtout
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -2045,11 +2036,10 @@ end subroutine mkFSkgrid
 !!  elph_ds
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      d2c_wtq,ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc_fourq
-!!      phdispl_cart2red,simpson_int,wrtout,zgemm
+!!      ftgkk
 !!
 !! NOTES
 !!   copied from ftiaf9.f
@@ -2596,10 +2586,10 @@ end subroutine mka2f
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      simpson_int,wrtout
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -2788,10 +2778,10 @@ end subroutine mka2fQgrid
 !!   kptirr = irreducible FS kpoint coordinates
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      destroy_kptrank,mkkptrank,wrap2_pmhalf
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -2881,10 +2871,10 @@ end subroutine order_fs_kpts
 !! OUTPUT
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      getkgrid,smpbz,symkpt,wrap2_pmhalf,wrtout
+!!      ftgkk
 !!
 !! NOTES
 !!
@@ -3081,11 +3071,10 @@ end subroutine ep_setupqpt
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      ftgam,ftgam_init,gam_mult_displ,ifc_fourq,make_path,phdispl_cart2red
-!!      wrap2_pmhalf,wrtout,zgemm
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -3424,10 +3413,10 @@ end subroutine mkph_linwid
 !!  2) In the present status of the code, all the k-points in the IBZ are used!
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      wrtout
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -3563,10 +3552,10 @@ end subroutine get_fs_bands
 !!   elph_ds = calculated |gkk|^2 are in elph_ds%gkk2
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      interpolate_gkk
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -3664,10 +3653,10 @@ end subroutine get_all_gkk2
 !!  in anaddb set ifcflag 1 such that the IFC are calculated in atmfrc prior to calling elphon
 !!
 !! PARENTS
-!!      get_all_gkk2
+!!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk,ifc_fourq,wrap2_pmhalf,zhpev
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -3911,10 +3900,10 @@ end subroutine interpolate_gkk
 !!   elph_ds%gkq = recip space elphon matrix elements.
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      complete_gkk,int2char4,read_gkk,wrtout
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -4071,7 +4060,7 @@ end subroutine get_all_gkq
 !!   elph_ds%gkr = real space elphon matrix elements.
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
 !!      ftgkk
@@ -4193,10 +4182,10 @@ end subroutine get_all_gkr
 !! elph_ds%gkk_qpt = gkk matrices for all qpts on a full mesh
 !!
 !! PARENTS
-!!      get_all_gkq
+!!      m_elphon
 !!
 !! CHILDREN
-!!      xmpi_sum,zgemm
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -4529,10 +4518,10 @@ end subroutine complete_gkk
 !!  elph_tr_ds%tmp_vvelocwtk = velocity square times integration weights at coarse k grid
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      d2c_weights,ep_el_weights,ep_fs_weights,get_veloc_tr,ifc_fourq,wrtout
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -5031,10 +5020,10 @@ end subroutine get_nv_fs_en
 !!  elph_tr_ds%veloc_sq0=FS averaged velocity at Ef at looped temperatures
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      ebands_update_occ,ep_fs_weights,get_veloc_tr,wrtout
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -5157,9 +5146,10 @@ end subroutine get_nv_fs_temp
 !! elph_tr_ds%FSelecveloc_sq = avergae FS electronic velocity
 !!
 !! PARENTS
-!!      elphon,get_nv_fs_en,get_nv_fs_temp
+!!      m_elphon
 !!
 !! CHILDREN
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -5228,10 +5218,10 @@ end subroutine get_veloc_tr
 !!   elph_ds = modified elph_ds%gamma_qpt and created elph_ds%gamma_rpt
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      get_rank,wrtout,xmpi_sum
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -5355,10 +5345,10 @@ end subroutine integrate_gamma
 !!   elph_tr_ds%gamma_qpt_tr and created elph_tr_ds%gamma_rpt_tr
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      wrtout,xmpi_sum
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -5519,10 +5509,10 @@ end subroutine integrate_gamma_tr
 !!   elph_tr_ds%gamma_qpt_trin
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
-!!      wrtout,xmpi_sum
+!!      ftgkk
 !!
 !! SOURCE
 
@@ -5729,9 +5719,10 @@ end subroutine integrate_gamma_tr_lova
 !!  = gkk matrices in real space stored in file unit_gkk_rpt
 !!
 !! PARENTS
-!!      get_all_gkr,interpolate_gkk,test_ftgkk
+!!      m_elphon
 !!
 !! CHILDREN
+!!      ftgkk
 !!
 !! NOTES
 !!   copied from ftiaf9.f
@@ -5942,90 +5933,6 @@ subroutine ftgkk (wghatm,gkk_qpt,gkk_rpt,gkqwrite,gkrwrite,gprim,ikpt_phon0,&
  end if
 
 end subroutine ftgkk
-!!***
-
-!!****f* ABINIT/test_ftgkk
-!! NAME
-!! test_ftgkk
-!!
-!! FUNCTION
-!!  Test the fourier transform routine ftgkk for the el-phon matrix elements
-!!
-!! INPUTS
-!!   elph_ds = elphon datastructure with matrix elements
-!!   gprim = reciprocal lattice vectors
-!!   natom = number of atoms
-!!   nrpt = number of real space points for FT interpolation
-!!   rpt = coordinates of real space points for FT interpolation
-!!   qpt_full = qpoint coordinates
-!!   wghatm = weights for pairs of atoms in FT interpolation
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!!  MJV 18/5/2008 reverted to old syntax/use for ftgkk, with all ft being done
-!!   in a batch. Might come back to 5.5 version with atomic FT in ftgkk, but later.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ftgkk
-!!
-!! SOURCE
-
-subroutine test_ftgkk(elph_ds,gprim,natom,nrpt,rpt,qpt_full,wghatm)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: natom,nrpt
- type(elph_type),intent(inout) :: elph_ds
-!arrays
- real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),qpt_full(3,elph_ds%nqpt_full)
- real(dp),intent(in) :: wghatm(natom,natom,nrpt)
-
-!Local variables-------------------------------
-!scalars
- integer :: ikpt_phon,iqpt,isppol,qtor,sz1,sz2
-!arrays
- real(dp),allocatable :: gkq_disk(:,:,:,:,:),tmp_gkq(:,:,:,:,:)
-
-! *************************************************************************
-
-!for each qpt do FT to recuperate original values
-
- isppol = 1
- qtor = 0
- sz1=elph_ds%ngkkband*elph_ds%ngkkband
- sz2=elph_ds%nbranch*elph_ds%nbranch
- ABI_ALLOCATE(gkq_disk,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
- ABI_ALLOCATE(tmp_gkq,(2,sz1,sz2,elph_ds%k_phon%nkpt,elph_ds%nsppol))
-
- do iqpt=1,elph_ds%nqpt_full
-   tmp_gkq(:,:,:,:,:) = zero
-
-   call ftgkk (wghatm,tmp_gkq,elph_ds%gkk_rpt,elph_ds%gkqwrite,&
-&   elph_ds%gkk_rptwrite,gprim,1,natom,&
-&   elph_ds%k_phon%nkpt,elph_ds%ngkkband,elph_ds%k_phon%nkpt,1,&
-&   nrpt,elph_ds%nsppol,qtor,rpt,qpt_full,elph_ds%unit_gkk_rpt,elph_ds%unitgkq)
-
-   if (elph_ds%gkqwrite == 0) then
-     do ikpt_phon=1,10
-       write (93,*) tmp_gkq(:,:,:,ikpt_phon,isppol)-elph_ds%gkk_qpt(:,:,:,ikpt_phon,isppol,iqpt)
-     end do
-   else
-     do ikpt_phon=1, elph_ds%k_phon%nkpt
-       read (elph_ds%unitgkq,REC=((iqpt-1)*elph_ds%k_phon%nkpt+ikpt_phon)) gkq_disk(:,:,:,ikpt_phon,:)
-     end do
-     do ikpt_phon=1,10
-       write (93,*) tmp_gkq(:,:,:,ikpt_phon,isppol)-gkq_disk(:,:,:,ikpt_phon,isppol)
-     end do
-   end if
- end do
-
-end subroutine test_ftgkk
 !!***
 
 end module m_elphon

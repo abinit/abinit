@@ -288,7 +288,7 @@ CONTAINS  !===========================================================
 !! fofr(cplex,ldx*ldy*ldz*ndat)=The FFT of fofg
 !!
 !! PARENTS
-!!      fourdp,m_fft
+!!      m_fft
 !!
 !! CHILDREN
 !!      fftw3_destroy_plan,fftw3_execute_dft
@@ -441,7 +441,7 @@ end subroutine fftw3_seqfourdp
 !!                no use of fofgin and npwin.
 !!
 !! PARENTS
-!!      fourwf
+!!      m_fft
 !!
 !! CHILDREN
 !!      fftw3_destroy_plan,fftw3_execute_dft
@@ -960,8 +960,10 @@ end subroutine fftw3_fftrisc_dp
 !!  See fftw3_fftrisc_dp for API docs.
 !!
 !! PARENTS
+!!      m_fftw3
 !!
 !! CHILDREN
+!!      fftw3_destroy_plan,fftw3_execute_dft
 !!
 !! SOURCE
 
@@ -1460,6 +1462,7 @@ end subroutine fftw3_fftur_dpc
 !!    In output: the Fourier transformed in the space specified by isign.
 !!
 !! PARENTS
+!!      m_fftw3
 !!
 !! CHILDREN
 !!      fftw3_destroy_plan,fftw3_execute_dft
@@ -2281,7 +2284,7 @@ end subroutine fftw3_many_dft_ip
 !!  fftw_destroy_plan before executing fftw3_cleanup
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      fftw3_destroy_plan,fftw3_execute_dft
@@ -2365,7 +2368,7 @@ end subroutine fftw3_destroy_plan
 !!  is called for the first time.
 !!
 !! PARENTS
-!!      driver,fftprof
+!!      fftprof,m_driver
 !!
 !! CHILDREN
 !!      fftw3_destroy_plan,fftw3_execute_dft
@@ -5444,7 +5447,7 @@ end subroutine fftw3_mpiforw
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
 !!
 !! PARENTS
-!!      fourdp,m_fft
+!!      m_fft
 !!
 !! CHILDREN
 !!      fftw3_destroy_plan,fftw3_execute_dft

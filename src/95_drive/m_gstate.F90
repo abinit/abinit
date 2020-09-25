@@ -224,10 +224,11 @@ contains
 !! Not yet possible to use restartxf in parallel when localrdwf==0
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
-!!      wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -279,7 +280,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: is_dfpt=.false.,wvlbigdft=.false.,wvl_debug=.false.
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
@@ -374,8 +375,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Structured debugging if prtvol==-level
  if(dtset%prtvol==-level)then
-   write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' gstate : enter , debug mode '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(80a,a,a)')  ('=',ii=1,80),ch10,' gstate : enter , debug mode '
+   call wrtout(std_out, msg)
  end if
 
 !###########################################################
@@ -586,23 +587,23 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwmin=minval(hdr%npwarr(:))
    if (dtset%mband > npwmin) then
      ! No way we can solve the problem. Abort now!
-     write(message,"(2(a,i0),4a)")&
-&     "Number of bands nband= ",dtset%mband," > number of planewaves npw= ",npwmin,ch10,&
-&     "The number of eigenvectors cannot be greater that the size of the Hamiltonian!",ch10,&
-&     "Action: decrease nband or, alternatively, increase ecut"
+     write(msg,"(2(a,i0),4a)")&
+     "Number of bands nband= ",dtset%mband," > number of planewaves npw= ",npwmin,ch10,&
+     "The number of eigenvectors cannot be greater that the size of the Hamiltonian!",ch10,&
+     "Action: decrease nband or, alternatively, increase ecut"
      if (dtset%ionmov/=23) then
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      else
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
      end if
 
    else if (dtset%mband >= 0.9 * npwmin) then
      ! Warn the user
-     write(message,"(a,i0,a,f6.1,4a)")&
+     write(msg,"(a,i0,a,f6.1,4a)")&
 &     "Number of bands nband= ",dtset%mband," >= 0.9 * maximum number of planewaves= ",0.9*npwmin,ch10,&
 &     "The problem is ill-defined and the GS algorithm will show numerical instabilities!",ch10,&
 &     "Assume experienced user. Execution will continue."
-     MSG_WARNING(message)
+     MSG_WARNING(msg)
    end if
  end if
 
@@ -667,24 +668,24 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
  if (cnt == 0) then
    mcg = 0
-   write(message,"(2(a,i0))")"rank: ",mpi_enreg%me, "does not have wavefunctions to treat. Setting mcg to: ",mcg
-   MSG_WARNING(message)
+   write(msg,"(2(a,i0))")"rank: ",mpi_enreg%me, "does not have wavefunctions to treat. Setting mcg to: ",mcg
+   MSG_WARNING(msg)
  end if
 
  if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
    if (my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol > floor(real(HUGE(0))/real(dtset%mpw) )) then
-     write (message,'(9a)')&
+     write (msg,'(9a)')&
 &     "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
 &     "This usually happens when paral_kgb == 0 and there are not enough procs to distribute kpts and spins",ch10,&
 &     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
 &     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
 &     "to decrease the memory requirements. Consider also OpenMP threads."
-     MSG_ERROR_NOSTOP(message,ii)
-     write (message,'(5(a,i0), 2a)')&
+     MSG_ERROR_NOSTOP(msg,ii)
+     write (msg,'(5(a,i0), 2a)')&
 &     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
 &     ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
 &     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end if
 
@@ -777,10 +778,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !  Should exchange the data about history in parallel localrdwf==0
    if(xmpi_paral==1 .and. dtset%localrdwf==0)then
-     write(message, '(a,a,a)' )&
+     write(msg, '(a,a,a)' )&
 &     'It is not yet possible to use non-zero restartxf,',ch10,&
 &     'in parallel, when localrdwf=0. Sorry for this ...'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
 
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,0))
@@ -788,14 +789,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_DEALLOCATE(ab_xfh%xfhist)
 
    if(ios>0)then
-     write(message,'(a,a,a)')&
+     write(msg,'(a,a,a)')&
 &     'An error occurred reading the input wavefunction file,',ch10,&
 &     'with restartxf=1.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    else if(ios==0)then
-     write(message, '(a,a,i4,a)' )ch10,&
+     write(msg, '(a,a,i4,a)' )ch10,&
 &     ' gstate : reading',ab_xfh%nxfh,' (x,f) history pairs from input wf file.'
-     call wrtout([std_out, ab_out], message)
+     call wrtout([std_out, ab_out], msg)
    end if
 !  WARNING : should check that restartxf is not negative
 !  WARNING : should check that restartxf /= only when dtfil%ireadwf is activated
@@ -1098,7 +1099,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          if (dtset%iomode == IO_MODE_MPI ) accessfil=4
          if (dtset%iomode == IO_MODE_ETSF) accessfil=3
          call ioarr(accessfil,rhor,dtset,results_gs%etotal,fform,dtfil%fildensin,hdr,&
-&         mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
+           mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
        end if
 
        if (rdwrpaw/=0) then
@@ -1321,8 +1322,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    call dtfil_init_time(dtfil,0)
 
-   write(message,'(a,80a)')ch10,('=',mu=1,80)
-   call wrtout([std_out, ab_out], message)
+   write(msg,'(a,80a)')ch10,('=',mu=1,80)
+   call wrtout([std_out, ab_out], msg)
 
    if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
@@ -1356,10 +1357,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    =========================================
 
    else ! Not an allowed option
-     write(message, '(a,i0,2a)' )&
+     write(msg, '(a,i0,2a)' )&
 &     'Disallowed value for ionmov=',dtset%ionmov,ch10,&
 &     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24 and 30'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
 
    call scfcv_destroy(scfcv_args)
@@ -1373,9 +1374,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  call timab(36,3,tsec)
 
- write(message, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
+ write(msg, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
 & ' ----iterations are completed or convergence reached----',ch10
- call wrtout([std_out, ab_out], message)
+ call wrtout([std_out, ab_out], msg)
 
 !Mark this GS computation as done
  initialized=1
@@ -1425,9 +1426,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  write_wfk = .True.
  if (dtset%prtwf==-1 .and. conv_retcode == 0) then
    write_wfk = .False.
-   message = "GS calculation converged with prtwf=-1 --> Skipping WFK file output"
-   call wrtout(ab_out, message, "COLL")
-   MSG_COMMENT(message)
+   msg = "GS calculation converged with prtwf=-1 --> Skipping WFK file output"
+   call wrtout(ab_out, msg)
+   MSG_COMMENT(msg)
  end if
 
 !To print out the WFs, need the rprimd that was used to generate the G vectors
@@ -1475,18 +1476,18 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt ==7 .or.  &
 & dtset%berryopt == 14 .or. dtset%berryopt == 16 .or. dtset%berryopt ==17 ) then ! output final elctric field data    !!HONG
    if (dtset%berryopt == 4) then
-     write(message,'(a,a)')   ch10, 'Constant unreduced E calculation  - final values:'
+     write(msg,'(a,a)')   ch10, 'Constant unreduced E calculation  - final values:'
    else if (dtset%berryopt == 6 ) then
-     write(message,'(a,a)')   ch10, 'Constant unreduced D calculation  - final values:'
+     write(msg,'(a,a)')   ch10, 'Constant unreduced D calculation  - final values:'
    else if (dtset%berryopt == 14) then
-     write(message,'(a,a)')   ch10, 'Constant reduced ebar calculation  - final values:'
+     write(msg,'(a,a)')   ch10, 'Constant reduced ebar calculation  - final values:'
    else if (dtset%berryopt == 16 ) then
-     write(message,'(a,a)')   ch10, 'Constant reduced d calculation  - final values:'
+     write(msg,'(a,a)')   ch10, 'Constant reduced d calculation  - final values:'
    else if (dtset%berryopt == 17) then
-     write(message,'(a,a)')   ch10, 'Constant reduced ebar and d calculation  - final values:'
+     write(msg,'(a,a)')   ch10, 'Constant reduced ebar and d calculation  - final values:'
    end if
 
-   call wrtout([std_out, ab_out], message)
+   call wrtout([std_out, ab_out], msg)
    call prtefield(dtset,dtefield,ab_out,rprimd)
    call prtefield(dtset,dtefield,std_out,rprimd)
 
@@ -1496,15 +1497,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end do
 !  eg = maxval(eg_dir)
 !  eg_ev = eg*Ha_eV
-   write(message,'(a,a,a,a,a,a,a,a,f7.2,a,a)')ch10,&
+   write(msg,'(a,a,a,a,a,a,a,a,f7.2,a,a)')ch10,&
 &   ' Please check: COMMENT - ',ch10,&
 &   '  As a rough estimate,',ch10,&
 &   '  to be below the critical field, the bandgap of your system',ch10,&
 &   '  should be larger than ',maxval(efield_band)*Ha_eV,' eV.',ch10
-   call wrtout([std_out, ab_out], message)
+   call wrtout([std_out, ab_out], msg)
 
-   write(message,'(a)')  '--------------------------------------------------------------------------------'
-   call wrtout([std_out, ab_out], message)
+   write(msg,'(a)')  '--------------------------------------------------------------------------------'
+   call wrtout([std_out, ab_out], msg)
  end if
 
 !Open the formatted derivative database file, and write the preliminary information
@@ -1781,10 +1782,11 @@ end subroutine gstate
 !!  start(3,natom)=copy of starting xred
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -1803,13 +1805,9 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !scalars
  integer :: ikpt,npw
  real(dp) :: arith,geom,wtknrm
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,*)' setup2 : enter '
-!ENDDEBUG
 
    if (dtset%iscf>=0) then
 
@@ -1841,14 +1839,14 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 
 !  Ensure portability of output thanks to tol8
      if (dtset%usewvl == 0) then
-       write(message, '(a,2f12.3)' ) '_setup2: Arith. and geom. avg. npw (full set) are',arith+tol8,geom
+       write(msg, '(a,2f12.3)' ) '_setup2: Arith. and geom. avg. npw (full set) are',arith+tol8,geom
      else
 #if defined HAVE_BIGDFT
-       write(message, '(a,2I8)' ) ' setup2: nwvl coarse and fine are', &
+       write(msg, '(a,2I8)' ) ' setup2: nwvl coarse and fine are', &
 &       wfs%ks%lzd%Glr%wfd%nvctr_c, wfs%ks%lzd%Glr%wfd%nvctr_f
 #endif
      end if
-     call wrtout([std_out, ab_out], message)
+     call wrtout([std_out, ab_out], msg)
    end if
 
 #if !defined HAVE_BIGDFT
@@ -1912,24 +1910,21 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  (only print and write to disk)
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      getnel,metric,prteigrs,prtrhomxmn,prtxf,write_eig,wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
-subroutine clnup1(acell,dtset,eigen,fermie,&
-  & fnameabo_dos,fnameabo_eig,fred,&
-  & mpi_enreg,nfft,ngfft,occ,prtfor,&
-  & resid,rhor,rprimd,vxcavg,xred)
+subroutine clnup1(acell,dtset,eigen,fermie, fnameabo_dos,fnameabo_eig,fred,&
+                  mpi_enreg,nfft,ngfft,occ,prtfor, resid,rhor,rprimd,vxcavg,xred)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft
- integer,intent(in) :: prtfor
- real(dp),intent(in) :: fermie
- real(dp),intent(in) :: vxcavg
+ integer,intent(in) :: nfft, prtfor
+ real(dp),intent(in) :: fermie, vxcavg
  character(len=*),intent(in) :: fnameabo_dos,fnameabo_eig
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1950,7 +1945,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
  integer :: comm,iatom,ii,iscf_dum,iwfrc,me,nnonsc,option,unitdos
  real(dp) :: entropy,grmax,grsum,maxocc,nelect,tolwf,ucvol
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) filename
 !arrays
  real(dp),allocatable :: doccde(:)
@@ -1960,11 +1955,11 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
  comm=mpi_enreg%comm_cell; me=xmpi_comm_rank(comm)
 
  if(dtset%prtstm==0)then ! Write reduced coordinates xred
-   write(message, '(a,i5,a)' )' reduced coordinates (array xred) for',dtset%natom,' atoms'
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,i5,a)' )' reduced coordinates (array xred) for',dtset%natom,' atoms'
+   call wrtout(ab_out, msg)
    do iatom=1,dtset%natom
-     write(message, '(1x,3f20.12)' ) xred(:,iatom)
-     call wrtout(ab_out,message,'COLL')
+     write(msg, '(1x,3f20.12)' ) xred(:,iatom)
+     call wrtout(ab_out, msg)
    end do
  end if
 
@@ -1984,11 +1979,11 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
    end do
    grsum=sqrt(grsum/dble(3*dtset%natom))
 
-   write(message, '(1x,a,1p,e12.4,a,e12.4,a)' )'rms dE/dt=',grsum,'; max dE/dt=',grmax,'; dE/dt below (all hartree)'
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(1x,a,1p,e12.4,a,e12.4,a)' )'rms dE/dt=',grsum,'; max dE/dt=',grmax,'; dE/dt below (all hartree)'
+   call wrtout(ab_out, msg)
    do iatom=1,dtset%natom
-     write(message, '(i5,1x,3f20.12)' ) iatom,fred(1:3,iatom)
-     call wrtout(ab_out,message,'COLL')
+     write(msg, '(i5,1x,3f20.12)' ) iatom,fred(1:3,iatom)
+     call wrtout(ab_out, msg)
    end do
 
  end if
@@ -1996,7 +1991,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
  if(dtset%prtstm==0)then
 
 !  Compute and write out dimensional cartesian coords and forces:
-   call wrtout(ab_out,' ','COLL')
+   call wrtout(ab_out,' ')
 
 !  (only write forces if iscf > 0 and dtset%nstep>0)
    if (dtset%iscf<0.or.dtset%nstep<=0.or.prtfor==0) then
@@ -2008,10 +2003,10 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
    call prtxf(fred,dtset%iatfix,ab_out,iwfrc,dtset%natom,rprimd,xred)
 
 !  Write length scales
-   write(message, '(1x,a,3f16.12,a)' )'length scales=',acell,' bohr'
-   call wrtout(ab_out,message,'COLL')
-   write(message, '(14x,a,3f16.12,a)' )'=',Bohr_Ang*acell(1:3),' angstroms'
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(1x,a,3f16.12,a)' )'length scales=',acell,' bohr'
+   call wrtout(ab_out, msg)
+   write(msg, '(14x,a,3f16.12,a)' )'=',Bohr_Ang*acell(1:3),' angstroms'
+   call wrtout(ab_out, msg)
 
  end if
 
@@ -2052,8 +2047,8 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 
 !If needed, print DOS (unitdos is closed in getnel, occ is not changed if option == 2
  if (dtset%prtdos==1 .and. me == master) then
-   if (open_file(fnameabo_dos,message, newunit=unitdos, status='unknown', action="write", form='formatted') /= 0) then
-     MSG_ERROR(message)
+   if (open_file(fnameabo_dos,msg, newunit=unitdos, status='unknown', action="write", form='formatted') /= 0) then
+     MSG_ERROR(msg)
    end if
    rewind(unitdos)
    maxocc=two/(dtset%nspinor*dtset%nsppol)  ! Will not work in the fixed moment case
@@ -2104,10 +2099,11 @@ end subroutine clnup1
 !!  (data written to unit iout)
 !!
 !! PARENTS
-!!      clnup1
+!!      m_gstate
 !!
 !! CHILDREN
-!!      matr3inv,wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2127,7 +2123,7 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
  character(len=15) :: format_line21
  character(len=15) :: format_line25
  character(len=15) :: format_line
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: favg(3),favg_out(3),ff(3),gprimd(3,3),xx(3)
 
@@ -2137,7 +2133,7 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
  format_line25='(i5,1x,3f25.14)'
 
 !Write cartesian coordinates in angstroms
- call wrtout(iout,' cartesian coordinates (angstrom) at end:','COLL')
+ call wrtout(iout,' cartesian coordinates (angstrom) at end:')
  do iatom=1,natom
    format_line=format_line21
    do mu=1,3
@@ -2146,15 +2142,15 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 &     rprimd(mu,3)*xred(3,iatom))*Bohr_Ang
      if(xx(mu)>99999 .or. xx(mu)<-9999)format_line=format_line25
    end do
-   write(message,format_line) iatom,xx
-   call wrtout(iout,message,'COLL')
+   write(msg,format_line) iatom,xx
+   call wrtout(iout, msg)
  end do
 
 !Optionally write cartesian forces in eV/Angstrom (also provide same in hartree/bohr)
  if (iwfrc/=0) then
 !  First, provide results in hartree/bohr
-   write(message, '(a,a)' ) ch10,' cartesian forces (hartree/bohr) at end:'
-   call wrtout(iout,message,'COLL')
+   write(msg, '(a,a)' ) ch10,' cartesian forces (hartree/bohr) at end:'
+   call wrtout(iout, msg)
    frms=zero
    fmax=zero
    favg(1)=zero
@@ -2195,8 +2191,8 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
          fmax=max(fmax,abs(ff(mu)))
        end if
      end do
-     write(message, format_line) iatom,ff
-     call wrtout(iout,message,'COLL')
+     write(msg, format_line) iatom,ff
+     call wrtout(iout, msg)
    end do
    if ( unfixd /= 0 ) frms = sqrt(frms/dble(unfixd))
 
@@ -2208,13 +2204,13 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
    if(abs(favg_out(2))<tol14)favg_out(2)=zero
    if(abs(favg_out(3))<tol14)favg_out(3)=zero
 
-   write(message, '(a,1p,2e14.7,1x,3e11.3,a)' )' frms,max,avg=',frms,fmax,favg_out(1:3),' h/b'
-   call wrtout(iout,message,'COLL')
+   write(msg, '(a,1p,2e14.7,1x,3e11.3,a)' )' frms,max,avg=',frms,fmax,favg_out(1:3),' h/b'
+   call wrtout(iout, msg)
 
    if (iwfrc==1) then
 
-     write(message, '(a,a)' )ch10,' cartesian forces (eV/Angstrom) at end:'
-     call wrtout(iout,message,'COLL')
+     write(msg, '(a,a)' )ch10,' cartesian forces (eV/Angstrom) at end:'
+     call wrtout(iout, msg)
      convt=Ha_eV/Bohr_Ang
 
 !    Note: subtract off average force
@@ -2226,11 +2222,11 @@ subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 &         gprimd(mu,3)*fred(3,iatom))-favg(mu))*convt
          if(ff(mu)>99999 .or. ff(mu)<-9999)format_line=format_line25
        end do
-       write(message, format_line) iatom,ff
-       call wrtout(iout,message,'COLL')
+       write(msg, format_line) iatom,ff
+       call wrtout(iout, msg)
      end do
-     write(message, '(a,1p,2e14.7,1x,3e11.3,a)' )' frms,max,avg=',convt*frms,convt*fmax,convt*favg_out(1:3),' e/A'
-     call wrtout(iout,message,'COLL')
+     write(msg, '(a,1p,2e14.7,1x,3e11.3,a)' )' frms,max,avg=',convt*frms,convt*fmax,convt*favg_out(1:3),' e/A'
+     call wrtout(iout, msg)
 
    end if
  end if
@@ -2270,10 +2266,11 @@ end subroutine prtxf
 !!  (only print)
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2500,10 +2497,11 @@ end subroutine clnup2
 !!                     at output, current xred is transferred to xred_old
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      pawuj_det,pawuj_free,pawuj_ini,scfcv_run
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2525,7 +2523,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  integer,target :: ndtpawuj=4
  integer :: iuj,conv_retcode
  real(dp) :: ures
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  real(dp),allocatable :: cgstart(:,:)
  type(macro_uj_type),allocatable,target :: dtpawuj(:)
@@ -2629,7 +2627,7 @@ end subroutine pawuj_drive
 !!   rprim and stress
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
@@ -2658,7 +2656,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 !Local variables-------------------------------
  integer :: ierr,ixfh,ncid_hdr,spaceComm,xfdim2
  real(dp),allocatable :: xfhist_tmp(:)
- character(len=500) :: message
+ character(len=500) :: msg
 !no_abirules
 #if defined HAVE_NETCDF
  integer :: ncerr
@@ -2691,9 +2689,9 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
    else if (wff2%iomode == IO_MODE_FORTRAN_MASTER) then
 !    FIXME: should copy the xfhist to other processors, and check that we are on the master to read in this case
 !    if node is master
-     write(message, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
+     write(msg, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
 &     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
 
      write(unit=wff2%unwff)ab_xfh%nxfh
      do ixfh=1,ab_xfh%nxfh
@@ -2773,8 +2771,8 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
        NCF_CHECK_MSG(ncerr," outxfhist : inquire xfhist")
 
        if (mxfh_tmp /= ab_xfh%mxfh .or. dim2inout_tmp /= 2 .or. xfdim2_tmp /= xfdim2) then
-         write (message,"(A)") 'outxfhist : ERROR xfhist has bad dimensions in NetCDF file. Can not re-write it.'
-         MSG_ERROR(message)
+         write (msg,"(A)") 'outxfhist : ERROR xfhist has bad dimensions in NetCDF file. Can not re-write it.'
+         MSG_ERROR(msg)
        end if
 
      end if
@@ -2797,9 +2795,9 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
    else if (wff2%iomode == IO_MODE_FORTRAN_MASTER) then
 !    FIXME: should copy the xfhist to other processors, and check that we are on the master to read in this case
 !    if node is master
-     write(message, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
+     write(msg, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
 &     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
 
      read(unit=wff2%unwff,iostat=ios)ab_xfh%nxfh
 
@@ -2828,9 +2826,9 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
    else if (wff2%iomode == IO_MODE_FORTRAN_MASTER) then
 !    FIXME: should copy the xfhist to other processors, and check that we are on the master to read in this case
 !    if node is master
-     write(message, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
+     write(msg, "(A,A,A,A)") ch10, " outxfhist: ERROR -", ch10, &
 &     'iomode == -1 (localrdwf ) has not been coded yet for xfhist rereading.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
 
      do ixfh=1,ab_xfh%nxfhr
        read(unit=wff2%unwff,iostat=ios)ab_xfh%xfhist(:,:,:,ixfh)
@@ -2868,9 +2866,9 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
  else
 !  write(std_out,*)' outxfhist : option ', option , ' not available '
-   write(message, "(A,A,A,A,I3,A)") ch10, "outxfhist: ERROR -", ch10, &
+   write(msg, "(A,A,A,A,I3,A)") ch10, "outxfhist: ERROR -", ch10, &
 &   "option ", option, " not available."
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
 end subroutine outxfhist

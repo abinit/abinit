@@ -56,6 +56,9 @@ nline    8
 prtden  0
 prteig  0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Mn-sp-r_LDA_1012_dojov0.4.psp8, O-r_LDA_1012_dojov0.4.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -63,7 +66,6 @@ prteig  0
 #%% [files]
 #%% files_to_test = 
 #%%    t71.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;
-#%% psp_files = Mn-sp-r_LDA_1012_dojov0.4.psp8,O-r_LDA_1012_dojov0.4.psp8
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [shell]

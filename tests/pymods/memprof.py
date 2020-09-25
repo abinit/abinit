@@ -349,8 +349,8 @@ class AbimemFile(object):
         #from abipy.tools.plotting import MplExpose
         with MplExpose(slide_mode=slide_mode, slide_timeout=slide_mode, verbose=1) as e:
             e(self.plot_memory_usage(show=False))
-            e(self.plot_peaks(show=False))
-            e(self.plot_hist(show=False))
+            #e(self.plot_peaks(show=False))
+            #e(self.plot_hist(show=False))
 
     def find_memleaks(self, verbose=0):
         """

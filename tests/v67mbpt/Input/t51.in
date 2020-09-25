@@ -92,6 +92,9 @@ bs_haydock_niter4  1000
 zcut 0.0001 eV
 ixc 7
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -103,7 +106,6 @@ ixc 7
 #%%  t51o_DS4_T0001_EXC_MDF,  tolnlines = 800, tolabs = 1.3e+0, tolrel = 2.5e-1, fld_options =  -ridiculous;
 #%%  t51o_DS4_T0005_EXC_MDF,  tolnlines = 800, tolabs = 1.7e-1, tolrel = 2.0e-1, fld_options =  -ridiculous;
 #%%  t51o_DS4_T0010_EXC_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
-#%% psp_files = 14si.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

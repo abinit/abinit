@@ -1,4 +1,4 @@
-# Crystalline AlAs : computation of the intrinsic mobility
+# Crystalline AlAs: computation of the intrinsic mobility
 
 ndtset 6
 
@@ -23,7 +23,9 @@ getdvdb_filepath "teph4mob_3_DVDB"
 
 # Definition of the variables related to transport properties
 tmesh 5.0 59.0 6 # Temperature array at which the mobility will be computed
-eph_extrael 1e-6 # Change this depending on the concentration you want
+
+# Change this depending on the concentration you want
+eph_doping  -2.26e+16    # this corresponds to eph_extrael 1e-6  
 
 sigma_erange1 0 0.10 eV # We compute the lifetimes of electrons only,
 sigma_erange2 0 0.12 eV # in an energy window of 0.15 eV from the CBM
@@ -71,19 +73,21 @@ nband 8
             0.25 0.25 0.25
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
 #%% [files]
 #%% files_to_test =
-#%%   teph4mob_6.out, tolnlines= 57, tolabs=  140, tolrel=  6.000e-03
-#%% psp_files =  13al.981214.fhi, 33as.pspnc
+#%%   teph4mob_6.out, tolnlines= 350, tolabs=  180, tolrel=  1.500e-02
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, RTA
 #%% description =
-#%%   E-ph for the mobility in semiconductors
+#%%   E-ph for mobility in semiconductors
 #%%<END TEST_INFO>

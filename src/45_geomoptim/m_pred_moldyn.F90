@@ -88,7 +88,7 @@ contains
 !!   we cannot simply use hist%xred to obtain those positions.
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
 !!      hist2var,var2hist,xcart2xred,xred2xcart

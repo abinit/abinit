@@ -204,10 +204,10 @@ CONTAINS
 !! green  = variable of type green_type
 !!
 !! PARENTS
-!!      m_dmft,dyson,m_hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -325,10 +325,10 @@ end subroutine init_green
 !!  green  <type(green_type)>= green function data
 !!
 !! PARENTS
-!!      impurity_solve,m_green
+!!      m_dmft,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -383,10 +383,10 @@ end subroutine init_green_tau
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,dyson,m_hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -449,10 +449,10 @@ end subroutine destroy_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      impurity_solve,m_green
+!!      m_dmft,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -503,10 +503,10 @@ end subroutine destroy_green_tau
 !! OUTPUT
 !!
 !! PARENTS
-!!      dyson,impurity_solve,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,m_forctqmc,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -565,10 +565,10 @@ end subroutine copy_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,impurity_solve,m_green,qmc_prep_ctqmc
+!!      m_dmft,m_forctqmc,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -671,10 +671,10 @@ end subroutine printocc_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      impurity_solve,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,m_forctqmc,m_green,m_outscfcv
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -998,10 +998,10 @@ end subroutine print_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,fermi_green,m_green,newton,spectral_function
+!!      m_dmft,m_green,m_outscfcv
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1374,10 +1374,10 @@ end subroutine compute_green
 !!   green%occup = occupations
 !!
 !! PARENTS
-!!      m_dmft,fermi_green,impurity_solve,m_green,newton
+!!      m_dmft,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1835,7 +1835,7 @@ end subroutine integrate_green
 !!      m_dmft
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1929,10 +1929,10 @@ end subroutine icip_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      impurity_solve,m_green,qmc_prep_ctqmc
+!!      m_dmft,m_forctqmc,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2217,7 +2217,7 @@ end subroutine fourier_green
 !!      m_dmft
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2291,7 +2291,7 @@ end subroutine check_fourier_green
 !! PARENTS
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2377,7 +2377,7 @@ end subroutine compa_occup_ks
 !!      m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo,dmft_nwlo)
@@ -2463,10 +2463,10 @@ end subroutine add_int_fct
 !!  ft= function is time space
 !!
 !! PARENTS
-!!      m_green,qmc_prep_ctqmc
+!!      m_forctqmc,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
@@ -2589,10 +2589,10 @@ end subroutine int_fct
 !!  ft= function is time space
 !!
 !! PARENTS
-!!      local_ks_green,m_green
+!!      m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
@@ -2731,7 +2731,7 @@ end subroutine fourier_fct
 !! PARENTS
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2798,10 +2798,10 @@ end subroutine spline_fct
 !! OUTPUT
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2891,7 +2891,7 @@ end subroutine occup_green_tau
 !!      m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3014,7 +3014,7 @@ end subroutine occup_green_tau
 !! PARENTS
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3110,7 +3110,7 @@ end subroutine occup_green_tau
 !!      m_dmft
 !!
 !! CHILDREN
-!!      compute_green,integrate_green,newton,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3253,10 +3253,10 @@ end subroutine fermi_green
 !!  ierr_hh      : different from zero if an error occurs
 !!
 !! PARENTS
-!!      fermi_green
+!!      m_green
 !!
 !! CHILDREN
-!!      compute_green,integrate_green
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3459,10 +3459,10 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 !!  Fxdouble     : Value of F''(x)
 !!
 !! PARENTS
-!!      newton
+!!      m_green
 !!
 !! CHILDREN
-!!      compute_green,integrate_green
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3555,10 +3555,10 @@ subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang
 !! nb_elec_x    : Number of electrons for the value of x
 !!
 !! PARENTS
-!!      newton
+!!      m_green
 !!
 !! CHILDREN
-!!      compute_green,integrate_green
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 

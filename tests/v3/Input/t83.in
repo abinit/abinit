@@ -178,13 +178,15 @@ optdriver7   5
    d3e_pert2_dir7   1 0 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/13al.3.hgh, PseudosHGH_pwteter/33as.5.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t83.out, tolnlines = 25, tolabs = 1.100e-06, tolrel = 3.300e-04
-#%% psp_files = 13al.psphgh, 33as.hgh
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

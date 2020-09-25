@@ -106,10 +106,10 @@ contains
 !!    for pspcod=4, it is an older expression, of 7 May 1992 .
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
-!!      psp1cc,psp1lo,psp1nl,psp4cc,spline,wrtout
+!!      spline
 !!
 !! SOURCE
 
@@ -437,10 +437,10 @@ end subroutine psp1in
 !!   (needed for spline fitter).
 !!
 !! PARENTS
-!!      psp1in
+!!      m_psp1
 !!
 !! CHILDREN
-!!      der_int,sincos
+!!      spline
 !!
 !! SOURCE
 
@@ -602,10 +602,10 @@ end subroutine psp1lo
 !! Bessel functions replaced by besj, which accomodates args near 0.
 !!
 !! PARENTS
-!!      psp1in
+!!      m_psp1
 !!
 !! CHILDREN
-!!      besjm,der_int,sincos,spline
+!!      spline
 !!
 !! SOURCE
 
@@ -871,9 +871,10 @@ end subroutine psp1nl
 !!  smf= $ \int_{r(0)}^{r(nlast)} f(r) dr $.
 !!
 !! PARENTS
-!!      psp1lo,psp1nl
+!!      m_psp1
 !!
 !! CHILDREN
+!!      spline
 !!
 !! SOURCE
 
@@ -976,9 +977,10 @@ end subroutine der_int
 !! so this routine is machine-dependent.
 !!
 !! PARENTS
-!!      psp1lo,psp1nl
+!!      m_psp1
 !!
 !! CHILDREN
+!!      spline
 !!
 !! SOURCE
 
@@ -1075,7 +1077,7 @@ end subroutine sincos
 !! the fifth derivative is not yet delivered.
 !!
 !! PARENTS
-!!      psp1in
+!!      m_psp1
 !!
 !! CHILDREN
 !!      spline

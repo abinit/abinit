@@ -52,6 +52,9 @@ diemac 4.0       # Although this is not mandatory, it is worth to
                   # is described in the "dielng" input variable section.
                   # Here, we follow the prescription for bulk silicon.
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/11na.pspnc, PseudosTM_pwteter/17cl.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -59,7 +62,6 @@ diemac 4.0       # Although this is not mandatory, it is worth to
 #%% [files]
 #%% files_to_test = 
 #%%   t60.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 11na.pspnc, 17cl.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

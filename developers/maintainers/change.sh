@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!LDA+U!DFT+U!' $file > tmp.file
+ sed -e 's!ti.hpc.paw.xml!Pseudodojo_paw_pw_stringent/Ti.xml!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

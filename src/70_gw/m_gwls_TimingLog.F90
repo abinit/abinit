@@ -72,7 +72,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_sternheimer
+!!      m_gwls_sternheimer
 !!
 !! CHILDREN
 !!
@@ -138,7 +138,7 @@ end subroutine setup_timing_log
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_sternheimer
+!!      m_gwls_sternheimer
 !!
 !! CHILDREN
 !!
@@ -168,7 +168,7 @@ end subroutine close_timing_log
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy,gwls_DielectricArray
+!!      m_gwls_ComputeCorrelationEnergy,m_gwls_DielectricArray
 !!
 !! CHILDREN
 !!
@@ -205,7 +205,8 @@ end subroutine write_text_block_in_Timing_log
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputeCorrelationEnergy,gwls_DielectricArray,gwls_GenerateEpsilon
+!!      m_gwls_ComputeCorrelationEnergy,m_gwls_DielectricArray
+!!      m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!
@@ -247,7 +248,7 @@ end subroutine write_timing_log
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_GWlanczos
+!!      m_gwls_GWlanczos
 !!
 !! CHILDREN
 !!

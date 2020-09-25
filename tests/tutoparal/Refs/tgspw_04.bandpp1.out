@@ -567,8 +567,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is 79au.pspnc
-- pspatm: opening atomic psp file    79au.pspnc
+- pspini: atom type   1  psp file is PseudosTM_pwteter/79au.pspnc
+- pspatm: opening atomic psp file    PseudosTM_pwteter/79au.pspnc
 -  Troullier-Martins psp for element  Au        Thu Oct 27 17:58:22 EDT 1994
 - 79.00000  11.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
