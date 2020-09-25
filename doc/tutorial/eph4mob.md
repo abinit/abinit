@@ -94,7 +94,7 @@ that can be computed with DFPT.
     energy (**band picture**). Polaronic effects such as those discussed in [this tutorial](eph4zpr)
     are not captured by the present approach.
 
-The generalized transport coefficients are defined by [[cite:Madsen2018]]
+The generalized transport coefficients are defined by:
 
 \begin{equation}
     \mcL^{(m)}_{\alpha\beta} =

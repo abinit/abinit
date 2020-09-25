@@ -336,9 +336,9 @@ In this case, the previous options should be augmented by:
 
 This approach is quite common for C code where `.h` files must be included to compile properly.
 It is less common for modern Fortran code in which include files are usually replaced by `.mod` files
-*i.e.* Fortran module files produced by the compiler whose location is usually specified via the `-J` option.
+*i.e.* Fortran modules produced by the compiler whose location is usually specified via the `-J` option.
 Still, the `-I` option for include files is valuable also when compiling Fortran applications as libraries
-such as FFTW and MKL that rely on (Fortran) include files whose location should be passed to the compiler
+such as FFTW and MKL rely on (Fortran) include files whose location should be passed to the compiler
 via `-I` instead of `-J`,
 see also the official [gfortran documentation](https://gcc.gnu.org/onlinedocs/gfortran/Directory-Options.html#Directory-Options).
 
@@ -400,7 +400,7 @@ echo $LD_LIBRARY_PATH
 
 Note how `/home/gmatteo/local/bin` has been **prepended** to the previous value of $PATH.
 From now on, we can invoke any executable located in $HOME/local/bin by just typing
-its **base name** in the shell without having to the type the full path.
+its **base name** in the shell without having to the enter the full path.
 
 !!! warning
 	Using:
@@ -619,13 +619,13 @@ To compile ABINIT with FFTW3 support, one should use:
 
 Note that, unlike in *libxc*, here we don't have to specify different libraries for Fortran and C
 as FFTW3 bundles **both the C and the Fortran API in the same library**.
-The Fortran interface is included by default provided the FFTW3 *configure* script can find a Fortran compiler on your system.
+The Fortran interface is included by default provided the FFTW3 *configure* script can find a Fortran compiler.
 In our case, we know that our FFTW3 library supports Fortran as *gfortran* was found by *configure*
-but this may not be true if we are using a precompiled library installed by our package manager.
+but this may not be true if you are using a precompiled library installed via your package manager.
 
-To make sure we have the Fortran API bundled in the library, one can use the `nm` tool
+To make sure we have the Fortran API, use the `nm` tool
 to get the list of symbols in the library and then use *grep* to search for the Fortran API.
-For instance we can check whether the library contains the Fortran routine for multiple single-precision
+For instance we can check whether our library contains the Fortran routine for multiple single-precision
 FFTs (*sfftw_plan_many_dft*) and the version for multiple double-precision FFTs (*dfftw_plan_many_dft*)
 
 ```sh
@@ -646,7 +646,7 @@ FFTs (*sfftw_plan_many_dft*) and the version for multiple double-precision FFTs 
 00000000000040d0 T dfftw_plan_many_dft_r2c__
 ```
 
-If you are using a FFTW3 library without the Fortran API, the ABINIT *configure* script will complain that the library
+If you are using a FFTW3 library without Fortran support, the ABINIT *configure* script will complain that the library
 cannot be called from Fortran and you will need to dig into *config.log* to understand what's going on.
 
 !!! note
@@ -1685,7 +1685,7 @@ Very likely, your executables/libraries have been compiled for the **wrong archi
 This may happen on clusters when the CPU family available on the frontend differs
 from the one available on the compute node and aggressive optimization options (-O3, -march, -xHost, etc) are used.
 Removing the optimization options and using the much safer -O2 level may help.
-Alternatively, one can compile the source directly on the compute node or use compilation options
+Alternatively, one can **configure and compile** the source directly on the compute node or use compilation options
 compatible both with the frontend and the compute node (ask your sysadmin for details).
 
 !!! warning
@@ -1863,8 +1863,8 @@ options tuned for performance or set the options explicitly via **FCFLAGS**.
     based on the Intel compilers (**_mpiicc_**, **_mpicpc_**, **_mpiifort_**)
 
 
-If the run *configure* with these options, we should see a section at the beginning
-in which the build system is testing basic capabilities of the Fortran compiler
+If we run *configure* with these options, we should see a section at the beginning
+in which the build system is testing basic capabilities of the Fortran compiler.
 If *configure* stops at this level it means there's a severe problem with your toolchain.
 
 ```text
@@ -1954,7 +1954,7 @@ Then we have a section in which *configure* tests the MPI implementation:
 So far so good. Our compilers and MPI seem to work so we can proceed with
 the setup of the external libraries.
 
-On my cluster, `module load intel/2018b` had also defined the **MKLROOT** env variable
+On my cluster, `module load intel/2018b` has also defined the **MKLROOT** env variable
 
 ```sh
 env | grep MKL
@@ -2105,7 +2105,7 @@ that the final executable will work out of the box.
 
 ??? note "Optional Exercise"
 
-     Compiler ABINIT with BLAS/ScalaPack from MKL.
+     Compile ABINIT with BLAS/ScalaPack from MKL.
      Scalapack (or ELPA) may lead to a significant speedup when running GS calculations
      with large [[nband]]. See also the [[np_slk]] input variable.
 

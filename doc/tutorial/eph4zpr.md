@@ -120,9 +120,9 @@ have an additional dependence on the physical temperature $T$.
     As a consequence, **accidental degeneracies won't be removed** when [[symsigma]] is set to 1.
 
 Note that both the FM and the DW term converge slowly with the $\qq$-sampling.
-Moreover, the real part of the self-energy requires the inclusions of many empty states.
+Moreover, accurate computation of the real part require the inclusion of a large number of empty states.
 
-In order to accelerate the convergence with the bands, the EPH code can replace the contributions
+In order to accelerate the convergence with [[nband]], the EPH code can replace the contributions
 given by the high-energy states above a certain band index $M$ with the solution
 of a **non-self-consistent Sternheimer equation** in which only the first $M$ states are required.
 The methodology, proposed in [[cite:Gonze2011]], is based on a **quasi-static approximation**
@@ -177,7 +177,7 @@ Since $A_\nk(\ww)$ integrates to 1,
 values of $Z_\nk$ in the [0.7, 1] range usually indicate the presence of a well-defined QP excitation
 that may be accompanied by some **background** and, possibly, additional **satellites**.
 Values of $Z_\nk$ greater than one are clearly unphysical and signal the breakdown of the linearized QP equation.
-The interpretation of the results requires
+The interpretation of these results requires
 a careful analysis of $A_\nk(\ww)$ and/or additional convergence tests.
 
 !!! important
@@ -303,7 +303,8 @@ $\bm{Z}^*$ and $\bm{\ee}^\infty$ are also computed with the same underconverged 
 
 Since AbiPy does not support multiple datasets, each directory corresponds to a single calculation.
 In particular, all the DFPT tasks (atomic perturbations, DDK, electric field perturbation)
-can be found inside the `w1` directory while `w1/outdata` contains the final DDB.
+can be found inside the `w1` directory while `w0/t0/outdata` contains the GS results.
+and `w0/t1/outdata` the GSR file with energie on an high-symmetry $\kk$-path.
 
 ## How to extract useful info from the output files
 
@@ -335,12 +336,8 @@ where the `abifile` prefix tells ABINIT that the lattice parameters and atomic p
 should be extracted from an ABINIT binary file e.g. HIST.nc, DEN.nc, GSR.nc, etc.
 (other formats are supported as well, see the documentation).
 
-<!--
-The majority of the netcdf files contain info about the crystalline structure.
-The syntax is `abitk COMMAND FILE`.
--->
 To print the crystalline structure to terminal, use the *abitk* Fortran executable
-shipped with the ABINIT package with the `crystal_print` command:
+shipped with the ABINIT package and the `crystal_print` command:
 
 ```md
 abitk crystal_print MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
@@ -358,7 +355,7 @@ abitk crystal_print MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
     2)    0.5000000  0.5000000  0.5000000   O
 ```
 
-This is the structure that we will be using in the forthcoming examples.
+This is the crystalline structure that we will be using in the forthcoming examples.
 <!--
 To print the same info in a format that we can directly reuse in the ABINIT input file, use:
 $ abitk crystal_abivars flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
@@ -601,7 +598,7 @@ the e-ph scattering potentials and we can finally start to generate the WFK file
 
 For our first NSCF calculation, we use a 4x4x4 $\Gamma$-centered $\kk$-mesh and 70 bands
 so that we can perform initial convergence studies for the number of empty states in the self-energy.
-Then we generate WFK files with denser meshes and less bands that will be used for the Sternheimer.
+Then we generate WFK files with denser meshes and less bands that will be used for the Sternheimer method.
 Note the use of [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[irdden]].
 
 You may now run the NSCF calculation by issuing:
@@ -866,7 +863,7 @@ In our calculation, the Z factor for the VBM is 0.644 while for the CBM we obtai
 On physical grounds, these values are reasonable as Z corresponds to the area under the QP peak
 in the spectral function and values in [~0.7, 1] indicates a well-defined QP excitations.
 -->
-These values are reasonable, still it's not uncommon to obtain unphysical Z factors in e-ph calculations i.e. values > 1,
+These values are reasonable, still it's not so uncommon to obtain unphysical Z factors in e-ph calculations i.e. values > 1,
 especially for states far from the band edge as the e-ph self-energy has a lot of structure in frequency-space
 and the linearized QP approach is not always justified.
 For this reason, in the rest of the tutorial, **we will be focusing on the analysis of the OTMS results**.
@@ -927,7 +924,8 @@ The figure on the right, gives the correction to the KS band gas as a function o
 $T$ obtained for different numbers of bands.
 A similar behaviour is observed also for the linearized equation.
 
-The results are quite disappointing in the sense that the QP corrections are far from converged!
+The results are quite disappointing in the sense that the QP gaps are far from being converged
+and the convergence rate is even worse if we look at the QP energies (the same behaviour is observed in $GW$).
 A more careful (and expensive) convergence study would reveal that 300 bands are needed.
 This computation, although feasible, would be too costly for a tutorial and is therefore left as an extra exercise.
 In the next section, we will see that the EPH code provides a much more efficient algorithm
@@ -1086,8 +1084,8 @@ These additional convergence tests cannot be covered in this lesson and they are
 
 ## How to compute the spectral function
 
-To compute the spectral function $A_\nk(\ww)$, we need to specify the number of frequencies via [[nfreqsp]].
-The code will compute $A(\ww)$ on a linear frequency mesh centered on the KS eigenvalue
+To compute the spectral function, we need to specify the number of frequencies via [[nfreqsp]].
+The code will compute $A_\nk(\ww)$ on a linear frequency mesh centered on the KS eigenvalue
 that spans the interval $[\ee_\nk - \Delta, \ee_\nk + \Delta]$ with $\Delta$ given by [[freqspmax]].
 An odd number of frequency points is enforced by the code.
 
@@ -1101,6 +1099,8 @@ freqspmax 1.0 eV
 An example of input file is available here:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_8.in %}
+
+Execute it with:
 
 ```sh
 abinit teph4zpr_8.in > teph4zpr_8.log 2> err &
@@ -1176,14 +1176,14 @@ will give different answers.
 (well, strictly speaking, it is very small yet finite because
 we are using a finite [[zcut]] in the calculation).
 As a net result, $A_\nk(\ww)$ presents a **sharp peak in correspondence of the QP energy**.
-Note also that our computed $A(\ww)$ does not integrate to 1 because the number of points [[nfreqsp]]
+Note also that our computed $A_\nk(\ww)$ does not integrate to 1 because the number of points [[nfreqsp]]
 is too small and part of the weight is lost in the numerical integration.
 This can be easily fixed by increasing the resolution of the frequency mesh.
 
-(iii) For this particular $\nk$ state, $\ww - \ee^0$ has a single intersection with $\Re \Sigma(\ww)$.
-However, it is possible to have states with multiple intersections that may lead to
-some background and/or additional satellites in $A(\ww)$
-provided the imaginary part of $\Sigma(\ww)$ is sufficiently small in that energy range.
+(iii) For this particular $\nk$ state, $\ww - \ee^0$ has a single intersection with $\Re \Sigma_\nk(\ww)$.
+However, it is possible to have configurations with multiple intersections that may lead to
+some background and/or additional satellites in $A_\nk(\ww)$
+provided the imaginary part of $\Sigma_\nk(\ww)$ is sufficiently small in that energy range.
 
 (iiii) The vertical red line in the second figure gives the on-shell QP energy.
 As already mentioned previously, the OTMS energy derives from a static formalism
@@ -1204,7 +1204,7 @@ on the OTMS results in most of this tutorial.
 Now we focus on more technical aspects and, in particular, on how to **compare spectral functions
 and self-energies obtained with different settings**.
 
-Remember that in *teph4zpr_8.in* we computed $A(\ww)$ with/without the Sternheimer method.
+Remember that in *teph4zpr_8.in* we computed $A_\nk(\ww)$ with/without the Sternheimer method.
 So the question is "how can we compare the two calculations and what can we learn from this analysis?"
 
 To compare the results obtained with/wo the Sternheimer, use |abicomp|
@@ -1235,14 +1235,14 @@ Note the following:
 (ii) The real part of $\Sigma_\nk(\ww)$ obtained with the two methods differ but
      the results should be interpreted with a critical eye.
      The Sternheimer method, indeed, is designed to accelerate the convergence of
-     $\Sigma(\ee^\KS_\nk)$ w.r.t. [[nband]] but cannot exactly reproduce the behaviour of
-     $\Sigma(\ww)$ at large frequencies since it is a static approximation.
+     $\Sigma_\nk(\ee^\KS_\nk)$ w.r.t. [[nband]] but cannot exactly reproduce the behaviour of
+     $\Sigma_\nk(\ww)$ at large frequencies since it is a static approximation.
      In other words, once the two approaches are properly converged one should see
      that the real part of the two self-energies agree around the bare KS eigenvalue
      and that the two curves stars to deviate at large $\ww$.
      This test is left as an additional excercise for volunteers.
 
-For additional examples, see this
+For additional examples for Diamond, see this
 [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/sigeph/lesson_sigeph.ipynb)
 
 ## MPI parallelism and memory requirements
@@ -1253,9 +1253,9 @@ When computing the imaginary part at the KS energy for transport properties,
 the EPH code is able to filter both $\kk$- and $\qq$-points so that only the relevant states
 around the band edge(s) are stored in memory.
 Unfortunately, in the case of full self-energy calculations, this filtering algorithm
-is not possible and each MPI process needs to store **all the $\kk$-wavevectors the IBZ**
+is not possible and each MPI process needs to store all the $\kk$-wavevectors the IBZ
 to be able to compute the e-ph matrix elements connecting $\kk$ to $\kq$.
-In other words, the wavefunctions in the IBZ are not MPI-distributed and this leads to a significant
+In other words, **the wavefunctions in the IBZ are not MPI-distributed** and this leads to a significant
 increase in the memory requirements, especially for dense meshes and/or large [[nband]].
 Fortunately, **the code is able to distribute bands** among the MPI processes in the band communicator
 hence the memory required for the wavefunctions will scale as [[nband]] / **np_band** where **np_band**

@@ -161,7 +161,7 @@ More specifically, in EPH the name of the DDB file is specified by
     present due to numerical inaccuracies) is reasonable.
     By the same token, make sure that no vibrational instabilty is present before
     embarking on big EPH calculations.
-    If the spectrum present instabilities around $\Gamma$ due to a Fourier interpolation 
+    If the spectrum presents instabilities around $\Gamma$ due to a Fourier interpolation
     done with coarse $\qq$-sampling, you may try to use [[rifcsph]].
 
 ### Variables for phonon DOS
@@ -211,7 +211,7 @@ ph_qpath 0.0 0.0 0.0 # Gamma
          0.0 0.0 0.0  # Gamma
 ```
 
-To obtain the list of high-symmetry q-points, one can use the `abistruct.py` script provided by |AbiPy|:
+To obtain the list of high-symmetry q-points, one can use the |abistruct| script provided by |AbiPy|:
 
 ```sh
 abistruct.py kpath in_DDB
@@ -374,7 +374,7 @@ The expression for the LR model including both dipole and quadrupole terms reads
 !!! important
 	The computation of the dynamical quadrupoles tensor within the DFPT framework will be made available in a future release,
 	together with a specific tutorial. Once it is computed and stored in the DDB,
-	the EPH code reads it automatically and uses it for the LR model. 
+	the EPH code reads it automatically and uses it for the LR model.
 
 <!--
 TODO: Discuss more the integration with the DFPT part.
@@ -443,9 +443,9 @@ while allowing one to decrease the cost of the calculation and the memory by a f
 
 A significant fraction of the wall-time in EPH is spent for performing the FFTs required
 to apply the first-order Hamiltonian $H^1$.
-The use of single precision in the FFT routines allows one to decrease the computational cost without losing precision.
+The use of single precision in the FFT routines allows one to decrease the computational cost without loosing precision.
 This trick is activated by setting [[mixprec]] = 1.
-Note however that this feature is available only if the code is linked with FFTW3 or intel-MKL.
+Note that this feature is available only if the code is linked with FFTW3 or intel-MKL.
 
 !!! important
 
