@@ -74,11 +74,14 @@ MODULE m_dtset
 type, public :: dataset_type
 
 ! Integer
+!A
  integer :: accuracy
  integer :: adpimd
+ integer :: asr = 1
  integer :: autoparal
  integer :: auxc_ixc
  integer :: awtr = 1
+!B
  integer :: bandpp
  integer :: bdeigrf
  integer :: berryopt
@@ -86,9 +89,22 @@ type, public :: dataset_type
  integer :: berrystep
  integer :: brav = 1
  integer :: brvltt
- integer :: bs_nstates
+!BEGIN VARIABLES FOR @Bethe-Salpeter
+ integer :: bs_algorithm = 2
+ integer :: bs_calctype = 1
+ integer :: bs_coulomb_term = 11
+ integer :: bs_coupling = 0
+ integer :: bs_exchange_term = 1
+ integer :: bs_haydock_niter = 100
  integer :: bs_hayd_term = 0
+ integer :: bs_interp_method = 1 ! YG interpolation
+ integer :: bs_interp_mode = 0 ! No interpolation
+ integer :: bs_interp_prep = 0 ! Do not prepare interp
+ integer :: bs_interp_rl_nb = 1
+ integer :: bs_nstates
  integer :: builtintest
+
+!C
  integer :: cd_full_grid
  integer :: cd_frqim_method
  integer :: cd_customnimfrqs
@@ -97,9 +113,11 @@ type, public :: dataset_type
  integer :: chkprim
  integer :: chksymbreak
  integer :: cineb_start
+!D
  integer :: delayperm
  integer :: densfor_pred
  integer :: diismemory
+ integer :: dipdip = 1
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -138,6 +156,7 @@ type, public :: dataset_type
  integer :: d3e_pert2_strs
  integer :: d3e_pert3_elfd
  integer :: d3e_pert3_phon
+!E
  integer :: efmas
  integer :: efmas_calc_dirs
  integer :: efmas_deg
@@ -145,14 +164,19 @@ type, public :: dataset_type
  integer :: efmas_n_dirs
  integer :: efmas_ntheta
  integer :: enunit
+ integer :: eph_intmeth = 2
+ integer :: eph_frohlichm = 0
+ integer :: eph_phrange(2) = 0
  integer :: eph_restart = 0
  integer :: eph_task = 1
  integer :: exchn2n3d
  integer :: extrapwf
+!F
  integer :: fftgw = 21
  integer :: fockoptmix
  integer :: fock_icutcoul
  integer :: frzfermi
+!G
  integer :: ga_algor
  integer :: ga_fitness
  integer :: ga_n_rules
@@ -184,20 +208,11 @@ type, public :: dataset_type
  integer :: getbscoup = 0
  integer :: gethaydock = 0
  integer :: goprecon
+ integer :: gpu_linalg_limit
  integer :: gwaclowrank = 0
  integer :: gwcalctyp = 0
  integer :: gwcomp = 0
  integer :: gwgamma = 0
- integer :: gwrpacorr = 0
- integer :: gw_customnfreqsp
- integer :: gw_icutcoul
- integer :: gw_invalid_freq
- integer :: gw_qprange
- integer :: gw_nqlwl
- ! TODO: REMOVE?
- integer :: gw_nstep = 30
- integer :: gw_sigxcore = 0
-
  ! GWLS
  integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine
  integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine
@@ -218,14 +233,26 @@ type, public :: dataset_type
  integer :: gwls_recycle                ! Recycle the sternheimer solutions computed to obtain the static dielectric matrix
                                         ! and add them to the other solutions requested.
                                         ! 0 : don't recycle. 1 : store in RAM. 2 : Store on disk.
+ integer :: gwmem = 11
+ integer :: gwpara = 2
+ integer :: gwrpacorr = 0
+
+ integer :: gw_customnfreqsp
  integer :: gw_frqim_inzgrid = 0
  integer :: gw_frqre_inzgrid = 0
  integer :: gw_frqre_tangrid = 0
+ integer :: gw_icutcoul
+ integer :: gw_invalid_freq
+ integer :: gw_nqlwl
+ ! TODO: REMOVE?
+ integer :: gw_nstep = 30
+ integer :: gw_qprange
  integer :: gw_sctype
- integer :: gwmem = 11
- integer :: gwpara = 2
+ integer :: gw_sigxcore = 0
+!H
  integer :: hmcsst
  integer :: hmctt
+!I
  integer :: iboxcut
  integer :: icoulomb
  integer :: icutcoul
@@ -267,10 +294,13 @@ type, public :: dataset_type
  integer :: ixc_sigma
  integer :: ixcpositron
  integer :: ixcrot
+!J
  integer :: jdtset !  jdtset contains the current dataset number
  integer :: jellslab
+!K
  integer :: kptopt
  integer :: kssform = 1
+!L
  integer :: localrdwf = 1
  integer :: lotf_classic
  integer :: lotf_nitex
@@ -278,6 +308,7 @@ type, public :: dataset_type
  integer :: lotf_version
  integer :: lw_flexo
  integer :: lw_qdrpl
+!M
  integer :: magconon
  integer :: maxnsym
  integer :: max_ncpus = 0
@@ -294,6 +325,7 @@ type, public :: dataset_type
  integer :: mpw
  integer :: mqgrid
  integer :: mqgriddg
+!N
  integer :: natom
  integer :: natpawu
  integer :: natrd
@@ -360,6 +392,7 @@ type, public :: dataset_type
  integer :: ntyppure
  integer :: nwfshist
  integer :: nzchempot
+!O
  integer :: occopt
  integer :: optcell
  integer :: optdriver
@@ -368,6 +401,7 @@ type, public :: dataset_type
  integer :: optstress
  integer :: orbmag
  integer :: ortalg
+!P
  integer :: paral_atom
  integer :: paral_kgb
  integer :: paral_rf
@@ -395,6 +429,9 @@ type, public :: dataset_type
  integer :: macro_uj
  integer :: pawujat
  integer :: pawxcdev
+ integer :: ph_ndivsm = 20
+ integer :: ph_nqpath = 0
+ integer :: ph_nqshift = 1
  integer :: pimd_constraint
  integer :: pitransform
  integer :: plowan_bandi
@@ -461,7 +498,9 @@ type, public :: dataset_type
  integer :: prtxml = 0
  integer :: prt1dm = 0
  integer :: ptgroupma
+!Q
  integer :: qptopt
+!R
  integer :: random_atpos
  integer :: recgratio
  integer :: recnpath
@@ -479,6 +518,7 @@ type, public :: dataset_type
  integer :: rfuser
  integer :: rf2_dkdk
  integer :: rf2_dkde
+!S
  integer :: signperm
  integer :: slk_rankpp
  integer :: smdelta
@@ -489,12 +529,15 @@ type, public :: dataset_type
  integer :: string_algo
  integer :: symmorphi = 1
  integer :: symchi = 1
+ integer :: symdynmat = 1
  integer :: symsigma = 1
+!T
  integer :: td_mexcit
  integer :: tfkinfunc
  integer :: tim1rev
  integer :: timopt
  integer :: tl_nprccg
+!U
  integer :: ucrpa
  integer :: use_gpu_cuda
  integer :: usedmatpu
@@ -519,6 +562,7 @@ type, public :: dataset_type
  integer :: useylm
  integer :: use_yaml = 0
  integer :: use_slk
+!V
  integer :: vacnum
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts
@@ -528,17 +572,20 @@ type, public :: dataset_type
  integer :: vdw_df_nsmooth
  integer :: vdw_df_tweaks
  integer :: vdw_xc
+!W
  integer :: wfoptalg
  integer :: wfk_task
  integer :: wvl_bigdft_comp
  integer :: wvl_nprccg
  integer :: w90iniprj
  integer :: w90prtunk
+!X
  integer :: xclevel
 
 !Integer arrays
  integer :: bdberry(4)
  integer :: bravais(11)
+ integer  :: bs_interp_kmult(3) = 0
  integer :: cd_subset_freq(2)
  integer :: d3e_pert1_atpol(2)
  integer :: d3e_pert1_dir(3)
@@ -557,6 +604,7 @@ type, public :: dataset_type
  integer :: ngfftdg(18)
  integer :: nloalg(3)
  integer :: ngkpt(3)   ! Number of division for MP sampling.
+ integer :: ph_ngqpt(3) = 20
  integer :: qprtrb(3)
  integer :: rfatpol(2)
  integer :: rfdir(3)
@@ -571,6 +619,7 @@ type, public :: dataset_type
 !Integer allocatables
  integer, allocatable ::  algalch(:)         ! algalch(ntypalch)
  integer, allocatable ::  bdgw(:,:,:)        ! bdgw(2,nkptgw,nsppol)
+ integer,allocatable  ::  bs_loband(:)
  integer, allocatable ::  constraint_kind(:) ! constraint_kind(ntypat)
  integer, allocatable ::  dynimage(:)        ! dynimage(nimage or mxnimage)
  integer, allocatable ::  efmas_bands(:,:)   ! efmas_bands(2,nkptgw)
@@ -598,6 +647,7 @@ type, public :: dataset_type
  real(dp) :: auxc_scal
  real(dp) :: bmass
  real(dp) :: boxcutmin
+ real(dp) :: bs_interp_m3_width = one
  real(dp) :: bxctmindg
  real(dp) :: cd_halfway_freq
  real(dp) :: cd_max_freq
@@ -631,6 +681,13 @@ type, public :: dataset_type
  real(dp) :: effmass_free
  real(dp) :: efmas_deg_tol
  real(dp) :: elph2_imagden
+ real(dp) :: eph_ecutosc = zero
+ real(dp) :: eph_extrael = zero
+ real(dp) :: eph_fermie = zero
+ real(dp) :: eph_fsewin = 0.04_dp
+ real(dp) :: eph_fsmear = 0.01_dp
+ real(dp) :: eph_mustar = 0.1_dp
+ real(dp) :: eph_phwinfact = 1.1_dp
  real(dp) :: eshift
  real(dp) :: esmear
  real(dp) :: exchmix
@@ -741,8 +798,13 @@ type, public :: dataset_type
 !Real arrays
  real(dp) :: boxcenter(3)
  real(dp) :: bfield(3)
+!  Take big absolute value numbers, but not the biggest ones, otherwise overflow can happen
+ real(dp) :: bs_eh_cutoff(2) = [smallest_real*tol6, greatest_real*tol6]
+ real(dp) :: bs_freq_mesh(3) = [zero,zero, 0.01_dp/Ha_eV]
+ real(dp) :: bs_haydock_tol(2) = [0.02_dp, zero]
  real(dp) :: dfield(3)
  real(dp) :: efield(3)
+ real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
  real(dp) :: neb_spring(2)
@@ -789,6 +851,8 @@ type, public :: dataset_type
  real(dp), allocatable :: nucdipmom(:,:)      ! nucdipmom(3,natom)
  real(dp), allocatable :: occ_orig(:,:)       ! occ_orig(mband*nkpt*nsppol,nimage)
  real(dp), allocatable :: pimass(:)           ! pimass(ntypat)
+ real(dp), allocatable :: ph_qpath(:,:)       ! ph_qpath(3, nqpath)
+ real(dp), allocatable :: ph_qshift(:,:)      ! ph_qshift(3, ph_nqshift)
  real(dp), allocatable :: ptcharge(:)         ! ptcharge(ntypat)
  real(dp), allocatable :: qmass(:)            ! qmass(nnos)
  real(dp), allocatable :: qptdm(:,:)          ! qptdm(3,nqptdm)
@@ -811,62 +875,7 @@ type, public :: dataset_type
  real(dp), allocatable :: ziontypat(:)        ! ziontypat(ntypat)
  real(dp), allocatable :: znucl(:)            ! znucl(npsp)
 
-!BEGIN VARIABLES FOR @Bethe-Salpeter
- integer :: bs_algorithm = 2
- integer :: bs_haydock_niter = 100
- integer :: bs_exchange_term = 1
- integer :: bs_coulomb_term = 11
- integer :: bs_calctype = 1
- integer :: bs_coupling = 0
- integer :: bs_interp_mode = 0 ! No interpolation
- integer :: bs_interp_prep = 0 ! Do not prepare interp
- integer :: bs_interp_method = 1 ! YG interpolation
- integer :: bs_interp_rl_nb = 1
-
- real(dp) :: bs_interp_m3_width = one
-
- integer  :: bs_interp_kmult(3) = 0
- real(dp) :: bs_haydock_tol(2) = [0.02_dp, zero]
-
- integer,allocatable :: bs_loband(:)
-
-!  Take big absolute value numbers, but the the biggest ones, otherwise overflow can happen
- real(dp) :: bs_eh_cutoff(2) = [smallest_real*tol6, greatest_real*tol6]
- real(dp) :: bs_freq_mesh(3) = [zero,zero, 0.01_dp/Ha_eV]
-!END VARIABLES FOR @Bethe-Salpeter.
-
- integer :: gpu_linalg_limit
-
-!EPH variables
-! ifc variables
- integer :: asr = 1
- integer :: dipdip = 1
- integer :: chneut = 1
- integer :: symdynmat = 1
-
-! Phonon variables.
- integer :: ph_ndivsm = 20
- integer :: ph_nqpath = 0
- integer :: ph_ngqpt(3) = 20
- integer :: ph_nqshift = 1
-
- real(dp),allocatable :: ph_qshift(:,:)
-  ! ph_qshift(3, ph_nqshift)
- real(dp),allocatable :: ph_qpath(:,:)
-  ! ph_qpath(3, nqpath)
-
 ! e-ph variables
- real(dp) :: eph_mustar = 0.1_dp
- integer :: eph_intmeth = 2
- real(dp) :: eph_extrael = zero
- real(dp) :: eph_fermie = zero
- integer :: eph_frohlichm = 0
- real(dp) :: eph_fsmear = 0.01_dp
- real(dp) :: eph_fsewin = 0.04_dp
- real(dp) :: eph_ecutosc = zero
- real(dp) :: eph_phwinfact = 1.1_dp
- real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
- integer :: eph_phrange(2) = 0
 
  integer :: eph_ngqpt_fine(3) = 0
  integer :: eph_np_pqbks(5) = 0
