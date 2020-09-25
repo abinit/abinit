@@ -434,6 +434,7 @@ to a value smaller than 2 e.g. 1.5 or the more aggressive 1.1.
 Note that one is not obliged to run the GS/DFPT part with the same [[boxcutmin]].
 The EPH code will automatically interpolate the DFPT potentials if the input FFT mesh computed from
 [[ecut]] and [[boxcutmin]] differs from the one found in the DVDB file.
+Just to clarify, you can change the value of [[boxcutmin]] in the EPH part but not [[ecut]].
 <!--
 An exact representation of densities/potentials in $\GG$-space is obtained with [[boxcutmin]] = 2,
 but we found that using a value of 1.1 does not significantly affect the result

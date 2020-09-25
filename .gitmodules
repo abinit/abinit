@@ -1,3 +1,4 @@
 [submodule "tests/modules_with_data/MgO_eph_zpr"]
 	path = tests/modules_with_data/MgO_eph_zpr
 	url = git://github.com/abinit/MgO_eph_zpr.git
+	branch = master
