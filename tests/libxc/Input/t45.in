@@ -30,11 +30,14 @@ getwfk1     0
 
 # Common to most hybrid/GW calculations
 getwfk      1        # Obtain WFK file from dataset 1
-ecutwfn     8      # Planewaves to be used to represent the wavefunctions
+#ecutwfn     8      # Planewaves to be used to represent the wavefunctions
 #ecutwfn    20     # Planewaves to be used to represent the wavefunctions
-ecutsigx    8    # Planewaves to be used to represent the exchange operator
+#ecutsigx    8    # Planewaves to be used to represent the exchange operator
 #ecutsigx   40     # Planewaves to be used to represent the exchange operator
-ecuteps     2
+#ecuteps     2
+ecuteps     1.73774393E+00  # choose this particular value to keep the new test close to old test
+ecutsigx    6.95097571E+00  # choose this particular value to keep the new test close to old test
+ecutwfn     6.95097571E+00  # choose this particular value to keep the new test close to old test
 gwcalctyp   25
 getqps     -1
 ixc_sigma  -428
