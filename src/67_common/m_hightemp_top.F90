@@ -36,6 +36,8 @@ module m_hightemp_top
   implicit none
 
   public :: hightemp_prt_cg,hightemp_prt_cprj
+  !!***
+
 contains
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_cg
@@ -182,6 +184,7 @@ contains
     ABI_DEALLOCATE(cg_tot)
     ABI_DEALLOCATE(kpgnorm_tot)
   end subroutine hightemp_prt_cg
+  !!***
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_cprj
   !! NAME
@@ -244,5 +247,7 @@ contains
       end do
     end if
   end subroutine hightemp_prt_cprj
+  !!***
 
 end module m_hightemp_top
+!!***

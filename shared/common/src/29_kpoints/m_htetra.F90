@@ -2066,6 +2066,11 @@ end subroutine htetra_wvals_weights
 !!  Same as above but computing only delta for performance and memory
 !!  HM: Should find a clean way to avoid copy paste routine
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dweight,comm)
 

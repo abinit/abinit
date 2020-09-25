@@ -50,6 +50,7 @@ module m_hightemp
   public :: hightemp_gaussian_jintegral,hightemp_gaussian_kintegral
   public :: hightemp_dosfreeel,hightemp_get_e_shiftfactor
   public :: hightemp_get_nfreeel,hightemp_prt_eigocc
+  !!***
 
   !----------------------------------------------------------------------
 
