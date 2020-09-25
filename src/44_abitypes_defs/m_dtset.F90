@@ -149,6 +149,8 @@ type, public :: dataset_type
  integer :: dmftqmc_l
  integer :: dmftqmc_seed
  integer :: dmftqmc_therm
+ integer :: dvdb_add_lr = 1
+ integer :: dvdb_rspace_cell = 0
  integer :: d3e_pert1_elfd
  integer :: d3e_pert1_phon
  integer :: d3e_pert2_elfd
@@ -168,7 +170,10 @@ type, public :: dataset_type
  integer :: eph_frohlichm = 0
  integer :: eph_phrange(2) = 0
  integer :: eph_restart = 0
+ integer :: eph_stern = 0
  integer :: eph_task = 1
+ integer :: eph_transport = 0
+ integer :: eph_use_ftinterp = 0
  integer :: exchn2n3d
  integer :: extrapwf
 !F
@@ -318,6 +323,7 @@ type, public :: dataset_type
  integer :: mffmem
  integer :: mgfft
  integer :: mgfftdg
+ integer :: mixprec = 0
  integer :: mkmem
  integer :: mkqmem
  integer :: mk1mem
@@ -340,6 +346,7 @@ type, public :: dataset_type
  integer :: nc_xccc_gspace = 0
  integer :: nconeq
  integer :: nctime
+ integer :: ndivsm = 0
  integer :: ndtset
  integer :: ndynimage
  integer :: neb_algo
@@ -349,6 +356,7 @@ type, public :: dataset_type
  integer :: nfreqre = -1
  integer :: nfreqsp = 0
  integer :: nimage
+ integer :: nkpath = 0
  integer :: nkpt
  integer :: nkptgw
  integer :: nkpthf
@@ -429,6 +437,7 @@ type, public :: dataset_type
  integer :: macro_uj
  integer :: pawujat
  integer :: pawxcdev
+ integer :: ph_intmeth = 2
  integer :: ph_ndivsm = 20
  integer :: ph_nqpath = 0
  integer :: ph_nqshift = 1
@@ -458,6 +467,7 @@ type, public :: dataset_type
  integer :: prtebands = 1
  integer :: prtefg = 0
  integer :: prtefmas = 1
+ integer :: prteliash = 0
  integer :: prteig
  integer :: prtelf = 0
  integer :: prtfc = 0
@@ -519,6 +529,7 @@ type, public :: dataset_type
  integer :: rf2_dkdk
  integer :: rf2_dkde
 !S
+ integer :: sigma_nshiftk = 1      ! Number of shifts in k-mesh for Sigma_{nk}.
  integer :: signperm
  integer :: slk_rankpp
  integer :: smdelta
@@ -531,6 +542,7 @@ type, public :: dataset_type
  integer :: symchi = 1
  integer :: symdynmat = 1
  integer :: symsigma = 1
+ integer :: symv1scf = 0
 !T
  integer :: td_mexcit
  integer :: tfkinfunc
@@ -585,14 +597,17 @@ type, public :: dataset_type
 !Integer arrays
  integer :: bdberry(4)
  integer :: bravais(11)
- integer  :: bs_interp_kmult(3) = 0
+ integer :: bs_interp_kmult(3) = 0
  integer :: cd_subset_freq(2)
+ integer :: ddb_ngqpt(3) = 0
  integer :: d3e_pert1_atpol(2)
  integer :: d3e_pert1_dir(3)
  integer :: d3e_pert2_atpol(2)
  integer :: d3e_pert2_dir(3)
  integer :: d3e_pert3_atpol(2)
  integer :: d3e_pert3_dir(3)
+ integer :: eph_ngqpt_fine(3) = 0
+ integer :: eph_np_pqbks(5) = 0
  integer :: fockdownsampling(3)
  integer :: jfielddir(3)
  integer :: kptrlatt(3,3)
@@ -610,7 +625,10 @@ type, public :: dataset_type
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
+ integer :: sigma_bsum_range(2) = 0
+ integer :: sigma_ngkpt(3) = 0         ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
  integer :: supercell_latt(3)
+ integer :: transport_ngkpt(3) = 0     ! K-mesh for Transport calculation.
  integer :: ucrpa_bands(2)
  integer :: vdw_supercell(3)
  integer :: vdw_typfrag(100)
@@ -725,6 +743,8 @@ type, public :: dataset_type
  real(dp) :: pawovlp
  real(dp) :: pawujrad
  real(dp) :: pawujv
+ real(dp) :: ph_smear = 0.00002_dp
+ real(dp) :: ph_wstep = 0.1_dp / Ha_meV
  real(dp) :: posocc
  real(dp) :: postoldfe
  real(dp) :: postoldff
@@ -802,8 +822,10 @@ type, public :: dataset_type
  real(dp) :: bs_eh_cutoff(2) = [smallest_real*tol6, greatest_real*tol6]
  real(dp) :: bs_freq_mesh(3) = [zero,zero, 0.01_dp/Ha_eV]
  real(dp) :: bs_haydock_tol(2) = [0.02_dp, zero]
+ real(dp) :: ddb_shiftq(3) = zero
  real(dp) :: dfield(3)
  real(dp) :: efield(3)
+ real(dp) :: einterp(4) = zero
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
@@ -815,7 +837,9 @@ type, public :: dataset_type
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
  real(dp) :: red_efieldbar(3)
+ real(dp) :: sigma_erange(2) = zero
  real(dp) :: strtarget(6)
+ real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]
  real(dp) :: ucrpa_window(2)
  real(dp) :: vcutgeo(3)
  real(dp) :: vprtrb(2)
@@ -841,6 +865,7 @@ type, public :: dataset_type
  real(dp), allocatable :: gwls_list_proj_freq(:)      ! gwls_list_proj_freq(gwls_n_proj_freq)
  real(dp), allocatable :: jpawu(:,:)        ! jpawu(ntypat,nimage)
  real(dp), allocatable :: kpt(:,:)          ! kpt(3,nkpt)
+ real(dp), allocatable :: kptbounds(:,:)
  real(dp), allocatable :: kptgw(:,:)        ! kptgw(3,nkptgw)
  real(dp), allocatable :: kptns(:,:)        ! kptns(3,nkpt) k-points renormalized and shifted.
                                             !  The ones that should be used inside the code.
@@ -860,6 +885,8 @@ type, public :: dataset_type
  real(dp), allocatable :: ratsph(:)           ! ratsph(ntypat)
  real(dp), allocatable :: rprim_orig(:,:,:)   ! rprim_orig(3,3,nimage)
  real(dp), allocatable :: rprimd_orig(:,:,:)  ! rprimd_orig(3,3,nimage)
+ real(dp), allocatable :: sigma_shiftk(:,:)   ! sigma_shiftk(3, sigma_nshiftk)    ! shifts in k-mesh for Sigma_{nk}.
+
  real(dp), allocatable :: shiftk(:,:)         ! shiftk(3,nshiftk)
  real(dp) :: shiftk_orig(3,MAX_NSHIFTK)       ! original shifts given in input (changed in inkpts).
 
@@ -875,51 +902,7 @@ type, public :: dataset_type
  real(dp), allocatable :: ziontypat(:)        ! ziontypat(ntypat)
  real(dp), allocatable :: znucl(:)            ! znucl(npsp)
 
-! e-ph variables
-
- integer :: eph_ngqpt_fine(3) = 0
- integer :: eph_np_pqbks(5) = 0
-
- integer :: eph_stern = 0
- integer :: eph_transport = 0
- integer :: eph_use_ftinterp = 0
-
- integer :: ph_intmeth = 2
- integer :: prteliash = 0
- real(dp) :: ph_wstep = 0.1_dp / Ha_meV
- real(dp) :: ph_smear = 0.00002_dp
- integer :: ddb_ngqpt(3) = 0
- real(dp) :: ddb_shiftq(3) = zero
-
- integer :: mixprec = 0
- integer :: symv1scf = 0
- integer :: dvdb_add_lr = 1
- integer :: dvdb_rspace_cell = 0
-
- integer :: sigma_bsum_range(2) = 0
-
- real(dp) :: sigma_erange(2) = zero
-
- integer :: transport_ngkpt(3) = 0
- ! K-mesh for Transport calculation.
-
- integer :: sigma_ngkpt(3) = 0
- ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
-
- integer :: sigma_nshiftk = 1
- ! Number of shifts in k-mesh for Sigma_{nk}.
-
- real(dp),allocatable :: sigma_shiftk(:,:)
- ! sigma_shiftk(3, sigma_nshiftk)
- ! shifts in k-mesh for Sigma_{nk}.
-!END EPH
-
- integer :: ndivsm = 0
- integer :: nkpath = 0
- real(dp) :: einterp(4) = zero
- real(dp),allocatable :: kptbounds(:,:)
- real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]
-
+!Character strings
  character(len=fnlen) :: getddb_filepath = ABI_NOFILE
  character(len=fnlen) :: getden_filepath = ABI_NOFILE
  character(len=fnlen) :: getdvdb_filepath = ABI_NOFILE
