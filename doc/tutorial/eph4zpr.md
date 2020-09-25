@@ -8,7 +8,7 @@ This tutorial explains how to compute the electron self-energy due to phonons, o
 renormalization (ZPR) of the band gap and temperature-dependent band energies within the harmonic approximation.
 We start with a very brief overview of the many-body formalism in the context of the electron-phonon (e-ph) interaction.
 Then we discuss how to evaluate the e-ph self-energy and perform typical convergence studies
-using the polar semiconductor MgO as as example.
+using the polar semiconductor MgO as an example.
 Further details concerning the implementation are given in [[cite:Gonze2019]] and [[cite:Romero2020]].
 Additional examples are provided in this
 [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/sigeph/lesson_sigeph.ipynb)
@@ -33,7 +33,7 @@ in this tutorial we are mainly interested in $\Sigma^{\text{e-ph}}$ and its temp
 
 In semiconductors and insulators, indeed, most of the temperature dependence of the electronic properties
 at "low" $T$ originates from the **e-ph interaction**
-and the **thermal expansion** of the unit cell (topic that, however, is not discussed in this lesson).
+and the **thermal expansion** of the unit cell (topic that, however, won't be discussed in this lesson).
 Corrections due to $\Sigma^{\text{e-e}}$ are obviously important as it is well known that KS gaps computed
 with LDA/GGA are systematically underestimated compared to experimental data.
 Nevertheless, the temperature dependence of $\Sigma^{\text{e-e}}$
@@ -121,6 +121,7 @@ have an additional dependence on the physical temperature $T$.
 
 Note that both the FM and the DW term converge slowly with the $\qq$-sampling.
 Moreover, the real part of the self-energy requires the inclusions of many empty states.
+
 In order to accelerate the convergence with the bands, the EPH code can replace the contributions
 given by the high-energy states above a certain band index $M$ with the solution
 of a **non-self-consistent Sternheimer equation** in which only the first $M$ states are required.
@@ -401,11 +402,8 @@ To plot the band structure using the GS eigenvalues stored in the GSR.nc file,
 use the |abiopen| script provided by AbiPy with the `-e` option:
 
 ```sh
-abiopen.py MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_GSR.nc -e
+abiopen.py MgO_eph_zpr/flow_zpr_mgo/w0/t1/outdata/out_GSR.nc -e
 ```
-
-The following figure has been obtained by using abiopen.py on a GSR.nc file containing the
-full band structure, not the one downloaded in this tutorial.
 
 ![](eph4zpr_assets/MgO_ebands.png)
 
@@ -430,7 +428,8 @@ that lists the **relative paths** of the **partial DDB files** in the
 
 Since we are dealing with a polar material, it is worth checking whether our final DDB contains
 Born effective charges and the electronic dielectric tensor.
-Instead of running *anaddb* or *abinit* and then checking the output file, we can simply use |abiopen|:
+Instead of running *anaddb* or *abinit* and then checking the output file,
+we can simply use |abiopen| with the `-p` option:
 
 ```sh
 abiopen.py MgO_eph_zpr/flow_zpr_mgo/w1//outdata/out_DDB -p
@@ -469,10 +468,10 @@ that produces the following figures:
 
 The results seem reasonable: the acoustic modes go to zero linearly for $\qq \rightarrow 0$
 as we are dealing with a 3D system, no instability is present
-and the band dispersion shows the LO-TO splitting typical of polar materials.
+and the phonon dispersion shows the LO-TO splitting typical of polar materials.
 
 Note, however, that the acoustic sum-rule is automatically enforced by the code so
-it is always a good idea to compare the phonon dispersion with/without [[asr]] as this
+it is always a good idea to compare the results with/without [[asr]] as this
 is an indirect indicator of the convergence/reliability of our calculations.
 We can automate the process with the *ddb_asr* command of |abiview|:
 
@@ -531,7 +530,7 @@ and the following input file:
     for a given $\qq$-point.
 
     The value of *pertcase* and *qpt* are reported in the ABINIT header.
-    To print the header to terminal, use:
+    To print the header to terminal, use *abitk* with the *hdr_print* command
 
     ```sh
      abitk hdr_print MgO_eph_zpr/flow_zpr_mgo/w1/t11/outdata/out_POT4.nc
@@ -602,10 +601,10 @@ the e-ph scattering potentials and we can finally start to generate the WFK file
 
 For our first NSCF calculation, we use a 4x4x4 $\Gamma$-centered $\kk$-mesh and 70 bands
 so that we can perform initial convergence studies for the number of empty states in the self-energy.
-Then we generate WFK files with less bands and less bands that will be used for the Sternheimer.
+Then we generate WFK files with denser meshes and less bands that will be used for the Sternheimer.
 Note the use of [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[irdden]].
 
-You may run the NSCF calculation by issuing:
+You may now run the NSCF calculation by issuing:
 
 ```sh
 abinit teph4zpr_3.in > teph4zpr_3.log 2> err &
@@ -660,7 +659,7 @@ with the following input file:
     In the last part of the tutorial, we explain how to specify a particular
     MPI distribution scheme with the [[eph_np_pqbks]] input variable.
 
-Let's now discuss the meaning of the different variables in more details.
+Let's now discuss the meaning of the different variables in more detail.
 We use [[optdriver]] 7 to enter the EPH code while [[eph_task]] 4 activates
 the computation of the full self-energy (real + imaginary parts).
 The paths to the external files (**DDB**, **WFK**, **DVDB**) are specified
@@ -716,6 +715,7 @@ First of all, we find a section that summarizes the most important parameters:
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
  Number of k-points for self-energy corrections: 1
+ Including all final {mk+q} states inside energy window: [4.347 9.112 ] [eV]
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
 ```
@@ -730,7 +730,7 @@ Then we find another section related to MPI parallelism.
 In this case we are running in sequential but the output will change if we run in paralle
 (see also [[eph_np_pqbks]]).
 The final message informs the user that the EPH code will either read the qpts from file (if the DVDB contains all of them, in case
-[[eph_ngqpt_finne]] is not defined in the input) or interpolate the scattering potentials
+[[eph_ngqpt_fine]] is not defined in the input) or interpolate the scattering potentials
 from [[ddb_ngqpt]] to [[eph_ngqpt_fine]].
 
 ```md
@@ -1035,13 +1035,13 @@ This is the value one should obtain when summing all the bands up to maximum num
 
 ## Convergence of the ZPR w.r.t. the q-mesh
 
-Now we fix this value for *nband* and perform a convergence study for the $\qq$-sampling.
+Now we fix this value of *nband* to 20 and perform a convergence study for the $\qq$-sampling.
 Unfortunately, we won't be able to fully convergence the results but, at least,
 you will get an idea on how to perform this kind of convergence study.
 
 In the input *teph4zpr_3.in*, we have computed WFK files on different $\kk$-meshes
 and a relatively small number of empty states (25 - 5 = 20).
-We can finally use the other WFK files generated in *teph4zpr_3.in* to perform ZPR calculations.
+We can finally use these WFK files to perform ZPR calculations by just adding:
 
 ```sh
 ndtset 3
@@ -1143,7 +1143,7 @@ Alternatively, one can use
 abiopen.py teph4zpr_8o_DS1_SIGEPH.nc
 ```
 
-to open the SIGEPH.nc file inside |iptyhon|.
+to open the SIGEPH.nc file inside ipython.
 Then, inside the ipython terminal, issue:
 
 ```ipython
@@ -1202,7 +1202,7 @@ obtained with the cumulant method**.
 This (lengthy) discussion was somehow needed to justify the reason why we have been focusing
 on the OTMS results in most of this tutorial.
 Now we focus on more technical aspects and, in particular, on how to **compare spectral functions
-and self-energies computed with different settings**.
+and self-energies obtained with different settings**.
 
 Remember that in *teph4zpr_8.in* we computed $A(\ww)$ with/without the Sternheimer method.
 So the question is "how can we compare the two calculations and what can we learn from this analysis?"
@@ -1248,18 +1248,18 @@ For additional examples, see this
 ## MPI parallelism and memory requirements
 
 There is an important difference with respect to [[eph_task]] -4 (computation of the imaginary part)
-that is worth discussing in more details.
+that is worth discussing in more detail.
 When computing the imaginary part at the KS energy for transport properties,
 the EPH code is able to filter both $\kk$- and $\qq$-points so that only the relevant states
 around the band edge(s) are stored in memory.
 Unfortunately, in the case of full self-energy calculations, this filtering algorithm
-is not possible and each MPI process needs to store **all the wavevectors the IBZ**
+is not possible and each MPI process needs to store **all the $\kk$-wavevectors the IBZ**
 to be able to compute the e-ph matrix elements connecting $\kk$ to $\kq$.
 In other words, the wavefunctions in the IBZ are not MPI-distributed and this leads to a significant
 increase in the memory requirements, especially for dense meshes and/or large [[nband]].
-Fortunately, the code is able to distribute **bands** among the MPI processes in the band communicator
+Fortunately, **the code is able to distribute bands** among the MPI processes in the band communicator
 hence the memory required for the wavefunctions will scale as [[nband]] / **np_band** where **np_band**
-is the number of MPI processes in the band communicator.
+is the number of MPI processes in the band communicator (see [[eph_np_pqbks]]).
 
 For ZPR calculations, the priorities are as follows:
 
@@ -1277,7 +1277,7 @@ For ZPR calculations, the priorities are as follows:
 2. Once the memory for the wavefunctions reaches a reasonable level, activate the parallelism
    over perturbations to decrease the memory for $W(\rr, \RR, 3\times\text{natom})$.
    For better efficiency, *eph_nperts* should divide 3 * [[natom]].
-   As explained in the [introduction page for the EPH code](eph_intro), this parallelization level
+   As explained in the [introduction page for the EPH code](eph_intro), this MPI level
    allows one to reduce the memory allocated for $W(\rr, \RR, 3\times\text{natom})$ so the number of procs
    in this communicator should divide 3 * [[natom]].
 

@@ -314,7 +314,7 @@ abinit teph4mob_4.in > teph4mob_4.log 2> err &
     for all the $\kk$-points in the IBZ and produce a partial WFK file containing
     only the wavevectors relevant for transport properties. This trick is
     **crucial to reach dense meshes** but can also be used for coarser meshes if
-    you want to accelerate a bit the NSCF part.
+    you want to accelerate the NSCF part and reduced the size of the WFK file.
 
 ## Calculation of the mobility
 
@@ -357,7 +357,24 @@ We now discuss the meaning of the e-ph variables in more detail:
 * [[eph_ngqpt_fine]] defines the dense $\qq$-mesh where the scattering potentials are interpolated
   and the e-ph matrix elements are computed.
 
-    !!! warning [[ngkpt]] and [[eph_ngqpt_fine]] should be commensurate.  More specifically, [[ngkpt]] must be a **multiple** of the $\qq$-mesh ([[eph_ngqpt_fine]]) because the WFK should contain all the $\kk$- and $\kq$-points.  In most cases, [[ngkpt]] == [[eph_ngqpt_fine]].  It is however possible to use fewer $\qq$-points.  Note also that [[ngkpt]] does not necessarily correspond to the $\kk$-mesh used for the computation of transport quantities, see the following discussion.  * We work within the rigid band approximation and introduce a small electron-doping: [[eph_doping]] = -1e+15 that corresponds to 1e+15 electrons per cm$^3$.  To obtain results that are representative of the intrinsic mobility, we suggest to use a very small value, for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$.  Alternatively, one can specify the doping via [[eph_extrael]] or [[eph_fermie]].  We also set [[occopt]] to 3 to correctly compute the location of the Fermi level using the Fermi-Dirac occupation function as we are dealing with the **physical temperature** and not a fictitious broadening for numerical integration purposes.
+    !!! warning
+
+        [[ngkpt]] and [[eph_ngqpt_fine]] should be commensurate.
+        More specifically, [[ngkpt]] must be a **multiple** of the $\qq$-mesh ([[eph_ngqpt_fine]])
+        because the WFK should contain all the $\kk$- and $\kq$-points.
+        In most cases, [[ngkpt]] == [[eph_ngqpt_fine]].
+        It is however possible to use fewer $\qq$-points.
+        Note also that [[ngkpt]] does not necessarily correspond to the $\kk$-mesh
+        used for the computation of transport quantities, see the following discussion.
+
+* We work within the rigid band approximation and introduce a small electron doping: [[eph_doping]] = -1e+15
+  that corresponds to 1e+15 electrons per cm$^3$.
+  To obtain results that are representative of the intrinsic mobility, we suggest to use a very small value,
+  for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$.
+  Alternatively, one can specify the doping via [[eph_extrael]] or [[eph_fermie]].
+  We also set [[occopt]] to 3 to correctly compute the location of the Fermi level
+  using the Fermi-Dirac occupation function as we are dealing with the **physical temperature**
+  and not a fictitious broadening for numerical integration purposes.
 
 * The list of physical temperatures is specified by [[tmesh]].
 
@@ -394,7 +411,7 @@ In this case, using the same sampling for electrons and phonons may be enough to
 
 * The [[sigma_erange]] variable defines the energy window, below the VBM and above the
   CBM, where the lifetimes will be computed.
-  Since the mobility tensor involve the derivative of the Fermi-Dirac occupation function centered on the Fermi level,
+  Since the mobility integrals involve the derivative of the Fermi-Dirac occupation function centered on the Fermi level,
   it is possible to restrict the computation to those $\kk$-points that contribute to the mobility integral.
   The value of the derivative, indeed, decreases rapidly
   as we go further from the Fermi level hence only the states close to the band edges contribute.
@@ -439,8 +456,8 @@ as a function of T is computed and printed afterwards.
 Make sure that $\mu_e$ is far enough from the band
 edges so that the computed mobility can be considered as intrinsic:
 the values of *D_v* and *D_c* should be large compared to ~3 kT
-else you enter the **degenerate** regime or **highly-degenerate** regime (if the Fermi level is inside the bands)
-where additional physical phenomena start to play a role.
+else you enter the **degenerate** regime or the **highly-degenerate** case (when the Fermi level is inside the bands)
+and additional physical phenomena start to play a role.
 
 ```sh
  Position of CBM/VBM with respect to the Fermi level:
@@ -493,7 +510,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
 !!! tip
 
     As already mentioned in the introduction, all the results are stored in the SIGEPH.nc file.
-    With |AbiPy|, one can easily have access to all the data of the computation.
+    With |AbiPy|, one can easily access to all the data of the computation.
     For instance, one can plot the electron linewidths as a function of the KS energy
     using the |abiopen| script:
 
@@ -584,11 +601,11 @@ We can now analyze the variation of the mobility with respect to [[sigma_erange]
 
 !!! tip
 
-    Note that you should perform this convergence study with a $\kk$-mesh that is already dense enough to
+    One should perform this convergence study with a $\kk$-mesh that is already dense enough to
     capture the band dispersion correctly.
     In this case, we are using a 24×24×24 mesh, which is not very dense for such computations.
     This means that, when increasing [[sigma_erange]], sometimes
-    no additional $\kk$-point is included and the sampling is too coarse.
+    no additional $\kk$-point is included as the sampling is too coarse.
     This is the case for the first three datasets (3 $\kk$-points), and the last two datasets (6 $\kk$-points).
     If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
     For instance, in Silicon, a 45×45×45 $\kk$-mesh could be used to determine [[sigma_erange]].
@@ -739,20 +756,21 @@ Just set [[eph_restart]] to 1 in the input file and rerun the job
 
 ## Transport calculation from SIGEPH.nc
 
-The routine that computes carrier mobilites is automatically invoked when [[eph_task]] -4
+The routine that computes carrier mobilites is automatically invoked when [[eph_task]] -4 is used
 and a **RTA.nc** file with the final results is produced.
-There are however cases in which one would like to compute mobilities starting from a pre-existent
-SIGEPH.nc file without performing a full calculation from scratch.
-In this case, one can use [[eph_task]] 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
-The advanced input variable [[transport_ngkpt]] can be use to downsample
-the $\kk$-mesh used to evaluate the mobility integral.
+There are however cases in which one would like to compute mobilities starting from
+a **pre-existent SIGEPH.nc** without performing a full calculation from scratch.
+In this case, use [[eph_task]] 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
+The advanced input variable [[transport_ngkpt]] can be used to downsample
+the $\kk$-mesh used in the mobility integrals.
 
 ## MPI parallelism and memory requirements
 
 There are **five different MPI levels** that can be used to distribute the workload
 and the most memory-demanding data structures.
 By default, the code tries to reach some compromise between memory requirements and time to solution
-by activating the parallelism over $\qq$-points if no other input is provided by the user.
+by activating the parallelism over perturbations and then the $\qq$-point parallelism
+if no input is provided by the user.
 You can however specify manually the MPI distribution across the five different levels
 by using [[eph_np_pqbks]] (a list of 5 integers).
 The product of these five numbers **must be equal to the total number of MPI processes**.
@@ -768,7 +786,7 @@ The parallelization over bands is usually not relevant for mobility computations
 as only a few states close to the VBM or CBM are usually included.
 The MPI parallelism over $\kk$-points and spins is very efficient
 but it requires HDF5 with MPI-IO support and, besides, memory won't scale.
-Use these additional levels if the memory requirements are under control
+Use these additional two levels if the memory requirements are under control
 and you want to boost the calculation.
 
 ## How to reduce the memory requirements
@@ -792,7 +810,7 @@ To reduce the memory for the wavefunctions, the code uses internal buffers in si
 This option is enabled at configure time by using `enable_gw_dpc="no"` (this is the default behaviour).
 
 If these tricks do not solve your problem, consider using OpenMP threads.
-The code is not highly-optimized for OpenMP but a few threads may be useful to avoid replicating memory at the MPI level.
+The code is not highly-optimized for OpenMP but a couple of threads may be useful to avoid replicating memory at the MPI level.
 As a rule of thumb, 2-4 OpenMP threads should be OK provided you link with threaded FFT and BLAS libraries.
 To compile ABINIT with OpenMP support and link with a threaded library see the
 corresponding section in the [compilation tutorial](compilation).
@@ -860,7 +878,7 @@ sigma_erange 0.0 0.2 eV   # Select kpts in fine mesh within this energy window.
 einterp 1 5 0 0           # Parameters for star-function interpolation
 ```
 
-This step produces a *KERANGE.nc* file (let's call it *out_KERANGE*) that can be used
+This input produces a *KERANGE.nc* file (let's call it *out_KERANGE*) that can be used
 via the [[getkerange_filepath]] variable as a starting point to perfom a NSCF run with the following variables:
 
 ```sh
@@ -878,7 +896,7 @@ nshiftk  1
 shiftk   0.0 0.0 0.0
 ```
 
-This calculation will produce a **customized Fortran WFK file** with [[ngkpt]] = 64 64 64 in which
+This part will produce a **customized Fortran WFK file** with [[ngkpt]] = 64 64 64 in which
 only the states listed in the **KERANGE.nc** netcdf file have been computed.
 This WKF file can then be used in the EPH code to compute mobilites.
 For further examples see [[test:v9_57]], and [[test:v9_61]].
