@@ -89,7 +89,6 @@ type, public :: dataset_type
  integer :: berrystep
  integer :: brav = 1
  integer :: brvltt
-!BEGIN VARIABLES FOR @Bethe-Salpeter
  integer :: bs_algorithm = 2
  integer :: bs_calctype = 1
  integer :: bs_coulomb_term = 11
@@ -110,6 +109,7 @@ type, public :: dataset_type
  integer :: cd_customnimfrqs
  integer :: chkdilatmx
  integer :: chkexit
+ integer :: chneut = 1
  integer :: chkprim
  integer :: chksymbreak
  integer :: cineb_start
