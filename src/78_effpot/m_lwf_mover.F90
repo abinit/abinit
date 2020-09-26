@@ -37,6 +37,11 @@ module m_lwf_mover
   use m_errors
   use m_abicore
   use m_xmpi
+  use m_nctk
+#define HAVE_NETCDF 1
+#if defined HAVE_NETCDF
+  use netcdf
+#endif
   use m_mpi_scheduler, only: mpi_scheduler_t, init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
@@ -71,6 +76,7 @@ module m_lwf_mover
      procedure :: run_varT
      procedure :: prepare_ncfile
      procedure :: set_ncfile_name
+     procedure :: read_hist_lwf_state
   end type lwf_mover_t
 
 contains
@@ -231,18 +237,68 @@ contains
            self%lwf(i*2-1)=tmp
            self%lwf(i*2)=0.0
          enddo
+      ! random
       case(1)
          call self%rng%rand_unif_01_array(self%lwf, self%nlwf)
          self%lwf=(self%lwf-0.5)*0.1
+      ! zero
       case(2)
          self%lwf(:)=0.0
+      ! read from lwf hist file
+      case(4)
+         call self%read_hist_lwf_state(restart_hist_fname)
       end select
 
       call self%hist%set_hist(lwf=self%lwf, energy=0.0_dp)
-
-      ABI_UNUSED(mode)
-      ABI_UNUSED(restart_hist_fname)
     end subroutine set_initial_state
+
+  !-------------------------------------------------------------------!
+  ! read_hist_lwf_state
+  !  read the last step of spin from hist file.
+  !-------------------------------------------------------------------!
+  subroutine read_hist_lwf_state(self, fname)
+    class(lwf_mover_t), intent(inout) :: self
+    character(len=fnlen), intent(in) :: fname
+    integer :: ierr, ncid, varid
+    integer :: nlwf, ntime
+    character(len=118) :: msg
+    ! open file
+
+#if defined HAVE_NETCDF
+    ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
+    NCF_CHECK_MSG(ierr, "The lwf_init_mode is set to 4. But opening netcdf file "//trim(fname)//" Failed. ")
+
+    ! sanity check. If the hist file is consistent with the current calculation
+    ierr=nctk_get_dim(ncid, "nlwf" , nlwf)
+    NCF_CHECK_MSG(ierr, "when reading nlwf")
+
+    msg="The number of lwfs in histfile is not equal & & to the present calculation." // &
+         & " Please check if the file is consistent."
+    if (nlwf/= self%nlwf) then
+       MSG_ERROR(msg)
+    end if
+
+    ierr=nctk_get_dim(ncid, "ntime", ntime)
+    NCF_CHECK_MSG(ierr, "when reading ntime")
+
+    ! read lwf and set as initial state
+    ierr =nf90_inq_varid(ncid, "lwf", varid)
+    NCF_CHECK_MSG(ierr, "when reading lwf.")
+
+    ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%lwf(:), &
+         & start=(/ 1, ntime/), count=(/nlwf,1/))
+    NCF_CHECK_MSG(ierr, "when reading lwf from lwf hist file")
+
+    ! close file
+    ierr=nf90_close(ncid)
+    NCF_CHECK_MSG(ierr, "Close netcdf file")
+#else
+    MSG_ERROR("lwf_init_state set to 4 but abinit is not compiled with netcdf.")
+#endif
+
+  end subroutine read_hist_lwf_state
+
+
 
     subroutine prepare_ncfile(self, params, fname)
       class(lwf_mover_t), intent(inout) :: self
