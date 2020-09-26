@@ -1,5 +1,5 @@
 
-.Version 9.1.6 of MULTIBINIT 
+.Version 9.2.1 of MULTIBINIT 
 .(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 21 Aug 2020.
-- ( at 20h42 )
+.Starting date : Tue 22 Sep 2020.
+- ( at 21h55 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_Multibinit-slc/tests/v9/Input/t83.nc
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_v9.2-newvar/tests/v9/Input/t83.nc
  to initialize the multibinit input
 
 ================================================================================
@@ -41,9 +41,7 @@
        ncell         6         6         6
        dtion        10
  Spin Dynamics :
-   spin_calc_correlation_obs           0
         spin_calc_thermo_obs           1
-          spin_calc_traj_obs           0
                spin_dynamics           2
             spin_temperature       50.00000
                 spin_damping        0.00000
@@ -90,13 +88,14 @@ reading spin terms.
 
 ================================================================================
 
-- Reading spin-lattice coupling terms from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_Multibinit-slc/tests/v9/Input/t83.nc
+- Reading spin-lattice coupling terms from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_v9.2-newvar/tests/v9/Input/t83.nc
  Initial spins set to random values.
 ================================================================================
 Coupled spin-lattice
 ================================================================================
      Iteration      E_spin(Ha)     E_latt(Ha)      E_slc(Ha)      E_tot(Ha)
 --------------------------------------------------------------------------------
+Measurement run:
 -            10    2.78652E-01    2.64542E-01   -2.79214E-05    5.43166E-01
 -            20    2.78679E-01    2.64703E-01   -2.13869E-04    5.43168E-01
 -            30    2.78719E-01    2.64990E-01   -5.37210E-04    5.43171E-01
@@ -1112,10 +1111,10 @@ Total energy                               5.43036E-01
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=        295.5  wall=        296.9
+- Proc.   0 individual time (sec): cpu=        292.8  wall=        293.1
 
 ================================================================================
 
-+Total cpu time    295.518  and wall time    296.899 sec
++Total cpu time    292.788  and wall time    293.143 sec
 
  multibinit : the run completed succesfully.

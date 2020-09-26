@@ -119,9 +119,9 @@ contains
     self%is_sorted=.False.
     self%is_unique=.False.
     if((self%is_pair_grouped)) then
-      !self%pair_1list%finalize()
-      !self%pair_2list%finalize()
-      !self%pair_startend%finalize()
+      call self%pair_1list%finalize()
+      call self%pair_2list%finalize()
+      call self%pair_startend%finalize()
     endif
     self%is_pair_grouped = .False.
 
@@ -324,7 +324,7 @@ contains
   subroutine group_by_pair(self)
     class(ndcoo_mat_t), intent(inout) :: self
 
-    integer :: i, ii, ij, ngroup
+    integer :: i, ii, ij
 !    type(int_array_type) :: i1, j1, startend
 
     if((self%is_pair_grouped)) return
