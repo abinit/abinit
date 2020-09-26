@@ -404,7 +404,7 @@ In this case, using the same sampling for electrons and phonons may be enough to
 * By default, the code use the tetrahedron method [[cite:Blochl1994]]
   to perform the integration in $\qq$-mesh.
   This allows to efficiently filter out the $\qq$-points that do not contribute to the lifetimes
-  since these transitions are not compatible with energy and momentum conservation.
+  since these transitions are not compatible with energy and crystalline-momentum conservation.
   The use of the tetrahedron method is **automatically activated** when [[eph_task]] is set to -4.
   It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended
   as the calculation will become significantly slower.
@@ -598,14 +598,18 @@ This run should take a few minutes.
 
 We can now analyze the variation of the mobility with respect to [[sigma_erange]].
 
+TODO: Add script to analyze convergence wrt sigma_erange
 
-!!! tip
+This study shows that an energy window of ~0.15 above the CBM is enough to converge
+so we use this value in the subsequent calculations.
+
+!!! warning
 
     One should perform this convergence study with a $\kk$-mesh that is already dense enough to
     capture the band dispersion correctly.
     In this case, we are using a 24×24×24 mesh, which is not very dense for such computations.
-    This means that, when increasing [[sigma_erange]], sometimes
-    no additional $\kk$-point is included as the sampling is too coarse.
+    This means that, when increasing [[sigma_erange]],
+    no additional $\kk$-point is included as the sampling is **too coarse**.
     This is the case for the first three datasets (3 $\kk$-points), and the last two datasets (6 $\kk$-points).
     If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
     For instance, in Silicon, a 45×45×45 $\kk$-mesh could be used to determine [[sigma_erange]].
@@ -641,7 +645,7 @@ the values of [[ngkpt]].
 -->
 
 To compute the mobility with a $\qq$-mesh twice as dense as the $\kk$-mesh,
-there are two possible approaches.
+there are two possible approaches:
 
 1. Run a computation with:
 
@@ -649,7 +653,7 @@ there are two possible approaches.
     * [[eph_ngqpt_fine]] 90 90 90,
     * [[sigma_ngkpt]] 45 45 45.
 
-    Using [[sigma_ngkpt]] to select the $\kk$-points in $\Sigma_\nk$ belonging to the 45×45×45 mesh,
+    using [[sigma_ngkpt]] to select the $\kk$-points in $\Sigma_\nk$ belonging to the 45×45×45 mesh,
     but now each lifetime is computed with a 90×90×90 $\qq$-mesh.
 
 2. Run a computation with:
@@ -661,10 +665,10 @@ there are two possible approaches.
     Following this approach, we compute lifetimes on a 90×90×90 $\kk$- and the integration
     is perfomed on the same $\qq$-mesh.
     You can then run again the transport driver only,
-    by setting [[eph_task]] 7 and [[transport_ngkpt]] 45 45 45.
+    by setting [[eph_task]] 7 and [[transport_ngkpt]] 45 45 45
     to downsample the $\kk$-mesh used to integrate the mobility in $\kk$-space.
     This second option has the advantage that it delivers **two mobilities** in one-shot
-    but it is overkilling if a 45×45×45/90×90×90 k/q sampling is already enough.
+    but it would be overkilling if a 45×45×45/90×90×90 k/q sampling is already enough.
 
 You can run again the previous input files by densifying the different meshes.
 For the densest grids, you might need to run with multiple MPI processes.
@@ -684,14 +688,15 @@ Obviously, these parameters depend on the system under investigation.
 Another possibility to improve the results without increasing the computation time significantly
 is the double-grid (DG) technique [[cite:Brunin2020b]].
 In this method, a coarse sampling is used for the $\kk$- and the $\qq$-mesh for the e-ph matrix elements,
-but a finer mesh is used to compute the weights for the delta functions associate to phonon absorption/emission.
-This technique allows one to accelerate the convergen while keeping the computational cost and the memory requirements low.
+but a **finer mesh** is used to interpolate the weights for the delta functions associated to phonon absorption/emission.
+This technique allows one to accelerate the convergence while keeping
+the computational cost and the memory requirements at a reasonable level.
 
 !!! important
 
     The efficiency of the DG approach depends on the strength of the polar Frohlich divergence:
-    if this divergence is very difficult to integrate numerically,
-    the coarse $\qq$-mesh for the e-ph matrix elements will have to be denser.
+    if the divergence is difficult to integrate numerically,
+    the coarse $\qq$-mesh for the e-ph matrix elements will have to be densified.
 
 The DG technique requires a second WFK file, containing the KS eigenvalues on the fine mesh.
 You can specify the path to the fine WFK file using [[getwfkfine_filepath]] as in:
