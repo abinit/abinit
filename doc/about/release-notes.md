@@ -330,7 +330,7 @@ the build system will try to find them in the "usual" directories, and inform th
 The build system also can make suggestions to the user, to complete its *.ac9 file.
 
 Specialized INSTALL notes are available to help the user for 
-[CentOS](../INSTALL_CentOS), [Easybuild](../INSTALL_Easybuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
+[CentOS](../INSTALL_CentOS), [EasyBuild](../INSTALL_EasyBuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
 
 By Y. Pouillon and JM Beuken
 
