@@ -1,0 +1,5 @@
+Pseudopotentials in this directory have been downloaded from http://www.pseudo-dojo.org/ in August 2020.
+Type : NC SR (ONCVPSP v0.4)
+XC : PBE
+Accuracy : standard
+Format : psp8
