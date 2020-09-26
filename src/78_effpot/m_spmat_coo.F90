@@ -47,6 +47,7 @@ module m_spmat_COO
    contains
      procedure :: initialize
      procedure :: mv
+     procedure :: diag
   end type COO_mat_t
 
 
@@ -64,6 +65,20 @@ contains
     end if
     call self%ndcoo_mat_t%initialize(mshape)
   end subroutine initialize
+
+  subroutine diag(self, d)
+    class(coo_mat_t), intent(inout) :: self
+    real(dp), intent(out) :: d(:)
+    integer :: ind, ind_i, ind_j
+    d(:)=0.0_dp
+    do ind=1, self%nnz
+       ind_i=self%ind%data(1, ind)
+       ind_j=self%ind%data(2, ind)
+       if (ind_i==ind_j) then
+          d(ind_i)=d(ind_i)+self%val%data(ind)
+       endif
+    end do
+  end subroutine diag
 
   !-----------------------------------------------------------------------
   !> @brief COO sparse matrix-vector multiplication. naive implementation.

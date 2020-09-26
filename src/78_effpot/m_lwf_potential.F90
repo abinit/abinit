@@ -58,6 +58,7 @@ module m_lwf_potential
      integer :: self_bound_order=0
      real(dp) :: self_bound_coeff=0.0_dp
      real(dp) :: beta
+     real(dp), allocatable :: coeff_diag(:)
    contains
      procedure :: initialize
      procedure :: finalize
@@ -91,6 +92,7 @@ contains
     !call self%coeff%initialize(mshape= [self%nlwf, self%nlwf])
     call self%coeff2%initialize(mshape= [self%nlwf, self%nlwf])
     self%csr_mat_ready=.False.
+    ABI_ALLOCATE(self%coeff_diag, (self%nlwf))
   end subroutine initialize
 
   !-------------------------------------------------------------------!
@@ -104,6 +106,7 @@ contains
     call self%abstract_potential_t%finalize()
     self%is_null=.True.
     self%nlwf=0
+    ABI_SFREE(self%coeff_diag)
   end subroutine finalize
 
   !-------------------------------------------------------------------!
@@ -136,6 +139,7 @@ contains
        self%csr_mat_ready=.True.
        !call xmpi_bcast(self%csr_mat_ready, master, comm, ierr)
     endif
+    call self%coeff_coo%diag(self%coeff_diag)
 
   end subroutine convert_coeff_to_csr
 
@@ -222,7 +226,7 @@ contains
 
 
     if (present(energy)) then
-       energy=energy+etmp
+       energy=energy+etmp*340.0/1200.0
     endif
     if(present(energy_table)) then
        call energy_table%put(self%label, etmp)
@@ -252,7 +256,7 @@ contains
 
     call self%convert_coeff_to_csr()
     call self%coeff%mv_one_row(ilwf, lwf, tmp)
-    deltaE=deltaE+ tmp*dlwf
+    deltaE=deltaE+ tmp*dlwf - self%coeff_diag(ilwf)*dlwf*dlwf
 
     ! bound term
     if (self%has_self_bound_term) then
@@ -260,7 +264,7 @@ contains
             & self%self_bound_coeff*(lwf_new**(self%self_bound_order) &
             & - lold**(self%self_bound_order))
     ! Adding x^6 and x^8 for VO2
-        deltaE=deltaE -1.1344*(lwf_new**6-lold**6) + 0.438*(lwf_new**8-lold**8)
+        deltaE=deltaE -1.833*(lwf_new**6-lold**6) + 1.838*(lwf_new**8-lold**8)
     end if
 
     if(modulo(ilwf, 2)==0) then
@@ -268,6 +272,8 @@ contains
     else
        deltaE=deltaE+ self%beta*((lwf_new**2- lold**2)*lwf(ilwf+1)**2)
     endif
+
+    deltaE=deltaE*340.0/1200.0
 
     lwf(ilwf)=lwf(ilwf)-dlwf
   end subroutine get_delta_E_lwf

@@ -63,6 +63,7 @@
        procedure, private :: accept
        procedure, private :: reject
        procedure  :: run_one_step
+       procedure :: set_temperature
        procedure, private :: run_one_mc_step
     end type lwf_mc_t
 
@@ -81,7 +82,6 @@
       self%beta=1.0/self%temperature ! Kb in a.u. is 1.
       self%lwf_new=0.0_dp
       self%lwf_old=0.0_dp
-
     end subroutine initialize
 
     !----------------------------------------------------------------------
@@ -95,6 +95,14 @@
       self%temperature=0.0
       self%beta=0.0
     end subroutine finalize
+
+    subroutine set_temperature(self, temperature)
+      class(lwf_mc_t), intent(inout) :: self
+      real(dp), intent(in) :: temperature
+      call self%lwf_mover_t%set_temperature(temperature)
+      self%temperature=temperature
+      self%beta=1.0/self%temperature ! Kb in a.u. is 1.
+    end subroutine set_temperature
 
 
     !----------------------------------------------------------------------
@@ -110,7 +118,7 @@
      ! try to change lwf
      r=self%attempt(self%rng, effpot)
      ! metropolis-hastings
-     if(self%rng%rand_unif_01()< min(1.0_dp, r) .and. abs(self%lwf_new)<0.4 ) then
+     if(self%rng%rand_unif_01()< min(1.0_dp, r) .and. abs(self%lwf_new)<0.5 ) then
         self%naccept=self%naccept+1
         call self%accept()
      else
@@ -174,6 +182,7 @@
      class(lwf_mc_t), intent(inout) :: self
      self%lwf(self%imove)=self%lwf_new
      self%energy=self%energy+self%deltaE
+     !print *, "E:", self%energy/self%supercell%ncell
    end subroutine accept
 
    !----------------------------------------------------------------------
