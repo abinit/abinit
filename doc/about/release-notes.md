@@ -34,7 +34,7 @@ In particular:
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...),
    as this was not sustainable (see [B.6](#v9.2.B.6)) and nowadays most users install prerequisite libraries themselves.
    See also the specialized INSTALL notes for
-   [CentOS](../INSTALL_CentOS), [Easybuild](../INSTALL_Easybuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
+   [CentOS](../INSTALL_CentOS), [EasyBuild](../INSTALL_EasyBuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.2.B.9)). 
    Note that the YAML output is still under development and modifications may appear in the next versions. 
