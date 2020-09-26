@@ -11304,7 +11304,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 When using Scalapack (or any similar Matrix Algebra library such as ELPA), the efficiency
-of the eigenpsolver saturates as the number of CPU cores increases.
+of the eigenproblem solver saturates as the number of CPU cores increases.
 In this case, it is more efficient to use a smaller number of CPUs for the LINALG calls.
 The maximum number of cores can be set with [[np_slk]].
 A large number for [[np_slk]] (i.e. 1000000) means that all cores are used for

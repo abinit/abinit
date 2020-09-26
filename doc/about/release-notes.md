@@ -6,7 +6,7 @@ List of changes with respect to version 8.10.
 Many thanks to the contributors to the ABINIT project between
 October 2018 and September 2020. These release notes
 are relative to modifications/improvements of ABINIT v9.2 with respect to v8.10
-(merge requests up to and including MR636 are taken into account)
+(merge requests up to and including MR692 are taken into account, also MR 697)
 
 The list of contributors includes:
 B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen,
@@ -32,9 +32,13 @@ In particular:
    A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
    to convert from the old `.ac`format to `.ac9`.
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...),
-as this was not sustainable (see [B.6](#v9.2.B.6)) and nowadays most users install prerequisite libraries themselves.
+   as this was not sustainable (see [B.6](#v9.2.B.6)) and nowadays most users install prerequisite libraries themselves.
+   See also the specialized INSTALL notes for
+   [CentOS](../INSTALL_CentOS), [Easybuild](../INSTALL_Easybuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
-    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.2.B.9)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
+   This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.2.B.9)). 
+   Note that the YAML output is still under development and modifications may appear in the next versions. 
+   A python API to extract the results of the calculation will be provided when the implementation is finalized.
 4. Several default values have been changed, see [A.3](#v9.2.A.3).
 
 
@@ -133,8 +137,8 @@ New input variables: [[brav]], [[dvdb_add_lr]], [[dvdb_qcache_mb]], [[dvdb_qdamp
 [[eph_stern]], [[eph_use_ftinterp]], [[eph_phwinfact]],
 [[getdvdb]], [[getdvdb_filepath]], [[getkerange_filepath]],
 [[getsigeph_filepath]],
-[[irddvdb]], [[prteliash]], [[sigma_bsum_range]], [[sigma_erange]],
-[[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]], [[rifcsph]].
+[[irddvdb]], [[prteliash]], [[rifcsph]], [[sigma_bsum_range]], [[sigma_erange]],
+[[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]].
 
 Note that the new EPH processing unit of ABINIT [[optdriver]]=7 has a different implementation than the one implemented in anaddb.
 Three new tutorials are availables, [[tutorial:eph_intro]], [[tutorial:eph4mob]] and [[tutorial:eph4zpr]], and supercede the legacy tutorials
@@ -325,6 +329,9 @@ If the user does not provide the path to these libraries,
 the build system will try to find them in the "usual" directories, and inform the user that it has done so.
 The build system also can make suggestions to the user, to complete its *.ac9 file.
 
+Specialized INSTALL notes are available to help the user for 
+[CentOS](../INSTALL_CentOS), [Easybuild](../INSTALL_Easybuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
+
 By Y. Pouillon and JM Beuken
 
 **B.7** New command line interface
@@ -381,7 +388,7 @@ By M. Giantomassi (MR 586).
 A new mechanism to read strings enclosed between **double quotation marks** from the input file has been activated.
 So, many new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
 that were expecting numerical values such as the `get*` and `ird*` variables.
-The goal is to encourange a new approach for performing ABINIT calculations in which multiple datasets
+The goal is to encourage a new approach for performing ABINIT calculations in which multiple datasets
 and `get*` variables are replaced by indipendent input files that are connected together via file paths.
 
 List of new input variables that rely on this feature:
