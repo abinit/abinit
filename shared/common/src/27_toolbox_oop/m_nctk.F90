@@ -801,7 +801,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    ! Write string with input.
    my_string = trim(INPUT_STRING)
    if (DTSET_IDX /= -1 .and. index(INPUT_STRING, "jdtset ") == 0) then
-     my_string = "jdtset " // itoa(DTSET_IDX) // "  " // trim(INPUT_STRING)
+     my_string = "jdtset " // trim(itoa(DTSET_IDX)) // "  " // trim(INPUT_STRING)
    end if
 
    input_len = len_trim(my_string)
