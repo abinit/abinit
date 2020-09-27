@@ -282,6 +282,10 @@ module m_multibinit_dataset
   !real(dp), allocatable :: qspin1l(:,:)
   !real(dp), allocatable :: qspin2l(:,:)
 
+
+! characters
+  character(len=fnlen) :: lwf_init_hist_fname
+
  end type multibinit_dtset_type
 !!***
 
@@ -418,6 +422,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%lwf_nctime = 1
  multibinit_dtset%lwf_ntime = 0
  multibinit_dtset%lwf_init_state = 0
+ multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
  multibinit_dtset%lwf_dt=0
  multibinit_dtset%lwf_self_bound_order=0
  multibinit_dtset%lwf_temperature=0.0_dp
@@ -1063,14 +1068,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%lwf_init_state=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_init_state',tread,'INT')
  if(tread==1) multibinit_dtset%lwf_init_state=intarr(1)
- if( .not. (multibinit_dtset%lwf_init_state <= 1) ) then
+ if( .not. (multibinit_dtset%lwf_init_state <= 4) ) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'lwf_init_state is ',multibinit_dtset%lwf_init_state,', but the only allowed values',ch10,&
-         &   'are 0, 1 and negative values.',ch10,&
+         &   'are 0, 1,2,3,4 and negative values.',ch10,&
          &   'Action: correct lwf_init_state in your input file.'
     MSG_ERROR(message)
  end if
 
+ multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_init_hist_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%lwf_init_hist_fname)
+ if(.not. tread==1) multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
 
  multibinit_dtset%lwf_dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_dynamics',tread,'INT')

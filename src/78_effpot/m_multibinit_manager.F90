@@ -523,8 +523,8 @@ contains
        ABI_DATATYPE_ALLOCATE_SCALAR(lwf_mc_t, self%lwf_mover)
     end select
     call self%lwf_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
-    fname=trim(self%filenames(2))//"_lwfhist_input.nc"
-    call self%lwf_mover%set_initial_state(mode=self%params%lwf_init_state, fname=fname)
+    call self%lwf_mover%set_initial_state(mode=self%params%lwf_init_state, &
+        & restart_hist_fname=trim(self%params%lwf_init_hist_fname))
   end subroutine set_lwf_mover
 
 
