@@ -203,7 +203,7 @@ subroutine opernla_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt
  if (choice==-1) return
 
  if (abs(choice)>1) then
-   MSG_ERROR('Only abs(choice)<=0 is available for now.')
+   MSG_ERROR('Only abs(choice)<=1 is available for now.')
  end if
  if (cplex/=2) then
    MSG_ERROR('Only cplex=2 is available for now.')
