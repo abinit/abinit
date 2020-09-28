@@ -3,7 +3,7 @@
 !!  m_gwrdm
 !!
 !! FUNCTION
-!!  Compute density matrix correction G = Go + Go Sigma Go (imaginary freqs. are used in Sigma_c) 
+!!  Compute density matrix correction Galitskii-Migdal Ecorr, G = Go + Go Sigma Go (imaginary freqs. are used in Sigma_c) 
 !!  and associated quantities (natural orbitals, matrix elements, etc)
 !! PARENTS
 !! 
@@ -40,94 +40,12 @@ module m_gwrdm
  private :: no2ks,ks2no
 !!***
  
- public :: calc_Ex_GM_k,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,print_tot_occ 
+ public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,print_tot_occ 
 !!***
 
 contains
 
 !!***
-!!****f* ABINIT/Calc_Ex_GM_k
-!! NAME
-!! calc_Ex_GM_k
-!!
-!! FUNCTION
-!! Calculate Galitskii-Migdal exchange. energy integrated in the Imaginary axis Ex = 1/(2pi) \sum_i \int Gii(iv)*Sigma_x,ii + cc. dv
-!!
-!! INPUTS
-!! ib1=min band for given k
-!! ib2=max band for given k.
-!! nomega_sigc=number of omegas (w) in the imaginary axis (iw) used in the quadrature.
-!! kpoint=k-point where the Galitskii-Migdal contribution is used. 
-!! weights=array containing the weights used in the quadrature.
-!! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin) 
-!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
-!! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
-!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
-!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
-!! Sr=sigma_t (see the definition of this structured datatype)
-!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
-!!
-!! OUTPUT
-!! Compute the Galitskii-Migdal exchange energy contribution of this k-point 
-!! 
-!! PARENTS
-!!  m_sigma_driver.f90
-!! CHILDREN
-!! SOURCE
-
-function calc_Ex_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,BSt,Kmesh) result(Ex_GM_k)
-
-!Arguments ------------------------------------
-!scalars
- real(dp) :: Ex_GM_k
- integer,intent(in) :: ib1,ib2,nomega_sigc,kpoint
- type(ebands_t),target,intent(in) :: BSt
- type(sigma_t),intent(in) :: Sr
- type(kmesh_t),intent(in) :: kmesh
-!arrays
- real(dp),intent(in) :: weights(:)
-!Local variables ------------------------------
-!scalars
- real(dp), parameter :: pi=3.141592653589793238462643383279502884197
- real(dp) :: tol8
- character(len=500) :: msg
- integer :: ibdm,iquad
- real(dp) :: ex_integrated,spin_fact,fact
- complex(dpc) :: denominator
-!arrays
-!************************************************************************
-
- DBG_ENTER("COLL")
-
- ex_integrated=0.0_dp
- spin_fact=2.0_dp
- fact=spin_fact*(1.0_dp/(4.0_dp*pi))
- tol8=1.0e-8
- write(msg,'(a26,f10.5)')' wtk used in calc_Ex_GM_k:',kmesh%wt(kpoint)
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
-
- if (ib1/=1) then
-   MSG_WARNING("Unable to compute the Galitskii-Migdal exchange energy because the first band was not included in bdgw interval.& 
-   &Restart the calculation starting bdgw from 1.")
- else
-   do ibdm=ib1,ib2
-     do iquad=1,nomega_sigc
-       denominator=(Sr%omega_i(iquad)-BSt%eig(ibdm,kpoint,1))
-       if (abs(denominator)>tol8) then
-         ! Sigma_pp/[(denominator)] + [Sigma_pp/[(denominator)]]^* = 2 Re [Sigma_pp/denominator]
-          ex_integrated=ex_integrated+weights(iquad)*2.0_dp*real(Sr%x_mat(ibdm,ibdm,kpoint,1)/denominator)
-       end if
-     end do
-   end do
- endif
- Ex_GM_k=kmesh%wt(kpoint)*fact*ex_integrated
-
- DBG_EXIT("COLL")
-
-end function calc_Ex_GM_k
-!!***
-
 !!****f* ABINIT/Calc_Ec_GM_k
 !! NAME
 !! calc_Ec_GM_k
@@ -194,7 +112,7 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
    MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was not included in bdgw interval.& 
    &Restart the calculation starting bdgw from 1.")
  else
-   do ibdm=ib1,ib2
+   do ibdm=1,ib2
      do iquad=1,nomega_sigc
        denominator=(Sr%omega_i(iquad)-BSt%eig(ibdm,kpoint,1))
        if (abs(denominator)>tol8) then
@@ -255,10 +173,8 @@ subroutine calc_rdmx(ib1,ib2,kpoint,iinfo,pot,dm1,BSt)
 
  DBG_ENTER("COLL")
  tol8=1.0e-8
- spin_fact=2.0d0
+ spin_fact=2.0_dp
  msg2='Sx-Vxc '
-
- !call printdm1(1,10,pot) ! Uncomment for debug 
 
  if (iinfo==0) then 
    write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
@@ -351,10 +267,10 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
    call wrtout(std_out,msg,'COLL')
  end if
 
- dm1(:,:)=0.0d0
+ dm1(:,:)=0.0_dp
  do ib1dm=ib1,ib2  
    do ib2dm=ib1dm,ib2 
-     dm1_mel=0.0d0
+     dm1_mel=0.0_dp
      do iquad=1,nomega_sigc
        denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(iquad)-BSt%eig(ib2dm,kpoint,1)) 
        if (abs(denominator)>tol8) then 
@@ -443,7 +359,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
  ABI_MALLOC(eigenvect,(ndim,ndim))
  ABI_MALLOC(rwork,(3*ndim-2))
 
- dm1_tmp=0.0d0
+ dm1_tmp=0.0_dp
  do ib2dm=1,ndim
    do ib1dm=ib2dm,ndim
      dm1_tmp(ib1dm,ib2dm)=dm1(ib1+(ib1dm-1),ib1+(ib2dm-1))
@@ -451,10 +367,9 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
      dm1_tmp(ib2dm,ib1dm)=conjg(dm1_tmp(ib1dm,ib2dm))
    end do
  end do
- !call printdm1(1,10,dm1_tmp) ! Uncomment for debug 
 
- work=0.0d0
- occs=0.0d0
+ work=0.0_dp
+ occs=0.0_dp
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
  if (info/=0) then
@@ -477,7 +392,6 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
     occs_tmp(ib1dm)=0.0_dp
   end if
  end do
- !call printdm1(1,10,eigenvect) ! Uncomment for debug
 
  if (check_Sijmat) then 
    do ib1dm=1,ndim
@@ -526,7 +440,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
  end if
 
  ! Store natural orbital eigenvectors matrix and occs. Also compute total number of electrons for this k-point
- toccs_k=0.0d0
+ toccs_k=0.0_dp
  do ib1dm=1,ndim
    do ib2dm=1,ndim
      nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint,1)=eigenvect(ib1dm,ib2dm)
@@ -534,7 +448,6 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
    occs_ks(ib1+(ib1dm-1),kpoint)=occs_tmp(ib1dm)
    toccs_k=toccs_k+occs_tmp(ib1dm)
  end do
- !call printdm1(1,10,eigenvect) ! Uncomment for debug 
 
  write(msg,'(a22,i5,a3,i5,a21,f10.5)') ' Total occ. from band ',ib1,' to', ib2,' at current k-point: ',toccs_k
  call wrtout(std_out,msg,'COLL')

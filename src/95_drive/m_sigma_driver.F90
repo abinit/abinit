@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM include: hartre from m_spacepar, density matrix module, and Gaussian quadrature one
  use m_spacepar,      only : hartre
- use m_gwrdm,         only : calc_Ex_GM_k,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,print_tot_occ 
+ use m_gwrdm,         only : calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,print_tot_occ 
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -222,7 +222,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ec_gm,ex_gm,coef_hyb 
+ real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ec_gm,coef_hyb 
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -2416,8 +2416,7 @@ endif
          nateigv(ib,ib,ikcalc,1)=cone
        enddo  
      enddo
-     ! MRM Initialize Galitskii-Migdal exchange and correlation energy accumulator
-     ex_gm=0.0_dp 
+     ! MRM Initialize Galitskii-Migdal correlation energy accumulator
      ec_gm=0.0_dp 
      ! MRM prepare arrays for the imaginary freq. integration of Sigma_c(iw)
      order_int=Sigp%nomegasi 
@@ -2714,11 +2713,6 @@ endif
            Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)=mat2rot(ib1dm,ib2dm)
          end do
        end do
-       if(coef_hyb>tol8) then
-         Sr%x_mat(:,:,ikcalc,1)=Sr%x_mat(:,:,ikcalc,1)/coef_hyb ! Produce <i|K[NO]|i> from alpha*<i|K[NO]|i>
-         ex_gm=ex_gm+calc_Ex_GM_k(ib1,ib2,nomega_sigc,ikcalc,Sr,weights,QP_BSt,Kmesh) ! Only restricted closed-shell calcs
-                                                                                      ! Warning: Using <KS_i|K[NO]|KS_j> in GM exchange energy.
-       end if
        ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>
        do ib1dm=1,ib2-ib1+1
          do ib2dm=1,ib2-ib1+1
@@ -2797,11 +2791,6 @@ endif
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a28)')' Vee[GM] = Vee[SD] + Ec[GM]:'
-     if(coef_hyb>tol8) then
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Ex[GM.Sx_no] = : ',ex_gm,' Ha ,',ex_gm*Ha_eV,' eV'
-     end if
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Ec[GM]       = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'
