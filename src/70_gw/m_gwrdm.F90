@@ -68,7 +68,9 @@ contains
 !! Kmesh <kmesh_t>=Structure describing the k-point sampling.
 !!
 !! OUTPUT
-!! Compute the Galitskii-Migdal corr energy contribution of this k-point
+!! Compute the Galitskii-Migdal corr energy contribution of this k-point:
+!! Ec ^k = weight_k * 1/(4*pi) * fact_spin * int _{ -Inf }^{ +Inf } dw Sigma_c(iw) * G0(iw) 
+!!       = weight_k * 1/(4*pi) * fact_spin * int _{   0  }^{ +Inf } dw 2 * Re{ Sigma_c(iw) * G0(iw) } 
 !!
 !! PARENTS
 !!  m_sigma_driver.f90
