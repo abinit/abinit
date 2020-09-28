@@ -752,6 +752,10 @@ By F. Jollet (MR 643, 645, 652, 653).
 
 **D.38** Nonlinear xc preliminary
 
+Preliminary work for some changes in the exchange correlation terms in nonlinear (3rd order DFPT).
+One term was implemented in both pead and dfptnl routines. Now it is merged in one routine (dfptnl_exc3).
+Due to a subtle reordering of nonlinear core correction terms, some pead refs are changed, but the final result ("First order change in electronic dielectric susceptibility tensor") remain the same.
+
 By L. Baguet (MR 650).
 
 
