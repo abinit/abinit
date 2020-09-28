@@ -101,7 +101,7 @@ function calc_Ex_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,BSt,Kmesh) result(Ex
 
  ex_integrated=0.0_dp
  spin_fact=2.0_dp
- fact=spin_fact*(1.0_dp/(2.0_dp*pi))
+ fact=spin_fact*(1.0_dp/(4.0_dp*pi))
  tol8=1.0e-8
  write(msg,'(a26,f10.5)')' wtk used in calc_Ex_GM_k:',kmesh%wt(kpoint)
  call wrtout(std_out,msg,'COLL')
@@ -121,7 +121,7 @@ function calc_Ex_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,BSt,Kmesh) result(Ex
      end do
    end do
  endif
- Ex_GM_k=kmesh%wt(kpoint)*0.5_dp*fact*ex_integrated
+ Ex_GM_k=kmesh%wt(kpoint)*fact*ex_integrated
 
  DBG_EXIT("COLL")
 
@@ -184,7 +184,7 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
 
  ec_integrated=0.0_dp
  spin_fact=2.0_dp
- fact=spin_fact*(1.0_dp/(2.0_dp*pi))
+ fact=spin_fact*(1.0_dp/(4.0_dp*pi))
  tol8=1.0e-8
  write(msg,'(a26,f10.5)')' wtk used in calc_Ec_GM_k:',kmesh%wt(kpoint)
  call wrtout(std_out,msg,'COLL')
@@ -204,7 +204,7 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
      end do
    end do
  endif
- Ec_GM_k=kmesh%wt(kpoint)*0.5_dp*fact*ec_integrated
+ Ec_GM_k=kmesh%wt(kpoint)*fact*ec_integrated
 
  DBG_EXIT("COLL")
 
