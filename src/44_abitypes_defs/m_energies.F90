@@ -147,6 +147,10 @@ module m_energies
   real(dp) :: e_nlpsp_vfock=zero
    ! Nonlocal pseudopotential part of total energy.
 
+  real(dp) :: e_nucdip=zero
+   ! Energy due to array of nuclear magnetic dipoles
+   ! valid for direct scheme
+
   real(dp) :: e_paw=zero
    ! PAW spherical part energy
 
@@ -245,6 +249,7 @@ subroutine energies_init(energies)
  energies%e_magfield    = zero
  energies%e_monopole    = zero
  energies%e_nlpsp_vfock = zero
+ energies%e_nucdip      = zero
  energies%e_paw         = zero
  energies%e_pawdc       = zero
  energies%e_sicdc       = zero
@@ -318,6 +323,7 @@ end subroutine energies_init
  energies_out%e_magfield           = energies_in%e_magfield
  energies_out%e_monopole           = energies_in%e_monopole
  energies_out%e_nlpsp_vfock        = energies_in%e_nlpsp_vfock
+ energies_out%e_nucdip             = energies_in%e_nucdip
  energies_out%e_paw                = energies_in%e_paw
  energies_out%e_pawdc              = energies_in%e_pawdc
  energies_out%e_sicdc              = energies_in%e_sicdc
@@ -408,6 +414,7 @@ end subroutine energies_copy
    energies_array(33)=energies%e_xc_vdw
    energies_array(34)=energies%h0
    energies_array(35)=energies%e_zeeman
+   energies_array(36)=energies%e_nucdip
  end if
 
  if (option==-1) then
@@ -446,6 +453,7 @@ end subroutine energies_copy
    energies%e_xc_vdw             = energies_array(33)
    energies%h0                   = energies_array(34)
    energies%e_zeeman             = energies_array(35)
+   energies%e_nucdip             = energies_array(36)
  end if
 
 end subroutine energies_to_array
@@ -603,7 +611,7 @@ subroutine energies_ncwrite(enes, ncid)
   "e_entropy", "entropy", "e_ewald", &
   "e_exactX","e_fermie", &
   "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
-  "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
+  "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
   "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
   "e_xc", "e_xcdc", "e_xc_vdw", &
   "h0","e_zeeman"], &
@@ -613,7 +621,7 @@ subroutine energies_ncwrite(enes, ncid)
    enes%e_exactX, enes%e_fermie, &
    enes%e_fock, enes%e_fockdc,enes%e_fock0,  enes%e_hartree, &
    enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
-   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
+   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, enes%e_nucdip, &
    enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
    enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
    enes%h0,enes%e_zeeman])
