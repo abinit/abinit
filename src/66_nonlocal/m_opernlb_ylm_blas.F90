@@ -203,7 +203,7 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  if (choice==4.or.choice==6.or.choice==23) return
 
  if (abs(choice)>1) then
-   MSG_ERROR('Only abs(choice)<=0 is available for now.')
+   MSG_ERROR('Only abs(choice)<=1 is available for now.')
  end if
  if (cplex/=2) then
    MSG_ERROR('Only cplex=2 is available for now.')
@@ -214,9 +214,9 @@ subroutine opernlb_ylm_blas(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 ! if (istwf_k/=1) then
 !   MSG_ERROR('Only istwf_k=1 is available for now.')
 ! end if
- if (paw_opt/=4) then
-   MSG_ERROR('Only paw_opt=4 is available for now.')
- end if
+! if (paw_opt/=4) then
+!   MSG_ERROR('Only paw_opt=4 is available for now.')
+! end if
  !
 !DDK not compatible with istwkf > 1
  if(cplex==1.and.(any(cplex_dgxdt(:)==2).or.any(cplex_d2gxdt(:)==2)))then
