@@ -51,7 +51,7 @@ contains
 !! calc_Ex_GM_k
 !!
 !! FUNCTION
-!! Calculate Galitskii-Migdal exchange. energy integrated in the Imaginary axis Ec = 1/pi \sum_i \int Gii(iv)*Sigma_x,ii + cc. dv
+!! Calculate Galitskii-Migdal exchange. energy integrated in the Imaginary axis Ex = 1/(2pi) \sum_i \int Gii(iv)*Sigma_x,ii + cc. dv
 !!
 !! INPUTS
 !! ib1=min band for given k
@@ -93,7 +93,7 @@ function calc_Ex_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,BSt,Kmesh) result(Ex
  character(len=500) :: msg
  integer :: ibdm,iquad
  real(dp) :: ex_integrated,spin_fact,fact
- complex(dpc) :: denominator!,division
+ complex(dpc) :: denominator
 !arrays
 !************************************************************************
 
@@ -116,15 +116,12 @@ function calc_Ex_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,BSt,Kmesh) result(Ex
        denominator=(Sr%omega_i(iquad)-BSt%eig(ibdm,kpoint,1))
        if (abs(denominator)>tol8) then
          ! Sigma_pp/[(denominator)] + [Sigma_pp/[(denominator)]]^* = 2 Re [Sigma_pp/denominator]
-          !division=Sr%x_mat(ibdm,ibdm,kpoint,1)/denominator
-          !ex_integrated=ex_integrated+weights(iquad)&
-          !&*real(division*exp(-aimag(Sr%omega_i(iquad))*0.0001)+conjg(division)*exp(aimag(Sr%omega_i(iquad))*0.0001))
           ex_integrated=ex_integrated+weights(iquad)*2.0_dp*real(Sr%x_mat(ibdm,ibdm,kpoint,1)/denominator)
        end if
      end do
    end do
  endif
- Ex_GM_k=kmesh%wt(kpoint)*fact*ex_integrated
+ Ex_GM_k=kmesh%wt(kpoint)*0.5_dp*fact*ex_integrated
 
  DBG_EXIT("COLL")
 
@@ -179,7 +176,7 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
  character(len=500) :: msg
  integer :: ibdm,iquad
  real(dp) :: ec_integrated,spin_fact,fact
- complex(dpc) :: denominator!,division
+ complex(dpc) :: denominator
 !arrays
 !************************************************************************
 
@@ -202,14 +199,12 @@ function calc_Ec_GM_k(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,Kmesh) 
        denominator=(Sr%omega_i(iquad)-BSt%eig(ibdm,kpoint,1))
        if (abs(denominator)>tol8) then
          ! Sigma_pp/[(denominator)] + [Sigma_pp/[(denominator)]]^* = 2 Re [Sigma_pp/denominator]
-          !division=sigcme_k(iquad,ibdm,ibdm,1)/denominator
-          !ec_integrated=ec_integrated+weights(iquad)*real(division+conjg(division))
           ec_integrated=ec_integrated+weights(iquad)*2.0_dp*real(sigcme_k(iquad,ibdm,ibdm,1)/denominator)
        end if
      end do
    end do
  endif
- Ec_GM_k=kmesh%wt(kpoint)*fact*ec_integrated
+ Ec_GM_k=kmesh%wt(kpoint)*0.5_dp*fact*ec_integrated
 
  DBG_EXIT("COLL")
 
