@@ -30,7 +30,7 @@ module m_symfind
  use m_abicore
  use m_symlist
 
- use m_symtk,     only : chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, smallprim
+ use m_symtk,     only : chkgrp, chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, smallprim, print_symmetries
  use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
 
@@ -62,7 +62,7 @@ contains
 !!
 !! INPUTS
 !! berryopt    =  4/14, 6/16, 7/17: electric or displacement field
-!! chrgat(natom)=target charge for each atom. Not always used, it depends on the value of constraint_kind
+!! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !! efield=cartesian coordinates of the electric field
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
 !! msym=default maximal number of symmetries
@@ -84,6 +84,7 @@ contains
 !!   primitive translations
 !!
 !! OUTPUT
+!! ierr (optional)=if non-zero, the symmetry operations do not form a group
 !! nsym=actual number of symmetries
 !! symafm(1:msym)=(anti)ferromagnetic part of nsym symmetry operations
 !! symrel(3,3,1:msym)= nsym symmetry operations in real space in terms
@@ -102,12 +103,13 @@ contains
 
  subroutine symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
 &  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-&  chrgat,nucdipmom)  ! Optional
+&  chrgat,ierr,nucdipmom)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
  integer,intent(in) :: prtvol
+ integer,optional,intent(out) :: ierr
  integer,intent(out) :: nsym
  real(dp),intent(in) :: tolsym
 !arrays
@@ -120,7 +122,7 @@ contains
 
 !Local variables-------------------------------
 !scalars
- integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ii
+ integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ierr_,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
  real(dp) :: det,ndnorm,nucdipmomcl2,nucdipmomcl20
  real(dp) :: spinat2,spinatcl2,spinatcl20
@@ -561,6 +563,17 @@ contains
  if (noncoll==1)   then
    ABI_DEALLOCATE(spinatred)
  end if
+
+ call chkgrp(nsym,symafm,symrel,ierr_)
+ if (ierr_/=0) then
+   call print_symmetries(nsym,symrel,tnons,symafm)
+ end if
+
+ if(.not.present(ierr))then
+   ABI_CHECK(ierr_==0,"Error in group closure")
+ else
+   ierr=ierr_
+ endif
 
 !DEBUG
 ! write(message,'(a,I0,a)')' symfind : exit, nsym=',nsym,ch10

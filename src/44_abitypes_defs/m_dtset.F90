@@ -756,6 +756,7 @@ type, public :: dataset_type
  real(dp) :: recefermi
  real(dp) :: rectolden
  real(dp) :: rhoqpmix
+ real(dp) :: rifcsph = zero
  real(dp) :: rcut
  real(dp) :: slabwsrad
  real(dp) :: slabzbeg
@@ -1772,6 +1773,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rf2_dkdk           = dtin%rf2_dkdk
  dtout%rf2_dkde           = dtin%rf2_dkde
  dtout%rhoqpmix           = dtin%rhoqpmix
+ dtout%rifcsph            = dtin%rifcsph
  dtout%signperm           = dtin%signperm
  dtout%slabwsrad          = dtin%slabwsrad
  dtout%slabzbeg           = dtin%slabzbeg
@@ -3221,7 +3223,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
- list_vars=trim(list_vars)//' rfstrs rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rprim'
+ list_vars=trim(list_vars)//' rfstrs rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  !These input parameters are obsolete (keep them for compatibility)
  list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
  list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs'
