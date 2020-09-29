@@ -481,12 +481,12 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  do kpoint=1,BSt%nkpt
    BSt%occ(b1gw:b2gw,kpoint,1) = occs(b1gw:b2gw,kpoint) ! Spins summed occ in [0:2] 
  enddo
- MSG_COMMENT("QP_BSt occupancies correctly updated with nat. orb. ones")
+ MSG_COMMENT("QP_BSt: occupancies were updated with nat. orb. ones")
  if ((size(Hdr%occ(:))/BSt%nkpt) < (b2gw-b1gw+1)) then
    !Actually, we should never reach this point because the code should stop during Wfd initialization in m_sigma_driver.F90
    MSG_ERROR("Impossible to use the existing read WFK to build a new one!")
  end if
- ! change occs in Header Hdr
+ 
  ! Update occ in Hdr before printing
  ib1dm=1
  do kpoint=1,BSt%nkpt
@@ -496,11 +496,10 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
      ib1dm=ib1dm+1
    end do
  end do
- MSG_COMMENT("Hdr_sigma occupancies correctly updated with nat. orb. ones")
 
- Hdr%npwarr(:)=Wfd%npwarr(:)                                   ! Use the npw = ones used in GW calc
+ Hdr%npwarr(:)=Wfd%npwarr(:)                                   ! Use the npw and ngfft = ones used in GW calc
  Hdr%ngfft(1:3)=ngfft_in(1:3)
- MSG_COMMENT("Hdr_sigma npw and ngfft correctly updated")
+ MSG_COMMENT("Hdr_sigma: occupancies, npw, and ngfft were updated")
 
 end subroutine update_hdr_bst
 !!***
