@@ -113,7 +113,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
  use m_spacepar,      only : hartre
- use m_gwrdm,         only : calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,print_tot_occ 
+ use m_gwrdm,         only : calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,rotate_ks_no,print_tot_occ 
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -2551,8 +2551,8 @@ endif
      !
      ! MRM: only the master has bands on Wfd_nato_master so it prints everything and prepares gw_rhor 
      !
-     call print_tot_occ(Sr,Kmesh,QP_BSt)                           
      call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
+     call print_tot_occ(Sr,Kmesh,QP_BSt)                           
      if (my_rank==0 .and. (dtset%prtwf == 1 .or. dtset%prtden == 1)) then
        call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs
        if (dtset%prtwf == 1) then 
