@@ -37,10 +37,10 @@ module m_gwrdm
  use m_xctk,           only : xcden  
  implicit none
 
- private :: no2ks,ks2no
+ private :: no2ks,ks2no,printdm1 
 !!***
  
- public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,print_tot_occ 
+ public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,rotate_ks_no,print_tot_occ 
 !!***
 
 contains
