@@ -112,7 +112,6 @@ module m_sigma_driver
  use m_calc_ucrpa,    only : calc_ucrpa
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
-! MRM include: hartre from m_spacepar, density matrix module, and Gaussian quadrature one
  use m_spacepar,      only : hartre
  use m_gwrdm,         only : calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,print_tot_occ 
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
@@ -334,9 +333,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wrtout(ab_out,msg,'COLL')
 
  gwcalctyp=Dtset%gwcalctyp
- gw1rdm=Dtset%gw1rdm ! MRM input variable to decide what updates should be applied and what must be printed
- x1rdm=Dtset%x1rdm   ! MRM input variable
- wfknocheck=.true.   ! MRM used for printing WFK file
+ gw1rdm=Dtset%gw1rdm ! MRM: input variable to decide whether updates to the 1-RDM must be performed
+ x1rdm=Dtset%x1rdm   ! MRM: input variable to use pure exchange correction on the 1-RDM ( Sigma_x )
+ wfknocheck=.true.   ! MRM: used for printing WFK file subroutine
 
  mod10 =MOD(Dtset%gwcalctyp,10)
 
@@ -733,8 +732,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
    Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
- ! MRM also initialize the Wfd_nato_master for GW 1-RDM if required.
- ! Warning, this should be replaced by copy but copy fails. Do it in the future! FIXME 
+ ! MRM: also initialize the Wfd_nato_master for GW 1-RDM if required.
+ ! Warning, this should be replaced by copy but copy fails due to band allocation differences. Do it in the future! FIXME 
  if (gwcalctyp==21 .and. gw1rdm>0) then
    call wfd_init(Wfd_nato_master,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bdm_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
@@ -845,7 +844,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(ks_taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
  call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
- if (Dtset%gwcalctyp==21 .and. gw1rdm>0) then ! MRM print initial (KS) density file (in case we need to compare DEN files)
+ if (Dtset%gwcalctyp==21 .and. gw1rdm>0) then ! MRM: print initial (KS) density file (in case we need to compare DEN files or cubes)
    gw1rdm_fname='gs_DEN'
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
    Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=KS_BSt)
@@ -2031,7 +2030,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      MSG_ERROR(msg)
    end if
 
-   ! MRM
+   ! Sigma_c(w)
    if (open_file(trim(Dtfil%fnameabo_sgr)//'_SIGC',msg,unit=unt_sigc,status='unknown',form='formatted') /= 0) then
      MSG_ERROR(msg)
    end if
@@ -2390,7 +2389,7 @@ endif
    ABI_FREE(M1_q_m)
 
  else
-   if (gwcalctyp==21 .and. gw1rdm>0) then  ! MRM allocate the 1-RDM correction info if gwcalctyp=21 and gw1rdm>0
+   if (gwcalctyp==21 .and. gw1rdm>0) then  ! MRM: allocate the 1-RDM correction arrays if gwcalctyp=21 and gw1rdm>0
      if (Sigp%nsppol/=1) then
        MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
        ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented for Sigp%nsppol==1
@@ -2415,9 +2414,9 @@ endif
          nateigv(ib,ib,ikcalc,1)=cone
        enddo  
      enddo
-     ! MRM Initialize Galitskii-Migdal correlation energy accumulator
+     ! Initialize Galitskii-Migdal correlation energy accumulator
      ec_gm=0.0_dp 
-     ! MRM prepare arrays for the imaginary freq. integration of Sigma_c(iw)
+     ! Prepare arrays for the imaginary freq. integration of Sigma_c(iw)
      order_int=Sigp%nomegasi 
      write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
      call wrtout(std_out,msg,'COLL')
@@ -2454,7 +2453,7 @@ endif
      call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
-      ! MRM compute 1-RDM correction?
+      ! MRM: compute 1-RDM correction?
       if (gwcalctyp==21 .and. gw1rdm>0) then 
 !       Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
@@ -2506,14 +2505,14 @@ endif
          end if
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
-       ! MRM compute 1-RDM correction, update dm1, and compute Galitskii-Migdal Ec.
+       ! MRM: compute 1-RDM correction, update dm1, and compute Galitskii-Migdal Ecorr.
        if (gwcalctyp==21 .and. gw1rdm>0) then
          dm1k=czero 
          ! Update the dm1 with the corr. contribution?
          if (x1rdm/=1) then
            call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs
            ec_gm_k=calc_Ec_GM_k(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt)               ! Only restricted closed-shell calcs
-           write(msg,'(a10,es16.6)')' Ec^k[GM]:',ec_gm_k
+           write(msg,'(a26,es16.6)')'                 Ec^k[GM]:',ec_gm_k
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
            write(msg,'(a26,es16.6)')' wtk used in wtk*Ec^k[GM]:',Kmesh%wt(ikcalc)
@@ -2537,7 +2536,7 @@ endif
 
    call xmpi_barrier(Wfd%comm)
 
-   ! MRM print WFK and DEN files.
+   ! MRM: print WFK and DEN files, and build band corrections.
    if (gwcalctyp==21 .and. gw1rdm>0) then
      ABI_MALLOC(old_purex,(b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(new_hartr,(b1gw:b2gw,Sigp%nkptgw))
@@ -2550,7 +2549,7 @@ endif
      old_purex(:,:)=czero
      new_hartr(:,:)=czero
      !
-     ! MRM only the master has bands on Wfd_nato_master so it prints everything and prepares gw_rhor 
+     ! MRM: only the master has bands on Wfd_nato_master so it prints everything and prepares gw_rhor 
      !
      call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
      call print_tot_occ(Sr,Kmesh,QP_BSt)                           
@@ -2669,10 +2668,10 @@ endif
         Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
      ABI_FREE(qlwl)
-      ! Now compute the "residual" Coulomb interactions. 
+     ! Now compute the "residual" Coulomb interactions. 
      Vcp_ks%vc_sqrt_resid=sqrt(coef_hyb*Vcp_ks%vc_sqrt**2)
      Vcp_ks%i_sz_resid=coef_hyb*Vcp_ks%i_sz
-      ! Now compute the matrix elements and save them on Sr%x_mat 
+     ! Now compute the matrix elements and save them on Sr%x_mat 
      do ikcalc=1,Sigp%nkptgw                                                 
        ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
        ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
@@ -2681,7 +2680,7 @@ endif
          call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,KS_BSt,Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),& ! Notice we need KS occs 
          & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&                                   ! and band energy diffs       
          & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
-      ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
+         ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
          call xmpi_barrier(Wfd%comm)
          do ib=b1gw,b2gw
            old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ikcalc,1)              ! Save old alpha*<i|K[KS]|i> from the GS calc. for Delta eik
@@ -2822,7 +2821,7 @@ endif
      ABI_FREE(gw_vhartr)
    endif  
    call xmpi_barrier(Wfd%comm)
-   ! MRM Finally, deallocate all arrays used for 1-RDM update
+   ! Finally, deallocate all arrays used for 1-RDM update
    if (gwcalctyp==21 .and. gw1rdm>0) then
      ABI_FREE(keep_ur_dm)
      ABI_FREE(bdm_mask)
@@ -2839,7 +2838,7 @@ endif
 
    call xmpi_barrier(Wfd%comm)
 
-  !MRM skip the rest for gw1rdm>0 and gwcalctyp/=21 
+  ! MRM: skip the rest for gw1rdm>0 and gwcalctyp/=21 
   if (gw1rdm==0 .and. gwcalctyp/=21) then 
    !  =====================================================
    !  ==== Solve Dyson equation storing results in Sr% ====
@@ -2989,7 +2988,7 @@ endif
    close(unt_gwdiag)
    close(unt_sig)
    close(unt_sgr)
-   close(unt_sigc) ! MRM
+   close(unt_sigc) 
    if (mod10==SIG_GW_AC) close(unt_sgm)
  end if
  !
@@ -3270,7 +3269,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      !end do
    end if
 
-   ! MRM do not print for 1-RDM correction
+   ! MRM: do not print for 1-RDM correction
    if(Sigp%gwcalctyp/=21) then
     write(msg,'(4a)')ch10,&
 &    ' setup_sigma : calculating Sigma(iw)',&
@@ -3287,7 +3286,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    ltest=(Sigp%omegasimax>0.1d-4.and.Sigp%nomegasi>0)
    ABI_CHECK(ltest,'Wrong value of omegasimax or nomegasi')
    if (Sigp%gwcalctyp/=1) then ! only one shot GW is allowed for AC.
-     !MSG_ERROR("SC-GW with analytic continuation is not coded") MRM let's allow it
+     !MSG_ERROR("SC-GW with analytic continuation is not coded") ! MRM: let's allow it
    end if
  end if
 
@@ -4075,7 +4074,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  if (mod10==SIG_GW_AC) then
-!   if (Sigp%gwcalctyp/=1) MSG_ERROR("Self-consistency with AC not implemented") MRM let's allow it
+!   if (Sigp%gwcalctyp/=1) MSG_ERROR("Self-consistency with AC not implemented") ! MRM: let's allow it
    if (Sigp%gwcomp==1) MSG_ERROR("AC with extrapolar technique not implemented")
  end if
 
