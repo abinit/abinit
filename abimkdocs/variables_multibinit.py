@@ -1470,6 +1470,21 @@ Variable(
 ),
 
 Variable(
+    abivarname="tolmxf@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=2e-5,
+    mnemonics="TOLerance on the MaXimal Force",
+    added_in_version="v9",
+    text=r"""
+Sets a maximal absolute force tolerance (in hartree/Bohr) below which BFGS structural relaxation iterations will stop. Corresponds to [[tolmxf]] of Abinit.
+""",
+),
+
+
+Variable(
 abivarname="analyze_anh_pot@multibinit",
     varset="multibinit",
     vartype="integer",
