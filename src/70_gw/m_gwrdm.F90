@@ -128,7 +128,6 @@ end function calc_Ec_GM_k
 !! ib1=min band for given k
 !! ib2=max band for given k.
 !! kpoint=k-point where the density matrix is updated. 
-!! iinfo=print extra information (verbose mode)
 !! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
 !! pot=Self-energy-Potential difference, matrix size (i,j), where i and j belong to k.
 !! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
@@ -195,9 +194,7 @@ end subroutine calc_rdmx
 !! INPUTS
 !! ib1=min band for given k
 !! ib2=max band for given k.
-!! nomega_sigc=number of omegas (w) in the imaginary axis (iw) used in the quadrature.
 !! kpoint=k-point where the density matrix is updated. 
-!! iinfo=print extra information (verbose mode)
 !! weights=array containing the weights used in the quadrature.
 !! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin) 
 !! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
@@ -213,11 +210,11 @@ end subroutine calc_rdmx
 !! CHILDREN
 !! SOURCE
 
-subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,dm1)
+subroutine calc_rdmc(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt,dm1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ib1,ib2,nomega_sigc,kpoint
+ integer,intent(in) :: ib1,ib2,kpoint
  type(ebands_t),target,intent(in) :: BSt
  type(sigma_t) :: Sr
 !arrays
@@ -227,10 +224,9 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,dm1)
 !Local variables ------------------------------
 !scalars
  real(dp), parameter :: pi=3.141592653589793238462643383279502884197
- real(dp) :: tol8,spin_fact,fact
+ real(dp) :: spin_fact,fact
  character(len=500) :: msg
- integer :: ib1dm,ib2dm,iquad 
- complex(dpc) :: denominator,division,dm1_mel
+ integer :: ib1dm,ib2dm 
 !arrays
 !************************************************************************
 
@@ -238,7 +234,6 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,dm1)
 
  spin_fact=2.0_dp
  fact=spin_fact*(1.0_dp/(2.0_dp*pi))
- tol8=1.0e-8
 
  write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sc(iw)  and k-point: ',BSt%kptns(1:,kpoint)
  call wrtout(std_out,msg,'COLL')
@@ -250,19 +245,11 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,Sr,weights,sigcme_k,BSt,dm1)
  dm1(:,:)=czero
  do ib1dm=ib1,ib2  
    do ib2dm=ib1dm,ib2 
-     dm1_mel=czero
-     do iquad=1,nomega_sigc
-       denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(iquad)-BSt%eig(ib2dm,kpoint,1)) 
-       if (abs(denominator)>tol8) then 
-         ! Sigma_pq/[(denominator)]
-           division=sigcme_k(iquad,ib1dm,ib2dm,1)/denominator 
-           dm1_mel=dm1_mel+weights(iquad)*division        ! +
-         ! [Sigma_qp/[(denominator)]]^*
-           division=sigcme_k(iquad,ib2dm,ib1dm,1)/denominator 
-           dm1_mel=dm1_mel+weights(iquad)*conjg(division) ! +
-       end if
-     end do
-     dm1(ib1dm,ib2dm)=fact*dm1_mel
+     ! Sigma_pq/[(denominator)] + [Sigma_qp/[(denominator)]]^*
+     dm1(ib1dm,ib2dm)=fact*sum(weights(:)*( sigcme_k(:,ib1dm,ib2dm,1)/&
+                 &( (Sr%omega_i(:)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(:)-BSt%eig(ib2dm,kpoint,1)) )&
+                                    +conjg( sigcme_k(:,ib2dm,ib1dm,1)/& 
+                 &( (Sr%omega_i(:)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(:)-BSt%eig(ib2dm,kpoint,1)) ) ) ) ) 
      ! Dji = Dij^*
      dm1(ib2dm,ib1dm)=conjg(dm1(ib1dm,ib2dm))
    end do  
@@ -284,7 +271,7 @@ end subroutine calc_rdmc
 !! ib1=min band for given k
 !! ib2=max band for given k.
 !! kpoint=k-point where the density matrix is updated.
-!! iinfo=print extra information (verbose mode)
+!! iinfo=use Sigma_x or Sigma_c phaser
 !! weights=array containing the weights used in the quadrature.
 !! nateigv=array containing the natural eigenvectors in columns (nbands,nband,k-point,nspin)
 !! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details).
@@ -381,7 +368,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
          Sib1k_ib2k=Sib1k_ib2k+conjg(eigenvect(ib3dm,ib1dm))*eigenvect(ib3dm,ib2dm)
        end do
        if (ib1dm==ib2dm) then
-         if(abs(Sib1k_ib2k-cmplx(1.0d0,0.0d0))>tol10) then
+         if(abs(Sib1k_ib2k-cmplx(1.0_dp,0.0_dp))>tol10) then
            write(msg,'(a45,i5,a1,i5,f10.5)') 'Large deviation from identity for bands ',ib1dm,' ',ib2dm,real(Sib1k_ib2k) 
            call wrtout(std_out,msg,'COLL')
          endif

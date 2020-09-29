@@ -2392,7 +2392,7 @@ endif
    if (gwcalctyp==21 .and. gw1rdm>0) then  ! MRM: allocate the 1-RDM correction arrays if gwcalctyp=21 and gw1rdm>0
      if (Sigp%nsppol/=1) then
        MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
-       ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented for Sigp%nsppol==1
+       ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented assuming Sigp%nsppol==1
      end if
      ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
@@ -2433,9 +2433,9 @@ endif
      wmin=zero
      wmax=one
      call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
-     weights(:)=weights(:)/(one-freqs(:))**two      ! Same freqs and weights as
+     weights(:)=weights(:)/(one-freqs(:))**two      ! Same freqs and weights as in
      freqs(:)=freqs(:)/(cone-freqs(:))              ! get_frequencies_and_weights_legendre
-     !Form complex frequencies from 0 to iInf and print them in the log file
+     ! Form complex frequencies from 0 to iInf and print them in the log file
      write(msg,'(a52)')'           Re(iw)           Im(iw)           weight  '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2453,7 +2453,7 @@ endif
      call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
-      ! MRM: compute 1-RDM correction?
+      ! MRM: compute 1-RDM analytic correction
       if (gwcalctyp==21 .and. gw1rdm>0) then 
 !       Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
@@ -2505,13 +2505,13 @@ endif
          end if
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
-       ! MRM: compute 1-RDM correction, update dm1, and compute Galitskii-Migdal Ecorr.
+       ! MRM: compute 1-RDM numerical correction (freq. integration G0 Sigma_c G0) and Galitskii-Migdal Ecorr.
        if (gwcalctyp==21 .and. gw1rdm>0) then
          dm1k=czero 
          ! Update the dm1 with the corr. contribution?
          if (x1rdm/=1) then
-           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs
-           ec_gm_k=calc_Ec_GM_k(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt)               ! Only restricted closed-shell calcs
+           call calc_rdmc(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs
+           ec_gm_k=calc_Ec_GM_k(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt)   ! Only restricted closed-shell calcs
            write(msg,'(a26,es16.6)')'                 Ec^k[GM]:',ec_gm_k
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
@@ -2551,8 +2551,8 @@ endif
      !
      ! MRM: only the master has bands on Wfd_nato_master so it prints everything and prepares gw_rhor 
      !
-     call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
      call print_tot_occ(Sr,Kmesh,QP_BSt)                           
+     call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
      if (my_rank==0 .and. (dtset%prtwf == 1 .or. dtset%prtden == 1)) then
        call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs
        if (dtset%prtwf == 1) then 
