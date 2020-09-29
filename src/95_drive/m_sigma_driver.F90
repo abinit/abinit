@@ -219,10 +219,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ec_gm,coef_hyb 
+ real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ec_gm,ec_gm_k,coef_hyb 
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -336,7 +336,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  gwcalctyp=Dtset%gwcalctyp
  gw1rdm=Dtset%gw1rdm ! MRM input variable to decide what updates should be applied and what must be printed
  x1rdm=Dtset%x1rdm   ! MRM input variable
- verbose=0           ! MRM change to verbose=1 for debug mode? (requires recompilation!)
  wfknocheck=.true.   ! MRM used for printing WFK file
 
  mod10 =MOD(Dtset%gwcalctyp,10)
@@ -2438,6 +2437,9 @@ endif
      weights(:)=weights(:)/(one-freqs(:))**two      ! Same freqs and weights as
      freqs(:)=freqs(:)/(cone-freqs(:))              ! get_frequencies_and_weights_legendre
      !Form complex frequencies from 0 to iInf and print them in the log file
+     write(msg,'(a52)')'           Re(iw)           Im(iw)           weight  '
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
      do ifreqs=1,order_int
        Sigp%omegasi(ifreqs)=cmplx(zero,freqs(ifreqs))
        Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
@@ -2457,7 +2459,7 @@ endif
 !       Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
-        call calc_rdmx(ib1,ib2,ikcalc,verbose,potk,dm1k,QP_BSt)          ! Only restricted closed-shell calcs 
+        call calc_rdmx(ib1,ib2,ikcalc,potk,dm1k,QP_BSt)          ! Only restricted closed-shell calcs 
 !       Update the full 1RDM with the exchange corrected one for this k-point
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
 !       Compute NAT ORBS for exchange corrected 1-RDM
@@ -2509,8 +2511,15 @@ endif
          dm1k=czero 
          ! Update the dm1 with the corr. contribution?
          if (x1rdm/=1) then
-           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs 
-           ec_gm=ec_gm+calc_Ec_GM_k(ib1,ib2,nomega_sigc,ikcalc,Sr,weights,sigcme_k,QP_BSt,Kmesh) ! Only restricted closed-shell calcs
+           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs
+           ec_gm_k=calc_Ec_GM_k(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt)               ! Only restricted closed-shell calcs
+           write(msg,'(a10,es16.6)')' Ec^k[GM]:',ec_gm_k
+           call wrtout(std_out,msg,'COLL')
+           call wrtout(ab_out,msg,'COLL')
+           write(msg,'(a26,es16.6)')' wtk used in wtk*Ec^k[GM]:',Kmesh%wt(ikcalc)
+           call wrtout(std_out,msg,'COLL')
+           call wrtout(ab_out,msg,'COLL')
+           ec_gm=ec_gm+Kmesh%wt(ikcalc)*ec_gm_k
          end if
 !        Update the full 1RDM with the GW corrected one for this k-point
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
