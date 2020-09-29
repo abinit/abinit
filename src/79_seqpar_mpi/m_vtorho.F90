@@ -85,6 +85,10 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
 
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
+
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
@@ -1680,6 +1684,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
    end if
 
+   ABI_DEALLOCATE(eknk)
    if (usefock) then
      ABI_DEALLOCATE(focknk)
      if (optforces>0)then
@@ -1848,8 +1853,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ABI_DEALLOCATE(tauwfg)
    end if
  end if
-
- ABI_DEALLOCATE(eknk)
 
  call timab(994,2,tsec)
 

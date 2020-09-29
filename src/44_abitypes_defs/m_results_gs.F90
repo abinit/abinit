@@ -863,8 +863,8 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
  ! so print zero if residm < tol30 or allow the caller not to write the convergence dict.
  if (with_conv) then
    call ydoc%add_reals( &
-     "deltae, nfreeel, res2, residm, diffor", &
-     [results%deltae, results%nfreeel, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
+     "deltae, res2, residm, diffor", &
+     [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
      real_fmt="(es10.3)", dict_key="convergence")
  else
    call ydoc%set_keys_to_string("deltae, res2, residm, diffor", "null", dict_key="convergence")
