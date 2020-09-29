@@ -504,7 +504,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
- if(present(hightemp) .and. associated(hightemp)) then
+ if(present(hightemp).and.associated(hightemp)) then
    call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
 &   fermilo,hightemp%gcut,nelectlo,tsmear,hightemp%ucvol,hightemp%version)
  end if
@@ -520,7 +520,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
- if(present(hightemp) .and. associated(hightemp)) then
+ if(present(hightemp).and.associated(hightemp)) then
    call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
 &   fermihi,hightemp%gcut,nelecthi,tsmear,hightemp%ucvol,hightemp%version)
  end if
@@ -571,7 +571,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      !Blanchet - Compute the number of free electrons with corresponding chemical
      !potential and add to nelect bounds.
-     if(present(hightemp) .and. associated(hightemp)) then
+     if(present(hightemp).and.associated(hightemp)) then
        call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
     &   fermimid,hightemp%gcut,nelectmid,tsmear,hightemp%ucvol,hightemp%version)
      end if

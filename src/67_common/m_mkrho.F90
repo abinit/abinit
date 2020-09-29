@@ -725,11 +725,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    end do
  end if
 
-
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
 !Blanchet Add free electrons contribution to density
- if(associated(hightemp))then
+ if(present(hightemp).and.associated(hightemp))then
    rhor(:,:)=rhor(:,:)+hightemp%nfreeel/ucvol/dtset%nspden
    rhog(1,1)=rhog(1,1)+hightemp%nfreeel/ucvol/dtset%nspden
  end if
