@@ -27,7 +27,7 @@ from pprint import pprint
 from pybtex.database import parse_file, Entry, BibliographyData
 from markdown.util import etree
 from pygments import highlight
-from pygments.lexers import BashLexer, BibTeXLexer
+from pygments.lexers import BashLexer, PythonLexer, BibTeXLexer
 from pygments.formatters import HtmlFormatter
 from doc.tests.pymods.termcolor import cprint
 from .variables import lazy_property, Variable,  ABI_TOPICS, ABI_RELEVANCES
@@ -1412,6 +1412,8 @@ Enter any string to search in the database. Clicking without any request will gi
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
             if path.endswith(".in"):
                 text = highlight(fh.read(), BashLexer(), HtmlFormatter(cssclass="codehilite small-text"))
+            elif path.endswith(".py"):
+                text = highlight(fh.read(), PythonLexer(), HtmlFormatter(cssclass="codehilite small-text"))
             else:
                 text = escape(fh.read(), tag="pre", cls="small-text")
 

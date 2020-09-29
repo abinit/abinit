@@ -67,6 +67,8 @@
  pp_dirpath "$ABI_PSPDIR"
  pseudos "6c_lda.paw"
 
+# This test is disabled on abiref, because a problem with SIGFPE is triggered inside the MPI layer (MPI_ALLREDUCE) when input arrays are not initialized with zeros.
+# MPI_SUM may overflow depending on the (random) memory chunks returned by C malloc. See several Gitlab comments from Matteo about this problem.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

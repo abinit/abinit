@@ -25,7 +25,7 @@ getdvdb_filepath "teph4mob_3_DVDB"
 tmesh 5.0 59.0 6 # Temperature array at which the mobility will be computed
 
 # Change this depending on the concentration you want
-eph_doping  -2.26e+16    # this corresponds to eph_extrael 1e-6  
+eph_doping  -1e+15   # in |e| cm^-3  
 
 sigma_erange1 0 0.10 eV # We compute the lifetimes of electrons only,
 sigma_erange2 0 0.12 eV # in an energy window of 0.15 eV from the CBM
@@ -82,7 +82,7 @@ nband 8
 #%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
 #%% [files]
 #%% files_to_test =
-#%%   teph4mob_6.out, tolnlines= 350, tolabs=  180, tolrel=  1.500e-02
+#%%   teph4mob_6.out, tolnlines= 350, tolabs=  220, tolrel=  1.500e-02
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

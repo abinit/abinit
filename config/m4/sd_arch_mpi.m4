@@ -119,12 +119,11 @@ AC_DEFUN([SD_MPI_INIT], [
       tmp_compil_vars="${tmp_compil_vars}${FC}"
       tmp_mpi_vars="${tmp_mpi_vars}${MPI_FCFLAGS}"
     fi
-    if test "${sd_mpi_init}" = "def" -a "${tmp_mpi_vars}" != ""; then
-      sd_mpi_enable="yes"
-      sd_mpi_init="env"
-    fi
-    if test "${sd_mpi_init}" = "def" -a "${tmp_compil_vars}" != ""; then
-      sd_mpi_init="env"
+    if test "${sd_mpi_init}" = "def" -o "${sd_mpi_init}" = "yon"; then
+      if test "${tmp_compil_vars}${tmp_mpi_vars}" != ""; then
+        sd_mpi_enable="yes"
+        sd_mpi_init="env"
+      fi
     fi
   fi
 

@@ -836,6 +836,9 @@ contains
  dprarr(1,:)=dtsets(:)%rhoqpmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rhoqpmix','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%rifcsph
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rifcsph','DPR',0)
+
 !rprim
  prtimg(:,:)=1
  do idtset=0,ndtset_alloc

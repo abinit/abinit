@@ -872,12 +872,28 @@ subroutine xmpi_abort(comm,mpierr,msg,exit_status)
    write(std_out,'(2a)')"User message: ",TRIM(msg)
  end if
 
- ! Close std_out and ab_out
- inquire(std_out,opened=testopen)
- if (testopen) close(std_out)
+ ! Close std_out and ab_out and flush units.
+ ! Note that flush does not guarantee that the data is committed to disk.
+ ! This is rather annoying because we may end up with incomplete log files
+ ! that cannot be parsed by Abinit.
+ ! For a possible approach based on fsync, see
+ ! https://gcc.gnu.org/onlinedocs/gcc-4.7.4/gfortran/FLUSH.html
+
+ inquire(std_out, opened=testopen)
+ if (testopen) then
+#if defined HAVE_FC_FLUSH
+   call flush(std_out)
+#endif
+   close(std_out)
+ end if
 
  inquire(ab_out,opened=testopen)
- if (testopen) close(ab_out)
+ if (testopen) then
+#if defined HAVE_FC_FLUSH
+   call flush(ab_out)
+#endif
+   close(ab_out)
+ end if
 
 #ifdef HAVE_MPI
  my_errorcode=MPI_ERR_UNKNOWN; if (PRESENT(mpierr)) my_errorcode=mpierr

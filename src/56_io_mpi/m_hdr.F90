@@ -3466,7 +3466,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    NCF_CHECK(ncerr)
 
    ! Define k-points. Note: monkhorst_pack_folding is replaced by kptrlatt and shiftk
-   ncerr = nctk_def_arrays(ncid, [&
+   ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("reduced_coordinates_of_kpoints", "dp", "number_of_reduced_dimensions, number_of_kpoints"), &
      nctkarr_t("kpoint_weights", "dp", "number_of_kpoints") &
      !nctkarr_t("monkhorst_pack_folding", "int", "number_of_vectors") &
