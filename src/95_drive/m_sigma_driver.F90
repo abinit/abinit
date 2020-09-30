@@ -2062,7 +2062,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  else if (gwcalctyp<20) then
    msg = " Self-Consistent on Energies only"
  else if (gwcalctyp==21) then
-   msg = " 1-RDM Corrections"
+   msg = " GW 1-RDM Corrections"
  else  
    msg = " Self-Consistent on Energies and Wavefunctions"
  end if
