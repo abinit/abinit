@@ -347,7 +347,7 @@ class Variable(object):
     @lazy_property
     def name(self):
         """Name of the variable without the executable name."""
-        return self.abivarname if "@" not in self.abivarname else self.abivarname.split("@")[0]
+        return self.abivarname.lower() if "@" not in self.abivarname else self.abivarname.split("@")[0].lower()
 
     @lazy_property
     def executable(self):

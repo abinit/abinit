@@ -543,16 +543,16 @@ Not all these new input variables are present in automatic tests, though.
 - [[analyze_anh_pot@multibinit|analyze_anh_pot]]
 - [[dyn_chksym@multibinit|dyn_chksym]]
 - [[dyn_tolsym@multibinit|dyn_tolsym]]
-- [[fit_EFS@multibinit|fit_EFS]]
+- [[fit_efs@multibinit|fit_EFS]]
 - [[fit_iatom@multibinit|fit_iatom]]
-- [[fit_SPC_maxS@multibinit|fit_SPC_maxS]]
+- [[fit_spc_maxs@multibinit|fit_SPC_maxS]]
 - [[latt_friction@multibinit|latt_friction]]
 - [[latt_taup@multibinit|latt_taup]] NOT TESTED
 - [[latt_taut@multibinit|latt_taut]]
 - [[opt_coeff@multibinit|opt_coeff]]
 - [[opt_effpot@multibinit|opt_effpot]]
 - [[opt_ncoeff@multibinit|opt_ncoeff]]
-- [[sel_EFS@multibinit|sel_EFS]]
+- [[sel_efs@multibinit|sel_EFS]]
 - [[strfact@multibinit|strfact]]
 - [[test_effpot@multibinit|test_effpot]]
 - [[test_prt_ph@multibinit|test_prt_ph]]
@@ -618,7 +618,7 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
 **D.13** a-TDEP utility:
-added [[guide:a-TDEP|A-TDEP user guide]],
+added [[guide:a-TDEP|a-TDEP user guide]],
 [[topic:a-TDEP|a-TDEP topic]], and corresponding input variable documentation.
 References: [[pdf:a-TDEP_Paper|a-TDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].
