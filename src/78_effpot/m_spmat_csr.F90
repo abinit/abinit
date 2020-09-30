@@ -58,7 +58,7 @@ module m_spmat_csr
      procedure :: sync ! sync data to all mpi ranks
      procedure :: mv_mpi => csr_mat_t_mv_mpi ! mpi version of mv
      procedure :: mv_select_row =>csr_mat_t_mv_select_row ! mv of selected rows
-     !procedure :: print
+     procedure :: mv_one_row =>csr_mat_t_mv_one_row ! mv of one rows
   end type CSR_mat_t
 
 contains
@@ -246,6 +246,28 @@ contains
        call xmpi_sum_master(b, 0, xmpi_world, ierr )
     endif
   end subroutine CSR_mat_t_mv_mpi
+
+  !-----------------------------------------------------------------------
+  !> @brief multiple a row, indexed by  of M by x:   y_i=  Mij x_j
+  !> @param [in] nrow: number of rows.
+  !> @param [in] ind_row: indices i
+  !> @param [in]  x: x
+  !> @param [out]  y: y
+  !-----------------------------------------------------------------------
+  subroutine CSR_mat_t_mv_one_row(self,  j, x, y)
+    class(CSR_mat_t), intent(in)::self 
+    integer, intent(in) ::j
+    real(dp), intent(in) :: x(self%ncol)
+    real(dp), intent(out) :: y
+    integer :: i,  i1, i2 
+    y=0.0_dp
+    i1=self%row_shift(j)
+    i2=self%row_shift(j+1)-1
+    do i=i1, i2
+       y= y+self%val(i)*x(self%icol(i))
+    end do
+  end subroutine CSR_mat_t_mv_one_row
+
 
   !-----------------------------------------------------------------------
   !> @brief multiple a submatrix (rows indexed by i) of M by x:   y_i=\sum M_ij x_j

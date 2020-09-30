@@ -64,7 +64,7 @@ contains
 
   subroutine set_params(self, params)
     class(lattice_effpot_t), intent(inout) :: self
-    type(multibinit_dtset_type) :: params
+    type(multibinit_dtset_type), intent(inout) :: params
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(params)
     MSG_ERROR("set_params for lattice_effpot not yet implemented")

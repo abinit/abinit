@@ -1082,7 +1082,7 @@ The bibtex file is available [here](../abiref.bib).
                 if "@" in name:
                     # Handle [[dipdip@anaddb|text]]
                     vname, code = name.split("@")
-                    var = self.codevars[code][vname]
+                    var = self.codevars[code][vname.lower()]
                     url = "/variables/%s#%s" % (var.varset, var.name)
                     if a.text is None: a.text = name
                     html_classes.append("codevar-wikilink")
@@ -1140,7 +1140,7 @@ The bibtex file is available [here](../abiref.bib).
             if namespace in self.codevars:
                 # Handle [[anaddb:asr|text]] or [[abinit:ecut|text]]
                 assert fragment is None
-                var = self.codevars[namespace][name]
+                var = self.codevars[namespace][name.lower()]
                 url = "/variables/%s#%s" % (var.varset, var.name)
                 html_classes.append("codevar-wikilink")
                 if a.text is None:

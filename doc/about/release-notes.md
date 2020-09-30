@@ -36,7 +36,8 @@ In particular:
    See also the specialized INSTALL notes for
    [CentOS](../INSTALL_CentOS), [EasyBuild](../INSTALL_EasyBuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
-   This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.2.B.9)). 
+   This means that some user-developed parsing tools might not work anymore, 
+   and should be adapted to the new ABINITv9 output file (see [B.9](#v9.2.B.9)). 
    Note that the YAML output is still under development and modifications may appear in the next versions. 
    A python API to extract the results of the calculation will be provided when the implementation is finalized.
 4. Several default values have been changed, see [A.3](#v9.2.A.3).
@@ -263,14 +264,7 @@ In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonz
 
 A tutorial for the multibinit spin model has been written, [[tutorial:spin_model]].
 
-Many new input variables are present.
-Not all these new input variables are present in automatic tests, though, in this beta-release.
-These "non-tested" input variables are indicated below with 'NT'.
-This will be completed for the production version v9.2 .
-List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23]], [[test:v9_81]], [[test:v9_82]],
-[[test:v9_86]], [[test:v9_87]].
-
-New input variables tested and documented:
+Many new input variables are present, tested and documented:
 [[slc_coupling@multibinit|slc_coupling]],
 [[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]],
 [[spin_damping@multibinit|spin_damping]],
@@ -288,12 +282,9 @@ New input variables tested and documented:
 [[spin_temperature_nstep@multibinit|spin_temperature_nstep]],
 [[spin_var_temperature@multibinit|spin_var_temperature]],
 [[spin_write_traj@multibinit|spin_write_traj]].
-Additionnal new input variables, still to be tested and/or documented:
-spin_calc_correlation_obs (NT and not documented),
-spin_calc_traj_obs (NT and not documented),
-[[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT),
-spin_tolavg (NT and not documented),
-spin_tolvar (NT and not documented),
+
+List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23]], [[test:v9_81]], [[test:v9_82]],
+[[test:v9_86]], [[test:v9_87]].
 
 By Xu He, N. Helbig, J. Bieder, E. Bousquet, Ph. Ghosez, M. Verstraete
 
@@ -389,7 +380,7 @@ A new mechanism to read strings enclosed between **double quotation marks** from
 So, many new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
 that were expecting numerical values such as the `get*` and `ird*` variables.
 The goal is to encourage a new approach for performing ABINIT calculations in which multiple datasets
-and `get*` variables are replaced by indipendent input files that are connected together via file paths.
+and `get*` variables are replaced by independent input files that are connected together via file paths.
 
 List of new input variables that rely on this feature:
 
@@ -448,7 +439,7 @@ By M. Giantomassi, G. Petretto, F. Naccarato.
 
 * * *
 
-### **C.** Changes for the developers (incluses information about compilers)
+### **C.** Changes for the developers (including information about compilers)
 
 **C.1** A python script to help ABINIT developers and development.
 
@@ -484,11 +475,11 @@ or, for variables introduced prior to v9,
 
 **C.2** Test farm: new and obsolete bots
 
-* Bots introduced in the test farm: atlas_gnu_9.1_openmpi, buda2_gnu_8.2_cuda, cronos2_gnu_7.4_paral.
-* Bots upgraded: abiref_gnu_5.3_* to abiref_gnu_9.2_* ; abiref_nag_6.2_openmpi to
-    abiref_nag_7.0_openmpi; bob_gnu_5.3_openmp to bob_gnu_7.5_openmp; buda2_gnu_8.1_mpich3
+* Bots introduced in the test farm: alps_nag_7.0_openmpi, atlas_gnu_9.1_openmpi, buda2_gnu_8.2_cuda, cronos2_gnu_7.4_paral,
+    scope_gnu_10.2_mpich, scope_gnu_7.5_dep.
+* Bots upgraded: abiref_gnu_5.3_* to abiref_gnu_9.2_*; bob_gnu_5.3_openmp to bob_gnu_7.5_openmp; buda2_gnu_8.1_mpich3
     to buda2_gnu_8.2_mpich3; graphene_gnu_6.4_macports to graphene_gnu_9.2_macports; max2_gnu_5.3_* to max2_gnu_6.5_*; ubu_gnu_5.3_openmpi to ubu_gnu_9.2_openmpi.
-* Bots removed: atlas_gnu_7.2_fb.ac (no nightly test of the fallbacks anymore), cronos_gnu_5.3_paral(remplaced by cronos2), inca_gnu_6.3_py3k (inca too old), tikal_gnu_* (tikal too old).
+* Bots removed: abiref_nag_6.2_openmpi (superceded by alps_nag_7.0_openmpi), atlas_gnu_7.2_fb.ac (no nightly test of the fallbacks anymore), cronos_gnu_5.3_paral(replaced by cronos2), inca_gnu_6.3_py3k (inca too old), tikal_gnu_* (tikal too old).
 Working also on a cronos-cronos2 cluster.
 
 By JM Beuken
@@ -548,31 +539,27 @@ New tests: [[test:v8_38]], [[test:v8_94]], [[test:v8_98]], [[test:v8_99]],
 [[test:v9_83]],  [[test:v9_84]], [[test:v9_85]].
 New input variables are listed below.
 Not all these new input variables are present in automatic tests, though.
-Also, not all of these are documented, or only partly documented (e.g. variable type, acronym, default, but no more).
 
 - [[analyze_anh_pot@multibinit|analyze_anh_pot]]
 - [[dyn_chksym@multibinit|dyn_chksym]]
 - [[dyn_tolsym@multibinit|dyn_tolsym]]
-- fit_EFS@multibinit, [[test:v8_103]] NOT DOCUMENTED
+- [[fit_efs@multibinit|fit_EFS]]
 - [[fit_iatom@multibinit|fit_iatom]]
-- [[fit_SPC_maxS@multibinit|fit_SPC_maxS]]
-- latt_compressibility@multibinit, NOT TESTED, NOT DOCUMENTED
+- [[fit_spc_maxs@multibinit|fit_SPC_maxS]]
 - [[latt_friction@multibinit|latt_friction]]
-- latt_mask@multibinit, NOT TESTED, NOT DOCUMENTED
 - [[latt_taup@multibinit|latt_taup]] NOT TESTED
 - [[latt_taut@multibinit|latt_taut]]
 - [[opt_coeff@multibinit|opt_coeff]]
 - [[opt_effpot@multibinit|opt_effpot]]
 - [[opt_ncoeff@multibinit|opt_ncoeff]]
-- sel_EFS@multibinit, [[test:v8_103]] NOT DOCUMENTED
+- [[sel_efs@multibinit|sel_EFS]]
 - [[strfact@multibinit|strfact]]
 - [[test_effpot@multibinit|test_effpot]]
 - [[test_prt_ph@multibinit|test_prt_ph]]
-- tolmxf@multibinit, NOT DOCUMENTED
-- ts_option@multibinit, NOT TESTED, NOT DOCUMENTED
+- [[ts_option@multibinit|ts_option]] NOT TESTED
 
 Finally, several input variables of the main ABINIT application are also reused for Multibinit, without modification
-of meaning, like [[iatfix]], [[natfix]] and related input variables, or [[tolmxf]].
+of meaning, like [[iatfix]], [[natfix]] (and related similar input variables), and also [[tolmxf]].
 
 By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
@@ -631,7 +618,7 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
 **D.13** a-TDEP utility:
-added [[guide:a-TDEP|A-TDEP user guide]],
+added [[guide:a-TDEP|a-TDEP user guide]],
 [[topic:a-TDEP|a-TDEP topic]], and corresponding input variable documentation.
 References: [[pdf:a-TDEP_Paper|a-TDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].
@@ -751,6 +738,10 @@ By M. Torrent and X. Gonze (MR 657).
 By F. Jollet (MR 643, 645, 652, 653).
 
 **D.38** Nonlinear xc preliminary
+
+Preliminary work for some changes in the exchange correlation terms in nonlinear (3rd order DFPT).
+One term was implemented in both pead and dfptnl routines. Now it is merged in one routine (dfptnl_exc3).
+Due to a subtle reordering of nonlinear core correction terms, some pead refs are changed, but the final result ("First order change in electronic dielectric susceptibility tensor") remain the same.
 
 By L. Baguet (MR 650).
 
