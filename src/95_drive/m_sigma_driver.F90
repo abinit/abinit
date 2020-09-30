@@ -2433,8 +2433,9 @@ endif
      wmin=zero
      wmax=one
      call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
+     ! From  0 to 1  -> 0 to infinity
      weights(:)=weights(:)/(one-freqs(:))**two      ! Same freqs and weights as in
-     freqs(:)=freqs(:)/(cone-freqs(:))              ! get_frequencies_and_weights_legendre
+     freqs(:)=freqs(:)/(one-freqs(:))               ! m_screening_driver.F90
      ! Form complex frequencies from 0 to iInf and print them in the log file
      write(msg,'(a52)')'           Re(iw)           Im(iw)           weight  '
      call wrtout(std_out,msg,'COLL')
