@@ -279,7 +279,7 @@ ABI_RELEVANCES = OrderedDict([
 class Variable(object):
     """
     This object gathers information about a single variable. name, associated topics, description etc
-    It's constructed from the variables_CODENANE.py modules but client code usually
+    It is constructed from the variables_CODENAME.py modules but client code usually
     interact with variables via the :class:`VarDatabase` dictionary.
     """
     def __init__(self,

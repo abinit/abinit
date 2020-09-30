@@ -35,7 +35,8 @@ D.4 Identify new tutorial doc files.
 D.5 From the developers : scan the merge requests
 D.6 Identify lacking or incomplete documentation and testing !
 D.7 Check and update doc/developers/contributor.txt file
-D.8 Contact the relevant people
+D.8 Check and update doc/theory/acknowledgments.md and the list of references mentioned in 57_iovars/m_out_acknowl.F90 .
+D.9 Contact the relevant people
 
 Then also
 D.9 Possibly update doc/installation.md

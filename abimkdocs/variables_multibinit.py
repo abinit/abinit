@@ -486,7 +486,7 @@ Variable(
     topics=['FitProcess_useful'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="FIT Training Set OPTION",
+    mnemonics="fit Training Set OPTION",
     added_in_version="before_v9",
     text=r"""
 * 0 --> the Training is hist from ABINIT
@@ -502,7 +502,7 @@ Variable(
     topics=['BoundingProcess_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="BOUND COEFFicient",
+    mnemonics="BOUND MODEL",
     added_in_version="before_v9",
     text=r"""
 Flag to activate the bound process:
