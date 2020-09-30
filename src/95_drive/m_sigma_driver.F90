@@ -2437,7 +2437,10 @@ endif
      weights(:)=weights(:)/(one-freqs(:))**two      ! Same freqs and weights as in
      freqs(:)=freqs(:)/(one-freqs(:))               ! m_screening_driver.F90
      ! Form complex frequencies from 0 to iInf and print them in the log file
-     write(msg,'(a52)')'           Re(iw)           Im(iw)           weight  '
+     write(msg,'(a52)')'           Re(iw)           Im(iw)           Weight  '
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a52)')'          --------         --------         -------- '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      do ifreqs=1,order_int
