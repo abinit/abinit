@@ -37,6 +37,7 @@ pages:
         - MacOS: INSTALL_MacOS.md
         - Ubuntu: INSTALL_Ubuntu.md
         - CentOS: INSTALL_CentOS.md
+        - EasyBuild: INSTALL_EasyBuild.md
         - GPUs: INSTALL_gpu.md
 
 - Topics:

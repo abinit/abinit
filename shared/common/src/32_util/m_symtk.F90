@@ -337,7 +337,7 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
 
 !Local variables-------------------------------
 !scalars
- integer :: isym,jsym,ksym,symafmchk,testeq=1
+ integer :: isym,jsym,ksym,print_warning=1,symafmchk,testeq=1
  logical :: found_inv
  character(len=500) :: msg
 !arrays
@@ -402,15 +402,17 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
        if (testeq==1) exit ! The test is positive
      end do
 !
-     if(testeq==0) then
+     if(testeq==0 .and. print_warning==1) then
        ! The test is negative
-       write(msg, '(a,2i3,a,7a)' )&
-        'product of symmetries',isym,jsym,' is not in group.',ch10,&
+       write(msg, '(a,2i3,a,9a)' )&
+        'Product of symmetries',isym,jsym,' is not in group.',ch10,&
         'This indicates that the input symmetry elements',ch10,&
         'do not possess closure under group composition.',ch10,&
-        'Action: check symrel, symafm and fix them.'
+        'ABINIT might stop with an ERROR after trying to correct and making a few more checks.',ch10,&
+        'Action: check symrel, symafm and possibly atomic positions, and fix them.'
        MSG_WARNING(msg)
        ierr = ierr+1
+       print_warning=0
      end if
 
    end do ! jsym

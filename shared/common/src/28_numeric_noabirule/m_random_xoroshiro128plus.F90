@@ -262,18 +262,18 @@ contains
         self%has_residual=.False.
         r=self%residual
     else
-        do
-        !rands(1) = 2 * self%rand_unif_01() - 1
-        rands(1) = 2 * rand_unif_01(self) - 1
-        !rands(2) = 2 * self%rand_unif_01() - 1
-        rands(2) = 2 * rand_unif_01(self) - 1
-        sum_sq = sum(rands**2)
-        if (sum_sq < 1.0_dp .and. sum_sq > 0.0_dp) exit
-        end do
-    rands = rands * sqrt(-2 * log(sum_sq) / sum_sq)
-    r=rands(1)
-    self%has_residual=.True.
-    self%residual=rands(2)
+       do
+          !rands(1) = 2 * self%rand_unif_01() - 1
+          rands(1) = 2 * rand_unif_01(self) - 1
+          !rands(2) = 2 * self%rand_unif_01() - 1
+          rands(2) = 2 * rand_unif_01(self) - 1
+          sum_sq = sum(rands**2)
+          if (sum_sq < 1.0_dp .and. sum_sq > 0.0_dp) exit
+       end do
+       rands = rands * sqrt(-2 * log(sum_sq) / sum_sq)
+       r=rands(1)
+       self%has_residual=.True.
+       self%residual=rands(2)
     endif
   end function rand_normal
 

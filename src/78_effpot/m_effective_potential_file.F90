@@ -3447,7 +3447,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
 !Local variables-------------------------------
 !scalar
  integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncells,nstep_hist
- real(dp):: factor
+ real(dp):: factor,ratio
  logical :: revelant_factor,need_map,need_verbose,need_fixmap
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3)
@@ -3502,22 +3502,35 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
 
  ncells = product(ncell)
 
-!Check if the energy store in the hist is revelant, sometimes some MD files gives
+!Check if the energy stored in the hist is revelant, sometimes some MD files gives
 !the energy of the unit cell... This is not suppose to happen... But just in case...
  do ii=1,nstep_hist
-   factE_hist = int(anint(hist%etot(ii) / eff_pot%energy))
-   if(factE_hist == 1) then
-!    In this case we mutiply the energy of the hist by the number of cell
-     hist%etot(ii) = hist%etot(ii)  * ncells
-   end if
-   if(factE_hist /=1 .and. factE_hist /= ncells)then
-     write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
+   if(abs(eff_pot%energy)>tol12)then
+     ratio=hist%etot(ii) / eff_pot%energy
+     if(abs(ratio)<real(huge(factE_hist))*half)then
+       factE_hist = nint(ratio)
+       if(factE_hist == 1) then
+!      In this case we mutiply the energy of the hist by the number of cell
+         hist%etot(ii) = hist%etot(ii)  * ncells
+       end if
+       if(factE_hist /=1 .and. factE_hist /= ncells)then
+         write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
+&            ' --- !WARNING',ch10,&
+&            '     The energy of the history step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
+&            '     However, the multiplicity of the cell is ',ncells,'.',ch10,&
+&            '     Please check the energy of the step ',ii,ch10,&
+&            ' ---',ch10
+         if(need_verbose) call wrtout(std_out,msg,'COLL')
+       endif
+     else
+       write(msg, '(4a,i0,3a,es16.6,5a)' )ch10,&
 &          ' --- !WARNING',ch10,&
-&          '     The energy of the step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
-&          '     However, the multiplicity of the cell is ',ncells,'.',ch10,&
-&          '     Please check the energy of the step ',ii,ch10,&
+&          '     The energy of the history step ',ii,' is apparently not initialized.',ch10,&
+&          '     Its current value is',hist%etot(ii),ch10,&
+&          '     This does not allow to perform checking on the multiplicity of the cell ',ch10,&
 &          ' ---',ch10
-     if(need_verbose) call wrtout(std_out,msg,'COLL')
+       if(need_verbose) call wrtout(std_out,msg,'COLL')
+     end if
    end if
  end do
 
