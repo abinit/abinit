@@ -113,7 +113,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
  use m_spacepar,      only : hartre
- use m_gwrdm,         only : calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,rotate_ks_no,print_tot_occ 
+ use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,rotate_ks_no,print_tot_occ!,calc_Ec_GM_k
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -221,7 +221,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ec_gm,ec_gm_k,coef_hyb 
+ real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,coef_hyb!,ec_gm,ec_gm_k 
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -2415,7 +2415,7 @@ endif
        enddo  
      enddo
      ! Initialize Galitskii-Migdal correlation energy accumulator
-     ec_gm=0.0_dp 
+     !ec_gm=0.0_dp 
      ! Prepare arrays for the imaginary freq. integration of Sigma_c(iw)
      order_int=Sigp%nomegasi 
      write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
@@ -2509,20 +2509,20 @@ endif
          end if
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
-       ! MRM: compute 1-RDM numerical correction (freq. integration G0 Sigma_c G0) and Galitskii-Migdal Ecorr.
+       ! MRM: compute 1-RDM numerical correction (freq. integration G0 Sigma_c G0).
        if (gwcalctyp==21 .and. gw1rdm>0) then
          dm1k=czero 
          ! Update the dm1 with the corr. contribution?
          if (x1rdm/=1) then
            call calc_rdmc(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs
-           ec_gm_k=calc_Ec_GM_k(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt)   ! Only restricted closed-shell calcs
-           write(msg,'(a26,es16.6)')'                 Ec^k[GM]:',ec_gm_k
-           call wrtout(std_out,msg,'COLL')
-           call wrtout(ab_out,msg,'COLL')
-           write(msg,'(a26,es16.6)')' wtk used in wtk*Ec^k[GM]:',Kmesh%wt(ikcalc)
-           call wrtout(std_out,msg,'COLL')
-           call wrtout(ab_out,msg,'COLL')
-           ec_gm=ec_gm+Kmesh%wt(ikcalc)*ec_gm_k
+           !ec_gm_k=calc_Ec_GM_k(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt)   ! Only restricted closed-shell calcs
+           !write(msg,'(a26,es16.6)')'                 Ec^k[GM]:',ec_gm_k
+           !call wrtout(std_out,msg,'COLL')
+           !call wrtout(ab_out,msg,'COLL')
+           !write(msg,'(a26,es16.6)')' wtk used in wtk*Ec^k[GM]:',Kmesh%wt(ikcalc)
+           !call wrtout(std_out,msg,'COLL')
+           !call wrtout(ab_out,msg,'COLL')
+           !ec_gm=ec_gm+Kmesh%wt(ikcalc)*ec_gm_k
          end if
 !        Update the full 1RDM with the GW corrected one for this k-point
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2803,14 +2803,14 @@ endif
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a28)')' Vee[GM] = Vee[SD] + Ec[GM]:'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Ec[GM]       = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Vee[GM]      = : ',(ex_energy+eh_energy+ec_gm),' Ha ,',(ex_energy+eh_energy+ec_gm)*Ha_eV,' eV'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
+     !call wrtout(std_out,msg,'COLL')
+     !call wrtout(ab_out,msg,'COLL')
+     !write(msg,'(a,2(es16.6,a))')' Ec[GM]       = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'
+     !call wrtout(std_out,msg,'COLL')
+     !call wrtout(ab_out,msg,'COLL')
+     !write(msg,'(a,2(es16.6,a))')' Vee[GM]      = : ',(ex_energy+eh_energy+ec_gm),' Ha ,',(ex_energy+eh_energy+ec_gm)*Ha_eV,' eV'
+     !call wrtout(std_out,msg,'COLL')
+     !call wrtout(ab_out,msg,'COLL')
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')

@@ -90,7 +90,7 @@ function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
 !scalars
  real(dp), parameter :: pi=3.141592653589793238462643383279502884197
  character(len=500) :: msg
- integer :: ibdm
+ integer :: ibdm!,unitt
  real(dp) :: ec_integrated,spin_fact,fact
 !arrays
 !************************************************************************
@@ -110,6 +110,17 @@ function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
      ec_integrated=ec_integrated+2.0_dp*real( sum(weights(:)*sigcme_k(:,ibdm,ibdm,1)/(Sr%omega_i(:)-BSt%eig(ibdm,kpoint,1)) ) )
    end do
  endif
+ 
+! unitt=kpoint*100
+! open(unit=unitt)
+! write(unitt,*) ' 1',kpoint
+! do ibdm=1,60 ! nomegai
+!   write(unitt,'(4f10.5)') weights(ibdm),real(sigcme_k(ibdm,1,1,1)),&
+!   &real( sigcme_k(ibdm,1,1,1)/((Sr%omega_i(ibdm)-BSt%eig(1,kpoint,1))**1.0_dp) ),&
+!   &real( sigcme_k(ibdm,1,1,1)/((Sr%omega_i(ibdm)-BSt%eig(1,kpoint,1))**2.0_dp) )
+! enddo
+! close(unitt)
+
  Ec_GM_k=fact*ec_integrated
 
  DBG_EXIT("COLL")
