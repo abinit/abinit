@@ -2362,7 +2362,7 @@ end subroutine compute_coeff_plowannier
 
  !Header of the file data.plowann
  write(unt,'(a22,i2)')"Total number of atom =", wan%natom_wan
- write(unt,*)"List of atoms", wan%iatom_wan(:)
+! write(unt,*)"List of atoms", wan%iatom_wan(:)
  write(unt,'(a7,2i4)')"Bands =",wan%bandi_wan,wan%bandf_wan
  write(unt,'(a26,i2)')"Total number of orbitals =",sum(wan%nbl_atom_wan(:))
  do iatom=1,wan%natom_wan
@@ -2441,7 +2441,7 @@ end subroutine compute_coeff_plowannier
 
  !Reading of the header of data.plowann
  read(unt,'(a22,i2)') msg, natom
- read(unt,*)
+! read(unt,*)
  read(unt,'(a7,2i4)') msg, bandi,bandf
  read(unt,'(a26,i2)') msg, nbl
  do iatom=1,wan_in%natom_wan
