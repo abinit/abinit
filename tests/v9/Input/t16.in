@@ -1,4 +1,4 @@
-# Ga50In50N test xredtreatment in case of tolsym loose.
+# Ga50In50N test xred treatment in case of tolsym loose.
 
 ecut 3 
 tolvrs 1.0d-12

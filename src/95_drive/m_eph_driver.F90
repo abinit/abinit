@@ -169,7 +169,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
- real(dp),parameter :: rifcsph0=zero
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk, use_wfq, use_dvdb
@@ -441,7 +440,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call ifc_init(ifc, cryst, ddb, &
    dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
    dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-   qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+   qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm)
 
  ABI_FREE(ddb_qshifts)
  call ifc%print(unit=std_out)

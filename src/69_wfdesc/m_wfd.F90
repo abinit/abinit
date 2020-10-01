@@ -46,7 +46,6 @@ module m_wfd
  use m_numeric_tools,  only : imin_loc, list2blocks, bool2index
  use m_hide_blas,      only : xcopy, xdotc
  use m_pptools,        only : printxsf
- use m_cgtools,        only : cg_zdotc
  use m_cgtk,           only : cgtk_change_gsphere, cgtk_rotate
  use m_fftcore,        only : print_ngfft, kgindex, sphereboundary, ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh, calc_ceikr, check_rot_fft
