@@ -847,6 +847,13 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(1021)='listkk                          '; basic(1021) = 1
 
+ names(1100)='nonlop_ylm                      '
+ names(1101)='nonlop_ylm%opernla              '
+ names(1102)='nonlop_ylm%opernla_blas         '
+ names(1103)='nonlop_ylm%opernlb              '
+ names(1104)='nonlop_ylm%opernlb_blas         '
+ names(1150)='nonlop_ylm(other)               '
+
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
  names(1502)='HF_updatecgocc                  '; basic(1502)=1
@@ -1243,6 +1250,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(44)
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
+   case(45)
+!      Estimate the complement of nonlop_ylm
+     tslots(:6)=(/1150,1100,-1101,-1102,-1103,-1104/)
 
    case default
      cycle
@@ -1630,6 +1640,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(78)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
          msg='low-level xgTransposer type '
+       case(79)
+         list(:6)=(/1100,1101,1102,1103,1104,1150/)
+         msg='nonlop_ylm'
        case default
          cycle ! This allows to disable temporarily some partitionings
 

@@ -40,6 +40,7 @@ module m_nonlop_ylm
  use m_opernlc_ylm,      only : opernlc_ylm
  use m_opernld_ylm,      only : opernld_ylm
  use m_kg,               only : mkkpgcart
+ use m_time,             only : timab
 
  implicit none
 
@@ -393,7 +394,7 @@ contains
  integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
  integer :: n1,n2,n3,nd2gxdt,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
- real(dp) :: enlk
+ real(dp) :: enlk, tsec(2)
  logical :: check,testnl
  character(len=500) :: message
 !arrays
@@ -412,6 +413,8 @@ contains
 ! **********************************************************************
 
  DBG_ENTER("COLL")
+
+ call timab(1100,1,tsec)
 
 !Check consistency of arguments
 !==============================================================
@@ -844,13 +847,17 @@ contains
 !      Computation or <p_lmn|c> (and derivatives) for this block of atoms
        if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
          if (abs(choice_a)>1) then
+           call timab(1101,1,tsec)
            call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
 &           nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
+           call timab(1101,2,tsec)
          else
+           call timab(1102,1,tsec)
            call opernla_ylm_blas(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
 &           nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
+           call timab(1102,2,tsec)
          end if
        end if
 
@@ -948,15 +955,19 @@ contains
              call ph1d3d(ia3,ia4,kgout,matblk,natom,npwout,n1,n2,n3,phkxredout,ph1d,ph3dout)
            end if
            if (abs(choice_b)>1) then
+             call timab(1103,1,tsec)
              call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
 &             idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
 &             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)
+             call timab(1103,2,tsec)
            else
+             call timab(1104,1,tsec)
              call opernlb_ylm_blas(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
 &             idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
 &             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)
+             call timab(1104,2,tsec)
            end if
          end if
 
@@ -1276,6 +1287,8 @@ contains
  if (nkpgout<nkpgout_) then
    ABI_DEALLOCATE(kpgout_)
  end if
+
+ call timab(1100,2,tsec)
 
  DBG_EXIT("COLL")
 
