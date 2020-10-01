@@ -105,22 +105,16 @@ function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
    MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was not included in bdgw interval.& 
    &Restart the calculation starting bdgw from 1.")
  else
+   ! Sigma_c(iv) produced from a previous integration at the screening stage, is numerically not much stable and introduces bumps.
+   ! Unfortunately, the Green's function times Sigma_c(iv) does not decay fast enough with iv to overcome the bumps. These bumps are
+   ! not pronouced for the linearized density matrix update, as two Green's functions are multiplied making the decay much faster with iv. 
+   ! If a better way to produce more stable Sigma_c(iv) values is found, this subroutine can be use to evaluate GM Ecorr in the future. TODO
    do ibdm=1,ib2
-     ! Sigma_pp(iw)/[(iw - e_ibdm,k)] + [Sigma_pp(iw)/[(iw - e_ibdm,k)]]^* = 2 Re [Sigma_pp(iw)/(iw - e_ibdm,k)]
+     ! Sigma_pp(iv)/[(iv - e_ibdm,k)] + [Sigma_pp(iv)/[(iv - e_ibdm,k)]]^* = 2 Re [Sigma_pp(iv)/(iv - e_ibdm,k)]
      ec_integrated=ec_integrated+2.0_dp*real( sum(weights(:)*sigcme_k(:,ibdm,ibdm,1)/(Sr%omega_i(:)-BSt%eig(ibdm,kpoint,1)) ) )
    end do
  endif
  
-! unitt=kpoint*100
-! open(unit=unitt)
-! write(unitt,*) ' 1',kpoint
-! do ibdm=1,60 ! nomegai
-!   write(unitt,'(4f10.5)') weights(ibdm),real(sigcme_k(ibdm,1,1,1)),&
-!   &real( sigcme_k(ibdm,1,1,1)/((Sr%omega_i(ibdm)-BSt%eig(1,kpoint,1))**1.0_dp) ),&
-!   &real( sigcme_k(ibdm,1,1,1)/((Sr%omega_i(ibdm)-BSt%eig(1,kpoint,1))**2.0_dp) )
-! enddo
-! close(unitt)
-
  Ec_GM_k=fact*ec_integrated
 
  DBG_EXIT("COLL")
