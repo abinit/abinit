@@ -288,7 +288,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
- type(hightemp_type),pointer :: hightemp => null()
+ type(hightemp_type),pointer :: hightemp
  type(macro_uj_type) :: dtpawuj(0)
  type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
@@ -846,14 +846,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (has_to_init) xred_old=xred
 
 !Initialize (eventually) hightemp object
+ nullify(hightemp)
  if(dtset%use_hightemp>=1) then
-   ABI_DATATYPE_ALLOCATE(hightemp,)
    if(dtset%mband<dtset%ht_nbcut) then
      write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate hightemp routines.",ch10,&
      & "nband=",dtset%mband," < ht_nbcut=",dtset%ht_nbcut,".",ch10,&
      & "Action: Increase nband or decrease ht_nbcut."
      MSG_ERROR(msg)
    else
+     ABI_DATATYPE_ALLOCATE(hightemp,)
      call hightemp%init(dtset%ht_gcut,dtset%mband,dtset%ht_nbcut,dtset%ht_prt_cg,rprimd,&
 &     dtset%use_hightemp)
    end if
@@ -1649,6 +1650,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call data4entropyDMFT_destroy(paw_dmft%forentropyDMFT)
  end if
 
+!Destroy hightemp datastructure
  if(associated(hightemp)) then
    call hightemp%destroy()
    ABI_DATATYPE_DEALLOCATE(hightemp)
