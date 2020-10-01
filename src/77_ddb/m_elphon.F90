@@ -116,7 +116,7 @@ contains
 !!     rpt(3,nprt) =canonical positions of R points in the unit cell
 !!     nrpt =number of real space points used to integrate IFC (for interpolation of dynamical matrices)
 !!     wghatm(natom,natom,nrpt) =Weight for the pair of atoms and the R vector
-!! filnam(7)=character strings giving file names
+!! filnam(8)=character strings giving file names
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -147,7 +147,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  type(ifc_type),intent(inout) :: Ifc
  integer,intent(in) :: comm
 !arrays
- character(len=fnlen),intent(in) :: filnam(7)
+ character(len=fnlen),intent(in) :: filnam(8)
 
 !Local variables-------------------------------
 !scalars
@@ -218,7 +218,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    end if
  end if
 
- elph_base_name=trim(filnam(2))//"_ep"
+ elph_base_name=trim(filnam(8))//"_ep"
  ddkfilename=trim(filnam(7))
  ABI_CHECK(len_trim(ddkfilename) > 0, "ddkfilename is not defined")
 
