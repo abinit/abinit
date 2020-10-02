@@ -45,7 +45,7 @@ Tested with __CentOS 8.2__
     - [NetCDF](https://www.unidata.ucar.edu/software/netcdf): Network Common Data Form
     - [libXC](https://tddft.org/programs/libxc/download/): Library of exchange-correlation functionals
 
-6.  __Optional supported librairies:__
+6.  __Optional libraries:__
 
     - [FFTW3](http://www.fftw.org/): Library for computing the discrete Fourier transform, **recommended with GNU**
     - [libxml2](http://xmlsoft.org/downloads.html): XML C parser, recommended for multibinit
@@ -65,11 +65,11 @@ __a relatively simple parallel version of ABINIT__ are summarized below:
 
     `sudo dnf install gcc-gfortran`
 
-2. __Install MPI library__ (MPICH)
+2. __Install the MPI library__ (MPICH)
 
     `sudo dnf install mpich mpich-devel`
 
-3. __Install linear algebra library__  (OpenBLAS)
+3. __Install the linear algebra library__  (OpenBLAS)
 
     `sudo dnf install openblas`
 
@@ -85,7 +85,7 @@ __a relatively simple parallel version of ABINIT__ are summarized below:
 
     `sudo dnf install fftw fftw-devel`
 
-6. __Install python interpreter__
+6. __Install the python interpreter__
 
     `sudo dnf install python3`
 
@@ -185,7 +185,7 @@ cd tests
     Summary: failed=0, succeeded=11, passed=0, skipped=0, disabled=0
     ```
 
-    otherwise there is a __problem__ with the compilation: see [Troubleshooting](#troubleshooting)
+otherwise there is a __problem__ with the compilation: see [Troubleshooting](#troubleshooting)
 
 __Install__ (optional):
 
@@ -209,8 +209,8 @@ All the variables and flags supported by the script can be found by typing:
 
 Some options are detected automatically by the script.
 For example, with the option `--with-mpi="yes"`, ABINIT will try to use the parallel fortran compiler
-found in $PATH (e.g. mpifort) and will try to detect the directories containing the associated libraries
-and the header files required by MPI.
+found in $PATH (e.g. mpifort) and will try to detect the directories containing the libraries
+and the associated header files required by MPI.
 
 When a lot of options are needed, it is advised to use a config file.
 
@@ -360,7 +360,7 @@ sudo dnf install libxc libxc-devel
 sudo dnf install python3
 ```
 
-### Getting sources of ABINIT
+### Getting the ABINIT tarball
 
 ```sh
 wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz

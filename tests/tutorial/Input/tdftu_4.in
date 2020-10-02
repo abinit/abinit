@@ -64,7 +64,7 @@ dmatpawu
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_19.1_bdir.*
+##%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
 #%%   tdftu_4.abo, tolnlines=  1, tolabs=  1.010e-04, tolrel=  4.000e-04, fld_options = -easy  

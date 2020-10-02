@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pair_list
 !! NAME
 !!  m_pair_list

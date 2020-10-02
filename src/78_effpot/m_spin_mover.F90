@@ -34,6 +34,7 @@
 
 #include "abi_common.h"
 
+
 module m_spin_mover
 
   use defs_basis
@@ -222,7 +223,7 @@ contains
     else
       call self%set_initial_state(mode=params%spin_init_state)
     endif
-      
+
     ! observable
     if(iam_master) then
        call self%spin_ob%initialize(self%supercell, params)
@@ -814,11 +815,11 @@ contains
        call self%spin_ob%reset()
     endif
 
-    !if (iam_master) then
-    !   msg="Measurement run:"
-    !   call wrtout(std_out,msg,'COLL')
-    !   call wrtout(ab_out, msg, 'COLL')
-    !end if
+    if (iam_master) then
+       msg="Measurement run:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+    end if
 
     do while(t<self%total_time)
        counter=counter+1

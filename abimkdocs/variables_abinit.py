@@ -1502,6 +1502,14 @@ it will simply issue a warning. There will be no rescaling. If 1, after tentativ
 rescaling as described in [[dilatmx]], the code will stop execution.
 Also, the use of [[chkdilatmx]] = 0 allows one to set [[dilatmx]] to a larger value than 1.15,
 otherwise forbidden as being a waste of CPU and memory.
+
+So, when using [[chkdilatmx]]=0, the relaxed lattice parameters might not be accurate, but will simply better
+than the starting ones.
+
+[[chkdilatmx]]=0 is useful when the starting geometry is likely very inaccurate. However, if the user is in search
+of an accurate geometry estimation, then a first determination of the (better but inaccurate) geometry with [[chkdilatmx]]=0
+should be followed by a more accurate second run from the better geometry with [[chkdilatmx]]=1 and [[dilatmx]] slightly larger than 1,
+(possibly 1.05).
 """,
 ),
 
@@ -2457,15 +2465,22 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
-on-the-flight variations the plane wave basis set, due to cell optimization by ABINIT.
-Useful only when [[ionmov]] == 2 or 22 and [[optcell]]/=0, that is, cell optimization.
+on-the-flight enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
+Useful only when doing cell optimization, e.g. [[optcell]]/=0, usually with [[ionmov]] == 2 or 22.
+Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large),
+then the recommended value of [[dilatmx]] is 1.05.
+When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
+you need an accurate estimation of the geometry, then make a first
+run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using
+the newly estimated geometry, with [[chkdilatmx]]=0 and [[dilatmx]] set to 1.05.
+If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]]=0 only once.
 
 In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
 ABINIT will rescale uniformly the
 tentative new primitive vectors to a value that leads at most to 90% of the
 maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
 prevent the geometry optimization algorithms to have taken a too large trial
-step), but afterwards will exit. Setting [[chkdilatmx]] == 0 allows one to
+step), but afterwards will stop and exit. Setting [[chkdilatmx]] == 0 allows one to
 book a larger planewave basis, but will not rescale the tentative new primitive vectors
 nor lead to an exit when the [[dilatmx]] threshold is exceeded.
 The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
@@ -2474,18 +2489,18 @@ this might be sufficiently accurate. In such case, [[dilatmx]] might even be let
 
 Detailed explanation: The memory space for the planewave basis set is defined
 by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called
-internally "ecut_eff". Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
-Still, operations (like scalar products) are taking into account these fake non-used planewaves,
-thus slowing down the ABINIT execution.
+internally "ecut_eff"). Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
+Still, operations (like scalar products) are done by taking into account these fake (non-used) planewaves,
+even if their coefficients are set to zero, thus slowing down the ABINIT execution.
 Using [[dilatmx]]<1.0 is equivalent to changing [[ecut]] in all its uses. This
 is allowed, although its meaning is no longer related to a maximal expected scaling.
 
 Setting [[dilatmx]] to a large value leads to waste of CPU time and memory.
 By default, ABINIT will not accept that you define [[dilatmx]] bigger than 1.15.
 This behaviour will be overcome by using [[chkdilatmx]] == 0.
-Supposing you think that the optimized [[acell]] values might be 10% larger
-than your input values, use simply [[dilatmx]] 1.1. This will already lead to
-an increase of the number of planewaves by a factor (1.1)  3  =1.331, and a
+Supposing you think that the optimized [[acell]] values might be 5% larger
+than your input values, use simply [[dilatmx]] 1.05. This will lead to
+an increase of the number of planewaves by a factor $(1.05)^3$, which is about $1.158$, and a
 corresponding increase in CPU time and memory.
 It is possible to use [[dilatmx]] when [[optcell]] =0, but a value larger than
 1.0 will be a waste.
@@ -3805,6 +3820,7 @@ Variable(
 Number of electrons per unit cell to be added/subtracted to the initial value computed
 from the pseudopotentials and the unit cell.
 Can be used to simulate doping within the rigid band approximation.
+Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
 See also [[eph_doping]] to specify the same quantity in terms of charge/cm^3
 """,
 ),
@@ -10211,8 +10227,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
-[[nband]] bands, are to be considered as part of a buffer. This concept is
-useful in three situations: in non-self-consistent calculations, for the
+[[nband]] bands, are to be considered as part of a buffer.
+A negative value is interpreted as percentage of [[nband]] (added in v9).
+
+This concept is useful in three situations: in non-self-consistent calculations, for the
 determination of the convergence tolerance; for response functions of metals,
 to avoid instabilities, and also when finite electric fields or non-linear
 responses (with electric field perturbations) are considered. For the two
@@ -11285,10 +11303,10 @@ Variable(
     requires="[[optdriver]] == 1 and [[paral_kgb]] == 1 (Ground-state calculations with LOBPCG algorithm)",
     added_in_version="before_v9",
     text=r"""
-When using Scalapack (or any similar Matrix Algebra library), the efficiency
-of the eigenproblem resolution saturates as the number of CPU cores increases.
-It is better to use a smaller number of CPU cores for the LINALG calls.
-This maximum number of cores can be set with [[np_slk]].
+When using Scalapack (or any similar Matrix Algebra library such as ELPA), the efficiency
+of the eigenproblem solver saturates as the number of CPU cores increases.
+In this case, it is more efficient to use a smaller number of CPUs for the LINALG calls.
+The maximum number of cores can be set with [[np_slk]].
 A large number for [[np_slk]] (i.e. 1000000) means that all cores are used for
 the Linear Algebra calls.
 np_slk must divide the number of processors involved in diagonalizations
@@ -21746,6 +21764,7 @@ Variable(
 Gives the doping charge in units of |e_charge| / cm^3.
 Negative for n-doping, positive for p-doping.
 Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
+Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
 """,
 ),
 
@@ -21773,6 +21792,20 @@ The default value is a compromise between numerical stability and efficiency.
 Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substancial decrease in the number of
 $\kq$ KS states that must be read from file with a subsequent decrease in the memory requirements for the wavefunctions.
 We recommended to perform initial tests to decide whether a value smaller than four can be used.
+""",
+),
+
+Variable(
+    abivarname="rifcsph",
+    varset="eph",
+    vartype="real",
+    topics=['Phonons_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Radius of the Interatomic Force Constant SPHere",
+    added_in_version="9.2.0",
+    text=r"""
+Same meaning as [[rifcsph@anaddb]]
 """,
 ),
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_drivexc
 !! NAME
 !!  m_drivexc

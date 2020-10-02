@@ -33,9 +33,7 @@
      ifcflag         1
      strcpli        -1
  Spin Dynamics :
-   spin_calc_correlation_obs           0
         spin_calc_thermo_obs           1
-          spin_calc_traj_obs           0
                spin_dynamics           2
             spin_temperature      600.00000
                 spin_damping        0.10000
@@ -86,6 +84,7 @@ reading spin terms.
 ================================================================================
     Iteration          time(s)         Avg_Mst/Ms      ETOT(Ha/uc)
 --------------------------------------------------------------------------------
+Measurement run:
 -           100      9.90000E-15      8.10635E-01     -2.85603E-03
 -           200      1.99000E-14      7.48766E-01     -2.55116E-03
 -           300      2.99000E-14      6.93914E-01     -2.32246E-03

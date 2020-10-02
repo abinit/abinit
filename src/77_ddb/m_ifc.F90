@@ -618,6 +618,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (nsphere > 0 .or. abs(rifcsph) > tol10) then
    call wrtout(std_out, ' Apply cutoff on IFCs.')
    call wrtout(std_out, sjoin(" nsphere:", itoa(nsphere), ", rifcsph:", ftoa(rifcsph)))
+   call wrtout(std_out, sjoin(" Radius of biggest sphere inscribed in the WS supercell: ", ftoa(r_inscribed_sphere)))
    call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,rcan,rprim,ifc_tmp%rpt,rcut_min,ifc_tmp%wghatm)
    if (Ifc%asr > 0) then
      call wrtout(std_out, ' Enforcing ASR on cutoffed IFCs.')
@@ -890,6 +891,7 @@ subroutine ifc_print(ifc, header, unit, prtvol)
 
  call wrtout(unt, sjoin(" Mass of the atoms (atomic mass unit): ", ltoa(ifc%amu)))
  call wrtout(unt, sjoin(" Number of real-space points for IFC(R): ", itoa(ifc%nrpt)))
+ call wrtout(std_out, sjoin(" Radius of biggest sphere inscribed in the WS supercell: ", ftoa(ifc%r_inscribed_sphere)))
  call wrtout(unt, " ")
 
  call wrtout(unt, " Q-mesh:")
@@ -1705,7 +1707,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
  integer,allocatable :: list(:),indngb(:)
  real(dp) :: invdlt(3,3),ra(3),xred(3),dielt(3,3)
  real(dp),allocatable :: dist(:,:,:),wkdist(:),rsiaf(:,:,:),sriaf(:,:,:),vect(:,:,:)
- real(dp),allocatable :: posngb(:,:)
+ real(dp),allocatable :: posngb(:,:),wghia(:)
  real(dp) :: gprimd(3,3),rprimd(3,3)
 
 ! *********************************************************************
@@ -1810,7 +1812,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
      nctkarr_t('ifc_atoms_indices', "i", "natifc"),&
      nctkarr_t('ifc_neighbours_indices', "i", "ifcout, natifc"),&
      nctkarr_t('ifc_distances', "dp", "ifcout, natifc "),&
-     nctkarr_t('ifc_matrix_cart_coord', "dp", "number_of_cartesian_directions,number_of_cartesian_directions, ifcout, natifc")])
+     nctkarr_t('ifc_matrix_cart_coord', "dp", "number_of_cartesian_directions,number_of_cartesian_directions, ifcout, natifc"),&
+     nctkarr_t('ifc_atoms_cart_coord', "dp", "number_of_cartesian_directions,ifcout, natifc"),&
+     nctkarr_t('ifc_weights', "dp", "ifcout, natifc")])
    NCF_CHECK(ncerr)
 
    if (Ifc%dipdip==1) then
@@ -1835,6 +1839,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
  ABI_MALLOC(vect,(3,3,ifcout1))
  ABI_MALLOC(indngb,(ifcout1))
  ABI_MALLOC(posngb,(3,ifcout1))
+ ABI_MALLOC(wghia,(ifcout1))
 
  iatifc=0
 
@@ -1881,6 +1886,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
        do ii=1,ifcout1
          ib = indngb(ii)
          irpt = (list(ii)-1)/Ifc%natom+1
+         wghia(ii) = Ifc%wghatm(ia,ib,irpt)
          ! limit printing to maximum distance for tdep
          if (wkdist(ii) > maxdist_tdep) cycle
 
@@ -1918,6 +1924,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
          NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=[1,iatifc],count=[ifcout1,1]))
          ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord"), rsiaf, start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
          NCF_CHECK(ncerr)
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_cart_coord"), posngb, start=[1,1,iatifc], count=[3,ifcout1,1]))
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_weights"), wghia, start=[1,iatifc], count=[ifcout1,1]))
+
          if (Ifc%dipdip==1) then
            ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord_short_range"), sriaf, &
              start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
@@ -1975,6 +1984,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
  ABI_FREE(dist)
  ABI_FREE(list)
  ABI_FREE(wkdist)
+ ABI_FREE(wghia)
 
 #ifdef HAVE_NETCDF
 contains
@@ -2015,7 +2025,8 @@ end subroutine ifc_write
 !! OUTPUT
 !! rsiaf(3,3,ifcout)=list of real space IFCs
 !! sriaf(3,3,ifcout)=list of the short range part of the real space IFCs
-!! vect(3,3,ifcout)=base vectors for local coordinates (longitudinal/transverse
+!! vect(3,3,ifcout)=base vectors for local coordinates (longitudinal/transverse), if ifc_getiaf is able to find
+!!   a third atom not aligned with the two atoms characterizing the IFC. If no, the second and third vectors are set to zero.
 !! indngb(ifcout)=indices in the unit cell of the neighbouring atoms
 !! posngb(3,ifcout)=position of the neighbouring atoms in cartesian coordinates
 !! output file
@@ -2100,20 +2111,22 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
    end do
    if(flag==0)then
      write(message, '(3a)' )&
-&     'Unable to find a third atom not aligned',ch10,&
-&     'with the two selected ones.'
-     MSG_BUG(message)
-   end if
-   vect2(1)=work(1)/scprod**0.5
-   vect2(2)=work(2)/scprod**0.5
-   vect2(3)=work(3)/scprod**0.5
-   vect3(1)=vect1(2)*vect2(3)-vect1(3)*vect2(2)
-   vect3(2)=vect1(3)*vect2(1)-vect1(1)*vect2(3)
-   vect3(3)=vect1(1)*vect2(2)-vect1(2)*vect2(1)
-   if (iout > 0) then
-     write(iout, '(a)' )' Third atom defining local coordinates : '
-     write(iout, '(a,i4,a,i4)' )'     ib = ',ib,'   irpt = ',irpt
-   end if
+&     'Unable to find a third atom not aligned with the two selected ones.',ch10,&
+&     'The local analysis (longitudinal/transverse) will not be done. The two transverse vectors are set to zero.'
+     MSG_WARNING(message)
+     vect2(:)=zero ; vect3(:)=zero
+   else
+     vect2(1)=work(1)/scprod**0.5
+     vect2(2)=work(2)/scprod**0.5
+     vect2(3)=work(3)/scprod**0.5
+     vect3(1)=vect1(2)*vect2(3)-vect1(3)*vect2(2)
+     vect3(2)=vect1(3)*vect2(1)-vect1(1)*vect2(3)
+     vect3(3)=vect1(1)*vect2(2)-vect1(2)*vect2(1)
+     if (iout > 0) then
+       write(iout, '(a)' )' Third atom defining local coordinates : '
+       write(iout, '(a,i4,a,i4)' )'     ib = ',ib,'   irpt = ',irpt
+     end if
+   endif
  end if
 
  ! Analysis and output of force constants, ordered with respect to the distance from atom ia
@@ -2161,21 +2174,23 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
        if (iout > 0) then
          write(iout, '(a,f9.5)' ) '  Trace         ',trace1+tol10
        end if
-       if(ii/=1)then
-         call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
-       end if
-       if (iout > 0) then
-         write(iout, '(a)' )' Transformation to local coordinates '
-         write(iout, '(a,3f16.6)' ) ' First  local vector :',vect1
-         write(iout, '(a,3f16.6)' ) ' Second local vector :',vect2
-         write(iout, '(a,3f16.6)' ) ' Third  local vector :',vect3
-       end if
-       call ifclo9(rsiaf(:,:,ii),ifcloc,vect1,vect2,vect3)
-       if (iout > 0) then
-         do nu=1,3
-           write(iout, '(1x,3f9.5)' )(ifcloc(mu,nu)+tol10,mu=1,3)
-         end do
-       end if
+       if(flag==1)then
+         if(ii/=1)then
+           call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
+         end if
+         if (iout > 0) then
+           write(iout, '(a)' )' Transformation to local coordinates '
+           write(iout, '(a,3f16.6)' ) ' First  local vector :',vect1
+           write(iout, '(a,3f16.6)' ) ' Second local vector :',vect2
+           write(iout, '(a,3f16.6)' ) ' Third  local vector :',vect3
+         end if
+         call ifclo9(rsiaf(:,:,ii),ifcloc,vect1,vect2,vect3)
+         if (iout > 0) then
+           do nu=1,3
+             write(iout, '(1x,3f9.5)' )(ifcloc(mu,nu)+tol10,mu=1,3)
+           end do
+         end if
+       endif ! flag==1
 
        vect(:,1,ii) = vect1
        vect(:,2,ii) = vect2
@@ -2273,37 +2288,39 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
          write(iout,'(3(f9.5,17x))')1.0,trace2/trace1+tol10,trace3/trace1+tol10 !
        end if
 
-       if(ii/=1)then
-         call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
-       end if
-       if (iout > 0) then
-         write(iout, '(a)' )' Transformation to local coordinates '
-         write(iout, '(a,3f16.6)' )' First  local vector :',vect1
-         write(iout, '(a,3f16.6)' )' Second local vector :',vect2
-         write(iout, '(a,3f16.6)' )' Third  local vector :',vect3
-       end if
-       call ifclo9(rsiaf(:,:,ii),rsloc,vect1,vect2,vect3)
-       call ifclo9(ewiaf1,ewloc,vect1,vect2,vect3)
-       call ifclo9(sriaf(:,:,ii),srloc,vect1,vect2,vect3)
-       if (iout > 0) then
-         do nu=1,3
-           write(iout, '(1x,3(3f9.5,1x))' )&
-&           (rsloc(mu,nu)+tol10,mu=1,3),&
-&           (ewloc(mu,nu)+tol10,mu=1,3),&
-&           (srloc(mu,nu)+tol10,mu=1,3)
-         end do
+       if(flag==1)then
          if(ii/=1)then
-           write(iout, '(a)' )' Ratio with respect to the longitudinal ifc'
-         else
-           write(iout, '(a)' )' Ratio with respect to the (1,1) element'
+           call axial9(rsiaf(:,:,ii),vect1,vect2,vect3)
          end if
-         do nu=1,3
-           write(iout, '(1x,3(3f9.5,1x))' )&
-&           (rsloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
-&           (ewloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
-&           (srloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3)
-         end do
-       end if
+         if (iout > 0) then
+           write(iout, '(a)' )' Transformation to local coordinates '
+           write(iout, '(a,3f16.6)' )' First  local vector :',vect1
+           write(iout, '(a,3f16.6)' )' Second local vector :',vect2
+           write(iout, '(a,3f16.6)' )' Third  local vector :',vect3
+         end if
+         call ifclo9(rsiaf(:,:,ii),rsloc,vect1,vect2,vect3)
+         call ifclo9(ewiaf1,ewloc,vect1,vect2,vect3)
+         call ifclo9(sriaf(:,:,ii),srloc,vect1,vect2,vect3)
+         if (iout > 0) then
+           do nu=1,3
+             write(iout, '(1x,3(3f9.5,1x))' )&
+&             (rsloc(mu,nu)+tol10,mu=1,3),&
+&             (ewloc(mu,nu)+tol10,mu=1,3),&
+&             (srloc(mu,nu)+tol10,mu=1,3)
+           end do
+           if(ii/=1)then
+             write(iout, '(a)' )' Ratio with respect to the longitudinal ifc'
+           else
+             write(iout, '(a)' )' Ratio with respect to the (1,1) element'
+           end if
+           do nu=1,3
+             write(iout, '(1x,3(3f9.5,1x))' )&
+&             (rsloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
+&             (ewloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3),&
+&             (srloc(mu,nu)/rsloc(1,1)+tol10,mu=1,3)
+           end do
+         end if
+       endif ! flag==1
 
        vect(:,1,ii) = vect1
        vect(:,2,ii) = vect2
