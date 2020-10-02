@@ -307,7 +307,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  this%dtpawuj=>dtpawuj
  this%eigen=>eigen
  this%hdr=>hdr
- this%hightemp=hightemp
+ this%hightemp=>hightemp
  this%initialized=>initialized
  this%irrzon=>irrzon
  this%mpi_enreg=>mpi_enreg
