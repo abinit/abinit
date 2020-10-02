@@ -288,7 +288,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
- type(hightemp_type),pointer :: hightemp
+ type(hightemp_type),pointer :: hightemp => null()
  type(macro_uj_type) :: dtpawuj(0)
  type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
@@ -846,7 +846,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (has_to_init) xred_old=xred
 
 !Initialize (eventually) hightemp object
- nullify(hightemp)
  if(dtset%use_hightemp>=1) then
    if(dtset%mband<dtset%ht_nbcut) then
      write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate hightemp routines.",ch10,&

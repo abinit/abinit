@@ -204,7 +204,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  type(orbmag_type),intent(in),target :: dtorbmag
 ! type(electronpositron_type),pointer :: electronpositron
  type(hdr_type),intent(in),target :: hdr
- type(hightemp_type),intent(in),target :: hightemp
+ type(hightemp_type),intent(in),pointer :: hightemp
  type(pawang_type),intent(in),target :: pawang
  type(pawfgr_type),intent(in),target :: pawfgr
  type(pseudopotential_type),intent(in),target :: psps
@@ -307,7 +307,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  this%dtpawuj=>dtpawuj
  this%eigen=>eigen
  this%hdr=>hdr
- this%hightemp=>hightemp
+ this%hightemp=hightemp
  this%initialized=>initialized
  this%irrzon=>irrzon
  this%mpi_enreg=>mpi_enreg
