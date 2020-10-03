@@ -21778,11 +21778,11 @@ Variable(
     mnemonics="EPH PHonon FACTor for energy WINdow",
     added_in_version="9.2.0",
     text=r"""
-This variable is used to define the effective energy window for the $\kq$ KS states
-in the computation of electron lifetimes ([[eph_task]] -4) and predict
+This variable defines the effective energy window for the $\kq$ KS states
+in the computation of electron lifetimes ([[eph_task]] -4) and is used to predict
 the list of $\qq$-points in the BZ that will be needeed during the calculation.
 
-The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk}$ but then this
+The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk$ but then this
 initial energy window must be increased a bit to accomodate for phonon absorption/emission (from $\kk$ to $\kq$).
 This is importat for $\nk$ states that are close to edge of the initial energy window as this states may be needed
 for the linear interpolation used in tetrahedron method.
