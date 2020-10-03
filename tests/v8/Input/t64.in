@@ -40,7 +40,7 @@
 #%% input_ddb = t62o_DDB
 #%% [files]
 #%% files_to_test =
-#%%   t64.out_DDB, tolnlines = 4, tolabs = 2.000e-08, tolrel = 1.000e-6
+#%%   t64_DDB, tolnlines = 4, tolabs = 2.000e-08, tolrel = 1.000e-6
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

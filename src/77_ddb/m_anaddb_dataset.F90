@@ -2107,6 +2107,7 @@ subroutine anaddb_init(input_path, filnam)
    write(std_out,*)' Give name for file containing ddk filenames for elphon/transport: '
    read(std_in, '(a)' ) filnam(7)
    write(std_out,'(a,a)' )'-   ',trim(filnam(7))
+   filnam(8) = ""
 
  else
    ! Read input
