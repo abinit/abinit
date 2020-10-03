@@ -396,6 +396,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
                       prtvol=dtset%prtvol)
 
+   ! DD cryst comes from DPPT --> no time-reversal if q /= 0
+   ! Change the value so that we use the same as the GS part.
+   cryst_ddb%timrev = cryst%timrev
    if (cryst%compare(cryst_ddb, header="Comparing WFK crystal with DDB crystal") /= 0) then
      MSG_ERROR("Crystal structure from WFK and DDB do not agree! Check messages above!")
    end if
@@ -506,6 +509,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_filepath, comm)
 
+   ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
+   ! Change the value so that we use the same as the GS part.
+   dvdb%cryst%timrev = cryst%timrev
    if (cryst%compare(dvdb%cryst, header="Comparing WFK crystal with DVDB crystal") /= 0) then
      MSG_ERROR("Crystal structure from WFK and DVDB do not agree! Check messages above!")
    end if

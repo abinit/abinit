@@ -633,7 +633,7 @@ integer function crystal_compare(self, other, header) result(ierr)
  return
 
  ! Print structure to aid debugging. Caller will handle exit status.
-10 call wrtout(std_out, "Comparing crystal1 and crystal2 for possible differences:")
+10 call wrtout(std_out, "Comparing crystal1 and crystal2 for possible differences before returning ierr /= 0!")
    call self%print(header="crystal1")
    call wrtout(std_out, "")
    call other%print(header="crystal2")
