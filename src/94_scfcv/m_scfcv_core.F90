@@ -2136,8 +2136,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  &+energies%e_hybcomp_E0+energies%e_hybcomp_v0+energies%e_hybcomp_v+energies%e_vdw_dftd&
  &+energies%e_elecfield+energies%e_magfield   
 
- write(std_out,'(a,2(es16.6,a))')' T          = : ',energies%e_kinetic    ,' Ha ,',energies%e_kinetic*Ha_eV    ,' eV'
- write(std_out,'(a,2(es16.6,a))')' Vext       = : ',energies%e_localpsp   ,' Ha ,',energies%e_localpsp*Ha_eV   ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Ekinetic   = : ',energies%e_kinetic    ,' Ha ,',energies%e_kinetic*Ha_eV    ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Evext      = : ',energies%e_localpsp   ,' Ha ,',energies%e_localpsp*Ha_eV   ,' eV'
  write(std_out,'(a,2(es16.6,a))')' PspCore    = : ',energies%e_corepsp    ,' Ha ,',energies%e_corepsp*Ha_eV      ,' eV'
  write(std_out,'(a,2(es16.6,a))')' E.nloc.psp = : ',enonlocalpsp          ,' Ha ,',enonlocalpsp*Ha_eV          ,' eV'
  write(std_out,'(a,2(es16.6,a))')' Ehartree   = : ',energies%e_hartree    ,' Ha ,',energies%e_hartree*Ha_eV    ,' eV'
