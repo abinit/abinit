@@ -2033,7 +2033,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%nstep==0)then
 !    nstep==0 computation of energy not yet implemented with Fock term, see m_energy.F90
      cond_string(1)='usefock' ; cond_values(1)=dt%usefock
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'usefock',dt%usefock,1,(/0/),iout)
+     if(dt%usefock/=1) then
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'usefock',dt%usefock,1,(/0/),iout)
+     else
+       write(msg,'(a)')&
+       'For usefock=1 and nstep=0, the Fock energy is not available and will not be computed.'
+       MSG_WARNING(msg)
+     endif
    endif
 
 !  nsym

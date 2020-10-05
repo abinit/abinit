@@ -2780,7 +2780,7 @@ endif
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      !
-     ! Print the updated Vee[SD] and Vee[GM] energies
+     ! Print the updated Vee[SD] energy
      !
      call xmpi_barrier(Wfd%comm)
      eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
@@ -2790,19 +2790,19 @@ endif
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a40)')' Vee[SD] energy obtained using GW 1-RDM:'
+     write(msg,'(a)')' Vee[SD] (= Ehartree + Efock) energy obtained using GW 1-RDM:'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Eh[SD]       = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Ex[SD]       = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Efock      = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Vee[SD]      = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a28)')' Vee[GM] = Vee[SD] + Ec[GM]:'
+     !write(msg,'(a28)')' Vee[GM] = Vee[SD] + Ec[GM]:'
      !call wrtout(std_out,msg,'COLL')
      !call wrtout(ab_out,msg,'COLL')
      !write(msg,'(a,2(es16.6,a))')' Ec[GM]       = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'

@@ -2042,7 +2042,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    if (.not.allocated(nhatgr) ) then
      ABI_ALLOCATE(nhatgr,(0,0,0))
    end if
-
+   
    call energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &   energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
 &   nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
@@ -2140,9 +2140,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  write(std_out,'(a,2(es16.6,a))')' Vext       = : ',energies%e_localpsp   ,' Ha ,',energies%e_localpsp*Ha_eV   ,' eV'
  write(std_out,'(a,2(es16.6,a))')' PspCore    = : ',energies%e_corepsp    ,' Ha ,',energies%e_corepsp*Ha_eV      ,' eV'
  write(std_out,'(a,2(es16.6,a))')' E.nloc.psp = : ',enonlocalpsp          ,' Ha ,',enonlocalpsp*Ha_eV          ,' eV'
- write(std_out,'(a,2(es16.6,a))')' J          = : ',energies%e_hartree    ,' Ha ,',energies%e_hartree*Ha_eV    ,' eV'
- write(std_out,'(a,2(es16.6,a))')' K          = : ',energies%e_fock0      ,' Ha ,',energies%e_fock0*Ha_eV      ,' eV'
- write(std_out,'(a,2(es16.6,a))')' Exc        = : ',energies%e_xc         ,' Ha ,',energies%e_xc*Ha_eV         ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Ehartree   = : ',energies%e_hartree    ,' Ha ,',energies%e_hartree*Ha_eV    ,' eV'
+ if(dtset%usefock==1 .and. dtset%nstep/=0) then
+   write(std_out,'(a,2(es16.6,a))')' Efock      = : ',energies%e_fock0      ,' Ha ,',energies%e_fock0*Ha_eV      ,' eV'
+ endif
+ write(std_out,'(a,2(es16.6,a))')' Exc_ks     = : ',energies%e_xc         ,' Ha ,',energies%e_xc*Ha_eV         ,' eV'
  if(abs(energies%e_vdw_dftd)>1.0d-6) then
    write(std_out,'(a,2(es16.6,a))')' EvdW-D     = : ',energies%e_vdw_dftd   ,' Ha ,',energies%e_vdw_dftd*Ha_eV   ,' eV'
  endif
