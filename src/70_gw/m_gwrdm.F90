@@ -67,8 +67,8 @@ contains
 !!
 !! OUTPUT
 !! Compute the Galitskii-Migdal corr energy contribution of this k-point:
-!! Ec ^k = weight_k * 1/(4*pi) * fact_spin * int _{ -Inf }^{ +Inf } dw Sigma_c(iw) * G0(iw) 
-!!       = weight_k * 1/(4*pi) * fact_spin * int _{   0  }^{ +Inf } dw 2 * Re{ Sigma_c(iw) * G0(iw) } 
+!! Ec ^k = weight_k * 1/(4*pi) * fact_spin * int _{ -Inf }^{ +Inf } dv Sigma_c(iv) * G0(iv) 
+!!       = weight_k * 1/(4*pi) * fact_spin * int _{   0  }^{ +Inf } dv 2 * Re{ Sigma_c(iv) * G0(iv) } 
 !!
 !! PARENTS
 !!  m_sigma_driver.f90
