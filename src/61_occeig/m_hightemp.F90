@@ -68,9 +68,13 @@ module m_hightemp
     real(dp) :: gcut,std_init,nfreeel,e_shiftfactor,ucvol
     logical :: prt_cg
   contains
-    procedure :: compute_efreeel,compute_ent_freeel
-    procedure :: compute_nfreeel,compute_pw_avg_std
-    procedure :: compute_e_shiftfactor,init,destroy
+    procedure :: compute_efreeel
+    procedure :: compute_ent_freeel
+    procedure :: compute_nfreeel
+    procedure :: compute_pw_avg_std
+    procedure :: compute_e_shiftfactor
+    procedure :: init
+    procedure :: destroy
   end type hightemp_type
   !!***
 
