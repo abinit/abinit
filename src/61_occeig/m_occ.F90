@@ -504,9 +504,11 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
- if(present(hightemp).and.associated(hightemp)) then
-   call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
-&   fermilo,hightemp%gcut,nelectlo,tsmear,hightemp%ucvol,hightemp%version)
+ if(present(hightemp)) then
+   if(associated(hightemp)) then
+     call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
+&     fermilo,hightemp%gcut,nelectlo,tsmear,hightemp%ucvol,hightemp%version)
+   end if
  end if
 
  fermihi=maxval(eigen(1:nband(1)*nkpt*nsppol))+6.001_dp*tsmear
@@ -520,9 +522,11 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
- if(present(hightemp).and.associated(hightemp)) then
-   call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
-&   fermihi,hightemp%gcut,nelecthi,tsmear,hightemp%ucvol,hightemp%version)
+ if(present(hightemp)) then
+   if(associated(hightemp)) then
+     call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
+&     fermihi,hightemp%gcut,nelecthi,tsmear,hightemp%ucvol,hightemp%version)
+   end if
  end if
 
 !write(std_out,'(2(a, es16.8))' )' newocc: initial nelect_lo: ',nelectlo, " nelect_hi: ", nelecthi
@@ -571,9 +575,11 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      !Blanchet - Compute the number of free electrons with corresponding chemical
      !potential and add to nelect bounds.
-     if(present(hightemp).and.associated(hightemp)) then
-       call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
-    &   fermimid,hightemp%gcut,nelectmid,tsmear,hightemp%ucvol,hightemp%version)
+     if(present(hightemp)) then
+       if (associated(hightemp)) then
+         call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
+&         fermimid,hightemp%gcut,nelectmid,tsmear,hightemp%ucvol,hightemp%version)
+       end if
      end if
 
      !write(std_out,'(a,i0,1x, 3(a,es13.5))' ) " iter: ", ii, &
