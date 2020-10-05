@@ -88,7 +88,6 @@ function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
  complex(dpc),intent(in) :: sigcme_k(:,:,:,:)
 !Local variables ------------------------------
 !scalars
- real(dp), parameter :: pi=3.141592653589793238462643383279502884197
  character(len=500) :: msg
  integer :: ibdm!,unitt
  real(dp) :: ec_integrated,spin_fact,fact
@@ -99,7 +98,7 @@ function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
 
  ec_integrated=0.0_dp
  spin_fact=2.0_dp
- fact=spin_fact*(1.0_dp/(4.0_dp*pi))
+ fact=spin_fact*(1.0_dp/(two_pi*2.0_dp))
 
  if (ib1/=1) then
    MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was not included in bdgw interval.& 
@@ -228,7 +227,6 @@ subroutine calc_rdmc(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt,dm1)
  complex(dpc),intent(in) :: sigcme_k(:,:,:,:)
 !Local variables ------------------------------
 !scalars
- real(dp), parameter :: pi=3.141592653589793238462643383279502884197
  real(dp) :: spin_fact,fact
  character(len=500) :: msg
  integer :: ib1dm,ib2dm 
@@ -238,7 +236,7 @@ subroutine calc_rdmc(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt,dm1)
  DBG_ENTER("COLL")
 
  spin_fact=2.0_dp
- fact=spin_fact*(1.0_dp/(2.0_dp*pi))
+ fact=spin_fact*(1.0_dp/two_pi)
 
  write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sc(iw)  and k-point: ',BSt%kptns(1:,kpoint)
  call wrtout(std_out,msg,'COLL')
