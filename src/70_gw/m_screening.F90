@@ -54,7 +54,7 @@ MODULE m_screening
  use m_fftcore,         only : kgindex
  use m_fft,             only : fourdp
  use m_gsphere,         only : gsphere_t
- use m_vcoul,           only : vcoul_t 
+ use m_vcoul,           only : vcoul_t
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_paw_sphharm,     only : ylmc
@@ -164,7 +164,7 @@ MODULE m_screening
  public :: get_epsm1
  public :: decompose_epsm1
  public :: make_epsm1_driver              !  Calculate the inverse symmetrical dielectric matrix starting from chi0
- public :: mkem1_q0                       ! construct the microscopic dieletric matrix for q-->0
+ public :: mkem1_q0                       ! construct the microscopic dielectric matrix for q-->0
  public :: screen_mdielf                  ! Calculates W_{G,G'}(q,w) for a given q-point in the BZ using a model dielectric function.
  public :: rpa_symepsm1
 !!***
@@ -1435,7 +1435,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  complex(dpc),allocatable :: buffer_lwing(:,:),buffer_uwing(:,:)
  complex(gwpc),allocatable :: kxcg_mat(:,:)
 
-!bootstrap 
+!bootstrap
  integer :: istep,nstep
  logical :: converged
  real(dp) :: conv_err, alpha
@@ -1785,12 +1785,12 @@ CASE(6)
    end do
    chi0(1,:,io) = czero; chi0(:,1,io) = czero; chi0(1,1,io) = one
    chi0_tmp = chi0(:,:,io)
-   call xginv(chi0_tmp,npwe,comm=comm) 
+   call xginv(chi0_tmp,npwe,comm=comm)
    chi0 = chi0_save
    chi0_tmp = MATMUL(chi0(:,:,io), chi0_tmp(:,:)) ! chi(RPA)
    do ig1=1,npwe
      chi0_tmp(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*chi0_tmp(ig1,:)
-   end do 
+   end do
    !call xginv(chi0_tmp,npwe,comm=comm) ! chi(RPA)^-1
    !vfxc_boot = chi0_tmp/epsm_lf(1,1)
    !

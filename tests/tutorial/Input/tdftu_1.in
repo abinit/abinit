@@ -41,7 +41,7 @@ chksymbreak 0  # The k point grid is not symmetric, but the calculations being f
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_19.1_bdir.*
+##%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
 #%%   tdftu_1.abo, tolnlines=  4, tolabs=  2.000e-06, tolrel=  2.000e-03, fld_options = -medium

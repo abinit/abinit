@@ -45,7 +45,7 @@ ndtset 7   acell: 3*3.515 angstrom  acell+ 3*0.005 angstrom
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_19.1_bdir.*
+##%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw1_5.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy

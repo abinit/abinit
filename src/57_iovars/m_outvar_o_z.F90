@@ -410,7 +410,7 @@ contains
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_it(1:narrm(idtset))
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1) 
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1)
 
 
 !plowan_iatom
@@ -835,6 +835,9 @@ contains
 
  dprarr(1,:)=dtsets(:)%rhoqpmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rhoqpmix','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%rifcsph
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rifcsph','DPR',0)
 
 !rprim
  prtimg(:,:)=1

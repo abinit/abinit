@@ -27,7 +27,7 @@ from pprint import pprint
 from pybtex.database import parse_file, Entry, BibliographyData
 from markdown.util import etree
 from pygments import highlight
-from pygments.lexers import BashLexer, BibTeXLexer
+from pygments.lexers import BashLexer, PythonLexer, BibTeXLexer
 from pygments.formatters import HtmlFormatter
 from doc.tests.pymods.termcolor import cprint
 from .variables import lazy_property, Variable,  ABI_TOPICS, ABI_RELEVANCES
@@ -211,7 +211,7 @@ _WEBSITE = None
 
 class Website(object):
     """
-    This object is a singleton. It stores all the information required to generated the HTML documentation
+    This object is a singleton. It stores all the information required to generate the HTML documentation
     (input variables, test suite, bibtex entries).
     It also provides methods such as `get_wikilink` that will be invoked by the python markdown parser
     to implement extensions to the standard markdown syntax.
@@ -1082,7 +1082,7 @@ The bibtex file is available [here](../abiref.bib).
                 if "@" in name:
                     # Handle [[dipdip@anaddb|text]]
                     vname, code = name.split("@")
-                    var = self.codevars[code][vname]
+                    var = self.codevars[code][vname.lower()]
                     url = "/variables/%s#%s" % (var.varset, var.name)
                     if a.text is None: a.text = name
                     html_classes.append("codevar-wikilink")
@@ -1140,7 +1140,7 @@ The bibtex file is available [here](../abiref.bib).
             if namespace in self.codevars:
                 # Handle [[anaddb:asr|text]] or [[abinit:ecut|text]]
                 assert fragment is None
-                var = self.codevars[namespace][name]
+                var = self.codevars[namespace][name.lower()]
                 url = "/variables/%s#%s" % (var.varset, var.name)
                 html_classes.append("codevar-wikilink")
                 if a.text is None:
@@ -1341,7 +1341,7 @@ The bibtex file is available [here](../abiref.bib).
         html_vars = ""
         for char, group in sort_and_groupby(list(allvars.items()), key=lambda t: t[0][0].upper()):
             lis = "\n".join("<li>{link}</li>".format(
-                link=var.internal_link(self, page_rpath, label=var.abivarname, cls="small-grey-link")) for _, var in group)
+                link=var.internal_link(self, page_rpath, label=var.abivarname, cls="small-grey-link")) for _, var in sorted(group))
 
         #for char, group in sort_and_groupby(allvars, key=lambda t: t[0][0].upper()):
         #    group = list(group)
@@ -1381,8 +1381,9 @@ The bibtex file is available [here](../abiref.bib).
 
 ## All variables
 
-See aim, anaddb or optic for the subset of input variables for the executables AIM(Bader), ANADDB and OPTIC.
-Such input variables are specifically labelled @aim, @anaddb, or @optic in the input variable database.
+See aim, anaddb, atdep, multibinit or optic for the subset of input variables for the executables 
+AIM(Bader), ANADDB, ATDEP, MULTIBINIT and OPTIC.
+Such input variables are specifically labelled @aim, @anaddb, @atdep, @multibinit or @optic in the input variable database.
 Enter any string to search in the database. Clicking without any request will give all variables.
 
 {search_form}
@@ -1411,6 +1412,8 @@ Enter any string to search in the database. Clicking without any request will gi
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
             if path.endswith(".in"):
                 text = highlight(fh.read(), BashLexer(), HtmlFormatter(cssclass="codehilite small-text"))
+            elif path.endswith(".py"):
+                text = highlight(fh.read(), PythonLexer(), HtmlFormatter(cssclass="codehilite small-text"))
             else:
                 text = escape(fh.read(), tag="pre", cls="small-text")
 
