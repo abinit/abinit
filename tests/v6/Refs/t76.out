@@ -268,7 +268,7 @@ Phonon band structure files, with atomic projections, will be output
 -mka2f: MacMillan Tc =     3.206734E-08 (Ha)     1.012605E-02 (Kelvin)
  mka2f_tr_lova: 1/3 trace of TRANSPORT lambda for isppol   1 =      1.392787E-02
 
- Will write phonon FREQS in BoltzTrap format to file t76.out_BTRAP
+ Will write phonon FREQS in BoltzTrap format to file t76_BTRAP
 
 ================================================================================
 
