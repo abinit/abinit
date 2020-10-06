@@ -2835,6 +2835,9 @@ endif
      write(msg,'(a,2(es16.6,a))')' Epsp_core  = : ',QP_energies%e_corepsp,' Ha ,',QP_energies%e_corepsp*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Enn        = : ',QP_energies%e_ewald,' Ha ,',QP_energies%e_ewald*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Evext      = : ',evext_energy,' Ha ,',evext_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
