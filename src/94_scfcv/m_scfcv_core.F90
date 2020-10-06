@@ -2154,7 +2154,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  if(abs(energies%e_magfield)>1.0d-6) then
    write(std_out,'(a,2(es16.6,a))')' Emfield    = : ',energies%e_magfield   ,' Ha ,',energies%e_magfield*Ha_eV   ,' eV'
  endif
- write(std_out,'(a,2(es16.6,a))')' Vnn        = : ',energies%e_ewald      ,' Ha ,',energies%e_ewald*Ha_eV      ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Enn        = : ',energies%e_ewald      ,' Ha ,',energies%e_ewald*Ha_eV      ,' eV'
  write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
  write(std_out,'(a,2(es16.6,a))')' Etot       = : ',esum                  ,' Ha ,',esum*Ha_eV                  ,' eV'
  write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
