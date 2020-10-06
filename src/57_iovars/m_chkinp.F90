@@ -3893,7 +3893,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  if (ierr>1) then
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
-   'The details of the problems can be found above.'
+   'The details of the problems can be found above, in an earlier WARNING.'
    MSG_ERROR(msg)
  end if
 

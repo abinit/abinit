@@ -357,6 +357,12 @@ def pull_trunk(ctx):
     ctx.run("git pull trunk develop")
     ctx.run("git stash apply")
 
+@task
+def pull(ctx):
+    """"Execute `git stash && git pull --recurse-submodules && git stash apply`"""
+    ctx.run("git stash")
+    ctx.run("git pull --recurse-submodules")
+    ctx.run("git stash apply")
 
 @task
 def branchoff(ctx, start_point):

@@ -11,7 +11,7 @@
  shiftk 0 0 0
 
 ##############################################
-####                 SECTION: eph                
+####                 SECTION: eph
 ##############################################
  optdriver 7
  eph_task 4
@@ -24,7 +24,7 @@
  getwfk_filepath "teph4zpr_3o_DS1_WFK"
 
 ##############################################
-####                 SECTION: Sigma_nk                 
+####                 SECTION: Sigma_nk
 ##############################################
  nkptgw 1
  kptgw
@@ -41,10 +41,11 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  teph4zpr_1.in, teph4zpr_2.in, teph4zpr_3.in, teph4zpr_4.in, teph4zpr_5.in, teph4zpr_6.in, teph4zpr_7.in
+#%% test_chain =  teph4zpr_1.in, teph4zpr_2.in, teph4zpr_3.in, teph4zpr_4.in,
+#%%               teph4zpr_5.in, teph4zpr_6.in, teph4zpr_7.in, teph4zpr_8.in
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
-#%% files_to_test = 
+#%% files_to_test =
 #%%   teph4zpr_5.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 10
