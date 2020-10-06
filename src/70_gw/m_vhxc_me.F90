@@ -98,11 +98,12 @@ contains
 !!
 !! OUTPUT
 !!  Mels
-!!   %vxc   =matrix elements of $v_{xc}[nv+nc]$.
-!!   %vxcval=matrix elements of $v_{xc}[nv]$.
+!!   %kinetic=matrix elements of $t$.
+!!   %vxc    =matrix elements of $v_{xc}[nv+nc]$.
+!!   %vxcval =matrix elements of $v_{xc}[nv]$.
 !!   %vxcval_hybrid=matrix elements of $v_{xc}[nv]^{hybrid functional}$.
-!!   %vhartr=matrix elements of $v_H$.
-!!   %vu    =matrix elements of $v_U$.
+!!   %vhartr =matrix elements of $v_H$.
+!!   %vu     =matrix elements of $v_U$.
 !!
 !! SIDE EFFECTS
 !!  Paw_ij= In case of self-Consistency it is changed. It will contain the new H0
@@ -315,7 +316,16 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
  write(msg,'(a,f8.4,2a,f8.4,a)')' E_xc[n_val]  = ',enxc_val,  ' [Ha]. ','<V_xc[n_val]> = ',vxcval_avg,' [Ha]. '
  call wrtout(std_out,msg,'COLL')
-
+ ! has_hbare uses veffh0. Why only use it with usepaw=1? Let it be available always
+ if (Mflags%has_hbare==1) then
+   if (Mflags%has_kinetic/=1) then
+     MSG_ERROR("Kinetic energy mels are required for the construction of Hbare mels!")
+   end if
+   ! Effective potential of the bare Hamiltonian: valence term is subtracted.
+   ABI_MALLOC(veffh0,(nfftf,nspden))
+   veffh0=vtrial-vxc_val
+   !veffh0=vtrial !this is to retrieve the KS Hamiltonian
+ endif 
  ! If PAW and qp-SCGW then update Paw_ij and calculate the matrix elements ===
  ! We cannot simply rely on gwcalctyp because I need KS vxc in sigma.
  if (Wfd%usepaw==1.and.Mflags%has_hbare==1) then
@@ -325,7 +335,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 &    Pawtab,Paw_an,Paw_ij,Pawang,Pawfgrtab,vxc,vxc_val,vtrial)
 
    ! Effective potential of the bare Hamiltonian: valence term is subtracted.
-   ABI_MALLOC(veffh0,(nfftf,nspden))
    veffh0=vtrial-vxc_val
    !veffh0=vtrial !this is to retrieve the KS Hamiltonian
  end if
@@ -400,13 +409,12 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      kg_k => Wfd%kdata(ik_ibz)%kg_k
      istwf_k = wfd%istwfk(ik_ibz)
 
-     ! Calculate |k+G|^2 needed by hbareme
-     !FIXME Here I have a problem if I use ecutwfn there is a bug somewhere in setshell or invars2m!
-     ! ecutwfn is slightly smaller than the max kinetic energy in gvec. The 0.1 pad should partially solve the problem
-     if (Mflags%has_hbare==1) then
+     ! Calculate |k+G|^2 needed by hbareme and kineticme
+     ! MRM: Solved ecut problem
+     if (Mflags%has_kinetic==1) then
        ABI_MALLOC(kinpw,(npw_k))
        ABI_MALLOC(kinwf2,(npw_k*nspinor))
-       call mkkin(Dtset%ecutwfn+0.1_dp,Dtset%ecutsm,Dtset%effmass_free,Cryst%gmet,kg_k,kinpw,kpt,npw_k,0,0)
+       call mkkin(Dtset%ecutwfn,Dtset%ecutsm,Dtset%effmass_free,Cryst%gmet,kg_k,kinpw,kpt,npw_k,0,0)
        where (kinpw>HUGE(zero)*1.d-11)
          kinpw=zero
        end where
@@ -418,7 +426,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
        ABI_CHECK(wfd%get_wave_ptr(jb, ik_ibz, is, wave_jb, msg) == 0, msg)
 
-       if (Mflags%has_hbare==1) then
+       if (Mflags%has_kinetic==1) then
          cg2 => wave_jb%ug
          kinwf2(1:npw_k)=cg2(1:npw_k)*kinpw(:)
          if (nspinor==2) kinwf2(npw_k+1:)=cg2(npw_k+1:)*kinpw(:)
@@ -455,19 +463,25 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
            if (wfd%nspinor == 2 .and. wfd%nspden == 1) &
              Mels%vhartree(ib, jb, ik_ibz, 2) = SUM(u1cjg_u2dpc(nfftf+1:) * vhartr(1:nfftf)) * nfftfm1
          end if
-
-         if (Mflags%has_hbare==1) then
+         if (Mflags%has_kinetic==1) then
            ABI_CHECK(wfd%get_wave_ptr(ib, ik_ibz, is, wave_ib, msg) == 0, msg)
            cg1 => wave_ib%ug(1:npw_k)
            cdot = DOT_PRODUCT(cg1, kinwf2(1:npw_k))
            !if (istwf_k /= 1) then
            !  cdot = two * cdot; if (istwf_k == 2) cdot = cdot - GWPC_CONJG(cg1(1)) * kinwf2(1)
            !end if
-           Mels%hbare(ib, jb, ik_ibz, is) = cdot + SUM(u1cjg_u2dpc(1:nfftf) * veffh0(1:nfftf, is)) * nfftfm1
+           Mels%kinetic(ib, jb, ik_ibz, is) = cdot 
+           if (wfd%nspinor == 2 .and. wfd%nspden == 1) then
+             cg1 => wave_ib%ug(npw_k+1:)
+             Mels%kinetic(ib, jb, ik_ibz, 2) = DOT_PRODUCT(cg1, kinwf2(npw_k+1:)) 
+           end if
+         end if
+         if (Mflags%has_hbare==1) then
+           Mels%hbare(ib, jb, ik_ibz, is) = Mels%kinetic(ib, jb, ik_ibz, is) + SUM(u1cjg_u2dpc(1:nfftf) * veffh0(1:nfftf, is)) * nfftfm1
            if (wfd%nspinor == 2 .and. wfd%nspden == 1) then
              cg1 => wave_ib%ug(npw_k+1:)
              Mels%hbare(ib, jb, ik_ibz, 2) = &
-               DOT_PRODUCT(cg1, kinwf2(npw_k+1:)) + SUM(u1cjg_u2dpc(nfftf+1:) * veffh0(1:nfftf, is)) * nfftfm1
+               Mels%kinetic(ib, jb, ik_ibz, 2) + SUM(u1cjg_u2dpc(nfftf+1:) * veffh0(1:nfftf, is)) * nfftfm1
            end if
          end if
 
@@ -478,9 +492,15 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
            ur2_up  => ur2(1:nfftf)
            ur2_dwn => ur2(nfftf+1:2*nfftf)
 
+           if (Mflags%has_kinetic==1) then
+             cg1 => wave_ib%ug(npw_k+1:)
+             tmp(1)=DOT_PRODUCT(cg1,kinwf2(npw_k+1:))
+             Mels%kinetic(ib,jb,ik_ibz,2  )=tmp(1)
+             Mels%kinetic(ib,jb,ik_ibz,3:4)=czero
+           end if
            if (Mflags%has_hbare==1) then
              cg1 => wave_ib%ug(npw_k+1:)
-             tmp(1)=SUM(CONJG(ur1_dwn)*veffh0(:,2)*ur2_dwn)*nfftfm1 + DOT_PRODUCT(cg1,kinwf2(npw_k+1:))
+             tmp(1)=SUM(CONJG(ur1_dwn)*veffh0(:,2)*ur2_dwn)*nfftfm1 + Mels%kinetic(ib,jb,ik_ibz,2)
              tmp(2)=SUM(CONJG(ur1_dwn)*      veffh0_ab(:) *ur2_dwn)*nfftfm1
              tmp(3)=SUM(CONJG(ur1_dwn)*CONJG(veffh0_ab(:))*ur2_dwn)*nfftfm1
              Mels%hbare(ib,jb,ik_ibz,2:4)=tmp(:)
@@ -513,7 +533,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
        end do !ib
      end do !jb
 
-     if (Mflags%has_hbare==1) then
+     if (Mflags%has_kinetic==1) then
        ABI_FREE(kinpw)
        ABI_FREE(kinwf2)
      end if

@@ -45,6 +45,7 @@ module m_sigma_driver
  use m_wfd
  use m_dtfil
  use m_crystal
+ use m_cgtools
 
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
@@ -74,7 +75,7 @@ module m_sigma_driver
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
  use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
  use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
-                             mels_get_haene, write_sigma_header, write_sigma_results
+                             mels_get_haene, mels_get_kiene, write_sigma_header, write_sigma_results
  use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
  use m_melemts,       only : melflags_reset, melements_print, melements_free, melflags_t, melements_t, melements_zero
@@ -221,8 +222,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,coef_hyb!,ec_gm,ec_gm_k 
- real(dp) :: ucvol,vxcavg,vxcavg_qp
+ real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ekin_energy,evext_energy,coef_hyb!,ec_gm,ec_gm_k 
+ real(dp) :: doti,ucvol,ucvol_local,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  real(dp):: gwalpha,gwbeta,wmin,wmax,eik_new,rcut,gsqcut,boxcut,ecutf  
@@ -377,6 +378,17 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  usexcnhat=0
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
+ if (dtset%usewvl == 0) then
+   ucvol_local = ucvol
+#if defined HAVE_BIGDFT
+ else
+!  We need to tune the volume when wavelets are used because, not
+!  all FFT points are used.
+!  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
+   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp)
+#endif
+ end if
+
  !
  ! === Define FFT grid(s) sizes ===
  ! * Be careful! This mesh is only used for densities, potentials and the matrix elements of v_Hxc. It is NOT the
@@ -1014,6 +1026,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call timab(407,1,tsec) ! vHxc_me
 
  call melflags_reset(KS_mflags)
+ if (Dtset%gwcalctyp==21 .and. gw1rdm>0) then
+   KS_mflags%has_hbare=1
+   KS_mflags%has_kinetic=1
+ end if
  KS_mflags%has_vhartree=1
  KS_mflags%has_vxc     =1
  KS_mflags%has_vxcval  =1
@@ -1527,7 +1543,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call melflags_reset(QP_mflags)
 !  if (gwcalctyp<20) QP_mflags%only_diago=1 ! For e-only, no need of off-diagonal elements.
    QP_mflags%has_vhartree=1
-   if (Dtset%usepaw==1)    QP_mflags%has_hbare  =1
+   if (Dtset%usepaw==1) then
+     QP_mflags%has_kinetic  =1
+     QP_mflags%has_hbare    =1
+   end if
 !  QP_mflags%has_vxc     =1
 !  QP_mflags%has_vxcval  =1
 !  if (Sigp%gwcalctyp >100) QP_mflags%has_vxcval_hybrid=1
@@ -2579,6 +2598,9 @@ endif
      Wfd_nato_master%bks_comm = xmpi_comm_null
      call Wfd_nato_master%free()
      call xmpi_barrier(Wfd%comm)
+     ! Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
+     call dotprod_vn(1,gw_rhor,evext_energy,doti,nfftf,gwc_nfftot,1,1,vpsp,&
+     &   ucvol_local)!,mpi_comm_sphgrid=mpi_comm_sphgrid)
      ! Proceed to compute the Fock matrix elements.  
      write(msg,'(a1)')  ' '
      call wrtout(std_out,msg,'COLL')
@@ -2704,8 +2726,9 @@ endif
      call vcoul_free(Vcp_full)
      ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)                            ! Save the new total exchange energy 
      !
-     ! Transform      <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>
-     ! and            <KS_i|J[NO]|KS_j> -> <NO_i|K[NO]|NO_j>
+     ! Transform      <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>,
+     !                <KS_i|J[NO]|KS_j> -> <NO_i|K[NO]|NO_j>,
+     ! and              <KS_i|T|KS_j>   ->   <NO_i|T|NO_j>
      !
      do ikcalc=1,Sigp%nkptgw                                                 
        ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
@@ -2735,6 +2758,18 @@ endif
        do ib1dm=1,ib2-ib1+1
          do ib2dm=1,ib2-ib1+1
            GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)=mat2rot(ib1dm,ib2dm)
+         end do
+       end do
+       ! <KS_i|T|KS_j> -> <NO_i|T|NO_j>
+       do ib1dm=1,ib2-ib1+1
+         do ib2dm=1,ib2-ib1+1
+           mat2rot(ib1dm,ib2dm)=GW1RDM_me%kinetic(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)
+         end do
+       end do
+       call rotate_ks_no(ib1,ib2,mat2rot,Umat,1)   
+       do ib1dm=1,ib2-ib1+1
+         do ib2dm=1,ib2-ib1+1
+           GW1RDM_me%kinetic(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)=mat2rot(ib1dm,ib2dm)
          end do
        end do
        ABI_FREE(Umat)
@@ -2784,6 +2819,7 @@ endif
      !
      call xmpi_barrier(Wfd%comm)
      eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
+     ekin_energy=mels_get_kiene(Sr,GW1RDM_me,Kmesh,QP_BSt)
      write(msg,'(a1)')' '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2791,6 +2827,12 @@ endif
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a)')' Vee[SD] (= Ehartree + Efock) energy obtained using GW 1-RDM:'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Ekinetic   = : ',ekin_energy,' Ha ,',ekin_energy*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Evext      = : ',evext_energy,' Ha ,',evext_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
@@ -3176,7 +3218,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
  real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
- real(dp) :: domegas,domegasi,ucvol,rcut
+ real(dp) :: domegas,domegasi,ucvol,ucvol_local,rcut
  logical,parameter :: linear_imag_mesh=.TRUE.
  logical :: ltest,remove_inv,changed,found
  character(len=500) :: msg
@@ -3362,6 +3404,17 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! Dimensional primitive translations rprimd (from input), gprimd, metrics and unit cell volume
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ if (dtset%usewvl == 0) then
+   ucvol_local = ucvol
+#if defined HAVE_BIGDFT
+ else
+!  We need to tune the volume when wavelets are used because, not
+!  all FFT points are used.
+!  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
+   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp)
+#endif
+ end if
+
 
  Sigp%npwwfn=Dtset%npwwfn
  Sigp%npwx  =Dtset%npwsigx
