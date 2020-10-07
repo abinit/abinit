@@ -4104,7 +4104,7 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nfftf,npwarr,pawfgr,
  !Local variables -------------------------
 
  !scalars
- integer :: exchn2n3d,icg,idir,ikg1,ikpt,isppol,istwf_k,me,my_nspinor
+ integer :: exchn2n3d,icg,idir,ierr,ikg1,ikpt,isppol,istwf_k,me,my_nspinor
  integer :: ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
  integer :: nproc,npw_k,npw_k_,nvloc,spaceComm
  real(dp) :: ecut_eff
@@ -4195,9 +4195,9 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nfftf,npwarr,pawfgr,
  end do ! end loop over kpts on current processor
 
  !  MPI communicate stuff between everyone
- ! if (nproc>1) then
- !  call xmpi_sum(energy,spaceComm,ierr)
- !end if
+ if (nproc>1) then
+   call xmpi_sum(energy,spaceComm,ierr)
+ end if
  energy = energy/(ucvol*dtset%nkpt)
 
  if(has_vectornd) then
