@@ -186,7 +186,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: has_fock,newlobpcg
+ logical :: has_fock,newlobpcg,newcgwf
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -265,7 +265,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  n1=gs_hamk%ngfft(1); n2=gs_hamk%ngfft(2); n3=gs_hamk%ngfft(3)
 
- if ( .not. newlobpcg ) then
+ newcgwf = wfopta10==0
+ mgsc=0
+ if ( .not. newlobpcg .and. .not. newcgwf) then
    igsc=0
    mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
 
@@ -964,7 +966,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DEALLOCATE(subvnlx)
    ABI_DEALLOCATE(subovl)
  end if
- if ( .not. newlobpcg ) then
+ if ( .not. newlobpcg .and. .not. newcgwf) then
    ABI_DEALLOCATE(gsc)
  end if
 
