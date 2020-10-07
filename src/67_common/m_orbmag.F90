@@ -47,7 +47,7 @@ module m_orbmag
   use m_fftcore,          only : kpgsph,sphereboundary
   use m_fourier_interpol, only : transgrid
   use m_geometry,         only : metric
-  use m_getghc,           only : getghc
+  use m_getghc,           only : getghc,getghc_nucdip
   use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type
   use m_initylmg,         only : initylmg
   use m_kg,               only : getph,mkkin,mkkpg,mkpwind_k,ph1d3d
@@ -169,6 +169,7 @@ module m_orbmag
   ! Bound methods:
   public :: destroy_orbmag
   public :: initorbmag
+  public :: nucdip_energy
   public :: orbmag
 
   private :: orbmag_wf
@@ -4050,6 +4051,163 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,nband_
 
 end subroutine make_onsite_bm
 !!***
+
+!!****f* ABINIT/nucdip_energy
+!! NAME
+!! nucdip_energy
+!!
+!! FUNCTION
+!! Compute the energy due to the nuclear magnetic dipoles
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_k,nfftf,npwarr,pawfgr,&
+    & vectornd,with_vectornd)
+
+ !Arguments ------------------------------------
+
+ !scalars
+ integer,intent(in) :: mcg,nband_k,nfftf,with_vectornd
+ real(dp),intent(out) :: energy
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type), intent(inout) :: mpi_enreg
+ type(pawfgr_type),intent(in) :: pawfgr
+
+ !arrays
+ integer,intent(in) :: npwarr(dtset%nkpt)
+ real(dp),intent(in) :: cg(2,mcg),gmet(3,3)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
+
+ !Local variables -------------------------
+
+ !scalars
+ integer :: exchn2n3d,icg,idir,ikg1,ikpt,isppol,istwf_k,me,my_nspinor
+ integer :: ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nn
+ integer :: nproc,npw_k,npw_k_,nvloc,spaceComm
+ real(dp) :: ecut_eff
+ logical :: has_vectornd
+
+ !arrays
+ integer,allocatable :: gbound_k(:,:),kg_k(:,:)
+ real(dp) :: kpoint(3),rhodum(1)
+ real(dp),allocatable :: cgrvtrial(:,:),cwavef(:,:),ghc_vectornd(:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:)
+
+ !-----------------------------------------------------------------------
+ !Init MPI
+ spaceComm=mpi_enreg%comm_cell
+ nproc=xmpi_comm_size(spaceComm)
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ me = mpi_enreg%me_kpt
+
+ ! TODO: generalize to nsppol > 1
+ isppol = 1
+ ! TODO: generalize to other values of ndat 
+ ndat = 1
+ ngfft1=dtset%ngfft(1) ; ngfft2=dtset%ngfft(2) ; ngfft3=dtset%ngfft(3)
+ ngfft4=dtset%ngfft(4) ; ngfft5=dtset%ngfft(5) ; ngfft6=dtset%ngfft(6)
+ istwf_k = 1 
+ ecut_eff = dtset%ecut*(dtset%dilatmx)**2
+ exchn2n3d = 0 
+ ikg1 = 0
+ nvloc = 1
+
+ has_vectornd = (with_vectornd .EQ. 1)
+
+ ! if vectornd is present, set it up similarly to how it's done for
+ ! vtrial. Note that it must be done for the three directions. Also, the following
+ ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
+ if(has_vectornd) then
+    ABI_ALLOCATE(vectornd_pac,(ngfft4,ngfft5,ngfft6,nvloc,3))
+    ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+    do idir = 1, 3
+       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+       call fftpac(isppol,mpi_enreg,dtset%nspden,&
+            & ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
+    end do
+    ABI_DEALLOCATE(cgrvtrial)
+ end if
+
+ ABI_ALLOCATE(kg_k,(3,dtset%mpw))
+ ABI_ALLOCATE(gbound_k,(2*dtset%mgfft+8,2))
+ energy = zero
+ icg = 0
+ do ikpt = 1, dtset%nkpt
+
+    ! if the current kpt is not on the current processor, cycle
+    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+
+    kpoint(:)=dtset%kptns(:,ikpt)
+    npw_k = npwarr(ikpt)
+
+    ABI_ALLOCATE(cwavef,(2,npw_k))
+    ABI_ALLOCATE(ghc_vectornd,(2,npw_k))
+
+    ! Build basis sphere of plane waves for the k-point
+    kg_k(:,:) = 0
+    call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpoint,1,mpi_enreg,dtset%mpw,npw_k_)
+    if (npw_k .NE. npw_k_) then
+       write(std_out,'(a)')'JWZ debug nucdip_energy npw_k inconsistency'
+    end if
+  
+    call sphereboundary(gbound_k,istwf_k,kg_k,dtset%mgfft,npw_k)
+
+    do nn = 1, nband_k
+
+      cwavef(1:2,1:npw_k) = cg(1:2,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
+
+      call getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpoint,&
+&       dtset%mgfft,mpi_enreg,ndat,dtset%ngfft,npw_k,nvloc,&
+&       ngfft4,ngfft5,ngfft6,my_nspinor,vectornd,0)
+
+      energy = energy + DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k)) &
+            &           + DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k))
+    end do
+
+    icg = icg + npw_k*nband_k
+
+    ABI_DEALLOCATE(cwavef)
+    ABI_DEALLOCATE(ghc_vectornd)
+
+ end do ! end loop over kpts on current processor
+
+ !  MPI communicate stuff between everyone
+ ! if (nproc>1) then
+ !  call xmpi_sum(energy,spaceComm,ierr)
+ !end if
+
+ if(has_vectornd) then
+    ABI_DEALLOCATE(vectornd_pac)
+ end if
+
+ ABI_DEALLOCATE(kg_k)
+ ABI_DEALLOCATE(gbound_k)
+
+end subroutine nucdip_energy
+!!***
+
 
 !!****f* ABINIT/make_eeig
 !! NAME
