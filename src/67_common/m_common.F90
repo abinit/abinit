@@ -1503,12 +1503,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
                          width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
      if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) then
-       write(msg, '(a,es21.14)' ) '    Kin. free el. E = ',energies%e_kin_freeel
-       call wrtout(iout,msg,'COLL')
-       call edoc%add_real('kinetic free electron',energies%e_kin_freeel)
-       write(msg, '(a,es21.14)' ) '    Tot kin. energy = ',energies%e_kin_freeel+energies%e_kinetic
-       call wrtout(iout,msg,'COLL')
-       call edoc%add_real('total kinetic',energies%e_kin_freeel+energies%e_kinetic)
+       call edoc%add_real('kinetic_extended',energies%e_kin_freeel)
+       call edoc%add_real('total_kinetic',energies%e_kin_freeel+energies%e_kinetic)
      end if
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
@@ -1599,12 +1595,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
                           width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
    if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) then
-     write(msg, '(a,es21.14)' ) '    Kin. free el E  = ',energies%e_kin_freeel
-     call wrtout(iout,msg,'COLL')
-     call dc_edoc%add_real('kinetic free electron',energies%e_kin_freeel)
-     write(msg, '(a,es21.14)' ) '    DC Kin. free el = ',energies%edc_kin_freeel
-     call wrtout(iout,msg,'COLL')
-     call dc_edoc%add_real('dc kinetic free electron',energies%edc_kin_freeel)
+     call dc_edoc%add_real('kinetic_extended_dc',energies%edc_kin_freeel)
    end if
    if (ipositron/=1) then
      !write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
