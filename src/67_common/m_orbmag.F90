@@ -4083,13 +4083,14 @@ end subroutine make_onsite_bm
 !!
 !! SOURCE
 
-subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_k,nfftf,npwarr,pawfgr,&
-    & vectornd,with_vectornd)
+subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nfftf,npwarr,pawfgr,&
+    & ucvol,vectornd,with_vectornd)
 
  !Arguments ------------------------------------
 
  !scalars
- integer,intent(in) :: mcg,nband_k,nfftf,with_vectornd
+ integer,intent(in) :: mcg,nfftf,with_vectornd
+ real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: energy
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -4157,7 +4158,7 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_k,nfftf,npwarr
  do ikpt = 1, dtset%nkpt
 
     ! if the current kpt is not on the current processor, cycle
-    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,dtset%nband(ikpt),-1,me)) cycle
 
     kpoint(:)=dtset%kptns(:,ikpt)
     npw_k = npwarr(ikpt)
@@ -4174,7 +4175,7 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_k,nfftf,npwarr
   
     call sphereboundary(gbound_k,istwf_k,kg_k,dtset%mgfft,npw_k)
 
-    do nn = 1, nband_k
+    do nn = 1, dtset%nband(ikpt)
 
       cwavef(1:2,1:npw_k) = cg(1:2,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
 
@@ -4186,7 +4187,7 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_k,nfftf,npwarr
             &           + DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k))
     end do
 
-    icg = icg + npw_k*nband_k
+    icg = icg + npw_k*dtset%nband(ikpt)
 
     ABI_DEALLOCATE(cwavef)
     ABI_DEALLOCATE(ghc_vectornd)
@@ -4197,6 +4198,7 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_k,nfftf,npwarr
  ! if (nproc>1) then
  !  call xmpi_sum(energy,spaceComm,ierr)
  !end if
+ energy = energy/(ucvol*dtset%nkpt)
 
  if(has_vectornd) then
     ABI_DEALLOCATE(vectornd_pac)
