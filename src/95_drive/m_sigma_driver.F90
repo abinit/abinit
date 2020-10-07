@@ -272,6 +272,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),allocatable :: qp_rhor(:,:),qp_vhartr(:),qp_vtrial(:,:),qp_vxc(:,:)
  real(dp),allocatable :: qp_taur(:,:),igwene(:,:,:)
  real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:)
+ real(dp),allocatable :: nl_bks(:,:,:)
  !real(dp),allocatable :: osoc_bks(:, :, :)
  real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:)
  complex(dpc) :: ovlp(2)
@@ -2647,6 +2648,11 @@ endif
      & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
      ABI_FREE(tmp_kstab)
      call xmpi_barrier(Wfd%comm)
+     !
+     !  
+     !
+     call Wfd_nato_all%get_nl_mels(Cryst,Psps,Pawtab,bdm2_mask,nl_bks)
+     ABI_FREE(nl_bks)
      !
      ! Exchange <NO_i|K[NO]|NO_j> and save old K and new J matrices
      !
