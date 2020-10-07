@@ -2651,7 +2651,7 @@ endif
      !
      !  
      !
-     call Wfd_nato_all%get_nl_mels(Cryst,Psps,Pawtab,bdm2_mask,nl_bks)
+     call Wfd_nato_all%get_nl_me(Cryst,Psps,Pawtab,bdm2_mask,nl_bks)
      ABI_FREE(nl_bks)
      !
      ! Exchange <NO_i|K[NO]|NO_j> and save old K and new J matrices

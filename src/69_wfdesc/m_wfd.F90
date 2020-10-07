@@ -128,7 +128,6 @@ module m_wfd
    real(dp),allocatable :: ph3d(:,:,:)
    ! ph3d(2, npw, natom)
    ! 3-dim structure factors, for each atom and each plane wave.
-   ! Available only for PAW.
 
    real(dp),allocatable :: phkxred(:,:)
    ! phkxred(2,natom))
@@ -503,7 +502,7 @@ module m_wfd
    procedure :: mkrho => wfd_mkrho
    ! Calculate the charge density on the fine FFT grid in real space.
 
-   procedure :: get_nl_mels => wfd_get_nl_mels
+   procedure :: get_nl_me => wfd_get_nl_me
    ! Compute diagonal non-local pseudopotential matrix elements.
 
    procedure :: pawrhoij => wfd_pawrhoij
@@ -605,11 +604,12 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
  ABI_MALLOC(ph1d,(2, 3*(2*mgfft+1)*Cryst%natom))
  call getph(Cryst%atindx,Cryst%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,Cryst%xred)
 
- matblk = 0; if (psps%usepaw == 1) matblk = Cryst%natom
+ !matblk = 0; if (psps%usepaw == 1) matblk = Cryst%natom
+ matblk=Cryst%natom
  ABI_MALLOC(Kdata%ph3d,(2, npw_k, matblk))
- if (psps%usepaw == 1) then
-   call ph1d3d(1,Cryst%natom,Kdata%kg_k,matblk,Cryst%natom,npw_k,ngfft(1),ngfft(2),ngfft(3),Kdata%phkxred,ph1d,Kdata%ph3d)
- end if
+! if (psps%usepaw == 1) then
+  call ph1d3d(1,Cryst%natom,Kdata%kg_k,matblk,Cryst%natom,npw_k,ngfft(1),ngfft(2),ngfft(3),Kdata%phkxred,ph1d,Kdata%ph3d)
+! end if
  ABI_FREE(ph1d)
 
  ! Compute spherical harmonics if required.
@@ -5417,9 +5417,9 @@ end subroutine wfd_plot_ur
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_get_nl_mels
+!!****f* m_wfd/wfd_get_nl_me
 !! NAME
-!! wfd_get_nl_mels
+!! wfd_get_nl_me
 !!
 !! FUNCTION
 !!  Compute the non-local potential using the Wfd information.
@@ -5437,7 +5437,7 @@ end subroutine wfd_plot_ur
 !!
 !! SOURCE
 
-subroutine wfd_get_nl_mels(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
+subroutine wfd_get_nl_me(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
 implicit none
 !Arguments ------------------------------------
 !scalars
@@ -5499,12 +5499,19 @@ implicit none
  ABI_CALLOC(nl_bks, (Wfd%mband, Wfd%nkibz, Wfd%nsppol))
  nl_bks(:,:,:) = czero
 
+ write(std_out,'(a)') ' '
+ write(std_out,sjoin(' Will calculate ',itoa(count(bks_mask)),' <b,k,s|Vnl|b,k,s> matrix elements in wfd_get_nl_me.')) 
  do ispin=1,Wfd%nsppol
    if (ispin/=1) then
      MSG_WARNING("In the construction of the non-local contribution, the case nsppol/=1 is not tested.")
    end if
    do ik_ibz=1,Wfd%nkibz
      if (all(bks_distrb(:, ik_ibz, ispin) /= Wfd%my_rank)) cycle
+
+!     write(msg,'(2a,3f8.3,2a,2(i3,a))')ch10,&
+!&  ' Calculating <nk|Sigma_x|nk> at k= ',kgw,ch10,&
+!&  ' bands from ',ib1,' to ',ib2,ch10
+! call wrtout(std_out,msg,'COLL')
 
      kpoint = Wfd%kibz(:, ik_ibz)
      istwf_k = Wfd%istwfk(ik_ibz)
@@ -5527,7 +5534,7 @@ implicit none
      ! Load k-dependent part in the Hamiltonian datastructure
      ! MRM compute_ph3d MUST BE TRUE! TODO
      call ham_k%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl_k,&
-&         ph3d_k=ph3d_k)
+&         ph3d_k=ph3d_k,compute_ph3d=(Wfd%paral_kgb/=1))
 !     call ham_k%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,kg_k=kg_k,&
 !&         kpg_k=kpg_k,ffnl_k=ffnl_k,ph3d_k=ph3d_k,compute_ph3d=(Wfd%paral_kgb/=1))
 
@@ -5578,7 +5585,7 @@ implicit none
 
  DBG_EXIT("COLL")
 
-end subroutine wfd_get_nl_mels
+end subroutine wfd_get_nl_me
 !!***
 
 !----------------------------------------------------------------------
