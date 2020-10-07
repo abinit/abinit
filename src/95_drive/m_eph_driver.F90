@@ -396,7 +396,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
                       prtvol=dtset%prtvol)
 
-   ! DD cryst comes from DPPT --> no time-reversal if q /= 0
+   ! DDB cryst comes from DPPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
    cryst_ddb%timrev = cryst%timrev
    if (cryst%compare(cryst_ddb, header="Comparing WFK crystal with DDB crystal") /= 0) then

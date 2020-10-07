@@ -3875,7 +3875,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  ! ===========================================================
  ! Write COMMENTs if some combination of input vars look weird
  ! ===========================================================
- if (dt%dipdip /= 0 .and. any(dt%occopt == [3, 4, 5, 6, 7])) then
+ if (optdriver == RUNL_EPH .and. dt%dipdip /= 0 .and. any(dt%occopt == [3, 4, 5, 6, 7])) then
    MSG_COMMENT("dipdip can be set to 0 in case of metals whereas dipdip 1 should be used in polar materials.")
  end if
 
