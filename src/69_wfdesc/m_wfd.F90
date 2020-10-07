@@ -5499,8 +5499,8 @@ implicit none
  ABI_CALLOC(nl_bks, (Wfd%mband, Wfd%nkibz, Wfd%nsppol))
  nl_bks(:,:,:) = czero
 
- write(std_out,'(a)') ' '
- write(std_out,sjoin(' Will calculate ',itoa(count(bks_mask)),' <b,k,s|Vnl|b,k,s> matrix elements in wfd_get_nl_me.')) 
+ write(std_out,'(a)') " "
+ call wrtout(std_out,sjoin(" Will calculate ",itoa(count(bks_mask))," <b,k,s|Vnl|b,k,s> matrix elements in wfd_get_nl_me.")) 
  do ispin=1,Wfd%nsppol
    if (ispin/=1) then
      MSG_WARNING("In the construction of the non-local contribution, the case nsppol/=1 is not tested.")
