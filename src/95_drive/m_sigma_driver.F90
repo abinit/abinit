@@ -2126,8 +2126,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  endif
 endif
 
- ABI_MALLOC(sigcme,(nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
- sigcme=czero
+ ! Do not store it for gw1rdm because it might be too large!
+ if(gw1rdm==0) then
+   ABI_MALLOC(sigcme,(nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
+   sigcme=czero
+ endif
 
 ! if (.False. .and. psps%usepaw == 0 .and. wfd%nspinor == 1 .and. any(dtset%so_psp /= 0)) then
 !   call wrtout(std_out, "Computing SOC contribution with first-order perturbation theory")
@@ -2528,7 +2531,6 @@ endif
            call wrtout(ab_out,msg,'COLL')
          end if
        end if
-       sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
        ! MRM: compute 1-RDM numerical correction (freq. integration G0 Sigma_c G0).
        if (gwcalctyp==21 .and. gw1rdm>0) then
          dm1k=czero 
@@ -2553,6 +2555,8 @@ endif
          else
            call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0) ! Only restricted closed-shell calcs 
          endif
+       else
+         sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
        end if
        ABI_DEALLOCATE(sigcme_k)
      end do
@@ -3076,7 +3080,9 @@ endif
  ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
  ABI_FREE(grvdw)
- ABI_FREE(sigcme)
+ if(gw1rdm==0) then
+   ABI_FREE(sigcme)
+ end if
 
  if (allocated(kxc)) then
    ABI_FREE(kxc)

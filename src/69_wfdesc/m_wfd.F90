@@ -604,28 +604,26 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
  ABI_MALLOC(ph1d,(2, 3*(2*mgfft+1)*Cryst%natom))
  call getph(Cryst%atindx,Cryst%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,Cryst%xred)
 
- !matblk = 0; if (psps%usepaw == 1) matblk = Cryst%natom
+ ! Calculate 3-dim structure factor phase information.
  matblk=Cryst%natom
  ABI_MALLOC(Kdata%ph3d,(2, npw_k, matblk))
-! if (psps%usepaw == 1) then
-  call ph1d3d(1,Cryst%natom,Kdata%kg_k,matblk,Cryst%natom,npw_k,ngfft(1),ngfft(2),ngfft(3),Kdata%phkxred,ph1d,Kdata%ph3d)
-! end if
+ call ph1d3d(1,Cryst%natom,Kdata%kg_k,matblk,Cryst%natom,npw_k,ngfft(1),ngfft(2),ngfft(3),Kdata%phkxred,ph1d,Kdata%ph3d)
  ABI_FREE(ph1d)
 
- ! Compute spherical harmonics if required.
- Kdata%has_ylm = 0
+ ! Compute spherical harmonics.
+ Kdata%has_ylm = 1
  ABI_MALLOC(Kdata%ylm, (npw_k, Psps%mpsang**2*Psps%useylm))
  useylmgr=0
  ABI_MALLOC(ylmgr_k,(npw_k, 3, Psps%mpsang**2*useylmgr))
 
  if (Kdata%useylm == 1) then
-   mkmem_=1; mpw_=npw_k; nband_=0; nkpt_=1; npwarr_(1)=npw_k
-   optder=0 ! only Ylm(K) are computed.
+  mkmem_=1; mpw_=npw_k; nband_=0; nkpt_=1; npwarr_(1)=npw_k
+  optder=0 ! only Ylm(K) are computed.
 
-   call initylmg(Cryst%gprimd, Kdata%kg_k, kpoint, mkmem_, MPI_enreg, Psps%mpsang, mpw_, nband_, nkpt_,&
-    npwarr_, 1, optder, Cryst%rprimd, Kdata%ylm, ylmgr_k)
+  call initylmg(Cryst%gprimd, Kdata%kg_k, kpoint, mkmem_, MPI_enreg, Psps%mpsang, mpw_, nband_, nkpt_,&
+   npwarr_, 1, optder, Cryst%rprimd, Kdata%ylm, ylmgr_k)
 
-   Kdata%has_ylm = 2
+  Kdata%has_ylm = 2
  end if
 
  ! Compute (k+G) vectors.
@@ -5452,7 +5450,7 @@ implicit none
 !Local variables ------------------------------
 !scalars
  integer,parameter :: nspinor1=1,nspden1=1,nsppol1=1,spin1=1
- integer,parameter :: ndat1=1,nnlout0=0,tim_nonlop0=0,idir0=0 
+ integer,parameter :: ndat1=1,nnlout1=1,tim_nonlop0=0,idir0=0
  integer :: natom,ib,ispin,ik_ibz,npw_k,istwf_k,nkpg 
  integer :: choice,cpopt,cp_dim,paw_opt,signs,ierr
  character(len=500) :: msg
@@ -5461,9 +5459,9 @@ implicit none
 !arrays
  integer :: bks_distrb(Wfd%mband, Wfd%nkibz, Wfd%nsppol)
  integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
- real(dp) :: kpoint(3),dum_enlout(0),dummy_lambda(1),nl(2)
+ real(dp) :: kpoint(3),enlout(1),nl(2)
  real(dp),allocatable :: kpg_k(:,:),vnl_psi(:,:),vectin(:,:) 
- real(dp),allocatable :: opaw_psi(:,:) !2, npw_k*Wfd%nspinor*Wfd%usepaw) ! <G|1+S|Cnk>
+ real(dp) :: opaw_psi(1,1) 
  real(dp),ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
  type(pawcprj_type),allocatable :: cprj(:,:)
@@ -5475,16 +5473,11 @@ implicit none
 
  natom = cryst%natom
 
- signs  = 2  ! => apply the non-local operator to a function in G-space.
+ signs  = 1  ! => get non-local energy in G-space.
  choice = 1  ! => <G|V_nonlocal|vectin>.
  cpopt  =-1; paw_opt= 0
  if (Wfd%usepaw==1) then
    MSG_ERROR("The construction of the non-local contribution is not tested/implemented for usepaw==1!")
-   !paw_opt=4 ! both PAW nonlocal part of H (Dij) and overlap matrix (Sij)
-   !cpopt=3   ! <p_lmn|in> are already in memory
-   !cp_dim = ((cpopt+5) / 5)
-   !ABI_MALLOC(cprj, (natom, nspinor1*cp_dim))
-   !call pawcprj_alloc(cprj, 0, Wfd%nlmn_sort)
  end if
  ! Initialize the Hamiltonian on the coarse FFT mesh.
  call init_hamiltonian(ham_k, psps, pawtab, nspinor1, nsppol1, nspden1, natom, cryst%typat, cryst%xred, &
@@ -5525,18 +5518,15 @@ implicit none
      vectin=zero
      vnl_psi=zero
      ! Compute (k+G) vectors (only if psps%useylm=1)
-     nkpg = 3 * Wfd%nloalg(3)
+     nkpg = 3 *  Wfd%nloalg(3)
      ABI_MALLOC(kpg_k, (npw_k, nkpg))
      if (nkpg > 0) then
        call mkkpg(kg_k, kpg_k, kpoint, nkpg, npw_k)
      end if
      
      ! Load k-dependent part in the Hamiltonian datastructure
-     ! MRM compute_ph3d MUST BE TRUE! TODO
      call ham_k%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl_k,&
-&         ph3d_k=ph3d_k,compute_ph3d=(Wfd%paral_kgb/=1))
-!     call ham_k%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,kg_k=kg_k,&
-!&         kpg_k=kpg_k,ffnl_k=ffnl_k,ph3d_k=ph3d_k,compute_ph3d=(Wfd%paral_kgb/=1))
+&         ph3d_k=ph3d_k,compute_ph3d=(Wfd%paral_kgb/=1),compute_gbound=(Wfd%paral_kgb/=1))
 
      ! ========================================================
      ! ==== Compute nonlocal form factors ffnl at all (k+G) ====
@@ -5558,14 +5548,17 @@ implicit none
              vectin(2, npw_k+1:) = aimag(ug1)
            end if
         
-           if (Wfd%usepaw == 1) call Wfd%get_cprj(ib, ik_ibz, ispin, cryst, cprj, sorted=.True.)
-        
-           call nonlop(choice, cpopt, cprj, dum_enlout, ham_k, idir0, dummy_lambda, Wfd%mpi_enreg, ndat1, nnlout0, &
+           if (Wfd%usepaw == 1) then
+              call Wfd%get_cprj(ib, ik_ibz, ispin, cryst, cprj, sorted=.True.)
+           end if
+           
+           !TODO: The ham_k for some reason is not properly initialize.   
+           write(*,*) 'MAUb',choice, cpopt,size(enlout),idir0,ndat1, nnlout1,paw_opt, signs, size(opaw_psi),tim_nonlop0,size(vnl_psi)
+           call nonlop(choice, cpopt, cprj, enlout, ham_k, idir0, (/zero/), Wfd%mpi_enreg, ndat1, nnlout1, &
                        paw_opt, signs, opaw_psi, tim_nonlop0, vectin, vnl_psi)
             
-           nl = cg_zdotc(npw_k * nspinor1, vectin, vnl_psi)
-           write(std_out,'(a,2x,i5,a,2x,i5,a,2x,f10.5)') ' k: ',ik_ibz,' band: ',ib,' <i|Vnl|i>: ',nl(1) * Ha_eV
-           nl_bks(ib, ik_ibz, ispin) = nl(1)
+           write(std_out,'(a,2x,i5,a,2x,i5,a,2x,f10.5)') ' k: ',ik_ibz,' band: ',ib,' <i|Vnl|i>: ',enlout(1) * Ha_eV
+           nl_bks(ib, ik_ibz, ispin) = enlout(1)
      end do ! ib
 
      ABI_FREE(vectin)
