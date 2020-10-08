@@ -43,9 +43,9 @@ program lapackprof
  use m_hide_lapack
 
  use defs_abitypes,   only : MPI_type
- use m_fstrings,      only : lower, itoa, strcat, sjoin
+ use m_fstrings,      only : lower, itoa, sjoin !, strcat
  use m_specialmsg,    only : specialmsg_getcount, herald
- use m_argparse,      only : get_arg, get_arg_list
+ use m_argparse,      only : get_arg, get_arg_list, get_start_step_num
  use m_time,          only : cwtime
  use m_io_tools,      only : prompt
  use m_numeric_tools, only : arth
@@ -55,13 +55,13 @@ program lapackprof
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master = 0, nspinor1 = 1
- integer :: comm, npw, ierr, my_rank, ii, isz, jj, it, step, icall, nfound
- integer :: istwfk = 1, useoverlap, mcg, mgsc, band, g0, idx, ortalgo, abimem_level, prtvol
+ integer,parameter :: master = 0
+ integer :: comm, npw, ierr, my_rank, ii, isz, jj, it, step, icall, nfound, nspinor
+ integer :: istwfk, mcg, mgsc, band, g0, idx, ortalgo, abimem_level, prtvol, usepaw, debug
  real(dp) ::  ctime, wtime, gflops, abimem_limit_mb
  logical :: do_check
  character(len=24) :: skinds
- character(len=500) :: header, routname, command, arg, msg
+ character(len=500) :: method, command, arg, msg !header,
  type(MPI_type) :: MPI_enreg
 !arrays
  integer,allocatable :: sizes(:)
@@ -71,9 +71,8 @@ program lapackprof
  complex(dpc),allocatable :: zvec(:), zmat(:,:), wmat(:,:), zpmat(:), evec(:,:)
 ! complex(spc),allocatable :: vec(:), mat(:,:)
  type(latime_t) :: Tres
- integer :: ncalls = 50, nband = 200, nsizes = 20, nthreads = 1
- logical :: debug_mode = .FALSE.
- integer :: size_arth(2) = [1000, 2000]
+ integer :: ncalls, nband, nsizes, nthreads
+ integer :: npw_start_step_num(3)
 
 ! *************************************************************************
 
@@ -93,9 +92,6 @@ program lapackprof
 #endif
 
  call herald("LAPACKPROF", abinit_version, std_out)
- ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
-
- call get_command_argument(1, command)
 
  ! Command line options.
  do ii=2,command_argument_count()
@@ -115,48 +111,52 @@ program lapackprof
    end if
  end do
 
- call init_mpi_enreg(mpi_enreg)
+ call get_command_argument(1, command)
+ ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("istwfk", istwfk, msg, default=1) == 0, msg)
+ ABI_CHECK(get_arg("usepaw", usepaw, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("ncalls", ncalls, msg, default=20) == 0, msg)
+ ABI_CHECK(get_arg("nband", nband, msg, default=50) == 0, msg)
+ ABI_CHECK(get_arg("nspinor", nspinor, msg, default=1) == 0, msg)
+ ABI_CHECK(get_arg("nthreads", nthreads, msg, default=1) == 0, msg)
+ ABI_CHECK(get_arg("debug", nthreads, msg, default=0) == 0, msg)
+ ABI_CHECK(get_start_step_num("npw", npw_start_step_num, msg, default=[1000, 2000, 20]) == 0, msg)
 
  if (my_rank == master) then
    write(std_out,'(a)')" Tool for profiling and testing Linear Algebra routines used in ABINIT."
  end if
 
+ call init_mpi_enreg(mpi_enreg)
  call xomp_set_num_threads(nthreads)
  call xomp_show_info(std_out)
 
- call xmpi_bcast(size_arth, master, comm, ierr)
- call xmpi_bcast(nsizes, master, comm, ierr)
+ ! Write metadata i.e parameters that do not change during the benchmark.
 
+ nsizes = npw_start_step_num(3)
  ABI_MALLOC(sizes, (nsizes))
- sizes = arth(size_arth(1), size_arth(2), nsizes)
+ sizes = arth(npw_start_step_num(1), npw_start_step_num(2), nsizes)
 
  select case (command)
  case ("projbd")
-   istwfk = 1
-   useoverlap = 0
-   routname = "projbd"
-   header = strcat("BEGIN_BENCHMARK: ",routname)
-   write(std_out,'(a)')TRIM(header)
+   write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "nband", "cpu_time", "wall_time"
 
    do isz=1,nsizes
      npw = sizes(isz)
      mcg  = npw * nband
-     mgsc = mcg * useoverlap
+     mgsc = mcg * usepaw
      ABI_MALLOC(cg, (2, mcg))
      call random_number(cg)
 
      ABI_MALLOC(gsc, (2, mgsc))
-     ABI_MALLOC(direc, (2, npw*nspinor1))
-     direc = zero
+     ABI_CALLOC(direc, (2, npw*nspinor))
      ABI_MALLOC(scprod, (2,nband))
 
      call cwtime(ctime,wtime,gflops,"start")
-
-     call projbd(cg,direc,0,0,0,istwfk,mcg,mgsc,nband,npw,nspinor1,gsc,scprod,0,0,useoverlap,&
-                 mpi_enreg%me_g0,mpi_enreg%comm_fft)
-
+     call projbd(cg, direc, 0, 0, 0, istwfk, mcg, mgsc, nband, npw, nspinor, gsc, scprod, 0, 0, usepaw, &
+                 mpi_enreg%me_g0, mpi_enreg%comm_fft)
      call cwtime(ctime,wtime,gflops,"stop")
-     write(std_out,'(2(a,i0),2(a,f9.6))')" npw = ",npw,", nband = ",nband,", cpu_time = ",ctime,", wall_time = ",wtime
+     write(std_out,'(1x,i8,1x,i6,2(1x,f12.6))') npw, nband, ctime, wtime
 
      ABI_FREE(scprod)
      ABI_FREE(direc)
@@ -164,27 +164,22 @@ program lapackprof
      ABI_FREE(gsc)
    end do
 
-   header = strcat("END_BENCHMARK: ",routname)
-   write(std_out,'(a)')TRIM(header)
+   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ", command))
 
- case ("ortho")
-   istwfk = 1
-   useoverlap = 0
+ case ("pw_orthon")
+   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ",command))
+   write(std_out, "(a1,a8,1x,a6,1x,a7,2(1x,a12))")"#", "npw", "nband", "ortalgo", "cpu_time", "wall_time"
 
-   do ortalgo=1,4,1
-     routname = strcat(" pw_orthon, ortalgo = ",itoa(ortalgo))
-     header = strcat("BEGIN_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
-
+   do ortalgo=0,4,1
      do isz=1,nsizes
        npw = sizes(isz)
        mcg  = npw * nband
-       mgsc = mcg * useoverlap
-       ABI_MALLOC(cg,(2,mcg))
+       mgsc = mcg * usepaw
+       ABI_MALLOC(cg,(2, mcg))
        call random_number(cg)
-       ABI_MALLOC(gsc,(2,mgsc))
+       ABI_MALLOC(gsc,(2, mgsc))
 
-       if (istwfk/=1) then
+       if (istwfk /= 1) then
          do band=1,nband
            g0 = 1 + (band-1)*npw
            cg(2,g0) = zero
@@ -192,15 +187,12 @@ program lapackprof
        end if
 
        call cwtime(ctime, wtime, gflops, "start")
-
-       call pw_orthon(0,0,istwfk,mcg,mgsc,npw,nband,ortalgo,gsc,useoverlap,cg,&
-                      mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
-
+       call pw_orthon(0,0, istwfk, mcg, mgsc, npw, nband, ortalgo, gsc, usepaw, cg,&
+                      mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
        call cwtime(ctime,wtime,gflops,"stop")
+       write(std_out,'(1x,i8,1x,i6,1x,i7,2(1x,f12.6))') npw, nband, ortalgo, ctime, wtime
 
-       write(std_out,'(2(a,i0),2(a,f9.6))')" npw = ",npw,", nband = ",nband,", cpu_time = ",ctime,", wall_time = ",wtime
-
-       if (debug_mode) then
+       if (debug == 1) then
          ABI_MALLOC(ortho_check,(2, nband, nband))
          if (istwfk/=1) then
            do band=1,nband
@@ -209,33 +201,30 @@ program lapackprof
            end do
          end if
 
-         call cg_zgemm("C","N",npw,nband,nband,cg,cg,ortho_check)
-
+         call cg_zgemm("C","N", npw, nband, nband, cg, cg, ortho_check)
          if (istwfk/=1) ortho_check = two * ortho_check
 
          do band=1,nband
            ortho_check(1,band,band) = ortho_check(1,band,band) - one
          end do
 
-         write(std_out,*)"MAX ABS error",MAXVAL( ABS(RESHAPE(ortho_check,(/2*nband*nband/)) ))
+         write(std_out,*)"DEBUG: Max Abs error:",MAXVAL( ABS(RESHAPE(ortho_check, [2*nband*nband])))
          ABI_FREE(ortho_check)
        end if
 
        ABI_FREE(cg)
        ABI_FREE(gsc)
-     end do
-
-     header = strcat("END_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
+     end do ! isz
+     write(std_out,'(a)')TRIM(sjoin("# end ortalgo: ", itoa(ortalgo)))
    end do ! ortalgo
+   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ", command))
 
  case ("copy")
+   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
    do step=1,2
-     if (step == 1) routname = " f90_zcopy"
-     if (step == 2) routname = " cg_zcopy"
-     header = strcat("BEGIN_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
-
+     if (step == 1) method = "F90"
+     if (step == 2) method = "BLAS"
      do isz=1,nsizes
        npw  = sizes(isz)
        ABI_MALLOC(cg1, (2, npw))
@@ -255,23 +244,22 @@ program lapackprof
          end do
        end if
        call cwtime(ctime, wtime, gflops, "stop")
-       write(std_out,'(a,i0,2(a,f9.6))')" npw = ",npw,", cpu_time = ",ctime,", wall_time = ",wtime
+       write(std_out,'(1x,i8,1x,a6,2(1x,f12.6))')npw, trim(method), ctime, wtime
 
        ABI_FREE(cg1)
        ABI_FREE(cg2)
      end do
 
-     header = strcat("END_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
+     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
    end do
+   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ", command))
 
  case ("zdotc")
+   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
    do step=1,2
-     if (step == 1) routname = " f90_zdotc"
-     if (step == 2) routname = " cg_zdotc"
-     header = strcat("BEGIN_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
-
+     if (step == 1) method = " F90"
+     if (step == 2) method = " BLAS"
      do isz=1,nsizes
        npw  = sizes(isz)
        ABI_MALLOC(cg1,(2, npw))
@@ -295,24 +283,21 @@ program lapackprof
          end do
        end if
        call cwtime(ctime, wtime, gflops, "stop")
-       write(std_out,'(a,i0,2(a,f9.6))')" npw = ",npw,", cpu_time = ",ctime,", wall_time = ",wtime
+       write(std_out,'(1x,i8,1x,a6,2(1x,f12.6))')npw, trim(method), ctime, wtime
        ABI_FREE(cg1)
        ABI_FREE(cg2)
      end do
-
-     header = strcat("END_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
+     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
    end do
+   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",method))
 
  case ("axpy")
-   ! alpha = (/one,zero/)
+   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
    alpha = [one, two]
    do step=1,2
-     if (step == 1) routname = " f90_axpy"
-     if (step == 2) routname = " cg_axpy"
-     header = strcat("BEGIN_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
-
+     if (step == 1) method = "F90"
+     if (step == 2) method = "BLAS"
      do isz=1,nsizes
        npw = sizes(isz)
        ABI_MALLOC(cg1, (2, npw))
@@ -346,23 +331,23 @@ program lapackprof
          end do
        end if
        call cwtime(ctime, wtime, gflops, "stop")
-       write(std_out,'(a,i0,2(a,f9.6))')" npw = ",npw,", cpu_time = ",ctime,", wall_time = ",wtime
+       write(std_out,'(1x,i8,1x,a6,2(1x,f12.6))')npw, trim(method), ctime, wtime
        ABI_FREE(cg1)
        ABI_FREE(cg2)
      end do
-
-     header = strcat("END_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
+     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
    end do
+   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",command))
 
  case ("zgemv")
+   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
    alpha = [one, two]
    beta = [zero, zero]
    do step=1,2
-     if (step == 1) routname = " f90_zgemv"
-     if (step == 2) routname = " cg_zgemv"
-     header = strcat("BEGIN_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
+     if (step == 1) method = "F90"
+     if (step == 2) method = "BLAS"
+     !write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ",method))
 
      do isz=1,nsizes
        npw = sizes(isz)
@@ -399,25 +384,23 @@ program lapackprof
          end do
        end if
        call cwtime(ctime, wtime, gflops, "stop")
-       write(std_out,'(a,i0,2(a,f9.6))')" npw = ",npw,", cpu_time = ",ctime,", wall_time = ",wtime
+       write(std_out,'(1x,i8,1x,a6,2(1x,f12.6))')npw, trim(method), ctime, wtime
 
        ABI_FREE(cg1)
        ABI_FREE(cg2)
        ABI_FREE(cg3)
      end do
-
-     header = strcat("END_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
+     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
    end do
+   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",command))
 
  case ("transpose")
+   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ",command))
+   write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
 
    do step=1,2
-     if (step == 1) routname = " f90_transpose"
-     if (step == 2) routname = " mkl_transponse"
-     header = strcat("BEGIN_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
-
+     if (step == 1) method = "F90"
+     if (step == 2) method = "MKL"
      do isz=1,nsizes
        npw = sizes(isz)
        ABI_MALLOC(zmat, (npw, npw))
@@ -441,94 +424,95 @@ program lapackprof
          end do
        end if
        call cwtime(ctime, wtime, gflops, "stop")
-       write(std_out,'(a,i0,2(a,f9.6))')"npw = ",npw,", cpu_time ",ctime,", wall_time ",wtime
+       write(std_out,'(1x,i8,1x,a6,2(1x,f12.6))')npw, trim(method), ctime, wtime
 
        ABI_FREE(zmat)
        ABI_FREE(wmat)
      end do
-
-     header = strcat("END_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
+     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
    end do
+   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",command))
 
   case ("zgerc")
+    write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+    write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
+    do step=1,2
+      if (step == 1) method = "F90"
+      if (step == 2) method = "BLAS"
+      do isz=1,nsizes
+        npw  = sizes(isz)
+        ABI_MALLOC(zvec, (npw))
+        ABI_MALLOC(zmat, (npw, npw))
+        zvec = cone; zmat = czero
 
-   do step=1,2
-     if (step == 1) routname = " f90_zgerc"
-     if (step == 2) routname = " zgerc"
-     header = strcat("BEGIN_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
-
-     do isz=1,nsizes
-       npw  = sizes(isz)
-       ABI_MALLOC(zvec, (npw))
-       ABI_MALLOC(zmat, (npw, npw))
-       zvec = cone; zmat = czero
-
-       call cwtime(ctime, wtime, gflops, "start")
-       if (step==1) then ! Home made zgerc
-         do it=1,ncalls
-           zmat = czero
+        call cwtime(ctime, wtime, gflops, "start")
+        if (step==1) then ! Home made zgerc
+          do it=1,ncalls
+            zmat = czero
 !$OMP PARALLEL DO
-           do jj=1,npw
-             do ii=1,npw
-               zmat(ii,jj) = zmat(ii,jj) + CONJG(zvec(ii)) * zvec(jj)
+             do jj=1,npw
+               do ii=1,npw
+                 zmat(ii,jj) = zmat(ii,jj) + CONJG(zvec(ii)) * zvec(jj)
+               end do
              end do
            end do
-         end do
-       else
-         do jj=1,ncalls
-           zmat = czero
-           call XGERC(npw,npw,(1._dp,0._dp),zvec,1,zvec,1,zmat,npw)
-         end do
-       end if
-       call cwtime(ctime, wtime, gflops, "stop")
-       write(std_out,'(a,i0,2(a,f9.6))')" npw = ",npw,", cpu_time ",ctime,", wall_time ",wtime
+        else
+          do jj=1,ncalls
+            zmat = czero
+            call XGERC(npw,npw,(1._dp,0._dp),zvec,1,zvec,1,zmat,npw)
+          end do
+        end if
+        call cwtime(ctime, wtime, gflops, "stop")
+        write(std_out,'(1x,i8,1x,a6,2(1x,f12.6))')npw, trim(method), ctime, wtime
 
-       ABI_FREE(zvec)
-       ABI_FREE(zmat)
-     end do
+        ABI_FREE(zvec)
+        ABI_FREE(zmat)
+      end do
 
-     header = strcat("END_BENCHMARK: ",routname)
-     write(std_out,'(a)')TRIM(header)
-   end do
+      write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
+    end do
+    write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ", command))
 
-   !do isz=1,nsizes
-   !npw  = sizes(isz)
-   !ABI_MALLOC(vec,(npw))
-   !ABI_MALLOC(mat,(npw,npw))
-   !vec = cone; mat = czero
+    !do isz=1,nsizes
+    !npw  = sizes(isz)
+    !ABI_MALLOC(vec,(npw))
+    !ABI_MALLOC(mat,(npw,npw))
+    !vec = cone; mat = czero
 
-   !call cwtime(ctime,wtime,gflops,"start")
+    !call cwtime(ctime,wtime,gflops,"start")
 
-   !do jj=1,ncalls
-   !call XGERC(npw,npw,(1._sp,0._sp),vec,1,vec,1,mat,npw)
-   !end do
+    !do jj=1,ncalls
+    !call XGERC(npw,npw,(1._sp,0._sp),vec,1,vec,1,mat,npw)
+    !end do
 
-   !call cwtime(ctime,wtime,gflops,"stop")
+    !call cwtime(ctime,wtime,gflops,"stop")
 
-   !write(std_out,'(a,i0,2f9.3)')" CGERG size, cpu_time, wall_time, max_abserr ",npw,ctime,wtime
+    !write(std_out,'(a,i0,2f9.3)')" CGERG size, cpu_time, wall_time, max_abserr ",npw,ctime,wtime
 
-   !ABI_FREE(vec)
-   !ABI_FREE(mat)
-   !end do
+    !ABI_FREE(vec)
+    !ABI_FREE(mat)
+    !end do
 
- case ("xginv")
-   do_check = .FALSE.
-   !do_check = .TRUE.
-   do ii=1,nsizes
-     npw  = sizes(ii)
-     call test_xginv(npw, skinds, do_check, Tres, comm)
+ !case ("xginv")
+ !  do_check = .FALSE.
+ !  !do_check = .TRUE.
+ !  do ii=1,nsizes
+ !    npw  = sizes(ii)
+ !    call test_xginv(npw, skinds, do_check, Tres, comm)
 
-     if (my_rank==master) then
-       write(std_out,'(a,i0,3f9.3)')&
-        " routine = xginv, size, cpu_time, wall_time, max_abserr ",Tres%msize,Tres%ctime,Tres%wtime,Tres%max_abserr
-     end if
-   end do
+ !    if (my_rank==master) then
+ !      write(std_out,'(a,i0,3f9.3)')&
+ !       " routine = xginv, size, cpu_time, wall_time, max_abserr ",Tres%msize,Tres%ctime,Tres%wtime,Tres%max_abserr
+ !    end if
+ !  end do
 
  case ("xhpev_vs_xheev")
+   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out, "(a1,a8,1x,a9,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
 
    do step=1,2
+     if (step == 1) method = "PACK"
+     if (step == 2) method = "NOPACK"
      do isz=1,nsizes
        npw = sizes(isz)
        ABI_REMALLOC(ene, (npw))
@@ -560,13 +544,15 @@ program lapackprof
          ABI_FREE(zmat)
        end if
        call cwtime(ctime, wtime, gflops, "stop")
-       write(std_out,'(a,i0,2(a,f9.6))')"EIG PROBLEM: size = ",npw,", cpu_time ",ctime,", wall_time ",wtime
+       write(std_out,'(1x,i8,1x,a8,2(1x,f12.6))')npw, trim(method), ctime, wtime
      end do
 
      ABI_FREE(ene)
      ABI_FREE(evec)
      ABI_FREE(zpmat)
+     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
    end do
+   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",command))
 
  case default
    MSG_ERROR(sjoin("Wrong command:", command))
