@@ -177,9 +177,10 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gstate,nonlinear,respfn
+!!      m_dfpt_looppert,m_eig2d,m_gstate,m_longwave,m_nonlinear,m_respfn_driver
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -308,9 +309,9 @@ end subroutine ddb_hdr_init
 !!  Allocate dynamic memory.
 !!
 !! PARENTS
-!!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -357,6 +358,7 @@ end subroutine ddb_hdr_malloc
 !! PARENTS
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -409,10 +411,9 @@ end subroutine ddb_hdr_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      ddb_interpolate,dfpt_looppert,eig2tot,gstate,mblktyp1,mblktyp5
-!!      nonlinear,respfn
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -467,10 +468,11 @@ end subroutine ddb_hdr_open_write
 !! OUTPUT
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5
-!!      mrgddb,thmeig
+!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,m_ifc,m_thmeig
+!!      mrgddb
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -605,9 +607,9 @@ end subroutine ddb_hdr_open_read
 !! OUTPUT
 !!
 !! PARENTS
-!!      mblktyp1,mblktyp5
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -711,6 +713,7 @@ end subroutine ddb_hdr_compare
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1159,6 +1162,7 @@ end subroutine psddb8
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1749,6 +1753,7 @@ end subroutine ioddb8_in
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1827,6 +1832,7 @@ end subroutine ddb_getdims
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2323,6 +2329,7 @@ end subroutine inprep8
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2430,6 +2437,7 @@ end subroutine ddb_chkname
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2482,15 +2490,15 @@ subroutine compare_ddb_variables(&
 
 ! *********************************************************************
 
-
-!Compare all the preliminary information
-!1. natom
+ !Compare all the preliminary information
+ !1. natom
  call chki8(natom,natom8,' natom')
-!2. nkpt
-!Compares the input and transfer values only if the input has not
-!been initialized by a ground state input file
-!There can also be the case of perturbation at Gamma, that
-!only need half of the number of k points.
+
+ ! 2. nkpt
+ ! Compares the input and transfer values only if the input has not
+ ! been initialized by a ground state input file
+ ! There can also be the case of perturbation at Gamma, that
+ ! only need half of the number of k points.
  if(fullinit/=0)then
    if(nkpt/=2*nkpt8 .and. 2*nkpt/=nkpt8)then
 
@@ -2499,23 +2507,24 @@ subroutine compare_ddb_variables(&
      !      with TRS only for certain q-points.
      !call chki8(nkpt,nkpt8,'  nkpt')
    else
-     write(std_out,*)' compar8 : assume that one of the DDB to be',&
-&     ' merged use Time-Reversal to'
+     write(std_out,*)' compar8 : assume that one of the DDB to be',' merged use Time-Reversal to'
      write(std_out,*)' decrease the number of k-points'
    end if
  else
-!  Otherwise, takes the meaningful value
+   !Otherwise, takes the meaningful value
    nkpt=nkpt8
  end if
-!3a. occopt
-!Because the program will stop if the bloks
-!do not compare well, take here the most favorable case.
+
+ ! 3a. occopt
+ ! Because the program will stop if the bloks
+ ! do not compare well, take here the most favorable case.
  if(occop8==0)occopt=0
-!3b. nband
-!Compares the input and transfer values only if the input has not
-!been initialized by a ground state input file
-!There can also be the case of perturbation at Gamma, that
-!only need half of the number of k points.
+
+ ! 3b. nband
+ ! Compares the input and transfer values only if the input has not
+ ! been initialized by a ground state input file
+ ! There can also be the case of perturbation at Gamma, that
+ ! only need half of the number of k points.
  if(fullinit==0 .or. nkpt8==2*nkpt)then
    bantot=0
    do ii=1,nkpt8
@@ -2531,46 +2540,46 @@ subroutine compare_ddb_variables(&
      bantot=bantot+nband(ii)
    end do
  end if
-!9. nsppol
+ !9. nsppol
  call chki8(nsppol,nsppol8,'nsppol')
-!4. nsym
+ !4. nsym
  if(nsym/=1 .and. nsym8/=1)then
    call chki8(nsym,nsym8,'  nsym')
  end if
-!5. ntypat
+ !5. ntypat
  call chki8(ntypat,ntypat8,'ntypat')
-!6. acell
+ !6. acell
  do ii=1,3
    call chkr8(acell(ii),acell8(ii),' acell',tol)
  end do
-!7. amu
+ !7. amu
  do ii=1,ntypat
    call chkr8(amu(ii),amu8(ii),'   amu',tol)
  end do
-!9. date
-!10. ecut
+ !9. date
+ !10. ecut
  call chkr8(ecut,ecut8,'  ecut',tol)
-!10b. pawecutdg (PAW only)
+ !10b. pawecutdg (PAW only)
  if (usepaw==1) then
    call chkr8(pawecutdg,pawecutdg8,'  ecut',tol)
  end if
-!11. iscf
-!Compares the input and transfer values only if the input has not
-!been initialized by a ground state input file
+ !11. iscf
+ !Compares the input and transfer values only if the input has not
+ !been initialized by a ground state input file
  if(fullinit/=0)then
    call chki8(iscf,iscf8,'  iscf')
  else
-!  Otherwise, takes the meaningful value
+   ! Otherwise, takes the meaningful value
    iscf=iscf8
  end if
-!12. ixc
+ !12. ixc
  call chki8(ixc,ixc8,'   ixc')
-!13. kpt and 14. kptnrm
-!Compares the input and transfer values only if the input
-!has not been initialized by a ground state input file
-!and if the number of k points is identical
+ ! 13. kpt and 14. kptnrm
+ ! Compares the input and transfer values only if the input
+ ! has not been initialized by a ground state input file
+ ! and if the number of k points is identical
  if(nkpt8 == 2*nkpt .or. fullinit==0)then
-!  Copy the largest number of k points in the right place
+   ! Copy the largest number of k points in the right place
    do ij=1,nkpt8
      do ii=1,3
        kpt(ii,ij)=kpt8(ii,ij)
@@ -2580,21 +2589,21 @@ subroutine compare_ddb_variables(&
  else if (nkpt==nkpt8)then
    do ij=1,nkpt
      do ii=1,3
-!      Compares the input and transfer values only if the input
-!      has not been initialized by a ground state input file
+       ! Compares the input and transfer values only if the input
+       ! has not been initialized by a ground state input file
        call chkr8(kpt(ii,ij)/kptnrm,kpt8(ii,ij)/kptnrm8,'   kpt',tol)
      end do
    end do
  end if
-!16. ngfft
-!MT dec 2013: deactivate the stop on ngfft to allow for
-! (nfft-converged) DFPT calculations with GS WFK obtained with a different ngfft
+ !16. ngfft
+ !MT dec 2013: deactivate the stop on ngfft to allow for
+ ! (nfft-converged) DFPT calculations with GS WFK obtained with a different ngfft
  do ii=1,3
    if (ngfft(ii) == ngfft8(ii)) cycle
    write(msg,'(3a,i10,3a,i10,a)') &
-&   'Comparing integers for variable ngfft.',ch10,&
-&   'Value from input DDB is',ngfft(ii),' and',ch10,&
-&   'from transfer DDB is',ngfft8(ii),'.'
+    'Comparing integers for variable ngfft.',ch10,&
+    'Value from input DDB is',ngfft(ii),' and',ch10,&
+    'from transfer DDB is',ngfft8(ii),'.'
    MSG_WARNING(msg)
  end do
 !17. occ
@@ -2770,6 +2779,7 @@ end subroutine compare_ddb_variables
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2823,6 +2833,7 @@ subroutine chkr8(reali,realt,name,tol)
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 

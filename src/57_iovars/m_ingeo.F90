@@ -129,13 +129,10 @@ contains
 !! MG: I completely agree. Abinit developers must learn that Fortran does not allow for aliasing!
 !!
 !! PARENTS
-!!      invars1
+!!      m_invars1
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,chkorthsy,fillcell,gensymshub,gensymshub4
-!!      gensymspgr,intagm_img,ingeobld,intagm,mati3inv,metric,mkradim,mkrdim
-!!      randomcellpos,symanal,symatm,symfind,symlatt,symmetrize_rprimd
-!!      symmetrize_xred,symrelrot,wrtout,xcart2xred,xred2xcart
+!!      intagm,metric,sort_dp
 !!
 !! SOURCE
 
@@ -176,13 +173,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,iexit,ii
+ integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
  integer :: ipsp,irreducible,isym,itypat,jsym,marr,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
- character(len=500) :: msg
+ character(len=600) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
  type(geo_t) :: geo
@@ -202,8 +199,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ABI_ALLOCATE(dprarr,(marr))
 
  ! Try from geo_string
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, &
-             'KEY', key_value=geo_string)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, 'KEY', key_value=geo_string)
 
  if (tread_geo /= 0) then
    ! Set up unit cell from external file.
@@ -257,7 +253,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call mkrdim(acell, rprim, rprimd)
  call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
 
- tolsym = tol8
+!tolsym = tol8
+!XG20200801 New default value for tolsym. This default value is also defined in m_invars1.F90
+ tolsym = tol5
  !if (tread_geo /= 0 .and. geo%filetype == "poscar") then
  !  tolsym = tol4
  !  MSG_COMMENT("Reading structure from POSCAR --> default value of tolsym is set to 1e-4")
@@ -268,7 +266,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Find a tentative Bravais lattice and its point symmetries (might not use them)
  ! Note that the Bravais lattice might not be the correct one yet (because the
- ! actual atomic locations might lower the symattry obtained from the lattice parameters only)
+ ! actual atomic locations might lower the symmetry obtained from the lattice parameters only)
  ABI_ALLOCATE(ptsymrel,(3,3,msym))
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
@@ -784,7 +782,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      ! Check whether the symmetry operations are consistent with the lattice vectors
      iexit=0
 
-     call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
+     call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
 
    else
      ! spgroup==0 and nsym==0
@@ -842,12 +840,21 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          end do
        end if
 
-
        call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
          nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-         chrgat=chrgat,nucdipmom=nucdipmom)
+         chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
+
+       !If the group closure is not obtained which should be exceptional, try with a larger tolsym (three times larger)
+       if(ierr/=0)then
+         call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
+           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,two*tolsym,typat,use_inversion,xred,&
+           chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
+         ABI_CHECK(ierr==0,"Error in group closure")
+         MSG_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
+       endif
 
        ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
+       ! and recompute the symmetry operations (tnons might not be accurate enough)
        if(tolsym>1.00001e-8)then
          ABI_ALLOCATE(indsym,(4,natom,nsym))
          ABI_ALLOCATE(symrec,(3,3,nsym))
@@ -859,16 +866,20 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          ABI_DEALLOCATE(indsym)
          ABI_DEALLOCATE(symrec)
 
-         write(msg,'(a,es14.6,10a)')&
-          'The tolerance on symmetries =',tolsym,ch10,&
-          'is bigger than the usual tolerance, i.e. 1.0e-8 .',ch10,&
-          'In order to avoid spurious effect, the atomic coordinates have been',ch10,&
+         write(msg,'(a,es14.6,11a)')&
+          'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+          'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
           'symmetrized before storing them in the dataset internal variable.',ch10,&
           'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
-          'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.'
+          'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+          'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
          MSG_WARNING(msg)
-       end if
 
+         call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
+           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+           chrgat=chrgat,nucdipmom=nucdipmom)
+
+       end if
      end if
    end if
 
@@ -928,18 +939,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    ! Check whether the symmetry operations are consistent with the lattice vectors
    iexit=1
 
-   call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
+   call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tol8)
+
    if(iexit==-1)then
-     call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
-     call mkradim(acell,rprim,rprimd)
-     write(msg,'(a,es14.6,10a)')&
-       'The tolerance on symmetries: ',tolsym,ch10,&
-       'is bigger than the usual tolerance, i.e. 1.0e-8 .',ch10,&
-       'In order to avoid spurious effect, the primitive vectors have been',ch10,&
+     write(msg,'(a,es14.6,11a)')&
+       'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+       'In order to avoid spurious effects, the primitive vectors have been',ch10,&
        'symmetrized before storing them in the dataset internal variable.',ch10,&
        'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
-       'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.'
+       'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+       'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
      MSG_WARNING(msg)
+     call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tol8)
+     call mkradim(acell,rprim,rprimd)
    end if
 
  end if
@@ -948,7 +960,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  angdeg(1)=180.0_dp/pi * acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))
  angdeg(2)=180.0_dp/pi * acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))
  angdeg(3)=180.0_dp/pi * acos(rmet(1,2)/sqrt(rmet(1,1)*rmet(2,2)))
- !write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
+!write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
 
 !--------------------------------------------------------------------------------------
 
@@ -1142,10 +1154,10 @@ end subroutine ingeo
 !! xcart(3,natom)=cartesian coordinates of atoms (bohr)
 !!
 !! PARENTS
-!!      ingeo
+!!      m_ingeo
 !!
 !! CHILDREN
-!!      intagm,wrtout
+!!      intagm,metric,sort_dp
 !!
 !! SOURCE
 
@@ -1795,9 +1807,10 @@ end subroutine ingeobld
 !!  xred(3,1:natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      ingeo
+!!      m_ingeo
 !!
 !! CHILDREN
+!!      intagm,metric,sort_dp
 !!
 !! SOURCE
 
@@ -1944,7 +1957,7 @@ end subroutine fillcell
 !! vacuum(3)= for each direction, 0 if no vacuum, 1 if vacuum
 !!
 !! PARENTS
-!!      invars1,invars2
+!!      m_invars1,m_invars2
 !!
 !! CHILDREN
 !!      intagm,metric,sort_dp

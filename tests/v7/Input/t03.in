@@ -65,13 +65,15 @@ xred 3*0 3*1/4
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/31ga.3.hgh, PseudosHGH_pwteter/33as.5.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t03.out, tolnlines = 10, tolabs = 0.0002, tolrel = 6.0e-1, fld_options =  -easy
-#%% psp_files = 31ga.hgh, 33as.hgh
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

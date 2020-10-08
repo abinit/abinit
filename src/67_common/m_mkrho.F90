@@ -127,11 +127,11 @@ contains
 !!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)
 !!
 !! PARENTS
-!!      afterscfloop,energy,gstate,respfn,scfcv,vtorho
+!!      m_afterscfloop,m_dft_energy,m_gstate,m_longwave,m_nonlinear
+!!      m_respfn_driver,m_scfcv_core,m_vtorho
 !!
 !! CHILDREN
-!!      bandfft_kpt_set_ikpt,fftpac,fourwf,prep_fourwf,prtrhomxmn
-!!      sphereboundary,symrhg,timab,wrtout,wvl_mkrho,xmpi_sum,diag_occ_rot_cg
+!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -809,10 +809,10 @@ end subroutine mkrho
 !!         as well as spin-up part if spin-polarized
 !!
 !! PARENTS
-!!      gstate,setup_positron
+!!      m_gstate,m_positron
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,wrtout,zerosym
+!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1250,10 +1250,11 @@ end subroutine initro
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
 !!
 !! PARENTS
-!!      afterscfloop,bethe_salpeter,clnup1,mkrho,screening,sigma,vtorho
+!!      m_afterscfloop,m_bethe_salpeter,m_gstate,m_mkrho,m_screening_driver
+!!      m_sigma_driver,m_vtorho
 !!
 !! CHILDREN
-!!      wrtout,xmpi_sum
+!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1892,10 +1893,10 @@ end subroutine prtrhomxmn
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      atomden
+!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2128,7 +2129,7 @@ end subroutine read_atomden
 !!
 !!
 !! PARENTS
-!!      read_atomden
+!!      m_mkrho
 !!
 !! CHILDREN
 !!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master

@@ -191,24 +191,9 @@ contains
 !!  etotal=total energy (sum of 8 contributions) (hartree)
 !!
 !! PARENTS
-!!      respfn
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      appdig,atom_gauss,crystal_free,crystal_init,ctocprj,ddb_free
-!!      ddb_from_file,ddb_hdr_free,ddb_hdr_init,ddb_hdr_open_write,dfpt_atm2fft
-!!      dfpt_init_mag1,dfpt_mkcore,dfpt_mkrho,dfpt_prtene,dfpt_scfcv
-!!      dfpt_vlocal,disable_timelimit,distrb2,dtset_copy,dtset_free,ebands_free
-!!      ebands_init,efmas_main,efmas_analysis,eig2stern,eigen_meandege,eigr2d_free,eigr2d_init
-!!      eigr2d_ncwrite,exit_check,fourdp,getcgqphase,getcut,getmpw,getnel,getph
-!!      gkk_free,gkk_init,gkk_ncwrite,hdr_copy,hdr_free,hdr_init,hdr_update
-!!      initmpi_band,initylmg,inwffil,kpgio,littlegroup_pert,localfilnam
-!!      localrdfile,localredirect,localwrfile,metric,mkrdim,outbsd,outgkk,outwf
-!!      pawang_free,pawang_init,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_getdim,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,prteigrs,put_eneocc_vect,read_rhor,rf2_getidirs
-!!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsym_ylm,status,symkpt
-!!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
-!!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -306,7 +291,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  logical :: first_entry,found_eq_gkk,t_exist,paral_atom,write_1wfk,init_rhor1
  logical :: kramers_deg
  character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1o,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
- character(len=500) :: message
+ character(len=500) :: msg
  type(crystal_t) :: crystal,ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
  type(ebands_t) :: ebands_k,ebands_kq,gkk_ebands
@@ -366,8 +351,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !Structured debugging if prtvol==-level
  if(dtset%prtvol==-level)then
-   write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' dfpt_looppert : enter , debug mode '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(80a,a,a)')  ('=',ii=1,80),ch10,' dfpt_looppert : enter , debug mode '
+   call wrtout(std_out,msg)
  end if
 
  dfpt_scfcv_retcode = -1
@@ -400,7 +385,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !Compute large sphere cut-off gsqcut
  if (psps%usepaw==1) then
-   call wrtout(std_out,ch10//' FFT (fine) grid used for densities/potentials:','COLL')
+   call wrtout(std_out,ch10//' FFT (fine) grid used for densities/potentials:')
  end if
  call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,ngfftf)
 
@@ -461,12 +446,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !         ipert_cnt = ipert_cnt+1;
 !         pert_tmp(ipert_cnt) = idir+(ipert-1)*3
 !       else
-!         write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
+!         write(msg, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
 !&         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
 !&         ' symmetric of a previously calculated perturbation.',ch10,&
 !&         ' So, its SCF calculation is not needed.',ch10
-!         call wrtout(std_out,message,'COLL')
-!         call wrtout(ab_out,message,'COLL')
+!         call wrtout(std_out,msg,'COLL')
+!         call wrtout(ab_out,msg,'COLL')
 !       end if ! Test of existence of symmetry of perturbation
 !     end if ! Test of existence of perturbation
 !   end do
@@ -529,12 +514,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
          to_compute_this_pert = 1
        else
-         write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
-&         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
-&         ' symmetric of a previously calculated perturbation.',ch10,&
-&         ' So, its SCF calculation is not needed.',ch10
-         call wrtout(std_out,message,'COLL')
-         call wrtout(ab_out,message,'COLL')
+         write(msg, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
+         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
+         ' symmetric of a previously calculated perturbation.',ch10,&
+         ' So, its SCF calculation is not needed.',ch10
+         call wrtout([std_out, ab_out], msg)
        end if ! Test of existence of symmetry of perturbation
      else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        to_compute_this_pert = 1
@@ -596,12 +580,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !           pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-10)*9 + (dtset%natom+6)*3
 !         end if
 !       else
-!         write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
+!         write(msg, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
 !&         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
 !&         ' symmetric of a previously calculated perturbation.',ch10,&
 !&         ' So, its SCF calculation is not needed.',ch10
-!         call wrtout(std_out,message,'COLL')
-!         call wrtout(ab_out,message,'COLL')
+!         call wrtout(std_out,msg,'COLL')
+!         call wrtout(ab_out,msg,'COLL')
 !       end if ! Test of existence of symmetry of perturbation
 !     end if ! Test of existence of perturbation
 !   end do
@@ -716,98 +700,87 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  ===== Describe the perturbation in output/log file
    _IBM6("IBM6 before print perturbation")
 
-   write(message, '(a,80a,a,a,3f10.6)' ) ch10,('-',ii=1,80),ch10,&
-&   ' Perturbation wavevector (in red.coord.) ',dtset%qptn(:)
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,80a,a,a,3f10.6)' ) ch10,('-',ii=1,80),ch10,&
+    ' Perturbation wavevector (in red.coord.) ',dtset%qptn(:)
+   call wrtout([std_out, ab_out],msg)
    if(ipert>=1 .and. ipert<=dtset%natom)then
-     write(message, '(a,i4,a,i4)' )' Perturbation : displacement of atom',ipert,'   along direction',idir
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     write(msg, '(a,i4,a,i4)' )' Perturbation : displacement of atom',ipert,'   along direction',idir
+     call wrtout([std_out, ab_out], msg)
      if(iscf_mod == -3)then
-       write(message, '(a,a,a,a,a,a,a,a)' )ch10,&
-&       ' dfpt_looppert : COMMENT -',ch10,&
-&       '  The first-order density is imposed to be zero (iscf=-3).',ch10,&
-&       '  Although this is strange in the case of phonons,',ch10,&
-&       '  you are allowed to do so.'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+       write(msg, '(a,a,a,a,a,a,a,a)' )ch10,&
+       ' dfpt_looppert : COMMENT -',ch10,&
+       '  The first-order density is imposed to be zero (iscf=-3).',ch10,&
+       '  Although this is strange in the case of phonons,',ch10,&
+       '  you are allowed to do so.'
+       call wrtout([std_out, ab_out], msg)
      end if
    else if(ipert==dtset%natom+1)then
-     write(message,'(a,i4)')' Perturbation : derivative vs k along direction',idir
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     write(msg,'(a,i4)')' Perturbation : derivative vs k along direction',idir
+     call wrtout([std_out, ab_out], msg)
      if( iscf_mod /= -3 )then
-       write(message, '(4a)' )ch10,&
-&       ' dfpt_looppert : COMMENT -',ch10,&
-&       '  In a d/dk calculation, iscf is set to -3 automatically.'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+       write(msg, '(4a)' )ch10,&
+       ' dfpt_looppert : COMMENT -',ch10,&
+       '  In a d/dk calculation, iscf is set to -3 automatically.'
+       call wrtout([std_out, ab_out], msg)
        iscf_mod=-3
      end if
      if( abs(dtset%dfpt_sciss) > 1.0d-8 )then
-       write(message, '(a,a,a,a,f14.8,a,a)' )ch10,&
-&       ' dfpt_looppert : WARNING -',ch10,&
-&       '  Value of dfpt_sciss=',dtset%dfpt_sciss,ch10,&
-&       '  Scissor with d/dk calculation : you are using a "naive" approach !'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+       write(msg, '(a,a,a,a,f14.8,a,a)' )ch10,&
+        ' dfpt_looppert : WARNING -',ch10,&
+        '  Value of dfpt_sciss=',dtset%dfpt_sciss,ch10,&
+        '  Scissor with d/dk calculation : you are using a "naive" approach !'
+       call wrtout([std_out, ab_out], msg)
      end if
    else if(ipert==dtset%natom+2)then
-     write(message, '(a,i4)' )' Perturbation : homogeneous electric field along direction',idir
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     write(msg, '(a,i4)' )' Perturbation : homogeneous electric field along direction',idir
+     call wrtout([std_out, ab_out], msg)
      if( iscf_mod == -3 )then
-       write(message, '(a,a,a,a,a,a)' )ch10,&
-&       ' dfpt_looppert : COMMENT -',ch10,&
-&       '  The first-order density is imposed to be zero (iscf=-3).',ch10,&
-&       '  This corresponds to a calculation without local fields.'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+       write(msg, '(a,a,a,a,a,a)' )ch10,&
+        ' dfpt_looppert : COMMENT -',ch10,&
+        '  The first-order density is imposed to be zero (iscf=-3).',ch10,&
+        '  This corresponds to a calculation without local fields.'
+       call wrtout([std_out, ab_out], msg)
      end if
    else if(ipert==dtset%natom+10.or.ipert==dtset%natom+11)then
      call rf2_getidirs(idir,idir1,idir2)
      if(ipert==dtset%natom+10)then
-       write(message,'(2(a,i1))') ' Perturbation : 2nd derivative wrt k, idir1 = ',idir1,&
-&       ' idir2 = ',idir2
+       write(msg,'(2(a,i1))') ' Perturbation : 2nd derivative wrt k, idir1 = ',idir1,&
+        ' idir2 = ',idir2
      else
-       write(message,'(2(a,i1),a)') ' Perturbation : 2nd derivative wrt k (idir1 =',idir1,&
-&       ') and Efield (idir2 =',idir2,')'
+       write(msg,'(2(a,i1),a)') ' Perturbation : 2nd derivative wrt k (idir1 =',idir1,&
+        ') and Efield (idir2 =',idir2,')'
      end if
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     call wrtout([std_out, ab_out], msg)
      if( iscf_mod /= -3 )then
-       write(message, '(4a)' )ch10,&
-&       ' dfpt_looppert : COMMENT -',ch10,&
-&       '  In this case, iscf is set to -3 automatically.'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+       write(msg, '(4a)' )ch10,&
+        ' dfpt_looppert : COMMENT -',ch10,&
+        '  In this case, iscf is set to -3 automatically.'
+       call wrtout([std_out, ab_out], msg)
        iscf_mod=-3
      end if
      if( abs(dtset%dfpt_sciss) > 1.0d-8 )then
-       write(message, '(a,a,a,a,f14.8,a,a)' )ch10,&
-&       ' dfpt_looppert : WARNING -',ch10,&
-&       '  Value of dfpt_sciss=',dtset%dfpt_sciss,ch10,&
-&       '  Scissor with d/dk calculation : you are using a "naive" approach !'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+       write(msg, '(a,a,a,a,f14.8,a,a)' )ch10,&
+        ' dfpt_looppert : WARNING -',ch10,&
+        '  Value of dfpt_sciss=',dtset%dfpt_sciss,ch10,&
+        '  Scissor with d/dk calculation : you are using a "naive" approach !'
+       call wrtout([std_out, ab_out], msg)
      end if
      ABI_ALLOCATE(occ_pert,(dtset%mband*nkpt*dtset%nsppol))
      occ_pert(:) = occ(:) - occ(1)
      maxocc = maxval(abs(occ_pert))
      if (maxocc>1.0d-6.and.abs(maxocc-occ(1))>1.0d-6) then ! True if non-zero occupation numbers are not equal
-       write(message, '(3a)' ) ' ipert=natom+10 or 11 does not work for a metallic system.',ch10,&
+       write(msg, '(3a)' ) ' ipert=natom+10 or 11 does not work for a metallic system.',ch10,&
        ' This perturbation will not be computed.'
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
        ABI_DEALLOCATE(occ_pert)
        cycle
      end if
      ABI_DEALLOCATE(occ_pert)
    else if(ipert>dtset%natom+11 .or. ipert<=0 )then
-     write(message, '(a,i0,3a)' ) &
-&     'ipert= ',ipert,' is outside the [1,dtset%natom+11] interval.',ch10,&
-&     'This perturbation is not (yet) allowed.'
-     MSG_BUG(message)
+     write(msg, '(a,i0,3a)' ) &
+      'ipert= ',ipert,' is outside the [1,dtset%natom+11] interval.',ch10,&
+      'This perturbation is not (yet) allowed.'
+     MSG_BUG(msg)
    end if
 !  Initialize the diverse parts of energy :
    eew=zero ; evdw=zero ; efrloc=zero ; efrnl=zero ; efrx1=zero ; efrx2=zero
@@ -1056,17 +1029,17 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
 
 !  Print a separator in output file
-   write(message,'(3a)')ch10,'--------------------------------------------------------------------------------',ch10
-   call wrtout(ab_out,message,'COLL')
+   write(msg,'(3a)')ch10,'--------------------------------------------------------------------------------',ch10
+   call wrtout(ab_out,msg)
 
 !  Initialize band structure datatype at k
    bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(eigen0,(bantot_rbz))
    eigen0(:)=zero
    call ebands_init(bantot_rbz,ebands_k,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
-&   nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
-&   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-&   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+     nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+     dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    ABI_DEALLOCATE(eigen0)
 
 !  Initialize header, update it with evolving variables
@@ -1084,13 +1057,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
    mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
    if (one*mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol > huge(1)) then
-     write (message,'(4a, 5(a,i0), 2a)')&
-&     "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
-&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
-&     "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
-&     mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
-&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
-     MSG_ERROR(message)
+     write (msg,'(4a, 5(a,i0), 2a)')&
+      "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
+      "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+      "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
+      mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+      'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(msg)
    end if
    ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
@@ -1200,8 +1173,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  SPr: do the same for k-q if kramers_deg=.false.
 
 !  Print a separator in output file
-   write(message, '(a,a)' )'--------------------------------------------------------------------------------',ch10
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,a)' )'--------------------------------------------------------------------------------',ch10
+   call wrtout(ab_out,msg)
 
 !  Initialize band structure datatype at k+q
    ABI_ALLOCATE(eigenq,(bantot_rbz))
@@ -1233,13 +1206,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    mcgq=mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
    !SPr: verified until here, add mcgq for -q
    if (one*mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol > huge(1)) then
-     write (message,'(4a, 5(a,i0), 2a)')&
-&     "Default integer is not wide enough to store the size of the GS wavefunction array (WFKQ, mcgq).",ch10,&
-&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
-&     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mkqmem_rbz: ",&
-&     mkqmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
-&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
-     MSG_ERROR(message)
+     write (msg,'(4a, 5(a,i0), 2a)')&
+     "Default integer is not wide enough to store the size of the GS wavefunction array (WFKQ, mcgq).",ch10,&
+     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mkqmem_rbz: ",&
+     mkqmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(msg)
    end if
 
    ABI_MALLOC_OR_DIE(cgq,(2,mcgq), ierr)
@@ -1332,15 +1305,15 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      do ikpt=1,nkpt_rbz
        nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
        if(ikpt<=nkpt_eff)then
-         write(message, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
-         call wrtout(std_out,message,'COLL')
+         write(msg, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
+         call wrtout(std_out,msg)
          do iband=1,nband_k,4
-           write(message, '(a,4es16.6)')'  ',eigenq(iband+band_index:min(iband+3,nband_k)+band_index)
-           call wrtout(std_out,message,'COLL')
+           write(msg, '(a,4es16.6)')'  ',eigenq(iband+band_index:min(iband+3,nband_k)+band_index)
+           call wrtout(std_out,msg)
          end do
        else if(ikpt==nkpt_eff+1)then
-         write(message,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigenq.',ch10
-         call wrtout(std_out,message,'COLL')
+         write(msg,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigenq.',ch10
+         call wrtout(std_out,msg)
        end if
        band_index=band_index+nband_k
      end do
@@ -1368,34 +1341,31 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      dosdeltae=zero ! the DOS is not computed with option=1
      maxocc=two/(dtset%nspinor*dtset%nsppol)
      call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,maxocc,dtset%mband,&
-&     nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
-&     dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
+       nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
+       dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
 !    Compare nelect at k and nelelect at k+q
-     write(message, '(a,a,a,es16.6,a,es16.6,a)')&
-&     ' dfpt_looppert : total number of electrons, from k and k+q',ch10,&
-&     '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     write(msg, '(a,a,a,es16.6,a,es16.6,a)')&
+       ' dfpt_looppert : total number of electrons, from k and k+q',ch10,&
+       '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
+     call wrtout([std_out, ab_out], msg)
      if (.not.kramers_deg) then
        call getnel(docckde_mq,dosdeltae,eigen_mq,entropy,fermie,maxocc,dtset%mband,&
-&       nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occk_mq,dtset%occopt,option,&
-&       dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
+         nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occk_mq,dtset%occopt,option,&
+         dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
 !      Compare nelect at k and nelelect at k-q
-       write(message, '(a,a,a,es16.6,a,es16.6,a)')&
-&       ' dfpt_looppert : total number of electrons, from k and k-q',ch10,&
-&       '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       write(msg, '(a,a,a,es16.6,a,es16.6,a)')&
+         ' dfpt_looppert : total number of electrons, from k and k-q',ch10,&
+         '  fully or partially occupied states are',dtset%nelect,' and',nelectkq,'.'
+       call wrtout([std_out, ab_out], msg)
      end if
    end if
 
 !  Debug message
-   if(dtset%prtvol==-level) call wrtout(std_out,'dfpt_looppert: initialisation of q part done.','COLL')
+   if(dtset%prtvol==-level) call wrtout(std_out,'dfpt_looppert: initialisation of q part done.')
 
 !  Initialisation of first-order wavefunctions
-   write(message,'(3a,i4)')' Initialisation of the first-order wave-functions :',ch10,'  ireadwf=',dtfil%ireadwf
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg,'(3a,i4)')' Initialisation of the first-order wave-functions :',ch10,'  ireadwf=',dtfil%ireadwf
+   call wrtout([std_out, ab_out], msg)
    call appdig(pertcase,dtfil%fnamewff1,fiwf1i)
    call appdig(pertcase,dtfil%fnameabo_1wf,fiwf1o)
 
@@ -1428,13 +1398,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    mcg1=mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
    if (one*mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol > huge(1)) then
-     write (message,'(4a, 5(a,i0), 2a)')&
-&     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
-&     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
-&     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mk1mem_rbz: ",&
-&     mk1mem_rbz, "nsppol: ",dtset%nsppol,ch10,&
-&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
-     MSG_ERROR(message)
+     write (msg,'(4a, 5(a,i0), 2a)')&
+     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
+     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+     "nspinor: ",dtset%nspinor, "mpw1: ",mpw1, "mband: ",dtset%mband, "mk1mem_rbz: ",&
+     mk1mem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+     MSG_ERROR(msg)
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    if (.not.kramers_deg) then
@@ -1550,19 +1520,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (.not. file_exists(fiwfddk)) then
          ! Trick needed to run Abinit test suite in netcdf mode.
          if (file_exists(nctk_ncify(fiwfddk))) then
-           write(message,"(3a)")"- File: ",trim(fiwfddk)," does not exist but found netcdf file with similar name."
-           call wrtout(std_out,message,'COLL')
+           write(msg,"(3a)")"- File: ",trim(fiwfddk)," does not exist but found netcdf file with similar name."
+           call wrtout(std_out,msg)
            fiwfddk = nctk_ncify(fiwfddk)
          end if
          if (.not. file_exists(fiwfddk)) then
            MSG_ERROR('Missing file: '//TRIM(fiwfddk))
          end if
        end if
-       write(message,'(2a)')'-dfpt_looppert : read the wavefunctions from file: ',trim(fiwfddk)
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
-!      Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-       call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1),spaceComm)
+       write(msg,'(2a)')'- dfpt_looppert: read the DDK wavefunctions from file: ',trim(fiwfddk)
+       call wrtout([std_out, ab_out],msg)
+       ! Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
+       call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1), xmpi_comm_self)
      end do
    end if
 
@@ -1655,11 +1624,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if ! check for prepgkk with symmetric pert
 
    if (found_eq_gkk) then
-     write (message, '(a,l6,i6,2a,3i6,2a,3i6,a)')  &
-&     ' found_eq_gkk,isym = ', found_eq_gkk, isym, ch10, &
-&     ' idir,  ipert,  icase   =  ', idir, ipert, icase, ch10, &
-&     ' idireq iperteq icaseeq =  ', idir_eq, ipert_eq, icase_eq, ch10
-     call wrtout(std_out,message,'COLL')
+     write (msg, '(a,l6,i6,2a,3i6,2a,3i6,a)')  &
+     ' found_eq_gkk,isym = ', found_eq_gkk, isym, ch10, &
+     ' idir,  ipert,  icase   =  ', idir, ipert, icase, ch10, &
+     ' idireq iperteq icaseeq =  ', idir_eq, ipert_eq, icase_eq, ch10
+     call wrtout(std_out,msg)
 !
 !    Make density for present perturbation, which is symmetric of 1 or more previous perturbations:
 !    rotate 1DEN arrays with symrel(isym) to produce rhog1_eq rhor1_eq
@@ -1682,9 +1651,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        dtset_tmp%toldff = zero
        dtset_tmp%tolrff = zero
        dtset_tmp%tolvrs = zero
-       write (message, '(a,i6,a)') ' NOTE: doing GKK calculation for icase ', icase, ' with non-SCF calculation'
-       call wrtout(std_out,message,'COLL')
-       !call wrtout(ab_out,message,'COLL') ! decomment and update output files
+       write (msg, '(a,i6,a)') ' NOTE: doing GKK calculation for icase ', icase, ' with non-SCF calculation'
+       call wrtout(std_out,msg)
+       !call wrtout(ab_out,msg,'COLL') ! decomment and update output files
 
      else ! do not use non-scf shortcut, but save rotated 1DEN for comparison
 ! saves the rotated rho, for later comparison with the full SCF rhor1: comment lines below for iscf = -2
@@ -1724,7 +1693,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          end if
 
          if (optn2 == 3) then
-           call wrtout(std_out," Initializing rhor1 from atom-centered gaussians", "COLL")
+           call wrtout(std_out," Initializing rhor1 from atom-centered gaussians")
            ABI_ALLOCATE(gauss,(2,ntypat))
            call atom_gauss(ntypat, dtset%densty, psps%ziontypat, psps%znucltypat, gauss)
 
@@ -1735,7 +1704,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
            ABI_FREE(gauss)
          else
-           call wrtout(std_out," Initializing rhor1 from valence densities taken from pseudopotential files", "COLL")
+           call wrtout(std_out," Initializing rhor1 from valence densities taken from pseudopotential files")
            call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
            mgfftf,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,ntypat,&
            ph1df,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
@@ -1744,7 +1713,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
        else
          ! Magnetic field perturbation
-         call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field", "COLL")
+         call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field")
 
          call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
 
@@ -1944,10 +1913,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(146,1,tsec)
 
 !  Print out message at the end of the iterations
-   write(message, '(80a,a,a,a,a)' ) ('=',ii=1,80),ch10,ch10,&
+   write(msg, '(80a,a,a,a,a)' ) ('=',ii=1,80),ch10,ch10,&
 &   ' ----iterations are completed or convergence reached----',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   call wrtout([std_out, ab_out], msg)
 
 !  Print _gkk file for this perturbation
    if (dtset%prtgkk == 1) then
@@ -2031,9 +1999,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !      Save density for present perturbation, for future use in symmetric perturbations
        rhor1_save(:,:,icase) = rhor1
      else
-       write (message, '(a,3E20.10)') 'norm diff = ', sum(abs(rhor1_save(:,:,icase) - rhor1)), &
+       write (msg, '(a,3E20.10)') 'norm diff = ', sum(abs(rhor1_save(:,:,icase) - rhor1)), &
 &       sum(abs(rhor1)), sum(abs(rhor1_save(:,:,icase) - rhor1))/sum(abs(rhor1))
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(std_out, msg)
      end if
    end if
 
@@ -2041,7 +2009,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    write_1wfk = .True.
    if (dtset%prtwf==-1 .and. dfpt_scfcv_retcode == 0) then
      write_1wfk = .False.
-     call wrtout(ab_out," dfpt_looppert: DFPT cycle converged with prtwf=-1. Will skip output of the 1st-order WFK file.","COLL")
+     call wrtout(ab_out," dfpt_looppert: DFPT cycle converged with prtwf=-1. Will skip output of the 1st-order WFK file.")
    end if
 
    if (write_1wfk) then
@@ -2090,16 +2058,15 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ek2=gmet(idir,idir)*(two_pi**2)*2.0_dp*dtset%nelect
      fsum=-ek1/ek2
      if(dtset%ecutsm<tol6)then
-       write(message, '(a,es20.10,a,a,es20.10)' ) &
-&       ' dfpt_looppert : ek2=',ek2,ch10,&
-&       '          f-sum rule ratio=',fsum
+       write(msg, '(a,es20.10,a,a,es20.10)' ) &
+       ' dfpt_looppert : ek2=',ek2,ch10,&
+       '          f-sum rule ratio=',fsum
      else
-       write(message, '(a,es20.10,a,a,es20.10,a)' ) &
-&       ' dfpt_looppert : ek2=',ek2,ch10,&
-&       '          f-sum rule ratio=',fsum,' (note : ecutsm/=0)'
+       write(msg, '(a,es20.10,a,a,es20.10,a)' ) &
+       ' dfpt_looppert : ek2=',ek2,ch10,&
+       '          f-sum rule ratio=',fsum,' (note : ecutsm/=0)'
      end if
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     call wrtout([std_out, ab_out] , msg)
 !    Write the diagonal elements of the dH/dk operator, after averaging over degenerate states
      ABI_ALLOCATE(eigen1_mean,(dtset%mband*nkpt_rbz*dtset%nsppol))
      call eigen_meandege(eigen0,eigen1,eigen1_mean,dtset%mband,nband_rbz,nkpt_rbz,dtset%nsppol,1)
@@ -2259,7 +2226,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
 &   (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
-     call wrtout(std_out,'Reading the dense grid WF file',"COLL")
+     call wrtout(std_out,'Reading the dense grid WF file')
 !    We get the Abinit header of the file hdr_fine as ouput
 !    We get eigenq_fine(mband,hdr_fine%nkpt,hdr_fine%nsppol) as ouput
      fname = dtfil%fnameabi_wfkfine
@@ -2303,7 +2270,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset)
        end if
      end if
-     call wrtout(std_out, 'Leaving: eig2stern', "COLL")
+     call wrtout(std_out, 'Leaving: eig2stern')
 
      if (dtset%ieig2rf==1.or.dtset%ieig2rf==2) then
        if (me==master) then
@@ -2365,10 +2332,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        end if
      end if !ieig2rf==1.or.ieig2rf==2
    else
-     write(message,'(3a)')&
-&     'K point grids must be the same for every perturbation: eig2stern not called',ch10,&
-&     'Action: Put kptopt=3 '
-     MSG_WARNING(message)
+     write(msg,'(3a)')&
+     'K point grids must be the same for every perturbation: eig2stern not called',ch10,&
+     'Action: Put kptopt=3 '
+     MSG_WARNING(msg)
    end if !kptopt
    ABI_DEALLOCATE(gh1c_pert)
    ABI_DEALLOCATE(gh0c1_pert)
@@ -2432,8 +2399,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! Trick needed to run Abinit test suite in netcdf mode.
      t_exist = file_exists(nctk_ncify(fiwfddk))
      if (t_exist) then
-       write(message,"(3a)")"- File: ",trim(fiwfddk)," does not exist but found netcdf file with similar name."
-       call wrtout(std_out,message,'COLL')
+       write(msg,"(3a)")"- File: ",trim(fiwfddk)," does not exist but found netcdf file with similar name."
+       call wrtout(std_out, msg)
        fiwfddk = nctk_ncify(fiwfddk)
      end if
    end if
@@ -2513,10 +2480,9 @@ end subroutine dfpt_looppert
 !!  phasecg = phase of different wavefunction products <k,n | k+q,n'>
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      smatrix,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2556,7 +2522,7 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
  real(dp), allocatable :: smat_k(:,:,:)
  real(dp), allocatable :: pwnsfac_k(:,:)
  logical, allocatable :: my_kpt(:,:)
- character(len=500) :: message
+ !character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -2661,8 +2627,7 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
    call xmpi_sum_master(phasecg,master,spaceComm,ierr)
    call xmpi_barrier(spaceComm)
    if (1==1) then
-     write(message,'(a)') '  In getcgqphase - contributions to phasecg collected'
-     call wrtout(std_out,message,'PERS')
+     call wrtout(std_out, 'In getcgqphase - contributions to phasecg collected')
    end if
  end if
 
@@ -2722,10 +2687,9 @@ end subroutine getcgqphase
 !! all energies in Hartree
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2751,7 +2715,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 &    'Six       ','Seven     ','Eight     ','Nine      ','Ten       ', &
 &    'Eleven    ','Twelve    ','Thirteen  ','Fourteen  ','Fifteen   ', &
 &    'Sixteen   ','Seventeen ','Eighteen  ','Nineteen  ','Twenty    '/)
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -2770,59 +2734,59 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 ! because we do not compute derivatives of the energy in this case
  if (usepaw==1) nn=nn+1
  if (usevdw==1) nn=nn+1
- write(message, '(4a)' ) ch10,&
+ write(msg, '(4a)' ) ch10,&
 & ' ',trim(numbstr(nn)),' components of 2nd-order total energy (hartree) are '
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  numb='1,2,3'
- write(message, '(3a)' )&
+ write(msg, '(3a)' )&
 & ' ',trim(numb),': 0th-order hamiltonian combined with 1st-order wavefunctions'
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es17.8,a,es17.8,a,es17.8)' )&
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
+ write(msg, '(a,es17.8,a,es17.8,a,es17.8)' )&
 & '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  numb='4,5,6';if( ipert==natom+3.or.ipert==natom+4) numb='4,5,6,7'
- write(message, '(3a)' )&
+ write(msg, '(3a)' )&
 & ' ',trim(numb),': 1st-order hamiltonian combined with 1st and 0th-order wfs'
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
  if(ipert/=natom+1.and.ipert/=natom+2)then
-   write(message, '(a,es17.8,a,es17.8,a,es17.8,a,a)' ) &
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a)' ) &
 &   ' loc psp =',elpsp1,'  Hartree=',ehart1,'     xc=',exc1,ch10,&
 &   ' note that "loc psp" includes a xc core correction that could be resolved'
  else if(ipert==natom+1) then
-   write(message, '(a,es17.8,a,es17.8,a,es17.8)' ) &
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &   '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1
  else if(ipert==natom+2) then
-   write(message, '(a,es17.8,a,es17.8,a,es17.8)' ) &
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &   '    dotwf=',enl1,  '  Hartree=',ehart1,'     xc=',exc1
  end if
  if(ipert==natom+3 .or. ipert==natom+4) then
-   write(message, '(a,es17.8,a,es17.8,a,es17.8,a,a,es17.8)' ) &
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a,es17.8)' ) &
 &   ' loc psp =',elpsp1,'  Hartree=',ehart1,'     xc=',exc1,ch10,&
 &   '     kin1=',ek1
  end if
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  enl1_effective=enl1;if (ipert==natom+2) enl1_effective=zero
  numb='7,8,9';if( ipert==natom+3.or.ipert==natom+4) numb='8,9,10'
- write(message, '(5a,es17.8,a,es17.8,a,es17.8)' )&
+ write(msg, '(5a,es17.8,a,es17.8,a,es17.8)' )&
 & ' ',trim(numb),': eventually, occupation + non-local contributions',ch10,&
 & '    edocc=',edocc,'     enl0=',enl0,'   enl1=',enl1_effective
- call wrtout(iout,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  if (usepaw==1) then
    numb='10';if( ipert==natom+3.or.ipert==natom+4) numb='11'
-   write(message, '(3a,es17.8)' )&
+   write(msg, '(3a,es17.8)' )&
 &   ' ',trim(numb),': eventually, PAW "on-site" Hxc contribution: epaw1=',epaw1
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
  if(ipert/=natom+10 .and.ipert/=natom+11) then
@@ -2845,164 +2809,164 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    if( ipert==natom+3.or.ipert==natom+4) then
      numb='1-10';if (usepaw==1) numb='1-11'
    end if
-   write(message, '(5a,es17.8)' )&
+   write(msg, '(5a,es17.8)' )&
 &   ' ',trim(numb),' gives the relaxation energy (to be shifted if some occ is /=2.0)',&
 &   ch10,'   erelax=',erelax
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
  if(ipert>=1.and.ipert<=natom)then
 
    numb='10,11,12';if (usepaw==1) numb='11,12,13'
-   write(message, '(4a)' )&
+   write(msg, '(4a)' )&
 &   ' ',trim(numb),' Non-relaxation  contributions : ',&
 &   'frozen-wavefunctions and Ewald'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es17.8,a,es17.8,a,es17.8)' ) &
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &   ' fr.local=',efrloc,' fr.nonlo=',efrnl,'  Ewald=',eew
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
 
-   write(message, '(a,es16.6)' )' dfpt_prtene : non-relax=',efrloc+efrnl+eew
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,es16.6)' )' dfpt_prtene : non-relax=',efrloc+efrnl+eew
+   call wrtout(std_out,msg)
 
    numb='13,14';if (usepaw==1) numb='14,15'
-   write(message, '(3a)' )&
+   write(msg, '(3a)' )&
 &   ' ',trim(numb),' Frozen wf xc core corrections (1) and (2)'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es17.8,a,es17.8)' ) &
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es17.8,a,es17.8)' ) &
 &   ' frxc 1  =',efrx1,'  frxc 2 =',efrx2
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
    if (usepaw==1) then
      numb='16'
-     write(message, '(5a,es17.8)' )&
+     write(msg, '(5a,es17.8)' )&
 &     ' ',trim(numb),' Contribution from 1st-order change of wavefunctions overlap',&
 &     ch10,' eovl1 =',eovl1
-     call wrtout(iout,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,msg)
+     call wrtout(std_out,msg)
    end if
    if (usevdw==1) then
      numb='15';if (usepaw==1) numb='17'
-     write(message, '(3a,es17.8)' )&
+     write(msg, '(3a,es17.8)' )&
 &     ' ',trim(numb),' Contribution from van der Waals DFT-D: evdw =',evdw
-     call wrtout(iout,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,msg)
+     call wrtout(std_out,msg)
    end if
 
-   write(message, '(a)' )' Resulting in : '
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a)' )' Resulting in : '
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
    etotal=erelax+eew+efrloc+efrnl+efrx1+efrx2+evdw
-   write(message, '(a,e20.10,a,e22.12,a)' ) &
+   write(msg, '(a,e20.10,a,e22.12,a)' ) &
 &   ' 2DEtotal=',etotal,' Ha. Also 2DEtotal=',etotal*Ha_eV,' eV'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es20.10,a,es20.10,a)' ) &
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es20.10,a,es20.10,a)' ) &
 &   '    (2DErelax=',erelax,' Ha. 2DEnonrelax=',etotal-erelax,' Ha)'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es20.10,a,a)' ) &
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es20.10,a,a)' ) &
 &   '    (  non-var. 2DEtotal :',&
 &   0.5_dp*(elpsp1+enl1)+eovl1+eew+efrloc+efrnl+efrx1+efrx2+evdw,' Ha)',ch10
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
 
  else if(ipert==natom+1.or.ipert==natom+2)then
    if (ipert==natom+1.and.usepaw==1) then
      numb='11'
-     write(message, '(5a,es17.8)' )&
+     write(msg, '(5a,es17.8)' )&
 &     ' ',trim(numb),' Contribution from 1st-order change of wavefunctions overlap',&
 &     ch10,' eovl1 =',eovl1
-     call wrtout(iout,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,msg)
+     call wrtout(std_out,msg)
    end if
-   write(message,*)' No Ewald or frozen-wf contrib.:',' the relaxation energy is the total one'
+   write(msg,*)' No Ewald or frozen-wf contrib.:',' the relaxation energy is the total one'
    if(berry_activated) then
      numb='10';
-     write(message,'(3a,es20.10)')' ',trim(numb),' Berry phase energy :',eberry
+     write(msg,'(3a,es20.10)')' ',trim(numb),' Berry phase energy :',eberry
    end if
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
    etotal=erelax
-   write(message, '(a,e20.10,a,e22.12,a)' ) &
+   write(msg, '(a,e20.10,a,e22.12,a)' ) &
 &   ' 2DEtotal=',etotal,' Ha. Also 2DEtotal=',etotal*Ha_eV,' eV'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es20.10,a)' ) &
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es20.10,a)' ) &
 &   '    (  non-var. 2DEtotal :',0.5_dp*(ek1+enl1_effective)+eovl1,' Ha)'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
 
  else if(ipert==natom+3 .or. ipert==natom+4) then
    numb='11,12,13';if (usepaw==1) numb='12,13,14'
-   write(message, '(4a)' )&
+   write(msg, '(4a)' )&
 &   ' ',trim(numb),' Non-relaxation  contributions : ','frozen-wavefunctions and Ewald'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es17.8,a,es17.8,a,es17.8)' ) &
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &   '  fr.hart=',efrhar,'   fr.kin=',efrkin,' fr.loc=',efrloc
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
 
    numb='14,15,16';if (usepaw==1) numb='15,16,17'
-   write(message, '(4a)' )&
+   write(msg, '(4a)' )&
 &   ' ',trim(numb),' Non-relaxation  contributions : ','frozen-wavefunctions and Ewald'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es17.8,a,es17.8,a,es17.8)' ) &
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &   '  fr.nonl=',efrnl,'    fr.xc=',efrx1,'  Ewald=',eew
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
 
    numb='17';if (usepaw==1) numb='18'
-   write(message, '(4a)' )&
+   write(msg, '(4a)' )&
 &   ' ',trim(numb),' Non-relaxation  contributions : ','pseudopotential core energy'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es17.8)' ) '  pspcore=',eii
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es17.8)' ) '  pspcore=',eii
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
    if (usepaw==1) then
      numb='19'
-     write(message, '(5a,es17.8)' )&
+     write(msg, '(5a,es17.8)' )&
 &     ' ',trim(numb),' Contribution from 1st-order change of wavefunctions overlap',&
 &     ch10,' eovl1 =',eovl1
-     call wrtout(iout,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,msg)
+     call wrtout(std_out,msg)
    end if
    if (usevdw==1) then
      numb='18';if (usepaw==1) numb='20'
-     write(message, '(3a,es17.8)' )&
+     write(msg, '(3a,es17.8)' )&
 &     ' ',trim(numb),' Contribution from van der Waals DFT-D: evdw =',evdw
-     call wrtout(iout,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,msg)
+     call wrtout(std_out,msg)
    end if
 
-   write(message, '(a,es16.6)' )' dfpt_prtene : non-relax=',&
+   write(msg, '(a,es16.6)' )' dfpt_prtene : non-relax=',&
 &   efrhar+efrkin+efrloc+efrnl+efrx1+eew+evdw
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a)' )' Resulting in : '
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,msg)
+   write(msg, '(a)' )' Resulting in : '
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
    etotal=erelax+efrhar+efrkin+efrloc+efrnl+efrx1+eew+eii+evdw
-   write(message, '(a,e20.10,a,e22.12,a)' ) &
+   write(msg, '(a,e20.10,a,e22.12,a)' ) &
 &   ' 2DEtotal=',etotal,' Ha. Also 2DEtotal=',etotal*Ha_eV,' eV'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es20.10,a,es20.10,a)' ) &
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es20.10,a,es20.10,a)' ) &
 &   '    (2DErelax=',erelax,' Ha. 2DEnonrelax=',etotal-erelax,' Ha)'
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   write(message, '(a,es20.10,a,a)' ) &
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
+   write(msg, '(a,es20.10,a,a)' ) &
 &   '    (  non-var. 2DEtotal :',&
 &   0.5_dp*(elpsp1+enl1+ek1+ehart01)+eovl1+&
 &   efrhar+efrkin+efrloc+efrnl+efrx1+eew+eii+evdw,' Ha)',ch10
-   call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
 end subroutine dfpt_prtene
@@ -3030,7 +2994,7 @@ end subroutine dfpt_prtene
 !!  eigenresp_mean(mband*nkpt*nsppol)= eigenresp, averaged over degenerate states
 !!
 !! PARENTS
-!!      dfpt_looppert,respfn
+!!      m_dfpt_looppert,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -3052,14 +3016,14 @@ subroutine eigen_meandege(eigen0,eigenresp,eigenresp_mean,mband,nband,nkpt,nsppo
 !scalars
  integer :: bdtot_index,bd2tot_index,iband,ii,ikpt,isppol,nband_k
  real(dp) :: eig0,mean
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
 
 ! *********************************************************************
 
  if(option/=1 .and. option/=2)then
-   write(message, '(a,i0)' )' The argument option should be 1 or 2, while it is found that option=',option
-   MSG_BUG(message)
+   write(msg, '(a,i0)' )' The argument option should be 1 or 2, while it is found that option=',option
+   MSG_BUG(msg)
  end if
 
  bdtot_index=0 ; bd2tot_index=0
@@ -3129,7 +3093,7 @@ end subroutine eigen_meandege
 !!  rhor1(cplex*nfft) = first order density magnetization guess
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!

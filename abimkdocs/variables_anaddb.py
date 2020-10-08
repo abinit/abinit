@@ -2356,4 +2356,26 @@ where t94.ddk contains the list of file names.
 """,
 ),
 
+Variable(
+    abivarname="outdata_prefix@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="string",
+    defaultval="",
+    mnemonics="OUTput DATA PREFIX",
+    added_in_version="9.2.2",
+    text=r"""
+This variable specifies the prefix name of the output files when anaddb is invoked with the new syntax:
+
+    anaddb t01.in > log 2> err
+
+instead of the legacy mode based on the files file. Example:
+
+    outdata_prefix = "t01_o"
+
+    See also [[outdata_prefix@abinit]]
+""",
+),
+
 ]

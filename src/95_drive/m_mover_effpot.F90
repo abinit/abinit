@@ -102,16 +102,10 @@ contains
 !!
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver
 !!
 !! CHILDREN
-!!      alloc_copy,destroy_mpi_enreg,destroy_results_gs,dtset_free
-!!      effective_potential_setcoeffs,effective_potential_setsupercell
-!!      fit_polynomial_coeff_fit,fit_polynomial_coeff_getpositive,generelist
-!!      init_results_gs,mover,polynomial_coeff_free,polynomial_coeff_getnorder
-!!      polynomial_coeff_init,polynomial_coeff_setcoefficient
-!!      polynomial_coeff_writexml,scfcv_destroy,wrtout,xcart2xred,xmpi_barrier
-!!      xred2xcart
+!!      matr3inv,symanal,symfind,symlatt
 !!
 !! SOURCE
 
@@ -1100,11 +1094,10 @@ end subroutine mover_effpot
 !!
 !!
 !! PARENTS
-!!      mover_effpot
+!!      m_mover_effpot
 !!
 !! CHILDREN
-!!
-!!      simfind,symlatt,symana,mat3inv
+!!      matr3inv,symanal,symfind,symlatt
 !!
 !! SOURCE
 

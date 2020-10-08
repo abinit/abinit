@@ -34,7 +34,7 @@ kptgw3   0.0  0.0  1/4
 bdgw3    24  25
 zcut3     0.1 eV
 
-icutcoul3  3  # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul3  3  # old deprecated value of icutcoul, only used for legacy
 
 #################### COMMON PART #########################
 
@@ -84,13 +84,15 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc, 08o_001023.pspfhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t07.out, tolnlines = 23, tolabs = 2.0e-3, tolrel = 6.0e-3, fld_options =  -medium
-#%% psp_files = 14si.pspnc, 08o_001023.pspfhi
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

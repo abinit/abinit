@@ -58,13 +58,15 @@ polcen  1 1 1
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tsv6_126.out, tolnlines=  4, tolabs=  3.000e-02, tolrel=  2.000e-01, fld_options=-ridiculous
-#%% psp_files= 13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

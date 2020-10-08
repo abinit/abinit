@@ -239,14 +239,10 @@ contains
 !!   the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
 !!
 !! PARENTS
-!!      m_shirley,outkss
+!!      m_io_kss
 !!
 !! CHILDREN
-!!      destroy_mpi_enreg,fftpac,getcprj,getghc
-!!      init_distribfft_seq,init_hamiltonian,initmpi_seq,initylmg,kpgsph
-!!      load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg
-!!      pawcprj_alloc,pawcprj_free,pawcprj_reorder,transgrid,wrtout,xheev
-!!      xheevx,xhegv,xhegvx,xmpi_barrier
+!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
 !!
 !! SOURCE
 
@@ -689,7 +685,7 @@ end subroutine ksdiago
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_shirley,outkss
+!!      m_io_kss
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout

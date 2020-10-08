@@ -39,13 +39,15 @@ usekden 1 # Test the kinetic energy density.
 prtgden 1 # Test the gradient of electronic density.
 prtlden 1 # Test the Laplacian of electronic density.
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01H.revPBEx.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t12.out, tolnlines = 0, tolabs = 1.0e-6, tolrel = 1.0e-4, fld_options =  -easy
-#%% psp_files = 01H.revPBEx.fhi
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

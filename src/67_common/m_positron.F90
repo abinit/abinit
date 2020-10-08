@@ -178,12 +178,11 @@ contains
 !!  rhor(nfft,nspden)=total electron/positron density (el/bohr**3)
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      energies_copy,energies_init,forstr,fourdp,getcut,hartre,initrhoij
-!!      initro,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawmknhat,pawrhoij_alloc
-!!      pawrhoij_copy,pawrhoij_free,read_rhor,wrtout
+!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -219,7 +218,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),grchempottn(3,dtset%natom),grcondft(3,dtset%natom)
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),ph1dc(2,(3*(2*dtset%mgfft+1)*dtset%natom)*dtset%usepaw)
- real(dp),intent(in) :: rprimd(3,3),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
  real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -228,7 +227,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp),intent(inout) :: nvresid(nfft,dtset%nspden)
  real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol),fred(3,dtset%natom)
  real(dp),intent(inout) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(inout) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
+ real(dp),intent(inout) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*dtset%usepaw)
@@ -598,8 +597,8 @@ type(fock_type),pointer, intent(inout) :: fock
      call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    end if
    if (history_level/=-1) then
-     call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,rhog_ep,rprimd,&
-&     electronpositron%vha_ep)
+     call hartre(1,gsqcut,dtset%icutcoul,dtset%usepaw,mpi_enreg,nfft,ngfft,&
+&    dtset%nkpt,dtset%rcut,rhog_ep,rprimd,dtset%vcutgeo,electronpositron%vha_ep)
      electronpositron%vha_ep=-electronpositron%vha_ep
    else
      electronpositron%vha_ep=zero
@@ -903,11 +902,11 @@ end subroutine setup_positron
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!
 !! PARENTS
-!!      outscfcv,posdoppler
+!!      m_outscfcv,m_positron
 !!
 !! CHILDREN
-!!      gammapositron,gammapositron_fft,mkdenpos,nderiv_gen,pawdensities
-!!      pawxcsum,simp_gen,wrtout,xmpi_sum
+!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1829,18 +1828,11 @@ end subroutine poslifetime
 !!  implement PAW on-site contribution for state-independent scheme
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      bandfft_kpt_destroy,bandfft_kpt_mpi_recv,bandfft_kpt_mpi_send
-!!      bandfft_kpt_reset,destroy_mpi_enreg,fourdp,fourwf,gammapositron_fft
-!!      initmpi_seq,initylmr,mkdenpos,pawaccrhoij,pawcprj_alloc,pawcprj_bcast
-!!      pawcprj_copy,pawcprj_free,pawcprj_get,pawcprj_mpi_recv,pawcprj_mpi_send
-!!      pawpsp_read_corewf,pawrhoij_alloc,pawrhoij_free,pawrhoij_gather
-!!      pawrhoij_nullify,poslifetime,posratecore,prep_fourwf,ptabs_fourdp,sbf8
-!!      set_mpi_enreg_fft,simp_gen,sphereboundary,pawrhoij_symrhoij,unset_mpi_enreg_fft
-!!      wffclose,wffopen,wrtout,xderivewrecend,xderivewrecinit,xderivewrite
-!!      xmoveoff,xmpi_bcast,xmpi_recv,xmpi_send,xmpi_sum
+!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3335,7 +3327,7 @@ end subroutine posdoppler
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      posdoppler
+!!      m_positron
 !!
 !! CHILDREN
 !!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen

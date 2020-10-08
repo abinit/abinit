@@ -44,13 +44,15 @@
  wtk  1
  znucl 13.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t35.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
-#%% psp_files = 13al.981214.fhi 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

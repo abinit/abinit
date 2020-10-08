@@ -35,7 +35,7 @@ gwcomp3     0
 nkptgw3     2
 kptgw3      0. 0. 0.     0.5 0.5 0.
 bdgw3       4 4          5 5
-icutcoul3   3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul3  3           # old deprecated value of icutcoul, only used for legacy
 
 # DATASET 4 : SIG
 optdriver4  4
@@ -49,7 +49,7 @@ gwencomp4   1.2
 nkptgw4     2
 kptgw4      0. 0. 0.     0.5 0.5 0.
 bdgw4       4 4          5 5
-icutcoul4   3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul4  3           # old deprecated value of icutcoul, only used for legacy
 
 # DATASET 5 : SCR
 optdriver5  3
@@ -74,7 +74,7 @@ gwencomp6   1.2
 nkptgw6     2
 kptgw6      0. 0. 0.     0.5 0.5 0.
 bdgw6       4 4          5 5
-icutcoul6   3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul6  3           # old deprecated value of icutcoul, only used for legacy
 
 
 
@@ -120,13 +120,15 @@ xred
 ixc     7
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc, PseudosTM_pwteter/6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t65.out, tolnlines = 12, tolabs = 1.05e-03, tolrel = 2.0e-03, fld_options = -medium
-#%% psp_files = 14si.pspnc, 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

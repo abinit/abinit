@@ -35,6 +35,9 @@ wtk 1 znucl 2
 xred 3*0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02he.bare"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -42,7 +45,6 @@ xred 3*0
 #%% test_chain = t11.in, t12.in, t13.in, t14.in, t15.in, t16.in, t17.in, t18.in, t19.in, t20.in
 #%% [files]
 #%% files_to_test = t17.out ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 02he.bare
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

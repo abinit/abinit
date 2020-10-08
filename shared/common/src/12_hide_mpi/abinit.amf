@@ -1,5 +1,6 @@
 EXTRA_DIST += \
 	xmpi_allgather.finc \
+        xmpi_iallgather.finc \
         xmpi_allgatherv.finc \
         xmpi_gather.finc \
         xmpi_gatherv.finc \

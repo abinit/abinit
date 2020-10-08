@@ -70,13 +70,15 @@ ionmov 2   ntime 5
 
 prtwf 0 prtden 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "51Sb_pbe-q5"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t55.out, tolnlines = 7, tolabs = 1e-05, tolrel = 9.0e-06
-#%% psp_files = 51Sb_pbe-q5
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

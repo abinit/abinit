@@ -22,17 +22,18 @@
 !!
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,anaddb_dtset_free,anaddb_init
-!!      asrq0_apply,asrq0_free,crystal_free,ddb_diel,ddb_elast,ddb_free
-!!      ddb_from_file,ddb_hdr_free,ddb_hdr_open_read,ddb_internalstr
-!!      ddb_interpolate,ddb_piezo,dfpt_phfrq,dfpt_prtph,dfpt_symph
-!!      elast_ncwrite,electrooptic,elphon,flush_unit,gruns_anaddb,gtblk9,gtdyn9
-!!      harmonic_thermo,herald,ifc_free,ifc_init,ifc_outphbtrap,ifc_print
-!!      ifc_speedofsound,ifc_write,instrng,int2char4,inupper,invars9,isfile
-!!      mkphbs,mkphdos,nctk_defwrite_nonana_terms,outvars_anaddb,phdos_free
-!!      phdos_ncwrite,phdos_print,phdos_print_debye,phdos_print_msqd
-!!      phdos_print_thermo,ramansus,relaxpol,thermal_supercell_free
-!!      thermal_supercell_make,thermal_supercell_print,thmeig,timein,wrtout
-!!      xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
+!!      asrq0%apply,asrq0%free,crystal%free,ddb%free,ddb%get_block,ddb_diel
+!!      ddb_elast,ddb_flexo,ddb_from_file,ddb_hdr%free,ddb_hdr_open_read
+!!      ddb_internalstr,ddb_interpolate,ddb_lw%free,ddb_lw_copy,ddb_piezo
+!!      dfpt_phfrq,dfpt_prtph,electrooptic,elphon,flush_unit,gruns_anaddb
+!!      gtdyn9,harmonic_thermo,herald,ifc%free,ifc%outphbtrap,ifc%print
+!!      ifc%speedofsound,ifc%write,ifc_coarse%free,ifc_init,instrng,int2char4
+!!      inupper,invars9,isfile,mkphbs,mkphdos,nctk_defwrite_nonana_raman_terms
+!!      nctk_defwrite_nonana_terms,nctk_defwrite_raman_terms,outvars_anaddb
+!!      phdos%free,phdos%ncwrite,phdos%print,phdos%print_debye,phdos%print_msqd
+!!      phdos%print_thermo,ramansus,relaxpol,thermal_supercell_free,thmeig
+!!      timab,timein,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
+!!      zacharias_supercell_make,zacharias_supercell_print
 !!
 !! SOURCE
 
@@ -116,7 +117,7 @@ program anaddb
  character(len=10) :: procstr
  character(len=24) :: codename, start_datetime
  character(len=strlen) :: string
- character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename, phibz_prefix
+ character(len=fnlen) :: filnam(8),elph_base_name,tmpfilename, phibz_prefix
  character(len=500) :: msg
  type(args_t) :: args
  type(anaddb_dataset_type) :: inp
@@ -273,7 +274,7 @@ program anaddb
  ana_ncid = nctk_noid
  if (iam_master) then
 #ifdef HAVE_NETCDF
-   NCF_CHECK_MSG(nctk_open_create(ana_ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
+   NCF_CHECK_MSG(nctk_open_create(ana_ncid, trim(filnam(8))//"_anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
    ncerr = nctk_def_dims(ana_ncid, [ &
        nctkdim_t('number_of_atoms', natom), &
        nctkdim_t('natom3', 3 * natom), &
@@ -534,7 +535,7 @@ program anaddb
  if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
    ABI_MALLOC(thm_scells, (inp%ntemper))
    call zacharias_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
-   call zacharias_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
+   call zacharias_supercell_print(filnam(8), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
  end if
 
 !***************************************************************************
@@ -560,13 +561,13 @@ program anaddb
    end do
 
    if (iam_master) then
-     call phdos%print_msqd(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
-     call phdos%print(strcat(filnam(2), "_PHDOS"))
+     call phdos%print_msqd(filnam(8), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos%print(strcat(filnam(8), "_PHDOS"))
      call phdos%print_debye(Crystal%ucvol)
-     call phdos%print_thermo(strcat(filnam(2), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
+     call phdos%print_thermo(strcat(filnam(8), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
 
 #ifdef HAVE_NETCDF
-     ncerr = nctk_open_create(phdos_ncid, strcat(filnam(2), "_PHDOS.nc"), xmpi_comm_self)
+     ncerr = nctk_open_create(phdos_ncid, strcat(filnam(8), "_PHDOS.nc"), xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
      NCF_CHECK(Crystal%ncwrite(phdos_ncid))
      call phdos%ncwrite(phdos_ncid)
@@ -578,7 +579,7 @@ program anaddb
  end if
 
  if (iam_master .and. inp%ifcflag==1 .and. inp%outboltztrap==1) then
-   call ifc%outphbtrap(Crystal, inp%ng2qpt, 1, inp%q2shft, filnam(2))
+   call ifc%outphbtrap(Crystal, inp%ng2qpt, 1, inp%q2shft, filnam(8))
  end if
 
  ! Phonon density of states and thermodynamical properties calculation
@@ -592,12 +593,12 @@ program anaddb
    call wrtout([std_out, ab_out], msg)
 
    if (inp%thmflag==1) then
-     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),comm)
+     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(8),comm)
 
    else if (inp%thmflag==2) then
      write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Entering thm9 routine with thmflag=2 ',ch10
      call wrtout([std_out, ab_out], msg)
-     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),comm,thmflag=inp%thmflag)
+     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(8),comm,thmflag=inp%thmflag)
    end if
  end if
 
@@ -606,14 +607,14 @@ program anaddb
 ! (print the phonon freq. at each qpt (and eigenvectors if asked by the user)
 ! and the mode characters (Gamma only as of 12.04.2020)
 !**********************************************************************
- call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),comm)
+ call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(8),comm)
 
  
  ! Interpolate the DDB onto the first list of vectors and write the file.
  if (inp%prtddb == 1 .and. inp%ifcflag == 1) then
    call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
    close(ddbun)
-   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
+   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(8),comm)
    call ddb_hdr%free()
  end if
 
@@ -623,7 +624,7 @@ program anaddb
 !***********************************************************************
 
  if (inp%thmflag>=3 .and. inp%thmflag<=8) then
-   elph_base_name=trim(filnam(2))//"_ep"
+   elph_base_name=trim(filnam(8))//"_ep"
    call thmeig(inp,ddb,Crystal,elph_base_name,filnam(5),ddbun,ab_out,natom,mpert,msize,asrq0%d2asr,comm)
  end if
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gpu_toolbox
 !! NAME
 !!  m_gpu_toolbox

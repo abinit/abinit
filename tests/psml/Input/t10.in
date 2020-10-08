@@ -28,13 +28,15 @@ toldfe2 1.0d-5
 nband 12
 ixc -101130
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26_Fe_atom.psml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%  t10.out, tolnlines = 32, tolabs = 1.1e-06, tolrel = 9.00e-01
-#%% psp_files = 26_Fe_atom.psml
 #%% [paral_info]
 #%% max_nprocs = 14
 #%% [extra_info]

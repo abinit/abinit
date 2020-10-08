@@ -20,7 +20,6 @@ teph_1o_DS9_GKK3
 #%% [files]
 #%% files_to_test = 
 #%%   teph_3.stdout, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
-#%% psp_files =  13al.981214.fhi 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

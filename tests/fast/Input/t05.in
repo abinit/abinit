@@ -45,6 +45,9 @@
  xred 3*0.00d0 3*0.25d0
  znucl 14
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -53,7 +56,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t05.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 14si.pspnc
 #%% [shell]
 #%% post_commands =  ww_cp t05o_WFK t09i_WFK
 #%% [paral_info]
@@ -63,6 +65,6 @@
 #%% keywords = 
 #%% description = 
 #%%   Same as 03 but run with newer Troullier-Martins psp
-#%%   with core density 14si.pspnc.  Start from wf.03 and run irdwfk=1.
+#%%   with core density PseudosTM_pwteter/14si.pspnc.  Start from wf.03 and run irdwfk=1.
 #%%   Also iterated to convergence.
 #%%<END TEST_INFO>

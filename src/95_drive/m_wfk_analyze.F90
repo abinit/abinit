@@ -46,7 +46,7 @@ module m_wfk_analyze
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_esymm,           only : esymm_t, esymm_free
- use m_ddk,             only : ddk_compute
+ use m_ddk,             only : ddkstore_t
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -108,7 +108,7 @@ contains
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! NOTES
 !!
@@ -128,10 +128,11 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
+!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
-subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
+subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -152,11 +153,10 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij
  integer :: band,ik_ibz,spin,first_band,last_band
- integer :: ierr,usexcnhat !,edos_intmeth
+ integer :: ierr,usexcnhat
  integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp
- !real(dp) :: edos_step,edos_broad
  !real(dp) :: cpu,wall,gflops
  !real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,nelect,norm,oldefermi
  character(len=500) :: msg
@@ -165,11 +165,11 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: cryst
  type(ebands_t) :: ebands
- !type(edos_t) :: edos
  type(pawfgr_type) :: pawfgr
  !type(paw_dmft_type) :: paw_dmft
  type(mpi_type) :: mpi_enreg
  type(wfd_t) :: wfd
+ type(ddkstore_t) :: ds
 !arrays
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: l_size_atm(:)
@@ -203,92 +203,28 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    end if
  end if
  call xmpi_bcast(wfk0_path, master, comm, ierr)
- call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path) )
+ call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path))
 
  !call cwtime(cpu,wall,gflops,"start")
 
  ! Costruct crystal and ebands from the GS WFK file.
- call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
+ call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm) !,gs_occ)
  call wfk0_hdr%vs_dtset(dtset)
 
  cryst = wfk0_hdr%get_crystal()
- call cryst%print(header="crystal structure from WFK file")
+ call cryst%print(header="Crystal structure from WFK file")
 
- ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
-
- ! TODO:
- ! Make sure everything is OK if WFK comes from a NSCF run since occ are set to zero
- ! fermie is set to 0 if nscf!
-
- ! Here we change the GS bands (fermi level, scissors operator ...)
- ! All the modifications to ebands should be done here.
-
- !if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
- !  write(msg,"(2a,2(a,i0,a,f14.6,a))")&
- !    " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
- !    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
- !    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
- !  call wrtout(ab_out,msg)
- !  call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
- !end if
-
- !if (dtset%eph_fermie /= zero) then ! default value of eph_fermie is zero hence no tolerance is used!
- !  ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
- !  call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
- !  call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
- !  call wrtout(ab_out,msg)
-
- !else if (abs(dtset%eph_extrael) > tol12) then
- !  NOT_IMPLEMENTED_ERROR()
- !  ! TODO: Be careful with the trick used in elphon for passing the concentration
- !  !call ebands_set_nelect(ebands, dtset%eph_extrael, spinmagntarget, msg)
- !  call wrtout(ab_out,msg)
- !end if
+ ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
 
  !call ebands_update_occ(ebands, spinmagntarget)
- call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
+ call ebands_print(ebands,header="Ground state energies", prtvol=dtset%prtvol)
  ABI_FREE(gs_eigen)
 
- ! Compute electron DOS.
- ! TODO: Optimize this part. Really slow if tetra and lots of points
- ! Could just do DOS around efermi
- !edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- !edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- !edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- !call edos_init(edos,ebands,cryst,edos_intmeth,edos_step,edos_broad,comm,ierr)
- !ABI_CHECK(ierr==0, "Error in edos_init, see message above.")
-
- ! Store DOS per spin channels
- !n0(:) = edos%gef(1:edos%nsppol)
- !if (my_rank == master) then
- !  path = strcat(dtfil%filnam_ds(4), "_EDOS")
- !  call edos_write(edos, path)
- !  !call edos_print(edos)
- !  write(ab_out,"(a)")sjoin("- Writing electron DOS to file:", path)
- !  write(ab_out,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief)*Ha_eV," [eV]"
- !  write(ab_out,"(a,es16.8)")" Total electron DOS in states/eV : ",edos%gef(0) / Ha_eV
- !  if (ebands%nsppol == 2) then
- !    write(ab_out,"(a,es16.8)")"   Spin up:  ",edos%gef(1) / Ha_eV
- !    write(ab_out,"(a,es16.8)")"   Spin down:",edos%gef(2) / Ha_eV
- !  end if
- !end if
- !call edos_free(edos)
-
- ! Output useful info on the electronic bands.
- ! Fermi Surface
- !if (dtset%prtfsurf /= 0  .and. my_rank == master) then
- !  path = strcat(dtfil%filnam_ds(4), "_BXSF")
- !  if (ebands_write_bxsf(ebands,cryst,path) /= 0) then
- !    MSG_WARNING("Cannot produce file for Fermi surface, check log file for more info")
- !  end if
- !end if
-
- ! TODO Recheck getng, should use same trick as that used in screening and sigma.
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
-& gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
+                  gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
 
- call print_ngfft(ngfftc,header='Coarse FFT mesh used for the wavefunctions')
- call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
+ call print_ngfft(ngfftc, header='Coarse FFT mesh used for the wavefunctions')
+ call print_ngfft(ngfftf, header='Dense FFT mesh used for densities and potentials')
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
@@ -310,7 +246,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
    ABI_MALLOC(pawrhoij,(cryst%natom))
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
-&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+                             nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
    call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
 
    ! Initialize values for several basic arrays
@@ -323,8 +259,8 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      call timab(553,1,tsec)
      gsqcut_shp = two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,zero,dtset%pawlcutd,dtset%pawlmix,&
-&     psps%mpsang,dtset%pawnphi,cryst%nsym,dtset%pawntheta,pawang,Pawrad,&
-&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
+                  psps%mpsang,dtset%pawnphi,cryst%nsym,dtset%pawntheta,pawang,Pawrad,&
+                  dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
      call timab(553,2,tsec)
 
      ! Update internal values
@@ -377,7 +313,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    optcut=1; optgr0=1; optgr1=1; optgr2=1; optrad=1
 
    call nhatgrid(cryst%atindx1,cryst%gmet,cryst%natom,cryst%natom,cryst%nattyp,ngfftf,cryst%ntypat,&
-&   optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,cryst%rprimd,cryst%typat,cryst%ucvol,cryst%xred)
+                optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,cryst%rprimd,cryst%typat,cryst%ucvol,cryst%xred)
 
    call pawfgrtab_print(pawfgrtab,cryst%natom,unit=std_out,prtvol=dtset%pawprtvol)
 
@@ -400,14 +336,13 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  case (WFK_TASK_KPTS_ERANGE)
    call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)
 
- !case (WFK_TASK_EBANDS)
-   !call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
- !case (WFK_TASK_PJDOS)
  !case (WFK_TASK_LDOS)
 
  case (WFK_TASK_DDK, WFK_TASK_DDK_DIAGO)
    ! Calculate the DDK matrix elements from the WFK file
-   call ddk_compute(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+   ds%only_diago = .False.; if (dtset%wfk_task == WFK_TASK_DDK_DIAGO) ds%only_diago = .True.
+   call ds%compute_ddk(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+   call ds%free()
 
  case (WFK_TASK_EINTERP)
    ! Band structure interpolation from eigenvalues computed on the k-mesh.
@@ -498,9 +433,10 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 !!  Initialize the wavefunction descriptor
 !!
 !! PARENTS
-!!      wfk_analyze
+!!      m_wfk_analyze
 !!
 !! CHILDREN
+!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
@@ -520,7 +456,7 @@ subroutine read_wfd()
    ABI_FREE(bks_mask)
 
    call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
-   call wfd%test_ortho(cryst,pawtab)
+   !call wfd%test_ortho(cryst, pawtab)
 
  end subroutine read_wfd
 

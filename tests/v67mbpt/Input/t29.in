@@ -9,7 +9,7 @@ ecuteps   2.1
 pawecutdg 24
 
 istwfk *1
-#icutcoul 0      # Spherical cutoff
+#gw_icutcoul 0      # Spherical cutoff
 #rcut 0.0        # the cutoff is automatically calculated so to enclose 
 #                # the same volume inside the cutoff as the volume of the solid. 
 
@@ -90,6 +90,9 @@ xred
    0.25 0.25 0.25
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.pbe"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -99,7 +102,6 @@ xred
 #%%  t29o_DS3_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t29o_DS3_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t29o_DS3_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous
-#%% psp_files = si_ps.736.pbe
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

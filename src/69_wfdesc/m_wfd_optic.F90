@@ -81,7 +81,7 @@ contains
 !!
 !! CHILDREN
 !!      get_bz_item,matrginv,pawcprj_alloc,pawcprj_free,vkbr_free,vkbr_init
-!!      wfd_distribute_bbp,wfd_get_cprj,wrtout,xmpi_barrier,xmpi_sum
+!!      wfd%distribute_bbp,wfd%get_cprj,wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 

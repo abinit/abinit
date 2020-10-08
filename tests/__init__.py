@@ -914,6 +914,7 @@ KNOWN_KEYWORDS = {
     "EFG": "Electric field gradient",
     "IMAGES": "Parallelization over images",
     "PARTIAL_DOS": "Partial DOS",
+    "RTA": "Relaxation-time approximation",
     "DOS": "electronic DOS calculations",
     "STS": "STS calculations",
     "CTQMC": "CTQMC method for DMFT",

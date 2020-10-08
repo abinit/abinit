@@ -36,12 +36,14 @@
  ntypat 1 typat 1 1  natom 2
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% exec_args = --timelimit 1:20:00
 #%% [files]
-#%% psp_files = 6c_lda.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

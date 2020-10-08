@@ -134,8 +134,8 @@ fine grid =   12 12 12
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.67231
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc44/trunk_6.15.2-private/tests/Psps_for_tests/2he.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc44/trunk_6.15.2-private/tests/Psps_for_tests/2he.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc44/trunk_6.15.2-private/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc44/trunk_6.15.2-private/tests/Psps_for_tests/PseudosHGH_pwteter/2he.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  2.00000   2.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

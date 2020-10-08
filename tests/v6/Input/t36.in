@@ -64,13 +64,15 @@ diemac  4.0
 
 timopt  2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "40zr.971106_mod, 8o.phoney_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t36.out, tolnlines = 6, tolabs = 2.0e-2, tolrel = 4.0e-4, fld_options =  -easy
-#%% psp_files = 40zr.971106_mod, 8o.phoney_mod
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

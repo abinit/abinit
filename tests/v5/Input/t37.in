@@ -61,13 +61,15 @@ dmatpawu            # The initial density matrix
 # === Other options
 prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t37.out, tolnlines = 9, tolabs = 5.410e-02, tolrel = 3.500e-02, fld_options = -easy
-#%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 3
 #%% [extra_info]

@@ -125,10 +125,10 @@ contains
 !! except for the calculation of <G|dVnl/dk|C> or strain gradients.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
-!!      mkffkg
+!!      dfpt_mkffkg
 !!
 !! SOURCE
 
@@ -738,7 +738,7 @@ end subroutine opernl2
 !! except for the calculation of <G|dVnl/dk|C> or strain gradients.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!      dfpt_mkffkg
@@ -1335,7 +1335,7 @@ end subroutine opernl3
 !! Present version decomposed according to iffkg
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!      dfpt_mkffkg
@@ -2343,7 +2343,7 @@ end subroutine opernl4a
 !! opernl4a.f is from reciprocal space to projected quantities.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!      dfpt_mkffkg

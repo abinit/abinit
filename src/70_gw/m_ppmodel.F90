@@ -219,7 +219,7 @@ CONTAINS  !=====================================================================
 !! * Notice that eig is used only if PPm%model==3
 !!
 !! PARENTS
-!!      calc_sigc_me,m_ppmodel
+!!      m_ppmodel,m_sigc
 !!
 !! CHILDREN
 !!
@@ -370,7 +370,7 @@ end subroutine ppm_nullify
 !!  PPm<ppmodel_t>=All dynamic memory is released.
 !!
 !! PARENTS
-!!      m_screen,mrgscr,sigma
+!!      m_screen,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -557,7 +557,7 @@ end subroutine ppm_table_free
 !!   proper dimensions according to the plasmon-pole model.
 !!
 !! PARENTS
-!!      m_screen,mrgscr,sigma
+!!      m_screen,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -699,7 +699,7 @@ end subroutine ppm_init
 !! * TODO: rhor_tot should be replaced by rhog_tot
 !!
 !! PARENTS
-!!      calc_sigc_me,mrgscr,sigma
+!!      m_sigc,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -2181,7 +2181,7 @@ end subroutine cqratio
 !!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
 !!
 !! PARENTS
-!!      calc_sigc_me
+!!      m_sigc
 !!
 !! CHILDREN
 !!

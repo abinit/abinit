@@ -97,7 +97,7 @@ In the meantime, you can read the input file and see that there is no PAW input 
 
 {% dialog tests/tutorial/Input/tpaw1_1.in %}
 
-Now, open the *tpaw1_1.in* file and change the last line; replace the *6c.pspnc* file with *C.LDA_PW-JTH.xml*.
+Now, open the *tpaw1_1.in* file and change the line iwth pseudos information:  replace the *PseudosTM_pwteter/6c.pspnc* file with *C.LDA_PW-JTH.xml*.
 Run the code again:
 
     abinit tpaw1_1.in > log 2> err &
@@ -283,7 +283,7 @@ achieved for ecut = 24 Hartree.
 ###3.b. Convergence with respect to ecut in the PAW case###
 
 Use the same input files as in section **1.a**.
-Again, modify the last line of *tpaw1_2.in*, replacing the *6c.pspnc* file by *C.LDA_PW-JTH.xml*.
+Again, modify the last line of *tpaw1_2.in*, replacing the *PseudosTM_pwteter/6c.pspnc* file by *C.LDA_PW-JTH.xml*.
 Run the code again and open the output file. You should obtain the values:
 
     etotal1    -1.1404413200E+01

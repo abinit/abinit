@@ -150,7 +150,7 @@ contains
 !! double loop on the number of plane waves.
 !!
 !! PARENTS
-!!      elpolariz
+!!      m_elpolariz
 !!
 !! CHILDREN
 !!      dzgedi,dzgefa,matr3inv,wrtout,xred2xcart

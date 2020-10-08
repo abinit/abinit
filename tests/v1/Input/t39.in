@@ -57,12 +57,14 @@
  prtwf  0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t39.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 01h.pspgth
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
@@ -72,7 +74,7 @@
 #%%   3H2 molecule with distant atoms : probe the use of the spinat variable
 #%%   Use spin-polarized mode, spinor mode, as well as antiferromagnetic mode.
 #%%   Even consider an initialization with reather crazy, nearly ferromagnetic spinat.
-#%%   Use 01h.pspgth, in a 8 8 16 box, with 15 Ha cut-off.
+#%%   Use PseudosGTH_pwteter/01h.pspgth, in a 8 8 16 box, with 15 Ha cut-off.
 #%%   Separation is 4 bohr.
 #%%   Consider anti-parallel spin configuration,  which is the favoured one
 #%%   for this distance. Get total energy of -0.981 839  Ha .

@@ -62,7 +62,7 @@ nshiftk   1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 31ga.pspnc, 33as.pspnc
+#%% psp_files = PseudosTM_pwteter/31ga.pspnc, PseudosTM_pwteter/33as.pspnc
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10

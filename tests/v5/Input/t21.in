@@ -105,13 +105,15 @@ typat 1 1 2 2 3 3
     nstep   100         # Maximal number of SCF cycles
    diemac   6.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/9f.pspnc, PseudosTM_pwteter/17cl.pspnc, PseudosHGH_pwteter/82pb.4.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t21.out, tolnlines = 2, tolabs = 1.100e-02, tolrel = 3.000e-04, fld_options =  -easy
-#%% psp_files = 9f.pspnc, 17cl.pspnc, 82pb.4.hgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

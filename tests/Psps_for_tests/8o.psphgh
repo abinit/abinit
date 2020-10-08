@@ -1,7 +1,0 @@
-Hartwigsen-Goedecker-Hutter psp for Oxygen,  from PRB58, 3641 (1998) paper
-8   6   980509                     zatom,zion,pspdat
-3   1   1    0    2001    0        pspcod,pspxc,lmax,lloc,mmax,r2well
-0.247621 -16.580318  2.395701 0  0   rloc, c1, c2, c3, c4
-0.221786  18.266917  0        0      rs, h11s, h22s, h33s
-0.256829  0.000000   0        0      rp, h11p, h22p, h33p
-          0.004476   0        0          k11p, k22p, k33p

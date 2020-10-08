@@ -88,10 +88,8 @@ contains
 !!      abinit
 !!
 !! CHILDREN
-!!      abi_io_redirect,distrb2,distrb2_hf,finddistrproc,get_npert_rbz,getmpw
-!!      getng,init_distribfft,init_mpi_enreg,initmpi_atom,initmpi_grid
-!!      initmpi_img,initmpi_pert,intagm,libpaw_write_comm_set,metric,mkrdim
-!!      wrtout
+!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
+!!      wrtout,xmpi_bcast,xmpi_comm_free
 !!
 !! SOURCE
 
@@ -259,9 +257,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  From total number of procs, compute all possible distributions
 !  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
    if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) then
-       iexit = 0
+     iexit = 0
    else
-   call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
+     call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
    !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
 
@@ -1003,12 +1001,11 @@ end subroutine mpi_setup
 !!  dtset%gpu_linalg_limit=threshold activating Linear Algebra on GPU
 !!
 !! PARENTS
-!!      mpi_setup
+!!      m_mpi_setup
 !!
 !! CHILDREN
-!!      compute_kgb_indicator,get_npert_rbz,hdr_free,hdr_read_from_fname
-!!      initmpi_world,kpgcount,metric,mkfilename,mkrdim,sort_dp,wrtout
-!!      xmpi_bcast
+!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
+!!      wrtout,xmpi_bcast,xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1938,7 +1935,7 @@ end subroutine finddistrproc
 !!   and wheter or not we should use Magma for Linear Algebra in lobpcgwf
 !!
 !! PARENTS
-!!      finddistrproc
+!!      m_mpi_setup
 !!
 !! CHILDREN
 !!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize

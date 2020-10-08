@@ -38,14 +38,16 @@ nkpt 2
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/6c.4.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
+#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
 #%% files_to_test = 
 #%%   t07.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = HGH/6c.4.hgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

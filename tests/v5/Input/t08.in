@@ -51,13 +51,15 @@ lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
 upawu  0.30  0.0   # values in Hartree
 jpawu  0.0350 0.0  # values in Hartree
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t08.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -easy
-#%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

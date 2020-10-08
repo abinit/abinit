@@ -107,10 +107,10 @@ contains
 !!   | gth_params(OUT)=store GTH coefficients and parameters.
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
-!!      psp2lo,psp2nl,spline,wrtout,wvl_descr_psp_fill
+!!      spline,zhpev
 !!
 !! SOURCE
 
@@ -288,10 +288,10 @@ end subroutine psp2in
 !!   and each projector
 !!
 !! PARENTS
-!!      psp2in
+!!      m_psp_hgh
 !!
 !! CHILDREN
-!!      spline
+!!      spline,zhpev
 !!
 !! SOURCE
 
@@ -432,10 +432,10 @@ end subroutine psp2nl
 !!   (needed for spline fitter).
 !!
 !! PARENTS
-!!      psp10in,psp2in,psp3in
+!!      m_psp_hgh
 !!
 !! CHILDREN
-!!      wrtout
+!!      spline,zhpev
 !!
 !! SOURCE
 
@@ -593,10 +593,10 @@ end subroutine psp2lo
 !!   |            1=using Ylm, 0=using Legendre polynomials
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
-!!      psp2lo,psp3nl,spline,wrtout,wvl_descr_psp_fill
+!!      spline,zhpev
 !!
 !! SOURCE
 
@@ -1029,7 +1029,7 @@ end subroutine psp3in
 !!   each projectors
 !!
 !! PARENTS
-!!      psp3in
+!!      m_psp_hgh
 !!
 !! CHILDREN
 !!      spline,zhpev
@@ -1396,10 +1396,10 @@ end subroutine psp3nl
 !!   |            1=using Ylm, 0=using Legendre polynomials
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
-!!      psp10nl,psp2lo,spline,wrtout,wvl_descr_psp_fill
+!!      spline,zhpev
 !!
 !! SOURCE
 
@@ -1643,7 +1643,7 @@ end subroutine psp10in
 !!   each projectors
 !!
 !! PARENTS
-!!      psp10in
+!!      m_psp_hgh
 !!
 !! CHILDREN
 !!      spline,zhpev

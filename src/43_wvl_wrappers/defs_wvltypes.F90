@@ -248,7 +248,7 @@ CONTAINS
 !! NOTES
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      nullify_atoms_data,nullify_dft_local_fields,nullify_diis_objects

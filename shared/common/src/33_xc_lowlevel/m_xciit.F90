@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xciit
 !! NAME
 !!  m_xciit
@@ -63,7 +62,7 @@ contains
 !!  [dvxc(npt)]=partial second derivatives of the xc energy
 !!
 !! PARENTS
-!!      drivexc
+!!      m_drivexc
 !!
 !! CHILDREN
 !!
