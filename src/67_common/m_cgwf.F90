@@ -39,7 +39,6 @@ module m_cgwf
                              pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
- use m_getchc,        only : getchc
  use m_getghc,        only : getghc
  use m_berrytk,       only : smatrix
  use m_nonlop,      only : nonlop
@@ -55,6 +54,7 @@ module m_cgwf
 !!***
 
  public :: cgwf
+ public :: mksubham
 
 !!***
 
@@ -185,7 +185,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
- logical :: newcgwf
  integer,parameter :: level=113,tim_getghc=1,tim_projbd=1
  integer,save :: nskip=0
  integer :: choice,counter,cpopt,ddkflag,dimenlc1,dimenlr1,dimenl2,iat,iatom,itypat
@@ -249,16 +248,12 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 !else,   one has to solve a classical eigenproblem   (H|Psi>=Lambda.|Psi>)
  gen_eigenpb=(gs_hamk%usepaw==1)
  useoverlap=0;if (gen_eigenpb) useoverlap=1
- !LTEST
- useoverlap=0
- !LTEST
 
 !Initializations and allocations
  isubh=1;isubo=1
  nblock=(nband-1)/nbdblock+1
  istwf_k=gs_hamk%istwf_k
  wfopta10=mod(wfoptalg,10)
- newcgwf=wfopta10==0
  !LTEST
  call writeout(999,'wfoptalg',wfoptalg)
  call writeout(999,'wfopta10',wfopta10)
@@ -282,18 +277,18 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_ALLOCATE(gvnlx_direc,(2,npw*nspinor))
  ABI_ALLOCATE(vresid,(2,npw*nspinor))
 
- if (gen_eigenpb.and..not.newcgwf)  then
+ if (gen_eigenpb)  then
    ABI_ALLOCATE(gs_direc,(2,npw*nspinor))
  else
    ABI_ALLOCATE(gs_direc,(0,0))
  end if
 
  if (gen_eigenpb) then
-   if (.not.newcgwf) ABI_ALLOCATE(scwavef,(2,npw*nspinor))
+   ABI_ALLOCATE(scwavef,(2,npw*nspinor))
    ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
  end if
 
- if (finite_field.and.gen_eigenpb.and.(inonsc==1))  then
+ if (gen_eigenpb.and.(inonsc==1))  then
    ABI_MALLOC_OR_DIE(ghc_all,(2,nband*npw*nspinor), ierr)
  end if
 
@@ -419,7 +414,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ! bands (for orthogonalization purpose); take benefit of this
  ! calculation to compute <g|H|c> at the same time, and cprj_k if finite_field
  ! ======================================================================
- if (finite_field .and. gen_eigenpb.and.inonsc==1) then
+ if (gen_eigenpb.and.inonsc==1) then
    do iblock=1,nblock
      ibandmin=1+(iblock-1)*nbdblock
      ibandmax=min(iblock*nbdblock,nband)
@@ -491,7 +486,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      call cg_zcopy(npw*nspinor,cg(1,1+icg_shift),cwavef)
 
      ! If generalized eigenproblem: extraction of the overlap information
-     if (gen_eigenpb.and..not.newcgwf) then
+     if (gen_eigenpb) then
        call cg_zcopy(npw*nspinor,gsc(1,1+igsc_shift),scwavef)
      end if
 
@@ -518,40 +513,39 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      xnorm = one
 !LTEST
      ! Compute (or extract) <g|H|c>
-     if (.not.newcgwf) then
-       if (finite_field.and.gen_eigenpb.and.(inonsc==1)) then
+     if (gen_eigenpb.and.(inonsc==1)) then
 
 !$OMP PARALLEL DO PRIVATE(ipw)
-         do ipw=1,npw*nspinor
-           ghc(1,ipw)=xnorm*ghc_all(1,ipw+icg_shift-icg)
-           ghc(2,ipw)=xnorm*ghc_all(2,ipw+icg_shift-icg)
-         end do
+       do ipw=1,npw*nspinor
+         ghc(1,ipw)=xnorm*ghc_all(1,ipw+icg_shift-icg)
+         ghc(2,ipw)=xnorm*ghc_all(2,ipw+icg_shift-icg)
+       end do
 
+     else
+!      By setting ieigen to iband, Fock contrib. of this iband to the energy will be calculated
+       call fock_set_ieigen(gs_hamk%fockcommon,iband)
+       sij_opt=0
+       call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlxc,&
+&       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+     end if
+
+
+     ! Minimisation of the residual: compute <G|(H-zshift)^2|C iband,k>
+     if(wfopta10==2 .or. wfopta10==3) then
+       ghcws(:,:)=ghc(:,:)
+       if (gen_eigenpb) then
+         sij_opt=1
+         work(:,:)=ghc(:,:)-zshift(iband)*scwavef(:,:)
        else
-!        By setting ieigen to iband, Fock contrib. of this iband to the energy will be calculated
-         call fock_set_ieigen(gs_hamk%fockcommon,iband)
          sij_opt=0
-         call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlxc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+         work(:,:)=ghc(:,:)-zshift(iband)*cwavef(:,:)
        end if
-
-       ! Minimisation of the residual: compute <G|(H-zshift)^2|C iband,k>
-       if(wfopta10==2 .or. wfopta10==3) then
-         ghcws(:,:)=ghc(:,:)
-         if (gen_eigenpb) then
-           sij_opt=1
-           work(:,:)=ghc(:,:)-zshift(iband)*scwavef(:,:)
-         else
-           sij_opt=0
-           work(:,:)=ghc(:,:)-zshift(iband)*cwavef(:,:)
-         end if
-         call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnlx_dummy,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
-         if (gen_eigenpb) then
-           ghc(:,:)=ghc(:,:)-zshift(iband)*swork(:,:)
-         else
-           ghc(:,:)=ghc(:,:)-zshift(iband)*work(:,:)
-         end if
+       call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnlx_dummy,&
+&       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+       if (gen_eigenpb) then
+         ghc(:,:)=ghc(:,:)-zshift(iband)*swork(:,:)
+       else
+         ghc(:,:)=ghc(:,:)-zshift(iband)*work(:,:)
        end if
      end if
 
@@ -564,15 +558,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! === COMPUTE THE RESIDUAL ===
 
          ! Compute lambda = <C|H|C> or <C|(H-zshift)**2|C>
-         !LTEST
-         if (.not.newcgwf) then
-           call dotprod_g(chc,doti,istwf_k,npw*nspinor,1,cwavef,ghc,me_g0,mpi_enreg%comm_spinorfft)
-         else
-           sij_opt = 0
-           call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_dum,gs_hamk,&
-&           eval,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getghc,0)
-         end if
-         !LTEST
+         call dotprod_g(chc,doti,istwf_k,npw*nspinor,1,cwavef,ghc,me_g0,mpi_enreg%comm_spinorfft)
          lam0=chc
 
          ! Check that lam0 is decreasing on succeeding lines:
@@ -594,9 +580,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! Note that vresid is precomputed to garantee cancellation of errors
          ! and allow residuals to reach values as small as 1.0d-24 or better.
 
-         if (wfopta10<=1.and..not.newcgwf) then
+         if (wfopta10<=1) then
            eval=chc
            if (gen_eigenpb) then
+
 !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghc(1,ipw)-chc*scwavef(1,ipw)
@@ -609,7 +596,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
                vresid(2,ipw)=ghc(2,ipw)-chc*cwavef(2,ipw)
              end do
            end if
-         else if (wfopta10>1) then
+         else
            call dotprod_g(eval,doti,istwf_k,npw*nspinor,1,cwavef,ghcws,me_g0,mpi_enreg%comm_spinorfft)
            if (gen_eigenpb) then
 !$OMP PARALLEL DO
@@ -624,14 +611,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
                vresid(2,ipw)=ghcws(2,ipw)-eval*cwavef(2,ipw)
              end do
            end if
-         else
-           eval=chc
-           !TO DO : to compute ( H - epsilon S ) with getghc
-           vresid(:,:) = zero
-           sij_opt = 0
-           if (gen_eigenpb) sij_opt = -1
-           call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
          end if
 
          ! Compute residual (squared) norm
@@ -719,7 +698,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! direc(2,npw)=<G|H|Cnk> - \sum_{(i<=n)} <G|H|Cik> , normalized.
 
          if(ortalg>=0)then
-           if (gen_eigenpb.and..not.newcgwf) then
+           if (gen_eigenpb) then
              call projbd(cg,direc,iband,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
 &             gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
            else
@@ -837,7 +816,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! ============ PROJECTION OF THE CONJUGATED GRADIENT ===================
          ! ======================================================================
 
-         if (gen_eigenpb.and..not.newcgwf) then
+         if (gen_eigenpb) then
            call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,scwavef,conjgr,me_g0,mpi_enreg%comm_spinorfft)
          else
            call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,cwavef,conjgr,me_g0,mpi_enreg%comm_spinorfft)
@@ -876,9 +855,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! Compute gh_direc = <G|H|D> and eventually gs_direc = <G|S|D>
          sij_opt=0;if (gen_eigenpb) sij_opt=1
-         !LTEST
-         sij_opt=0
-         !LTEST
 
          call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
@@ -1111,7 +1087,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 !          call cg_zaxpby(npw*nspinor,(/sintn,zero/),gvnlx_direc,(/costh,zero/),gvnlxc)
          end if
 
-         if (gen_eigenpb.and..not.newcgwf) then
+         if (gen_eigenpb) then
 !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              scwavef(1,ipw)=scwavef(1,ipw)*costh+gs_direc(1,ipw)*sintn
@@ -1316,11 +1292,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_DEALLOCATE(gs_direc)
 
  if (gen_eigenpb)  then
-   if (.not.newcgwf) ABI_DEALLOCATE(scwavef)
+   ABI_DEALLOCATE(scwavef)
    ABI_DEALLOCATE(direc_tmp)
  end if
 
- if (finite_field.and.gen_eigenpb.and.(inonsc==1))  then
+ if (gen_eigenpb.and.(inonsc==1))  then
    ABI_DEALLOCATE(ghc_all)
  end if
 

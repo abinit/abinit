@@ -45,6 +45,7 @@ module m_vtowfk
  use m_gwls_hamiltonian, only : build_H
  use m_fftcore,     only : fftcore_set_mixprec, fftcore_mixprec
  use m_cgwf,        only : cgwf
+ use m_cgwfnew,     only : cgwfnew
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
  use m_spacepar,    only : meanvalue_g
@@ -408,11 +409,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      else
 !      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
 !      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
-       call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
-&       gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
-&       mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
-&       dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&       subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
+       if (newcgwf) then
+         call cgwfnew(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
+&         gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
+&         mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
+&         dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
+&         subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
+       else
+         call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
+&         gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
+&         mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
+&         dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
+&         subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
+       end if
      end if
    end if
 
@@ -768,9 +777,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
 &             use_gpu_cuda=dtset%use_gpu_cuda)
            end if
-           ABI_DEALLOCATE(cwavef_x)
-           ABI_DEALLOCATE(cwavef_y)
-         end if
+           ABI_DEALLOCATE(cwavef_x) 
+           ABI_DEALLOCATE(cwavef_y) 
+         end if                     
          call timab(537,2,tsec)
          ABI_DEALLOCATE(cwavefb)
        end if
