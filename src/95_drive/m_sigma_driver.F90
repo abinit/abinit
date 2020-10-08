@@ -2038,7 +2038,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end if
      rewind(temp_unt)
      read(temp_unt,*)
-     read(temp_unt,*)
+     !read(temp_unt,*)
      read(temp_unt,'(a7,2i4)') msg, ib1, ib2
      close(temp_unt)
  endif
