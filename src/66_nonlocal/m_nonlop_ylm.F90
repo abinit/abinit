@@ -358,7 +358,7 @@ contains
 &                      kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
-&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,qdir)
+&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,enlout_im,qdir)
 
 !Arguments ------------------------------------
 !scalars
@@ -383,6 +383,7 @@ contains
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
  real(dp),intent(inout) :: vectin(:,:)
  real(dp),intent(out) :: enlout(:)
+ real(dp),intent(out),optional :: enlout_im(:)
  real(dp),intent(out) :: svectout(:,:)
  real(dp),intent(inout) :: vectout (:,:)
  type(pawcprj_type),intent(inout) :: cprjin(:,:)
@@ -394,7 +395,7 @@ contains
  integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
  integer :: n1,n2,n3,nd2gxdt,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
- real(dp) :: enlk, tsec(2)
+ real(dp) :: enlk
  logical :: check,testnl
  character(len=500) :: message
 !arrays
@@ -409,6 +410,7 @@ contains
  real(dp),allocatable :: sij_typ(:),strnlk(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: ffnlin_typ(:,:,:),ffnlout_typ(:,:,:),kpgin_(:,:),kpgout_(:,:)
+ real(dp) :: tsec(2)
 
 ! **********************************************************************
 
@@ -629,6 +631,9 @@ contains
    ABI_ALLOCATE(strnlk,(6))
    enlk=zero;fnlk=zero;ddkk=zero;strnlk=zero
    enlout(:)=zero
+   if (present(enlout_im)) then
+     enlout_im(:)=zero
+   end if
  end if
  if (signs==2) then
    if (paw_opt==0.or.paw_opt==1.or.paw_opt==4) vectout(:,:)=zero
@@ -939,9 +944,15 @@ contains
 !            end do
 !            end do
 !            end if
-             call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&             enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
-&             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
+             if (present(enlout_im)) then
+               call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
+&               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
+&               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk,enlout_im=enlout_im)
+             else
+               call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
+&               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
+&               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
+             end if
              ABI_DEALLOCATE(gx_left)
            end if
          end if

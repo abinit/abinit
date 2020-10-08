@@ -266,7 +266,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  n1=gs_hamk%ngfft(1); n2=gs_hamk%ngfft(2); n3=gs_hamk%ngfft(3)
 
- newcgwf = wfopta10==0
+ newcgwf = (wfopta10==0).and.(gs_hamk%usepaw==1)
  mgsc=0
  if ( .not. newlobpcg .and. .not. newcgwf) then
    igsc=0

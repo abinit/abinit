@@ -189,7 +189,7 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer,parameter :: level=113,tim_getghc=1,tim_projbd=1
  integer,save :: nskip=0
  integer :: choice,counter,cpopt,ddkflag,dimenlc1,dimenlr1,dimenl2,iat,iatom,itypat
- integer :: iband,ibandmin,ibandmax,me_g0
+ integer :: ia,iband,ibandmin,ibandmax,me_g0
  integer :: ibdblock,iblock,icg1,icg_shift,icp1,icp2,idir,idum1,ierr,ifor,igs,igsc_shift,ii,ikgf
  integer :: ikpt2,ikpt2f,ikptf,iline,iproc,ipw,ispinor,istwf_k,isubh,isubo,itrs
  integer :: job,mcg_q,me_distrb,natom,ncpgr,nblock,nproc_distrb,npw_k2
@@ -199,7 +199,6 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp) :: dphase_aux2,e0,e0_old,e1,e1_old,eval,gamma
  real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,thetam
  real(dp) :: xnorm
- logical :: gen_eigenpb
  character(len=500) :: message
  integer :: hel(2,3)
  integer,allocatable :: dimlmn(:),dimlmn_srt(:),ikptf_recv(:),pwind_k(:),sflag_k(:)
@@ -214,10 +213,7 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef(:,:)
  real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),swork(:,:),vresid(:,:),work(:,:)
  real(dp),pointer :: kinpw(:)
- type(pawcprj_type) :: cprj_dum(1,1)
- type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:)
- type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_band_srt(:,:),cprj_gat(:,:)
- type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
+ type(pawcprj_type),allocatable :: cprj_cwavef(:,:)
 
 ! *********************************************************************
 
@@ -247,9 +243,8 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
 !if PAW, one has to solve a generalized eigenproblem (H|Psi>=Lambda.S|Psi>)
 !else,   one has to solve a classical eigenproblem   (H|Psi>=Lambda.|Psi>)
- gen_eigenpb=(gs_hamk%usepaw==1)
- useoverlap=0;if (gen_eigenpb) useoverlap=1
  !LTEST
+! useoverlap=1
  useoverlap=0
  !LTEST
 
@@ -269,7 +264,6 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  !LTEST
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
- cpopt=-1
  kinpw => gs_hamk%kinpw_k
 
  ABI_ALLOCATE(pcon,(npw))
@@ -285,9 +279,18 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_ALLOCATE(gvnlx_direc,(2,npw*nspinor))
  ABI_ALLOCATE(vresid,(2,npw*nspinor))
 
- if (gen_eigenpb) then
-   ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
- end if
+ ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
+ ABI_DATATYPE_ALLOCATE(cprj_cwavef,(natom,nbdblock))
+ ncpgr = 0 ! no need of gradients here
+!Dimensioning and allocation of <p_i|Cnk>
+ ABI_ALLOCATE(dimlmn,(natom))
+ dimlmn=0  ! Type-sorted cprj
+ ia=0
+ do itypat=1,gs_hamk%ntypat
+   dimlmn(ia+1:ia+gs_hamk%nattyp(itypat))=count(gs_hamk%indlmn(3,:,itypat)>0)
+   ia=ia+gs_hamk%nattyp(itypat)
+ end do
+ call pawcprj_alloc(cprj_cwavef,ncpgr,dimlmn)
 
  ABI_ALLOCATE(swork,(0,0))
  ABI_ALLOCATE(gvnlx_dummy,(0,0))
@@ -351,11 +354,18 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      if(nline/=0)then
        do iline=1,nline
 
+         call getcprj(1,0,cwavef,cprj_cwavef,&
+&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+
          ! === COMPUTE THE RESIDUAL ===
 
-         ! Compute lambda = <C|H|C> or <C|(H-zshift)**2|C>
+         ! Compute lambda = <C|H|C>
          sij_opt = 0
-         call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_dum,gs_hamk,&
+         cpopt = 2
+         call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,gs_hamk,&
 &         eval,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getghc,0)
          lam0=chc
 
@@ -379,9 +389,9 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          eval=chc
          !TO DO : to compute ( H - epsilon S ) with getghc
          vresid(:,:) = zero
-         sij_opt = 0
-         if (gen_eigenpb) sij_opt = -1
-         call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
+         sij_opt = -1
+         cpopt=-1
+         call getghc(cpopt,cwavef,cprj_cwavef,ghc,scwavef,gs_hamk,gvnlxc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
 
          ! Compute residual (squared) norm
@@ -421,11 +431,7 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! ======================================================================
 
          ! Compute the steepest descent direction
-         if (gen_eigenpb) then
-           call cg_zcopy(npw*nspinor,vresid,direc)  ! Store <G|H-lambda.S|C> in direc
-         else
-           call cg_zcopy(npw*nspinor,ghc,direc)     ! Store <G|H|C> in direc
-         end if
+         call cg_zcopy(npw*nspinor,vresid,direc)  ! Store <G|H-lambda.S|C> in direc
 
          ! =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
          ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
@@ -438,27 +444,12 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! direc(2,npw)=<G|H|Cnk> - \sum_{(i<=n)} <G|H|Cik> , normalized.
 
          if(ortalg>=0)then
-           if (gen_eigenpb) then
-             call projbd(cg,direc,iband,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
-&             gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
-           else
-             call projbd(cg,direc,-1   ,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
-&             gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
-           end if
-         else
-!          For negative ortalg must still project current band out of conjugate vector (unneeded if gen_eigenpb)
-           if (.not.gen_eigenpb) then
-             call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,cwavef,direc,me_g0,mpi_enreg%comm_spinorfft)
-             if(istwf_k==1)then
-               call cg_zaxpy(npw*nspinor,-(/dotr,doti/),cwavef,direc)
-             else
-               call cg_zaxpy(npw*nspinor,(/-dotr,zero/),cwavef,direc)
-             end if
-           end if
+           call projbd(cg,direc,iband,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
+&           gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
          end if
 
          ! For a generalized eigenpb, store the steepest descent direction
-         if (gen_eigenpb) direc_tmp=direc
+         direc_tmp=direc
 
          ! ======================================================================
          ! ======== PRECONDITION THE STEEPEST DESCENT DIRECTION =================
@@ -488,11 +479,7 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
          ! ======================================================================
 
-         if (gen_eigenpb) then
-           call dotprod_g(dotgg,doti,istwf_k,npw*nspinor,1,direc,direc_tmp,me_g0,mpi_enreg%comm_spinorfft)
-         else
-           call dotprod_g(dotgg,doti,istwf_k,npw*nspinor,1,direc,ghc,me_g0,mpi_enreg%comm_spinorfft)
-         end if
+         call dotprod_g(dotgg,doti,istwf_k,npw*nspinor,1,direc,direc_tmp,me_g0,mpi_enreg%comm_spinorfft)
 
          ! MJV: added 5 Feb 2012 - causes divide by 0 on next iteration of iline
          if (abs(dotgg) < TINY(0.0_dp)*1.e50_dp) dotgg = TINY(0.0_dp)*1.e50_dp
@@ -551,26 +538,17 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            end do
          end if
 
-         ! In case of generalized eigenproblem, normalization of direction vector
-         ! cannot be done here (because S|D> is not known here).
-         if (.not.gen_eigenpb) then
-           call sqnorm_g(dotr,istwf_k,npw*nspinor,direc,me_g0,mpi_enreg%comm_fft)
-           xnorm=one/sqrt(abs(dotr))
-           call cg_zscal(npw*nspinor,(/xnorm,zero/),direc)
-           xnorm=one
-         end if
-
          ! ======================================================================
          ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
          ! ======================================================================
 
          ! Compute gh_direc = <G|H|D> and eventually gs_direc = <G|S|D>
-         sij_opt=0;if (gen_eigenpb) sij_opt=1
+         sij_opt=1
          !LTEST
          sij_opt=0
          !LTEST
 
-         call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
+         call getghc(cpopt,direc,cprj_cwavef,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
 
          ! In case of generalized eigenproblem, compute now the norm of the conjugated gradient
@@ -749,6 +727,10 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ! ===================
  ! FINAL DEALLOCATIONS
  ! ===================
+
+ call pawcprj_free(cprj_cwavef)
+ ABI_DATATYPE_DEALLOCATE(cprj_cwavef)
+ ABI_DEALLOCATE(dimlmn)
  ABI_DEALLOCATE(conjgr)
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(direc)
@@ -761,9 +743,7 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_DEALLOCATE(vresid)
  ABI_DEALLOCATE(gs_direc)
 
- if (gen_eigenpb)  then
-   ABI_DEALLOCATE(direc_tmp)
- end if
+ ABI_DEALLOCATE(direc_tmp)
 
  ABI_DEALLOCATE(gvnlx_dummy)
 

@@ -129,7 +129,7 @@ contains
 !!
 !! SOURCE
 
-subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavefp,cwaveprj,gs_ham,lambda,mpi_enreg,ndat,&
+subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,gs_ham,lambda,mpi_enreg,ndat,&
 &                 npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc,&
 &                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
 
@@ -144,8 +144,8 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavefp,cwaveprj,gs_ham,lambda,mpi_
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
 !arrays
  integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
- real(dp),intent(inout) :: cwavef(:,:),cwavefp(:,:)
- type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
+ real(dp),intent(inout) :: cwavef(:,:),cwavef_left(:,:)
+ type(pawcprj_type),intent(inout),target :: cwaveprj(:,:),cwaveprj_left(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -164,7 +164,7 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavefp,cwaveprj,gs_ham,lambda,mpi_
  integer, ABI_CONTIGUOUS pointer :: recvcount_fft(:),recvdisp_fft(:)
  integer, ABI_CONTIGUOUS pointer ::  sendcount_fft(:),senddisp_fft(:)
  integer, allocatable:: dimcprj(:)
- real(dp) :: enlout(ndat),lambda_ndat(ndat),tsec(2),dotr,doti
+ real(dp) :: enlout(ndat),enlout_im(ndat),lambda_ndat(ndat),tsec(2),dotr,doti
  real(dp),target :: nonlop_dum(1,1)
  real(dp),allocatable :: buff_wf(:,:),cwavef1(:,:),cwavef2(:,:),cwavef_fft(:,:),cwavef_fft_tr(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),ghc3(:,:),ghc4(:,:),ghc_mGGA(:,:),ghc_vectornd(:,:)
@@ -199,7 +199,7 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavefp,cwaveprj,gs_ham,lambda,mpi_
 &                 prtvol,sij_opt,tim_getchc,type_calc,&
 &                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
 
- call dotprod_g(chc_re_tmp,chc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavefp,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+ call dotprod_g(chc_re_tmp,chc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 !LTEST
 
 !Select k-dependent objects according to select_k input parameter
@@ -258,6 +258,12 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavefp,cwaveprj,gs_ham,lambda,mpi_
  if (gs_ham%usepaw==1.and.cpopt>=0) then
    if (size(cwaveprj)<gs_ham%natom*my_nspinor*ndat) then
      msg='wrong size for cwaveprj!'
+     MSG_BUG(msg)
+   end if
+ end if
+ if (gs_ham%usepaw==1) then
+   if (size(cwaveprj_left)<gs_ham%natom*my_nspinor*ndat) then
+     msg='wrong size for cwaveprj_left!'
      MSG_BUG(msg)
    end if
  end if
@@ -573,7 +579,7 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavefp,cwaveprj,gs_ham,lambda,mpi_
      ABI_DEALLOCATE(ghc_vectornd)
    end if
 
-   call dotprod_g(chc_re,chc_im,gs_ham%istwf_k,npw*nspinor,2,cwavefp,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+   call dotprod_g(chc_re,chc_im,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
  else
    chc_re = zero
@@ -608,18 +614,33 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavefp,cwaveprj,gs_ham,lambda,mpi_
 !         cwaveprj_fock=>cwaveprj
 !       end if
 !     else
-     cwaveprj_nonlop=>cwaveprj
 !     end if
      paw_opt=gs_ham%usepaw ; if (sij_opt/=0) paw_opt=sij_opt+3
      lambda_ndat = lambda
 
-     call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
-&     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
+     !LTEST
+!     call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
+!&     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,cprjin_left=cwaveprj_left)
+!
+!     call dotprod_g(dotr,doti,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,gvnlxc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!     !LTEST
+     signs=1 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
+     cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
 
-     call dotprod_g(dotr,doti,gs_ham%istwf_k,npw*nspinor,2,cwavefp,gvnlxc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+     call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
+&     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
+&     cprjin_left=cwaveprj_left,enlout_im=enlout_im)
 
-     chc_re = chc_re + dotr
-     chc_im = chc_im + doti
+!     !LTEST
+!     call writeout(999,'dotr    ',dotr)
+!     call writeout(999,'dotr bis',enlout(1))
+!     call writeout(999,'doti    ',doti)
+!     call writeout(999,'doti bis',enlout_im(1))
+!     !LTEST
+     do idat=1,ndat
+       chc_re = chc_re + enlout(idat)
+       chc_im = chc_im + enlout_im(idat)
+     end do
 
 !     if (gs_ham%usepaw==1 .and. has_fock)then
 !       if (fock_get_getghc_call(fock)==1) then
@@ -659,10 +680,10 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavefp,cwaveprj,gs_ham,lambda,mpi_
        do ig=1,npw_k2
          igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
          if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-           chc_re = chc_re +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavefp(re,igspinor)
-           chc_re = chc_re +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavefp(im,igspinor)
-           chc_im = chc_im +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavefp(re,igspinor)
-           chc_im = chc_im -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavefp(im,igspinor)
+           chc_re = chc_re +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+           chc_re = chc_re +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
+           chc_im = chc_im +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(re,igspinor)
+           chc_im = chc_im -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(im,igspinor)
          end if
        end do ! ig
      end do ! ispinor
@@ -688,10 +709,10 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavefp,cwaveprj,gs_ham,lambda,mpi_
  ABI_DEALLOCATE(gsc)
 
 !LTEST
-! call writeout(999,'chc_re (dif)',chc_re-chc_re_tmp)
-! call writeout(999,'chc_re_tmp',chc_re_tmp)
-! call writeout(999,'chc_im (dif)',chc_im-chc_im_tmp)
-! call writeout(999,'chc_im_tmp',chc_im_tmp)
+ call writeout(999,'chc_re (dif)',chc_re-chc_re_tmp)
+ call writeout(999,'chc_im (dif)',chc_im-chc_im_tmp)
+ call writeout(999,'chc_re_tmp',chc_re_tmp)
+ call writeout(999,'chc_im_tmp',chc_im_tmp)
 !LTEST
 !
 !! call timab(200+tim_getchc,2,tsec)

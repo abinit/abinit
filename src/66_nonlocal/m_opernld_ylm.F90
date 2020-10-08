@@ -127,7 +127,8 @@ contains
 
 subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,&
-&                      ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
+&                      ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt,strnlk,&
+&                      enlout_im)
 
 !Arguments ------------------------------------
 !scalars
@@ -142,6 +143,7 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
  real(dp),intent(in) :: gx(cplex,nlmn,nincat,nspinor),gxfac(cplex_fac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))
  real(dp),intent(inout) :: ddkk(6),enlout(nnlout),fnlk(3*natom),strnlk(6)
+ real(dp),intent(inout),optional :: enlout_im(nnlout)
 
 !Local variables-------------------------------
 !scalars
@@ -163,15 +165,37 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
 
 !  ============== Accumulate the non-local energy ===============
    if (choice==1) then
-     do ispinor=1,nspinor
-       do ia=1,nincat
-         do ilmn=1,nlmn
-           do iplex=1,cplex
-             enlout(1)=enlout(1)+gxfac(iplex,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor)
+     if (present(enlout_im).and.cplex==2) then ! cplex=cplex_fac=2
+       do ispinor=1,nspinor
+         do ia=1,nincat
+           do ilmn=1,nlmn
+             enlout   (1)=enlout   (1)+gxfac(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor)
+             enlout   (1)=enlout   (1)+gxfac(2,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor)
+             enlout_im(1)=enlout_im(1)+gxfac(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor)
+             enlout_im(1)=enlout_im(1)-gxfac(1,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor)
            end do
          end do
        end do
-     end do
+     else if (present(enlout_im).and.cplex_fac==2) then ! cplex=1,cplex_fac=2
+       do ispinor=1,nspinor
+         do ia=1,nincat
+           do ilmn=1,nlmn
+             enlout   (1)=enlout   (1)+gxfac(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor)
+             enlout_im(1)=enlout_im(1)+gxfac(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor)
+           end do
+         end do
+       end do
+     else ! only the real part is needed or the imaginary part is zero
+       do ispinor=1,nspinor
+         do ia=1,nincat
+           do ilmn=1,nlmn
+             do iplex=1,cplex
+               enlout(1)=enlout(1)+gxfac(iplex,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor)
+             end do
+           end do
+         end do
+       end do
+     end if
    end if
 
 !  ============ Accumulate the forces contributions =============
