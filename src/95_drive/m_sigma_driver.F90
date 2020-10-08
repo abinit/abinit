@@ -222,7 +222,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ekin_energy,evext_energy,coef_hyb!,ec_gm,ec_gm_k 
+ real(dp) :: etot,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ekin_energy,evext_energy,coef_hyb!,ec_gm,ec_gm_k 
  real(dp) :: doti,ucvol,ucvol_local,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -2653,10 +2653,18 @@ endif
      ABI_FREE(tmp_kstab)
      call xmpi_barrier(Wfd%comm)
      !
-     !  
+     ! Build all <NO_i|Vnl|NO_i> terms and save them on nl_bks(band,k,spin)
+     !      Then, compute the non-local energy as e_nlpsp_vfock 
      !
      call Wfd_nato_all%get_nl_me(Cryst,Psps,Pawtab,bdm2_mask,nl_bks)
-     ABI_FREE(nl_bks)
+     evextnl_energy=zero
+     do spin=1,Sigp%nsppol
+       do ikcalc=1,Sigp%nkptgw
+         do ib=Sr%b1gw,Sr%b2gw
+           evextnl_energy=evextnl_energy+Kmesh%wt(ikcalc)*QP_BSt%occ(ib,ikcalc,spin)*nl_bks(ib,ikcalc,spin)
+         end do
+       end do
+     end do
      !
      ! Exchange <NO_i|K[NO]|NO_j> and save old K and new J matrices
      !
@@ -2830,6 +2838,7 @@ endif
      call xmpi_barrier(Wfd%comm)
      eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
      ekin_energy=mels_get_kiene(Sr,GW1RDM_me,Kmesh,QP_BSt)
+     etot=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy
      write(msg,'(a1)')' '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2845,7 +2854,7 @@ endif
      write(msg,'(a,2(es16.6,a))')' Evext_l    = : ',evext_energy,' Ha ,',evext_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Evext_nl   = : ',QP_energies%e_nlpsp_vfock,' Ha ,',QP_energies%e_nlpsp_vfock*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Evext_nl   = : ',evextnl_energy,' Ha ,',evextnl_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Epsp_core  = : ',QP_energies%e_corepsp,' Ha ,',QP_energies%e_corepsp*Ha_eV,' eV'
@@ -2861,6 +2870,9 @@ endif
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Etot       = : ',etot,' Ha ,',etot*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
@@ -2882,6 +2894,7 @@ endif
      ! Clean GW1RDM_me
      !
      call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
+     ABI_FREE(nl_bks)
      ABI_FREE(old_purex)
      ABI_FREE(new_hartr)
      ABI_FREE(gw_rhor)

@@ -135,7 +135,6 @@ module m_wfd
 
    real(dp),allocatable :: fnl_dir0der0(:,:,:,:)
    ! fnl_dir0der0(npw,1,lmnmax,ntypat)
-   ! nonlocal form factors. Computed only if usepaw == 1.
    ! fnl(k+G).ylm(k+G) if PAW
    ! f_ln(k+G)/|k+G|^l if NC
 
@@ -632,16 +631,13 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
  if (nkpg>0) call mkkpg(Kdata%kg_k, kpg_k, kpoint, nkpg, npw_k)
 
  ! Compute nonlocal form factors fnl_dir0der0 for all (k+G).
- dimffnl = 0
- if (psps%usepaw == 1) dimffnl = 1+3*ider0
+ dimffnl = 1+3*ider0
  ABI_MALLOC(Kdata%fnl_dir0der0,(npw_k, dimffnl, Psps%lmnmax, Cryst%ntypat))
 
- if (dimffnl /= 0) then
-   call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,Kdata%fnl_dir0der0,Psps%ffspl,&
-     Cryst%gmet,Cryst%gprimd,ider0,idir0,Psps%indlmn,Kdata%kg_k,kpg_k,kpoint,Psps%lmnmax,&
-     Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,Cryst%ntypat,&
-     Psps%pspso,Psps%qgrid_ff,Cryst%rmet,Psps%usepaw,Psps%useylm,Kdata%ylm,ylmgr_k)
- end if
+ call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,Kdata%fnl_dir0der0,Psps%ffspl,&
+   Cryst%gmet,Cryst%gprimd,ider0,idir0,Psps%indlmn,Kdata%kg_k,kpg_k,kpoint,Psps%lmnmax,&
+   Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,Cryst%ntypat,&
+   Psps%pspso,Psps%qgrid_ff,Cryst%rmet,Psps%usepaw,Psps%useylm,Kdata%ylm,ylmgr_k)
 
  ABI_FREE(kpg_k)
  ABI_FREE(ylmgr_k)
@@ -5482,7 +5478,7 @@ implicit none
  ! Initialize the Hamiltonian on the coarse FFT mesh.
  call init_hamiltonian(ham_k, psps, pawtab, nspinor1, nsppol1, nspden1, natom, cryst%typat, cryst%xred, &
     Wfd%nfft, Wfd%mgfft, Wfd%ngfft, cryst%rprimd, Wfd%nloalg)
-
+ 
  ! Continue to prepare the GS Hamiltonian (note spin1)
  call ham_k%load_spin(spin1, with_nonlocal=.true.)
 
@@ -5500,11 +5496,6 @@ implicit none
    end if
    do ik_ibz=1,Wfd%nkibz
      if (all(bks_distrb(:, ik_ibz, ispin) /= Wfd%my_rank)) cycle
-
-!     write(msg,'(2a,3f8.3,2a,2(i3,a))')ch10,&
-!&  ' Calculating <nk|Sigma_x|nk> at k= ',kgw,ch10,&
-!&  ' bands from ',ib1,' to ',ib2,ch10
-! call wrtout(std_out,msg,'COLL')
 
      kpoint = Wfd%kibz(:, ik_ibz)
      istwf_k = Wfd%istwfk(ik_ibz)
@@ -5552,12 +5543,10 @@ implicit none
               call Wfd%get_cprj(ib, ik_ibz, ispin, cryst, cprj, sorted=.True.)
            end if
            
-           !TODO: The ham_k for some reason is not properly initialize.   
-           write(*,*) 'MAUb',choice, cpopt,size(enlout),idir0,ndat1, nnlout1,paw_opt, signs, size(opaw_psi),tim_nonlop0,size(vnl_psi)
+           ! Compute nonlocal band energy. We could use nonlop to get matrix elements but we only need diagonal contributions. 
+           ! enlout(1) is the band energy
            call nonlop(choice, cpopt, cprj, enlout, ham_k, idir0, (/zero/), Wfd%mpi_enreg, ndat1, nnlout1, &
                        paw_opt, signs, opaw_psi, tim_nonlop0, vectin, vnl_psi)
-            
-           write(std_out,'(a,2x,i5,a,2x,i5,a,2x,f10.5)') ' k: ',ik_ibz,' band: ',ib,' <i|Vnl|i>: ',enlout(1) * Ha_eV
            nl_bks(ib, ik_ibz, ispin) = enlout(1)
      end do ! ib
 
@@ -5570,11 +5559,6 @@ implicit none
  call xmpi_sum(nl_bks, Wfd%comm, ierr)
 
  call ham_k%free() 
-
- if (Wfd%usepaw == 1) then
-   call pawcprj_free(cprj)
-   ABI_FREE(cprj)
- end if
 
  DBG_EXIT("COLL")
 
