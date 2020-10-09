@@ -9,4 +9,4 @@ Here are a few commands you can try:
   * sudo apt install python-is-python3 python3-dev
   * sudo dnf install python3
 
-After that, re-run the cofigure script of ABINIT.
+After that, re-run the configure script of ABINIT.
