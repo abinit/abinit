@@ -56,11 +56,10 @@ program lapackprof
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: comm, npw, ierr, my_rank, ii, isz, jj, it, step, icall, nfound, nspinor
+ integer :: comm, npw, my_rank, ii, isz, jj, it, step, icall, nfound, nspinor !ierr,
  integer :: istwfk, mcg, mgsc, band, g0, idx, ortalgo, abimem_level, prtvol, usepaw, debug
  real(dp) ::  ctime, wtime, gflops, abimem_limit_mb
- logical :: do_check
- character(len=24) :: skinds
+ !logical :: do_check
  character(len=500) :: method, command, arg, msg !header,
  type(MPI_type) :: MPI_enreg
 !arrays
@@ -70,7 +69,7 @@ program lapackprof
  real(dp),allocatable :: cg1(:,:), cg2(:,:), cg3(:,:), ene(:), direc(:,:), scprod(:,:)
  complex(dpc),allocatable :: zvec(:), zmat(:,:), wmat(:,:), zpmat(:), evec(:,:)
 ! complex(spc),allocatable :: vec(:), mat(:,:)
- type(latime_t) :: Tres
+ !type(latime_t) :: Tres
  integer :: ncalls, nband, nsizes, nthreads
  integer :: npw_start_step_num(3)
 
