@@ -27,7 +27,7 @@ sources = [
  "m_forces.F90",
  "m_forstr.F90",
  "m_cgwf.F90",
- "m_cgwfnew.F90",
+ "m_cgwf_paw.F90",
  "m_epjdos.F90",
  "m_ksdiago.F90",
  "mkcore_wvl.F90",
