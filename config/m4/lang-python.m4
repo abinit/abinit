@@ -139,7 +139,7 @@ AC_DEFUN([ABI_PROG_PYTHON],
 [
   # Look for a Python interpreter
   AC_CHECK_PROGS(PYTHON,
-    [python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3 python2.7 python])
+    [python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3 python2.7 python2 python])
   if test "${PYTHON}" = ""; then
     ABI_MSG_NOTICE([python-not-found], [Could not find any Python interpreter])
     AC_MSG_ERROR([Cannot continue without Python])
