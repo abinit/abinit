@@ -144,6 +144,7 @@ AC_DEFUN([ABI_PROG_PYTHON],
     ABI_MSG_NOTICE([python-not-found], [Could not find any Python interpreter])
     AC_MSG_ERROR([Cannot continue without Python])
   fi
+  export PYTHON
 
   # Look for a Python configurator
   AC_CHECK_PROGS([PYTHON_CONFIG], [${PYTHON}-config])
