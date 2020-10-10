@@ -125,8 +125,8 @@ contains
 !! SOURCE
 
 subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
-&                 prtvol,sij_opt,tim_getghc,type_calc,&
-&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
+                  prtvol,sij_opt,tim_getghc,type_calc,&
+                  kg_fft_k,kg_fft_kp,select_k) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars

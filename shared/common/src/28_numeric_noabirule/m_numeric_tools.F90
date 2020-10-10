@@ -3736,11 +3736,11 @@ end subroutine symmetrize_dpc
 !!
 !! INPUTS
 !! N: size of matrix
-!! cplx: is the matrix complex
-!! mat_in(2, N*N)= matrix to be packed
+!! cplx: 2 if matrix is complex, 1 for real matrix.
+!! mat_in(cplx, N*N)= matrix to be packed
 !!
 !! OUTPUT
-!! mat_out(N*N+1)= packed matrix
+!! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
 !! PARENTS
 !!      m_rayleigh_ritz
@@ -3751,10 +3751,11 @@ end subroutine symmetrize_dpc
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
-
  integer, intent(in) :: N, cplx
  real(dp), intent(in) :: mat_in(cplx, N*N)
  real(dp), intent(out) :: mat_out(cplx*N*(N+1)/2)
+
+!local variables
  integer :: isubh, i, j
 
  ! *************************************************************************

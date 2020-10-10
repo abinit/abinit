@@ -49,6 +49,7 @@ module m_vtowfk
  use m_lobpcgwf,    only : lobpcgwf2
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
+ use m_rmm_diis,    only : rmm_diis
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
@@ -184,7 +185,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: has_fock,newlobpcg
+ logical :: has_fock, newlobpcg, do_subdiago, do_ortho, rotate_subvnlx
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -405,10 +406,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
 !      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
        call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
-&       gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
-&       mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
-&       dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&       subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
+         gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
+         mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
+         dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
+         subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
+
+       if (dtset%useria == 1 .and. nnsclo_now == 1) then
+         call rmm_diis(cg(:,icg+1:), dtset, eig_k, enlx_k, gs_hamk, gsc, kinpw, &
+                       mpi_enreg, nband_k, npw_k, my_nspinor, resid_k)
+       end if
+
      end if
    end if
 
@@ -432,8 +439,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  =========================================================================
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
+   do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
+   if (dtset%useria == 1 .and. nnsclo_now == 1) do_subdiago = .False.
 
-   if( .not. wfopta10 == 1 .and. .not. newlobpcg ) then
+   if (do_subdiago) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
      call subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, &
        mcg, mgsc, nband_k, npw_k, my_nspinor, dtset%paral_kgb, &
@@ -472,7 +481,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
-   if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
+   do_ortho = ((wfoptalg/=14 .and. wfoptalg /= 1) .or. dtset%ortalg > 0)
+   if (do_ortho) then
      call pw_orthon(icg, igsc, istwf_k, mcg, mgsc, npw_k*my_nspinor, nband_k, ortalgo, gsc, gs_hamk%usepaw, cg, &
       mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
    end if
@@ -517,7 +527,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
      exit
    end if
- end do ! End loop over inonsc (NON SELF-CONSISTENT LOOP)
+ end do ! inonsc (NON SELF-CONSISTENT LOOP)
 
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
@@ -805,14 +815,18 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,message,'PERS')
  end if
 
-!Norm-conserving or FockACE: Compute nonlocal+FockACE part of total energy : rotate subvnlx
- if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg ) then
+!Norm-conserving or FockACE: Compute nonlocal+FockACE part of total energy: rotate subvnlx
+ rotate_subvnlx = gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg
+ if (dtset%useria == 1 .and. nnsclo_now == 1) rotate_subvnlx = .False.
+
+ if (rotate_subvnlx) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
    ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
    ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
    mat1=zero
 
    if (wfopta10==4) then
+     !call cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
      enlx_k(1:nband_k)=zero
 
      if (istwf_k==1) then
@@ -838,6 +852,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
 
    else
+     !call cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
 !    MG: This version is much faster with good OMP scalability.
 !    Construct upper triangle of matvnl from subvnlx using full storage mode.
      pidx=0
@@ -867,15 +882,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  if (iscf<=0 .and. residk > dtset%tolwfr) then
    write(message,'(a,2(i0,1x),a,es13.5)')&
-&   'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid= ',residk
+    'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid= ',residk
    MSG_WARNING(message)
  end if
 
 !Print out eigenvalues (hartree)
  if (prtvol>2 .or. ikpt<=nkpt_max) then
    write(message, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
-&   'eigenvalues (hartree) for',nband_k,'bands',ch10,&
-&   '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
+    'eigenvalues (hartree) for',nband_k,'bands',ch10,&
+    '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
    call wrtout(std_out,message,'PERS')
    do ii=0,(nband_k-1)/6
      write(message, '(1p,6e12.4)' ) (eig_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))

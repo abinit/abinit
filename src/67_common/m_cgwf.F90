@@ -118,7 +118,7 @@ contains
 !!  dphase_k(3) = change in Zak phase for the current k-point in case berryopt = 4/14,6/16,7/17 (electric (displacement) field)
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
 !!  subham(nband*(nband+1))=Hamiltonian expressed in the WFs subspace
-!!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
+!!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in the WFs subspace
 !!  subvnlx(nband*(nband+1)*use_subvnlx))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
 !!   expressed in the WFs subspace
 !!
@@ -135,9 +135,9 @@ contains
 !!               where S is the overlap matrix (used only for paw)
 !!
 !! NOTES
-!!  1) cg should not be filtered and normalized : it should already be OK at input !
+!!  1) cg should not be filtered and normalized: it should already be OK at input !
 !!  2) Not sure that that the generalized eigenproblem (when gs_hamk%usepaw=1)
-!!     is compatible with wfoptalg=2 or 3 (use of shifted square  Hamiltonian) - to be verified
+!!     is compatible with wfoptalg=2 or 3 (use of shifted square Hamiltonian) - to be verified
 !!
 !! PARENTS
 !!      m_vtowfk

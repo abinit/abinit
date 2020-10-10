@@ -118,6 +118,8 @@ MODULE m_cgtools
  public :: subdiago                 ! Diagonalizes the Hamiltonian in the eigenfunction subspace
  public :: pw_orthon                ! Normalize nvec complex vectors each of length nelem and then
                                     ! orthogonalize by modified Gram-Schmidt.
+ public :: cg_hprotate_and_get_diag
+ public :: cg_hrotate_and_get_diag
 !***
 
 CONTAINS  !========================================================================================
@@ -824,6 +826,7 @@ end subroutine cg_zaxpby
 !! y := alpha*conjg(A')*x + beta*y,
 !!
 !! where: alpha and beta are scalars, x and y are vectors, A is an m-by-n matrix.
+!! default is alpha = 1 and beta = 0.
 !!
 !! INPUTS
 !!
@@ -1154,21 +1157,21 @@ subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
      doti = dotarr(2)
    end if
 
- else if (istwf_k==2 .and. me_g0==1) then ! Gamma k-point and I have G=0
-
+ else if (istwf_k==2 .and. me_g0==1) then
+   ! Gamma k-point and I have G=0
    dotr=half*vect1(1,1)*vect2(1,1)
    dotr = dotr + cg_real_zdotc(npw-1,vect1(1,2),vect2(1,2))
    dotr = two*dotr
    if (option==2) doti=zero
 
- else ! Other TR k-points
-
+ else
+   ! Other TR k-points
    dotr = cg_real_zdotc(npw,vect1,vect2)
    dotr=two*dotr
    if (option==2) doti=zero
  end if
 
-!Reduction in case of parallelism
+ !Reduction in case of parallelism
  if (xmpi_comm_size(comm)>1) then
    if (option==1.or.istwf_k/=1) then
      call xmpi_sum(dotr,comm,ierr)
@@ -1867,7 +1870,7 @@ end subroutine mean_fftr
 !!
 !! SOURCE
 
-subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
+subroutine cg_getspin(cgcband, npw_k, spin, cgcmat)
 
 !Arguments ------------------------------------
 !scalars
@@ -3469,20 +3472,20 @@ end subroutine cg_normev
 !! cg_precon
 !!
 !! FUNCTION
-!! precondition $<G|(H-e_{n,k})|C_{n,k}>$
+!! precondition <G|(H-e)|C>
 !!
 !! INPUTS
-!!  $cg(2,npw)=<G|C_{n,k}>$.
-!!  $eval=current band eigenvalue=<C_{n,k}|H|C_{n,k}>$.
+!!  cg(2,npw)=<G|C>.
+!!  eval=current band eigenvalue = <C|H|C>.
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (Hartree)
 !!  nspinor=number of spinorial components of the wavefunctions
-!!  $vect(2,npw)=<G|H|C_{n,k}>$.
+!!  vect(2,npw)=<G|H|C>.
 !!  npw=number of planewaves at this k point.
 !!  optekin= 1 if the kinetic energy used in preconditionning is modified
 !!             according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
 !!           0 otherwise
-!!  mg_g0=1 if the node treats G0.
+!!  mg_g0=1 if the node treats G=0.
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -3496,7 +3499,7 @@ end subroutine cg_normev
 !!
 !! SOURCE
 
-subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,comm)
+subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pcon, vect, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3521,7 +3524,6 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
    ek0=zero
    do ispinor=1,nspinor
      igs=(ispinor-1)*npw
-!    !$OMP PARALLEL DO PRIVATE(ig) REDUCTION(+:ek0) SHARED(cg,igs,kinpw,npw)
      do ig=1+igs,npw+igs
        if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
          ek0=ek0+kinpw(ig-igs)*(cg(1,ig)**2+cg(2,ig)**2)
@@ -3538,7 +3540,6 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
    end if
    do ispinor=1,nspinor
      igs=(ispinor-1)*npw
-!    !$OMP PARALLEL DO PRIVATE(ig) REDUCTION(+:ek0) SHARED(cg,ipw1,kinpw,npw)
      do ig=ipw1+igs,npw+igs
        if(kinpw(ig)<huge(0.0_dp)*1.d-11)then
          ek0=ek0+kinpw(ig)*(cg(1,ig)**2+cg(2,ig)**2)
@@ -3553,9 +3554,7 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
  call timab(48,2,tsec)
 
  if(ek0<1.0d-10)then
-   write(msg,'(3a)')&
-   'The mean kinetic energy of a wavefunction vanishes.',ch10,&
-   'It is reset to 0.1 Ha.'
+   write(msg,'(3a)')'The mean kinetic energy of a wavefunction vanishes.',ch10,'It is reset to 0.1 Ha.'
    MSG_WARNING(msg)
    ek0=0.1_dp
  end if
@@ -3602,9 +3601,9 @@ end subroutine cg_precon
 !!
 !! INPUTS
 !!  blocksize= size of blocks of bands
-!!  $cg(vectsize,blocksize)=<G|C_{n,k}> for a block of bands$.
-!!  $eval(blocksize,blocksize)=current block of bands eigenvalues=<C_{n,k}|H|C_{n,k}>$.
-!!  $ghc(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
+!!  cg(vectsize,blocksize)=<G|C_{n,k}> for a block of bands.
+!!  eval(blocksize,blocksize)=current block of bands eigenvalues=<C_{n,k}|H|C_{n,k}>.
+!!  ghc(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands.
 !!  iterationnumber=number of iterative minimizations in LOBPCG
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (Hartree)
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
@@ -4361,7 +4360,7 @@ end subroutine overlap_g
 !! subdiago
 !!
 !! FUNCTION
-!! This routine diagonalizes the Hamiltonian in the eigenfunction subspace
+!! This routine diagonalizes the Hamiltonian in the trial subspace.
 !!
 !! INPUTS
 !!  icg=shift to be applied on the location of data in the array cg
@@ -4372,17 +4371,17 @@ end subroutine overlap_g
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  npw_k=number of plane waves at this k point
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
-!!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
-!!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
 !!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
-!!  me_g0=1 if this processors has G=0, 0 otherwise.
+!!  me_g0=1 if this processor has G=0, 0 otherwise.
 !!
 !! OUTPUT
 !!  eig_k(nband_k)=array for holding eigenvalues (hartree)
 !!  evec(2*nband_k,nband_k)=array for holding eigenvectors
 !!
 !! SIDE EFFECTS
+!!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace. Hermitianized in output.
+!!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace. Hermitianized in output.
 !!  cg(2,mcg)=wavefunctions
 !!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
 !!
@@ -4394,9 +4393,8 @@ end subroutine overlap_g
 !!
 !! SOURCE
 
-subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
-                    mcg,mgsc,nband_k,npw_k,nspinor,paral_kgb,&
-                    subham,subovl,use_subovl,usepaw,me_g0)
+subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k, npw_k, nspinor, paral_kgb, &
+                    subham, subovl, use_subovl, usepaw, me_g0)
 
  use m_linalg_interfaces
  use m_abi_linalg
@@ -4423,6 +4421,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
  end if
 
  ! 1 if Scalapack version is used.
+ ! MG_TODO: This should not be bound to paral_kgb
  use_slk = paral_kgb
 
  rvectsize=npw_k*nspinor
@@ -4430,10 +4429,9 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 
 !Impose Hermiticity on diagonal elements of subham (and subovl, if needed)
 ! MG FIXME: In these two calls we are aliasing the args
+ !write(std_out, *)"subham", subham
  call hermit(subham,subham,ierr,nband_k)
- if (use_subovl==1) then
-   call hermit(subovl,subovl,ierr,nband_k)
- end if
+ if (use_subovl==1) call hermit(subovl,subovl,ierr,nband_k)
 
 !Diagonalize the Hamitonian matrix
  if(istwf_k==2) then
@@ -5127,5 +5125,131 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 end subroutine pw_orthon
 !!***
 
-END MODULE m_cgtools
+!!****f* m_cgtools/cg_hprotate_and_get_diag
+!! NAME
+!!   cg_hprotate_and_get_diag
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nband_k
+!arrays
+ real(dp),intent(in) :: subvnlx(nband_k*(nband_k+1))
+ real(dp),intent(in) :: evec(2*nband_k,nband_k)
+ real(dp), intent(out) :: enlx_k(nband_k)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ii,jj,pidx,iband
+ real(dp),allocatable :: mat1(:,:,:),matvnl(:,:,:)
+
+! *************************************************************************
+
+ ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
+ ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
+
+ pidx=0
+ do jj=1,nband_k
+   do ii=1,jj
+     pidx=pidx+1
+     matvnl(1,ii,jj)=subvnlx(2*pidx-1)
+     matvnl(2,ii,jj)=subvnlx(2*pidx  )
+   end do
+ end do
+
+ call zhemm('L','U',nband_k,nband_k,cone,matvnl,nband_k,evec,nband_k,czero,mat1,nband_k)
+
+!$OMP PARALLEL DO
+ do iband=1,nband_k
+   enlx_k(iband) = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
+ end do
+
+ ABI_DEALLOCATE(matvnl)
+ ABI_DEALLOCATE(mat1)
+
+end subroutine cg_hprotate_and_get_diag
+!!***
+
+!!****f* m_cgtools/cg_hrotate_and_get_diag
+!! NAME
+!!   cg_hrotate_and_get_diag
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwf_k, nband_k
+!arrays
+ real(dp),intent(in) :: totvnlx(2*nband_k,nband_k)
+ real(dp),intent(in) :: evec(2*nband_k,nband_k)
+ real(dp),intent(out) :: enlx_k(nband_k)
+
+!Local variables ------------------------------
+!scalars
+ real(dp),external :: ddot
+ integer :: ii,jj,iband
+ real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:), evec_loc(:,:)
+
+! *************************************************************************
+
+ ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
+ ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
+ mat1=zero
+
+ enlx_k(1:nband_k)=zero
+
+ if (istwf_k==1) then
+   call zhemm('l','l',nband_k,nband_k,cone,totvnlx,nband_k,evec,nband_k,czero,mat1,nband_k)
+   do iband=1,nband_k
+     enlx_k(iband)= cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
+   end do
+
+ else if (istwf_k==2) then
+   ABI_ALLOCATE(evec_loc,(nband_k,nband_k))
+   ABI_ALLOCATE(mat_loc,(nband_k,nband_k))
+   do iband=1,nband_k
+     do jj=1,nband_k
+       evec_loc(iband,jj)=evec(2*iband-1,jj)
+     end do
+   end do
+   call dsymm('l','l',nband_k,nband_k,one,totvnlx,nband_k,evec_loc,nband_k,zero,mat_loc,nband_k)
+   do iband=1,nband_k
+     enlx_k(iband)=ddot(nband_k,evec_loc(:,iband),1,mat_loc(:,iband),1)
+   end do
+   ABI_DEALLOCATE(evec_loc)
+   ABI_DEALLOCATE(mat_loc)
+ end if
+
+ ABI_DEALLOCATE(matvnl)
+ ABI_DEALLOCATE(mat1)
+
+end subroutine cg_hrotate_and_get_diag
+!!***
+
+end module m_cgtools
 !!***
