@@ -34,13 +34,6 @@
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpgv'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -127,12 +120,6 @@ end subroutine abi_dhpgv
 !!
   subroutine abi_chpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpgv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -193,12 +180,6 @@ end subroutine abi_chpgv
 !! SOURCE
 
 subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpgv'
-!End of the abilint section
 
  implicit none
 

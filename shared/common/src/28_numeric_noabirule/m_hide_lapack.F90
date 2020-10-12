@@ -3,7 +3,7 @@
 !!  m_hide_lapack
 !!
 !! FUNCTION
-!!  ABInit Linear Algebra Subroutine Interfaces.
+!!  ABINIT Linear Algebra Subroutine Interfaces.
 !!
 !!  This modules provides interfaces performing the overloading of commonly used Lapack routines.
 !!  The main purpose of this module is to create a layer between abinit routines and Lapack procedures.
@@ -99,10 +99,10 @@ MODULE m_hide_lapack
  interface xheev
    module procedure wrap_CHEEV
    module procedure wrap_ZHEEV
-   module procedure wrap_DSYEV_ZHEEV
+   !module procedure wrap_DSYEV_ZHEEV
  end interface xheev
 
- !public :: xheev_cplex
+ public :: xheev_cplex
 
  interface xhpev
    module procedure wrap_CHPEV
@@ -117,17 +117,17 @@ MODULE m_hide_lapack
 
  interface xheevx
    module procedure wrap_ZHEEVX
-   module procedure wrap_DSYEVX_ZHEEVX
+   !module procedure wrap_DSYEVX_ZHEEVX
  end interface xheevx
 
- !public :: xheevx_cplex
+ public :: xheevx_cplex
 
  interface xhegvx
    module procedure wrap_ZHEGVX
-   module procedure wrap_DSYGVX_ZHEGVX
+   !module procedure wrap_DSYGVX_ZHEGVX
  end interface xhegvx
 
- !public :: xhegvx_cplex
+ public :: xhegvx_cplex
 
  interface xgeev
    module procedure wrap_CGEEV
@@ -250,15 +250,15 @@ subroutine wrap_CHEEV(jobz, uplo, n, a, w)
  call CHEEV(jobz,uplo,n,a,n,w,work,lwork,rwork,info)
 
  if (info < 0) then
-  write(msg,'(a,i0,a)')"The ",-info,"-th argument of CHEEV had an illegal value."
-  MSG_ERROR(msg)
+   write(msg,'(a,i0,a)')"The ",-info,"-th argument of CHEEV had an illegal value."
+   MSG_ERROR(msg)
  end if
 
  if (info > 0) then
-  write(msg,'(2a,i0,a)')&
-   "CHEEV: the algorithm failed to converge; ",ch10,&
-   info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-  MSG_ERROR(msg)
+   write(msg,'(2a,i0,a)')&
+    "CHEEV: the algorithm failed to converge; ",ch10,&
+    info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+   MSG_ERROR(msg)
  end if
 
  ABI_FREE(rwork)
@@ -319,7 +319,7 @@ end subroutine wrap_CHEEV
 !!
 !! SOURCE
 
-subroutine wrap_ZHEEV(jobz,uplo,n,a,w,comm)
+subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -348,79 +348,73 @@ subroutine wrap_ZHEEV(jobz,uplo,n,a,w,comm)
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  SELECT CASE(use_scalapack)
-
  CASE (.FALSE.)
 
-  lwork = MAX(1,2*n-1)
+   lwork = MAX(1,2*n-1)
+   ABI_MALLOC(work, (lwork))
+   ABI_MALLOC(rwork, (MAX(1,3*n-2)))
 
-  ABI_MALLOC(work, (lwork))
-  ABI_MALLOC(rwork, (MAX(1,3*n-2)))
+   call ZHEEV(jobz,uplo,n,a,n,w,work,lwork,rwork,info)
 
-  call ZHEEV(jobz,uplo,n,a,n,w,work,lwork,rwork,info)
+   if (info < 0) then
+    write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEV had an illegal value."
+    MSG_ERROR(msg)
+   end if
 
-  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEV had an illegal value."
-   MSG_ERROR(msg)
-  end if
+   if (info > 0) then
+    write(msg,'(2a,i0,a)')&
+     "ZHEEV: the algorithm failed to converge; ",ch10,&
+     info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+    MSG_ERROR(msg)
+   end if
 
-  if (info > 0) then
-   write(msg,'(2a,i0,a)')&
-&   "ZHEEV: the algorithm failed to converge; ",ch10,&
-&   info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-   MSG_ERROR(msg)
-  end if
-
-  ABI_FREE(rwork)
-  ABI_FREE(work)
-
-  RETURN
+   ABI_FREE(rwork)
+   ABI_FREE(work)
+   RETURN
 
  CASE (.TRUE.)
-
 #ifdef HAVE_LINALG_SCALAPACK
-  call init_scalapack(Slk_processor,comm)
-  istwf_k=1
+   call init_scalapack(Slk_processor,comm)
+   istwf_k=1
 
-  ! Initialize and fill Scalapack matrix from the global one.
-  tbloc=SLK_BLOCK_SIZE
-  call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   ! Initialize and fill Scalapack matrix from the global one.
+   tbloc=SLK_BLOCK_SIZE
+   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
 
-  write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  call wrtout(std_out,msg,"COLL")
+   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
+   call wrtout(std_out,msg,"COLL")
 
-  call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
+   call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
-  want_eigenvectors = firstchar(jobz,(/"V","v"/))
-  if (want_eigenvectors) then ! Initialize the distributed vectors.
-   call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-  end if
+   want_eigenvectors = firstchar(jobz,(/"V","v"/))
+   if (want_eigenvectors) then ! Initialize the distributed vectors.
+    call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   end if
 
-  ! Solve the problem with scaLAPACK.
-  call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
+   ! Solve the problem with scaLAPACK.
+   call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
 
-  call destruction_matrix_scalapack(Slk_mat)
+   call destruction_matrix_scalapack(Slk_mat)
 
-  if (want_eigenvectors) then ! A is overwritten with the eigenvectors
-   a = czero
-   call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
-   call destruction_matrix_scalapack(Slk_vec)
-   call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
-  end if
+   if (want_eigenvectors) then ! A is overwritten with the eigenvectors
+    a = czero
+    call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
+    call destruction_matrix_scalapack(Slk_vec)
+    call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
+   end if
 
-  call end_scalapack(Slk_processor)
-
-  RETURN
+   call end_scalapack(Slk_processor)
+   RETURN
 #endif
 
   MSG_BUG("You should not be here!")
-
  END SELECT
 
 end subroutine wrap_ZHEEV
@@ -428,12 +422,12 @@ end subroutine wrap_ZHEEV
 
 !----------------------------------------------------------------------
 
-!!****f* m_hide_lapack/wrap_DSYEV_ZHEEV
+!!****f* m_hide_lapack/xheev_cplex
 !! NAME
-!!  wrap_DSYEV_ZHEEV
+!!  xheev_cplex
 !!
 !! FUNCTION
-!!  wrap_DSYEV_ZHEEV computes the eigenvalues and, optionally, the eigenvectors of a
+!!  xheev_cplex computes the eigenvalues and, optionally, the eigenvectors of a
 !!  (complex Hermitian| real symmetric) matrix in double precision.
 !!
 !! INPUTS
@@ -481,22 +475,23 @@ end subroutine wrap_ZHEEV
 !!
 !! SOURCE
 
-subroutine wrap_DSYEV_ZHEEV(jobz, uplo, cplex, n, a, w, comm)
+subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n,cplex
  integer,optional,intent(in) :: comm
  character(len=*),intent(in) :: jobz,uplo
+ integer,intent(out) :: ierr
+ character(len=*),intent(out) :: msg
 !arrays
  real(dp),intent(inout) :: a(cplex,n,n)
  real(dp),intent(out) :: w(n)
 
 !Local variables ------------------------------
 !scalars
- integer :: lwork,info,nprocs
+ integer :: lwork,nprocs
  logical :: use_scalapack
- character(len=500) :: msg
 !arrays
  real(dp),allocatable :: rwork(:)
  real(dp),allocatable :: work_real(:)
@@ -511,117 +506,106 @@ subroutine wrap_DSYEV_ZHEEV(jobz, uplo, cplex, n, a, w, comm)
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  if (ALL(cplex/=(/1,2/))) then
-  write(msg,'(a,i0)')" Wrong value for cplex: ",cplex
-  MSG_BUG(msg)
+   write(msg,'(a,i0)')" Wrong value for cplex: ",cplex
+   ierr = 1; return
  end if
 
  SELECT CASE(use_scalapack)
-
  CASE (.FALSE.)
+  if (cplex==1) then
+    ! Real symmetric case.
+    lwork = MAX(1,3*n-1)
+    ABI_MALLOC(work_real,(lwork))
 
-  if (cplex==1) then  ! Real symmetric case.
+    call DSYEV(jobz,uplo,n,a,n,w,work_real,lwork,ierr)
 
-   lwork = MAX(1,3*n-1)
+    if (ierr < 0) then
+     write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of DSYEV had an illegal value."
+    end if
 
-   ABI_MALLOC(work_real,(lwork))
+    if (ierr > 0) then
+     write(msg,'(2a,i0,a)')&
+       "DSYEV: the algorithm failed to converge; ",ch10,&
+       ierr," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+    end if
 
-   call DSYEV(jobz,uplo,n,a,n,w,work_real,lwork,info)
-
-   if (info < 0) then
-    write(msg,'(a,i0,a)')" The ",-info,"-th argument of DSYEV had an illegal value."
-    MSG_ERROR(msg)
-   end if
-
-   if (info > 0) then
-    write(msg,'(2a,i0,a)')&
-      "DSYEV: the algorithm failed to converge; ",ch10,&
-      info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-    MSG_ERROR(msg)
-   end if
-
-   ABI_FREE(work_real)
-
-   RETURN
+    ABI_FREE(work_real)
+    RETURN
 
   else
-   ! Hermitian case.
-   lwork = MAX(1,2*n-1)
+    ! Hermitian case.
+    lwork = MAX(1,2*n-1)
 
-   ABI_MALLOC(work_cplx, (lwork))
-   ABI_MALLOC(rwork, (MAX(1,3*n-2)))
+    ABI_MALLOC(work_cplx, (lwork))
+    ABI_MALLOC(rwork, (MAX(1,3*n-2)))
 
-   call ZHEEV(jobz,uplo,n,a,n,w,work_cplx,lwork,rwork,info)
+    call ZHEEV(jobz,uplo,n,a,n,w,work_cplx,lwork,rwork,ierr)
 
-   if (info < 0) then
-    write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEV had an illegal value."
-    MSG_ERROR(msg)
-   end if
+    if (ierr < 0) then
+      write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of ZHEEV had an illegal value."
+    end if
 
-   if (info > 0) then
-    write(msg,'(2a,i0,a)')&
-     "ZHEEV: the algorithm failed to converge; ",ch10,&
-     info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-    MSG_ERROR(msg)
-   end if
+    if (ierr > 0) then
+      write(msg,'(2a,i0,a)')&
+       "ZHEEV: the algorithm failed to converge; ",ch10,&
+       ierr," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+    end if
 
-   ABI_FREE(rwork)
-   ABI_FREE(work_cplx)
-
-   RETURN
+    ABI_FREE(rwork)
+    ABI_FREE(work_cplx)
+    RETURN
   end if ! cplex
 
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
+   MSG_ERROR("Not coded yet")
 
-  MSG_ERROR("Not coded yet")
+   !call init_scalapack(Slk_processor,comm)
+   !istwf_k=1
+   !
+   !! Initialize and fill Scalapack matrix from the global one.
+   !tbloc=SLK_BLOCK_SIZE
+   !call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   !
+   !write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
+   !call wrtout(std_out,msg,"PERS")
+   !
+   !call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
+   !
+   !want_eigenvectors = firstchar(jobz,(/"V","v"/))
+   !if (want_eigenvectors) then ! Initialize the distributed vectors.
+   ! call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   !end if
+   !
+   !! Solve the problem with scaLAPACK.
+   !call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
+   !
+   !call destruction_matrix_scalapack(Slk_mat)
+   !
+   !if (want_eigenvectors) then ! A is overwritten with the eigenvectors
+   ! a = czero
+   ! call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
+   ! call destruction_matrix_scalapack(Slk_vec)
+   ! call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
+   !end if
+   !
+   !call end_scalapack(Slk_processor)
 
-!  call init_scalapack(Slk_processor,comm)
-!  istwf_k=1
-!
-!  ! Initialize and fill Scalapack matrix from the global one.
-!  tbloc=SLK_BLOCK_SIZE
-!  call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-!
-!  write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-!  call wrtout(std_out,msg,"PERS")
-!
-!  call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
-!
-!  want_eigenvectors = firstchar(jobz,(/"V","v"/))
-!  if (want_eigenvectors) then ! Initialize the distributed vectors.
-!   call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-!  end if
-!
-!  ! Solve the problem with scaLAPACK.
-!  call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
-!
-!  call destruction_matrix_scalapack(Slk_mat)
-!
-!  if (want_eigenvectors) then ! A is overwritten with the eigenvectors
-!   a = czero
-!   call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
-!   call destruction_matrix_scalapack(Slk_vec)
-!   call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
-!  end if
-!
-!  call end_scalapack(Slk_processor)
-
-  RETURN
+   RETURN
 #endif
 
-  MSG_BUG("You should not be here!")
-
+   MSG_BUG("You should not be here!")
  END SELECT
 
-end subroutine wrap_DSYEV_ZHEEV
+end subroutine xheev_cplex
 !!***
 
 !----------------------------------------------------------------------
@@ -684,7 +668,7 @@ end subroutine wrap_DSYEV_ZHEEV
 !!
 !! SOURCE
 
-subroutine wrap_CHPEV(jobz,uplo,n,ap,w,z,ldz)
+subroutine wrap_CHPEV(jobz, uplo, n, ap, w, z, ldz)
 
 !Arguments ------------------------------------
 !scalars
@@ -711,15 +695,15 @@ subroutine wrap_CHPEV(jobz,uplo,n,ap,w,z,ldz)
  call CHPEV( JOBZ, UPLO, N, AP, W, Z, LDZ, WORK, RWORK, INFO )
 
  if (info < 0) then
-  write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEV had an illegal value."
-  MSG_ERROR(msg)
+   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEV had an illegal value."
+   MSG_ERROR(msg)
  end if
 
  if (info > 0) then
-  write(msg,'(2a,i0,a)')&
-&  "ZHPEV: the algorithm failed to converge; ",ch10,&
-&  info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-  MSG_ERROR(msg)
+   write(msg,'(2a,i0,a)')&
+    "ZHPEV: the algorithm failed to converge; ",ch10,&
+    info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+   MSG_ERROR(msg)
  end if
 
  ABI_FREE(rwork)
@@ -794,7 +778,7 @@ end subroutine wrap_CHPEV
 !!
 !! SOURCE
 
-subroutine wrap_ZHPEV(jobz,uplo,n,ap,w,z,ldz,comm)
+subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -825,36 +809,34 @@ subroutine wrap_ZHPEV(jobz,uplo,n,ap,w,z,ldz,comm)
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  SELECT CASE(use_scalapack)
-
  CASE (.FALSE.)
+   ABI_MALLOC(work, (MAX(1,2*n-1)))
+   ABI_MALLOC(rwork, (MAX(1,3*n-2)))
 
-  ABI_MALLOC(work, (MAX(1,2*n-1)))
-  ABI_MALLOC(rwork, (MAX(1,3*n-2)))
+   call ZHPEV(jobz,uplo,n,ap,w,z,ldz,work,rwork,info)
 
-  call ZHPEV(jobz,uplo,n,ap,w,z,ldz,work,rwork,info)
+   if (info < 0) then
+     write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHPEV had an illegal value."
+     MSG_ERROR(msg)
+   end if
 
-  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHPEV had an illegal value."
-   MSG_ERROR(msg)
-  end if
+   if (info > 0) then
+     write(msg,'(2a,i0,a)')&
+      "ZHPEV: the algorithm failed to converge; ",ch10,&
+      info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+     MSG_ERROR(msg)
+   end if
 
-  if (info > 0) then
-   write(msg,'(2a,i0,a)')&
-&   "ZHPEV: the algorithm failed to converge; ",ch10,&
-&   info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-   MSG_ERROR(msg)
-  end if
-
-  ABI_FREE(rwork)
-  ABI_FREE(work)
-  RETURN
+   ABI_FREE(rwork)
+   ABI_FREE(work)
+   RETURN
 
  CASE (.TRUE.)
 
@@ -890,18 +872,16 @@ subroutine wrap_ZHPEV(jobz,uplo,n,ap,w,z,ldz,comm)
 
    call end_scalapack(Slk_processor)
 
-  RETURN
+   RETURN
 #endif
 
-  MSG_BUG("You should not be here!")
-
+   MSG_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZHPEV
 !!***
 
 !----------------------------------------------------------------------
-
 
 !!****f* m_hide_lapack/wrap_ZHEGV
 !! NAME
@@ -970,7 +950,7 @@ end subroutine wrap_ZHPEV
 !!
 !! SOURCE
 
-subroutine wrap_ZHEGV(itype,jobz,uplo,n,a,b,w,comm)
+subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -998,88 +978,82 @@ subroutine wrap_ZHEGV(itype,jobz,uplo,n,a,b,w,comm)
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  SELECT CASE(use_scalapack)
-
  CASE (.FALSE.)
+   lwork = MAX(1,2*n-1)
 
-  lwork = MAX(1,2*n-1)
+   ABI_MALLOC(work, (lwork))
+   ABI_MALLOC(rwork, (MAX(1,3*n-2)))
 
-  ABI_MALLOC(work, (lwork))
-  ABI_MALLOC(rwork, (MAX(1,3*n-2)))
+   call ZHEGV(itype,jobz,uplo,n,a,n,b,n,w,work,lwork,rwork,info)
 
-  call ZHEGV(itype,jobz,uplo,n,a,n,b,n,w,work,lwork,rwork,info)
-
-  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEGV had an illegal value."
-   MSG_ERROR(msg)
-  end if
-
-  if (info > 0) then
-   if (info<= n) then
-    write(msg,'(2a,i0,a)')&
-&    "ZHEGV failed to converge: ",ch10,&
-&    info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-   else
-    ii = info -n
-    write(msg,'(3a,i0,3a)')&
-&   "ZHEGV failed to converge: ",ch10,&
-&   "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
-&   "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+   if (info < 0) then
+     write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEGV had an illegal value."
+     MSG_ERROR(msg)
    end if
-   MSG_ERROR(msg)
-  end if
 
-  ABI_FREE(rwork)
-  ABI_FREE(work)
+   if (info > 0) then
+     if (info<= n) then
+       write(msg,'(2a,i0,a)')&
+        "ZHEGV failed to converge: ",ch10,&
+        info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+     else
+       ii = info -n
+       write(msg,'(3a,i0,3a)')&
+        "ZHEGV failed to converge: ",ch10,&
+        "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
+        "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+     end if
+     MSG_ERROR(msg)
+   end if
 
-  RETURN
+   ABI_FREE(rwork)
+   ABI_FREE(work)
+   RETURN
 
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-  call init_scalapack(Slk_processor,comm)
-  istwf_k=1
+   call init_scalapack(Slk_processor,comm)
+   istwf_k=1
 
-  ! Initialize and fill Scalapack matrix from the global one.
-  tbloc=SLK_BLOCK_SIZE
+   ! Initialize and fill Scalapack matrix from the global one.
+   tbloc=SLK_BLOCK_SIZE
 
-  write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  call wrtout(std_out,msg,"COLL")
+   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
+   call wrtout(std_out,msg,"COLL")
 
-  call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-  call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
+   call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-  call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-  call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
+   call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
-  ! Solve the problem with scaLAPACK.
-  MSG_ERROR("slk_pZHEGV not yet coded")
-  ! TODO
-  !% call slk_pzhegv(itype,jobz,uplo,Slk_matA,Slk_matB,w)
+   ! Solve the problem with scaLAPACK.
+   MSG_ERROR("slk_pZHEGV not yet coded")
+   ! TODO
+   !% call slk_pzhegv(itype,jobz,uplo,Slk_matA,Slk_matB,w)
 
-  call destruction_matrix_scalapack(Slk_matB)
+   call destruction_matrix_scalapack(Slk_matB)
 
-  if (firstchar(jobz,(/"V","v"/))) then ! A is overwritten with the eigenvectors
-   a = czero
-   call slk_matrix_to_global_dpc_2D(Slk_matA,"All",a) ! Fill the entries calculated by this node.
-   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
-  end if
+   if (firstchar(jobz,(/"V","v"/))) then ! A is overwritten with the eigenvectors
+     a = czero
+     call slk_matrix_to_global_dpc_2D(Slk_matA,"All",a) ! Fill the entries calculated by this node.
+     call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+   end if
 
-  call destruction_matrix_scalapack(Slk_matA)
-
-  call end_scalapack(Slk_processor)
-
-  RETURN
+   call destruction_matrix_scalapack(Slk_matA)
+   call end_scalapack(Slk_processor)
+   RETURN
 #endif
 
-  MSG_BUG("You should not be here!")
-
+   MSG_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZHEGV
@@ -1196,79 +1170,78 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
 
  use_scalapack = .FALSE.
  if (present(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = nprocs > 1
+   use_scalapack = nprocs > 1
 #endif
  end if
 
  if (all(cplex /= [1, 2])) then
-  write(msg,'(a,i0)')"Wrong value for cplex: ",cplex
-  ierr = 1; return
+   write(msg,'(a,i0)')"Wrong value for cplex: ",cplex
+   ierr = 1; return
  end if
 
  SELECT CASE(use_scalapack)
  CASE (.FALSE.)
 
-  if (cplex==1) then ! Real symmetric case.
+  if (cplex==1) then
+    ! Real symmetric case.
+    lwork = MAX(1,3*n-1)
 
-   lwork = MAX(1,3*n-1)
+    ABI_MALLOC(work_real,(lwork))
+    call DSYGV(itype,jobz,uplo,n,a,n,b,n,w,work_real,lwork,ierr)
 
-   ABI_MALLOC(work_real,(lwork))
-
-   call DSYGV(itype,jobz,uplo,n,a,n,b,n,w,work_real,lwork,ierr)
-
-   if (ierr < 0) then
-    write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of DSYGV had an illegal value."
-   end if
-
-   if (ierr > 0) then
-    if (ierr <= n) then
-     write(msg,'(2a,i0,a)')&
-       " DSYGV failed to converge: ",ch10,&
-     ierr," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-    else
-     ii = ierr - n
-     write(msg,'(3a,i0,3a)')&
-      "DSYGV failed to converge: ",ch10,&
-      "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
-      "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+    if (ierr < 0) then
+      write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of DSYGV had an illegal value."
     end if
-   end if
 
-   ABI_FREE(work_real)
-   return
+    if (ierr > 0) then
+      if (ierr <= n) then
+        write(msg,'(2a,i0,a)')&
+          " DSYGV failed to converge: ",ch10,&
+        ierr," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+      else
+        ii = ierr - n
+        write(msg,'(3a,i0,3a)')&
+         "DSYGV failed to converge: ",ch10,&
+         "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
+         "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+      end if
+    end if
+
+    ABI_FREE(work_real)
+    return
 
   else
-   ! complex Hermitian case
-   lwork = MAX(1,2*n-1)
+    ! complex Hermitian case
+    lwork = MAX(1,2*n-1)
 
-   ABI_MALLOC(work_cplx,(lwork))
-   ABI_MALLOC(rwork,(MAX(1,3*n-2)))
+    ABI_MALLOC(work_cplx,(lwork))
+    ABI_MALLOC(rwork,(MAX(1,3*n-2)))
 
-   call ZHEGV(itype,jobz,uplo,n,a,n,b,n,w,work_cplx,lwork,rwork,ierr)
+    call ZHEGV(itype,jobz,uplo,n,a,n,b,n,w,work_cplx,lwork,rwork,ierr)
 
-   if (ierr < 0) then
-    write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of ZHEGV had an illegal value."
-   end if
-
-   if (ierr > 0) then
-    if (ierr <= n) then
-     write(msg,'(2a,i0,a)')&
-      "ZHEGV failed to converge: ",ch10,&
-      ierr," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
-    else
-     ii = ierr -n
-     write(msg,'(3a,i0,3a)')&
-     "ZHEGV failed to converge: ",ch10,&
-     "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
-     "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+    if (ierr < 0) then
+      write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of ZHEGV had an illegal value."
     end if
-   end if
 
-   ABI_FREE(rwork)
-   ABI_FREE(work_cplx)
-   return
+    if (ierr > 0) then
+      if (ierr <= n) then
+        write(msg,'(2a,i0,a)')&
+         "ZHEGV failed to converge: ",ch10,&
+         ierr," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+      else
+        ii = ierr -n
+        write(msg,'(3a,i0,3a)')&
+        "ZHEGV failed to converge: ",ch10,&
+        "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
+        "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+      end if
+    end if
+
+    ABI_FREE(rwork)
+    ABI_FREE(work_cplx)
+    return
   end if ! cplex
 
  CASE (.TRUE.)
@@ -1318,7 +1291,6 @@ end subroutine xhegv_cplex
 !!***
 
 !----------------------------------------------------------------------
-
 
 !!****f* m_hide_lapack/wrap_ZHEEVX
 !! NAME
@@ -1470,18 +1442,16 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  SELECT CASE(use_scalapack)
-
  CASE (.FALSE.) ! Standard LAPACK call.
 
   lwork = MAX(1,2*n)
-
   ABI_MALLOC(work,(lwork))
   ABI_MALLOC(rwork,(7*n))
   ABI_MALLOC(iwork,(5*n))
@@ -1490,63 +1460,59 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
   call ZHEEVX(jobz,range,uplo,n,a,n,vl,vu,il,iu,abstol,m,w,z,ldz,work,lwork,rwork,iwork,ifail,info)
 
   if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEVX had an illegal value."
-   MSG_ERROR(msg)
+    write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEVX had an illegal value."
+    MSG_ERROR(msg)
   end if
 
   if (info > 0) then
-   write(msg,'(2a,i0,a)')&
-&   "ZHEEVX: the algorithm failed to converge; ",ch10,&
-&   info,"eigenvectors failed to converge. "
-   MSG_ERROR(msg)
+    write(msg,'(2a,i0,a)')"ZHEEVX: the algorithm failed to converge; ",ch10,&
+     info,"eigenvectors failed to converge. "
+    MSG_ERROR(msg)
   end if
 
   ABI_FREE(iwork)
   ABI_FREE(ifail)
   ABI_FREE(rwork)
   ABI_FREE(work)
-
   RETURN
 
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-  call init_scalapack(Slk_processor,comm)
-  istwf_k=1
+   call init_scalapack(Slk_processor,comm)
+   istwf_k=1
 
-  ! Initialize and fill Scalapack matrix from the global one.
-  tbloc=SLK_BLOCK_SIZE
-  call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   ! Initialize and fill Scalapack matrix from the global one.
+   tbloc=SLK_BLOCK_SIZE
+   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
 
-  write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  call wrtout(std_out,msg,"COLL")
+   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
+   call wrtout(std_out,msg,"COLL")
 
-  call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
+   call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
-  want_eigenvectors = firstchar(jobz,(/"V","v"/))
-  if (want_eigenvectors) then ! Initialize the distributed vectors.
-   call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-  end if
+   want_eigenvectors = firstchar(jobz,(/"V","v"/))
+   if (want_eigenvectors) then ! Initialize the distributed vectors.
+     call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   end if
 
-  ! Solve the problem.
-  call slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,m,w)
+   ! Solve the problem.
+   call slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,m,w)
 
-  call destruction_matrix_scalapack(Slk_mat)
+   call destruction_matrix_scalapack(Slk_mat)
 
-  if (want_eigenvectors) then ! A is overwritten with the eigenvectors
-   z = czero
-   call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
-   call destruction_matrix_scalapack(Slk_vec)
-   call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
-  end if
+   if (want_eigenvectors) then ! A is overwritten with the eigenvectors
+    z = czero
+    call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
+    call destruction_matrix_scalapack(Slk_vec)
+    call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+   end if
 
-  call end_scalapack(Slk_processor)
-
-  RETURN
+   call end_scalapack(Slk_processor)
+   RETURN
 #endif
 
-  MSG_BUG("You should not be here!")
-
+   MSG_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZHEEVX
@@ -1554,13 +1520,12 @@ end subroutine wrap_ZHEEVX
 
 !----------------------------------------------------------------------
 
-
-!!****f* m_hide_lapack/wrap_DSYEVX_ZHEEVX
+!!****f* m_hide_lapack/xheevx_cplex
 !! NAME
-!!  wrap_DSYEVX_ZHEEVX
+!!  xheevx_cplex
 !!
 !! FUNCTION
-!!  wrap_DSYEVX_ZHEEVX computes selected eigenvalues and, optionally, eigenvectors
+!!  xheevx_cplex computes selected eigenvalues and, optionally, eigenvectors
 !!  of a (real symmetric|complex Hermitian) matrix A.  Eigenvalues and eigenvectors can
 !!  be selected by specifying either a range of values or a range of
 !!  indices for the desired eigenvalues.
@@ -1675,15 +1640,18 @@ end subroutine wrap_ZHEEVX
 !!
 !! SOURCE
 
-subroutine wrap_DSYEVX_ZHEEVX(jobz,range,uplo,cplex,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
+subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
+                        abstol, m, w, z, ldz, msg, ierr, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: il,iu,ldz,n,cplex
  integer,optional,intent(in) :: comm
  integer,intent(inout) :: m
+ integer,intent(out) :: ierr
  real(dp),intent(in) :: abstol,vl,vu
  character(len=*),intent(in) :: jobz,range,uplo
+ character(len=*),intent(out) :: msg
 !arrays
  real(dp),intent(out) :: w(n)
  !real(dp),intent(out) :: z(cplex,ldz,n)
@@ -1692,9 +1660,8 @@ subroutine wrap_DSYEVX_ZHEEVX(jobz,range,uplo,cplex,n,a,vl,vu,il,iu,abstol,m,w,z
 
 !Local variables ------------------------------
 !scalars
- integer :: lwork,info,nprocs
+ integer :: lwork,nprocs
  logical :: use_scalapack
- character(len=500) :: msg
 !arrays
  integer,allocatable :: ifail(:),iwork(:)
  real(dp),allocatable :: rwork(:)
@@ -1711,85 +1678,73 @@ subroutine wrap_DSYEVX_ZHEEVX(jobz,range,uplo,cplex,n,a,vl,vu,il,iu,abstol,m,w,z
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  if (ALL(cplex/=(/1,2/))) then
-  write(msg,'(a,i0)')" Wrong value for cplex: ",cplex
-  MSG_ERROR(msg)
+   write(msg,'(a,i0)')" Wrong value for cplex: ",cplex
+   ierr = 1; return
  end if
 
  SELECT CASE(use_scalapack)
+ CASE (.FALSE.)
+  ! Standard LAPACK call.
 
- CASE (.FALSE.) ! Standard LAPACK call.
+  if (cplex==1) then
+    ! Real symmetric case
+    lwork = MAX(1,8*n)
+    ABI_MALLOC(work_real,(lwork))
+    ABI_MALLOC(iwork,(5*n))
+    ABI_MALLOC(ifail,(n))
 
-  if (cplex==1) then      ! Real symmetric case
+    call DSYEVX(jobz,range,uplo,n,a,n,vl,vu,il,iu,abstol,m,w,z,ldz,work_real,lwork,iwork,ifail,ierr)
 
-   lwork = MAX(1,8*n)
+    if (ierr < 0) then
+      write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of DSYEVX had an illegal value."
+    end if
 
-   ABI_MALLOC(work_real,(lwork))
-   ABI_MALLOC(iwork,(5*n))
-   ABI_MALLOC(ifail,(n))
+    if (ierr > 0) then
+      write(msg,'(2a,i0,a)')&
+       "DSYEVX: the algorithm failed to converge; ",ch10,ierr,"eigenvectors failed to converge. "
+    end if
 
-   call DSYEVX(jobz,range,uplo,n,a,n,vl,vu,il,iu,abstol,m,w,z,ldz,work_real,lwork,iwork,ifail,info)
+    ABI_FREE(work_real)
+    ABI_FREE(iwork)
+    ABI_FREE(ifail)
+    RETURN
 
-   if (info < 0) then
-    write(msg,'(a,i0,a)')" The ",-info,"-th argument of DSYEVX had an illegal value."
-    MSG_ERROR(msg)
-   end if
+  else
+    ! Complex Hermitian case.
+    lwork = MAX(1,2*n)
+    ABI_MALLOC(work_cplx,(lwork))
+    ABI_MALLOC(rwork,(7*n))
+    ABI_MALLOC(iwork,(5*n))
+    ABI_MALLOC(ifail,(n))
 
-   if (info > 0) then
-    write(msg,'(2a,i0,a)')&
-&    "DSYEVX: the algorithm failed to converge; ",ch10,&
-&    info,"eigenvectors failed to converge. "
-    MSG_ERROR(msg)
-   end if
+    call ZHEEVX(jobz,range,uplo,n,a,n,vl,vu,il,iu,abstol,m,w,z,ldz,work_cplx,lwork,rwork,iwork,ifail,ierr)
 
-   ABI_FREE(work_real)
-   ABI_FREE(iwork)
-   ABI_FREE(ifail)
+    if (ierr < 0) then
+      write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of ZHEEVX had an illegal value."
+    end if
 
-   RETURN
+    if (ierr > 0) then
+      write(msg,'(2a,i0,a)')&
+      "ZHEEVX: the algorithm failed to converge; ",ch10,ierr,"eigenvectors failed to converge. "
+    end if
 
-  else                    ! Complex Hermitian case.
-
-   lwork = MAX(1,2*n)
-
-   ABI_MALLOC(work_cplx,(lwork))
-   ABI_MALLOC(rwork,(7*n))
-   ABI_MALLOC(iwork,(5*n))
-   ABI_MALLOC(ifail,(n))
-
-   call ZHEEVX(jobz,range,uplo,n,a,n,vl,vu,il,iu,abstol,m,w,z,ldz,work_cplx,lwork,rwork,iwork,ifail,info)
-
-   if (info < 0) then
-    write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEEVX had an illegal value."
-    MSG_ERROR(msg)
-   end if
-
-   if (info > 0) then
-    write(msg,'(2a,i0,a)')&
-&    "ZHEEVX: the algorithm failed to converge; ",ch10,&
-&    info,"eigenvectors failed to converge. "
-    MSG_ERROR(msg)
-   end if
-
-   ABI_FREE(iwork)
-   ABI_FREE(ifail)
-   ABI_FREE(rwork)
-   ABI_FREE(work_cplx)
-
-   RETURN
-
+    ABI_FREE(iwork)
+    ABI_FREE(ifail)
+    ABI_FREE(rwork)
+    ABI_FREE(work_cplx)
+    RETURN
   end if
 
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-
   MSG_ERROR("Not coded yet")
   ! call init_scalapack(Slk_processor,comm)
   ! istwf_k=1
@@ -1826,10 +1781,9 @@ subroutine wrap_DSYEVX_ZHEEVX(jobz,range,uplo,cplex,n,a,vl,vu,il,iu,abstol,m,w,z
 #endif
 
   MSG_BUG("You should not be here!")
-
  END SELECT
 
-end subroutine wrap_DSYEVX_ZHEEVX
+end subroutine xheevx_cplex
 !!***
 
 !----------------------------------------------------------------------
@@ -1997,96 +1951,91 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  SELECT CASE(use_scalapack)
+ CASE (.FALSE.)
+   ! Standard LAPACK call.
+   lwork = MAX(1,2*n)
+   ABI_MALLOC(work,(lwork))
+   ABI_MALLOC(rwork,(7*n))
+   ABI_MALLOC(iwork,(5*n))
+   ABI_MALLOC(ifail,(n))
 
- CASE (.FALSE.) ! Standard LAPACK call.
+   call ZHEGVX(itype,jobz,range,uplo,n,a,n,b,n,vl,vu,il,iu,abstol,m,w,z,ldz,work,lwork,rwork,iwork,ifail,info)
 
-  lwork = MAX(1,2*n)
-
-  ABI_MALLOC(work,(lwork))
-  ABI_MALLOC(rwork,(7*n))
-  ABI_MALLOC(iwork,(5*n))
-  ABI_MALLOC(ifail,(n))
-
-  call ZHEGVX(itype,jobz,range,uplo,n,a,n,b,n,vl,vu,il,iu,abstol,m,w,z,ldz,work,lwork,rwork,iwork,ifail,info)
-
-  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEGVX had an illegal value."
-   MSG_ERROR(msg)
-  end if
-
-  if (info > 0) then
-   if (info<= n) then
-    write(msg,'(a,i0,a)')&
-&    "ZHEGVX failed to converge: ",info," eigenvectors failed to converge. "
-   else
-    ii = info -n
-    write(msg,'(3a,i0,3a)')&
-&   "ZHEEVX failed to converge: ",ch10,&
-&   "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
-&   "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+   if (info < 0) then
+     write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEGVX had an illegal value."
+     MSG_ERROR(msg)
    end if
-   MSG_ERROR(msg)
-  end if
 
-  ABI_FREE(iwork)
-  ABI_FREE(ifail)
-  ABI_FREE(rwork)
-  ABI_FREE(work)
+   if (info > 0) then
+     if (info<= n) then
+       write(msg,'(a,i0,a)')"ZHEGVX failed to converge: ",info," eigenvectors failed to converge. "
+     else
+       ii = info -n
+       write(msg,'(3a,i0,3a)')&
+        "ZHEEVX failed to converge: ",ch10,&
+        "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
+        "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+     end if
+     MSG_ERROR(msg)
+   end if
 
-  RETURN
+   ABI_FREE(iwork)
+   ABI_FREE(ifail)
+   ABI_FREE(rwork)
+   ABI_FREE(work)
+   RETURN
 
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-  call init_scalapack(Slk_processor,comm)
-  istwf_k=1
+   call init_scalapack(Slk_processor,comm)
+   istwf_k=1
 
-  ! Initialize and fill Scalapack matrix from the global one.
-  tbloc=SLK_BLOCK_SIZE
+   ! Initialize and fill Scalapack matrix from the global one.
+   tbloc=SLK_BLOCK_SIZE
 
-  write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  call wrtout(std_out,msg,"COLL")
+   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
+   call wrtout(std_out,msg,"COLL")
 
-  call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-  call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
+   call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-  call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-  call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
+   call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
-  want_eigenvectors = firstchar(jobz,(/"V","v"/))
-  if (want_eigenvectors) then ! Initialize the distributed vectors.
-   call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-  end if
+   want_eigenvectors = firstchar(jobz,(/"V","v"/))
+   if (want_eigenvectors) then ! Initialize the distributed vectors.
+     call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   end if
 
-  ! Solve the problem.
-  MSG_ERROR("slk_pZHEGVX not coded yet")
-  ! TODO write the scaLAPACK wrapper.
-  !call slk_pZHEGVX(itype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abstol,Slk_vec,m,w)
+   ! Solve the problem.
+   MSG_ERROR("slk_pZHEGVX not coded yet")
+   ! TODO write the scaLAPACK wrapper.
+   !call slk_pZHEGVX(itype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abstol,Slk_vec,m,w)
 
-  call destruction_matrix_scalapack(Slk_matA)
-  call destruction_matrix_scalapack(Slk_matB)
+   call destruction_matrix_scalapack(Slk_matA)
+   call destruction_matrix_scalapack(Slk_matB)
 
-  if (want_eigenvectors) then ! A is overwritten with the eigenvectors
-   z = czero
-   call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
-   call destruction_matrix_scalapack(Slk_vec)
-   call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
-  end if
+   if (want_eigenvectors) then ! A is overwritten with the eigenvectors
+     z = czero
+     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
+     call destruction_matrix_scalapack(Slk_vec)
+     call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
+   end if
 
-  call end_scalapack(Slk_processor)
+   call end_scalapack(Slk_processor)
 
-  RETURN
+   RETURN
 #endif
 
   MSG_BUG("You should not be here!")
-
  END SELECT
 
 end subroutine wrap_ZHEGVX
@@ -2094,12 +2043,12 @@ end subroutine wrap_ZHEGVX
 
 !----------------------------------------------------------------------
 
-!!****f* m_hide_lapack/wrap_DSYGVX_ZHEGVX
+!!****f* m_hide_lapack/xhegvx_cplex
 !! NAME
-!!  wrap_DSYGVX_ZHEGVX
+!!  xhegvx_cplex
 !!
 !! FUNCTION
-!!  wrap_DSYGVX_ZHEGVX  - compute selected eigenvalues, and optionally, eigenvectors of a
+!!  xhegvx_cplex  - compute selected eigenvalues, and optionally, eigenvectors of a
 !!  (real symmetric-definite|complex generalized Hermitian-definite) eigenproblem, of the form
 !!  A*x=(lambda)*B*x, A*Bx=(lambda)*x, or B*A*x=(lambda)*x.
 !!  Here A and B are assumed to be (real symmetric|complex Hermitian) and B is also positive definite.
@@ -2230,15 +2179,18 @@ end subroutine wrap_ZHEGVX
 !!
 !! SOURCE
 
-subroutine wrap_DSYGVX_ZHEGVX(itype,jobz,range,uplo,cplex,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
+subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
+                        vl, vu, il, iu, abstol, m, w, z, ldz, msg, ierr, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: il,iu,ldz,n,itype,cplex
  integer,optional,intent(in) :: comm
  integer,intent(inout) :: m
+ integer,intent(out) :: ierr
  real(dp),intent(in) :: abstol,vl,vu
  character(len=*),intent(in) :: jobz,range,uplo
+ character(len=*),intent(out) :: msg
 !arrays
  real(dp),intent(out) :: w(n)
  !real(dp),intent(out) :: z(cplex,ldz,n)
@@ -2247,9 +2199,8 @@ subroutine wrap_DSYGVX_ZHEGVX(itype,jobz,range,uplo,cplex,n,a,b,vl,vu,il,iu,abst
 
 !Local variables ------------------------------
 !scalars
- integer :: lwork,info,nprocs,ii
+ integer :: lwork,nprocs,ii
  logical :: use_scalapack
- character(len=500) :: msg
 !arrays
  integer,allocatable :: ifail(:),iwork(:)
  real(dp),allocatable :: rwork(:)
@@ -2266,101 +2217,90 @@ subroutine wrap_DSYGVX_ZHEGVX(itype,jobz,range,uplo,cplex,n,a,b,vl,vu,il,iu,abst
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  if (ALL(cplex/=(/1,2/))) then
-  write(msg,'(a,i0)')" Wrong value for cplex: ",cplex
-  MSG_ERROR(msg)
+   write(msg,'(a,i0)')" Wrong value for cplex: ",cplex
+   ierr = 1; return
  end if
 
  SELECT CASE(use_scalapack)
 
- CASE (.FALSE.) ! Standard LAPACK call.
+ CASE (.FALSE.)
+  ! Standard LAPACK call.
+  if (cplex==1) then
+    ! Real symmetric case
+    lwork = MAX(1,8*n)
 
-  if (cplex==1) then  ! Real symmetric case
+    ABI_MALLOC(work_real,(lwork))
+    ABI_MALLOC(iwork,(5*n))
+    ABI_MALLOC(ifail,(n))
 
-   lwork = MAX(1,8*n)
+    call DSYGVX(itype,jobz,range,uplo,n,a,n,b,n,vl,vu,il,iu,abstol,m,w,z,ldz,work_real,lwork,iwork,ifail,ierr)
 
-   ABI_MALLOC(work_real,(lwork))
-   ABI_MALLOC(iwork,(5*n))
-   ABI_MALLOC(ifail,(n))
-
-   call DSYGVX(itype,jobz,range,uplo,n,a,n,b,n,vl,vu,il,iu,abstol,m,w,z,ldz,work_real,lwork,iwork,ifail,info)
-
-   if (info < 0) then
-    write(msg,'(a,i0,a)')" The ",-info,"-th argument of DSYGVX had an illegal value."
-    MSG_ERROR(msg)
-   end if
-
-   if (info > 0) then
-    if (info<= n) then
-     write(msg,'(a,i0,a)')&
-&     " DSYGVX failed to converge: ",info," eigenvectors failed to converge. "
-    else
-     ii = info -n
-     write(msg,'(3a,i0,3a)')&
-&    " DSYGVX failed to converge: ",ch10,&
-&    " The leading minor of order ",ii," of B is not positive definite. ",ch10,&
-&    " The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+    if (ierr < 0) then
+      write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of DSYGVX had an illegal value."
     end if
-    MSG_ERROR(msg)
-   end if
 
-   ABI_FREE(iwork)
-   ABI_FREE(ifail)
-   ABI_FREE(work_real)
-
-   RETURN
-
-  else                ! Complex Hermitian case.
-
-   lwork = MAX(1,2*n)
-
-   ABI_MALLOC(work_cplx,(lwork))
-   ABI_MALLOC(rwork,(7*n))
-   ABI_MALLOC(iwork,(5*n))
-   ABI_MALLOC(ifail,(n))
-
-   !write(std_out,*)"Calling ZHEGVX"
-
-   call ZHEGVX(itype,jobz,range,uplo,n,a,n,b,n,vl,vu,il,iu,abstol,m,w,z,ldz,work_cplx,lwork,rwork,iwork,ifail,info)
-
-   if (info < 0) then
-    write(msg,'(a,i0,a)')"The ",-info,"-th argument of ZHEGVX had an illegal value."
-    MSG_ERROR(msg)
-   end if
-
-   if (info > 0) then
-    if (info<= n) then
-     write(msg,'(a,i0,a)')&
-&     "ZHEGVX failed to converge: ",info," eigenvectors failed to converge. "
-    else
-     ii = info -n
-     write(msg,'(3a,i0,3a)')&
-&    "ZHEEVX failed to converge: ",ch10,&
-&    "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
-&    "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+    if (ierr > 0) then
+      if (ierr<= n) then
+       write(msg,'(a,i0,a)')" DSYGVX failed to converge: ",ierr," eigenvectors failed to converge. "
+      else
+       ii = ierr - n
+       write(msg,'(3a,i0,3a)')&
+        " DSYGVX failed to converge: ",ch10,&
+        " The leading minor of order ",ii," of B is not positive definite. ",ch10,&
+        " The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+      end if
     end if
-    MSG_ERROR(msg)
-   end if
 
-   ABI_FREE(iwork)
-   ABI_FREE(ifail)
-   ABI_FREE(rwork)
-   ABI_FREE(work_cplx)
+    ABI_FREE(iwork)
+    ABI_FREE(ifail)
+    ABI_FREE(work_real)
+    RETURN
 
-   RETURN
+  else
+    ! Complex Hermitian case.
+    lwork = MAX(1,2*n)
 
+    ABI_MALLOC(work_cplx,(lwork))
+    ABI_MALLOC(rwork,(7*n))
+    ABI_MALLOC(iwork,(5*n))
+    ABI_MALLOC(ifail,(n))
+
+    !write(std_out,*)"Calling ZHEGVX"
+    call ZHEGVX(itype,jobz,range,uplo,n,a,n,b,n,vl,vu,il,iu,abstol,m,w,z,ldz,work_cplx,lwork,rwork,iwork,ifail,ierr)
+
+    if (ierr < 0) then
+      write(msg,'(a,i0,a)')"The ",-ierr,"-th argument of ZHEGVX had an illegal value."
+    end if
+
+    if (ierr > 0) then
+      if (ierr<= n) then
+        write(msg,'(a,i0,a)')"ZHEGVX failed to converge: ",ierr," eigenvectors failed to converge. "
+      else
+        ii = ierr -n
+        write(msg,'(3a,i0,3a)')&
+         "ZHEEVX failed to converge: ",ch10,&
+         "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
+         "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+      end if
+    end if
+
+    ABI_FREE(iwork)
+    ABI_FREE(ifail)
+    ABI_FREE(rwork)
+    ABI_FREE(work_cplx)
+    RETURN
   end if ! cplex
 
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-
   MSG_ERROR("not coded yet")
   ! call init_scalapack(Slk_processor,comm)
   ! istwf_k=1
@@ -2403,10 +2343,9 @@ subroutine wrap_DSYGVX_ZHEGVX(itype,jobz,range,uplo,cplex,n,a,b,vl,vu,il,iu,abst
 #endif
 
   MSG_BUG("You should not be here!")
-
  END SELECT
 
-end subroutine wrap_DSYGVX_ZHEGVX
+end subroutine xhegvx_cplex
 !!***
 
 !----------------------------------------------------------------------
@@ -2479,7 +2418,7 @@ end subroutine wrap_DSYGVX_ZHEGVX
 !!
 !! SOURCE
 
-subroutine wrap_CGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
+subroutine wrap_CGEEV(jobvl, jobvr, n, a, lda, w, vl, ldvl, vr, ldvr)
 
 !Arguments ------------------------------------
 !scalars
@@ -2509,15 +2448,15 @@ subroutine wrap_CGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
  call CGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr,work,lwork,rwork,info)
 
  if (info < 0) then
-  write(msg,'(a,i0,a)')" The ",-info,"-th argument of CGEEV had an illegal value."
-  MSG_ERROR(msg)
+   write(msg,'(a,i0,a)')" The ",-info,"-th argument of CGEEV had an illegal value."
+   MSG_ERROR(msg)
  end if
 
  if (info > 0) then
-  write(msg,'(3a,i0,a,i0,a)')&
-&  "CGEEV: The QR algorithm failed to compute all the eigenvalues, and no eigenvectors have been computed;",ch10,&
-&  "Elements ",info+1,":",n," of W contain eigenvalues which have converged. "
-  MSG_ERROR(msg)
+   write(msg,'(3a,i0,a,i0,a)')&
+     "CGEEV: The QR algorithm failed to compute all the eigenvalues, and no eigenvectors have been computed;",ch10,&
+     "Elements ",info+1,":",n," of W contain eigenvalues which have converged. "
+   MSG_ERROR(msg)
  end if
 
  ABI_FREE(work)
@@ -2623,37 +2562,32 @@ subroutine wrap_ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
  use_scalapack=.FALSE.
 
  SELECT CASE(use_scalapack)
-
  CASE (.FALSE.)
 
-  lwork = MAX(1,2*n)
+   lwork = MAX(1,2*n)
+   ABI_MALLOC(work,(lwork))
+   ABI_MALLOC(rwork,(2*n))
 
-  ABI_MALLOC(work,(lwork))
-  ABI_MALLOC(rwork,(2*n))
+   call ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr,work,lwork,rwork,info)
 
-  call ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr,work,lwork,rwork,info)
+   if (info < 0) then
+    write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZGEEV had an illegal value."
+    MSG_ERROR(msg)
+   end if
 
-  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZGEEV had an illegal value."
-   MSG_ERROR(msg)
-  end if
+   if (info > 0) then
+    write(msg,'(3a,i0,a,i0,a)')&
+     "ZGEEV: The QR algorithm failed to compute all the eigenvalues, and no eigenvectors have been computed;",ch10,&
+     "Elements ",info+1,":",n," of W contain eigenvalues which have converged. "
+    MSG_ERROR(msg)
+   end if
 
-  if (info > 0) then
-   write(msg,'(3a,i0,a,i0,a)')&
-&   "ZGEEV: The QR algorithm failed to compute all the eigenvalues, and no eigenvectors have been computed;",ch10,&
-&   "Elements ",info+1,":",n," of W contain eigenvalues which have converged. "
-   MSG_ERROR(msg)
-  end if
-
-  ABI_FREE(work)
-  ABI_FREE(rwork)
-
-  RETURN
+   ABI_FREE(work)
+   ABI_FREE(rwork)
+   RETURN
 
  CASE (.TRUE.)
-
-  MSG_BUG("You should not be here!")
-
+   MSG_BUG("You should not be here!")
  END SELECT
 
 end subroutine wrap_ZGEEV
@@ -2689,7 +2623,7 @@ end subroutine wrap_ZGEEV
 !!
 !! SOURCE
 
-subroutine cginv(a,n,comm)
+subroutine cginv(a, n, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -2727,47 +2661,44 @@ subroutine cginv(a,n,comm)
  SELECT CASE(use_scalapack)
 
  CASE (.FALSE.)
+   ABI_MALLOC(ipiv, (n))
 
-  ABI_MALLOC(ipiv,(n))
+   call CGETRF(n,n,a,n,ipiv,info) ! P* L* U  Factorization.
 
-  call CGETRF(n,n,a,n,ipiv,info) ! P* L* U  Factorization.
+   if (info < 0) then
+     write(msg,'(a,i0,a)')" The ",-info,"-th argument of CGETRF had an illegal value."
+     MSG_ERROR(msg)
+   end if
 
-  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of CGETRF had an illegal value."
-   MSG_ERROR(msg)
-  end if
+   if (info > 0) then
+     write(msg,'(3a,i0,4a)')&
+      "The matrix that has been passed in argument is probably either singular or nearly singular.",ch10,&
+      "U(i,i) in the P*L*U factorization is exactly zero for i = ",info,ch10,&
+      "The factorization has been completed but the factor U is exactly singular.",ch10,&
+      "Division by zero will occur if it is used to solve a system of equations."
+     MSG_ERROR(msg)
+   end if
 
-  if (info > 0) then
-   write(msg,'(3a,i0,4a)')&
-&   "The matrix that has been passed in argument is probably either singular or nearly singular.",ch10,&
-&   "U(i,i) in the P*L*U factorization is exactly zero for i = ",info,ch10,&
-&   "The factorization has been completed but the factor U is exactly singular.",ch10,&
-&   "Division by zero will occur if it is used to solve a system of equations."
-   MSG_ERROR(msg)
-  end if
+   lwork=MAX(1,n)
+   ABI_MALLOC(work,(lwork))
 
-  lwork=MAX(1,n)
+   call CGETRI(n,a,n,ipiv,work,lwork,info) ! Inverts U and the computes inv(A)
 
-  ABI_MALLOC(work,(lwork))
+   if (info < 0) then
+     write(msg,'(a,i0,a)')" The ",-info,"-th argument of CGETRI had an illegal value."
+     MSG_ERROR(msg)
+   end if
 
-  call CGETRI(n,a,n,ipiv,work,lwork,info) ! Inverts U and the computes inv(A)
+   if (info > 0) then
+     write(msg,'(3a,i0,a)')&
+      "The matrix that has been passed to this subroutine is probably either singular or nearly singular.",ch10,&
+      "U(i,i) for i= ",info," is exactly zero; the matrix is singular and its inverse could not be computed."
+     MSG_ERROR(msg)
+   end if
 
-  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of CGETRI had an illegal value."
-   MSG_ERROR(msg)
-  end if
-
-  if (info > 0) then
-   write(msg,'(3a,i0,a)')&
-&   "The matrix that has been passed to this subroutine is probably either singular or nearly singular.",ch10,&
-    "U(i,i) for i= ",info," is exactly zero; the matrix is singular and its inverse could not be computed."
-   MSG_ERROR(msg)
-  end if
-
-  ABI_FREE(ipiv)
-  ABI_FREE(work)
-
-  RETURN
+   ABI_FREE(ipiv)
+   ABI_FREE(work)
+   RETURN
 
  CASE (.TRUE.)
 
@@ -2881,7 +2812,7 @@ end subroutine cginv
 !!
 !! SOURCE
 
-subroutine zginv(a,n,comm)
+subroutine zginv(a, n, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -2908,87 +2839,82 @@ subroutine zginv(a,n,comm)
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  SELECT CASE(use_scalapack)
-
  CASE (.FALSE.)
+   ABI_MALLOC(ipiv, (n))
+   call ZGETRF(n,n,a,n,ipiv,info) ! P* L* U  Factorization.
 
-  ABI_MALLOC(ipiv,(n))
-  call ZGETRF(n,n,a,n,ipiv,info) ! P* L* U  Factorization.
+   if (info < 0) then
+     write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZGETRF had an illegal value."
+     MSG_ERROR(msg)
+   end if
 
-  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZGETRF had an illegal value."
-   MSG_ERROR(msg)
-  end if
+   if (info > 0) then
+    write(msg,'(3a,i0,4a)')&
+      "The matrix that has been passed in argument is probably either singular or nearly singular.",ch10,&
+      "U(i,i) in the P*L*U factorization is exactly zero for i = ",info,ch10,&
+      "The factorization has been completed but the factor U is exactly singular.",ch10,&
+      "Division by zero will occur if it is used to solve a system of equations."
+    MSG_ERROR(msg)
+   end if
 
-  if (info > 0) then
-   write(msg,'(3a,i0,4a)')&
-&   "The matrix that has been passed in argument is probably either singular or nearly singular.",ch10,&
-&   "U(i,i) in the P*L*U factorization is exactly zero for i = ",info,ch10,&
-&   "The factorization has been completed but the factor U is exactly singular.",ch10,&
-&   "Division by zero will occur if it is used to solve a system of equations."
-   MSG_ERROR(msg)
-  end if
+   lwork=MAX(1,n)
+   ABI_MALLOC(work,(lwork))
 
-  lwork=MAX(1,n)
+   call ZGETRI(n,a,n,ipiv,work,lwork,info) ! Invert U and then compute inv(A)
 
-  ABI_MALLOC(work,(lwork))
+   if (info < 0) then
+     write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZGETRI had an illegal value."
+     MSG_ERROR(msg)
+   end if
 
-  call ZGETRI(n,a,n,ipiv,work,lwork,info) ! Invert U and then compute inv(A)
+   if (info > 0) then
+    write(msg,'(3a,i0,a)')&
+      "The matrix that has been passed to this subroutine is probably either singular or nearly singular.",ch10,&
+      "U(i,i) for i= ",info," is exactly zero; the matrix is singular and its inverse could not be computed."
+    MSG_ERROR(msg)
+   end if
 
-  if (info < 0) then
-   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZGETRI had an illegal value."
-   MSG_ERROR(msg)
-  end if
-
-  if (info > 0) then
-   write(msg,'(3a,i0,a)')&
-&   "The matrix that has been passed to this subroutine is probably either singular or nearly singular.",ch10,&
-&   "U(i,i) for i= ",info," is exactly zero; the matrix is singular and its inverse could not be computed."
-   MSG_ERROR(msg)
-  end if
-
-  ABI_FREE(ipiv)
-  ABI_FREE(work)
-
-  RETURN
+   ABI_FREE(ipiv)
+   ABI_FREE(work)
+   RETURN
 
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-  call init_scalapack(Slk_processor,comm)
-  istwf_k=1
+   call init_scalapack(Slk_processor,comm)
+   istwf_k=1
 
-  ! Initialize and fill Scalapack matrix from the global one.
-  tbloc=SLK_BLOCK_SIZE
-  call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   ! Initialize and fill Scalapack matrix from the global one.
+   tbloc=SLK_BLOCK_SIZE
+   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
 
-  write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  call wrtout(std_out,msg,"COLL")
+   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
+   call wrtout(std_out,msg,"COLL")
 
-  call slk_matrix_from_global_dpc_2D(Slk_mat,"All",a)
+   call slk_matrix_from_global_dpc_2D(Slk_mat,"All",a)
 
-  ! Perform the calculation with scaLAPACK.
-  call slk_zinvert(Slk_mat)
+   ! Perform the calculation with scaLAPACK.
+   call slk_zinvert(Slk_mat)
 
-  ! Reconstruct the global matrix from the distributed one.
-  a = czero
-  call slk_matrix_to_global_dpc_2D(Slk_mat,"All",a)  ! Fill the entries calculated by this node.
-  call destruction_matrix_scalapack(Slk_mat)
+   ! Reconstruct the global matrix from the distributed one.
+   a = czero
+   call slk_matrix_to_global_dpc_2D(Slk_mat,"All",a)  ! Fill the entries calculated by this node.
+   call destruction_matrix_scalapack(Slk_mat)
 
-  call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
-  call end_scalapack(Slk_processor)
+   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+   call end_scalapack(Slk_processor)
 
-  RETURN
+   RETURN
 #endif
 
   MSG_BUG("You should not be here!")
-
  END SELECT
 
 end subroutine zginv
@@ -3029,7 +2955,7 @@ end subroutine zginv
 !!
 !! SOURCE
 
-subroutine zhpd_invert(uplo,a,n,comm)
+subroutine zhpd_invert(uplo, a, n, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3055,14 +2981,13 @@ subroutine zhpd_invert(uplo,a,n,comm)
 
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
-  nprocs = xmpi_comm_size(comm)
+   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+   use_scalapack = (nprocs>1)
 #endif
  end if
 
  SELECT CASE(use_scalapack)
-
  CASE (.FALSE.)
    ! *  ZPOTRF computes the Cholesky factorization of a complex Hermitian positive definite.
    ! *     A = U**H * U,  if UPLO = 'U', or
@@ -3076,8 +3001,8 @@ subroutine zhpd_invert(uplo,a,n,comm)
 
    if (info > 0) then
     write(msg,'(a,i0,3a)')&
-&     "The leading minor of order ",info," is not positive definite, ",ch10,&
-&     "and the factorization could not be completed."
+      "The leading minor of order ",info," is not positive definite, ",ch10,&
+      "and the factorization could not be completed."
     MSG_ERROR(msg)
    end if
    !
@@ -3088,47 +3013,48 @@ subroutine zhpd_invert(uplo,a,n,comm)
    ! *  inverse of A, overwriting the input factor U or L.
    call ZPOTRI(uplo,n,a,n,info)
 
-  if (info < 0) then
-    write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZPOTRI had an illegal value."
-    MSG_ERROR(msg)
-  end if
+   if (info < 0) then
+     write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZPOTRI had an illegal value."
+     MSG_ERROR(msg)
+   end if
 
-  if (info > 0) then
-    write(msg,'(a,2(1x,i0),a)')&
-&     "The ( ",info,info,")element of the factor U or L is zero, and the inverse could not be computed."
-    MSG_ERROR(msg)
-  end if
+   if (info > 0) then
+     write(msg,'(a,2(1x,i0),a)')&
+       "The ( ",info,info,")element of the factor U or L is zero, and the inverse could not be computed."
+     MSG_ERROR(msg)
+   end if
 
-  RETURN
+   RETURN
 
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-  call init_scalapack(Slk_processor,comm)
-  istwf_k=1
+   call init_scalapack(Slk_processor,comm)
+   istwf_k=1
 
-  ! Initialize and fill Scalapack matrix from the global one.
-  tbloc=SLK_BLOCK_SIZE
-  call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   ! Initialize and fill Scalapack matrix from the global one.
+   tbloc=SLK_BLOCK_SIZE
+   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
 
-  write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  call wrtout(std_out,msg,"COLL")
+   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
+   call wrtout(std_out,msg,"COLL")
 
-  call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
+   call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
-  ! Perform the calculation with scaLAPACK.
-  call slk_zdhp_invert(Slk_mat,uplo)
+   ! Perform the calculation with scaLAPACK.
+   call slk_zdhp_invert(Slk_mat,uplo)
 
-  ! Reconstruct the global matrix from the distributed one.
-  a = czero
-  call slk_matrix_to_global_dpc_2D(Slk_mat,uplo,a)  ! Fill the entries calculated by this node.
-  call destruction_matrix_scalapack(Slk_mat)
+   ! Reconstruct the global matrix from the distributed one.
+   a = czero
+   call slk_matrix_to_global_dpc_2D(Slk_mat,uplo,a)  ! Fill the entries calculated by this node.
+   call destruction_matrix_scalapack(Slk_mat)
 
-  call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
-  call end_scalapack(Slk_processor)
+   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
+   call end_scalapack(Slk_processor)
 
-  RETURN
+   RETURN
 #endif
+
    MSG_BUG("You should not be here!")
  END SELECT
 
@@ -3136,73 +3062,6 @@ end subroutine zhpd_invert
 !!***
 
 !----------------------------------------------------------------------
-
-
-!!****f* m_hide_lapack/test_xginv
-!! NAME
-!!  test_xginv
-!!
-!! FUNCTION
-
-subroutine test_xginv(msize,skinds,do_check,Tres,comm)
-
-!Arguments -----------------------------------
-!scalars
- integer,intent(in) :: msize,comm
- logical,intent(in) :: do_check
- character(len=*),intent(in) :: skinds
- type(latime_t),intent(out) :: Tres
-!arrays
- !complex(spc),allocatable :: cmat_spc(:,:)
- !complex(spc),allocatable :: cmat_spc_check(:,:)
- complex(dpc),allocatable :: cmat_dpc(:,:)
- complex(dpc),allocatable :: cmat_dpc_check(:,:)
-
-!Local variables-------------------------------
-!scalars
- integer :: ii
- real(dp) :: max_abserr
-
-! *************************************************************************
-
- if (.FALSE.) write(std_out,*)skinds
-
- if (do_check) then
-   ABI_MALLOC(cmat_dpc_check,(msize,msize))
-   cmat_dpc_check = czero
-   do ii=1,msize
-    cmat_dpc_check(ii,ii) = cone
-   end do
-   !call xginv(cmat_dpc_check,msize,comm=xmpi_comm_self)
- end if
-
- ABI_MALLOC(cmat_dpc,(msize,msize))
- do ii=1,msize
-  cmat_dpc(ii,ii) = cone
- end do
-
- call cwtime(Tres%ctime,Tres%wtime,Tres%gflops,"start")
-
- call xginv(cmat_dpc,msize,comm)
-
- call cwtime(Tres%ctime,Tres%wtime,Tres%gflops,"stop")
- Tres%testname  = 'test_xginv'
- Tres%msize     = msize
-
- max_abserr = -one
- if (do_check) then
-   max_abserr = MAXVAL( ABS(cmat_dpc - cmat_dpc_check) )
- end if
- Tres%max_abserr = max_abserr
-
- ABI_FREE(cmat_dpc)
-
- if (allocated(cmat_dpc_check)) then
-   ABI_FREE(cmat_dpc_check)
- end if
-
-end subroutine test_xginv
-!!***
 
 !!****f* m_hide_lapack/matrginv
 !! NAME
@@ -3263,7 +3122,6 @@ subroutine matrginv(a,lda,n)
 
  ABI_ALLOCATE(work,(nwork))
  ABI_ALLOCATE(ipvt,(n))
-
 
 #if defined HAVE_LINALG_ESSL
 
@@ -4017,4 +3875,71 @@ subroutine dzgefa(a,lda,n,ipvt,info)
 end subroutine dzgefa
 !!***
 
+!!****f* m_hide_lapack/test_xginv
+!! NAME
+!!  test_xginv
+!!
+!! FUNCTION
+
+subroutine test_xginv(msize,skinds,do_check,Tres,comm)
+
+!Arguments -----------------------------------
+!scalars
+ integer,intent(in) :: msize,comm
+ logical,intent(in) :: do_check
+ character(len=*),intent(in) :: skinds
+ type(latime_t),intent(out) :: Tres
+!arrays
+ !complex(spc),allocatable :: cmat_spc(:,:)
+ !complex(spc),allocatable :: cmat_spc_check(:,:)
+ complex(dpc),allocatable :: cmat_dpc(:,:)
+ complex(dpc),allocatable :: cmat_dpc_check(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: max_abserr
+
+! *************************************************************************
+
+ if (.FALSE.) write(std_out,*)skinds
+
+ if (do_check) then
+   ABI_MALLOC(cmat_dpc_check,(msize,msize))
+   cmat_dpc_check = czero
+   do ii=1,msize
+    cmat_dpc_check(ii,ii) = cone
+   end do
+   !call xginv(cmat_dpc_check,msize,comm=xmpi_comm_self)
+ end if
+
+ ABI_MALLOC(cmat_dpc,(msize,msize))
+ do ii=1,msize
+  cmat_dpc(ii,ii) = cone
+ end do
+
+ call cwtime(Tres%ctime,Tres%wtime,Tres%gflops,"start")
+
+ call xginv(cmat_dpc,msize,comm)
+
+ call cwtime(Tres%ctime,Tres%wtime,Tres%gflops,"stop")
+ Tres%testname  = 'test_xginv'
+ Tres%msize     = msize
+
+ max_abserr = -one
+ if (do_check) then
+   max_abserr = MAXVAL( ABS(cmat_dpc - cmat_dpc_check) )
+ end if
+ Tres%max_abserr = max_abserr
+
+ ABI_FREE(cmat_dpc)
+
+ if (allocated(cmat_dpc_check)) then
+   ABI_FREE(cmat_dpc_check)
+ end if
+
+end subroutine test_xginv
+!!***
+
 END MODULE m_hide_lapack
+!!***
