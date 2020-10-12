@@ -834,7 +834,9 @@ end if
    mat1=zero
 
    if (wfopta10==4) then
-     !call cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
+#if 1
+     call cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
+#else
      enlx_k(1:nband_k)=zero
 
      if (istwf_k==1) then
@@ -858,9 +860,12 @@ end if
        ABI_DEALLOCATE(evec_loc)
        ABI_DEALLOCATE(mat_loc)
      end if
+#endif
 
    else
-     !call cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
+#if 1
+     call cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
+#else
 !    MG: This version is much faster with good OMP scalability.
 !    Construct upper triangle of matvnl from subvnlx using full storage mode.
      pidx=0
@@ -879,6 +884,7 @@ end if
        res = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
        enlx_k(iband) = res
      end do
+#endif
    end if
 
    ABI_DEALLOCATE(matvnl)

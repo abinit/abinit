@@ -5161,6 +5161,7 @@ subroutine cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
  ABI_MALLOC(matvnl,(2,nband_k,nband_k))
  ABI_MALLOC(mat1,(2,nband_k,nband_k))
 
+ ! Construct upper triangle of matvnl from subvnlx using full storage mode.
  pidx=0
  do jj=1,nband_k
    do ii=1,jj
