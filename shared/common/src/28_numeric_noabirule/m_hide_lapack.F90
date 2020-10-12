@@ -16,8 +16,10 @@
 !!  of Lapack is that the work arrays are allocated inside the wrapper with optimal size
 !!  thus reducing the number of input argcomm_scalapackuments that has to be passed.
 !!  Leading dimensions have been removed from the interface whenever possible.
-!!  In F90 one can pass the array descriptor if the routines should operate on a slice of the local array (seldom done in abinit).
-!!  Using array descriptor is OK but will it likely slow-down the calculation as some compilers perform a copy of the input-output data.
+!!  In F90 one can pass the array descriptor if the routines should operate on a slice
+!!  of the local array (seldom done in abinit).
+!!  Using array descriptor is OK but will it likely slow-down the calculation as
+!!  some compilers perform a copy of the input-output data.
 !!  If efficiency is a concern, then the F77 call should be used
 !!
 !! COPYRIGHT
@@ -30,7 +32,7 @@
 !! PARENTS
 !!
 !! CHILDREN
-
+!!
 !! TODO
 !!  1) Use a function to define the size of the Scalapack block according to some heuristic method.
 !!  2) Define a threshold below which Scalapack is not used although the MPI communicator is passed.
@@ -63,27 +65,28 @@ MODULE m_hide_lapack
 
  private
 
-! Procedures for complex Hermitian matrices
+! Complex Hermitian matrices
 
  public :: xheev   ! Computes all the eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix.
 
  public :: xhpev   ! Computes all the eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix
-                   !   in packed storage (Scalapack version not available)
+                   ! in packed storage (Scalapack version not available)
 
  public :: xhegv   ! Compute all the eigenvalues, and optionally, the eigenvectors of a complex generalized
-                   !   Hermitian-definite eigenproblem, of the form:
-                   !   A*x=(lambda)*B*x, A*Bx=(lambda)*x, or B*A*x=(lambda)*x
+                   ! Hermitian-definite eigenproblem, of the form:
+                   ! A*x=(lambda)*B*x, A*Bx=(lambda)*x, or B*A*x=(lambda)*x
 
  public :: xheevx  ! Computes selected eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix A.
-                   !   Eigenvalues and eigenvectors can be selected by specifying either a range of values or a range of
-                   !   indices for the desired eigenvalues.
+                   ! Eigenvalues and eigenvectors can be selected by specifying either a range of values or a range of
+                   ! indices for the desired eigenvalues.
 
- public :: xhegvx  ! Computes selected eigenvalues, and optionally, eigenvectors of a complex generalized Hermitian-definite eigenproblem,
-                   !   of the form A*x=(lambda)*B*x, A*Bx=(lambda)*x, or B*A*x=(lambda)*x.
-                   !   Eigenvalues and eigenvectors can be selected by specifying either a range of values or a range of
-                   !   indices for the desired eigenvalues.
+ public :: xhegvx  ! Computes selected eigenvalues, and optionally, eigenvectors
+                   ! of a complex generalized Hermitian-definite eigenproblem,
+                   ! of the form A*x=(lambda)*B*x, A*Bx=(lambda)*x, or B*A*x=(lambda)*x.
+                   ! Eigenvalues and eigenvectors can be selected by specifying either a range of values or a range of
+                   ! indices for the desired eigenvalues.
 
-! Procedures for complex non-symmetric matrices
+! Complex non-symmetric matrices
 
  public :: xgeev   ! Computes for a complex nonsymmetric matrix A, the eigenvalues and, optionally,
                    ! the left and/or right eigenvectors.
@@ -94,43 +97,50 @@ MODULE m_hide_lapack
  public :: xhdp_invert   ! Invert a Hermitian positive definite matrix.
 
  interface xheev
-  module procedure wrap_CHEEV
-  module procedure wrap_ZHEEV
-  module procedure wrap_DSYEV_ZHEEV
+   module procedure wrap_CHEEV
+   module procedure wrap_ZHEEV
+   module procedure wrap_DSYEV_ZHEEV
  end interface xheev
 
+ !public :: xheev_cplex
+
  interface xhpev
-  module procedure wrap_CHPEV
-  module procedure wrap_ZHPEV
+   module procedure wrap_CHPEV
+   module procedure wrap_ZHPEV
  end interface xhpev
 
  interface xhegv
-  module procedure wrap_ZHEGV
-  module procedure wrap_DSYGV_ZHEGV
+   module procedure wrap_ZHEGV
  end interface xhegv
 
+ public :: xhegv_cplex
+
  interface xheevx
-  module procedure wrap_ZHEEVX
-  module procedure wrap_DSYEVX_ZHEEVX
+   module procedure wrap_ZHEEVX
+   module procedure wrap_DSYEVX_ZHEEVX
  end interface xheevx
 
+ !public :: xheevx_cplex
+
  interface xhegvx
-  module procedure wrap_ZHEGVX
-  module procedure wrap_DSYGVX_ZHEGVX
+   module procedure wrap_ZHEGVX
+   module procedure wrap_DSYGVX_ZHEGVX
  end interface xhegvx
 
+ !public :: xhegvx_cplex
+
  interface xgeev
-  module procedure wrap_CGEEV
-  module procedure wrap_ZGEEV
+   module procedure wrap_CGEEV
+   module procedure wrap_ZGEEV
  end interface xgeev
 
  interface xginv
-  module procedure cginv
-  module procedure zginv
+   module procedure cginv
+   module procedure zginv
  end interface xginv
 
  interface xhdp_invert
-  module procedure zhpd_invert
+   module procedure zhpd_invert
  end interface xhdp_invert
 
  public :: matrginv      ! Invert a general matrix of real*8 elements.
@@ -1077,12 +1087,12 @@ end subroutine wrap_ZHEGV
 
 !----------------------------------------------------------------------
 
-!!****f* m_hide_lapack/wrap_DSYGV_ZHEGV
+!!****f* m_hide_lapack/xhegv_cplex
 !! NAME
-!!  wrap_DSYGV_ZHEGV
+!!  xhegv_cplex
 !!
 !! FUNCTION
-!!  wrap_DSYGV_ZHEGV computes all the  eigenvalues, and  optionally, the eigenvectors of a
+!!  xhegv_cplex computes all the  eigenvalues, and  optionally, the eigenvectors of a
 !!  (real generalized symmetric-definite| complex generalized  Hermitian-definite)
 !!  eigenproblem, of  the form
 !!        A*x=(lambda)*B*x  (1),
@@ -1157,48 +1167,47 @@ end subroutine wrap_ZHEGV
 !!
 !! SOURCE
 
-subroutine wrap_DSYGV_ZHEGV(itype,jobz,uplo,cplex,n,a,b,w,comm)
+subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n,itype,cplex
+ character(len=*),intent(in) :: jobz, uplo
+ character(len=*),intent(out) :: msg
+ integer,intent(out) :: ierr
  integer,optional,intent(in) :: comm
- character(len=*),intent(in) :: jobz,uplo
 !arrays
- real(dp),intent(inout) :: a(cplex,n,n),b(cplex,n,n)
+ real(dp),intent(inout) :: a(cplex,n,n), b(cplex,n,n)
  real(dp),intent(out) :: w(n)
 
 !Local variables ------------------------------
 !scalars
- integer :: lwork,info,nprocs,ii
+ integer :: lwork,nprocs,ii
  logical :: use_scalapack
- character(len=500) :: msg
 !arrays
- real(dp),allocatable :: rwork(:)
- real(dp),allocatable :: work_real(:)
+ real(dp),allocatable :: rwork(:), work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,tbloc
+ integer :: istwf_k, tbloc
  type(matrix_scalapack)    :: Slk_matA,Slk_matB
  type(processor_scalapack) :: Slk_processor
 #endif
 !************************************************************************
 
- use_scalapack=.FALSE.
- if (PRESENT(comm)) then
+ use_scalapack = .FALSE.
+ if (present(comm)) then
   nprocs = xmpi_comm_size(comm)
 #ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
+  use_scalapack = nprocs > 1
 #endif
  end if
 
- if (ALL(cplex/=(/1,2/))) then
+ if (all(cplex /= [1, 2])) then
   write(msg,'(a,i0)')"Wrong value for cplex: ",cplex
-  MSG_ERROR(msg)
+  ierr = 1; return
  end if
 
  SELECT CASE(use_scalapack)
-
  CASE (.FALSE.)
 
   if (cplex==1) then ! Real symmetric case.
@@ -1207,66 +1216,59 @@ subroutine wrap_DSYGV_ZHEGV(itype,jobz,uplo,cplex,n,a,b,w,comm)
 
    ABI_MALLOC(work_real,(lwork))
 
-   call DSYGV(itype,jobz,uplo,n,a,n,b,n,w,work_real,lwork,info)
+   call DSYGV(itype,jobz,uplo,n,a,n,b,n,w,work_real,lwork,ierr)
 
-   if (info < 0) then
-    write(msg,'(a,i0,a)')" The ",-info,"-th argument of DSYGV had an illegal value."
-    MSG_ERROR(msg)
+   if (ierr < 0) then
+    write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of DSYGV had an illegal value."
    end if
 
-   if (info > 0) then
-    if (info<= n) then
+   if (ierr > 0) then
+    if (ierr <= n) then
      write(msg,'(2a,i0,a)')&
-&     " DSYGV failed to converge: ",ch10,&
-&     info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+       " DSYGV failed to converge: ",ch10,&
+     ierr," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
     else
-     ii = info -n
+     ii = ierr - n
      write(msg,'(3a,i0,3a)')&
-&    "DSYGV failed to converge: ",ch10,&
-&    "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
-&    "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+      "DSYGV failed to converge: ",ch10,&
+      "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
+      "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
     end if
-    MSG_ERROR(msg)
    end if
 
    ABI_FREE(work_real)
+   return
 
-   RETURN
-
-  else               ! complex Hermitian case
-
+  else
+   ! complex Hermitian case
    lwork = MAX(1,2*n-1)
 
    ABI_MALLOC(work_cplx,(lwork))
    ABI_MALLOC(rwork,(MAX(1,3*n-2)))
 
-   call ZHEGV(itype,jobz,uplo,n,a,n,b,n,w,work_cplx,lwork,rwork,info)
+   call ZHEGV(itype,jobz,uplo,n,a,n,b,n,w,work_cplx,lwork,rwork,ierr)
 
-   if (info < 0) then
-    write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZHEGV had an illegal value."
-    MSG_ERROR(msg)
+   if (ierr < 0) then
+    write(msg,'(a,i0,a)')" The ",-ierr,"-th argument of ZHEGV had an illegal value."
    end if
 
-   if (info > 0) then
-    if (info<= n) then
+   if (ierr > 0) then
+    if (ierr <= n) then
      write(msg,'(2a,i0,a)')&
-&     "ZHEGV failed to converge: ",ch10,&
-&     info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+      "ZHEGV failed to converge: ",ch10,&
+      ierr," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
     else
-     ii = info -n
+     ii = ierr -n
      write(msg,'(3a,i0,3a)')&
-&    "ZHEGV failed to converge: ",ch10,&
-&    "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
-&    "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
+     "ZHEGV failed to converge: ",ch10,&
+     "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
+     "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
     end if
-    MSG_ERROR(msg)
    end if
 
    ABI_FREE(rwork)
    ABI_FREE(work_cplx)
-
-   RETURN
-
+   return
   end if ! cplex
 
  CASE (.TRUE.)
@@ -1310,10 +1312,9 @@ subroutine wrap_DSYGV_ZHEGV(itype,jobz,uplo,cplex,n,a,b,w,comm)
 #endif
 
   MSG_BUG("You should not be here!")
-
  END SELECT
 
-end subroutine wrap_DSYGV_ZHEGV
+end subroutine xhegv_cplex
 !!***
 
 !----------------------------------------------------------------------

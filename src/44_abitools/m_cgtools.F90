@@ -3882,7 +3882,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 end subroutine cg_precon_block
 !!***
 
-!!****f* m_cgtools/cz_zprecon_block
+!!****f* m_cgtools/cg_zprecon_block
 !!
 !! NAME
 !! cg_zprecon_block

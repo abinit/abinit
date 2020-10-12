@@ -405,7 +405,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      else
 !      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
 !      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
-if (dtset%useria == 0 .or. (dtset%useria == 321 .and. nnsclo_now == 1)) then
+if (dtset%useria == 0 .or. (dtset%useria == 321 .and. nnsclo_now == 2)) then
+       !call wrtout(std_out, "Calling cgwf")
 
        call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
          gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
@@ -445,7 +446,7 @@ end if
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
    do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
-   if (dtset%useria == 1 .and. nnsclo_now == 1) do_subdiago = .False.
+   if (dtset%useria == 321 .and. nnsclo_now == 1) do_subdiago = .False.
 
    if (do_subdiago) then
      if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
@@ -824,7 +825,7 @@ end if
 
 !Norm-conserving or FockACE: Compute nonlocal+FockACE part of total energy: rotate subvnlx
  rotate_subvnlx = gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg
- if (dtset%useria == 1 .and. nnsclo_now == 1) rotate_subvnlx = .False.
+ if (dtset%useria == 321 .and. nnsclo_now == 1) rotate_subvnlx = .False.
 
  if (rotate_subvnlx) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'

@@ -36,7 +36,7 @@ module m_ksdiago
  use defs_abitypes,       only : MPI_type
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
- use m_hide_lapack,       only : xheev, xhegv, xheevx, xhegvx
+ use m_hide_lapack,       only : xheev, xhegv, xheevx, xhegvx, xhegv_cplex
  use m_kg,                only : mkkin, mkkpg
  use m_fftcore,           only : kpgsph
  use m_fft,               only : fftpac
@@ -401,10 +401,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 &   ' is less than the number of G-vectors found,',ch10,&
 &   ' the program will perform partial diagonalizations.'
  end if
- if (prtvol>0) then
-   call wrtout(std_out,msg,'COLL')
- end if
-!
+ if (prtvol>0) call wrtout(std_out,msg,'COLL')
 
 !* Set up local potential vlocal with proper dimensioning, from vtrial.
 !* Select spin component of interest if nspden<=2 as nvloc==1, for nspden==4, nvloc==4
@@ -575,7 +572,8 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 
  jobz =Diago_ctl%jobz  !jobz="Vectors"
 
- if (do_full_diago) then ! * Complete diagonalization
+ if (do_full_diago) then
+   ! Complete diagonalization
 
    write(msg,'(2a,3es16.8,3x,3a,i5)')ch10,&
    ' Begin complete diagonalization for kpt= ',kpoint(:),stag(isppol),ch10,&
@@ -585,12 +583,14 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
    if (Psps%usepaw==0) then
      call xheev(  jobz,"Upper",cplex_ghg,npw_k*nspinor,ghg_mat,eig_ene)
    else
-     call xhegv(1,jobz,"Upper",cplex_ghg,npw_k*nspinor,ghg_mat,gtg_mat,eig_ene)
+     call xhegv_cplex(1, jobz, "Upper", cplex_ghg, npw_k*nspinor, ghg_mat, gtg_mat, eig_ene, msg, ierr)
+     ABI_CHECK(ierr == 0, msg)
    end if
 
    eig_vec(:,:,:)=  ghg_mat
 
- else ! * Partial diagonalization
+ else
+   ! Partial diagonalization
 
    range=Diago_ctl%range !range="Irange"
 
