@@ -2605,9 +2605,9 @@ endif
      call Wfd_nato_master%free()
      call xmpi_barrier(Wfd%comm)
      ! Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
-     call dotprod_vn(1,gw_rhor,evext_energy,doti,nfftf,gwc_nfftot,1,1,vpsp,ucvol_local)!,mpi_comm_sphgrid=mpi_comm_sphgrid) !?
+     call dotprod_vn(1,gw_rhor,evext_energy,doti,nfftf,gwc_nfftot,1,1,vpsp,ucvol_local)!,mpi_comm_sphgrid=mpi_comm_sphgrid) !
      one_pot(:)=1.0_dp ! Basically, integrate the density on the FFT grid to check its value. 
-     call dotprod_vn(1,gw_rhor,den_int,doti,nfftf,gwc_nfftot,1,1,one_pot,ucvol_local)  !,mpi_comm_sphgrid=mpi_comm_sphgrid) !?
+     call dotprod_vn(1,gw_rhor,den_int,doti,nfftf,gwc_nfftot,1,1,one_pot,ucvol_local)  !,mpi_comm_sphgrid=mpi_comm_sphgrid) !
      ! Proceed to compute the Fock matrix elements.  
      write(msg,'(a1)')  ' '
      call wrtout(std_out,msg,'COLL')
