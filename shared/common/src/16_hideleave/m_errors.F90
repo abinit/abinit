@@ -792,10 +792,10 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
 
  case ('STOP')
 
-   write(sbuf,'(8a)')ch10,&
+   write(sbuf,'(9a)')ch10,&
      "--- !",TRIM(level),ch10,&
-     "message: |",ch10,TRIM(indent(my_msg)),ch10
-   call wrtout(unit_, sbuf, mode_paral)
+     "message: |",ch10,TRIM(indent(my_msg)),ch10,"..."
+   call wrtout(unit_, sbuf, mode_paral, do_flush=.True.)
    if (.not.present(NOSTOP)) call abi_abort(mode_paral, print_config=.FALSE.)
 
  case default
