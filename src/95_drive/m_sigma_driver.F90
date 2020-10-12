@@ -222,7 +222,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: etot,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ekin_energy,evext_energy,coef_hyb 
+ real(dp) :: etot,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ekin_energy,evext_energy,den_int,coef_hyb 
  real(dp) :: doti,ucvol,ucvol_local,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -271,7 +271,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),allocatable :: qp_rhor_n_one(:,:),qp_rhor_nt_one(:,:)
  real(dp),allocatable :: qp_rhor(:,:),qp_vhartr(:),qp_vtrial(:,:),qp_vxc(:,:)
  real(dp),allocatable :: qp_taur(:,:),igwene(:,:,:)
- real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:)
+ real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:),one_pot(:)
  real(dp),allocatable :: nl_bks(:,:,:)
  !real(dp),allocatable :: osoc_bks(:, :, :)
  real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:)
@@ -973,6 +973,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(ks_vhartr,(nfftf))
  ABI_MALLOC(ks_vtrial,(nfftf,Dtset%nspden))
  ABI_MALLOC(vpsp,(nfftf))
+ ABI_MALLOC(one_pot,(nfftf))
  ABI_MALLOC(ks_vxc,(nfftf,Dtset%nspden))
 
  optene=4; moved_atm_inside=0; moved_rhor=0; istep=1
@@ -2605,6 +2606,8 @@ endif
      call xmpi_barrier(Wfd%comm)
      ! Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
      call dotprod_vn(1,gw_rhor,evext_energy,doti,nfftf,gwc_nfftot,1,1,vpsp,ucvol_local)!,mpi_comm_sphgrid=mpi_comm_sphgrid) !?
+     one_pot(:)=1.0_dp ! Basically, integrate the density on the FFT grid to check its value. 
+     call dotprod_vn(1,gw_rhor,den_int,doti,nfftf,gwc_nfftot,1,1,one_pot,ucvol_local)  !,mpi_comm_sphgrid=mpi_comm_sphgrid) !?
      ! Proceed to compute the Fock matrix elements.  
      write(msg,'(a1)')  ' '
      call wrtout(std_out,msg,'COLL')
@@ -2874,6 +2877,9 @@ endif
      write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,1(es16.6))')  ' Density    = : ',den_int
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
      write(msg,'(a)')' Vee[SD] (= Ehartree + Efock) energy obtained using GW 1-RDM:'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -3078,6 +3084,7 @@ endif
  ABI_FREE(ks_vhartr)
  ABI_FREE(ks_vtrial)
  ABI_FREE(vpsp)
+ ABI_FREE(one_pot)
  ABI_FREE(ks_vxc)
  ABI_FREE(xccc3d)
  ABI_FREE(grchempottn)
