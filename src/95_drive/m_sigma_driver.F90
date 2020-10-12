@@ -222,7 +222,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: etot,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ekin_energy,evext_energy,coef_hyb!,ec_gm,ec_gm_k 
+ real(dp) :: etot,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ekin_energy,evext_energy,coef_hyb 
  real(dp) :: doti,ucvol,ucvol_local,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -2604,8 +2604,7 @@ endif
      call Wfd_nato_master%free()
      call xmpi_barrier(Wfd%comm)
      ! Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
-     call dotprod_vn(1,gw_rhor,evext_energy,doti,nfftf,gwc_nfftot,1,1,vpsp,&
-     &   ucvol_local)!,mpi_comm_sphgrid=mpi_comm_sphgrid)
+     call dotprod_vn(1,gw_rhor,evext_energy,doti,nfftf,gwc_nfftot,1,1,vpsp,ucvol_local)!,mpi_comm_sphgrid=mpi_comm_sphgrid) !?
      ! Proceed to compute the Fock matrix elements.  
      write(msg,'(a1)')  ' '
      call wrtout(std_out,msg,'COLL')
@@ -2845,9 +2844,6 @@ endif
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a)')' Vee[SD] (= Ehartree + Efock) energy obtained using GW 1-RDM:'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Ekinetic   = : ',ekin_energy,' Ha ,',ekin_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2860,13 +2856,13 @@ endif
      write(msg,'(a,2(es16.6,a))')' Epsp_core  = : ',QP_energies%e_corepsp,' Ha ,',QP_energies%e_corepsp*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Enn        = : ',QP_energies%e_ewald,' Ha ,',QP_energies%e_ewald*Ha_eV,' eV'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Efock      = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Enn        = : ',QP_energies%e_ewald,' Ha ,',QP_energies%e_ewald*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
@@ -2878,15 +2874,9 @@ endif
      write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     !write(msg,'(a28)')' Vee[GM] = Vee[SD] + Ec[GM]:'
-     !call wrtout(std_out,msg,'COLL')
-     !call wrtout(ab_out,msg,'COLL')
-     !write(msg,'(a,2(es16.6,a))')' Ec[GM]       = : ',ec_gm,' Ha ,',ec_gm*Ha_eV,' eV'
-     !call wrtout(std_out,msg,'COLL')
-     !call wrtout(ab_out,msg,'COLL')
-     !write(msg,'(a,2(es16.6,a))')' Vee[GM]      = : ',(ex_energy+eh_energy+ec_gm),' Ha ,',(ex_energy+eh_energy+ec_gm)*Ha_eV,' eV'
-     !call wrtout(std_out,msg,'COLL')
-     !call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a)')' Vee[SD] (= Ehartree + Efock) energy obtained using GW 1-RDM:'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
