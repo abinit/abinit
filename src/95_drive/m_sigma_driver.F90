@@ -857,7 +857,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(ks_taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
  call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
- if (Dtset%gwcalctyp==21 .and. gw1rdm>0) then ! MRM: print initial (KS) density file (in case we need to compare DEN files or cubes)
+ if (Dtset%gwcalctyp==21 .and. gw1rdm>0) then ! MRM: print initial (KS) density file (useful to compare DEN files or cubes)
    gw1rdm_fname='KS_sigma_DEN'
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
    Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=KS_BSt)
@@ -2536,14 +2536,6 @@ endif
          ! Update the dm1 with the corr. contribution?
          if (x1rdm/=1) then
            call calc_rdmc(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs
-           !ec_gm_k=calc_Ec_GM_k(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt)   ! Only restricted closed-shell calcs
-           !write(msg,'(a26,es16.6)')'                 Ec^k[GM]:',ec_gm_k
-           !call wrtout(std_out,msg,'COLL')
-           !call wrtout(ab_out,msg,'COLL')
-           !write(msg,'(a26,es16.6)')' wtk used in wtk*Ec^k[GM]:',Kmesh%wt(ikcalc)
-           !call wrtout(std_out,msg,'COLL')
-           !call wrtout(ab_out,msg,'COLL')
-           !ec_gm=ec_gm+Kmesh%wt(ikcalc)*ec_gm_k
          end if
 !        Update the full 1RDM with the GW corrected one for this k-point
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2576,7 +2568,8 @@ endif
      old_purex(:,:)=czero
      new_hartr(:,:)=czero
      !
-     ! MRM: only the master has bands on Wfd_nato_master so it prints everything and prepares gw_rhor 
+     ! Warining!
+     ! MRM: only the master has bands on Wfd_nato_master so it prints everything and computes gw_rhor 
      !
      call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
      call print_tot_occ(Sr,Kmesh,QP_BSt)                           
@@ -2668,6 +2661,7 @@ endif
      !
      ! Exchange <NO_i|K[NO]|NO_j> and save old K and new J matrices
      !
+      ! Build Vcp_ks and Vcp_full
      if (Dtset%gw_nqlwl==0) then
        nqlwl=1
        ABI_MALLOC(qlwl,(3,nqlwl))
@@ -2715,7 +2709,7 @@ endif
      ! Now compute the "residual" Coulomb interactions. 
      Vcp_ks%vc_sqrt_resid=sqrt(coef_hyb*Vcp_ks%vc_sqrt**2)
      Vcp_ks%i_sz_resid=coef_hyb*Vcp_ks%i_sz
-     ! Now compute the matrix elements and save them on Sr%x_mat 
+     ! Get the matrix elements and save them on Sr%x_mat 
      do ikcalc=1,Sigp%nkptgw                                                 
        ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
        ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
