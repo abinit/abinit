@@ -175,7 +175,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, path
  type(hdr_type) :: wfk0_hdr, wfq_hdr
- type(crystal_t) :: cryst,cryst_ddb
+ type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr
@@ -395,6 +395,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (use_wfk) then
    call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
                       prtvol=dtset%prtvol)
+
+   ! DDB cryst comes from DPPT --> no time-reversal if q /= 0
+   ! Change the value so that we use the same as the GS part.
+   cryst_ddb%timrev = cryst%timrev
+   if (cryst%compare(cryst_ddb, header="Comparing WFK crystal with DDB crystal") /= 0) then
+     MSG_ERROR("Crystal structure from WFK and DDB do not agree! Check messages above!")
+   end if
    call cryst_ddb%free()
  else
    ! Get crystal from DDB.
@@ -501,6 +508,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_filepath, comm)
+
+   ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
+   ! Change the value so that we use the same as the GS part.
+   dvdb%cryst%timrev = cryst%timrev
+   if (cryst%compare(dvdb%cryst, header="Comparing WFK crystal with DVDB crystal") /= 0) then
+     MSG_ERROR("Crystal structure from WFK and DVDB do not agree! Check messages above!")
+   end if
    if (dtset%prtvol > 10) dvdb%debug = .True.
 
    ! This to symmetrize the DFPT potentials.

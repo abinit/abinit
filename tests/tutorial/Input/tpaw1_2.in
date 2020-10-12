@@ -45,7 +45,7 @@ ndtset 9   ecut: 8. ecut+  2.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_19.1_bdir.*
+##%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw1_2.abo, tolnlines=  2, tolabs=  1.001e-08, tolrel=  2.000e-04
