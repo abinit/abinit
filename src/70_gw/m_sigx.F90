@@ -627,21 +627,20 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        end do ! jb Got all matrix elements from minbnd up to maxbnd.
 
        theta_mu_minus_esum = fact_sp * qp_occ(ib_sum,ik_ibz,spin)
-
-       do kb=ib1,ib2
-         ! Compute the ket Sigma_x |phi_{k,kb}>.
-         rhotwgp(:) = rhotwg_ki(:,kb)
-         ! Loop over the non-zero row elements of this column.
-         ! If gwcalctyp <  20: only diagonal elements since QP == KS.
-         ! If gwcalctyp >= 20:
-         !      * Only off-diagonal elements connecting states with same character.
-         !      * Only the upper triangle if HF, SEX, or COHSEX.
-         do irow=1,Sigxij_tab(spin)%col(kb)%size1
-           jb = Sigxij_tab(spin)%col(kb)%bidx(irow)
-           rhotwg = rhotwg_ki(:,jb)
-           ! Calculate bare exchange <phi_j|Sigma_x|phi_k>.
-           ! Do the scalar product only if ib_sum is occupied.
-           if (abs(theta_mu_minus_esum/fact_sp) >= tol_empty) then     ! MRM allow negative occ numbers
+       if (abs(theta_mu_minus_esum/fact_sp) >= tol_empty) then     ! MRM allow negative occ numbers
+         do kb=ib1,ib2
+           ! Compute the ket Sigma_x |phi_{k,kb}>.
+           rhotwgp(:) = rhotwg_ki(:,kb)
+           ! Loop over the non-zero row elements of this column.
+           ! If gwcalctyp <  20: only diagonal elements since QP == KS.
+           ! If gwcalctyp >= 20:
+           !      * Only off-diagonal elements connecting states with same character.
+           !      * Only the upper triangle if HF, SEX, or COHSEX.
+           do irow=1,Sigxij_tab(spin)%col(kb)%size1
+             jb = Sigxij_tab(spin)%col(kb)%bidx(irow)
+             rhotwg = rhotwg_ki(:,jb)
+             ! Calculate bare exchange <phi_j|Sigma_x|phi_k>.
+             ! Do the scalar product only if ib_sum is occupied.
              do iab=1,Sigp%nsig_ab
                spadx1 = spinor_padx(1, iab); spadx2 = spinor_padx(2, iab)
                gwpc_sigxme = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1) * theta_mu_minus_esum
@@ -650,13 +649,13 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
                is_idx = spin; if (nspinor == 2) is_idx = iab
                sigxme_tmp(jb, kb, is_idx) = sigxme_tmp(jb, kb, is_idx) + &
 &                (wtqp + wtqm)*DBLE(gwpc_sigxme) + (wtqp - wtqm)*j_gw*AIMAG(gwpc_sigxme)
-
+         
                sigx(1, jb, kb, is_idx) = sigx(1, jb, kb, is_idx) + wtqp *      gwpc_sigxme
                sigx(2, jb, kb, is_idx) = sigx(2, jb, kb, is_idx) + wtqm *CONJG(gwpc_sigxme)
              end do
-           end if
-         end do ! jb used to calculate matrix elements of Sigma_x
-       end do ! kb to calculate matrix elements of Sigma_x
+           end do ! jb used to calculate matrix elements of Sigma_x
+         end do ! kb to calculate matrix elements of Sigma_x
+       end if
      end do ! ib_sum
 
      ! Deallocate k-dependent quantities.
