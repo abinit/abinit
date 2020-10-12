@@ -271,7 +271,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),allocatable :: qp_rhor_n_one(:,:),qp_rhor_nt_one(:,:)
  real(dp),allocatable :: qp_rhor(:,:),qp_vhartr(:),qp_vtrial(:,:),qp_vxc(:,:)
  real(dp),allocatable :: qp_taur(:,:),igwene(:,:,:)
- real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:),one_pot(:)
+ real(dp),allocatable :: vpsp(:),xccc3d(:),dijexc_core(:,:,:),dij_hf(:,:,:)
  real(dp),allocatable :: nl_bks(:,:,:)
  !real(dp),allocatable :: osoc_bks(:, :, :)
  real(dp),allocatable :: ks_aepaw_rhor(:,:) !,ks_n_one_rhor(:,:),ks_nt_one_rhor(:,:)
@@ -973,7 +973,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(ks_vhartr,(nfftf))
  ABI_MALLOC(ks_vtrial,(nfftf,Dtset%nspden))
  ABI_MALLOC(vpsp,(nfftf))
- ABI_MALLOC(one_pot,(nfftf))
  ABI_MALLOC(ks_vxc,(nfftf,Dtset%nspden))
 
  optene=4; moved_atm_inside=0; moved_rhor=0; istep=1
@@ -2596,9 +2595,9 @@ endif
      call Wfd_nato_master%free()
      call xmpi_barrier(Wfd%comm)
      ! Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
-     call dotprod_vn(1,gw_rhor,evext_energy,doti,nfftf,gwc_nfftot,1,1,vpsp,ucvol_local)!,mpi_comm_sphgrid=mpi_comm_sphgrid) !
-     one_pot(:)=1.0_dp ! Basically, integrate the density on the FFT grid to check its value. 
-     call dotprod_vn(1,gw_rhor,den_int,doti,nfftf,gwc_nfftot,1,1,one_pot,ucvol_local)  !,mpi_comm_sphgrid=mpi_comm_sphgrid) !
+     den_int=sum(gw_rhor(:,1))*ucvol_local/nfftf               ! Only restricted closed-shell calcs
+     evext_energy=sum(gw_rhor(:,1)*vpsp(:))*ucvol_local/nfftf  ! Only restricted closed-shell calcs
+     !call dotprod_vn(1,gw_rhor,evext_energy,doti,nfftf,gwc_nfftot,1,1,vpsp,ucvol_local)!,mpi_comm_sphgrid=mpi_comm_sphgrid) !
      ! Proceed to compute the Fock matrix elements.  
      write(msg,'(a1)')  ' '
      call wrtout(std_out,msg,'COLL')
@@ -3076,7 +3075,6 @@ endif
  ABI_FREE(ks_vhartr)
  ABI_FREE(ks_vtrial)
  ABI_FREE(vpsp)
- ABI_FREE(one_pot)
  ABI_FREE(ks_vxc)
  ABI_FREE(xccc3d)
  ABI_FREE(grchempottn)
