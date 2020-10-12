@@ -212,7 +212,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine wrap_CHEEV(jobz,uplo,n,a,w)
+subroutine wrap_CHEEV(jobz, uplo, n, a, w)
 
 !Arguments ------------------------------------
 !scalars
@@ -246,8 +246,8 @@ subroutine wrap_CHEEV(jobz,uplo,n,a,w)
 
  if (info > 0) then
   write(msg,'(2a,i0,a)')&
-&  "CHEEV: the algorithm failed to converge; ",ch10,&
-&  info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+   "CHEEV: the algorithm failed to converge; ",ch10,&
+   info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
   MSG_ERROR(msg)
  end if
 
@@ -424,7 +424,7 @@ end subroutine wrap_ZHEEV
 !!
 !! FUNCTION
 !!  wrap_DSYEV_ZHEEV computes the eigenvalues and, optionally, the eigenvectors of a
-!!  (complex Hermitian| real symmetric) matrix in double precision. [PRIVATE]
+!!  (complex Hermitian| real symmetric) matrix in double precision.
 !!
 !! INPUTS
 !!  JOBZ    (input) CHARACTER*1
@@ -471,7 +471,7 @@ end subroutine wrap_ZHEEV
 !!
 !! SOURCE
 
-subroutine wrap_DSYEV_ZHEEV(jobz,uplo,cplex,n,a,w,comm)
+subroutine wrap_DSYEV_ZHEEV(jobz, uplo, cplex, n, a, w, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -531,8 +531,8 @@ subroutine wrap_DSYEV_ZHEEV(jobz,uplo,cplex,n,a,w,comm)
 
    if (info > 0) then
     write(msg,'(2a,i0,a)')&
-&    "DSYEV: the algorithm failed to converge; ",ch10,&
-&    info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+      "DSYEV: the algorithm failed to converge; ",ch10,&
+      info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
     MSG_ERROR(msg)
    end if
 
@@ -540,8 +540,8 @@ subroutine wrap_DSYEV_ZHEEV(jobz,uplo,cplex,n,a,w,comm)
 
    RETURN
 
-  else                ! Hermitian case.
-
+  else
+   ! Hermitian case.
    lwork = MAX(1,2*n-1)
 
    ABI_MALLOC(work_cplx, (lwork))
@@ -556,8 +556,8 @@ subroutine wrap_DSYEV_ZHEEV(jobz,uplo,cplex,n,a,w,comm)
 
    if (info > 0) then
     write(msg,'(2a,i0,a)')&
-&    "ZHEEV: the algorithm failed to converge; ",ch10,&
-&    info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
+     "ZHEEV: the algorithm failed to converge; ",ch10,&
+     info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
     MSG_ERROR(msg)
    end if
 
@@ -1250,12 +1250,12 @@ subroutine wrap_DSYGV_ZHEGV(itype,jobz,uplo,cplex,n,a,b,w,comm)
    if (info > 0) then
     if (info<= n) then
      write(msg,'(2a,i0,a)')&
-&     "ZHEEV failed to converge: ",ch10,&
+&     "ZHEGV failed to converge: ",ch10,&
 &     info," off-diagonal elements of an intermediate tridiagonal form did not converge to zero. "
     else
      ii = info -n
      write(msg,'(3a,i0,3a)')&
-&    "ZHEEV failed to converge: ",ch10,&
+&    "ZHEGV failed to converge: ",ch10,&
 &    "The leading minor of order ",ii," of B is not positive definite. ",ch10,&
 &    "The factorization of B could not be completed and no eigenvalues or eigenvectors were computed."
     end if

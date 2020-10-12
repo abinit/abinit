@@ -3752,8 +3752,8 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 
  else if (optpcon>0) then
 !  Compute mean kinetic energy of all bands
-   ABI_ALLOCATE(ek0,(blocksize))
-   ABI_ALLOCATE(ek0_inv,(blocksize))
+   ABI_MALLOC(ek0,(blocksize))
+   ABI_MALLOC(ek0_inv,(blocksize))
    if (iterationnumber==1.or.optpcon==1) then
      do iblocksize=1,blocksize
        if (me_g0 == 1)then
@@ -3873,8 +3873,8 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        end if
      end do
    end do
-   ABI_DEALLOCATE(ek0)
-   ABI_DEALLOCATE(ek0_inv)
+   ABI_FREE(ek0)
+   ABI_FREE(ek0_inv)
  end if !optpcon
 
  call timab(536,2,tsec)
@@ -3982,8 +3982,8 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 
  else if (optpcon>0) then
 !  Compute mean kinetic energy of all bands
-   ABI_ALLOCATE(ek0,(blocksize))
-   ABI_ALLOCATE(ek0_inv,(blocksize))
+   ABI_MALLOC(ek0,(blocksize))
+   ABI_MALLOC(ek0_inv,(blocksize))
    if (iterationnumber==1.or.optpcon==1) then
      do iblocksize=1,blocksize
        ek0(iblocksize)=0.0_dp
@@ -4039,8 +4039,8 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        end do
      end do
    end do
-   ABI_DEALLOCATE(ek0)
-   ABI_DEALLOCATE(ek0_inv)
+   ABI_FREE(ek0)
+   ABI_FREE(ek0_inv)
  end if !optpcon
 
  call timab(536,2,tsec)
@@ -4109,11 +4109,11 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
 !The general case, where a complex phase indeterminacy is present
  if(istwfk==1)then
 
-   ABI_ALLOCATE(cimb,(nband_k))
-   ABI_ALLOCATE(creb,(nband_k))
-   ABI_ALLOCATE(saab,(nband_k))
-   ABI_ALLOCATE(sabb,(nband_k))
-   ABI_ALLOCATE(sbbb,(nband_k))
+   ABI_MALLOC(cimb,(nband_k))
+   ABI_MALLOC(creb,(nband_k))
+   ABI_MALLOC(saab,(nband_k))
+   ABI_MALLOC(sabb,(nband_k))
+   ABI_MALLOC(sbbb,(nband_k))
    cimb(:)=zero ; creb(:)=zero
 
 !  Loop over bands
@@ -4227,18 +4227,18 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
 
    end do ! iband
 
-   ABI_DEALLOCATE(cimb)
-   ABI_DEALLOCATE(creb)
-   ABI_DEALLOCATE(saab)
-   ABI_DEALLOCATE(sabb)
-   ABI_DEALLOCATE(sbbb)
+   ABI_FREE(cimb)
+   ABI_FREE(creb)
+   ABI_FREE(saab)
+   ABI_FREE(sabb)
+   ABI_FREE(sbbb)
 
 !  ====================================================================
 
 !  Storages that take into account the time-reversal symmetry : the freedom is only a sign freedom
  else  ! if istwfk/=1
 
-   ABI_ALLOCATE(creb,(nband_k))
+   ABI_MALLOC(creb,(nband_k))
    creb(:)=zero
 !  Loop over bands
    do iband=1,nband_k
@@ -4274,7 +4274,7 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
 
    end do ! iband
 
-   ABI_DEALLOCATE(creb)
+   ABI_FREE(creb)
 
  end if ! istwfk
 
@@ -4435,22 +4435,22 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
 !Diagonalize the Hamitonian matrix
  if(istwf_k==2) then
-   ABI_ALLOCATE(evec_tmp,(nband_k,nband_k))
-   ABI_ALLOCATE(subham_tmp,(nband_k*(nband_k+1)/2))
+   ABI_MALLOC(evec_tmp,(nband_k,nband_k))
+   ABI_MALLOC(subham_tmp,(nband_k*(nband_k+1)/2))
    subham_tmp=subham(1:nband_k*(nband_k+1):2)
    evec_tmp=zero
    if (use_subovl==1) then
-     ABI_ALLOCATE(subovl_tmp,(nband_k*(nband_k+1)/2))
+     ABI_MALLOC(subovl_tmp,(nband_k*(nband_k+1)/2))
      subovl_tmp=subovl(1:nband_k*(nband_k+1):2)
 !    TO DO: Not sure this one has been fully tested
      call abi_xhpgv(1,'V','U',nband_k,subham_tmp,subovl_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
-     ABI_DEALLOCATE(subovl_tmp)
+     ABI_FREE(subovl_tmp)
    else
      call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
    evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
-   ABI_DEALLOCATE(evec_tmp)
-   ABI_DEALLOCATE(subham_tmp)
+   ABI_FREE(evec_tmp)
+   ABI_FREE(subham_tmp)
  else
    if (use_subovl==1) then
      call abi_xhpgv(1,'V','U',nband_k,subham,subovl,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
@@ -4545,9 +4545,9 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
    end if
 
-   ABI_DEALLOCATE(blockvectora)
-   ABI_DEALLOCATE(blockvectorb)
-   ABI_DEALLOCATE(blockvectorc)
+   ABI_FREE(blockvectora)
+   ABI_FREE(blockvectorb)
+   ABI_FREE(blockvectorc)
 
  else
 
@@ -4571,7 +4571,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
      call abi_xcopy(npw_k*nspinor*nband_k, work(1,1),1,gsc(1,1+igsc),1,x_cplx=2)
    end if
 
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
  end if
 
  contains
@@ -4711,9 +4711,9 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 
    if(istwf_k==1) then
      vectsize=nelem
-     ABI_ALLOCATE(cgramxbx,(nvec,nvec))
-     ABI_ALLOCATE(cblockvectorx,(vectsize,nvec))
-     ABI_ALLOCATE(cblockvectorbx,(vectsize,nvec))
+     ABI_MALLOC(cgramxbx,(nvec,nvec))
+     ABI_MALLOC(cblockvectorx,(vectsize,nvec))
+     ABI_MALLOC(cblockvectorbx,(vectsize,nvec))
      call abi_xcopy(nvec*vectsize,vecnm(:,cgindex(1):cgindex(nvec)-1),1,cblockvectorx,1,x_cplx=2)
      if (useoverlap == 1) then
        call abi_xcopy(nvec*vectsize,ovl_vecnm(:,gscindex(1):gscindex(nvec)-1),1,cblockvectorbx,1,x_cplx=2)
@@ -4726,17 +4726,17 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
        call abi_xtrsm('r','u','n','n',vectsize,nvec,cone,cgramxbx,nvec,cblockvectorbx,vectsize)
        call abi_xcopy(nvec*vectsize,cblockvectorbx,1,ovl_vecnm(:,gscindex(1):gscindex(nvec)-1),1,x_cplx=2)
      end if
-     ABI_DEALLOCATE(cgramxbx)
-     ABI_DEALLOCATE(cblockvectorx)
-     ABI_DEALLOCATE(cblockvectorbx)
+     ABI_FREE(cgramxbx)
+     ABI_FREE(cblockvectorx)
+     ABI_FREE(cblockvectorbx)
 
    else if(istwf_k==2) then
      ! Pack real and imaginary part of the wavefunctions.
      rvectsiz=nelem
      vectsize=2*nelem; if(me_g0==1) vectsize=vectsize-1
-     ABI_ALLOCATE(rgramxbx,(nvec,nvec))
-     ABI_ALLOCATE(rblockvectorx,(vectsize,nvec))
-     ABI_ALLOCATE(rblockvectorbx,(vectsize,nvec))
+     ABI_MALLOC(rgramxbx,(nvec,nvec))
+     ABI_MALLOC(rblockvectorx,(vectsize,nvec))
+     ABI_MALLOC(rblockvectorbx,(vectsize,nvec))
      do ivec=1,nvec
        if (me_g0 == 1) then
          call abi_xcopy(1,vecnm(1,cgindex(ivec)),1,rblockvectorx (1,ivec),1)
@@ -4799,9 +4799,9 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
          end if
        end if
      end do
-     ABI_DEALLOCATE(rgramxbx)
-     ABI_DEALLOCATE(rblockvectorx)
-     ABI_DEALLOCATE(rblockvectorbx)
+     ABI_FREE(rgramxbx)
+     ABI_FREE(rblockvectorx)
+     ABI_FREE(rblockvectorbx)
    end if
 
  else if (ortalgo==4) then
@@ -5158,8 +5158,8 @@ subroutine cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
- ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
+ ABI_MALLOC(matvnl,(2,nband_k,nband_k))
+ ABI_MALLOC(mat1,(2,nband_k,nband_k))
 
  pidx=0
  do jj=1,nband_k
@@ -5177,8 +5177,8 @@ subroutine cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
    enlx_k(iband) = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
  end do
 
- ABI_DEALLOCATE(matvnl)
- ABI_DEALLOCATE(mat1)
+ ABI_FREE(matvnl)
+ ABI_FREE(mat1)
 
 end subroutine cg_hprotate_and_get_diag
 !!***
@@ -5217,8 +5217,8 @@ subroutine cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
- ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
+ ABI_MALLOC(matvnl,(2,nband_k,nband_k))
+ ABI_MALLOC(mat1,(2,nband_k,nband_k))
  mat1=zero
 
  enlx_k(1:nband_k)=zero
@@ -5230,8 +5230,8 @@ subroutine cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
    end do
 
  else if (istwf_k==2) then
-   ABI_ALLOCATE(evec_loc,(nband_k,nband_k))
-   ABI_ALLOCATE(mat_loc,(nband_k,nband_k))
+   ABI_MALLOC(evec_loc,(nband_k,nband_k))
+   ABI_MALLOC(mat_loc,(nband_k,nband_k))
    do iband=1,nband_k
      do jj=1,nband_k
        evec_loc(iband,jj)=evec(2*iband-1,jj)
@@ -5241,12 +5241,12 @@ subroutine cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
    do iband=1,nband_k
      enlx_k(iband)=ddot(nband_k,evec_loc(:,iband),1,mat_loc(:,iband),1)
    end do
-   ABI_DEALLOCATE(evec_loc)
-   ABI_DEALLOCATE(mat_loc)
+   ABI_FREE(evec_loc)
+   ABI_FREE(mat_loc)
  end if
 
- ABI_DEALLOCATE(matvnl)
- ABI_DEALLOCATE(mat1)
+ ABI_FREE(matvnl)
+ ABI_FREE(mat1)
 
 end subroutine cg_hrotate_and_get_diag
 !!***

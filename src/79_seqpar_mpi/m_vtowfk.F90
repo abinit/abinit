@@ -405,14 +405,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      else
 !      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
 !      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
+if (dtset%useria == 0 .or. (dtset%useria == 321 .and. nnsclo_now == 1)) then
+
        call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
          gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
          mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
          dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
          subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
 
-       if (dtset%useria == 1 .and. nnsclo_now == 1) then
-         call rmm_diis(cg(:,icg+1:), dtset, eig_k, enlx_k, gs_hamk, gsc, kinpw, &
+end if
+
+       if (dtset%useria == 321 .and. nnsclo_now == 1) then
+         !call wrtout(std_out, "Calling rmms_diis after cwfw")
+         call rmm_diis(cg(:,icg+1:), dtset, eig_k, enlx_k, gs_hamk, gsc, &
                        mpi_enreg, nband_k, npw_k, my_nspinor, resid_k)
        end if
 
@@ -443,6 +448,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if (dtset%useria == 1 .and. nnsclo_now == 1) do_subdiago = .False.
 
    if (do_subdiago) then
+     if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
      call timab(585,1,tsec) !"vtowfk(subdiago)"
      call subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, &
        mcg, mgsc, nband_k, npw_k, my_nspinor, dtset%paral_kgb, &
@@ -483,6 +489,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ortalgo=mpi_enreg%paral_kgb
    do_ortho = ((wfoptalg/=14 .and. wfoptalg /= 1) .or. dtset%ortalg > 0)
    if (do_ortho) then
+     if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
      call pw_orthon(icg, igsc, istwf_k, mcg, mgsc, npw_k*my_nspinor, nband_k, ortalgo, gsc, gs_hamk%usepaw, cg, &
       mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
    end if
@@ -992,9 +999,6 @@ end subroutine vtowfk
 !!  gsc(2,mgsc)= same array with altered phase.
 !!
 !! NOTES
-!! When the sign of the real part was fixed (modif v3.1.3g.6), the
-!! test Tv3#5 , dataset 5, behaved differently than previously.
-!! This should be cleared up.
 !!
 !! PARENTS
 !!      m_vtowfk

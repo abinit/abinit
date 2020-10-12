@@ -613,7 +613,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (resid(iband)<tolwfr) then
            if (prtvol>=10) then
              write(message, '(a,i4,a,i2,a,es12.4)' ) &
-&             ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
+              ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
              call wrtout(std_out,message,'PERS')
            end if
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped

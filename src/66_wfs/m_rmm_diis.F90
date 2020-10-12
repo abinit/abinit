@@ -35,7 +35,7 @@ module m_rmm_diis
  use defs_abitypes,   only : mpi_type
  use m_time,          only : timab
  use m_numeric_tools, only : pack_matrix
- use m_hide_lapack,   only : xheev
+ use m_hide_lapack,   only : xheev, xhegv
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby, pawcprj_copy
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_getghc,        only : getghc
@@ -72,7 +72,7 @@ contains
 !!  eig(nband)=array for holding eigenvalues (hartree)
 !!  resid(nband)=residuals for each states
 !!  If usepaw==1:
-!!    gsc(2,*)=<g|s|c> matrix elements (s=overlap)
+!!    gsc_all(2,*)=<g|s|c> matrix elements (s=overlap)
 !!  If usepaw==0
 !!    enlx(nband)=contribution from each band to nonlocal psp + potential Fock ACE part of total energy, at this k-point
 !!
@@ -88,14 +88,14 @@ contains
 !!
 !! SOURCE
 
-subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc, kinpw, mpi_enreg, nband, npw, nspinor, resid)
+subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, npw, nspinor, resid)
 
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
  integer,intent(in) :: nband, npw, nspinor
- real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband), gsc(2,npw*nspinor*nband*dtset%usepaw)
+ real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband), gsc_all(2,npw*nspinor*nband*dtset%usepaw)
  !real(dp),intent(in) :: kinpw(npw)
  real(dp),intent(inout) :: enlx(nband)
  real(dp),intent(inout) :: resid(nband)
@@ -103,20 +103,20 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc, kinpw, mpi_enreg, nband,
 
 !Local variables-------------------------------
  integer,parameter :: ndat1 = 1, type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
- integer :: ii, jj
+ integer :: ii, jj, cplex, nline
  integer :: iband, cpopt, sij_opt, is, ie, mcg, mgsc, use_subovl, istwf_k, optekin, usepaw, iter
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft
  real(dp),parameter :: rdummy = zero
- real(dp) :: dprod_r, dprod_i, lambda, r1
+ real(dp) :: dprod_r, dprod_i, lambda, rval
+ character(len=500) :: msg
 !arrays
- integer :: max_niter_band(nband)
- !integer, allocatable :: nline_bands(:)
+ !integer :: max_niter_band(nband)
  real(dp) :: tsec(2), eig_save(nband)
- real(dp),allocatable :: ghc(:,:), gvnlxc(:,:), pcon(:), chain_ug(:,:,:), chain_res(:,:,:)
+ real(dp),allocatable :: ghc(:,:), gsc(:,:), gvnlxc(:,:), pcon(:), chain_phi(:,:,:), chain_res(:,:,:)
  real(dp),allocatable :: residvec(:,:), kres(:,:), phi_now(:,:)
  real(dp),allocatable :: evec(:,:),evec_loc(:,:), subham(:), subovl(:)
  real(dp),allocatable :: h_ij(:,:,:), vnlx_ij(:,:,:)
- real(dp),allocatable :: diis_resmat(:,:,:), diis_smat(:,:,:), diis_workmat(:,:,:), diis_evec(:,:,:), diis_eig(:,:)
+ real(dp),allocatable :: diis_resmat(:,:,:), diis_smat(:,:,:), diis_eig(:), wmat1(:,:,:), wmat2(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  !type(pawcprj_type) :: cprj_dum(1,1)
 
@@ -144,6 +144,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc, kinpw, mpi_enreg, nband,
  end if
 
  ABI_MALLOC(ghc, (2, npw*nspinor))
+ ABI_MALLOC(gsc, (2, npw*nspinor*usepaw))
  ABI_MALLOC(gvnlxc, (2, npw*nspinor))
 
  ! ====================
@@ -154,7 +155,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc, kinpw, mpi_enreg, nband,
 
  do iband=1,nband
    is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
-   call getghc(cpopt, cg(:,is:ie), cwaveprj, ghc, gsc(:,is:ie), gs_hamk, gvnlxc,&
+   call getghc(cpopt, cg(:,is:ie), cwaveprj, ghc, gsc_all(:,is:ie), gs_hamk, gvnlxc,&
                rdummy, mpi_enreg, ndat1, dtset%prtvol, sij_opt, tim_getghc, type_calc0)
 
    ! <i|H|j> and <i|Vnl + FockACE|j>
@@ -163,7 +164,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc, kinpw, mpi_enreg, nband,
    call cg_zgemv("C", npw*nspinor, nband, cg, gvnlxc, vnlx_ij(:,:,iband))
  end do
 
- ! Pack <i|H|j> to prepare call subdiago.
+ ! Pack <i|H|j> to prepare call to subdiago.
  ABI_MALLOC(subham, (nband*(nband+1)))
  call pack_matrix(h_ij, subham, nband, 2)
  ABI_FREE(h_ij)
@@ -182,11 +183,11 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc, kinpw, mpi_enreg, nband,
  ! =================
  call timab(585,1,tsec) !"vtowfk(subdiago)"
  ABI_MALLOC(evec, (2*nband, nband))
- call subdiago(cg, eig, evec, gsc, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, dtset%paral_kgb, &
+ call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, dtset%paral_kgb, &
                subham, subovl, use_subovl, usepaw, me_g0)
  call timab(585,2,tsec)
 
- ! Compute Vnl in new cg. Use subham as Workspace.
+ ! Compute Vnl in new cg basis. Use subham as Workspace.
  call pack_matrix(vnlx_ij, subham, nband, 2)
  call cg_hprotate_and_get_diag(nband, subham, evec, enlx)
  ABI_FREE(vnlx_ij)
@@ -198,47 +199,164 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc, kinpw, mpi_enreg, nband,
  ! ==========
  ! DIIS loop
  ! ==========
- optekin = 0 !; if (dtset%wfoptalg>=10) optekin = 1
- max_niter_band = dtset%nline
+ optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
+ optekin = 1
+ !write(std_out,*)"optekin:", optekin
+ nline = dtset%nline
 
  ABI_ALLOCATE(pcon, (npw))
- ABI_MALLOC(chain_ug, (2, npw*nspinor, 0:dtset%nline))
- ABI_MALLOC(chain_res, (2, npw*nspinor, 0:dtset%nline))
+ ABI_MALLOC(chain_phi, (2, npw*nspinor, 0:nline))
+ ABI_MALLOC(chain_res, (2, npw*nspinor, 0:nline))
 
- ABI_MALLOC(diis_resmat, (2, dtset%nline, dtset%nline))          ! <R_i|R_j>
- ABI_MALLOC(diis_workmat, (2, dtset%nline, dtset%nline))
- ABI_MALLOC(diis_smat, (2, dtset%nline, dtset%nline * usepaw))   ! <i|S|j> for PAW
- ABI_MALLOC(diis_evec, (2, dtset%nline, dtset%nline))
-
+ ABI_MALLOC(diis_resmat, (2, 0:nline, 0:nline)) ! <R_i|R_j>
+ ABI_MALLOC(diis_smat, (2, 0:nline, 0:nline))   ! <i|S|j>
  ABI_MALLOC(residvec, (2, npw*nspinor))
  ABI_MALLOC(kres, (2, npw*nspinor))
  ABI_MALLOC(phi_now, (2, npw*nspinor))
- !ABI_MALLOC(nline_bands, (nband))
- !ABI_FREE(nline_bands)
 
  eig_save = eig
 
  do iband=1,nband
-   ! phi_0 is stored in cg
+   ! Step 0:
+   ! |phi_0> taken from cg
    is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
    phi_now = cg(:,is:ie)
-   chain_ug(:,:,0) = phi_now
+   chain_phi(:,:,0) = phi_now
 
-   do iter=1,1 !, max_niter_band(iband)
-   !do iter=1,2
-     call getghc(cpopt, phi_now, cwaveprj, ghc, gsc(:,is:ie), gs_hamk, gvnlxc, &
+   ! Compute H |phi_0>
+   call getghc(cpopt, phi_now, cwaveprj, ghc, gsc_all(:,is:ie), gs_hamk, gvnlxc, &
+               rdummy, mpi_enreg, ndat1, dtset%prtvol, sij_opt, tim_getghc, type_calc0)
+
+   call dotprod_g(eig(iband), dprod_i, istwf_k, npw*nspinor, option1, ghc, &
+                  phi_now, me_g0, comm_spinorfft)
+
+   if (usepaw == 1) then
+     call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option1, gsc_all(:, is:), &
+                    phi_now, me_g0, comm_spinorfft)
+     eig(iband) = eig(iband) / dprod_r
+   end if
+
+   ! Get residual R_0 = (H- e_0.S) |phi_0>
+   if (usepaw == 1) then
+     residvec = ghc - eig(iband) * gsc_all(:, is:ie)
+   else
+     residvec = ghc - eig(iband) * phi_now
+   end if
+
+   ! Store R_0 in chain array.
+   chain_res(:,:,0) = residvec
+   ! Evaluate <R0|R0> and <phi_0|S|phi_0>
+   call sqnorm_g(resid(iband), istwf_k, npw*nspinor, residvec, me_g0, comm_fft)
+   diis_resmat(:, 0, 0) = [resid(iband), zero]
+   call sqnorm_g(rval, istwf_k, npw*nspinor, phi_now, me_g0, comm_spinorfft)
+   diis_smat(:, 0, 0) = [rval, zero]
+
+   kres = residvec
+   ! Precondition R0, output in kres = K.R_0
+   call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
+   !call cg_precon(residvec, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
+                  optekin, pcon, kres, comm_bandspinorfft)
+   !write(std_out,*)"kres(1:2):", kres(:, 1:2)
+
+   write(msg,'(2(a5),a14,a12)')'iter', "band", "eigen", "resid"
+   call wrtout(std_out, msg ,"PERS")
+   write(msg,'(2(i5),f14.6,es12.4)')0, iband, eig(iband) * Ha_eV, resid(iband)
+   call wrtout(std_out, msg ,"PERS")
+
+iter_loop: do iter=1,nline
+
+     if (iter == 1) then
+       ! Compute H |K.R_0>
+       call getghc(cpopt, kres, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, &
+                   rdummy, mpi_enreg, ndat1, dtset%prtvol, sij_opt, tim_getghc, type_calc0)
+
+       ! Compute residual: (H - e_0.S) |K.R_0>
+       if (usepaw == 1) then
+         residvec = ghc - eig(iband) * gsc
+       else
+         residvec = ghc - eig(iband) * kres
+       end if
+
+       ! Compute lambda that minimizes the norm of the residual.
+       ! lambda = - Re{<R_0|(H - e_0.S)}|K.R_0>} / |(H - e_0.S) K.R_0|**2
+       call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option1, &
+                      chain_res(:,:,0), residvec, me_g0, comm_spinorfft)
+       call sqnorm_g(rval, istwf_k, npw*nspinor, residvec, me_g0, comm_spinorfft)
+
+       lambda = -dprod_r / rval
+       !write(std_out, *)"lambda, dprod_r, rval ", lambda, dprod_r, rval
+       !if (lambda < tol1 .or. lambda > one) then
+       !   lambda = 0.1
+       !end if
+       !lambda = one
+
+       ! phi_1 = phi_0 + lambda K.R_0
+       phi_now = chain_phi(:,:,0) + lambda * kres
+       call sqnorm_g(rval, istwf_k, npw*nspinor, phi_now, me_g0, comm_spinorfft)
+       phi_now = phi_now / sqrt(rval)
+       chain_phi(:,:,1) = phi_now
+
+     else
+       ! Solve DIIS to get phi_now for iter >= 2
+       cplex = 2
+       ABI_MALLOC(diis_eig, (0:iter-1))
+       ABI_MALLOC(wmat1, (cplex, 0:iter-1, 0:iter-1))
+       ABI_MALLOC(wmat2, (cplex, 0:iter-1, 0:iter-1))
+
+       wmat1 = diis_resmat(:, 0:iter-1, 0:iter-1)
+       wmat2 = diis_smat(:, 0:iter-1, 0:iter-1)
+       !do ii=0,iter-1
+       !  write(std_out, *) "diis_resmat:", wmat1(:,ii,:)
+       !end do
+       !do ii=0,iter-1
+       !  write(std_out, *) "diis_smat:", wmat2(:,ii,:)
+       !end do
+
+       call xhegv(1, "V", "U", cplex, iter, wmat1, wmat2, diis_eig)
+       !write(std_out,*)"diis_eig:", diis_eig(0)
+       !write(std_out,*)"RE diis_vec  :", wmat1(1,:,0)
+       !write(std_out,*)"IMAG diis_vec:", wmat1(2,:,0)
+       !if (ierr) exit iter_loop
+
+       ! Take linear combination
+       ! Compute phi_now with lambda obtained in step #1
+       call cg_zgemv("N", npw*nspinor, iter, chain_phi, wmat1(:,:,0), phi_now)
+       call cg_zgemv("N", npw*nspinor, iter, chain_res, wmat1(:,:,0), residvec)
+       call sqnorm_g(rval, istwf_k, npw*nspinor, phi_now, me_g0, comm_spinorfft)
+       phi_now = phi_now / sqrt(rval)
+
+       ! Precondition residual, output in kres.
+       kres = residvec
+       !call cg_precon(residvec, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
+       call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
+                      optekin, pcon, kres, comm_bandspinorfft)
+
+       phi_now = phi_now + lambda * kres
+       call sqnorm_g(rval, istwf_k, npw*nspinor, phi_now, me_g0, comm_spinorfft)
+       phi_now = phi_now / sqrt(rval)
+       chain_phi(:,:,iter) = phi_now
+
+       ABI_FREE(wmat1)
+       ABI_FREE(wmat2)
+       ABI_FREE(diis_eig)
+     end if
+
+     ! Compute H |phi_now>
+     call getghc(cpopt, phi_now, cwaveprj, ghc, gsc_all(:,is:ie), gs_hamk, gvnlxc, &
                  rdummy, mpi_enreg, ndat1, dtset%prtvol, sij_opt, tim_getghc, type_calc0)
 
      ! New approximated eigenvalue.
-     !if (iter > 1)
+if (iter == 1) then
+!if (iter <= 2) then
      call dotprod_g(eig(iband), dprod_i, istwf_k, npw*nspinor, option1, ghc, &
                     phi_now, me_g0, comm_spinorfft)
 
      if (usepaw == 1) then
-       call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option1, gsc(:, is:), &
+       call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option1, gsc_all(:, is:), &
                       phi_now, me_g0, comm_spinorfft)
        eig(iband) = eig(iband) / dprod_r
      end if
+end if
 
      !if (abs(eig(iband) - eig_save(iband))) < (eaccuracy / nband_occ / dtset%nline) then
      !  max_niter_band(iband) = 0
@@ -246,72 +364,71 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc, kinpw, mpi_enreg, nband,
 
      ! Residual.
      if (usepaw == 1) then
-       residvec = ghc - eig(iband) * gsc(:, is:ie)
+       residvec = ghc - eig(iband) * gsc_all(:, is:ie)
      else
        residvec = ghc - eig(iband) * phi_now
      end if
 
-     ! Store residual in R_{i-1}.
-     chain_res(:, :, iter-1) = residvec
+     ! Store residual R_iter.
+     chain_res(:, :, iter) = residvec
      call sqnorm_g(resid(iband), istwf_k, npw*nspinor, residvec, me_g0, comm_fft)
-     !resid(iband) = sum(residvec**2)
+
+     call dotprod_g(enlx(iband), dprod_i, istwf_k, npw*nspinor, option1, &
+       phi_now, gvnlxc, me_g0, comm_bandspinorfft)
 
      ! ============== CHECK FOR CONVERGENCE ========================
+     write(msg,"(2(i5),f14.6,es12.4)")iter, iband, eig(iband) * Ha_eV, resid(iband)
+     call wrtout(std_out, msg, 'PERS')
 
-     ! Precondition residual, output in kres.
-     !call cg_precon(residvec, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
-     !               optekin, pcon, kres, comm_bandspinorfft)
-     kres = residvec
-
-     ! <R_i|R_j> for j = iter-1
-     do ii=0,iter-1
-       call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option2, &
-                      chain_res(:,:,ii), chain_res(:,:,iter-1), me_g0, comm_spinorfft)
-       diis_resmat(:, ii+1, iter) = [dprod_r, dprod_i]
-     end do
-
-     if (iter == 1) then
-       ! Compute lambda = -<R0|R1> / <R1|R1>
-       !call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option1, &
-       !               chain_res(:,:,0), kres, me_g0, comm_spinorfft)
-       !call sqnorm_g(r1, istwf_k, npw*nspinor, chain_res(:,:,0), me_g0, comm_spinorfft)
-       !lambda = -dprod_r / r1 ** 2
-       !write(std_out, *)"lambda: ", lambda
-       lambda = 0.1_dp
-
-       ! phi_1 = phi_0 + lambda K.R_0
-       chain_ug(:,:,iter) = phi_now + lambda * kres
-       phi_now = chain_ug(:,:,iter)
-
-     else
-       ! Solve DIIS
-       if (usepaw == 0) then
-         !diis_workmat = diis_resmat
-         !call xheev("V", "U", dtset%nline, diis_workmat, diis_eig)
-       else
-       end if
-       ! Compute new trial wavefunction
-       !call cg_lincom(iter, betas, npw*nspinor, chain_ug(:,:,:), phi_now)
-       !call cg_lincom(iter, betas, npw*nspinor, chain_res(:,:,:), kres)
-       phi_now = phi_now + lambda * kres
+     !if (resid(iband) < dtset%tolwfr) then
+     !if (resid(iband) < tol10) then
+     !if (resid(iband) < tol12) then
+     if (resid(iband) < tol16) then
+       !if (dtset%prtvol >= 10) then
+         write(msg, '(2a,i4,a,i2,a,es12.4,a)' ) ch10, &
+          ' rmm_diis: band ',iband,' converged after ',iter,' iterations with resid: ',resid(iband), ch10
+         call wrtout(std_out, msg , "PERS")
+       !end if
+       exit iter_loop
      end if
 
-   end do ! iter
+     ! Precondition residual, output in kres.
+     !kres = residvec
+     !call cg_precon(residvec, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
+     !               optekin, pcon, kres, comm_bandspinorfft)
+
+     ! <R_i|R_j> for j = iter
+     ! <i|S|j>
+     do ii=0,iter
+       call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option2, &
+                      chain_res(:,:,ii), chain_res(:,:,iter), me_g0, comm_spinorfft)
+       if (ii == iter) dprod_i = zero
+       diis_resmat(:, ii, iter) = [dprod_r, dprod_i]
+
+       call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option2, &
+                      chain_phi(:,:,ii), chain_phi(:,:,iter), me_g0, comm_spinorfft)
+       if (ii == iter) dprod_i = zero
+       diis_smat(:, ii, iter) = [dprod_r, dprod_i]
+     end do
+
+   end do iter_loop
 
    ! Update wavefunction for this band
+   !call sqnorm_g(rval, istwf_k, npw*nspinor, phi_now, me_g0, comm_spinorfft)
+   !phi_now = phi_now / sqrt(rval)
    cg(:,is:ie) = phi_now
+
  end do ! iband
 
  ABI_FREE(pcon)
- ABI_FREE(chain_ug)
+ ABI_FREE(chain_phi)
  ABI_FREE(chain_res)
  ABI_FREE(diis_resmat)
- ABI_FREE(diis_workmat)
  ABI_FREE(diis_smat)
- ABI_FREE(diis_evec)
 
  ! Final cleanup
  ABI_FREE(ghc)
+ ABI_FREE(gsc)
  ABI_FREE(residvec)
  ABI_FREE(kres)
  ABI_FREE(phi_now)
