@@ -105,7 +105,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 !Local variables-------------------------------
 
  integer,parameter :: ndat1 = 1, type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, level = 114
- integer :: ii, jj, cplex, nline, ierr, prtvol
+ integer :: ii, cplex, nline, ierr, prtvol
  integer :: iband, cpopt, sij_opt, is, ie, mcg, mgsc, use_subovl, istwf_k, optekin, usepaw, iter
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft
  real(dp),parameter :: rdummy = zero
@@ -322,7 +322,7 @@ iter_loop: do iter=1,nline
        !write(std_out,*)"RE diis_vec  :", wmat1(1,:,0)
        !write(std_out,*)"IMAG diis_vec:", wmat1(2,:,0)
        if (ierr /= 0) then
-         call wrtout(std_out, sjoin("xhegv failed with:", msg, ch10, "at iter: ", itoa(iter), "Exit iter_loop!"))
+         call wrtout(std_out, sjoin("xhegv failed with:", msg, ch10, "at iter: ", itoa(iter), "exit iter_loop!"))
          ABI_FREE(wmat1)
          ABI_FREE(wmat2)
          ABI_FREE(diis_eig)
@@ -426,16 +426,14 @@ iter_loop: do iter=1,nline
 
    ! Update wavefunction for this band
    cg(:,is:ie) = phi_now
-
  end do ! iband
 
+ ! Final cleanup
  ABI_FREE(pcon)
  ABI_FREE(chain_phi)
  ABI_FREE(chain_res)
  ABI_FREE(diis_resmat)
  ABI_FREE(diis_smat)
-
- ! Final cleanup
  ABI_FREE(ghc)
  ABI_FREE(gsc)
  ABI_FREE(residvec)
