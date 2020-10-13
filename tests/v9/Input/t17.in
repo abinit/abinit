@@ -3,7 +3,7 @@
 useria 321 # Needed to acivate CG + RMM-DIIS. To be changed when in production
 boxcutmin 1.8
 
-istwfk *1  # Important. istwfk /= 1 are not yet supported
+#istwfk *1  # Important. istwfk /= 1 are not yet supported
 ecut   20
 diemac 12.0
 

@@ -196,18 +196,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: use_subvnlx=0
  integer :: use_totvnlx=0
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
- integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,pidx,inonsc
- integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,jj,mgsc,my_nspinor,n1,n2,n3 !kk
+ integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
+ integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
  integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc, use_rmm_diis
  real(dp) :: ar,ar_im,eshift,occblock
- real(dp) :: res,residk,weight,cpu,wall,gflops
+ real(dp) :: residk,weight,cpu,wall,gflops
  character(len=500) :: msg
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
- real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
- real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:)
+ real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),gsc(:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 

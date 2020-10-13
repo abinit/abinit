@@ -1081,9 +1081,7 @@ subroutine sqnorm_g(dotr,istwf_k,npwsp,vect,me_g0,comm)
    dotr=two*dotr
  end if
 
- if (xmpi_comm_size(comm)>1) then
-   call xmpi_sum(dotr,comm,ierr)
- end if
+ if (xmpi_comm_size(comm)>1) call xmpi_sum(dotr,comm,ierr)
 
 end subroutine sqnorm_g
 !!***
@@ -1147,7 +1145,8 @@ subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
 
 ! *************************************************************************
 
- if (istwf_k==1) then ! General k-point
+ if (istwf_k==1) then
+   ! General k-point
 
    if(option==1)then
      dotr = cg_real_zdotc(npw,vect1,vect2)

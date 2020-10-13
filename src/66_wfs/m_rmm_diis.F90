@@ -106,7 +106,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 
  integer,parameter :: ndat1 = 1, type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, level = 114
  integer,parameter :: use_subovl0 = 0
- integer :: ii, cplex, nline, ierr, prtvol
+ integer :: ii, ig, ib, cplex, nline, ierr, prtvol
  integer :: iband, cpopt, sij_opt, is, ie, mcg, mgsc, istwf_k, optekin, usepaw, iter
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft
  real(dp),parameter :: rdummy = zero
@@ -114,13 +114,13 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  character(len=500) :: msg
 !arrays
  !integer :: max_niter_band(nband)
- real(dp) :: tsec(2), eig_save(nband)
+ real(dp) :: tsec(2), eig_save(nband) !, g0hc(2), cg0(2,nband)
  real(dp),allocatable :: ghc(:,:), gsc(:,:), gvnlxc(:,:), pcon(:), chain_phi(:,:,:), chain_res(:,:,:)
  real(dp),allocatable :: residvec(:,:), kres(:,:), phi_now(:,:)
  real(dp),allocatable :: evec(:,:), subham(:), h_ij(:,:,:)
  real(dp),allocatable :: diis_resmat(:,:,:), diis_smat(:,:,:), diis_eig(:), wmat1(:,:,:), wmat2(:,:,:)
  real(dp) :: subovl(use_subovl0)
- real(dp),pointer :: gsc_ptr(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: gsc_ptr(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  !type(pawcprj_type) :: cprj_dum(1,1)
 
@@ -156,20 +156,32 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  ! ====================
  ! Apply H to input cg
  ! ====================
- ABI_MALLOC(h_ij, (2, nband, nband))
+ ABI_CALLOC(h_ij, (2, nband, nband))
 
  do iband=1,nband
    is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
    if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
+
    call getghc(cpopt, cg(:,is:ie), cwaveprj, ghc, gsc_ptr, gs_hamk, gvnlxc, &
                rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
-   ! <i|H|j> and <i|Vnl + FockACE|j>
-   if (istwf_k == 1) then
-     call cg_zgemv("C", npw*nspinor, nband, cg, ghc, h_ij(:,:,iband))
-   else
-     MSG_ERROR("Only istwf_k == 1 is supported")
+   ! Compute <i|H|iband>
+   call cg_zgemv("C", npw*nspinor, nband, cg, ghc, h_ij(:,:,iband))
+
+   if (istwf_k /= 1) then
+     h_ij(:,:,iband) = two * h_ij(:,:,iband)
+
+     if (istwf_k == 2 .and. me_g0 == 1) then
+       ! Gamma k-point and I have G=0
+       do ib=1,nband
+         ig = 1 + npw * nspinor * (ib - 1)
+         h_ij(1,ib,iband) = h_ij(1,ib,iband) - cg(1,ig) * ghc(1,1)
+       end do
+     end if
+     ! Force matrix to be real.
+     h_ij(2,:,iband) = zero
    end if
+
  end do
 
  ! Pack <i|H|j> to prepare call to subdiago.
@@ -263,7 +275,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
      call wrtout(std_out, msg, "PERS")
    end if
 
-iter_loop: do iter=1,nline
+   iter_loop: do iter=1,nline
 
      if (iter == 1) then
        ! Compute H |K.R_0>

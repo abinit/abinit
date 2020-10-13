@@ -32,7 +32,7 @@
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           8
-       mpw =        1139          nfft =       27000          nkpt =           8
+       mpw =        1125          nfft =       27000          nkpt =           8
 ================================================================================
 P This job should need less than                       9.708 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -56,7 +56,7 @@ _ WF disk file :      1.114 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
            diemac      1.20000000E+01
              ecut      2.00000000E+01 Hartree
 -          fftalg         312
-           istwfk        1    0    1    0    0    0    1    0
+           istwfk        2    0    3    0    0    0    7    0
               ixc       -1012
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -153,7 +153,7 @@ P           mkmem           8
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1139, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1125, }
 cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
@@ -325,7 +325,7 @@ band_energy         : -4.28537600338907E-02
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
-           istwfk        1    0    1    0    0    0    1    0
+           istwfk        2    0    3    0    0    0    7    0
               ixc       -1012
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
