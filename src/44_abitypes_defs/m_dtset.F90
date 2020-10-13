@@ -528,6 +528,7 @@ type, public :: dataset_type
  integer :: rfuser
  integer :: rf2_dkdk
  integer :: rf2_dkde
+ integer :: rmm_diis = 0
 !S
  integer :: sigma_nshiftk = 1      ! Number of shifts in k-mesh for Sigma_{nk}.
  integer :: signperm
@@ -1772,6 +1773,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfuser             = dtin%rfuser
  dtout%rf2_dkdk           = dtin%rf2_dkdk
  dtout%rf2_dkde           = dtin%rf2_dkde
+ dtout%rmm_diis           = dtin%rmm_diis
  dtout%rhoqpmix           = dtin%rhoqpmix
  dtout%rifcsph            = dtin%rifcsph
  dtout%signperm           = dtin%signperm
@@ -3229,6 +3231,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
  list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs'
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
+ list_vars=trim(list_vars)//' rmm_diis'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'

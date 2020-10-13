@@ -1,14 +1,20 @@
+#
 # GS calculation with the CG + RMM-DIIS eigensolver and NC pseudos
 #
-useria 321 # Needed to acivate CG + RMM-DIIS. To be changed when in production
+rmm_diis  1       # Activate CG + RMM-DIIS.
 boxcutmin 1.8
 
-#istwfk *1  # Important. istwfk /= 1 are not yet supported
-ecut   20
+ndtset 2
+
+nspinor1 1
+nspinor2 2
+nspden2  1
+getwfk2 -1
+
+ecut   16
 diemac 12.0
 
 nband  8
-nstep  30
 toldfe 1e-8
 
 ngkpt   4 4 4
@@ -16,7 +22,8 @@ nshiftk 1
 shiftk  0.0 0.0 0.0
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
+#pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
+pseudos "Si_r.psp8"
 
 # Definition of the unit cell
 acell 1.0 1.0 1.0

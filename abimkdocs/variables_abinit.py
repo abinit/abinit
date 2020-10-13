@@ -21809,4 +21809,18 @@ Same meaning as [[rifcsph@anaddb]]
 """,
 ),
 
+Variable(
+    abivarname="rmm_diis",
+    varset="dev",
+    vartype="integer",
+    topics=['TuningSpeed_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Activate RMM-DIIS eigensolver in the GS part.",
+    added_in_version="9.3.0",
+    text=r"""
+This variable is still under active development
+""",
+),
+
 ]
