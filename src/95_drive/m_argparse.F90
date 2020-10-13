@@ -55,6 +55,7 @@ module m_argparse
    module procedure get_arg_int
    module procedure get_arg_dp
    module procedure get_arg_str
+   module procedure get_arg_bool
  end interface get_arg
 
  public :: get_arg_list    ! Parse array argument from command line. Return exit code.
@@ -524,7 +525,7 @@ end function get_arg_dp
 !!  get_arg_str
 !!
 !! FUNCTION
-!!  Parse scalar argument from command line. Return exit code.
+!!  Parse scalar string argument from command line. Return exit code.
 !!
 !! INPUTS
 !!  argname= Argument name
@@ -577,6 +578,66 @@ integer function get_arg_str(argname, argval, msg, default, exclude) result(ierr
  end if
 
 end function get_arg_str
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_argparse/get_arg_bool
+!! NAME
+!!  get_arg_bool
+!!
+!! FUNCTION
+!!  Parse scalar boolean argument from command line. Return exit code.
+!!
+!! INPUTS
+!!  argname= Argument name
+!!  [default]= Default value
+!!  [exclude]= argname and exclude are mutually exclusive.
+!!
+!! OUTPUT
+!!   argval= Value of argname
+!!   msg= Error message
+!!
+!! SOURCE
+
+integer function get_arg_bool(argname, argval, msg, default, exclude) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: argname
+ logical,intent(out) :: argval
+ character(len=*),intent(out) :: msg
+ logical,optional,intent(in) :: default
+ character(len=*),optional,intent(in) :: exclude
+
+!Local variables-------------------------------
+ integer :: ii, istat
+ logical :: found_argname, found_excl
+ character(len=500) :: arg
+
+! *************************************************************************
+
+ ierr = 0; msg = ""; if (present(default)) argval = default
+ found_argname = .False.; found_excl = .False.
+ argval = .False.
+
+ do ii=1,command_argument_count()
+   call get_command_argument(ii, arg)
+   if (present(exclude)) then
+     if (arg == "--" // trim(exclude)) found_excl = .True.
+   end if
+   if (begins_with(arg, "--" // trim(argname))) then
+     argval = parse_yesno(arg, "--" // trim(argname), default=.True.)
+     found_argname = .True.
+   end if
+ end do
+
+ if (ierr /= 0) msg = sjoin("Error while reading argument: ", argname, ch10, msg)
+ if (found_argname .and. found_excl) then
+   ierr = ierr + 1; msg = sjoin("Variables", argname, "and", exclude, "are mutually exclusive", ch10, msg)
+ end if
+
+end function get_arg_bool
 !!***
 
 !----------------------------------------------------------------------
