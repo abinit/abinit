@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 13 Oct 2020.
-- ( at 03h31 )
+- ( at 13h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit_rmms/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t17/t17.in
 - output file    -> t17.out
@@ -34,9 +34,9 @@
 -    mband =           8        mffmem =           1         mkmem =           8
        mpw =        1125          nfft =       27000          nkpt =           8
 ================================================================================
-P This job should need less than                       9.708 Mbytes of memory.
+P This job should need less than                       9.690 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      1.114 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
+_ WF disk file :      1.101 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -199,23 +199,23 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.5124623309067    -8.512E+00 1.567E-02 1.352E+01
- ETOT  2  -8.5179323643386    -5.470E-03 1.245E-03 2.877E-01
- ETOT  3  -8.5179936887293    -6.132E-05 5.245E-05 3.812E-03
- ETOT  4  -8.5179868330466     6.856E-06 2.536E-05 2.069E-05
- ETOT  5  -8.5179806650120     6.168E-06 2.327E-05 8.051E-08
- ETOT  6  -8.5179813811874    -7.162E-07 1.996E-05 1.726E-09
- ETOT  7  -8.5179813258924     5.530E-08 1.996E-05 1.597E-12
- ETOT  8  -8.5179813264215    -5.291E-10 1.986E-05 1.011E-13
- ETOT  9  -8.5179813272641    -8.426E-10 1.843E-05 2.052E-14
+ ETOT  1  -8.5122285863300    -8.512E+00 1.733E-02 1.334E+01
+ ETOT  2  -8.5179276428133    -5.699E-03 1.341E-03 3.093E-01
+ ETOT  3  -8.5179935902826    -6.595E-05 3.781E-05 3.484E-03
+ ETOT  4  -8.5179868224163     6.768E-06 2.536E-05 2.727E-05
+ ETOT  5  -8.5179806307872     6.192E-06 2.326E-05 2.388E-07
+ ETOT  6  -8.5179813952679    -7.645E-07 1.992E-05 3.708E-09
+ ETOT  7  -8.5179813197248     7.554E-08 1.982E-05 1.902E-11
+ ETOT  8  -8.5179813293136    -9.589E-09 1.860E-05 4.353E-13
+ ETOT  9  -8.5179813247071     4.606E-09 1.398E-05 5.864E-14
 
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  8.426E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  4.606E-09 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.75989038E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.75989038E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.75989038E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.75989201E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.75989201E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.75989201E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -228,14 +228,14 @@ lattice_vectors:
 lattice_lengths: [   7.18969,    7.18969,    7.18969, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6279439E+02
-convergence: {deltae: -8.426E-10, res2:  2.052E-14, residm:  1.843E-05, diffor: null, }
-etotal    :  -8.51798133E+00
+convergence: {deltae:  4.606E-09, res2:  5.864E-14, residm:  1.398E-05, diffor: null, }
+etotal    :  -8.51798132E+00
 entropy   :   0.00000000E+00
-fermie    :   1.83423099E-01
+fermie    :   1.83423097E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -4.75989038E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -4.75989038E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -4.75989038E-05, ]
+- [ -4.75989201E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -4.75989201E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -4.75989201E-05, ]
 pressure_GPa:   1.4004E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
@@ -250,12 +250,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.00000          1.83029430
-    2        2.00000          1.83318084
+    2        2.00000          1.83318085
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.101E-08; max=  18.427E-06
+ Mean square residual over all n,k,spin=   26.005E-08; max=  13.983E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -289,28 +289,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.13705811821285E+00
-hartree             :  5.47735556998532E-01
-xc                  : -3.11985293656460E+00
+kinetic             :  3.13705812018942E+00
+hartree             :  5.47735560847843E-01
+xc                  : -3.11985293826191E+00
 Ewald energy        : -8.47667076152844E+00
 psp_core            :  4.06099448937198E-01
-local_psp           : -2.33025444696801E+00
-non_local_psp       :  1.31790369364837E+00
-total_energy        : -8.51798132726412E+00
-total_energy_eV     : -2.31786059608496E+02
-band_energy         : -4.28537600338907E-02
+local_psp           : -2.33025445563958E+00
+non_local_psp       :  1.31790370074837E+00
+total_energy        : -8.51798132470710E+00
+total_energy_eV     : -2.31786059538916E+02
+band_energy         : -4.28537697654741E-02
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.75989038E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.75989038E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.75989038E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.75989201E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.75989201E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.75989201E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4004E+00 GPa]
-- sigma(1 1)= -1.40040786E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.40040786E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.40040786E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -1.40040834E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.40040834E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.40040834E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -321,7 +321,7 @@ band_energy         : -4.28537600338907E-02
         boxcutmin      1.80000000E+00
            diemac      1.20000000E+01
              ecut      2.00000000E+01 Hartree
-           etotal     -8.5179813273E+00
+           etotal     -8.5179813247E+00
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
@@ -350,7 +350,7 @@ P           mkmem           8
                        5.0838808732E+00  0.0000000000E+00  5.0838808732E+00
                        5.0838808732E+00  5.0838808732E+00  0.0000000000E+00
           spgroup         227
-           strten     -4.7598903763E-05 -4.7598903763E-05 -4.7598903763E-05
+           strten     -4.7598920091E-05 -4.7598920091E-05 -4.7598920091E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -498,10 +498,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.4  wall=          5.2
+- Proc.   0 individual time (sec): cpu=          4.6  wall=          6.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.4  wall=          5.2
++Overall time at end (sec) : cpu=          4.6  wall=          6.2
