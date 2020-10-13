@@ -160,8 +160,11 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
                rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
    ! <i|H|j> and <i|Vnl + FockACE|j>
-   !TODO: if istwf_k ==
-   call cg_zgemv("C", npw*nspinor, nband, cg, ghc, h_ij(:,:,iband))
+   if (istwf_k == 1) then
+     call cg_zgemv("C", npw*nspinor, nband, cg, ghc, h_ij(:,:,iband))
+   else
+     MSG_ERROR("Only istwf_k == 1 is supported")
+   end if
 
    !call cg_zgemv("C", npw*nspinor, nband, cg, gvnlxc, vnlx_ij(:,:,iband))
  end do

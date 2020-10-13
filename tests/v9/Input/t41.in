@@ -70,4 +70,3 @@ rprim     -0.5  0.5  0.5
 #%%   Works with pseudo Pseudodojo_paw_pbe_standard/Fe.xml , where usexcnhat=0 . See test v9#42 for the usexcnhat==1 case.
 #%% topics = PAW
 #%%<END TEST_INFO>
-

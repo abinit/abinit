@@ -95,11 +95,12 @@ contains
 !!  mcgq=second dimension of the cgq array (electric field, MPI //)
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mkgq = second dimension of pwnsfacq
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw
 !!  natom=number of atoms in cell.
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  nkpt=number of k points.
+!!  istep=index of the number of steps in the routine scfcv
 !!  nnsclo_now=number of non-self-consistent loops for the current vtrial
 !!             (often 1 for SCF calculation, =nstep for non-SCF calculations)
 !!  npw_k=number of plane waves at this k point
@@ -157,13 +158,13 @@ contains
 subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 & eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 & ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj,mkgq,mpi_enreg,&
-& mpw,natom,nband_k,nkpt,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
+& mpw,natom,nband_k,nkpt,istep,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
 & pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift)
 
 !Arguments ------------------------------------
  integer, intent(in) :: ibg,icg,ikpt,iscf,isppol,mband_cprj,mcg,mcgq,mcprj,mkgq,mpw
  integer, intent(in) :: natom,nband_k,nkpt,nnsclo_now,npw_k,optforces
- integer, intent(in) :: prtvol,pwind_alloc
+ integer, intent(in) :: prtvol,pwind_alloc,istep
  logical,intent(in) :: fixed_occ
  real(dp), intent(in) :: cpus,wtk
  type(datafiles_type), intent(in) :: dtfil
@@ -199,14 +200,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,jj,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
  integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
- logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc, use_rmm_diis
  real(dp) :: ar,ar_im,eshift,occblock
  real(dp) :: res,residk,weight,cpu,wall,gflops
- character(len=500) :: message
+ character(len=500) :: msg
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
- real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
+ real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
@@ -218,8 +219,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Structured debugging if prtvol==-level
  if(prtvol==-level)then
-   write(message,'(80a,a,a)') ('=',ii=1,80),ch10,'vtowfk: enter'
-   call wrtout(std_out,message,'PERS')
+   write(msg,'(80a,a,a)') ('=',ii=1,80),ch10,'vtowfk: enter'
+   call wrtout(std_out,msg,'PERS')
  end if
 
 !=========================================================================
@@ -233,6 +234,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
+ use_rmm_diis = (istep > 2 .and. dtset%useria == 321)
 
 !Parallelization over spinors management
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
@@ -307,8 +309,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ! Carry out UP TO dtset%nline steps, or until resid for every band is < dtset%tolwfr
  if (prtvol>2 .or. ikpt<=nkpt_max) then
-   write(message,'(a,i5,2x,a,3f9.5,2x,a)')' non-scf iterations; kpt # ',ikpt,', k= (',gs_hamk%kpt_k,'), band residuals:'
-   call wrtout(std_out,message,'PERS')
+   write(msg,'(a,i5,2x,a,3f9.5,2x,a)')' non-scf iterations; kpt # ',ikpt,', k= (',gs_hamk%kpt_k,'), band residuals:'
+   call wrtout(std_out,msg,'PERS')
  end if
 
 !Electric field: initialize dphase_k
@@ -361,10 +363,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
      if(wfopta10==4.or.wfopta10==1) then
        if (istwf_k/=1.and.istwf_k/=2) then !no way to use lobpcg
-         write(message,'(3a)')&
+         write(msg,'(3a)')&
           'Only istwfk=1 or 2 are allowed with wfoptalg=4/14 !',ch10,&
           'Action: put istwfk to 1 or remove k points with half integer coordinates.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
 
 !    =========================================================================
@@ -403,20 +405,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !      ======== MINIMIZATION OF BANDS: CONJUGATE GRADIENT (Teter et al.) =======
 !      =========================================================================
      else
-!      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
-!      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
-if (dtset%useria == 0 .or. (dtset%useria == 321 .and. nnsclo_now == 2)) then
-       !call wrtout(std_out, "Calling cgwf")
+       ! use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
+       ! use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
+       if (.not. use_rmm_diis) then
+         !call wrtout(std_out, "Calling cgwf")
+         call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
+           gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
+           mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
+           dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
+           subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
 
-       call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
-         gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
-         mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
-         dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-         subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
-
-end if
-
-       if (dtset%useria == 321 .and. nnsclo_now == 1) then
+        else
          !call wrtout(std_out, "Calling rmms_diis after cwfw")
          call rmm_diis(cg(:,icg+1:), dtset, eig_k, enlx_k, gs_hamk, gsc, &
                        mpi_enreg, nband_k, npw_k, my_nspinor, resid_k)
@@ -437,8 +436,8 @@ end if
 !  Print residuals
    if(prtvol>2 .or. ikpt<=nkpt_max)then
      do ii=0,(nband_k-1)/8
-       write(message,'(a,8es10.2)')' res:',(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
-       call wrtout(std_out,message,'PERS')
+       write(msg,'(a,8es10.2)')' res:',(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
+       call wrtout(std_out,msg,'PERS')
      end do
    end if
 
@@ -446,7 +445,7 @@ end if
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
    do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
-   if (dtset%useria == 321 .and. nnsclo_now == 1) do_subdiago = .False.
+   if (use_rmm_diis) do_subdiago = .False.
 
    if (do_subdiago) then
      if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
@@ -460,8 +459,8 @@ end if
 !  Print energies
    if(prtvol>2 .or. ikpt<=nkpt_max)then
      do ii=0,(nband_k-1)/8
-       write(message, '(a,8es10.2)' )' ene:',(eig_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
-       call wrtout(std_out,message,'PERS')
+       write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
+       call wrtout(std_out,msg,'PERS')
      end do
    end if
 
@@ -819,96 +818,44 @@ end if
 
 !Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers
  if(iscf>0 .and. fixed_occ .and. (prtvol>2 .or. ikpt<=nkpt_max) )then
-   write(message,'(a,i0)')' vtowfk: number of one-way 3D ffts skipped in vtowfk until now =',nskip
-   call wrtout(std_out,message,'PERS')
+   write(msg,'(a,i0)')' vtowfk: number of one-way 3D ffts skipped in vtowfk until now =',nskip
+   call wrtout(std_out,msg,'PERS')
  end if
 
-!Norm-conserving or FockACE: Compute nonlocal+FockACE part of total energy: rotate subvnlx
+ ! Norm-conserving or FockACE: Compute nonlocal+FockACE part of total energy: rotate subvnlx elements
+ ! Note the two calls. For (old) lobpcgwf we have a (nband_k, nband_k) matrix, whereas cgwf
+ ! returns results in packed form.
+ !
  rotate_subvnlx = gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg
- if (dtset%useria == 321 .and. nnsclo_now == 1) rotate_subvnlx = .False.
+ if (use_rmm_diis) rotate_subvnlx = .False.
 
  if (rotate_subvnlx) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
-   ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
-   ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
-   mat1=zero
-
    if (wfopta10==4) then
-#if 1
      call cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
-#else
-     enlx_k(1:nband_k)=zero
-
-     if (istwf_k==1) then
-       call zhemm('l','l',nband_k,nband_k,cone,totvnlx,nband_k,evec,nband_k,czero,mat1,nband_k)
-       do iband=1,nband_k
-         res = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
-         enlx_k(iband)= res
-       end do
-     else if (istwf_k==2) then
-       ABI_ALLOCATE(evec_loc,(nband_k,nband_k))
-       ABI_ALLOCATE(mat_loc,(nband_k,nband_k))
-       do iband=1,nband_k
-         do jj=1,nband_k
-           evec_loc(iband,jj)=evec(2*iband-1,jj)
-         end do
-       end do
-       call dsymm('l','l',nband_k,nband_k,one,totvnlx,nband_k,evec_loc,nband_k,zero,mat_loc,nband_k)
-       do iband=1,nband_k
-         enlx_k(iband)=ddot(nband_k,evec_loc(:,iband),1,mat_loc(:,iband),1)
-       end do
-       ABI_DEALLOCATE(evec_loc)
-       ABI_DEALLOCATE(mat_loc)
-     end if
-#endif
-
    else
-#if 1
      call cg_hprotate_and_get_diag(nband_k, subvnlx, evec, enlx_k)
-#else
-!    MG: This version is much faster with good OMP scalability.
-!    Construct upper triangle of matvnl from subvnlx using full storage mode.
-     pidx=0
-     do jj=1,nband_k
-       do ii=1,jj
-         pidx=pidx+1
-         matvnl(1,ii,jj)=subvnlx(2*pidx-1)
-         matvnl(2,ii,jj)=subvnlx(2*pidx  )
-       end do
-     end do
-
-     call zhemm('L','U',nband_k,nband_k,cone,matvnl,nband_k,evec,nband_k,czero,mat1,nband_k)
-
-!$OMP PARALLEL DO PRIVATE(res)
-     do iband=1,nband_k
-       res = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
-       enlx_k(iband) = res
-     end do
-#endif
    end if
-
-   ABI_DEALLOCATE(matvnl)
-   ABI_DEALLOCATE(mat1)
    call timab(586,2,tsec)
  end if
 
 !###################################################################
 
  if (iscf<=0 .and. residk > dtset%tolwfr) then
-   write(message,'(a,2(i0,1x),a,es13.5)')&
+   write(msg,'(a,2(i0,1x),a,es13.5)')&
     'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid= ',residk
-   MSG_WARNING(message)
+   MSG_WARNING(msg)
  end if
 
 !Print out eigenvalues (hartree)
  if (prtvol>2 .or. ikpt<=nkpt_max) then
-   write(message, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
+   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
     'eigenvalues (hartree) for',nband_k,'bands',ch10,&
     '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
-   call wrtout(std_out,message,'PERS')
+   call wrtout(std_out,msg,'PERS')
    do ii=0,(nband_k-1)/6
-     write(message, '(1p,6e12.4)' ) (eig_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
-     call wrtout(std_out,message,'PERS')
+     write(msg, '(1p,6e12.4)' ) (eig_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
+     call wrtout(std_out,msg,'PERS')
    end do
  else if(ikpt==nkpt_max+1)then
    call wrtout(std_out,' vtowfk : prtvol=0 or 1, do not print more k-points.','PERS')
@@ -916,25 +863,25 @@ end if
 
 !Print out decomposition of eigenvalues in the non-selfconsistent case or if prtvol>=10
  if( (iscf<0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) .or. prtvol>=10)then
-   write(message, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
+   write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
 &   ' mean kinetic energy (hartree) for ',nband_k,' bands',ch10,&
 &   '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
-   call wrtout(std_out,message,'PERS')
+   call wrtout(std_out,msg,'PERS')
 
    do ii=0,(nband_k-1)/6
-     write(message, '(1p,6e12.4)' ) (ek_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
-     call wrtout(std_out,message,'PERS')
+     write(msg, '(1p,6e12.4)' ) (ek_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
+     call wrtout(std_out,msg,'PERS')
    end do
 
    if (gs_hamk%usepaw==0) then
-     write(message, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
+     write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
 &     ' mean NL+Fock-type energy (hartree) for ',nband_k,' bands',ch10,&
 &     '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
-     call wrtout(std_out,message,'PERS')
+     call wrtout(std_out,msg,'PERS')
 
      do ii=0,(nband_k-1)/6
-       write(message,'(1p,6e12.4)') (enlx_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
-       call wrtout(std_out,message,'PERS')
+       write(msg,'(1p,6e12.4)') (enlx_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
+       call wrtout(std_out,msg,'PERS')
      end do
    end if
  end if
@@ -961,8 +908,8 @@ end if
 
 !Structured debugging : if prtvol=-level, stop here.
  if(prtvol==-level)then
-   write(message,'(a,a,a,i0,a)')' vtowfk : exit ',ch10,'  prtvol=-',level,', debugging mode => stop '
-   MSG_ERROR(message)
+   write(msg,'(a,a,a,i0,a)')' vtowfk : exit ',ch10,'  prtvol=-',level,', debugging mode => stop '
+   MSG_ERROR(msg)
  end if
 
  call timab(30,2,tsec)
@@ -1029,7 +976,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
  integer :: iband,ierr,ii,indx
  real(dp) :: cim,cre,gscim,gscre,quotient,root1,root2,saa,sab,sbb,theta
  real(dp) :: thppi,xx,yy
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: buffer2(nband_k,2),buffer3(nband_k,3),tsec(2)
  real(dp),allocatable :: cimb(:),creb(:),saab(:),sabb(:),sbbb(:) !,sarr(:,:)
@@ -1125,11 +1072,11 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
            end do
          end if
        else
-         write(message,'(a,i0,5a)')&
+         write(msg,'(a,i0,5a)')&
 &         'The eigenvector with band ',iband,' has zero norm.',ch10,&
 &         'This usually happens when the number of bands (nband) is comparable to the number of planewaves (mpw)',ch10,&
 &         'Action: Check the parameters of the calculation. If nband ~ mpw, then decrease nband or, alternatively, increase ecut'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
 
        xx=cos(theta)

@@ -1,0 +1,49 @@
+# GS calculation with the CG + RMM-DIIS eigensolver and NC pseudos
+#
+useria 321 # Needed to acivate CG + RMM-DIIS. To be changed when in production
+boxcutmin 1.8
+
+istwfk *1  # Important. istwfk /= 1 are not yet supported
+ecut   20
+diemac 12.0
+
+nband  8
+nstep  30
+toldfe 1e-8
+
+ngkpt   4 4 4
+nshiftk 1
+shiftk  0.0 0.0 0.0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
+
+# Definition of the unit cell
+acell 1.0 1.0 1.0
+rprim 0.0 5.083880873222 5.083880873222
+      5.083880873222 0.0 5.083880873222
+      5.083880873222 5.083880873222 0.0
+
+# Definition of the atom types
+ntypat 1
+znucl 14
+
+natom 2
+typat 1 1
+xred
+      0.0  0.0  0.0
+      1/4  1/4  1/4
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t17.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, RMM-DIIS
+#%% description = GS calculation with the CG + RMM-DIIS eigensolver and NC pseudos
+#%%<END TEST_INFO>

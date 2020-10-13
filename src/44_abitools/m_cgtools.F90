@@ -4673,9 +4673,9 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
      if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>zero)then
 !      if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>tol16)then
        write(msg,'(2a,3i0,2es16.6,a,a)')&
-&       ' For istwf_k=2,observed the following element of vecnm :',ch10,&
-&       nelem,ivec,icg,vecnm(1:2,1+nelem*(ivec-1)+icg),ch10,&
-&       '  with a non-negligible imaginary part.'
+       ' For istwf_k=2,observed the following element of vecnm :',ch10,&
+       nelem,ivec,icg,vecnm(1:2,1+nelem*(ivec-1)+icg),ch10,&
+       '  with a non-negligible imaginary part.'
        MSG_BUG(msg)
      end if
    end do
@@ -5109,13 +5109,9 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
            end do
          end if
 
-!        End use of time-reversal symmetry
-       end if
-
+       end if !        End use of time-reversal symmetry
      end if  ! Test on "ivec"
-
-!    end loop over vectors (or bands) with index ivec :
-   end do
+   end do !    end loop over vectors (or bands) with index ivec :
 
  else
    write(msg,'(a,i0)')"Wrong value for ortalgo: ",ortalgo
@@ -5130,6 +5126,9 @@ end subroutine pw_orthon
 !!   cg_hprotate_and_get_diag
 !!
 !! FUNCTION
+!!  Compute the diagonal elements of E^H VNLX E
+!!  where VNLX is an Hermitean matrixin packed form.
+!!  Mainly used to rotate the matrix elements of an operator after the subspace diagonalization.
 !!
 !! INPUTS
 !!
@@ -5189,6 +5188,9 @@ end subroutine cg_hprotate_and_get_diag
 !!   cg_hrotate_and_get_diag
 !!
 !! FUNCTION
+!!  Compute the diagonal elements of E^H VNLX E
+!!  where VNLX is an Hermitean matrix.
+!!  Mainly used to rotate the matrix elements of an operator after the subspace diagonalization.
 !!
 !! INPUTS
 !!
@@ -5213,7 +5215,7 @@ subroutine cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
 !Local variables ------------------------------
 !scalars
  real(dp),external :: ddot
- integer :: ii,jj,iband
+ integer :: jj,iband
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:), evec_loc(:,:)
 
 ! *************************************************************************
