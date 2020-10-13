@@ -105,8 +105,9 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 !Local variables-------------------------------
 
  integer,parameter :: ndat1 = 1, type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, level = 114
+ integer,parameter :: use_subovl0 = 0
  integer :: ii, cplex, nline, ierr, prtvol
- integer :: iband, cpopt, sij_opt, is, ie, mcg, mgsc, use_subovl, istwf_k, optekin, usepaw, iter
+ integer :: iband, cpopt, sij_opt, is, ie, mcg, mgsc, istwf_k, optekin, usepaw, iter
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft
  real(dp),parameter :: rdummy = zero
  real(dp) :: dprod_r, dprod_i, lambda, rval
@@ -116,9 +117,9 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  real(dp) :: tsec(2), eig_save(nband)
  real(dp),allocatable :: ghc(:,:), gsc(:,:), gvnlxc(:,:), pcon(:), chain_phi(:,:,:), chain_res(:,:,:)
  real(dp),allocatable :: residvec(:,:), kres(:,:), phi_now(:,:)
- real(dp),allocatable :: evec(:,:),evec_loc(:,:), subham(:), subovl(:)
- real(dp),allocatable :: h_ij(:,:,:)
+ real(dp),allocatable :: evec(:,:), subham(:), h_ij(:,:,:)
  real(dp),allocatable :: diis_resmat(:,:,:), diis_smat(:,:,:), diis_eig(:), wmat1(:,:,:), wmat2(:,:,:)
+ real(dp) :: subovl(use_subovl0)
  real(dp),pointer :: gsc_ptr(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  !type(pawcprj_type) :: cprj_dum(1,1)
@@ -178,24 +179,16 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  !call xmpi_sum(subham, comm_spinorfft, ierr)
  !call xmpi_sum(resid, comm_fft, ierr)
 
- use_subovl = 0
- if (use_subovl == 1) then
-   ABI_MALLOC(subovl, (nband*(nband+1)))
- else
-   ABI_MALLOC(subovl, (0))
- end if
-
  ! =================
  ! Subspace rotation
  ! =================
  call timab(585,1,tsec) !"vtowfk(subdiago)"
  ABI_MALLOC(evec, (2*nband, nband))
  call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, dtset%paral_kgb, &
-               subham, subovl, use_subovl, usepaw, me_g0)
+               subham, subovl, use_subovl0, usepaw, me_g0)
  call timab(585,2,tsec)
 
  ABI_FREE(subham)
- ABI_FREE(subovl)
  ABI_FREE(evec)
 
  ! ==========
@@ -258,8 +251,8 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 
    kres = residvec
    ! Precondition R0, output in kres = K.R_0
-   call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
    !call cg_precon(residvec, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
+   call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
                   optekin, pcon, kres, comm_bandspinorfft)
    !write(std_out,*)"kres(1:2):", kres(:, 1:2)
 
