@@ -219,27 +219,22 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !Check sizes
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwavef)<2*npw_k1*my_nspinor*ndat) then
-   msg='wrong size for cwavef!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for cwavef!')
  end if
  if (size(ghc)<2*npw_k2*my_nspinor*ndat) then
-   msg='wrong size for ghc!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for ghc!')
  end if
  if (size(gvnlxc)<2*npw_k2*my_nspinor*ndat) then
-   msg='wrong size for gvnlxc!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for gvnlxc!')
  end if
  if (sij_opt==1) then
    if (size(gsc)<2*npw_k2*my_nspinor*ndat) then
-     msg='wrong size for gsc!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for gsc!')
    end if
  end if
  if (gs_ham%usepaw==1.and.cpopt>=0) then
    if (size(cwaveprj)<gs_ham%natom*my_nspinor*ndat) then
-     msg='wrong size for cwaveprj!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for cwaveprj!')
    end if
  end if
 
@@ -254,8 +249,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 !paral_kgb constraint
  if (mpi_enreg%paral_kgb==1.and.(.not.k1_eq_k2)) then
-   msg='paral_kgb=1 not allowed for k/=k_^prime!'
-   MSG_BUG(msg)
+   MSG_BUG('paral_kgb=1 not allowed for k/=k_^prime!')
  end if
 
 !Do we add Fock exchange term ?

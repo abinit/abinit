@@ -159,9 +159,9 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 
  do iband=1,nband
    is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
-   gsc_ptr => gsc_all(:,is:ie)
+   if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
    call getghc(cpopt, cg(:,is:ie), cwaveprj, ghc, gsc_ptr, gs_hamk, gvnlxc, &
-                 rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
+               rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
    ! <i|H|j> and <i|Vnl + FockACE|j>
    if (istwf_k == 1) then
