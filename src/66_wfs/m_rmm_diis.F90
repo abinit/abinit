@@ -96,7 +96,8 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  type(dataset_type),intent(in) :: dtset
  type(mpi_type),intent(in) :: mpi_enreg
  integer,intent(in) :: nband, npw, nspinor
- real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband), gsc_all(2,npw*nspinor*nband*dtset%usepaw)
+ real(dp),intent(inout) :: cg(2,npw*nspinor*nband)
+ real(dp),target,intent(inout) :: gsc_all(2,npw*nspinor*nband*dtset%usepaw)
  real(dp),intent(inout) :: enlx(nband)
  real(dp),intent(inout) :: resid(nband)
  real(dp),intent(out) :: eig(nband)
@@ -116,8 +117,9 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  real(dp),allocatable :: ghc(:,:), gsc(:,:), gvnlxc(:,:), pcon(:), chain_phi(:,:,:), chain_res(:,:,:)
  real(dp),allocatable :: residvec(:,:), kres(:,:), phi_now(:,:)
  real(dp),allocatable :: evec(:,:),evec_loc(:,:), subham(:), subovl(:)
- real(dp),allocatable :: h_ij(:,:,:), vnlx_ij(:,:,:)
+ real(dp),allocatable :: h_ij(:,:,:)
  real(dp),allocatable :: diis_resmat(:,:,:), diis_smat(:,:,:), diis_eig(:), wmat1(:,:,:), wmat2(:,:,:)
+ real(dp),pointer :: gsc_ptr(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  !type(pawcprj_type) :: cprj_dum(1,1)
 
@@ -128,6 +130,8 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 
  me_g0 = mpi_enreg%me_g0; comm_fft = mpi_enreg%comm_fft
  comm_spinorfft = mpi_enreg%comm_spinorfft; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
+
+ gsc_ptr => null()
 
  !eig_save = eig
  !eaccuracy =
@@ -152,12 +156,12 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  ! Apply H to input cg
  ! ====================
  ABI_MALLOC(h_ij, (2, nband, nband))
- !ABI_MALLOC(vnlx_ij, (2, nband, nband))
 
  do iband=1,nband
    is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
-   call getghc(cpopt, cg(:,is:ie), cwaveprj, ghc, gsc_all(:,is:ie), gs_hamk, gvnlxc,&
-               rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
+   gsc_ptr => gsc_all(:,is:ie)
+   call getghc(cpopt, cg(:,is:ie), cwaveprj, ghc, gsc_ptr, gs_hamk, gvnlxc, &
+                 rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
    ! <i|H|j> and <i|Vnl + FockACE|j>
    if (istwf_k == 1) then
@@ -165,8 +169,6 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
    else
      MSG_ERROR("Only istwf_k == 1 is supported")
    end if
-
-   !call cg_zgemv("C", npw*nspinor, nband, cg, gvnlxc, vnlx_ij(:,:,iband))
  end do
 
  ! Pack <i|H|j> to prepare call to subdiago.
@@ -191,12 +193,6 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, dtset%paral_kgb, &
                subham, subovl, use_subovl, usepaw, me_g0)
  call timab(585,2,tsec)
-
- ! Compute Vnl in new cg basis. Use subham as Workspace.
- ! This is no longer needeed.
- !call pack_matrix(vnlx_ij, subham, nband, 2)
- !call cg_hprotate_and_get_diag(nband, subham, evec, enlx)
- !ABI_FREE(vnlx_ij)
 
  ABI_FREE(subham)
  ABI_FREE(subovl)
@@ -232,14 +228,15 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
    chain_phi(:,:,0) = phi_now
 
    ! Compute H |phi_0>
-   call getghc(cpopt, phi_now, cwaveprj, ghc, gsc_all(:,is:ie), gs_hamk, gvnlxc, &
+   if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
+   call getghc(cpopt, phi_now, cwaveprj, ghc, gsc_ptr, gs_hamk, gvnlxc, &
                rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
    call dotprod_g(eig(iband), dprod_i, istwf_k, npw*nspinor, option1, ghc, &
                   phi_now, me_g0, comm_spinorfft)
 
    if (usepaw == 1) then
-     call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option1, gsc_all(:, is:), &
+     call dotprod_g(dprod_r, dprod_i, istwf_k, npw*nspinor, option1, gsc_all(:,is:), &
                     phi_now, me_g0, comm_spinorfft)
      eig(iband) = eig(iband) / dprod_r
    end if
@@ -360,7 +357,8 @@ iter_loop: do iter=1,nline
      end if
 
      ! Compute H |phi_now>
-     call getghc(cpopt, phi_now, cwaveprj, ghc, gsc_all(:,is:ie), gs_hamk, gvnlxc, &
+     if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
+     call getghc(cpopt, phi_now, cwaveprj, ghc, gsc_ptr, gs_hamk, gvnlxc, &
                  rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
      ! New approximated eigenvalue.
