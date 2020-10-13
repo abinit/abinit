@@ -83,12 +83,12 @@ module m_gemm_nonlop
  end type gemm_nonlop_type
 !!***
 
- type(gemm_nonlop_type), public, allocatable :: gemm_nonlop_kpt(:)
+ type(gemm_nonlop_type), save, public, allocatable :: gemm_nonlop_kpt(:)
  !(nkpt)
 
- integer, public :: gemm_nonlop_ikpt_this_proc_being_treated
+ integer, save, public :: gemm_nonlop_ikpt_this_proc_being_treated
  !! This is oh so very crude, but I can't find any other way to do it without passing ikpt deep down to nonlop
- logical, public :: gemm_nonlop_use_gemm = .false.
+ logical, save, public :: gemm_nonlop_use_gemm = .false.
  ! Public variable indicating whether we should call gemm_nonlop or fall back to the usual nonlop. Set to false
  ! in order not to interfere with non-GS calls to nonlop.
 

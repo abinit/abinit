@@ -4,6 +4,11 @@
 rmm_diis  1       # Activate CG + RMM-DIIS.
 boxcutmin 1.8
 
+# TODO: Likely bug is use_gemm_nonlop is used in multidataset mode.
+#use_gemm_nonlop1 1 # test nonlop with BLAS, requires useylm 1
+#useylm1 1
+#useylm2 0
+
 ndtset 2
 
 nspinor1 1
@@ -11,7 +16,7 @@ nspinor2 2
 nspden2  1
 getwfk2 -1
 
-ecut   16
+ecut   20    # This to overconverge results and make the test more stable.
 diemac 12.0
 
 nband  8
@@ -22,7 +27,6 @@ nshiftk 1
 shiftk  0.0 0.0 0.0
 
 pp_dirpath "$ABI_PSPDIR"
-#pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
 pseudos "Si_r.psp8"
 
 # Definition of the unit cell
@@ -46,7 +50,7 @@ xred
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t17.out, tolnlines = 12, tolabs = 1e-05, tolrel = 0.3;
+#%%   t17.out, tolnlines = 20, tolabs = 1e-05, tolrel = 0.2;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
