@@ -2894,13 +2894,13 @@ end subroutine cgnc_gramschmidt
 !!
 !! SOURCE
 
-subroutine cgpaw_normalize(npws,nband,cg,gsc,istwfk,me_g0,comm_pw)
+subroutine cgpaw_normalize(npws, nband, cg, gsc, istwfk, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws,nband,istwfk,me_g0,comm_pw
+ integer,intent(in) :: npws, nband, istwfk, me_g0, comm_pw
 !arrays
- real(dp),intent(inout) :: cg(2*npws*nband),gsc(2*npws*nband)
+ real(dp),intent(inout) :: cg(2*npws*nband), gsc(2*npws*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -2928,9 +2928,7 @@ subroutine cgpaw_normalize(npws,nband,cg,gsc,istwfk,me_g0,comm_pw)
    end if
  end if
 
- if (comm_pw /= xmpi_comm_self) then
-   call xmpi_sum(norm,comm_pw,ierr)
- end if
+ if (comm_pw /= xmpi_comm_self) call xmpi_sum(norm, comm_pw, ierr)
 
  ierr = 0
  do band=1,nband

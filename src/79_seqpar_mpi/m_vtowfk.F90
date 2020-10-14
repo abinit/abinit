@@ -124,13 +124,15 @@ contains
 !!  dphase_k(3)=change in Zak phase for the current k-point
 !!  eig_k(nband_k)=array for holding eigenvalues (hartree)
 !!  ek_k(nband_k)=contribution from each band to kinetic energy, at this k-point
-!!  ek_k_nd(2,nband_k,nband_k*use_dmft)=contribution to kinetic energy, including non-diagonal terms, at this k-point (usefull if use_dmft)
+!!  ek_k_nd(2,nband_k,nband_k*use_dmft)=contribution to kinetic energy,
+!!     including non-diagonal terms, at this k-point (usefull if use_dmft)
 !!  resid_k(nband_k)=residuals for each band over all k points,
 !!                   BEFORE the band rotation.
 !!  ==== if optforces>0 ====
 !!    grnl_k(3*natom,nband_k)=nonlocal gradients, at this k-point
 !!  ==== if (gs_hamk%usepaw==0) ====
-!!    enlx_k(nband_k)=contribution from each band to nonlocal pseudopotential + potential Fock-type part of total energy, at this k-point
+!!    enlx_k(nband_k)=contribution from each band to
+!!                    nonlocal pseudopotential + Fock-type part of total energy, at this k-point
 !!  ==== if (gs_hamk%usepaw==1) ====
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
@@ -234,6 +236,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
  use_rmm_diis = (istep > 2 .and. abs(dtset%rmm_diis) /= 0)
+ !use_rmm_diis = istep > 5
 
 !Parallelization over spinors management
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
