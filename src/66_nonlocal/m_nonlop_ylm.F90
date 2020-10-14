@@ -911,11 +911,13 @@ contains
 !      If choice==0, that's all for these atoms !
        if (choice>0) then
          if(choice/=7) then
+           call timab(1105,1,tsec)
 !          Contraction from <p_i|c> to Sum_j[Dij.<p_j|c>] (and derivatives)
            call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,dgxdt,dgxdtfac,dgxdtfac_sij,&
 &           d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,dimekbq,enl,gx,gxfac,gxfac_sij,&
 &           iatm,indlmn_typ,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
 &           nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
+           call timab(1105,2,tsec)
          else
            gxfac_sij=gx
          end if
@@ -925,9 +927,11 @@ contains
 !        ==============================================================
          if (signs==1) then
            if (.not.present(cprjin_left)) then
+             call timab(1106,1,tsec)
              call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &             enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
+             call timab(1106,2,tsec)
            else
              ABI_ALLOCATE(gx_left,(cplex,nlmn,nincat,nspinor))
 !            Retrieve <p_lmn|c> coeffs
@@ -945,13 +949,17 @@ contains
 !            end do
 !            end if
              if (present(enlout_im)) then
+               call timab(1108,1,tsec)
                call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
 &               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk,enlout_im=enlout_im)
+               call timab(1108,2,tsec)
              else
+               call timab(1107,1,tsec)
                call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
 &               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
+               call timab(1107,2,tsec)
              end if
              ABI_DEALLOCATE(gx_left)
            end if

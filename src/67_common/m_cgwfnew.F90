@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_cgwfnew
+!!****m* ABINIT/m_cgwf_paw
 !! NAME
-!!  m_cgwfnew
+!!  m_cgwf_paw
 !!
 !! FUNCTION
 !!  Conjugate-gradient eigensolver.
@@ -23,14 +23,13 @@
 
 #include "abi_common.h"
 
-module m_cgwfnew
+module m_cgwf_paw
 
  use defs_basis
  use m_errors
  use m_xmpi
  use m_abicore
  use m_cgtools
- use m_efield
 
  use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
@@ -38,10 +37,8 @@ module m_cgwfnew
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
                              pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn
  use m_hamiltonian,   only : gs_hamiltonian_type
- use m_fock,          only : fock_set_ieigen,fock_set_getghc_call
- use m_getchc,        only : getchc
+ use m_getchc,        only : getchc,getcsc
  use m_getghc,        only : getghc
- use m_berrytk,       only : smatrix
  use m_nonlop,        only : nonlop
  use m_paw_overlap,   only : smatrix_k_paw
  use m_cgprj,         only : getcprj
@@ -55,16 +52,16 @@ module m_cgwfnew
  private
 !!***
 
- public :: cgwfnew
+ public :: cgwf_paw
 
 !!***
 
 contains
 !!***
 
-!!****f* m_cgwf/cgwfnew
+!!****f* m_cgwf/cgwf_paw
 !! NAME
-!! cgwfnew
+!! cgwf_paw
 !!
 !! FUNCTION
 !! Update all wavefunction |C>, non self-consistently.
@@ -82,14 +79,12 @@ contains
 !!  filnam_ds1=name of input file (used for exit checking)
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  icg=shift to be applied on the location of data in the array cg
-!!  igsc=shift to be applied on the location of data in the array gsc
 !!  ikpt=number of the k-point
 !!  inonsc=index of non self-consistent loop
 !!  isppol=spin polarization currently treated
 !!  mband =maximum number of bands
 !!  mcg=second dimension of the cg array
 !!  mcgq=second dimension of the cgq array
-!!  mgsc=second dimension of the gsc array
 !!  mkgq = second dimension of pwnsfacq
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw
@@ -103,13 +98,6 @@ contains
 !!  nsppol=number of spin polarizations
 !!  ortalg=governs the choice of the algorithm for orthogonalisation.
 !!  prtvol=control print volume and debugging output
-!!  pwind(pwind_alloc,2,3) = array used to compute
-!!           the overlap matrix smat between k-points (see initberry.f)
-!!  pwind_alloc = first dimension of pwind
-!!  pwnsfac(2,pwind_alloc) = phase factors for non-symmorphic translations
-!!                           (see initberry.f)
-!!  pwnsfacq(2,mkgq) = phase factors for the nearest neighbours of the
-!!                     current k-point (electric field, MPI //)
 !!  tolrde=tolerance on the ratio of differences of energies (for the line minimisation)
 !!  tolwfr=tolerance on largest wf residual
 !!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
@@ -120,7 +108,6 @@ contains
 !!  zshift(nband)=in case wfoptalg is 2 or 3, shift of the Hamiltonian
 !!
 !! OUTPUT
-!!  dphase_k(3) = change in Zak phase for the current k-point in case berryopt = 4/14,6/16,7/17 (electric (displacement) field)
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
 !!  subham(nband*(nband+1))=Hamiltonian expressed in the WFs subspace
 !!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
@@ -135,9 +122,6 @@ contains
 !!  dtefield <type(efield_type)> = variables related to Berry phase
 !!      calculations (see initberry.f)
 !!  quit= if 1, proceeds to smooth ending of the job.
-!!  if(gs_hamk%usepaw==1)
-!!   gsc(2,mgsc)=<G|S|C band,k> coefficients for ALL bands
-!!               where S is the overlap matrix (used only for paw)
 !!
 !! NOTES
 !!  1) cg should not be filtered and normalized : it should already be OK at input !
@@ -156,41 +140,36 @@ contains
 !!
 !! SOURCE
 
-subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
-&                filnam_ds1,gsc,gs_hamk,icg,igsc,ikpt,inonsc,&
-&                isppol,mband,mcg,mcgq,mgsc,mkgq,mpi_enreg,&
+subroutine cgwf_paw(cg,cgq,chkexit,cpus,eig,&
+&                filnam_ds1,gs_hamk,icg,ikpt,inonsc,&
+&                isppol,mband,mcg,mcgq,mkgq,mpi_enreg,&
 &                mpw,nband,nbdblock,nkpt,nline,npw,npwarr,&
-&                nspinor,nsppol,ortalg,prtvol,pwind,&
-&                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
-&                subvnlx,tolrde,tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
-
+&                nspinor,nsppol,ortalg,prtvol,quit,resid,&
+&                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
- integer,intent(in) :: berryopt,chkexit,icg,igsc,ikpt,inonsc,isppol
- integer,intent(in) :: mband,mcg,mcgq,mgsc,mkgq,mpw,nband,nbdblock,nkpt,nline
- integer,intent(in) :: npw,nspinor,nsppol,ortalg,prtvol,pwind_alloc
- integer,intent(in) :: use_subovl,use_subvnlx,wfoptalg
+ integer,intent(in) :: chkexit,icg,ikpt,inonsc,isppol
+ integer,intent(in) :: mband,mcg,mcgq,mkgq,mpw,nband,nbdblock,nkpt,nline
+ integer,intent(in) :: npw,nspinor,nsppol,ortalg,prtvol
+ integer,intent(in) :: wfoptalg
  integer,intent(in) :: quit
  real(dp),intent(in) :: cpus,tolrde,tolwfr
  character(len=*),intent(in) :: filnam_ds1
  type(MPI_type),intent(in) :: mpi_enreg
- type(efield_type),intent(inout) :: dtefield
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays
- integer,intent(in) :: npwarr(nkpt),pwind(pwind_alloc,2,3)
+ integer,intent(in) :: npwarr(nkpt)
  real(dp),intent(in) :: cgq(2,mcgq)
- real(dp),intent(in) :: pwnsfac(2,pwind_alloc),pwnsfacq(2,mkgq),zshift(nband)
- real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc)
- real(dp),intent(inout) :: dphase_k(3)
- real(dp),intent(out) :: subham(nband*(nband+1)),subovl(nband*(nband+1)*use_subovl)
- real(dp),intent(out) :: subvnlx(nband*(nband+1)*use_subvnlx)
+ real(dp),intent(inout),target :: cg(2,mcg)
+ real(dp), intent(inout) :: eig(nband)
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
- integer,parameter :: level=113,tim_getghc=1,tim_projbd=1
+integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
+integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  integer,save :: nskip=0
  integer :: choice,counter,cpopt,ddkflag,dimenlc1,dimenlr1,dimenl2,iat,iatom,itypat
- integer :: ia,iband,ibandmin,ibandmax,me_g0
- integer :: ibdblock,iblock,icg1,icg_shift,icp1,icp2,idir,idum1,ierr,ifor,igs,igsc_shift,ii,ikgf
+ integer :: ia,iband,ibandmin,ibandmax,jband,me_g0
+ integer :: ibdblock,iblock,icg1,icg_shift,icp1,icp2,idir,idum1,ierr,ifor,igs,ii,ikgf
  integer :: ikpt2,ikpt2f,ikptf,iline,iproc,ipw,ispinor,istwf_k,isubh,isubo,itrs
  integer :: job,mcg_q,me_distrb,natom,ncpgr,nblock,nproc_distrb,npw_k2
  integer :: optekin,paw_opt,signs,shiftbd,sij_opt,spaceComm_distrb
@@ -204,23 +183,25 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer,allocatable :: dimlmn(:),dimlmn_srt(:),ikptf_recv(:),pwind_k(:),sflag_k(:)
  real(dp) :: bcut(2,3),dphase_aux1(3),dtm_k(2),phase_end(3)
  real(dp) :: phase_init(3),tsec(2)
- real(dp),allocatable :: cg1_k(:,:),cgq_k(:,:),conjgr(:,:),cwavef(:,:)
+ real(dp),allocatable :: cg1_k(:,:),cgq_k(:,:),conjgr(:,:)
+ real(dp), pointer :: cwavef(:,:)
  real(dp),allocatable :: detovc(:,:,:),detovd(:,:,:),direc(:,:),direc_tmp(:,:)
  real(dp),allocatable :: gh_direc(:,:),gh_direcws(:,:),ghc(:,:),ghc_all(:,:),ghcws(:,:)
  real(dp),allocatable :: grad_berry(:,:),grad_total(:,:),gs_direc(:,:)
- real(dp) :: gsc_dummy(0,0)
- real(dp),allocatable :: gvnlxc(:,:),gvnlx_direc(:,:),gvnlx_dummy(:,:)
- real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef(:,:)
- real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),swork(:,:),vresid(:,:),work(:,:)
+ real(dp),allocatable :: gvnlxc(:,:),gvnlx_direc(:,:)
+ real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef_dum(:,:)
+ real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),vresid(:,:),work(:,:)
  real(dp),pointer :: kinpw(:)
- type(pawcprj_type),allocatable :: cprj_cwavef(:,:)
+ type(pawcprj_type),allocatable,target :: cprj_cwavef_all(:,:)
+ type(pawcprj_type),pointer :: cprj_cwavef(:,:)
+ type(pawcprj_type),allocatable :: cprj_direc(:,:)
 
 ! *********************************************************************
 
  DBG_ENTER("COLL")
 
 !Starting the routine
- call timab(22,1,tsec)
+ call timab(1300,1,tsec)
 
 !Touching chkexit, cpus,filnam_ds to avoid warning for abirules. This is dirty...
  if(chkexit<0)then
@@ -243,18 +224,23 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
 !if PAW, one has to solve a generalized eigenproblem (H|Psi>=Lambda.S|Psi>)
 !else,   one has to solve a classical eigenproblem   (H|Psi>=Lambda.|Psi>)
- !LTEST
-! useoverlap=1
  useoverlap=0
- !LTEST
 
 !Initializations and allocations
  isubh=1;isubo=1
  nblock=(nband-1)/nbdblock+1
+ if(nbdblock>1)then
+   MSG_BUG('cgwf_paw not implemented for nbdblock>1!')
+ end if
+
+
  istwf_k=gs_hamk%istwf_k
  wfopta10=mod(wfoptalg,10)
  if (wfopta10/=0) then
-   MSG_ERROR('cgwf new is implemented only for wfopta10==0')
+   MSG_BUG('cgwf_paw is implemented only for wfopta10==0')
+ end if
+ if (ortalg>=0) then
+   MSG_BUG('cgwf_paw tested only for ortalg<0')
  end if
  !LTEST
  call writeout(999,'wfoptalg',wfoptalg)
@@ -270,17 +256,19 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_ALLOCATE(ghc,(2,npw*nspinor))
  ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
  ABI_ALLOCATE(conjgr,(2,npw*nspinor))
- ABI_ALLOCATE(cwavef,(2,npw*nspinor))
+! ABI_ALLOCATE(cwavef,(2,npw*nspinor))
+ ABI_ALLOCATE(scwavef_dum,(0,0))
  ABI_ALLOCATE(direc,(2,npw*nspinor))
  ABI_ALLOCATE(scprod,(2,nband))
 
  ABI_ALLOCATE(gh_direc,(2,npw*nspinor))
  ABI_ALLOCATE(gs_direc,(2,0))
  ABI_ALLOCATE(gvnlx_direc,(2,npw*nspinor))
- ABI_ALLOCATE(vresid,(2,npw*nspinor))
+! ABI_ALLOCATE(vresid,(2,npw*nspinor))
 
  ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
- ABI_DATATYPE_ALLOCATE(cprj_cwavef,(natom,nbdblock))
+ ABI_DATATYPE_ALLOCATE(cprj_cwavef_all,(natom,nband))
+ ABI_DATATYPE_ALLOCATE(cprj_direc ,(natom,nbdblock))
  ncpgr = 0 ! no need of gradients here
 !Dimensioning and allocation of <p_i|Cnk>
  ABI_ALLOCATE(dimlmn,(natom))
@@ -290,10 +278,28 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    dimlmn(ia+1:ia+gs_hamk%nattyp(itypat))=count(gs_hamk%indlmn(3,:,itypat)>0)
    ia=ia+gs_hamk%nattyp(itypat)
  end do
- call pawcprj_alloc(cprj_cwavef,ncpgr,dimlmn)
+ call pawcprj_alloc(cprj_cwavef_all,ncpgr,dimlmn)
+ call pawcprj_alloc(cprj_direc ,ncpgr,dimlmn)
 
- ABI_ALLOCATE(swork,(0,0))
- ABI_ALLOCATE(gvnlx_dummy,(0,0))
+ do iblock=1,nblock
+   ibandmin=1+(iblock-1)*nbdblock
+   ibandmax=min(iblock*nbdblock,nband)
+   do iband=ibandmin,ibandmax
+     ibdblock=iband-(iblock-1)*nbdblock
+     icg_shift=npw*nspinor*(iband-1)+icg
+
+!     call cg_zcopy(npw*nspinor,cg(1,1+icg_shift),cwavef)
+     cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
+     cprj_cwavef => cprj_cwavef_all(:,iband:iband)
+
+     call getcprj(1,0,cwavef,cprj_cwavef,&
+&      gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&      gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&      gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&      gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+
+   end do
+ end do
 
  ! Loop over blocks of bands. In the standard band-sequential algorithm, nblock=nband.
  do iblock=1,nblock
@@ -309,8 +315,10 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      ibdblock=iband-(iblock-1)*nbdblock
      counter=100*iband+inonsc
      icg_shift=npw*nspinor*(iband-1)+icg
-     igsc_shift=npw*nspinor*(iband-1)+igsc
 
+     !LTEST
+     call writeout(999,'iband',iband)
+     !LTEST
      ! ======================================================================
      ! ========== INITIALISATION OF MINIMIZATION ITERATIONS =================
      ! ======================================================================
@@ -323,12 +331,19 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      dotgp=one
 
      ! Extraction of the vector that is iteratively updated
-     call cg_zcopy(npw*nspinor,cg(1,1+icg_shift),cwavef)
+!     call cg_zcopy(npw*nspinor,cg(1,1+icg_shift),cwavef)
+     cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
+     cprj_cwavef => cprj_cwavef_all(:,iband:iband)
 
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
      ! WARNING : It might be interesting to skip the following operation.
      ! The associated routines should be reexamined to see whether cwavef is not already normalized.
-!LTEST
+     cpopt = 2
+     call getcsc(dotr,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
+&     gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
+     xnorm=one/sqrt(dotr)
+     call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
+
 !     if (gen_eigenpb) then
 !       call dotprod_g(dotr,doti,istwf_k,npw*nspinor,2,cwavef,scwavef,me_g0,mpi_enreg%comm_spinorfft)
 !       dotr=sqrt(dotr**2+doti**2); xnorm=one/sqrt(dotr)
@@ -339,14 +354,11 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 !       xnorm=one/sqrt(abs(dotr))
 !       call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
 !     end if
-!
-!     if (prtvol==-level) then
-!       write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
-!       call wrtout(std_out,message,'PERS')
-!     end if
-!
-     xnorm = one
-!LTEST
+
+     if (prtvol==-level) then
+       write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
+       call wrtout(std_out,message,'PERS')
+     end if
 
      ! ======================================================================
      ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
@@ -354,20 +366,19 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      if(nline/=0)then
        do iline=1,nline
 
-         call getcprj(1,0,cwavef,cprj_cwavef,&
-&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
-
          ! === COMPUTE THE RESIDUAL ===
-
          ! Compute lambda = <C|H|C>
          sij_opt = 0
          cpopt = 2
-         call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,gs_hamk,&
-&         eval,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getghc,0)
+         !LTEST
+         call writeout(999,'iline',iline)
+         call writeout(999,'getchc : chc')
+         !LTEST
+         call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
+           &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
          lam0=chc
+         eval=chc
+         eig(iband)=chc
 
          ! Check that lam0 is decreasing on succeeding lines:
          if (iline==1) then
@@ -386,16 +397,12 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! Note that vresid is precomputed to garantee cancellation of errors
          ! and allow residuals to reach values as small as 1.0d-24 or better.
 
-         eval=chc
-         !TO DO : to compute ( H - epsilon S ) with getghc
-         vresid(:,:) = zero
          sij_opt = -1
-         cpopt=-1
-         call getghc(cpopt,cwavef,cprj_cwavef,ghc,scwavef,gs_hamk,gvnlxc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+         call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
 
          ! Compute residual (squared) norm
-         call sqnorm_g(resid(iband),istwf_k,npw*nspinor,vresid,me_g0,mpi_enreg%comm_fft)
+         call sqnorm_g(resid(iband),istwf_k,npw*nspinor,direc,me_g0,mpi_enreg%comm_fft)
 
          if (prtvol==-level) then
            write(message,'(a,i0,2f14.6)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
@@ -431,7 +438,7 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! ======================================================================
 
          ! Compute the steepest descent direction
-         call cg_zcopy(npw*nspinor,vresid,direc)  ! Store <G|H-lambda.S|C> in direc
+!         call cg_zcopy(npw*nspinor,vresid,direc)  ! Store <G|H-lambda.S|C> in direc
 
          ! =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
          ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
@@ -442,10 +449,24 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! Project the steepest descent direction:
          ! direc(2,npw)=<G|H|Cnk> - \sum_{(i<=n)} <G|H|Cik> , normalized.
-
          if(ortalg>=0)then
-           call projbd(cg,direc,iband,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
-&           gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+           call getcprj(1,0,direc,cprj_direc,&
+&           gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&           gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&           gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&           gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+           do jband=1,nband
+             icg_shift=npw*nspinor*(jband-1)+icg
+             cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
+             cprj_cwavef => cprj_cwavef_all(:,jband:jband)
+             call getcsc(scprod(1,jband),scprod(2,jband),cpopt,direc,cwavef,cprj_direc,cprj_cwavef,&
+&             gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc_band)
+           end do
+           icg_shift=npw*nspinor*(iband-1)+icg
+           cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
+           cprj_cwavef => cprj_cwavef_all(:,iband:iband)
+           call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
+&           direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
          end if
 
          ! For a generalized eigenpb, store the steepest descent direction
@@ -471,9 +492,34 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
          ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
+         call getcprj(1,0,direc,cprj_direc,&
+&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+         do jband=1,nband
+           !LTEST
+!           call writeout(999,'jband',jband)
+           !LTEST
+           icg_shift=npw*nspinor*(jband-1)+icg
+           cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
+           cprj_cwavef => cprj_cwavef_all(:,jband:jband)
+           call getcsc(scprod(1,jband),scprod(2,jband),cpopt,direc,cwavef,cprj_direc,cprj_cwavef,&
+&           gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc_band)
+         end do
          ! Projecting again out all bands (not normalized).
-         call projbd(cg,direc,-1,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
-&         gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+         call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
+&         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+
+         call getcprj(1,0,direc,cprj_direc,&
+&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+
+         icg_shift=npw*nspinor*(iband-1)+icg
+         cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
+         cprj_cwavef => cprj_cwavef_all(:,iband:iband)
 
          ! ======================================================================
          ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
@@ -489,7 +535,12 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            gamma=zero
            dotgp=dotgg
            call cg_zcopy(npw*nspinor,direc,conjgr)
-
+           !LTEST
+           if (prtvol==-level)then
+             write(message,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
+             call wrtout(std_out,message,'PERS')
+           end if
+           !LTEST
          else
            gamma=dotgg/dotgp
            dotgp=dotgg
@@ -518,7 +569,21 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! ============ PROJECTION OF THE CONJUGATED GRADIENT ===================
          ! ======================================================================
 
-         call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,cwavef,conjgr,me_g0,mpi_enreg%comm_spinorfft)
+!         call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,cwavef,conjgr,me_g0,mpi_enreg%comm_spinorfft)
+         call getcprj(1,0,conjgr,cprj_direc,&
+&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+         call getcsc(dotr,doti,cpopt,conjgr,cwavef,cprj_direc,cprj_cwavef,&
+&         gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
+
+         !LTEST
+         if (prtvol==-level)then
+           write(message,'(a,es16.6)')' cgwf: dotr = ',dotr
+           call wrtout(std_out,message,'PERS')
+         end if
+         !LTEST
 
          ! Project the conjugated gradient onto the current band
          ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
@@ -537,34 +602,53 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
            end do
          end if
+         call getcprj(1,0,direc,cprj_direc,&
+&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
 
          ! ======================================================================
          ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
          ! ======================================================================
 
          ! Compute gh_direc = <G|H|D> and eventually gs_direc = <G|S|D>
-         sij_opt=1
-         !LTEST
-         sij_opt=0
-         !LTEST
+!         sij_opt=1
+!         !LTEST
+!         sij_opt=0
+!         !LTEST
+!
+!         call getghc(cpopt,direc,cprj_cwavef,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
+!&         eval,mpi_enreg,1,prtvol,sij_opt,t im_getghc,0)
 
-         call getghc(cpopt,direc,cprj_cwavef,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
-
-         ! In case of generalized eigenproblem, compute now the norm of the conjugated gradient
+         ! In case of generalized eigenprobl em, compute now the norm of the conjugated gradient
          !LTEST
+         call getcsc(dotr,doti,cpopt,direc,direc,cprj_direc,cprj_direc,&
+&         gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
+         xnorm=one/sqrt(abs(dotr))
 !         if (gen_eigenpb) then
 !           call dotprod_g(dotr,doti,istwf_k,npw*nspinor,1,direc,gs_direc,me_g0,mpi_enreg%comm_spinorfft)
 !           xnorm=one/sqrt(abs(dotr))
 !         end i
          !LTEST
 
+         sij_opt=0
          ! Compute dhc = Re{<D|H|C>}
-         call dotprod_g(dhc,doti,istwf_k,npw*nspinor,1,direc,ghc,me_g0,mpi_enreg%comm_spinorfft)
+!         call dotprod_g(dhc,doti,istwf_k,npw*nspinor,1,direc,ghc,me_g0,mpi_enreg%comm_spinorfft)
+         !LTEST
+         call writeout(999,'getchc : dhc')
+         !LTEST
+         call getchc(dhc,doti,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,&
+           &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
          dhc=dhc*xnorm
 
          ! Compute <D|H|D> or <D|(H-zshift)^2|D>
-         call dotprod_g(dhd,doti,istwf_k,npw*nspinor,1,direc,gh_direc,me_g0,mpi_enreg%comm_spinorfft)
+!         call dotprod_g(dhd,doti,istwf_k,npw*nspinor,1,direc,gh_direc,me_g0,mpi_enreg%comm_spinorfft)
+         !LTEST
+         call writeout(999,'getchc : dhd')
+         !LTEST
+         call getchc(dhd,doti,cpopt,direc,direc,cprj_direc,cprj_direc,&
+&          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
          dhd=dhd*xnorm**2
 
          if(prtvol==-level)then
@@ -622,24 +706,33 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
            cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
          end do
+         call getcprj(1,0,cwavef,cprj_cwavef,&
+&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+
+         call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
+           &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
+         eig(iband)=chc
 
 !        call cg_zaxpby(npw*nspinor,(/sintn,zero/),direc,(/costh,zero/),cwavef)
-         call cg_zcopy(npw*nspinor,cwavef,cg(1,1+icg_shift))
+!         call cg_zcopy(npw*nspinor,cwavef,cg(1,1+icg_shift))
 
-         do ipw=1,npw*nspinor
-           ghc(1,ipw)  =ghc(1,ipw)*costh + gh_direc(1,ipw)*sintn
-           ghc(2,ipw)  =ghc(2,ipw)*costh + gh_direc(2,ipw)*sintn
-         end do
+!         do ipw=1,npw*nspinor
+!           ghc(1,ipw)  =ghc(1,ipw)*costh + gh_direc(1,ipw)*sintn
+!           ghc(2,ipw)  =ghc(2,ipw)*costh + gh_direc(2,ipw)*sintn
+!         end do
 
 
-         if (use_subvnlx==1) then
-!$OMP PARALLEL DO
-           do ipw=1,npw*nspinor
-             gvnlxc(1,ipw)=gvnlxc(1,ipw)*costh + gvnlx_direc(1,ipw)*sintn
-             gvnlxc(2,ipw)=gvnlxc(2,ipw)*costh + gvnlx_direc(2,ipw)*sintn
-           end do
+!         if (use_subvnlx==1) then
+!!$OMP PARALLEL DO
+!           do ipw=1,npw*nspinor
+!             gvnlxc(1,ipw)=gvnlxc(1,ipw)*costh + gvnlx_direc(1,ipw)*sintn
+!             gvnlxc(2,ipw)=gvnlxc(2,ipw)*costh + gvnlx_direc(2,ipw)*sintn
+!           end do
 !          call cg_zaxpby(npw*nspinor,(/sintn,zero/),gvnlx_direc,(/costh,zero/),gvnlxc)
-         end if
+!         end if
 
          ! ======================================================================
          ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
@@ -683,17 +776,18 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    !  ======================================================================
    !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
    !  ======================================================================
+
    !LTEST
 !   call writeout(999,'iblock',iblock)
 !   call writeout(999,'ghc-cwavef',ghc-cwavef)
 !   call writeout(999,'gsc-cwavef',scwavef-cwavef)
    !LTEST
-   call mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
-&   isubh,isubo,mcg,mgsc,nband,nbdblock,npw,&
-&   nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
+!   call mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
+!&   isubh,isubo,mcg,mgsc,nband,nbdblock,npw,&
+!&   nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
    !LTEST
-   call sqnorm_g(dotr,istwf_k,npw*nspinor,cwavef,me_g0,mpi_enreg%comm_fft)
-   xnorm=xnorm+dotr
+!   call sqnorm_g(dotr,istwf_k,npw*nspinor,cwavef,me_g0,mpi_enreg%comm_fft)
+!   xnorm=xnorm+dotr
 !   call writeout(999,'subham',subham(isubh-2)-dotr)
    !LTEST
 
@@ -708,19 +802,20 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
  ! Debugging ouputs
  if(prtvol==-level)then
-   isubh=1
-   if (use_subvnlx==1) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
-   if (use_subvnlx==0) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
+!   isubh=1
+!   if (use_subvnlx==1) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
+!   if (use_subvnlx==0) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
    do iband=1,nband
-     do ii=1,iband
-       if (use_subvnlx==1) then
-         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
-       else
-         write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
-       end if
+!     do ii=1,iband
+!       if (use_subvnlx==1) then
+!         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
+!       else
+!         write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
+!       end if
+       write(message,'(i5,es16.6)')iband,eig(iband)
        call wrtout(std_out,message,'PERS')
-       isubh=isubh+2
-     end do
+!       isubh=isubh+2
+!     end do
    end do
  end if
 
@@ -728,11 +823,14 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ! FINAL DEALLOCATIONS
  ! ===================
 
- call pawcprj_free(cprj_cwavef)
- ABI_DATATYPE_DEALLOCATE(cprj_cwavef)
+ nullify(cprj_cwavef)
+ call pawcprj_free(cprj_cwavef_all)
+ call pawcprj_free(cprj_direc)
+ ABI_DATATYPE_DEALLOCATE(cprj_cwavef_all)
+ ABI_DATATYPE_DEALLOCATE(cprj_direc)
  ABI_DEALLOCATE(dimlmn)
  ABI_DEALLOCATE(conjgr)
- ABI_DEALLOCATE(cwavef)
+ ABI_DEALLOCATE(scwavef_dum)
  ABI_DEALLOCATE(direc)
  ABI_DEALLOCATE(pcon)
  ABI_DEALLOCATE(scprod)
@@ -740,24 +838,20 @@ subroutine cgwfnew(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(gh_direc)
  ABI_DEALLOCATE(gvnlx_direc)
- ABI_DEALLOCATE(vresid)
+! ABI_DEALLOCATE(vresid)
  ABI_DEALLOCATE(gs_direc)
 
  ABI_DEALLOCATE(direc_tmp)
 
- ABI_DEALLOCATE(gvnlx_dummy)
-
- ABI_DEALLOCATE(swork)
-
 ! Do not delete this line, needed to run with open MP
  write(unit=message,fmt=*) resid(1)
 
- call timab(22,2,tsec)
+ call timab(1300,2,tsec)
 
  DBG_EXIT("COLL")
 
-end subroutine cgwfnew
+end subroutine cgwf_paw
 !!***
 
-end module m_cgwfnew
+end module m_cgwf_paw
 !!***

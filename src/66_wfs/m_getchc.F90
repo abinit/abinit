@@ -149,7 +149,7 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: level=114,re=1,im=2,tim_fourwf=1
+ integer,parameter :: level=114,re=1,im=2,tim_fourwf=33
  integer :: choice,cplex,cpopt_here,i1,i2,i3,idat,idir,ierr
  integer :: ig,igspinor,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
  integer :: nnlout,npw_fft,npw_k1,npw_k2,nspinortot
@@ -182,7 +182,7 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
  DBG_ENTER("COLL")
 
 !Keep track of total time spent in getchc:
-! call timab(200+tim_getchc,1,tsec)
+ call timab(1370,1,tsec)
 
 !!Structured debugging if prtvol==-level
 ! if(prtvol==-level)then
@@ -195,11 +195,11 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
  ABI_ALLOCATE(gsc,(2,npw*nspinor))
 
 !LTEST
- call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
-&                 prtvol,sij_opt,tim_getchc,type_calc,&
-&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
-
- call dotprod_g(chc_re_tmp,chc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+! call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
+!&                 prtvol,sij_opt,tim_getchc,type_calc,&
+!&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
+!
+! call dotprod_g(chc_re_tmp,chc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 !LTEST
 
 !Select k-dependent objects according to select_k input parameter
@@ -593,7 +593,7 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 !============================================================
 
    if ((type_calc==0).or.(type_calc==2)) then
-     signs=2 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
+     signs=1 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=15
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
 !     if (has_fock) then
 !       if (gs_ham%usepaw==1) then
@@ -619,13 +619,13 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
      lambda_ndat = lambda
 
      !LTEST
+!     signs=2 
 !     call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 !&     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,cprjin_left=cwaveprj_left)
 !
 !     call dotprod_g(dotr,doti,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,gvnlxc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+     signs=1
 !     !LTEST
-     signs=1 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
-     cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
 
      call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
@@ -709,13 +709,21 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
  ABI_DEALLOCATE(gsc)
 
 !LTEST
- call writeout(999,'chc_re (dif)',chc_re-chc_re_tmp)
- call writeout(999,'chc_im (dif)',chc_im-chc_im_tmp)
- call writeout(999,'chc_re_tmp',chc_re_tmp)
- call writeout(999,'chc_im_tmp',chc_im_tmp)
+! if (abs(chc_re-chc_re_tmp)>tol8) then
+!   call writeout(999,'chc_re (dif)',chc_re-chc_re_tmp)
+!   call writeout(999,'chc_im (dif)',chc_im-chc_im_tmp)
+!   MSG_ERROR('ERROR in getchc : dif re is too large')
+! end if
+! if (abs(chc_im-chc_im_tmp)>tol8) then
+!   call writeout(999,'chc_re (dif)',chc_re-chc_re_tmp)
+!   call writeout(999,'chc_im (dif)',chc_im-chc_im_tmp)
+!   MSG_ERROR('ERROR in getchc : dif im is too large')
+! end if
+! call writeout(999,'chc_re_tmp',chc_re_tmp)
+! call writeout(999,'chc_im_tmp',chc_im_tmp)
 !LTEST
 !
-!! call timab(200+tim_getchc,2,tsec)
+ call timab(1370,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -770,118 +778,182 @@ end subroutine getchc
 !!
 !! SOURCE
 
-subroutine getcsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
-&                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
+!subroutine getcsc(csc_re,csc_im,cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
+!&                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
+subroutine getcsc(csc_re,csc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,gs_ham,mpi_enreg,ndat,&
+&                 npw,nspinor,prtvol,tim_getcsc,&
+&                 select_k) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
- integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor
+ integer,intent(in) :: cpopt,ndat,prtvol
+ integer,intent(in) :: npw,nspinor,tim_getcsc
  integer,intent(in),optional :: select_k
+ real(dp),intent(out) :: csc_re,csc_im
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
 !arrays
- real(dp),intent(in) :: cg(2,mcg)
- real(dp),intent(out) :: gsc(2,mgsc)
- type(pawcprj_type),intent(in) :: cprj(natom,mcprj)
+ real(dp),intent(inout) :: cwavef(:,:),cwavef_left(:,:)
+ type(pawcprj_type),intent(inout),target :: cwaveprj(:,:),cwaveprj_left(:,:)
+
+!!Arguments ------------------------------------
+!!scalars
+! integer,intent(in),optional :: select_k
+! type(MPI_type),intent(in) :: mpi_enreg
+! type(gs_hamiltonian_type),intent(inout),target :: gs_ham
+!!arrays
+! real(dp),intent(out) :: csc_re,csc_im
+! type(pawcprj_type),intent(in) :: cprj(natom,mcprj)
 
 !Local variables-------------------------------
 !scalars
- integer :: choice,cpopt,dimenl1,dimenl2,iband,iband1,iband2,ierr,index_cg,index_cprj
- integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm
+ integer :: choice,dimenl1,dimenl2,iband,idat,idir,ierr,index_cg,index_cprj
+ integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm,nnlout
  !character(len=500) :: msg
 !arrays
- real(dp) :: enlout_dum(1),tsec(2)
- real(dp),allocatable :: cwavef(:,:),scwavef(:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
+ real(dp) :: enlout(1),enlout_im(1),tsec(2)
+ real(dp),allocatable :: gsc(:,:),gvnlxc(:,:)
+ !LTEST
+ real(dp) :: csc_re_tmp,csc_im_tmp
+ !LTEST
 ! *********************************************************************
 
  DBG_ENTER("COLL")
 
-!Compatibility tests
- my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
- if(gs_ham%usepaw==0) then
-   MSG_BUG('Only compatible with PAW (usepaw=1) !')
- end if
- if(nband<0.and.(mcg<npw_k*my_nspinor.or.mgsc<npw_k*my_nspinor.or.mcprj<my_nspinor)) then
-   MSG_BUG('Invalid value for mcg, mgsc or mcprj !')
- end if
+ call timab(1360+tim_getcsc,1,tsec)
 
-!Keep track of total time spent in getcsc:
- call timab(565,1,tsec)
+!!Compatibility tests
+! my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
+! if(gs_ham%usepaw==0) then
+!   MSG_BUG('Only compatible with PAW (usepaw=1) !')
+! end if
+! if(nband<0.and.(mcg<npw_k*my_nspinor.or.mgsc<npw_k*my_nspinor.or.mcprj<my_nspinor)) then
+!   MSG_BUG('Invalid value for mcg, mgsc or mcprj !')
+! end if
 
- gsc = zero
-
-!Prepare some data
- ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
- ABI_ALLOCATE(scwavef,(2,npw_k*my_nspinor))
- if (gs_ham%usecprj==1) then
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor))
-   call pawcprj_alloc(cwaveprj,0,gs_ham%dimcprj)
- else
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
- end if
- dimenl1=gs_ham%dimekb1;dimenl2=natom;tim_nonlop=0
- choice=1;signs=2;cpopt=-1+3*gs_ham%usecprj;paw_opt=3;useylm=1
  select_k_=1;if (present(select_k)) select_k_=select_k
- me=mpi_enreg%me_kpt
+!Keep track of total time spent in getcsc:
+ choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=16 ; paw_opt=3
+ !LTEST
+! ABI_ALLOCATE(gsc,(2,nspinor*npw))
+! ABI_ALLOCATE(gvnlxc,(2,nspinor*npw))
+!
+! signs=2
+! call nonlop(choice,cpopt,cwaveprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,ndat,&
+!& nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
+!
+! call dotprod_g(csc_re_tmp,csc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,gsc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+! ABI_DEALLOCATE(gsc)
+! ABI_DEALLOCATE(gvnlxc)
+ !LTEST
 
-!Loop over bands
- index_cprj=ibg;index_cg=icg;index_gsc=igsc
- if (nband>0) then
-   iband1=1;iband2=nband
- else if (nband<0) then
-   iband1=abs(nband);iband2=iband1
-   index_cprj=index_cprj+(iband1-1)*my_nspinor
-   index_cg  =index_cg  +(iband1-1)*npw_k*my_nspinor
-   index_gsc =index_gsc +(iband1-1)*npw_k*my_nspinor
- end if
+ call timab(1361,1,tsec)
+ call dotprod_g(csc_re,csc_im,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+ call timab(1361,2,tsec)
 
- do iband=iband1,iband2
+ ABI_ALLOCATE(gsc,(0,0))
+ ABI_ALLOCATE(gvnlxc,(0,0))
 
-   if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me.and.nband>0) then
-     gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=zero
-     index_cprj=index_cprj+my_nspinor
-     index_cg=index_cg+npw_k*my_nspinor
-     index_gsc=index_gsc+npw_k*my_nspinor
-     cycle
-   end if
+ signs=1
+ call nonlop(choice,cpopt,cwaveprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,ndat,&
+& nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
+& cprjin_left=cwaveprj_left,enlout_im=enlout_im)
 
-!  Retrieve WF at (n,k)
-   cwavef(:,1:npw_k*my_nspinor)=cg(:,1+index_cg:npw_k*my_nspinor+index_cg)
-   if (gs_ham%usecprj==1) then
-     call pawcprj_copy(cprj(:,1+index_cprj:my_nspinor+index_cprj),cwaveprj)
-   end if
-
-!  Compute <g|S|Cnk>
-   call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_ham,0,(/zero/),mpi_enreg,1,1,paw_opt,&
-&   signs,scwavef,tim_nonlop,cwavef,cwavef,select_k=select_k_)
-
-   gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=scwavef(:,1:npw_k*my_nspinor)
-
-!  End of loop over bands
-   index_cprj=index_cprj+my_nspinor
-   index_cg=index_cg+npw_k*my_nspinor
-   index_gsc=index_gsc+npw_k*my_nspinor
+ ABI_DEALLOCATE(gsc)
+ ABI_DEALLOCATE(gvnlxc)
+! !LTEST
+! call writeout(999,'dotr    ',dotr)
+! call writeout(999,'dotr bis',enlout(1))
+! call writeout(999,'doti    ',doti)
+! call writeout(999,'doti bis',enlout_im(1))
+! !LTEST
+ do idat=1,ndat
+   csc_re = csc_re + enlout(idat)
+   csc_im = csc_im + enlout_im(idat)
  end do
 
-!Reduction in case of parallelization
- if ((xmpi_paral==1)) then
-   call timab(48,1,tsec)
-   call xmpi_sum(gsc,mpi_enreg%comm_band,ierr)
-   call timab(48,2,tsec)
- end if
-
-!Memory deallocation
- ABI_DEALLOCATE(cwavef)
- ABI_DEALLOCATE(scwavef)
- if (gs_ham%usecprj==1) then
-   call pawcprj_free(cwaveprj)
- end if
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
-
- call timab(565,2,tsec)
+!LTEST
+! if (abs(csc_re-csc_re_tmp)>tol8) then
+!   call writeout(999,'csc_re (dif)',csc_re-csc_re_tmp)
+!   call writeout(999,'csc_im (dif)',csc_im-csc_im_tmp)
+!   MSG_ERROR('ERROR in getcsc : dif re is too large')
+! end if
+! if (abs(csc_im-csc_im_tmp)>tol8) then
+!   call writeout(999,'csc_re (dif)',csc_re-csc_re_tmp)
+!   call writeout(999,'csc_im (dif)',csc_im-csc_im_tmp)
+!   MSG_ERROR('ERROR in getcsc : dif im is too large')
+! end if
+ !LTEST
+! call writeout(999,'chc_re_tmp',chc_re_tmp)
+!!Prepare some data
+! ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
+! ABI_ALLOCATE(scwavef,(2,npw_k*my_nspinor))
+! if (gs_ham%usecprj==1) then
+!   ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor))
+!   call pawcprj_alloc(cwaveprj,0,gs_ham%dimcprj)
+! else
+!   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
+! end if
+! dimenl1=gs_ham%dimekb1;dimenl2=natom;tim_nonlop=0
+! choice=1;signs=2;cpopt=-1+3*gs_ham%usecprj;paw_opt=3;useylm=1
+! select_k_=1;if (present(select_k)) select_k_=select_k
+! me=mpi_enreg%me_kpt
+!
+!!Loop over bands
+! index_cprj=ibg;index_cg=icg;index_gsc=igsc
+! if (nband>0) then
+!   iband1=1;iband2=nband
+! else if (nband<0) then
+!   iband1=abs(nband);iband2=iband1
+!   index_cprj=index_cprj+(iband1-1)*my_nspinor
+!   index_cg  =index_cg  +(iband1-1)*npw_k*my_nspinor
+!   index_gsc =index_gsc +(iband1-1)*npw_k*my_nspinor
+! end if
+!
+! do iband=iband1,iband2
+!
+!   if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me.and.nband>0) then
+!     gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=zero
+!     index_cprj=index_cprj+my_nspinor
+!     index_cg=index_cg+npw_k*my_nspinor
+!     index_gsc=index_gsc+npw_k*my_nspinor
+!     cycle
+!   end if
+!
+!!  Retrieve WF at (n,k)
+!   cwavef(:,1:npw_k*my_nspinor)=cg(:,1+index_cg:npw_k*my_nspinor+index_cg)
+!   if (gs_ham%usecprj==1) then
+!     call pawcprj_copy(cprj(:,1+index_cprj:my_nspinor+index_cprj),cwaveprj)
+!   end if
+!
+!!  Compute <g|S|Cnk>
+!   call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_ham,0,(/zero/),mpi_enreg,1,1,paw_opt,&
+!&   signs,scwavef,tim_nonlop,cwavef,cwavef,select_k=select_k_)
+!
+!   gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=scwavef(:,1:npw_k*my_nspinor)
+!
+!!  End of loop over bands
+!   index_cprj=index_cprj+my_nspinor
+!   index_cg=index_cg+npw_k*my_nspinor
+!   index_gsc=index_gsc+npw_k*my_nspinor
+! end do
+!
+!!Reduction in case of parallelization
+! if ((xmpi_paral==1)) then
+!   call timab(48,1,tsec)
+!   call xmpi_sum(gsc,mpi_enreg%comm_band,ierr)
+!   call timab(48,2,tsec)
+! end if
+!
+!!Memory deallocation
+! ABI_DEALLOCATE(cwavef)
+! ABI_DEALLOCATE(scwavef)
+! if (gs_ham%usecprj==1) then
+!   call pawcprj_free(cwaveprj)
+! end if
+! ABI_DATATYPE_DEALLOCATE(cwaveprj)
+!
+ call timab(1360+tim_getcsc,2,tsec)
 
  DBG_EXIT("COLL")
 

@@ -39,6 +39,8 @@ module m_cgprj
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, &
                         pawcprj_set_zero, pawcprj_mpi_sum
  use m_opernla_ylm, only : opernla_ylm
+ use m_opernla_ylm_blas, only : opernla_ylm_blas
+ use m_time,             only : timab
 
  implicit none
 
@@ -144,6 +146,7 @@ contains
  integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ishift,ispinor,itypat
  integer :: jc,matblk,mincat,nd2gxdt,ndgxdt,nincat,nkpg,nkpg_,nlmn,signs
 !arrays
+ real(dp) :: tsec(2)
  integer,allocatable :: cplex_dgxdt(:),cplex_d2gxdt(:),indlmn_typ(:,:)
  real(dp),allocatable :: d2gxdt(:,:,:,:,:),dgxdt(:,:,:,:,:),ffnl_typ(:,:,:)
  real(dp),allocatable :: gx(:,:,:,:)
@@ -152,6 +155,8 @@ contains
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+
+ call timab(1200,1,tsec)
 
 !Nothing to do in that case
  if (cpopt==1.and.choice==1) return
@@ -276,9 +281,19 @@ contains
      end if
 
 !    Compute <p_i|c> scalars (and derivatives) for this block of atoms
-     call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
-&     ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
-&     nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
+     if (abs(choice_)>1) then
+       call timab(1201,1,tsec)
+       call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
+&       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
+&       nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
+       call timab(1201,2,tsec)
+     else
+       call timab(1202,1,tsec)
+       call opernla_ylm_blas(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
+&       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
+&       nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
+       call timab(1202,2,tsec)
+     end if
 
 !    Transfer result to output variable cwaveprj
      if (cpopt==0) then
@@ -353,6 +368,8 @@ contains
  if (nloalg(2)<=0) then
    ABI_DEALLOCATE(ph3d_)
  end if
+
+ call timab(1200,2,tsec)
 
  DBG_EXIT('COLL')
 

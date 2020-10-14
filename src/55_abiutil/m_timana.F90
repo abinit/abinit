@@ -382,6 +382,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(232)='nonlop%prep_nonl%forstrn        '
  names(233)='nonlop%appinvovl                '
  names(234)='nonlop%prep_nonl%energy         '
+ names(235)='nonlop%getchc                   '; basic(235)=1
+ names(236)='nonlop%getcsc                   '; basic(236)=1
 
  names(238)='scfcv_core                      '
  names(239)='scfcv_core(Berry)               '
@@ -759,6 +761,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(862)='fourwf%suskmm !0 part 2         '
  names(871)='fourwf%suskmm !3 part 1         '
  names(872)='fourwf%suskmm !3 part 2         '
+ names(873)='fourwf%getchc                   '; basic(873)=1
 
  names(901)='newvtr(before selection)        '
  names(902)='newvtr(bef. prcref_PMA)         '
@@ -848,11 +851,32 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1021)='listkk                          '; basic(1021) = 1
 
  names(1100)='nonlop_ylm                      '
- names(1101)='nonlop_ylm%opernla              '
- names(1102)='nonlop_ylm%opernla_blas         '
- names(1103)='nonlop_ylm%opernlb              '
- names(1104)='nonlop_ylm%opernlb_blas         '
- names(1150)='nonlop_ylm(other)               '
+ names(1101)='nlylm%opernla                   '
+ names(1102)='nlylm%opernla_blas              '
+ names(1103)='nlylm%opernlb                   '
+ names(1104)='nlylm%opernlb_blas              '
+ names(1105)='nlylm%opernlc                   '
+ names(1106)='nlylm%opernld                   '
+ names(1107)='nlylm%opernld(left)             '
+ names(1108)='nlylm%opernld(left+im)          '
+ names(1150)='nlylm(other)                    '
+
+ names(1200)='getcprj                         '; basic(1200) = 1
+ names(1201)='getcprj%opernla                 '
+ names(1202)='getcprj%opernla_blas            '
+ names(1210)='getcprj(other)                  '
+
+ names(1300)='cgwf_paw                        '
+ names(1301)='cgwf_paw%other                  '
+
+ names(1360)='getcsc(all)                     '
+ names(1361)='getcsc%dotprod_g                '; basic(1361)= 1
+ names(1362)='getcsc%other                    '
+ names(1363)='getcsc(1band)                   '
+ names(1364)='getcsc(bands)                   '
+
+ names(1370)='getchc                          '
+ names(1371)='getchc%other                    '
 
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
@@ -1177,7 +1201,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(21)
 !      Estimate different complements in vtowfk
 !      vtowfk(ssdiag) (= vtowfk(loop)    - cgwf )
-     tslots(:5)=(/-588, 39,-22,-530, -1600/)
+     tslots(:6)=(/-588, 39,-22,-530,-1300, -1600/)
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
@@ -1240,7 +1264,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(40)
 !      More complements in vtowfk
 !      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon
-     tslots(:7)=(/-590,39,-22,-530,-585,-583, -1600/)
+     tslots(:8)=(/-590,39,-22,-530,-585,-583, -1300,-1600/)
    case(41)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
@@ -1252,7 +1276,22 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
    case(45)
 !      Estimate the complement of nonlop_ylm
-     tslots(:6)=(/1150,1100,-1101,-1102,-1103,-1104/)
+     tslots(:10)=(/1150,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
+   case(46)
+!      Estimate the complement of getcprj
+     tslots(:4)=(/1210,1200,-1201,-1202/)
+   case(47)
+!      Estimate the complement of cgwf_paw
+     tslots(:8)=(/1301,1300,-1200,-1363,-1364,-1370,-201,-211/)
+   case(48)
+!      Sum calls of getcsc
+     tslots(:3)=(/1360,1363,1364/)
+   case(49)
+!      Estimate the complement of getcsc
+     tslots(:4)=(/1362,1360,-1361,-236/)
+   case(50)
+!      Estimate the complement of getchc
+     tslots(:4)=(/1371,1370,-235,-873/)
 
    case default
      cycle
@@ -1513,7 +1552,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,TIMER_SIZE/)
          msg= 'vtorho '
        case(7)
-         list(:15)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1600,TIMER_SIZE/) ; msg='vtowfk '
+         list(:16)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1300,1600,TIMER_SIZE/) ; msg='vtowfk '
        case(8)
          if(abs(timopt)==3)then
            list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; msg='lobpcgwf (abs(timopt)==3)'
@@ -1641,8 +1680,20 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
          msg='low-level xgTransposer type '
        case(79)
-         list(:6)=(/1100,1101,1102,1103,1104,1150/)
+         list(:8)=(/1300,1200,1363,1364,1370,201,211,1301/)
+         msg='cgwf_paw'
+       case(80)
+         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1150/)
          msg='nonlop_ylm'
+       case(81)
+         list(:4)=(/1200,1201,1202,1210/)
+         msg='getcprj'
+       case(82)
+         list(:4)=(/1360,1361,236,1362/)
+         msg='getcsc'
+       case(83)
+         list(:4)=(/1370,873,235,1371/)
+         msg='getchc'
        case default
          cycle ! This allows to disable temporarily some partitionings
 
