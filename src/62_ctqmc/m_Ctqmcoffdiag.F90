@@ -1626,20 +1626,20 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
       END DO
     END DO
   END DO
-  IF ( op%rank .EQ. 0 ) THEN
-    ifl=0
-    DO iflavor = 1, flavors
-      DO iflavor2 = 1, flavors
-        ifl=ifl+1
-        write(346,*) "#",iflavor,iflavor2,ifl
-        do  itau=1,op%samples+1
-          write(346,*) itau,real(F(itau,iflavor,iflavor2))
-        enddo
-        write(346,*) 
-      END DO
-    END DO
-  ENDIF
-  close(346)
+! IF ( op%rank .EQ. 0 ) THEN
+!   ifl=0
+!   DO iflavor = 1, flavors
+!     DO iflavor2 = 1, flavors
+!       ifl=ifl+1
+!       write(346,*) "#",iflavor,iflavor2,ifl
+!       do  itau=1,op%samples+1
+!         write(346,*) itau,real(F(itau,iflavor,iflavor2))
+!       enddo
+!       write(346,*) 
+!     END DO
+!   END DO
+! ENDIF
+! close(346)
   DO iflavor = 1, flavors
     DO iflavor2 = 1, flavors
       DO itau=1,samples+1
