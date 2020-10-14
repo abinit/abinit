@@ -88,6 +88,7 @@ bandpp2 11
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_nag_7.0_.*
 #%% [files]
 #%% files_to_test =
 #%%   t84.out, tolnlines =  3, tolabs =5.0e-1, tolrel = 5.0e-1, fld_options=-medium ;
