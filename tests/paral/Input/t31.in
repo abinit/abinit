@@ -14,7 +14,7 @@ nband1 500
 nband2 520
 
 #SCF cycle parameters
-tolvrs 1.d-3 nstep 3
+tolvrs 1.d-3 nstep 1  nline 2
 
 #K-points and sym
 occopt 3
