@@ -235,8 +235,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
- use_rmm_diis = (istep > 2 .and. abs(dtset%rmm_diis) /= 0)
- !use_rmm_diis = istep > 5
+ use_rmm_diis = .False.
+ if (abs(dtset%rmm_diis) /= 0) then
+   if (dtset%rmm_diis > 0) use_rmm_diis = istep > 3 + dtset%rmm_diis
+   if (dtset%rmm_diis < 0) use_rmm_diis = .True.
+ end if
 
 !Parallelization over spinors management
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)

@@ -1,0 +1,50 @@
+# GaAs crystal,
+# GS calculation with the CG + RMM-DIIS eigensolver and PAW GGA-PBE pseudos.
+
+ rmm_diis 1
+ #prtvol -432
+
+ use_gemm_nonlop 1 # test nonlop with BLAS, requires useylm 1
+
+#First dataset : SCF run
+ nband  30
+ nbdbuf 10
+ #tolwfr  1.e-12
+ tolvrs 1e-10
+
+ ecut 8.00  
+ pawecutdg 24.00
+ diemac 10.0
+
+#Common data
+ nshiftk 1
+ shiftk 0 0 0
+ ngkpt 4 4 4
+
+ natom  2
+ ntypat  2
+ acell   3*10.60
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ xred 3*0.00 3*0.25
+ typat  1 2
+ znucl  31 33
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pbe_standard/Ga.xml, Pseudodojo_paw_pbe_standard/As.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t18.out, tolnlines = 19, tolabs = 1.e-06, tolrel = 3.000e-01;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, RMM-DIIS
+#%% description =
+#%%   GaAs, zinc-blende structure.
+#%%   GS calculation with the CG + RMM-DIIS eigensolver and PAW GGA-PBE pseudos.
+#%% topics = Optic
+#%%<END TEST_INFO>

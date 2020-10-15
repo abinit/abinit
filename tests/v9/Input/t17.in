@@ -1,4 +1,3 @@
-#
 # GS calculation with the CG + RMM-DIIS eigensolver and NC pseudos
 #
 rmm_diis  1       # Activate CG + RMM-DIIS.
@@ -50,7 +49,7 @@ xred
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t17.out, tolnlines = 40, tolabs = 1e-06, tolrel = 1.5;
+#%%   t17.out, tolnlines = 40, tolabs = 3e-04, tolrel = 1.5;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
