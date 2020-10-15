@@ -71,9 +71,6 @@ contains
 !!  overlap matrix (not used for norm conserving psps).
 !!
 !! INPUTS
-!!  berryopt == 4/14: electric field is on;
-!           6/7/16/7: electric displacement field is on;
-!!              all other values, no field is present
 !!  chkexit= if non-zero, check whether the user wishes to exit
 !!  cpus = CPU time limit
 !!  filnam_ds1=name of input file (used for exit checking)
@@ -82,51 +79,35 @@ contains
 !!  ikpt=number of the k-point
 !!  inonsc=index of non self-consistent loop
 !!  isppol=spin polarization currently treated
-!!  mband =maximum number of bands
 !!  mcg=second dimension of the cg array
-!!  mcgq=second dimension of the cgq array
-!!  mkgq = second dimension of pwnsfacq
 !!  mpi_enreg=information about MPI parallelization
-!!  mpw=maximum dimensioned size of npw
 !!  nband=number of bands.
 !!  nbdblock=number of bands in a block
 !!  nkpt=number of k points
 !!  nline=number of line minimizations per band.
 !!  npw=number of planewaves in basis sphere at given k.
-!!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  nsppol=number of spin polarizations
 !!  ortalg=governs the choice of the algorithm for orthogonalisation.
 !!  prtvol=control print volume and debugging output
 !!  tolrde=tolerance on the ratio of differences of energies (for the line minimisation)
 !!  tolwfr=tolerance on largest wf residual
-!!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
-!!  use_subvnlx=1 if subvnlx has to be computed
 !!  wfoptalg=govern the choice of algorithm for wf optimisation
 !!   (0, 1, 10 and 11 : in the present routine, usual CG algorithm ;
 !!   (2 and 3 : use shifted square Hamiltonian)
-!!  zshift(nband)=in case wfoptalg is 2 or 3, shift of the Hamiltonian
 !!
 !! OUTPUT
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
-!!  subham(nband*(nband+1))=Hamiltonian expressed in the WFs subspace
-!!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
-!!  subvnlx(nband*(nband+1)*use_subvnlx))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
-!!   expressed in the WFs subspace
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)
 !!    at input =wavefunction <G|C band,k> coefficients for ALL bands
 !!    at output same as input except that
 !!      the current band, with number 'band' has been updated
-!!  dtefield <type(efield_type)> = variables related to Berry phase
-!!      calculations (see initberry.f)
 !!  quit= if 1, proceeds to smooth ending of the job.
 !!
 !! NOTES
 !!  1) cg should not be filtered and normalized : it should already be OK at input !
-!!  2) Not sure that that the generalized eigenproblem (when gs_hamk%usepaw=1)
-!!     is compatible with wfoptalg=2 or 3 (use of shifted square  Hamiltonian) - to be verified
 !!
 !! PARENTS
 !!      vtowfk
@@ -140,15 +121,15 @@ contains
 !!
 !! SOURCE
 
-subroutine cgwf_paw(cg,cgq,chkexit,cpus,eig,&
+subroutine cgwf_paw(cg,chkexit,cpus,eig,&
 &                filnam_ds1,gs_hamk,icg,ikpt,inonsc,&
-&                isppol,mband,mcg,mcgq,mkgq,mpi_enreg,&
-&                mpw,nband,nbdblock,nkpt,nline,npw,npwarr,&
+&                isppol,mcg,mpi_enreg,&
+&                nband,nbdblock,nkpt,nline,npw,&
 &                nspinor,nsppol,ortalg,prtvol,quit,resid,&
 &                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
  integer,intent(in) :: chkexit,icg,ikpt,inonsc,isppol
- integer,intent(in) :: mband,mcg,mcgq,mkgq,mpw,nband,nbdblock,nkpt,nline
+ integer,intent(in) :: mcg,nband,nbdblock,nkpt,nline
  integer,intent(in) :: npw,nspinor,nsppol,ortalg,prtvol
  integer,intent(in) :: wfoptalg
  integer,intent(in) :: quit
@@ -157,8 +138,6 @@ subroutine cgwf_paw(cg,cgq,chkexit,cpus,eig,&
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays
- integer,intent(in) :: npwarr(nkpt)
- real(dp),intent(in) :: cgq(2,mcgq)
  real(dp),intent(inout),target :: cg(2,mcg)
  real(dp), intent(inout) :: eig(nband)
  real(dp),intent(out) :: resid(nband)
@@ -167,30 +146,21 @@ subroutine cgwf_paw(cg,cgq,chkexit,cpus,eig,&
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
 integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  integer,save :: nskip=0
- integer :: choice,counter,cpopt,ddkflag,dimenlc1,dimenlr1,dimenl2,iat,iatom,itypat
+ integer :: counter,cpopt,itypat
  integer :: ia,iband,ibandmin,ibandmax,jband,me_g0
- integer :: ibdblock,iblock,icg1,icg_shift,icp1,icp2,idir,idum1,ierr,ifor,igs,ii,ikgf
- integer :: ikpt2,ikpt2f,ikptf,iline,iproc,ipw,ispinor,istwf_k,isubh,isubo,itrs
- integer :: job,mcg_q,me_distrb,natom,ncpgr,nblock,nproc_distrb,npw_k2
- integer :: optekin,paw_opt,signs,shiftbd,sij_opt,spaceComm_distrb
+ integer :: ibdblock,iblock,icg_shift,igs
+ integer :: iline,ipw,ispinor,istwf_k
+ integer :: natom,ncpgr,nblock
+ integer :: optekin,sij_opt
  integer :: useoverlap,wfopta10
- real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr
- real(dp) :: dphase_aux2,e0,e0_old,e1,e1_old,eval,gamma
- real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,thetam
- real(dp) :: xnorm
+ real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
+ real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,xnorm
  character(len=500) :: message
- integer :: hel(2,3)
- integer,allocatable :: dimlmn(:),dimlmn_srt(:),ikptf_recv(:),pwind_k(:),sflag_k(:)
- real(dp) :: bcut(2,3),dphase_aux1(3),dtm_k(2),phase_end(3)
- real(dp) :: phase_init(3),tsec(2)
- real(dp),allocatable :: cg1_k(:,:),cgq_k(:,:),conjgr(:,:)
+ integer,allocatable :: dimlmn(:)
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: conjgr(:,:),gvnlxc(:,:)
  real(dp), pointer :: cwavef(:,:)
- real(dp),allocatable :: detovc(:,:,:),detovd(:,:,:),direc(:,:),direc_tmp(:,:)
- real(dp),allocatable :: gh_direc(:,:),gh_direcws(:,:),ghc(:,:),ghc_all(:,:),ghcws(:,:)
- real(dp),allocatable :: grad_berry(:,:),grad_total(:,:),gs_direc(:,:)
- real(dp),allocatable :: gvnlxc(:,:),gvnlx_direc(:,:)
- real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef_dum(:,:)
- real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),vresid(:,:),work(:,:)
+ real(dp),allocatable :: direc(:,:),direc_tmp(:,:),pcon(:),scprod(:,:),scwavef_dum(:,:)
  real(dp),pointer :: kinpw(:)
  complex(dp) :: cx_tmp,cx_tmp2
  type(pawcprj_type),allocatable,target :: cprj_cwavef_all(:,:)
@@ -218,22 +188,17 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 !======================================================================
 
 !MPI data
- spaceComm_distrb=mpi_enreg%comm_cell
- nproc_distrb=xmpi_comm_size(spaceComm_distrb)
- me_distrb=mpi_enreg%me_kpt
  me_g0 = mpi_enreg%me_g0
 
-!if PAW, one has to solve a generalized eigenproblem (H|Psi>=Lambda.S|Psi>)
-!else,   one has to solve a classical eigenproblem   (H|Psi>=Lambda.|Psi>)
  useoverlap=0
 
+ cpopt = 2
+
 !Initializations and allocations
- isubh=1;isubo=1
  nblock=(nband-1)/nbdblock+1
  if(nbdblock>1)then
    MSG_BUG('cgwf_paw not implemented for nbdblock>1!')
  end if
-
 
  istwf_k=gs_hamk%istwf_k
  wfopta10=mod(wfoptalg,10)
@@ -247,27 +212,19 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  call writeout(999,'wfoptalg',wfoptalg)
  call writeout(999,'wfopta10',wfopta10)
  call writeout(999,'ortalg',ortalg)
- xnorm=0.0_DP
  !LTEST
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
  kinpw => gs_hamk%kinpw_k
 
  ABI_ALLOCATE(pcon,(npw))
- ABI_ALLOCATE(ghc,(2,npw*nspinor))
- ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
  ABI_ALLOCATE(conjgr,(2,npw*nspinor))
-! ABI_ALLOCATE(cwavef,(2,npw*nspinor))
  ABI_ALLOCATE(scwavef_dum,(0,0))
  ABI_ALLOCATE(direc,(2,npw*nspinor))
  ABI_ALLOCATE(scprod,(2,nband))
-
- ABI_ALLOCATE(gh_direc,(2,npw*nspinor))
- ABI_ALLOCATE(gs_direc,(2,0))
- ABI_ALLOCATE(gvnlx_direc,(2,npw*nspinor))
-! ABI_ALLOCATE(vresid,(2,npw*nspinor))
-
  ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
+ ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
+
  ABI_DATATYPE_ALLOCATE(cprj_cwavef_all,(natom,nband))
  ABI_DATATYPE_ALLOCATE(cprj_direc ,(natom,nbdblock))
  ABI_DATATYPE_ALLOCATE(cprj_conjgr ,(natom,nbdblock))
@@ -281,8 +238,8 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
    ia=ia+gs_hamk%nattyp(itypat)
  end do
  call pawcprj_alloc(cprj_cwavef_all,ncpgr,dimlmn)
- call pawcprj_alloc(cprj_direc ,ncpgr,dimlmn)
- call pawcprj_alloc(cprj_conjgr ,ncpgr,dimlmn)
+ call pawcprj_alloc(cprj_direc,ncpgr,dimlmn)
+ call pawcprj_alloc(cprj_conjgr,ncpgr,dimlmn)
 
  do iblock=1,nblock
    ibandmin=1+(iblock-1)*nbdblock
@@ -291,7 +248,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
      ibdblock=iband-(iblock-1)*nbdblock
      icg_shift=npw*nspinor*(iband-1)+icg
 
-!     call cg_zcopy(npw*nspinor,cg(1,1+icg_shift),cwavef)
      cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
      cprj_cwavef => cprj_cwavef_all(:,iband:iband)
 
@@ -334,29 +290,16 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
      dotgp=one
 
      ! Extraction of the vector that is iteratively updated
-!     call cg_zcopy(npw*nspinor,cg(1,1+icg_shift),cwavef)
      cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
      cprj_cwavef => cprj_cwavef_all(:,iband:iband)
 
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
      ! WARNING : It might be interesting to skip the following operation.
      ! The associated routines should be reexamined to see whether cwavef is not already normalized.
-     cpopt = 2
      call getcsc(dotr,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
 &     gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
      xnorm=one/sqrt(dotr)
      call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
-
-!     if (gen_eigenpb) then
-!       call dotprod_g(dotr,doti,istwf_k,npw*nspinor,2,cwavef,scwavef,me_g0,mpi_enreg%comm_spinorfft)
-!       dotr=sqrt(dotr**2+doti**2); xnorm=one/sqrt(dotr)
-!       call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
-!       call cg_zscal(npw*nspinor,(/xnorm,zero/),scwavef)
-!     else
-!       call sqnorm_g(dotr,istwf_k,npw*nspinor,cwavef,me_g0,mpi_enreg%comm_fft)
-!       xnorm=one/sqrt(abs(dotr))
-!       call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
-!     end if
 
      if (prtvol==-level) then
        write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
@@ -372,7 +315,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          ! === COMPUTE THE RESIDUAL ===
          ! Compute lambda = <C|H|C>
          sij_opt = 0
-         cpopt = 2
          !LTEST
          call writeout(999,'iline',iline)
          call writeout(999,'getchc : chc')
@@ -399,6 +341,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          ! Compute residual vector:
          ! Note that vresid is precomputed to garantee cancellation of errors
          ! and allow residuals to reach values as small as 1.0d-24 or better.
+
+         ! ======================================================================
+         ! =========== COMPUTE THE STEEPEST DESCENT DIRECTION ===================
+         ! ======================================================================
 
          sij_opt = -1
          call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
@@ -435,13 +381,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
            exit                         ! Exit from the loop on iline
          end if
-
-         ! ======================================================================
-         ! =========== COMPUTE THE STEEPEST DESCENT DIRECTION ===================
-         ! ======================================================================
-
-         ! Compute the steepest descent direction
-!         call cg_zcopy(npw*nspinor,vresid,direc)  ! Store <G|H-lambda.S|C> in direc
 
          ! =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
          ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
@@ -501,9 +440,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 &         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
          do jband=1,nband
-           !LTEST
-!           call writeout(999,'jband',jband)
-           !LTEST
            icg_shift=npw*nspinor*(jband-1)+icg
            cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
            cprj_cwavef => cprj_cwavef_all(:,jband:jband)
@@ -559,13 +495,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
              call wrtout(std_out,message,'PERS')
            end if
 
-           ! Note: another way to compute gamma: Polak, Ribiere no real improvement ; to be more carrefully tested
-           ! call dotprod_g(dotgg,doti,istwf_k,mpi_enreg,npw*nspinor,1,direc,direc_tmp)
-           ! !direcp must be set to zero at the beginning
-           ! direcp=direc-direcp
-           ! call dotprod_g(dotgmg,doti,istwf_k,mpi_enreg,npw*nspinor,1,direcp,direc_tmp)
-           ! direcp=direc;gamma=dotgmg/dotgp;dotgp=dotgmg
-
 !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
@@ -575,14 +504,12 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
            call cprj_axpby(cprj_conjgr,cprj_direc,cprj_conjgr,cone,cx_tmp,&
 &                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
-           !call cg_zaxpby(npw*nspinor,cg_one,direc,(/gamma,zero/),conjgr)
          end if
 
          ! ======================================================================
          ! ============ PROJECTION OF THE CONJUGATED GRADIENT ===================
          ! ======================================================================
 
-!         call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,cwavef,conjgr,me_g0,mpi_enreg%comm_spinorfft)
          call getcsc(dotr,doti,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
 &         gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
 
@@ -619,29 +546,13 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
          ! ======================================================================
 
-         ! Compute gh_direc = <G|H|D> and eventually gs_direc = <G|S|D>
-!         sij_opt=1
-!         !LTEST
-!         sij_opt=0
-!         !LTEST
-!
-!         call getghc(cpopt,direc,cprj_cwavef,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
-!&         eval,mpi_enreg,1,prtvol,sij_opt,t im_getghc,0)
-
-         ! In case of generalized eigenprobl em, compute now the norm of the conjugated gradient
-         !LTEST
+         ! Compute <G|H|D>
          call getcsc(dotr,doti,cpopt,direc,direc,cprj_direc,cprj_direc,&
 &         gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
          xnorm=one/sqrt(abs(dotr))
-!         if (gen_eigenpb) then
-!           call dotprod_g(dotr,doti,istwf_k,npw*nspinor,1,direc,gs_direc,me_g0,mpi_enreg%comm_spinorfft)
-!           xnorm=one/sqrt(abs(dotr))
-!         end i
-         !LTEST
 
          sij_opt=0
          ! Compute dhc = Re{<D|H|C>}
-!         call dotprod_g(dhc,doti,istwf_k,npw*nspinor,1,direc,ghc,me_g0,mpi_enreg%comm_spinorfft)
          !LTEST
          call writeout(999,'getchc : dhc')
          !LTEST
@@ -650,7 +561,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          dhc=dhc*xnorm
 
          ! Compute <D|H|D> or <D|(H-zshift)^2|D>
-!         call dotprod_g(dhd,doti,istwf_k,npw*nspinor,1,direc,gh_direc,me_g0,mpi_enreg%comm_spinorfft)
          !LTEST
          call writeout(999,'getchc : dhd')
          !LTEST
@@ -719,28 +629,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 &         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &         natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
 
-         call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
-           &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
-         eig(iband)=chc
-
-!        call cg_zaxpby(npw*nspinor,(/sintn,zero/),direc,(/costh,zero/),cwavef)
-!         call cg_zcopy(npw*nspinor,cwavef,cg(1,1+icg_shift))
-
-!         do ipw=1,npw*nspinor
-!           ghc(1,ipw)  =ghc(1,ipw)*costh + gh_direc(1,ipw)*sintn
-!           ghc(2,ipw)  =ghc(2,ipw)*costh + gh_direc(2,ipw)*sintn
-!         end do
-
-
-!         if (use_subvnlx==1) then
-!!$OMP PARALLEL DO
-!           do ipw=1,npw*nspinor
-!             gvnlxc(1,ipw)=gvnlxc(1,ipw)*costh + gvnlx_direc(1,ipw)*sintn
-!             gvnlxc(2,ipw)=gvnlxc(2,ipw)*costh + gvnlx_direc(2,ipw)*sintn
-!           end do
-!          call cg_zaxpby(npw*nspinor,(/sintn,zero/),gvnlx_direc,(/costh,zero/),gvnlxc)
-!         end if
-
          ! ======================================================================
          ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
          ! ======================================================================
@@ -758,8 +646,20 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 &             ' deltae=',deltae,' < tolrde*',deold,' =>skip lines'
              call wrtout(std_out,message,'PERS')
            end if
+           ! Update chc before exit
+           call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
+             &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
+           eig(iband)=chc
+
            nskip=nskip+2*(nline-iline)  ! Number of one-way 3D ffts skipped
            exit                         ! Exit from the loop on iline
+         end if
+
+         ! Update chc only if last iteration, otherwise it will be done at the beginning of the next one
+         if (iline==nline) then
+           call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
+             &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
+           eig(iband)=chc
          end if
 
        end do ! END LOOP FOR A GIVEN BAND Note that there are three "exit" instructions inside
@@ -784,45 +684,13 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
    !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
    !  ======================================================================
 
-   !LTEST
-!   call writeout(999,'iblock',iblock)
-!   call writeout(999,'ghc-cwavef',ghc-cwavef)
-!   call writeout(999,'gsc-cwavef',scwavef-cwavef)
-   !LTEST
-!   call mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
-!&   isubh,isubo,mcg,mgsc,nband,nbdblock,npw,&
-!&   nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
-   !LTEST
-!   call sqnorm_g(dotr,istwf_k,npw*nspinor,cwavef,me_g0,mpi_enreg%comm_fft)
-!   xnorm=xnorm+dotr
-!   call writeout(999,'subham',subham(isubh-2)-dotr)
-   !LTEST
-
  end do ! iblock End loop over block of bands
- !LTEST
-! call writeout(999,'xnorm',xnorm)
- !LTEST
-
- if (allocated(dimlmn_srt)) then
-   ABI_DEALLOCATE(dimlmn_srt)
- end if
 
  ! Debugging ouputs
  if(prtvol==-level)then
-!   isubh=1
-!   if (use_subvnlx==1) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
-!   if (use_subvnlx==0) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
    do iband=1,nband
-!     do ii=1,iband
-!       if (use_subvnlx==1) then
-!         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
-!       else
-!         write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
-!       end if
        write(message,'(i5,es16.6)')iband,eig(iband)
        call wrtout(std_out,message,'PERS')
-!       isubh=isubh+2
-!     end do
    end do
  end if
 
@@ -839,15 +707,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  ABI_DEALLOCATE(dimlmn)
  ABI_DEALLOCATE(conjgr)
  ABI_DEALLOCATE(scwavef_dum)
+ ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(direc)
  ABI_DEALLOCATE(pcon)
  ABI_DEALLOCATE(scprod)
- ABI_DEALLOCATE(ghc)
- ABI_DEALLOCATE(gvnlxc)
- ABI_DEALLOCATE(gh_direc)
- ABI_DEALLOCATE(gvnlx_direc)
-! ABI_DEALLOCATE(vresid)
- ABI_DEALLOCATE(gs_direc)
 
  ABI_DEALLOCATE(direc_tmp)
 

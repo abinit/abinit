@@ -45,7 +45,7 @@ module m_vtowfk
  use m_gwls_hamiltonian, only : build_H
  use m_fftcore,     only : fftcore_set_mixprec, fftcore_mixprec
  use m_cgwf,        only : cgwf
- use m_cgwfnew,     only : cgwfnew
+ use m_cgwf_paw,    only : cgwf_paw
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
  use m_spacepar,    only : meanvalue_g
@@ -187,7 +187,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: has_fock,newlobpcg,newcgwf
+ logical :: has_fock,newlobpcg,enable_cgwf_paw
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -266,9 +266,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  n1=gs_hamk%ngfft(1); n2=gs_hamk%ngfft(2); n3=gs_hamk%ngfft(3)
 
- newcgwf = (wfopta10==0).and.(gs_hamk%usepaw==1)
+ enable_cgwf_paw = (gs_hamk%usepaw==1).and.(wfopta10==0)
  mgsc=0
- if ( .not. newlobpcg .and. .not. newcgwf) then
+ if ( .not. newlobpcg .and. .not. enable_cgwf_paw) then
    igsc=0
    mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
 
@@ -409,12 +409,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      else
 !      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
 !      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
-       if (newcgwf) then
-         call cgwfnew(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
-&         gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
-&         mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
-&         dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&         subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
+       if (enable_cgwf_paw) then
+         call cgwf_paw(cg,dtset%chkexit,cpus,eig_k,dtfil%filnam_ds(1),&
+&         gs_hamk,icg,ikpt,inonsc,isppol,mcg,&
+&         mpi_enreg,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,my_nspinor,&
+&         dtset%nsppol,dtset%ortalg,prtvol,quit,resid_k,dtset%tolrde,dtset%tolwfr,wfoptalg)
        else
          call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
 &         gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
@@ -446,7 +445,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
 
-   if( .not. wfopta10 == 1 .and. .not. newlobpcg ) then
+   if( .not. wfopta10 == 1 .and. .not. newlobpcg .and. .not. enable_cgwf_paw ) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
      call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &     mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
@@ -975,7 +974,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DEALLOCATE(subvnlx)
    ABI_DEALLOCATE(subovl)
  end if
- if ( .not. newlobpcg .and. .not. newcgwf) then
+ if ( .not. newlobpcg .and. .not. enable_cgwf_paw) then
    ABI_DEALLOCATE(gsc)
  end if
 

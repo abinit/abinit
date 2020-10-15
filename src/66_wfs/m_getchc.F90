@@ -778,8 +778,6 @@ end subroutine getchc
 !!
 !! SOURCE
 
-!subroutine getcsc(csc_re,csc_im,cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
-!&                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
 subroutine getcsc(csc_re,csc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,gs_ham,mpi_enreg,ndat,&
 &                 npw,nspinor,prtvol,tim_getcsc,&
 &                 select_k) ! optional arguments
