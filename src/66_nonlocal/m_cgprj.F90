@@ -48,6 +48,7 @@ module m_cgprj
 !!***
 
  public :: getcprj
+ public :: cprj_axpby
  public :: ctocprj
 !!***
 
@@ -374,6 +375,99 @@ contains
  DBG_EXIT('COLL')
 
  end subroutine getcprj
+!!***
+
+!!****f* ABINIT/cprj_axpby
+!! NAME
+!! cprj_axpby
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine cprj_axpby(cprj_res,cprj_a,cprj_b,alpha,beta,&
+&                   indlmn,istwf_k,lmnmax,mpi_enreg,&
+&                   natom,nattyp,nspinor,ntypat)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,lmnmax
+ integer,intent(in) :: natom,nspinor,ntypat
+ complex(dp),intent(in) :: alpha,beta
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
+ type(pawcprj_type),intent(inout) :: cprj_res(natom,nspinor)
+ type(pawcprj_type),intent(inout) :: cprj_a(natom,nspinor)
+ type(pawcprj_type),intent(inout) :: cprj_b(natom,nspinor)
+
+!Local variables-------------------------------
+!scalars
+ integer :: cplex,ia,ia1,ia2,ia3,ia4,iatm,ispinor,itypat
+ integer :: mincat,nincat,nlmn
+!arrays
+ real(dp) :: tsec(2)
+ real(dp), allocatable :: ax(:,:),by(:,:)
+
+! *********************************************************************
+
+ DBG_ENTER('COLL')
+
+ call timab(1211,1,tsec)
+
+!Some other dims
+ mincat=min(NLO_MINCAT,maxval(nattyp))
+ cplex=2;if (istwf_k>1) cplex=1
+
+!Loop over atom types
+ ia1=1;iatm=0
+ do itypat=1,ntypat
+   ia2=ia1+nattyp(itypat)-1;if (ia2<ia1) cycle
+   nlmn=count(indlmn(3,:,itypat)>0)
+
+   ABI_ALLOCATE(ax,(2,nlmn))
+   ABI_ALLOCATE(by,(2,nlmn))
+
+!  Loop on blocks of atoms inside type
+   do ia3=ia1,ia2,mincat
+     ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
+
+     do ispinor=1,nspinor
+       do ia=1,nincat
+         ax(1:cplex,1:nlmn) = dble(alpha)*cprj_a(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
+         ax(1,1:nlmn) = ax(1,1:nlmn) - dimag(alpha)*cprj_a(iatm+ia,ispinor)%cp(2,1:nlmn)
+         ax(2,1:nlmn) = ax(2,1:nlmn) + dimag(alpha)*cprj_a(iatm+ia,ispinor)%cp(1,1:nlmn)
+         by(1:cplex,1:nlmn) =  dble(beta)*cprj_b(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
+         by(1,1:nlmn) = by(1,1:nlmn) - dimag(beta)*cprj_b(iatm+ia,ispinor)%cp(2,1:nlmn)
+         by(2,1:nlmn) = by(2,1:nlmn) + dimag(beta)*cprj_b(iatm+ia,ispinor)%cp(1,1:nlmn)
+         cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) = ax(1:cplex,1:nlmn) + by(1:cplex,1:nlmn)
+       end do
+     end do
+
+!    End loop inside block of atoms
+     iatm=iatm+nincat
+   end do
+
+   ABI_DEALLOCATE(ax)
+   ABI_DEALLOCATE(by)
+
+!  End loop over atom types
+   ia1=ia2+1
+ end do
+
+ call timab(1211,2,tsec)
+
+ DBG_EXIT('COLL')
+
+ end subroutine cprj_axpby
 !!***
 
 !!****f* ABINIT/ctocprj

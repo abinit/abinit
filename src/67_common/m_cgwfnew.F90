@@ -41,7 +41,7 @@ module m_cgwf_paw
  use m_getghc,        only : getghc
  use m_nonlop,        only : nonlop
  use m_paw_overlap,   only : smatrix_k_paw
- use m_cgprj,         only : getcprj
+ use m_cgprj,         only : getcprj,cprj_axpby
  use m_cgwf,          only : mksubham
  !LTEST
  use testing
@@ -192,9 +192,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef_dum(:,:)
  real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),vresid(:,:),work(:,:)
  real(dp),pointer :: kinpw(:)
+ complex(dp) :: cx_tmp,cx_tmp2
  type(pawcprj_type),allocatable,target :: cprj_cwavef_all(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:)
- type(pawcprj_type),allocatable :: cprj_direc(:,:)
+ type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_conjgr(:,:)
 
 ! *********************************************************************
 
@@ -269,6 +270,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
  ABI_DATATYPE_ALLOCATE(cprj_cwavef_all,(natom,nband))
  ABI_DATATYPE_ALLOCATE(cprj_direc ,(natom,nbdblock))
+ ABI_DATATYPE_ALLOCATE(cprj_conjgr ,(natom,nbdblock))
  ncpgr = 0 ! no need of gradients here
 !Dimensioning and allocation of <p_i|Cnk>
  ABI_ALLOCATE(dimlmn,(natom))
@@ -280,6 +282,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  end do
  call pawcprj_alloc(cprj_cwavef_all,ncpgr,dimlmn)
  call pawcprj_alloc(cprj_direc ,ncpgr,dimlmn)
+ call pawcprj_alloc(cprj_conjgr ,ncpgr,dimlmn)
 
  do iblock=1,nblock
    ibandmin=1+(iblock-1)*nbdblock
@@ -511,11 +514,13 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
 
-         call getcprj(1,0,direc,cprj_direc,&
-&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+         do jband=1,nband
+           cprj_cwavef => cprj_cwavef_all(:,jband:jband)
+           cx_tmp = COMPLEX(scprod(1,jband),scprod(2,jband))
+           call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef,cone,-cx_tmp,&
+&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+&                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
+         end do
 
          icg_shift=npw*nspinor*(iband-1)+icg
          cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
@@ -535,6 +540,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
            gamma=zero
            dotgp=dotgg
            call cg_zcopy(npw*nspinor,direc,conjgr)
+           call cprj_axpby(cprj_conjgr,cprj_direc,cprj_direc,cone,czero,&
+&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+&                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
+
            !LTEST
            if (prtvol==-level)then
              write(message,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
@@ -562,6 +571,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
              conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
              conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
            end do
+           cx_tmp = COMPLEX(gamma,zero)
+           call cprj_axpby(cprj_conjgr,cprj_direc,cprj_conjgr,cone,cx_tmp,&
+&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+&                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
            !call cg_zaxpby(npw*nspinor,cg_one,direc,(/gamma,zero/),conjgr)
          end if
 
@@ -570,12 +583,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          ! ======================================================================
 
 !         call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,cwavef,conjgr,me_g0,mpi_enreg%comm_spinorfft)
-         call getcprj(1,0,conjgr,cprj_direc,&
-&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
-         call getcsc(dotr,doti,cpopt,conjgr,cwavef,cprj_direc,cprj_cwavef,&
+         call getcsc(dotr,doti,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
 &         gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
 
          !LTEST
@@ -602,11 +610,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
              direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
            end do
          end if
-         call getcprj(1,0,direc,cprj_direc,&
-&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+         cx_tmp = COMPLEX(-dotr,zero)
+         call cprj_axpby(cprj_direc,cprj_conjgr,cprj_cwavef,cone,cx_tmp,&
+&         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+&         natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
 
          ! ======================================================================
          ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
@@ -706,11 +713,11 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
            cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
            cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
          end do
-         call getcprj(1,0,cwavef,cprj_cwavef,&
-&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+         cx_tmp  = COMPLEX(costh,zero)
+         cx_tmp2 = COMPLEX(sintn,zero)
+         call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_direc,cx_tmp,cx_tmp2,&
+&         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+&         natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
 
          call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
            &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
@@ -826,8 +833,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  nullify(cprj_cwavef)
  call pawcprj_free(cprj_cwavef_all)
  call pawcprj_free(cprj_direc)
+ call pawcprj_free(cprj_conjgr)
  ABI_DATATYPE_DEALLOCATE(cprj_cwavef_all)
- ABI_DATATYPE_DEALLOCATE(cprj_direc)
+ ABI_DATATYPE_DEALLOCATE(cprj_conjgr)
  ABI_DEALLOCATE(dimlmn)
  ABI_DEALLOCATE(conjgr)
  ABI_DEALLOCATE(scwavef_dum)
