@@ -148,22 +148,23 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  integer,save :: nskip=0
  integer :: counter,cpopt,itypat
  integer :: ia,iband,ibandmin,ibandmax,jband,me_g0
- integer :: ibdblock,iblock,icg_shift,igs
+ integer :: ibdblock,iblock,igs
  integer :: iline,ipw,ispinor,istwf_k
  integer :: natom,ncpgr,nblock
  integer :: optekin,sij_opt
  integer :: useoverlap,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
  real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,xnorm
+ real(dp) :: dot(2)
  character(len=500) :: message
  integer,allocatable :: dimlmn(:)
- real(dp) :: tsec(2)
+ real(dp) :: tsec(2),dotrr(1),dotii(1)
  real(dp),allocatable :: conjgr(:,:),gvnlxc(:,:)
- real(dp), pointer :: cwavef(:,:)
+ real(dp), pointer :: cwavef(:,:),cwavef_bands(:,:)
  real(dp),allocatable :: direc(:,:),direc_tmp(:,:),pcon(:),scprod(:,:),scwavef_dum(:,:)
- real(dp),pointer :: kinpw(:)
+ real(dp),pointer :: scprod_csc(:),kinpw(:)
  complex(dp) :: cx_tmp,cx_tmp2
- type(pawcprj_type),allocatable,target :: cprj_cwavef_all(:,:)
+ type(pawcprj_type),allocatable,target :: cprj_cwavef_bands(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:)
  type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_conjgr(:,:)
 
@@ -222,10 +223,11 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  ABI_ALLOCATE(scwavef_dum,(0,0))
  ABI_ALLOCATE(direc,(2,npw*nspinor))
  ABI_ALLOCATE(scprod,(2,nband))
+ ABI_ALLOCATE(scprod_csc,(2*nband))
  ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
  ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
 
- ABI_DATATYPE_ALLOCATE(cprj_cwavef_all,(natom,nband))
+ ABI_DATATYPE_ALLOCATE(cprj_cwavef_bands,(natom,nband))
  ABI_DATATYPE_ALLOCATE(cprj_direc ,(natom,nbdblock))
  ABI_DATATYPE_ALLOCATE(cprj_conjgr ,(natom,nbdblock))
  ncpgr = 0 ! no need of gradients here
@@ -237,19 +239,20 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
    dimlmn(ia+1:ia+gs_hamk%nattyp(itypat))=count(gs_hamk%indlmn(3,:,itypat)>0)
    ia=ia+gs_hamk%nattyp(itypat)
  end do
- call pawcprj_alloc(cprj_cwavef_all,ncpgr,dimlmn)
+ call pawcprj_alloc(cprj_cwavef_bands,ncpgr,dimlmn)
  call pawcprj_alloc(cprj_direc,ncpgr,dimlmn)
  call pawcprj_alloc(cprj_conjgr,ncpgr,dimlmn)
+
+ cwavef_bands => cg(:,1+icg:nblock*npw*nspinor+icg)
 
  do iblock=1,nblock
    ibandmin=1+(iblock-1)*nbdblock
    ibandmax=min(iblock*nbdblock,nband)
    do iband=ibandmin,ibandmax
      ibdblock=iband-(iblock-1)*nbdblock
-     icg_shift=npw*nspinor*(iband-1)+icg
 
-     cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
-     cprj_cwavef => cprj_cwavef_all(:,iband:iband)
+     cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
+     cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
 
      call getcprj(1,0,cwavef,cprj_cwavef,&
 &      gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
@@ -273,7 +276,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
    do iband=ibandmin,ibandmax
      ibdblock=iband-(iblock-1)*nbdblock
      counter=100*iband+inonsc
-     icg_shift=npw*nspinor*(iband-1)+icg
 
      !LTEST
      call writeout(999,'iband',iband)
@@ -290,15 +292,15 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
      dotgp=one
 
      ! Extraction of the vector that is iteratively updated
-     cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
-     cprj_cwavef => cprj_cwavef_all(:,iband:iband)
+     cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
+     cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
 
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
      ! WARNING : It might be interesting to skip the following operation.
      ! The associated routines should be reexamined to see whether cwavef is not already normalized.
-     call getcsc(dotr,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
+     call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
 &     gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
-     xnorm=one/sqrt(dotr)
+     xnorm=one/sqrt(dot(1))
      call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
 
      if (prtvol==-level) then
@@ -397,16 +399,17 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 &           gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
 &           gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &           gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
-           do jband=1,nband
-             icg_shift=npw*nspinor*(jband-1)+icg
-             cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
-             cprj_cwavef => cprj_cwavef_all(:,jband:jband)
-             call getcsc(scprod(1,jband),scprod(2,jband),cpopt,direc,cwavef,cprj_direc,cprj_cwavef,&
-&             gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc_band)
-           end do
-           icg_shift=npw*nspinor*(iband-1)+icg
-           cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
-           cprj_cwavef => cprj_cwavef_all(:,iband:iband)
+           call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
+&           gs_hamk,mpi_enreg,nband,npw,nspinor,prtvol,tim_getcsc_band)
+!           do jband=1,nband
+!             cwavef => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
+!             cprj_cwavef => cprj_cwavef_bands(:,jband:jband)
+!             call getcsc(scprod(:,jband),cpopt,direc,cwavef,cprj_direc,cprj_cwavef,&
+!&             gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc_band)
+!           end do
+!           cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
+!           cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+           scprod = reshape(scprod_csc,(/2,nband/))
            call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &           direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
          end if
@@ -439,28 +442,28 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 &         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
 &         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
-         do jband=1,nband
-           icg_shift=npw*nspinor*(jband-1)+icg
-           cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
-           cprj_cwavef => cprj_cwavef_all(:,jband:jband)
-           call getcsc(scprod(1,jband),scprod(2,jband),cpopt,direc,cwavef,cprj_direc,cprj_cwavef,&
-&           gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc_band)
-         end do
+         call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
+&         gs_hamk,mpi_enreg,nband,npw,nspinor,prtvol,tim_getcsc_band)
+!         do jband=1,nband
+!           cwavef => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
+!           cprj_cwavef => cprj_cwavef_bands(:,jband:jband)
+!           call getcsc(scprod(:,jband),cpopt,direc,cwavef,cprj_direc,cprj_cwavef,&
+!&           gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc_band)
+!         end do
          ! Projecting again out all bands (not normalized).
+         scprod = reshape(scprod_csc,(/2,nband/))
          call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
-
+         ! Apply projbd to cprj_direc
          do jband=1,nband
-           cprj_cwavef => cprj_cwavef_all(:,jband:jband)
+           cprj_cwavef => cprj_cwavef_bands(:,jband:jband)
            cx_tmp = COMPLEX(scprod(1,jband),scprod(2,jband))
            call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef,cone,-cx_tmp,&
 &                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
          end do
-
-         icg_shift=npw*nspinor*(iband-1)+icg
-         cwavef => cg(:,1+icg_shift:icg_shift+npw*nspinor)
-         cprj_cwavef => cprj_cwavef_all(:,iband:iband)
+!         cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
+         cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
 
          ! ======================================================================
          ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
@@ -510,8 +513,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          ! ============ PROJECTION OF THE CONJUGATED GRADIENT ===================
          ! ======================================================================
 
-         call getcsc(dotr,doti,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
+         call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
 &         gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
+         dotr=dot(1)
 
          !LTEST
          if (prtvol==-level)then
@@ -546,10 +550,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
          ! ======================================================================
 
-         ! Compute <G|H|D>
-         call getcsc(dotr,doti,cpopt,direc,direc,cprj_direc,cprj_direc,&
+         ! Compute norm of direc
+         call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
 &         gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
-         xnorm=one/sqrt(abs(dotr))
+         xnorm=one/sqrt(abs(dot(1)))
 
          sij_opt=0
          ! Compute dhc = Re{<D|H|C>}
@@ -699,10 +703,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  ! ===================
 
  nullify(cprj_cwavef)
- call pawcprj_free(cprj_cwavef_all)
+ call pawcprj_free(cprj_cwavef_bands)
  call pawcprj_free(cprj_direc)
  call pawcprj_free(cprj_conjgr)
- ABI_DATATYPE_DEALLOCATE(cprj_cwavef_all)
+ ABI_DATATYPE_DEALLOCATE(cprj_cwavef_bands)
  ABI_DATATYPE_DEALLOCATE(cprj_conjgr)
  ABI_DEALLOCATE(dimlmn)
  ABI_DEALLOCATE(conjgr)

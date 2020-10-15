@@ -778,7 +778,7 @@ end subroutine getchc
 !!
 !! SOURCE
 
-subroutine getcsc(csc_re,csc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,gs_ham,mpi_enreg,ndat,&
+subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,ndat,&
 &                 npw,nspinor,prtvol,tim_getcsc,&
 &                 select_k) ! optional arguments
 
@@ -787,25 +787,18 @@ subroutine getcsc(csc_re,csc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
  integer,intent(in) :: cpopt,ndat,prtvol
  integer,intent(in) :: npw,nspinor,tim_getcsc
  integer,intent(in),optional :: select_k
- real(dp),intent(out) :: csc_re,csc_im
+ real(dp),intent(out) :: csc(2*ndat)
  type(MPI_type),intent(in) :: mpi_enreg
- type(gs_hamiltonian_type),intent(inout),target :: gs_ham
+ type(gs_hamiltonian_type),intent(inout) :: gs_ham
 !arrays
- real(dp),intent(inout) :: cwavef(:,:),cwavef_left(:,:)
- type(pawcprj_type),intent(inout),target :: cwaveprj(:,:),cwaveprj_left(:,:)
-
-!!Arguments ------------------------------------
-!!scalars
-! integer,intent(in),optional :: select_k
-! type(MPI_type),intent(in) :: mpi_enreg
-! type(gs_hamiltonian_type),intent(inout),target :: gs_ham
-!!arrays
-! real(dp),intent(out) :: csc_re,csc_im
-! type(pawcprj_type),intent(in) :: cprj(natom,mcprj)
+ real(dp),intent(inout) :: cwavef(:,:)
+ real(dp),intent(inout),target :: cwavef_left(:,:)
+ type(pawcprj_type),intent(inout) :: cprj(:,:)
+ type(pawcprj_type),intent(inout),target :: cprj_left(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: choice,dimenl1,dimenl2,iband,idat,idir,ierr,index_cg,index_cprj
+ integer :: band_shift,choice,dimenl1,dimenl2,iband,idat,idir,ierr,index_cg,index_cprj
  integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm,nnlout
  !character(len=500) :: msg
 !arrays
@@ -813,6 +806,8 @@ subroutine getcsc(csc_re,csc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
  real(dp),allocatable :: gsc(:,:),gvnlxc(:,:)
  !LTEST
  real(dp) :: csc_re_tmp,csc_im_tmp
+ real(dp), pointer :: cwavef_left_oneband(:,:)
+ type(pawcprj_type),pointer :: cprj_left_oneband(:,:)
  !LTEST
 ! *********************************************************************
 
@@ -829,9 +824,6 @@ subroutine getcsc(csc_re,csc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 !   MSG_BUG('Invalid value for mcg, mgsc or mcprj !')
 ! end if
 
- select_k_=1;if (present(select_k)) select_k_=select_k
-!Keep track of total time spent in getcsc:
- choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=16 ; paw_opt=3
  !LTEST
 ! ABI_ALLOCATE(gsc,(2,nspinor*npw))
 ! ABI_ALLOCATE(gvnlxc,(2,nspinor*npw))
@@ -845,30 +837,37 @@ subroutine getcsc(csc_re,csc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 ! ABI_DEALLOCATE(gvnlxc)
  !LTEST
 
- call timab(1361,1,tsec)
- call dotprod_g(csc_re,csc_im,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
- call timab(1361,2,tsec)
+ do idat=1,ndat
+   band_shift = (idat-1)*npw*nspinor
+   cwavef_left_oneband => cwavef_left(:,1+band_shift:npw*nspinor+band_shift)
+   call timab(1361,1,tsec)
+   call dotprod_g(csc(2*idat-1),csc(2*idat),gs_ham%istwf_k,npw*nspinor,2,cwavef_left_oneband,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+   call timab(1361,2,tsec)
+ end do
 
- ABI_ALLOCATE(gsc,(0,0))
- ABI_ALLOCATE(gvnlxc,(0,0))
-
- signs=1
- call nonlop(choice,cpopt,cwaveprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,ndat,&
-& nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
-& cprjin_left=cwaveprj_left,enlout_im=enlout_im)
-
- ABI_DEALLOCATE(gsc)
- ABI_DEALLOCATE(gvnlxc)
+ if (gs_ham%usepaw==1) then
+   select_k_=1;if (present(select_k)) select_k_=select_k
+   choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=16 ; paw_opt=3
+   ABI_ALLOCATE(gsc,(0,0))
+   ABI_ALLOCATE(gvnlxc,(0,0))
+   signs=1
+   do idat=1,ndat
+     cprj_left_oneband => cprj_left(:,idat:idat)
+     call nonlop(choice,cpopt,cprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,1,&
+&     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
+&     cprjin_left=cprj_left_oneband,enlout_im=enlout_im)
+     csc(2*idat-1) = csc(2*idat-1) + enlout(1)
+     csc(2*idat  ) = csc(2*idat  ) + enlout_im(1)
+   end do
+   ABI_DEALLOCATE(gsc)
+   ABI_DEALLOCATE(gvnlxc)
+ end if
 ! !LTEST
 ! call writeout(999,'dotr    ',dotr)
 ! call writeout(999,'dotr bis',enlout(1))
 ! call writeout(999,'doti    ',doti)
 ! call writeout(999,'doti bis',enlout_im(1))
 ! !LTEST
- do idat=1,ndat
-   csc_re = csc_re + enlout(idat)
-   csc_im = csc_im + enlout_im(idat)
- end do
 
 !LTEST
 ! if (abs(csc_re-csc_re_tmp)>tol8) then
