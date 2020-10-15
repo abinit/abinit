@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 13 Oct 2020.
-- ( at 11h24 )
+.Starting date : Thu 15 Oct 2020.
+- ( at 12h22 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/TestBot_MPI1/v67mbpt_t51/t51.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/TestBot_MPI1/v67mbpt_t51/t51.in
 - output file    -> t51.out
 - root for input  files -> t51i
 - root for output files -> t51o
@@ -343,8 +343,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -827,12 +827,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 . Writing resonant excitonic Hamiltonian on file t51o_DS4_BSR; file size=   0.00 [Gb].
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0001_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0001_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 61 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 73 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 62 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 71 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0001_EXC_MDF
   
  Macroscopic dielectric function:
@@ -850,12 +850,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0002_EXC_MDF
   
  Macroscopic dielectric function:
@@ -873,12 +873,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0003_EXC_MDF
   
  Macroscopic dielectric function:
@@ -896,12 +896,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 55 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 45 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 47 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0004_EXC_MDF
   
  Macroscopic dielectric function:
@@ -919,12 +919,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0005_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0005_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 45 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0005_EXC_MDF
   
  Macroscopic dielectric function:
@@ -942,12 +942,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0006_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0006_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0006_EXC_MDF
   
  Macroscopic dielectric function:
@@ -965,12 +965,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0007_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0007_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 41 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0007_EXC_MDF
   
  Macroscopic dielectric function:
@@ -988,12 +988,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0008_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0008_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 56 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0008_EXC_MDF
   
  Macroscopic dielectric function:
@@ -1011,12 +1011,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0009_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0009_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0009_EXC_MDF
   
  Macroscopic dielectric function:
@@ -1034,12 +1034,12 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0010_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0010_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 46 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0010_EXC_MDF
   
  Macroscopic dielectric function:
@@ -1367,10 +1367,10 @@ P           mkmem4          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.9  wall=         35.3
+- Proc.   0 individual time (sec): cpu=          9.7  wall=         26.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.9  wall=         35.3
++Overall time at end (sec) : cpu=          9.7  wall=         26.1
