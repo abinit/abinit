@@ -59,8 +59,6 @@ module m_rmm_diis
    integer :: npw
    integer :: nspinor
 
-   !type(mpi_enreg),pointer :: mpi_enreg
-
    real(dp),allocatable :: resmat(:,:,:)
    real(dp),allocatable :: smat(:,:,:)
 
@@ -114,7 +112,7 @@ contains
 !!
 !! SOURCE
 
-subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, npw, nspinor, resid)
+subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nband, npw, nspinor, resid)
 
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -125,6 +123,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  real(dp),target,intent(inout) :: gsc_all(2,npw*nspinor*nband*dtset%usepaw)
  real(dp),intent(inout) :: enlx(nband)
  real(dp),intent(inout) :: resid(nband)
+ real(dp),intent(in) :: occ(nband)
  real(dp),intent(out) :: eig(nband)
 
 !Local variables-------------------------------
@@ -141,7 +140,6 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  real(dp),allocatable :: ghc(:,:), gsc(:,:), gvnlxc(:,:), pcon(:)
  real(dp),allocatable :: residvec(:,:), kres(:,:), phi_now(:,:)
  real(dp),allocatable :: evec(:,:), subham(:), h_ij(:,:,:)
- !real(dp),allocatable :: wmat1(:,:,:), wmat2(:,:,:), wvec(:,:)
  real(dp) :: subovl(use_subovl0)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_ptr(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
@@ -237,6 +235,11 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  ABI_MALLOC(kres, (2, npw*nspinor))
  ABI_MALLOC(phi_now, (2, npw*nspinor))
  max_nlines_band = dtset%nline
+ ! TODO: Don't reduce nline if MD
+ !if dtset%
+ do iband=1,nband
+   if (occ(iband) < tol3) max_nlines_band(iband) = max(dtset%nline / 2, 2)
+ end do
 
  iband_loop: do iband=1,nband
    ! Compute H |phi_0> from subdiago cg.
@@ -249,7 +252,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
    hist_ene(0) = eig(iband)
    diis%chain_resv(:,:,0) = residvec
 
-   ! Store phi_0, S phi_0.
+   ! Store |phi_0>, |S phi_0>.
    diis%chain_phi(:,:,0) = phi_now
    if (usepaw == 1) diis%chain_sphi(:,:,0) = gsc_ptr
 
@@ -265,7 +268,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
       cycle iband_loop
    end if
 
-   ! Precondition R_0, output in kres = K.R_0
+   ! Precondition |R_0>, output in kres = |K R_0>
    kres = residvec
    !call cg_precon(residvec, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
    call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
@@ -286,7 +289,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
        call getghc(cpopt, kres, cprj_dum, ghc, gsc, gs_hamk, gvnlxc, &
                    rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
-       ! Compute residual: (H - e_0.S) |K R_0>
+       ! Compute residual: (H - e_0 S) |K R_0>
        if (usepaw == 1) then
          residvec = ghc - eig(iband) * gsc
        else
@@ -305,7 +308,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
        phi_now = diis%chain_phi(:,:,0) + lambda * kres
 
      else
-       ! Solve DIIS to get phi_now for iline >= 2
+       ! Solve DIIS equations to get phi_now for iline >= 2
        call diis%solve(iline, npw*nspinor, phi_now, residvec)
 
        ! Precondition residual, output in kres.
@@ -318,24 +321,22 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
        phi_now = phi_now + lambda * kres
      end if
 
-     ! Compute H |phi_now>
+     ! Compute H |phi_now>.
      if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
                           eig(iband:), resid(iband:), enlx(iband), residvec, normalize=.True.)
 
      ! Store residual R_i for i == iline and evaluate new enlx for NC.
-     diis%chain_phi(:,:,iline) = phi_now
-     if (usepaw == 1) then
-       diis%chain_sphi(:,:,iline) = gsc_ptr
-     end if
      hist_ene(iline) = eig(iband)
-     diis%chain_resv(:, :, iline) = residvec
      hist_resid(iline) = resid(iband)
+     diis%chain_phi(:,:,iline) = phi_now
+     diis%chain_resv(:, :, iline) = residvec
+     if (usepaw == 1) diis%chain_sphi(:,:,iline) = gsc_ptr
 
      ! ============== CHECK FOR CONVERGENCE ========================
      if (prtvol == -level) then
-       write(msg,"(2(i5),2(f14.6,1x),es12.4)")&
+       write(msg,"(2(i5),2(f14.6,1x),es12.4)") &
          iline, iband, hist_ene(iline) * Ha_eV, (hist_ene(iline) - hist_ene(iline-1)) * Ha_meV, resid(iband)
        call wrtout(std_out, msg, 'PERS')
      end if
@@ -350,27 +351,30 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
      end if
 
      ! Compute <R_i|R_j> and <i|S|j> for j = iline
-if (iline /= nline) then
-     call diis%eval_mats(iline, me_g0, comm_spinorfft)
-end if
+     if (iline /= nline) call diis%eval_mats(iline, me_g0, comm_spinorfft)
 
    end do iline_loop
 
    ! Update wavefunction for this band
    ! TODO: End with trial step but then I have to move the check for exit at the end of the loop.
    cg(:,is:ie) = phi_now
-   !if (iline == nline + 1) then
-     !write(std_out, *)" Performing Last trial step"
-     !call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
-     !                     eig(iband:), resid(iband:), enlx(iband), residvec, normalize=.True.)
 
-     !kres = diis%chain_resv(:,:, nline)
-     !cg(:,is:ie) = phi_now + lambda * diis%chain_resv(:,:, nline)
-   !end if
+   if (.False. .and. iline == nline + 1) then
+     !write(std_out, *)" Performing Last trial step"
+     kres = diis%chain_resv(:,:, nline)
+     call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
+                    optekin, pcon, kres, comm_bandspinorfft)
+     !phi_now = phi_now + 0.1 * kres
+     phi_now = phi_now + lambda * kres
+     if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
+
+     call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
+                          eig(iband:), resid(iband:), enlx(iband), residvec, normalize=.True.)
+     cg(:,is:ie) = phi_now
+   end if
  end do iband_loop
 
  ! Final cleanup
- call diis%free()
  ABI_FREE(pcon)
  ABI_FREE(ghc)
  ABI_FREE(gsc)
@@ -378,6 +382,7 @@ end if
  ABI_FREE(kres)
  ABI_FREE(phi_now)
  ABI_FREE(gvnlxc)
+ call diis%free()
 
 end subroutine rmm_diis
 !!***
