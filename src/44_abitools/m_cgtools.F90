@@ -2653,7 +2653,7 @@ end subroutine cgpaw_cholesky
 !!
 !! SOURCE
 
-subroutine cgnc_normalize(npws,nband,cg,istwfk,me_g0,comm_pw)
+subroutine cgnc_normalize(npws, nband, cg, istwfk, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
@@ -2678,9 +2678,9 @@ subroutine cgnc_normalize(npws,nband,cg,istwfk,me_g0,comm_pw)
    !norm(band) = cg_real_zdotc(npws, cg(ptr), cg(ptr))
  end do
 
- if (istwfk>1) then
+ if (istwfk > 1) then
    norm = two * norm
-   if (istwfk==2 .and. me_g0==1) then
+   if (istwfk == 2 .and. me_g0 == 1) then
 !$OMP PARALLEL DO PRIVATE(ptr) IF (nband >1)
      do band=1,nband
        ptr = 1 + 2*npws*(band-1)
@@ -2689,9 +2689,7 @@ subroutine cgnc_normalize(npws,nband,cg,istwfk,me_g0,comm_pw)
    end if
  end if
 
- if (comm_pw /= xmpi_comm_self) then
-   call xmpi_sum(norm,comm_pw,ierr)
- end if
+ if (comm_pw /= xmpi_comm_self) call xmpi_sum(norm, comm_pw, ierr)
 
  ierr = 0
  do band=1,nband
@@ -2702,7 +2700,7 @@ subroutine cgnc_normalize(npws,nband,cg,istwfk,me_g0,comm_pw)
    end if
  end do
 
- if (ierr/=0) then
+ if (ierr /= 0) then
    write(msg,'(a,i0,a)')" Found ",ierr," vectors with norm <= zero!"
    MSG_ERROR(msg)
  end if
@@ -2710,8 +2708,8 @@ subroutine cgnc_normalize(npws,nband,cg,istwfk,me_g0,comm_pw)
 !$OMP PARALLEL DO PRIVATE(ptr,alpha) IF (nband > 1)
  do band=1,nband
    ptr = 1 + 2*npws*(band-1)
-   alpha = (/one/norm(band), zero/)
-   call cg_zscal(npws,alpha,cg(ptr))
+   alpha = [one / norm(band), zero]
+   call cg_zscal(npws, alpha, cg(ptr))
  end do
 
 end subroutine cgnc_normalize
@@ -2948,9 +2946,9 @@ subroutine cgpaw_normalize(npws, nband, cg, gsc, istwfk, me_g0, comm_pw)
 !$OMP PARALLEL DO PRIVATE(ptr,alpha) IF (nband > 1)
  do band=1,nband
    ptr = 1 + 2*npws*(band-1)
-   alpha = (/one/norm(band), zero/)
-   call cg_zscal(npws,alpha,cg(ptr))
-   call cg_zscal(npws,alpha,gsc(ptr))
+   alpha = [one/norm(band), zero]
+   call cg_zscal(npws, alpha, cg(ptr))
+   call cg_zscal(npws, alpha, gsc(ptr))
  end do
 
 end subroutine cgpaw_normalize

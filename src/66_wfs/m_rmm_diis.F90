@@ -50,6 +50,30 @@ module m_rmm_diis
  public :: rmm_diis
 !!***
 
+ !type,private :: diis_t
+ !  integer :: usepaw
+ !  integer :: ndat
+ !  integer :: istwf_k
+ !  integer :: cplex
+ !  integer :: nline
+
+   !type(mpi_enreg),pointer :: mpi_enreg
+
+   !real(dp),allocatable :: diis_resmat(:,:,:)
+   !real(dp),allocatable ::diis_smat(:,:,:)
+   !real(dp),allocatable :: diis_smat(:,:,:)
+   !real(dp),allocatable :: chain_phi(:,:,:)
+   !real(dp),allocatable :: chain_sphi(:,:,:)
+   !real(dp),allocatable :: chain_resv(:,:,:)
+
+
+ !contains
+ !  procedure :: free => diis_free
+ !  procedure :: solve => diis_solve
+ !  procedure :: eval_matrices => diis_eval_matrices
+
+ !end type diis_t
+
 contains
 !!***
 
@@ -122,8 +146,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  real(dp) :: subovl(use_subovl0)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_ptr(:,:)
  complex(dp),allocatable :: work(:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
- !type(pawcprj_type) :: cprj_dum(1,1)
+ type(pawcprj_type) :: cprj_dum(1,1)
 
 ! *************************************************************************
 
@@ -137,8 +160,6 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 
  cpopt = -1
  if (usepaw == 1) then
-   ABI_MALLOC(cwaveprj, (gs_hamk%natom, nspinor*ndat1))
-   call pawcprj_alloc(cwaveprj, 0, gs_hamk%dimcprj)
    sij_opt = 1 ! Recompute S
    !cpopt = 0  ! <p_lmn|in> are computed and saved
    cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
@@ -161,7 +182,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 
    ! By setting ieigen to iband, Fock contrib of this iband to the energy will be calculated
    !call fock_set_ieigen(gs_hamk%fockcommon, iband)
-   call getghc(cpopt, cg(:,is:ie), cwaveprj, ghc, gsc_ptr, gs_hamk, gvnlxc, &
+   call getghc(cpopt, cg(:,is:ie), cprj_dum, ghc, gsc_ptr, gs_hamk, gvnlxc, &
                rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
    ! Compute <i|H|iband> for i=1,nband
@@ -221,15 +242,20 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
  ABI_MALLOC(phi_now, (2, npw*nspinor))
 
  max_nlines_band = dtset%nline
- ! Can avoid call to getghc below if I precompute and rotate after subdiago.
+ cplex = 2
+ !diis = rmm_diis_new(usepaw, istwf_k, dtset%nline)
+ !call diis%free()
 
  iband_loop: do iband=1,nband
    ! Compute H |phi_0> from subdiago cg.
    is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
    phi_now = cg(:,is:ie)
 
+   !call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc, mpi_enreg, &
+   !                     eig(iband), resid(iband), enlx(iband), residvec, normalize=.False.)
+
    if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
-   call getghc(cpopt, phi_now, cwaveprj, ghc, gsc_ptr, gs_hamk, gvnlxc, &
+   call getghc(cpopt, phi_now, cprj_dum, ghc, gsc_ptr, gs_hamk, gvnlxc, &
                rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
    call dotprod_g(eig(iband), doti, istwf_k, npw*nspinor, option1, ghc, &
@@ -266,10 +292,12 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
    !end if
    !diis_smat(:, 0, 0) = [dotr, doti]
    !write(std_out, *)"diis_smat: ", diis_smat(:, 0, 0)
+
+   ! Assume input cg are already S-normalized.
    diis_smat(:, 0, 0) = [one, zero]
 
    ! Band locking for NSCF or SCF if tolwfr > 0 is used.
-   if (resid(iband) < dtset%tolwfr) then
+   if (resid(iband) < dtset%tolwfr) then ! .or. (dtset%tolwfr == zero .and. resid(iband) < tol20))
       if (dtset%iscf >= 0 .and. usepaw == 0) then
         ! Must recompute enlx(iband) before cycling but only if SCF.
         call dotprod_g(enlx(iband), doti, istwf_k, npw*nspinor, option1, &
@@ -296,7 +324,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 
      if (iline == 1) then
        ! Compute H |K R_0>
-       call getghc(cpopt, kres, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, &
+       call getghc(cpopt, kres, cprj_dum, ghc, gsc, gs_hamk, gvnlxc, &
                    rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
        ! Compute residual: (H - e_0.S) |K R_0>
@@ -319,7 +347,7 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 
      else
        ! Solve DIIS to get phi_now for iline >= 2
-       cplex = 2
+
        !call diis%solve(iline, phi_now, residvec)
 
 #if 0
@@ -392,6 +420,9 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
        phi_now = phi_now + lambda * kres
      end if
 
+     !call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc, mpi_enreg, &
+     !                     eig(iband:), resid(iband:), enlx(iband), residvec, normalze=True)
+
      if (usepaw == 0) then
        ! NC normalization.
        call sqnorm_g(rval, istwf_k, npw*nspinor, phi_now, me_g0, comm_spinorfft)
@@ -401,9 +432,9 @@ subroutine rmm_diis(cg, dtset, eig, enlx, gs_hamk, gsc_all, mpi_enreg, nband, np
 
      ! Compute H |phi_now>
      if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
-     !call fock_set_ieigen(gs_hamk%fockcommon, iband)
 
-     call getghc(cpopt, phi_now, cwaveprj, ghc, gsc_ptr, gs_hamk, gvnlxc, &
+     !call fock_set_ieigen(gs_hamk%fockcommon, iband)
+     call getghc(cpopt, phi_now, cprj_dum, ghc, gsc_ptr, gs_hamk, gvnlxc, &
                  rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
      if (usepaw == 1) then
@@ -495,9 +526,11 @@ end if
    ! TODO: End with trial step but then I have to move the check for exit at the end of the loop.
    cg(:,is:ie) = phi_now
    !if (iline == nline + 1) then
-   !  write(std_out, *)"Last trial step"
-   !  kres = chain_resv(:,:, nline)
-   !  cg(:,is:ie) = phi_now + lambda * chain_resv(:,:, nline)
+     !write(std_out, *)"Last trial step"
+     !call getghc_eigresid(gs_hamk, ndat, phi_now, ghc, gsc, mpi_enreg, &
+     !                     eig(iband), resid(iband), gvnlxc, residvec)
+     !kres = chain_resv(:,:, nline)
+     !cg(:,is:ie) = phi_now + lambda * chain_resv(:,:, nline)
    !end if
  end do iband_loop
 
@@ -514,11 +547,6 @@ end if
  ABI_FREE(kres)
  ABI_FREE(phi_now)
  ABI_FREE(gvnlxc)
-
- if (usepaw == 1) then
-   call pawcprj_free(cwaveprj)
-   ABI_FREE(cwaveprj)
- end if
 
 end subroutine rmm_diis
 !!***
@@ -549,6 +577,103 @@ logical function exit_diis(iline, nline, hist_ene, hist_resid, dtset) result(ans
 
 end function exit_diis
 !!***
+
+subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_now, ghc, gsc, mpi_enreg, prtvol, &
+                           eig, resid, enlx, residvec, normalize)
+
+!Arguments ------------------------------------
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ integer,intent(in) :: npw, nspinor, ndat, prtvol
+ real(dp),intent(inout) :: phi_now(2, npw*nspinor*ndat)
+ real(dp),intent(out) :: ghc(2,npw*nspinor*ndat), gsc(2,npw*nspinor*ndat*gs_hamk%usepaw)
+ type(mpi_type),intent(in) :: mpi_enreg
+ real(dp),intent(out) :: eig(ndat), resid(ndat)
+ real(dp),intent(out) :: enlx(ndat)
+ real(dp),intent(out) :: residvec(2, npw*nspinor*ndat)
+ logical,optional,intent(in) :: normalize
+
+!Local variables-------------------------------
+ integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
+ integer :: istwf_k, usepaw, cpopt, sij_opt, idat, is, ie, npws
+ integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft
+ real(dp),parameter :: rdummy = zero
+ logical :: normalize_
+ real(dp) :: rval, dotr, doti
+!arrays
+ real(dp),allocatable :: gvnlxc(:, :)
+ type(pawcprj_type) :: cprj_dum(1,1)
+
+! *************************************************************************
+
+ usepaw = gs_hamk%usepaw; istwf_k = gs_hamk%istwf_k !; prtvol = dtset%prtvol
+ me_g0 = mpi_enreg%me_g0; comm_fft = mpi_enreg%comm_fft
+ comm_spinorfft = mpi_enreg%comm_spinorfft; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
+ normalize_ = .True.; if (present(normalize)) normalize_ = normalize
+ npws = npw * nspinor
+
+ cpopt = -1
+ if (usepaw == 1) then
+   sij_opt = 1 ! Recompute S
+   !cpopt = 0  ! <p_lmn|in> are computed and saved
+   cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
+ else
+   sij_opt = 0
+ end if
+
+ if (usepaw == 0 .and. normalize_) then
+   ! NC normalization.
+   !call sqnorm_g(rval, istwf_k, npw*nspinor, phi_now, me_g0, comm_spinorfft)
+   !phi_now = phi_now / sqrt(rval)
+   call cgnc_normalize(npw * nspinor, ndat, phi_now, istwf_k, me_g0, comm_spinorfft)
+ end if
+
+ ABI_MALLOC(gvnlxc, (2, npw*nspinor*ndat))
+
+ ! Compute H |phi_now>
+ !call fock_set_ieigen(gs_hamk%fockcommon, iband)
+ call getghc(cpopt, phi_now, cprj_dum, ghc, gsc, gs_hamk, gvnlxc, &
+             rdummy, mpi_enreg, ndat, prtvol, sij_opt, tim_getghc, type_calc0)
+
+ if (usepaw == 1 .and. normalize) then
+   ! PAW normalization is done here.
+   !call dotprod_g(dotr, doti, istwf_k, npw*nspinor, option1, phi_now, gsc, me_g0, comm_spinorfft)
+   !rval = one / sqrt(abs(dotr))
+   !phi_now = phi_now * rval
+   !gsc = gsc * rval
+
+   call cgpaw_normalize(npw * nspinor, ndat, phi_now, gsc, istwf_k, me_g0, comm_spinorfft)
+ end if
+
+ do idat=1,ndat
+   is = 1 + (idat - 1) * npw * nspinor
+   ie = is - 1 + npw * nspinor
+   call dotprod_g(eig(idat), doti, istwf_k, npw*nspinor, option1, ghc(:,is), phi_now(:,is), me_g0, comm_spinorfft)
+
+   if (usepaw == 1) then
+     call dotprod_g(dotr, doti, istwf_k, npw*nspinor, option1, gsc(:,is), phi_now(:,is), me_g0, comm_spinorfft)
+     eig(idat) = eig(idat) / dotr
+   end if
+
+   ! Residual.
+   if (usepaw == 1) then
+     residvec(:,is:ie) = ghc(:,is:ie) - eig(idat) * gsc(:,is:ie)
+   else
+     residvec(:,is:ie) = ghc(:,is:ie) - eig(idat) * phi_now(:,is:ie)
+   end if
+
+   ! Store residual R_i for i == iline and evaluate new enlx for NC.
+   call sqnorm_g(resid(idat), istwf_k, npw*nspinor, residvec(1,is), me_g0, comm_fft)
+
+   if (usepaw == 0) then
+     call dotprod_g(enlx(idat), doti, istwf_k, npw*nspinor, option1, &
+                    phi_now(1,is), gvnlxc(1,is), me_g0, comm_bandspinorfft)
+   end if
+ end do
+
+ ABI_FREE(gvnlxc)
+
+end subroutine getghc_eigresid
+!!!***
 
 end module m_rmm_diis
 !!***

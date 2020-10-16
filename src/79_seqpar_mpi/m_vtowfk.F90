@@ -235,10 +235,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
+
+ ! Decide whether RMM-DIIS eigensolve should be used depending on istep
  use_rmm_diis = .False.
  if (abs(dtset%rmm_diis) /= 0) then
    if (dtset%rmm_diis > 0) use_rmm_diis = istep > 3 + dtset%rmm_diis
    if (dtset%rmm_diis < 0) use_rmm_diis = .True.
+   if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigesolver.")
  end if
 
 !Parallelization over spinors management
