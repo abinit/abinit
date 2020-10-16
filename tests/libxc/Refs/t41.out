@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h41 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 10h29 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t41/t41.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/libxc_t41/t41.in
 - output file    -> t41.out
 - root for input  files -> t41i
 - root for output files -> t41o
@@ -44,16 +44,16 @@ _ WF disk file :      0.394 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      15  mpssoang =       2    mqgrid =    3001
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =           8        mffmem =           1         mkmem =          19
-       mpw =         127          nfft =        3375          nkpt =          19
+       mpw =         150          nfft =        4096          nkpt =          19
 ================================================================================
-P This job should need less than                       1.901 Mbytes of memory.
+P This job should need less than                       2.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.297 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.350 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 
@@ -61,16 +61,16 @@ _ WF disk file :      0.297 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      15  mpssoang =       2    mqgrid =    3001
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =           8        mffmem =           1         mkmem =          19
-       mpw =         127          nfft =        3375          nkpt =          19
+       mpw =         150          nfft =        4096          nkpt =          19
 ================================================================================
-P This job should need less than                       1.901 Mbytes of memory.
+P This job should need less than                       2.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.297 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.350 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 
@@ -78,16 +78,16 @@ _ WF disk file :      0.297 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      15  mpssoang =       2    mqgrid =    3001
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =           8        mffmem =           1         mkmem =          19
-       mpw =         127          nfft =        3375          nkpt =          19
+       mpw =         150          nfft =        4096          nkpt =          19
 ================================================================================
-P This job should need less than                       1.901 Mbytes of memory.
+P This job should need less than                       2.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.297 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.350 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -106,17 +106,11 @@ _ WF disk file :      0.297 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
              bdgw           1       8
            diemac      1.20000000E+01
              ecut1     1.20000000E+01 Hartree
-             ecut2     1.04264636E+01 Hartree
-             ecut3     1.04264636E+01 Hartree
-             ecut4     1.04264636E+01 Hartree
-         ecutsigx1     1.15000000E+01 Hartree
-         ecutsigx2     1.04264636E+01 Hartree
-         ecutsigx3     1.04264636E+01 Hartree
-         ecutsigx4     1.04264636E+01 Hartree
-          ecutwfn1     1.15000000E+01 Hartree
-          ecutwfn2     1.04264636E+01 Hartree
-          ecutwfn3     1.04264636E+01 Hartree
-          ecutwfn4     1.04264636E+01 Hartree
+             ecut2     1.15000000E+01 Hartree
+             ecut3     1.15000000E+01 Hartree
+             ecut4     1.15000000E+01 Hartree
+         ecutsigx      1.15000000E+01 Hartree
+          ecutwfn      1.15000000E+01 Hartree
            enunit           1
 -          fftalg         312
            getwfk1          0
@@ -311,10 +305,7 @@ P           mkmem          19
             nband           8
           nbandhf           4
            ndtset           4
-            ngfft1         16      16      16
-            ngfft2         15      15      15
-            ngfft3         15      15      15
-            ngfft4         15      15      15
+            ngfft          16      16      16
              nkpt          19
            nkptgw           1
            nkpthf         256
@@ -444,8 +435,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -589,8 +580,8 @@ band_energy         :  1.13818376545444E+00
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 127, }
-cutoff_energies: {ecut:  10.4, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+cutoff_energies: {ecut:  11.5, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 15, }
 ...
@@ -616,8 +607,8 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -696,30 +687,30 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9937; Expected =    8.0000
- average of density, n =  0.104400
- r_s =    1.3175
- omega_plasma =   31.1678 [eV]
+ Number of electrons calculated from density =    7.9984; Expected =    8.0000
+ average of density, n =  0.104461
+ r_s =    1.3172
+ omega_plasma =   31.1769 [eV]
 
 
  rdqps: reading QP wavefunctions of the previous step 
         looking for file t41i_DS2_QPS
  file not found, 1st iteration initialized with KS eigenelements 
 
- Number of electrons calculated from density =    7.9937; Expected =    8.0000
- average of density, n =  0.104400
- r_s =    1.3175
- omega_plasma =   31.1678 [eV]
+ Number of electrons calculated from density =    7.9984; Expected =    8.0000
+ average of density, n =  0.104461
+ r_s =    1.3172
+ omega_plasma =   31.1769 [eV]
 
 
 --------------------------------------------------------------------------------
 
  QP results after the unitary transformation in the KS subspace: 
 
-  Number of electrons    =    7.9937
+  Number of electrons    =    7.9984
 
   QP Band energy    [Ha] =  1.13818376545444E+00
-  QP Hartree energy [Ha] =  9.04317167030055E-01
+  QP Hartree energy [Ha] =  9.10345267929666E-01
 
 --------------------------------------------------------------------------------
 
@@ -756,18 +747,18 @@ iteration_state: {dtset: 2, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.568
-QP_gap     :    6.973
-Delta_QP_KS:    1.405
+QP_gap     :    6.993
+Delta_QP_KS:    1.425
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -8.965   -14.841    -8.965    -5.988    -5.580     0.000     1.000     0.000    -5.580    -2.602   -11.567   -11.567
-        2    12.951   -16.710    12.951    16.267    -3.993     0.000     1.000     0.000    -3.993    -0.677    12.274    12.274
-        3    12.951   -16.710    12.951    16.267    -3.993     0.000     1.000     0.000    -3.993    -0.677    12.274    12.274
-        4    12.951   -16.710    12.951    16.267    -3.993     0.000     1.000     0.000    -3.993    -0.677    12.274    12.274
-        5    18.519   -15.395    18.519    21.552    -2.305     0.000     1.000     0.000    -2.305     0.728    19.247    19.247
-        6    18.519   -15.395    18.519    21.552    -2.305     0.000     1.000     0.000    -2.305     0.728    19.247    19.247
-        7    18.519   -15.395    18.519    21.552    -2.305     0.000     1.000     0.000    -2.305     0.728    19.247    19.247
-        8    25.707   -16.219    25.707    28.967    -2.023     0.000     1.000     0.000    -2.023     1.237    26.944    26.944
+        1    -8.965   -14.862    -8.965    -5.986    -5.587     0.000     1.000     0.000    -5.587    -2.608   -11.573   -11.573
+        2    12.951   -16.721    12.951    16.271    -3.999     0.000     1.000     0.000    -3.999    -0.680    12.272    12.272
+        3    12.951   -16.721    12.951    16.271    -3.999     0.000     1.000     0.000    -3.999    -0.680    12.272    12.272
+        4    12.951   -16.721    12.951    16.271    -3.999     0.000     1.000     0.000    -3.999    -0.680    12.272    12.272
+        5    18.519   -15.483    18.519    21.578    -2.314     0.000     1.000     0.000    -2.314     0.745    19.264    19.264
+        6    18.519   -15.483    18.519    21.578    -2.314     0.000     1.000     0.000    -2.314     0.745    19.264    19.264
+        7    18.519   -15.483    18.519    21.578    -2.314     0.000     1.000     0.000    -2.314     0.745    19.264    19.264
+        8    25.707   -16.231    25.707    28.976    -2.027     0.000     1.000     0.000    -2.027     1.243    26.950    26.950
 ...
 
 
@@ -775,7 +766,7 @@ data: !SigmaeeData |
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (  -2.602   0.000) for band index:  1
+.  kptgw no:  1; Maximum DeltaE = (  -2.608   0.000) for band index:  1
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -784,8 +775,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 127, }
-cutoff_energies: {ecut:  10.4, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+cutoff_energies: {ecut:  11.5, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 15, }
 ...
@@ -874,30 +865,30 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9937; Expected =    8.0000
- average of density, n =  0.104400
- r_s =    1.3175
- omega_plasma =   31.1678 [eV]
+ Number of electrons calculated from density =    7.9984; Expected =    8.0000
+ average of density, n =  0.104461
+ r_s =    1.3172
+ omega_plasma =   31.1769 [eV]
 
 
  rdqps: reading QP wavefunctions of the previous step 
         looking for file t41i_DS3_QPS
  file not found, 1st iteration initialized with KS eigenelements 
 
- Number of electrons calculated from density =    7.9937; Expected =    8.0000
- average of density, n =  0.104400
- r_s =    1.3175
- omega_plasma =   31.1678 [eV]
+ Number of electrons calculated from density =    7.9984; Expected =    8.0000
+ average of density, n =  0.104461
+ r_s =    1.3172
+ omega_plasma =   31.1769 [eV]
 
 
 --------------------------------------------------------------------------------
 
  QP results after the unitary transformation in the KS subspace: 
 
-  Number of electrons    =    7.9937
+  Number of electrons    =    7.9984
 
   QP Band energy    [Ha] =  1.13818376545444E+00
-  QP Hartree energy [Ha] =  9.04317167030055E-01
+  QP Hartree energy [Ha] =  9.10345267929666E-01
 
 --------------------------------------------------------------------------------
 
@@ -934,18 +925,18 @@ iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.568
-QP_gap     :    7.710
-Delta_QP_KS:    2.143
+QP_gap     :    7.728
+Delta_QP_KS:    2.161
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -8.965   -14.841    -8.965    -5.623    -6.420     0.000     1.000     0.000    -6.420    -3.077   -12.042   -12.042
-        2    12.951   -16.710    12.951    16.678    -4.785     0.000     1.000     0.000    -4.785    -1.057    11.894    11.894
-        3    12.951   -16.710    12.951    16.678    -4.785     0.000     1.000     0.000    -4.785    -1.057    11.894    11.894
-        4    12.951   -16.710    12.951    16.678    -4.785     0.000     1.000     0.000    -4.785    -1.057    11.894    11.894
-        5    18.519   -15.395    18.519    21.946    -2.342     0.000     1.000     0.000    -2.342     1.085    19.604    19.604
-        6    18.519   -15.395    18.519    21.946    -2.342     0.000     1.000     0.000    -2.342     1.085    19.604    19.604
-        7    18.519   -15.395    18.519    21.946    -2.342     0.000     1.000     0.000    -2.342     1.085    19.604    19.604
-        8    25.707   -16.219    25.707    29.364    -2.036     0.000     1.000     0.000    -2.036     1.622    27.329    27.329
+        1    -8.965   -14.862    -8.965    -5.620    -6.427     0.000     1.000     0.000    -6.427    -3.082   -12.047   -12.047
+        2    12.951   -16.721    12.951    16.681    -4.791     0.000     1.000     0.000    -4.791    -1.061    11.890    11.890
+        3    12.951   -16.721    12.951    16.681    -4.791     0.000     1.000     0.000    -4.791    -1.061    11.890    11.890
+        4    12.951   -16.721    12.951    16.681    -4.791     0.000     1.000     0.000    -4.791    -1.061    11.890    11.890
+        5    18.519   -15.483    18.519    21.970    -2.352     0.000     1.000     0.000    -2.352     1.100    19.619    19.619
+        6    18.519   -15.483    18.519    21.970    -2.352     0.000     1.000     0.000    -2.352     1.100    19.619    19.619
+        7    18.519   -15.483    18.519    21.970    -2.352     0.000     1.000     0.000    -2.352     1.100    19.619    19.619
+        8    25.707   -16.231    25.707    29.375    -2.039     0.000     1.000     0.000    -2.039     1.630    27.336    27.336
 ...
 
 
@@ -953,7 +944,7 @@ data: !SigmaeeData |
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (  -3.077   0.000) for band index:  1
+.  kptgw no:  1; Maximum DeltaE = (  -3.082   0.000) for band index:  1
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -962,8 +953,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
-dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 127, }
-cutoff_energies: {ecut:  10.4, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+cutoff_energies: {ecut:  11.5, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 15, }
 ...
@@ -1052,30 +1043,30 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9937; Expected =    8.0000
- average of density, n =  0.104400
- r_s =    1.3175
- omega_plasma =   31.1678 [eV]
+ Number of electrons calculated from density =    7.9984; Expected =    8.0000
+ average of density, n =  0.104461
+ r_s =    1.3172
+ omega_plasma =   31.1769 [eV]
 
 
  rdqps: reading QP wavefunctions of the previous step 
         looking for file t41i_DS4_QPS
  file not found, 1st iteration initialized with KS eigenelements 
 
- Number of electrons calculated from density =    7.9937; Expected =    8.0000
- average of density, n =  0.104400
- r_s =    1.3175
- omega_plasma =   31.1678 [eV]
+ Number of electrons calculated from density =    7.9984; Expected =    8.0000
+ average of density, n =  0.104461
+ r_s =    1.3172
+ omega_plasma =   31.1769 [eV]
 
 
 --------------------------------------------------------------------------------
 
  QP results after the unitary transformation in the KS subspace: 
 
-  Number of electrons    =    7.9937
+  Number of electrons    =    7.9984
 
   QP Band energy    [Ha] =  1.13818376545444E+00
-  QP Hartree energy [Ha] =  9.04317167030055E-01
+  QP Hartree energy [Ha] =  9.10345267929666E-01
 
 --------------------------------------------------------------------------------
 
@@ -1112,18 +1103,18 @@ iteration_state: {dtset: 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.568
-QP_gap     :    7.473
-Delta_QP_KS:    1.906
+QP_gap     :    7.496
+Delta_QP_KS:    1.928
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -8.965   -14.841    -8.965    -5.995    -5.136     0.000     1.000     0.000    -5.136    -2.166   -11.131   -11.131
-        2    12.951   -16.710    12.951    15.885    -3.828     0.000     1.000     0.000    -3.828    -0.894    12.057    12.057
-        3    12.951   -16.710    12.951    15.885    -3.828     0.000     1.000     0.000    -3.828    -0.894    12.057    12.057
-        4    12.951   -16.710    12.951    15.885    -3.828     0.000     1.000     0.000    -3.828    -0.894    12.057    12.057
-        5    18.519   -15.395    18.519    21.404    -1.874     0.000     1.000     0.000    -1.874     1.011    19.530    19.530
-        6    18.519   -15.395    18.519    21.404    -1.874     0.000     1.000     0.000    -1.874     1.011    19.530    19.530
-        7    18.519   -15.395    18.519    21.404    -1.874     0.000     1.000     0.000    -1.874     1.011    19.530    19.530
-        8    25.707   -16.219    25.707    28.751    -1.628     0.000     1.000     0.000    -1.628     1.416    27.123    27.123
+        1    -8.965   -14.862    -8.965    -6.002    -5.142     0.000     1.000     0.000    -5.142    -2.179   -11.144   -11.144
+        2    12.951   -16.721    12.951    15.883    -3.833     0.000     1.000     0.000    -3.833    -0.901    12.051    12.051
+        3    12.951   -16.721    12.951    15.883    -3.833     0.000     1.000     0.000    -3.833    -0.901    12.051    12.051
+        4    12.951   -16.721    12.951    15.883    -3.833     0.000     1.000     0.000    -3.833    -0.901    12.051    12.051
+        5    18.519   -15.483    18.519    21.428    -1.881     0.000     1.000     0.000    -1.881     1.028    19.546    19.546
+        6    18.519   -15.483    18.519    21.428    -1.881     0.000     1.000     0.000    -1.881     1.028    19.546    19.546
+        7    18.519   -15.483    18.519    21.428    -1.881     0.000     1.000     0.000    -1.881     1.028    19.546    19.546
+        8    25.707   -16.231    25.707    28.753    -1.631     0.000     1.000     0.000    -1.631     1.416    27.123    27.123
 ...
 
 
@@ -1131,7 +1122,7 @@ data: !SigmaeeData |
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (  -2.166   0.000) for band index:  1
+.  kptgw no:  1; Maximum DeltaE = (  -2.179   0.000) for band index:  1
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1142,17 +1133,11 @@ data: !SigmaeeData |
              bdgw           1       8
            diemac      1.20000000E+01
              ecut1     1.20000000E+01 Hartree
-             ecut2     1.04264636E+01 Hartree
-             ecut3     1.04264636E+01 Hartree
-             ecut4     1.04264636E+01 Hartree
-         ecutsigx1     1.15000000E+01 Hartree
-         ecutsigx2     1.04264636E+01 Hartree
-         ecutsigx3     1.04264636E+01 Hartree
-         ecutsigx4     1.04264636E+01 Hartree
-          ecutwfn1     1.15000000E+01 Hartree
-          ecutwfn2     1.04264636E+01 Hartree
-          ecutwfn3     1.04264636E+01 Hartree
-          ecutwfn4     1.04264636E+01 Hartree
+             ecut2     1.15000000E+01 Hartree
+             ecut3     1.15000000E+01 Hartree
+             ecut4     1.15000000E+01 Hartree
+         ecutsigx      1.15000000E+01 Hartree
+          ecutwfn      1.15000000E+01 Hartree
            enunit           1
            etotal1    -1.1928648088E+01
            etotal2     0.0000000000E+00
@@ -1359,10 +1344,7 @@ P           mkmem          19
             nband           8
           nbandhf           4
            ndtset           4
-            ngfft1         16      16      16
-            ngfft2         15      15      15
-            ngfft3         15      15      15
-            ngfft4         15      15      15
+            ngfft          16      16      16
              nkpt          19
            nkptgw           1
            nkpthf         256
@@ -1463,10 +1445,53 @@ P           mkmem          19
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          5.6        0.09      0.002
+- Total wall clock time (s,m,h):         10.3        0.17      0.003
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            5.6, wall_time =           10.3
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  3.445  61.4      5.035  48.9              3      -1.00        0.68       0.68
+- pspini                         0.694  12.4      0.698   6.8              4      -1.00        0.99       0.99
+- ewald                          0.580  10.3      0.581   5.6              7      -1.00        1.00       1.00
+- fourwf%(pot)                   0.556   9.9      0.571   5.5           5595      -1.00        0.97       0.97
+- invars2                        0.258   4.6      0.258   2.5              4      -1.00        1.00       1.00
+- timing timab                   0.115   2.0      0.117   1.1              9      -1.00        0.98       0.98
+- projbd                         0.093   1.7      0.096   0.9           8758      -1.00        0.97       0.97
+- abinit(2)                      0.074   1.3      0.074   0.7              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.072   1.3      0.068   0.7           5595      -1.00        1.06       1.06
+- getghc-other                   0.070   1.3      0.065   0.6             -1      -1.00        1.08       1.08
+- others (117)                   0.250   4.4      0.248   2.4             -1      -1.00        1.01       1.01
+-<END_TIMER>
+-
+- subtotal                       6.207 110.6      7.811  75.8                                  0.79       0.79
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           5.6, wall_time =          10.3
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  3.445  61.4      5.035  48.9              3      -1.00        0.68       0.68
+- pspini                         0.694  12.4      0.698   6.8              4      -1.00        0.99       0.99
+- ewald                          0.580  10.3      0.581   5.6              7      -1.00        1.00       1.00
+- fourwf%(pot)                   0.556   9.9      0.571   5.5           5595      -1.00        0.97       0.97
+- invars2                        0.258   4.6      0.258   2.5              4      -1.00        1.00       1.00
+- timing timab                   0.115   2.0      0.117   1.1              9      -1.00        0.98       0.98
+- projbd                         0.093   1.7      0.096   0.9           8758      -1.00        0.97       0.97
+- abinit(2)                      0.074   1.3      0.074   0.7              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.072   1.3      0.068   0.7           5595      -1.00        1.06       1.06
+- getghc-other                   0.070   1.3      0.065   0.6             -1      -1.00        1.08       1.08
+- others (117)                   0.250   4.4      0.248   2.4             -1      -1.00        1.01       1.01
+-<END_TIMER>
 
+- subtotal                       6.207 110.6      7.811  75.8                                  0.79       0.79
 
 ================================================================================
 
@@ -1551,10 +1576,10 @@ P           mkmem          19
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=         12.5
+- Proc.   0 individual time (sec): cpu=          5.6  wall=         10.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=         12.5
+.Delivered   4 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.6  wall=         10.3
