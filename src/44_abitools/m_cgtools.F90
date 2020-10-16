@@ -47,9 +47,9 @@ MODULE m_cgtools
  use m_errors
  use m_xmpi
 
- use m_fstrings,   only : toupper
- use m_time,       only : timab
- use m_numeric_tools,   only : hermit
+ use m_fstrings,      only : toupper
+ use m_time,          only : cwtime, cwtime_report, timab, sec2str
+ use m_numeric_tools, only : hermit
 
  implicit none
 
@@ -4362,6 +4362,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
 !Local variables-------------------------------
  integer :: iband,ii,ierr,rvectsize,vectsize,use_slk
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  ! real(dp) :: tsec(2)
  real(dp),allocatable :: evec_tmp(:,:),subovl_tmp(:),subham_tmp(:)
@@ -4380,14 +4381,15 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
  rvectsize=npw_k*nspinor
  vectsize=2*rvectsize;if (me_g0==1) vectsize=vectsize-1
+ call cwtime(cpu, wall, gflops, "start")
 
-!Impose Hermiticity on diagonal elements of subham (and subovl, if needed)
-! MG FIXME: In these two calls we are aliasing the args
- !write(std_out, *)"subham", subham
- call hermit(subham,subham,ierr,nband_k)
- if (use_subovl==1) call hermit(subovl,subovl,ierr,nband_k)
+ !Impose Hermiticity on diagonal elements of subham (and subovl, if needed)
+ ! MG FIXME: In these two calls we are aliasing the args
+ call hermit(subham, subham, ierr, nband_k)
+ if (use_subovl==1) call hermit(subovl, subovl, ierr, nband_k)
+ call cwtime_report(" hermit", cpu, wall, gflops)
 
-!Diagonalize the Hamitonian matrix
+ ! Diagonalize the Hamitonian matrix
  if(istwf_k==2) then
    ABI_MALLOC(evec_tmp,(nband_k,nband_k))
    ABI_MALLOC(subham_tmp,(nband_k*(nband_k+1)/2))
@@ -4396,7 +4398,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
    if (use_subovl==1) then
      ABI_MALLOC(subovl_tmp,(nband_k*(nband_k+1)/2))
      subovl_tmp=subovl(1:nband_k*(nband_k+1):2)
-!    TO DO: Not sure this one has been fully tested
+     ! TODO: Not sure this one has been fully tested
      call abi_xhpgv(1,'V','U',nband_k,subham_tmp,subovl_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
      ABI_FREE(subovl_tmp)
    else
@@ -4412,30 +4414,32 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
      call abi_xhpev('V','U',nband_k,subham,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
  end if
+ call cwtime_report(" hdiago", cpu, wall, gflops)
 
-!Normalize each eigenvector and set phase:
-!The problem with minus/plus signs might be present also if .not. use_subovl
-!if(use_subovl == 0) then
- call cg_normev(evec,nband_k,nband_k)
-!end if
+ !Normalize each eigenvector and set phase:
+ !The problem with minus/plus signs might be present also if .not. use_subovl
+ !if(use_subovl == 0) then
+ call cg_normev(evec, nband_k, nband_k)
+ !end if
 
  if(istwf_k==2)then
    do iband=1,nband_k
      do ii=1,nband_k
        if(abs(evec(2*ii,iband))>1.0d-10)then
          write(msg,'(3a,2i0,2es16.6,a,a)')ch10,&
-         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
-         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
+         ' For istwf_k=2, observed the following element of evec:',ch10,&
+         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,' with a non-negligible imaginary part.'
          MSG_BUG(msg)
        end if
      end do
    end do
  end if
+ call cwtime_report(" normev", cpu, wall, gflops)
 
-!=====================================================
-!Carry out rotation of bands C(G,n) according to evecs
-! ZGEMM if istwfk==1, DGEMM if istwfk==2
-!=====================================================
+ !=====================================================
+ ! Carry out rotation of bands C(G,n) according to evecs
+ ! ZGEMM if istwfk==1, DGEMM if istwfk==2
+ !=====================================================
  if (istwf_k==2) then
 
    ABI_MALLOC_OR_DIE(blockvectora,(vectsize,nband_k), ierr)
@@ -4455,7 +4459,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
    end do
 
    call abi_xgemm('N','N',vectsize,nband_k,nband_k,&
-&   cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
+     cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
 
    do iband=1,nband_k
      if (me_g0 == 1) then
@@ -4468,8 +4472,8 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
      end if
    end do
 
-!  If paw, must also rotate S.C(G,n):
    if (usepaw==1) then
+    ! If paw, must also rotate S.C(G,n):
 
      do iband=1,nband_k
        if (me_g0 == 1) then
@@ -4484,7 +4488,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
      end do
 
      call abi_xgemm('N','N',vectsize,nband_k,nband_k,&
-&     cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
+                    cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
 
      do iband=1,nband_k
        if (me_g0 == 1) then
@@ -4507,38 +4511,38 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
    ABI_MALLOC_OR_DIE(work,(2,npw_k*nspinor*nband_k), ierr)
 
-!  MG: Do not remove this initialization.
-!  telast_06 stops in fxphase on inca_debug and little_buda (very very strange, due to atlas?)
+   ! MG: Do not remove this initialization.
+   ! telast_06 stops in fxphase on inca_debug and little_buda (very very strange, due to atlas?)
    work=zero
 
    call abi_xgemm('N','N',npw_k*nspinor,nband_k,nband_k,cone, &
-&   cg(:,icg+1:npw_k*nspinor*nband_k+icg),npw_k*nspinor, &
-&   evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
+     cg(:,icg+1:npw_k*nspinor*nband_k+icg),npw_k*nspinor, &
+     evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
 
    call abi_xcopy(npw_k*nspinor*nband_k,work(1,1),1,cg(1,1+icg),1,x_cplx=2)
 
-!  If paw, must also rotate S.C(G,n):
    if (usepaw==1) then
+     ! If paw, must also rotate S.C(G,n):
      call abi_xgemm('N','N',npw_k*nspinor,nband_k,nband_k,cone, &
-&     gsc(:,1+igsc:npw_k*nspinor*nband_k+igsc),npw_k*nspinor, &
-&     evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
+       gsc(:,1+igsc:npw_k*nspinor*nband_k+igsc),npw_k*nspinor, &
+       evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
      call abi_xcopy(npw_k*nspinor*nband_k, work(1,1),1,gsc(1,1+igsc),1,x_cplx=2)
    end if
 
    ABI_FREE(work)
  end if
+ call cwtime_report(" rotation", cpu, wall, gflops)
 
  contains
 
    function cgindex_subd(iband)
+     integer :: iband,cgindex_subd
+     cgindex_subd=npw_k*nspinor*(iband-1)+icg+1
+   end function cgindex_subd
 
-   integer :: iband,cgindex_subd
-   cgindex_subd=npw_k*nspinor*(iband-1)+icg+1
- end function cgindex_subd
    function gscindex_subd(iband)
-
-   integer :: iband,gscindex_subd
-   gscindex_subd=npw_k*nspinor*(iband-1)+igsc+1
+     integer :: iband,gscindex_subd
+     gscindex_subd=npw_k*nspinor*(iband-1)+igsc+1
  end function gscindex_subd
 
 end subroutine subdiago
