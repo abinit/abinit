@@ -179,7 +179,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
- character(len=600) :: msg
+ character(len=1000) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
  type(geo_t) :: geo
@@ -942,13 +942,16 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tol8)
 
    if(iexit==-1)then
-     write(msg,'(a,es14.6,11a)')&
-       'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
-       'In order to avoid spurious effects, the primitive vectors have been',ch10,&
-       'symmetrized before storing them in the dataset internal variable.',ch10,&
-       'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
-       'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-       'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
+      write(msg,'(5a,es14.6,12a)')&
+        'It is observed that the input primitive vectors are not accurate:',ch10,&
+        'the lattice is not left invariant within 1.0e-8 when applying symmetry operations.',ch10,&
+        'However, they are only slightly inaccurate, as inaccuracies are within the input tolsym=', tolsym,ch10,&
+        'In order to avoid spurious effects, the primitive vectors have been',ch10,&
+        'symmetrized before storing them in the dataset internal variable.',ch10,&
+        'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
+        'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+        'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower,',ch10,&
+        'or use input primitive vectors that are accurate to better than 1.0e-8.'
      MSG_WARNING(msg)
      call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tol8)
      call mkradim(acell,rprim,rprimd)
