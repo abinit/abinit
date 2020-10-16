@@ -358,14 +358,15 @@ contains
 &                      kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
-&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,enlout_im,qdir)
+&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,&
+&                      enlout_im,ndat_left,qdir)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,natom,nkpgin,nkpgout,nnlout
  integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,signs
- integer,intent(in),optional :: qdir
+ integer,intent(in),optional :: qdir,ndat_left
  real(dp),intent(in) :: lambda,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -393,7 +394,7 @@ contains
 !scalars
  integer :: choice_a,choice_b,cplex,cplex_enl,cplex_fac,ia,ia1,ia2,ia3,ia4,ia5
  integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
- integer :: n1,n2,n3,nd2gxdt,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
+ integer :: n1,n2,n3,nd2gxdt,ndat_left_,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
  real(dp) :: enlk
  logical :: check,testnl
@@ -492,6 +493,10 @@ contains
 &   'With nloc_mem<=0, mincat must be less than matblk.',ch10,&
 &   'Their value is ',mincat,' and ',matblk,'.'
    MSG_BUG(message)
+ end if
+ ndat_left_=1
+ if (present(ndat_left)) then
+   ndat_left_=ndat_left
  end if
 
 !Define dimensions of projected scalars
@@ -929,13 +934,13 @@ contains
            if (.not.present(cprjin_left)) then
              call timab(1106,1,tsec)
              call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&             enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
+&             enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,ndat_left_,nd2gxdt,ndgxdt,ndgxdtfac,&
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
              call timab(1106,2,tsec)
            else
-             ABI_ALLOCATE(gx_left,(cplex,nlmn,nincat,nspinor))
+             ABI_ALLOCATE(gx_left,(cplex,nlmn,nincat,nspinor*ndat_left_))
 !            Retrieve <p_lmn|c> coeffs
-             do ispinor=1,nspinor
+             do ispinor=1,nspinor*ndat_left_
                do ia=1,nincat
                  gx_left(1:cplex,1:nlmn,ia,ispinor)=cprjin_left(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
                end do
@@ -951,13 +956,13 @@ contains
              if (present(enlout_im)) then
                call timab(1108,1,tsec)
                call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
+&               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,ndat_left_,nd2gxdt,ndgxdt,ndgxdtfac,&
 &               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk,enlout_im=enlout_im)
                call timab(1108,2,tsec)
              else
                call timab(1107,1,tsec)
                call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
+&               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,ndat_left_,nd2gxdt,ndgxdt,ndgxdtfac,&
 &               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
                call timab(1107,2,tsec)
              end if

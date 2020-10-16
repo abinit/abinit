@@ -802,8 +802,9 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm,nnlout
  !character(len=500) :: msg
 !arrays
- real(dp) :: enlout(1),enlout_im(1),tsec(2)
+ real(dp) :: tsec(2)
  real(dp),allocatable :: gsc(:,:),gvnlxc(:,:)
+ real(dp),allocatable :: enlout(:),enlout_im(:)
  !LTEST
  real(dp) :: csc_re_tmp,csc_im_tmp
  real(dp), pointer :: cwavef_left_oneband(:,:)
@@ -815,6 +816,18 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
 
  call timab(1360+tim_getcsc,1,tsec)
 
+ if (size(cwavef,2)/=npw*nspinor) then
+   MSG_BUG('Wrong size for cwavef')
+ end if
+ if (size(cwavef_left,2)/=npw*nspinor*ndat) then
+   MSG_BUG('Wrong size for cwavef_left')
+ end if
+ if (size(cprj,2)/=nspinor) then
+   MSG_BUG('Wrong size for cprj')
+ end if
+ if (size(cprj_left,2)/=nspinor*ndat) then
+   MSG_BUG('Wrong size for cprj_left')
+ end if
 !!Compatibility tests
 ! my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
 ! if(gs_ham%usepaw==0) then
@@ -837,19 +850,24 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
 ! ABI_DEALLOCATE(gvnlxc)
  !LTEST
 
- do idat=1,ndat
-   band_shift = (idat-1)*npw*nspinor
-   cwavef_left_oneband => cwavef_left(:,1+band_shift:npw*nspinor+band_shift)
-   call timab(1361,1,tsec)
-   call dotprod_g(csc(2*idat-1),csc(2*idat),gs_ham%istwf_k,npw*nspinor,2,cwavef_left_oneband,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-   call timab(1361,2,tsec)
- end do
+! do idat=1,ndat
+!   band_shift = (idat-1)*npw*nspinor
+!   cwavef_left_oneband => cwavef_left(:,1+band_shift:npw*nspinor+band_shift)
+!   call timab(1361,1,tsec)
+!   call dotprod_g(csc(2*idat-1),csc(2*idat),gs_ham%istwf_k,npw*nspinor,2,cwavef_left_oneband,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!   call timab(1361,2,tsec)
+! end do
+ call timab(1361,1,tsec)
+ call zgemv('C',npw*nspinor,ndat,cone,cwavef_left,npw*nspinor,cwavef,1,czero,csc,1)
+ call timab(1361,2,tsec)
 
  if (gs_ham%usepaw==1) then
    select_k_=1;if (present(select_k)) select_k_=select_k
    choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=16 ; paw_opt=3
    ABI_ALLOCATE(gsc,(0,0))
    ABI_ALLOCATE(gvnlxc,(0,0))
+   ABI_ALLOCATE(enlout   ,(ndat))
+   ABI_ALLOCATE(enlout_im,(ndat))
    signs=1
    do idat=1,ndat
      cprj_left_oneband => cprj_left(:,idat:idat)
@@ -859,8 +877,17 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
      csc(2*idat-1) = csc(2*idat-1) + enlout(1)
      csc(2*idat  ) = csc(2*idat  ) + enlout_im(1)
    end do
+!   call nonlop(choice,cpopt,cprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,1,&
+!&   nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
+!&   cprjin_left=cprj_left,enlout_im=enlout_im,ndat_left=ndat)
+!   do idat=1,ndat
+!     csc(2*idat-1) = csc(2*idat-1) + enlout(idat)
+!     csc(2*idat  ) = csc(2*idat  ) + enlout_im(idat)
+!   end do
    ABI_DEALLOCATE(gsc)
    ABI_DEALLOCATE(gvnlxc)
+   ABI_DEALLOCATE(enlout   )
+   ABI_DEALLOCATE(enlout_im)
  end if
 ! !LTEST
 ! call writeout(999,'dotr    ',dotr)

@@ -126,7 +126,7 @@ contains
 !! SOURCE
 
 subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,&
+&                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,ndat_left,nd2gxdt,ndgxdt,&
 &                      ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt,strnlk,&
 &                      enlout_im)
 
@@ -134,20 +134,22 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
 !scalars
  integer,intent(in) :: choice,cplex,cplex_fac,ia3,natom,nd2gxdt,ndgxdt
  integer,intent(in) :: ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt
+ integer,intent(in) :: ndat_left
  real(dp),intent(inout) :: enlk
 !arrays
  real(dp),intent(in) :: d2gxdt(cplex,nd2gxdt,nlmn,nincat,nspinor)
  real(dp),intent(in) :: dgxdt(cplex,ndgxdt,nlmn,nincat,nspinor)
  real(dp),intent(in) :: dgxdtfac(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: dgxdtfac_sij(cplex,ndgxdtfac,nlmn,nincat,nspinor*(paw_opt/3))
- real(dp),intent(in) :: gx(cplex,nlmn,nincat,nspinor),gxfac(cplex_fac,nlmn,nincat,nspinor)
+ real(dp),intent(in) :: gx(cplex,nlmn,nincat,nspinor*ndat_left),gxfac(cplex_fac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))
- real(dp),intent(inout) :: ddkk(6),enlout(nnlout),fnlk(3*natom),strnlk(6)
- real(dp),intent(inout),optional :: enlout_im(nnlout)
+ real(dp),intent(inout) :: ddkk(6),enlout(nnlout*ndat_left),fnlk(3*natom),strnlk(6)
+ real(dp),intent(inout),optional :: enlout_im(nnlout*ndat_left)
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,iashift,ilmn,iplex,ishift,ispinor,mu,mua,mua1,mua2,mub,mushift,mut,muu,nu,nushift
+ integer :: ia,iashift,idat_left,ilmn,iplex,ishift,ispinor,mu,mua,mua1,mua2,mub,mushift,mut,muu
+ integer :: nu,nushift
  real(dp) :: dummy
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -166,31 +168,37 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
 !  ============== Accumulate the non-local energy ===============
    if (choice==1) then
      if (present(enlout_im).and.cplex==2) then ! cplex=cplex_fac=2
-       do ispinor=1,nspinor
-         do ia=1,nincat
-           do ilmn=1,nlmn
-             enlout   (1)=enlout   (1)+gxfac(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor)
-             enlout   (1)=enlout   (1)+gxfac(2,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor)
-             enlout_im(1)=enlout_im(1)+gxfac(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor)
-             enlout_im(1)=enlout_im(1)-gxfac(1,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor)
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               enlout   (idat_left)=enlout   (idat_left)+gxfac(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout   (idat_left)=enlout   (idat_left)+gxfac(2,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)+gxfac(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)-gxfac(1,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+             end do
            end do
          end do
        end do
      else if (present(enlout_im).and.cplex_fac==2) then ! cplex=1,cplex_fac=2
-       do ispinor=1,nspinor
-         do ia=1,nincat
-           do ilmn=1,nlmn
-             enlout   (1)=enlout   (1)+gxfac(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor)
-             enlout_im(1)=enlout_im(1)+gxfac(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor)
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               enlout   (idat_left)=enlout   (idat_left)+gxfac(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)+gxfac(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+             end do
            end do
          end do
        end do
      else ! only the real part is needed or the imaginary part is zero
-       do ispinor=1,nspinor
-         do ia=1,nincat
-           do ilmn=1,nlmn
-             do iplex=1,cplex
-               enlout(1)=enlout(1)+gxfac(iplex,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor)
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               do iplex=1,cplex
+                 enlout(idat_left)=enlout(idat_left)+gxfac(iplex,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               end do
              end do
            end do
          end do
