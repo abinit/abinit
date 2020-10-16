@@ -427,8 +427,8 @@ contains
 !Some other dims
  mincat=min(NLO_MINCAT,maxval(nattyp))
  cplex=2;if (istwf_k>1) cplex=1
- alpha_zero = alpha(1)**2 + alpha(2)**2 < tol20
- beta_zero  =  beta(1)**2 +  beta(2)**2 < tol20
+ alpha_zero = (alpha(1)**2 + alpha(2)**2) < tol12*tol12
+ beta_zero  = ( beta(1)**2 +  beta(2)**2) < tol12*tol12
  alpha_im_zero = (abs(alpha(2)) < tol12) .or. cplex==1
  beta_im_zero  = (abs(beta(2))  < tol12) .or. cplex==1 
 

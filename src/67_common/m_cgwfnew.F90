@@ -632,8 +632,8 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
            cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
            cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
          end do
-         cx_tmp  = COMPLEX(costh,zero)
-         cx_tmp2 = COMPLEX(sintn,zero)
+         cx_tmp  = (/costh,zero/)
+         cx_tmp2 = (/sintn,zero/)
          call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_direc,cx_tmp,cx_tmp2,&
 &         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &         natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
