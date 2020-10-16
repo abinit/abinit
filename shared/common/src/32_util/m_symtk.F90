@@ -1323,7 +1323,7 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 
 !  Projection of the first conventional vector perpendicular to rbasis(:,3)
 !  and choice of the first normalized direction
-   scprod1=sum(rnormalized(:,3)*cell_base(:,1))
+   scprod1=sum(rnormalized(:,3)*rconv(:,1))
    rbasis(:,1)=rconv(:,1)-rnormalized(:,3)*scprod1
    norm(1)=sqrt(sum(rbasis(:,1)**2))
    rnormalized(:,1)=rbasis(:,1)/norm(1)

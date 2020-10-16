@@ -866,7 +866,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          ABI_DEALLOCATE(indsym)
          ABI_DEALLOCATE(symrec)
 
-         write(msg,'(a,es14.6,11a)')&
+         write(msg,'(a,es12.3,11a)')&
           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
           'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
           'symmetrized before storing them in the dataset internal variable.',ch10,&
@@ -942,7 +942,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tol8)
 
    if(iexit==-1)then
-      write(msg,'(5a,es14.6,12a)')&
+      write(msg,'(5a,es11.3,12a)')&
         'It is observed that the input primitive vectors are not accurate:',ch10,&
         'the lattice is not left invariant within 1.0e-8 when applying symmetry operations.',ch10,&
         'However, they are only slightly inaccurate, as inaccuracies are within the input tolsym=', tolsym,ch10,&
