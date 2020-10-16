@@ -17,7 +17,7 @@
 
 # Parameters common to all runs
       ecut      6.00
-  ecutsigx      1.49923969
+  ecutsigx      5.00000000
    ecuteps      1.49923969
     istwfk      8*1
      ngkpt      4      4      4
@@ -46,8 +46,8 @@
     getwfk3     2
 
      nband3    10
-    ecutwfn3    1.49923969E+00 Hartree
-      awtr3     0  # Note : the default awtr 1 is better
+    ecutwfn3    5.00    # Increased value to stabilize the test
+      awtr3     0       # Note : the default awtr 1 is better
 
 # Calculation of the model GW corrections - iteration 1
  optdriver4     4
@@ -55,8 +55,8 @@
     getwfk4     2
     getscr4     3
      nband4    10
-   ecutwfn4     1.49923969E+00 Hartree
- gw_icutcoul4     3  # old deprecated value of icutcoul, only used for legacy
+   ecutwfn4     5.00    # Increased value to stabilize the test
+ gw_icutcoul4     3     # old deprecated value of icutcoul, only used for legacy
 
 
 # Calculation of the dielectric matrix - iteration 2
@@ -66,7 +66,7 @@
     getqps5     4
 
      nband5    10
-   ecutwfn5     1.49923969E+00 Hartree
+   ecutwfn5     5.00      # Increased value to stabilize the test
       awtr5       0       # Note : the default awtr 1 is better
 
 # Calculation of the model GW corrections - iteration 2
@@ -77,8 +77,8 @@
     getqps6     4
     getscr6     5
      nband6    10
-   ecutwfn6     1.49923969E+00 Hartree
- gw_icutcoul6     3  # old deprecated value of icutcoul, only used for legacy
+   ecutwfn6     5.00  # Increased value to stabilize the test
+ gw_icutcoul6     3   # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the quasiparticle Wannier functions
 
@@ -137,7 +137,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t03.out, tolnlines = 27, tolabs = 7.0e-03, tolrel = 1.05e-00
+#%%   t03.out, tolnlines = 30, tolabs = 7.0e-03, tolrel = 1.05e-00
 #%% extra_inputs = t03o_DS7_w90.win
 #%% [paral_info]
 #%% max_nprocs = 1

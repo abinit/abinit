@@ -3237,7 +3237,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !Local variables-------------------------------
 !scalars
  integer,parameter :: pertcase0=0,master=0
- integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icsing_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
+ integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
@@ -3992,7 +3992,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  endif
  do ivcoul_init=1,nvcoul_init
    rcut = Dtset%rcut
-   icsing_eff=Dtset%gw_icutcoul
+   icutcoul_eff=Dtset%gw_icutcoul
    Sigp%sigma_mixing=one
    if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
      if(abs(Dtset%hyb_mixing)>tol8)then
@@ -4000,7 +4000,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
        Sigp%sigma_mixing=abs(Dtset%hyb_mixing)
      else if(abs(Dtset%hyb_mixing_sr)>tol8)then
        Sigp%sigma_mixing=abs(Dtset%hyb_mixing_sr)
-       icsing_eff=5
+       icutcoul_eff=5
      endif
      if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8)rcut=one/Dtset%hyb_range_fock
    endif
@@ -4009,10 +4009,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    if(ivcoul_init==1)then
 
      if (Gsph_x%ng > Gsph_c%ng) then
-       call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+       call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
         Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
      else
-       call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+       call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
         Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 
@@ -4020,10 +4020,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
 !    Use a temporary Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
      if (Gsph_x%ng > Gsph_c%ng) then
-       call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+       call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
         Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
      else
-       call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+       call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
         Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 
@@ -4040,7 +4040,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
    endif
 !#else
-!   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icsing_eff,ivcoul_init,Dtset%vcutgeo,&
+!   call vcoul_init(Vcp,Gsph_Max,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,ivcoul_init,Dtset%vcutgeo,&
 !&    Dtset%ecutsigx,Sigp%npwx,nqlwl,qlwl,ngfftf,comm)
 !#endif
 

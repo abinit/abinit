@@ -58,4 +58,6 @@ inp_files = [
 "t85.in", # Velocity Verlet NVE
 "t86.in", # Spin lattice coupling, Only Oiju term activated.
 "t87.in", # Spin lattice coupling, Oiju and Tijuv. 
+# GS Coulomb cut-off
+"t90.in", # checkG Coulomb cut-off, large tolerance a.t.m.
 ]

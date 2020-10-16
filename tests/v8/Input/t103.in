@@ -37,9 +37,9 @@ sel_EFS = 1 1 1
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = A. MARTIN, M.M. Schmitt
+#%% authors = A. Martin, M.M. Schmitt
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read ddb and HIST, fit the anharmonic part on Energies and generate effective potential
+#%%   Read ddb and HIST, fit the anharmonic part on energies and generate effective potential
 #%% topics = FitProcess,LatticeModel
 #%%<END TEST_INFO>

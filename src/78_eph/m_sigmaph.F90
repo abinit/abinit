@@ -698,6 +698,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(sigmaph_t) :: sigma, sigma_restart
  type(ddkop_t) :: ddkop
  type(rf2_t) :: rf2
+ type(crystal_t) :: pot_cryst
  type(hdr_type) :: pot_hdr
  type(phstore_t) :: phstore
  character(len=500) :: msg
@@ -1115,6 +1116,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call wrtout(unts, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
+   pot_cryst = pot_hdr%get_crystal()
+   if (cryst%compare(pot_cryst, header="Comparing input crystal with POT crystal") /= 0) then
+     MSG_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
+   end if
+   call pot_cryst%free()
    call pot_hdr%free()
  end if
 
@@ -1403,7 +1409,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            iq_ibz_fine = iq_ibz_k
            if (sigma%symsigma == 0) iq_ibz_fine = sigma%ephwg%lgk%find_ibzimage(qpt)
            ABI_CHECK(iq_ibz_fine /= -1, sjoin("Cannot find q-point in IBZ(k):", ktoa(qpt)))
-           if (sigma%symsigma == 1) then
+           if (abs(sigma%symsigma) == 1) then
               if (.not. all(abs(sigma%qibz_k(:, iq_ibz_fine) - sigma%ephwg%lgk%ibz(:, iq_ibz_fine)) < tol12)) then
                 MSG_ERROR("Mismatch in qpoints.")
               end if
@@ -2117,7 +2123,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Compute Debye-Waller term
      ! =========================
      if (.not. sigma%imag_only) then
-       call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller term within rigid ion approx...")
+       call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller within rigid ion approximation...")
        ! Collect gkq0_atm inside qpt_comm
        ! In principle it's sufficient to broadcast from itreated_q0 inside qpt_comm
        ! Yet, q-points are not equally distributed so this synch is detrimental.
@@ -2126,7 +2132,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Integral over IBZ(k) distributed inside qpt_comm
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
-       if (sigma%symsigma == +1) nq = sigma%nqibz_k
+       if (abs(sigma%symsigma) == +1) nq = sigma%nqibz_k
        call xmpi_split_work(nq, sigma%qpt_comm%value, q_start, q_stop)
 
        do iq_ibz_k=q_start,q_stop
@@ -3813,7 +3819,6 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
          ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"), &
                               velocity(:, band_ks, ikpt, spin), start=[1, iband, ikcalc, spin])
          NCF_CHECK(ncerr)
-
        end do
      end do
    end do
@@ -4889,8 +4894,6 @@ subroutine sigmaph_print(self, dtset, unt)
  if (unt == dev_null) return
 
  ! Write dimensions
- !write(unt,"(a, 2(f5.3, 1x), a)")"Computing self-energy corrections for states inside energy window:", &
- !    self%elow * Ha_eV, self%ehigh * Ha_eV, "[eV]"
  write(unt,"(/,a)")sjoin(" Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
  write(unt,"(a)")sjoin(" From bsum_start:", itoa(self%bsum_start), "to bsum_stop:", itoa(self%bsum_stop))
  if (dtset%eph_stern == 1 .and. .not. self%imag_only) then
@@ -4898,13 +4901,15 @@ subroutine sigmaph_print(self, dtset, unt)
    write(unt, "(a, es16.6, a, i0)")" Tolwfr:", dtset%tolwfr, ", nline: ", dtset%nline
  end if
  write(unt,"(a)")sjoin(" Symsigma: ",itoa(self%symsigma), "Timrev:", itoa(self%timrev))
- write(unt,"(a)")sjoin(" Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
+ if (.not. (self%qint_method == 1 .and. self%imag_only)) then
+   write(unt,"(a)")sjoin(" Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
+ end if
  msg = " Standard quadrature"; if (self%qint_method == 1) msg = " Tetrahedron method"
  write(unt, "(2a)")sjoin(" Method for q-space integration:", msg)
  if (self%qint_method == 1) then
    ndiv = 1; if (self%use_doublegrid) ndiv = self%eph_doublegrid%ndiv
    write(unt, "(a, 2(es16.6,1x))")" Tolerance for integration weights < ", dtset%eph_tols_idelta(:) / ndiv
-   !write(unt, "(a, (f5.2,1x))")" eph_phwinfact: ", self%phwinfact
+   write(unt, "(a, (f5.2,1x))")" eph_phwinfact: ", self%phwinfact
  end if
  if (self%use_doublegrid) write(unt, "(a, i0)")" Using double grid technique with ndiv: ", self%eph_doublegrid%ndiv
  if (self%imag_only) write(unt, "(a)")" Only the Imaginary part of Sigma will be computed."
@@ -4920,23 +4925,25 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "chneut:", itoa(dtset%chneut))
  write(unt,"(a)")sjoin(" dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
 
- select case (self%frohl_model)
- case (0)
-   write(unt,"(a)")" No special treatment of Frohlich divergence in gkq for q --> 0"
- case (1)
-   write(unt,"(a)")" Integrating Frohlich model in small sphere around Gamma to accelerate qpt convergence"
-   write(unt,"(2(a,i0,1x))")" Sperical integration performed with: ntheta: ", self%ntheta, ", nphi: ", self%nphi
- !case (3)
-   !write(unt,"((a,i0,1x,a,f5.3,1x,a))")"nr points:", self%nqr, "qrad:", self%qrad, "[Bohr^-1]"
- case default
-   MSG_ERROR(sjoin("Invalid value of frohl_mode:", itoa(self%frohl_model)))
- end select
+ !select case (self%frohl_model)
+ !case (0)
+ !  write(unt,"(a)")" No special treatment for the integration of the Frohlich divergence in gkq for q --> 0"
+ !case (1)
+ !  write(unt,"(a)")" Integrating Frohlich model in small sphere around Gamma to accelerate qpt convergence"
+ !  write(unt,"(2(a,i0,1x))")" Sperical integration performed with: ntheta: ", self%ntheta, ", nphi: ", self%nphi
+ !!case (3)
+ !  !write(unt,"((a,i0,1x,a,f5.3,1x,a))")"nr points:", self%nqr, "qrad:", self%qrad, "[Bohr^-1]"
+ !case default
+ !  MSG_ERROR(sjoin("Invalid value of frohl_mode:", itoa(self%frohl_model)))
+ !end select
 
  write(unt,"(a, i0)")" Number of k-points for self-energy corrections: ", self%nkcalc
  if (any(abs(dtset%sigma_erange) /= zero)) then
    write(unt, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
  end if
- write(unt,"(a)")" List of K-points for self-energy corrections:"
+ write(unt,"(a, 2(f5.3, 1x), a)")" Including all final {mk+q} states inside energy window: [", &
+     self%elow * Ha_eV, self%ehigh * Ha_eV, "] [eV]"
+ write(unt,"(a)")" List of k-points for self-energy corrections:"
  do ikc=1,self%nkcalc
    if (ikc > 10) then
      write(unt, "(2a)")" nkcalc > 10. Stop printing more k-point information.",ch10
@@ -5026,7 +5033,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
  natom3 = 3 * cryst%natom
  ndiv = 1; if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
 
- ABI_CHECK(sigma%symsigma == 1, "symsigma 0 with tetra not implemented")
+ ABI_CHECK(abs(sigma%symsigma) == 1, "symsigma 0 with tetra not implemented")
 
  if (sigma%imag_only) then
    ! Weights for Im (tetrahedron, eta --> 0)

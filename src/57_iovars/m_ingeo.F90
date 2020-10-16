@@ -173,7 +173,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,iexit,ii
+ integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
  integer :: ipsp,irreducible,isym,itypat,jsym,marr,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
@@ -842,7 +842,16 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
        call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
          nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-         chrgat=chrgat,nucdipmom=nucdipmom)
+         chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
+
+       !If the group closure is not obtained which should be exceptional, try with a larger tolsym (three times larger)
+       if(ierr/=0)then
+         call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
+           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,two*tolsym,typat,use_inversion,xred,&
+           chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
+         ABI_CHECK(ierr==0,"Error in group closure")
+         MSG_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
+       endif
 
        ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
        ! and recompute the symmetry operations (tnons might not be accurate enough)

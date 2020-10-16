@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h20 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 10h50 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t63/t63.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/v5_t63/t63.in
 - output file    -> t63.out
 - root for input  files -> t63i
 - root for output files -> t63o
@@ -48,16 +48,16 @@ _ WF disk file :      0.905 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      16  mpssoang =       1    mqgrid =    3001
+     lnmax =       1     mgfft =      18  mpssoang =       1    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      96    n1xccc =       0    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           4
-       mpw =         280          nfft =        4096          nkpt =           4
+       mpw =         296          nfft =        5832          nkpt =           4
 ================================================================================
-P This job should need less than                       2.897 Mbytes of memory.
+P This job should need less than                       3.672 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.686 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
+_ WF disk file :      0.725 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
 
 
@@ -67,16 +67,16 @@ _ WF disk file :      0.686 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      16  mpssoang =       1    mqgrid =    3001
+     lnmax =       1     mgfft =      18  mpssoang =       1    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      96    n1xccc =       0    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           4
-       mpw =         280          nfft =        4096          nkpt =           4
+       mpw =         296          nfft =        5832          nkpt =           4
 ================================================================================
-P This job should need less than                       2.897 Mbytes of memory.
+P This job should need less than                       3.672 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.686 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
+_ WF disk file :      0.725 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
 
 
@@ -86,16 +86,16 @@ _ WF disk file :      0.686 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      16  mpssoang =       1    mqgrid =    3001
+     lnmax =       1     mgfft =      18  mpssoang =       1    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      96    n1xccc =       0    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           4
-       mpw =         280          nfft =        4096          nkpt =           4
+       mpw =         296          nfft =        5832          nkpt =           4
 ================================================================================
-P This job should need less than                       2.897 Mbytes of memory.
+P This job should need less than                       3.672 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.686 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
+_ WF disk file :      0.725 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
 
 
@@ -105,16 +105,16 @@ _ WF disk file :      0.686 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
-     lnmax =       1     mgfft =      16  mpssoang =       1    mqgrid =    3001
+     lnmax =       1     mgfft =      18  mpssoang =       1    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      96    n1xccc =       0    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           4
-       mpw =         280          nfft =        4096          nkpt =           4
+       mpw =         296          nfft =        5832          nkpt =           4
 ================================================================================
-P This job should need less than                       2.897 Mbytes of memory.
+P This job should need less than                       3.672 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.686 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
+_ WF disk file :      0.725 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -133,26 +133,10 @@ _ WF disk file :      0.686 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
              bdgw           1       2       1       2       1       2       1       2
                             1       2       1       2
            diemac      1.20000000E+01
-             ecut1     1.20000000E+01 Hartree
-             ecut2     1.13263669E+01 Hartree
-             ecut3     1.13263669E+01 Hartree
-             ecut4     1.13263669E+01 Hartree
-             ecut5     1.13263669E+01 Hartree
-          ecuteps1     4.30000000E+00 Hartree
-          ecuteps2     4.24738757E+00 Hartree
-          ecuteps3     4.24738757E+00 Hartree
-          ecuteps4     4.24738757E+00 Hartree
-          ecuteps5     4.24738757E+00 Hartree
-         ecutsigx1     8.49477515E+00 Hartree
-         ecutsigx2     8.49477515E+00 Hartree
-         ecutsigx3     8.49477515E+00 Hartree
-         ecutsigx4     8.49477515E+00 Hartree
-         ecutsigx5     8.49477515E+00 Hartree
-          ecutwfn1     1.20000000E+01 Hartree
-          ecutwfn2     1.13263669E+01 Hartree
-          ecutwfn3     1.13263669E+01 Hartree
-          ecutwfn4     1.13263669E+01 Hartree
-          ecutwfn5     1.13263669E+01 Hartree
+             ecut      1.20000000E+01 Hartree
+          ecuteps      4.30000000E+00 Hartree
+         ecutsigx      8.49477515E+00 Hartree
+          ecutwfn      1.20000000E+01 Hartree
            enunit           2
 -          fftalg         312
             fftgw          11
@@ -166,7 +150,7 @@ _ WF disk file :      0.686 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
            getwfk3          1
            getwfk4          1
            getwfk5          1
-         gw_icutcoul          3
+      gw_icutcoul           3
           inclvkb1          2
           inclvkb2          0
           inclvkb3          2
@@ -195,11 +179,7 @@ P           mkmem           4
            nbdbuf4          0
            nbdbuf5          0
            ndtset           5
-            ngfft1         18      18      18
-            ngfft2         16      16      16
-            ngfft3         16      16      16
-            ngfft4         16      16      16
-            ngfft5         16      16      16
+            ngfft          18      18      18
              nkpt           4
            nkptgw           3
            npweps1          0
@@ -473,8 +453,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.18593
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -658,8 +638,8 @@ band_energy         : -4.07626596921474E-01
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 4, mband: 20, nsppol: 2, nspinor: 1, nspden: 2, mpw: 280, }
-cutoff_energies: {ecut:  11.3, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 4, mband: 20, nsppol: 2, nspinor: 1, nspden: 2, mpw: 296, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -683,21 +663,6 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  R(3)=  0.0000000  0.0000000  5.2805547  G(3)=  0.0000000  0.0000000  0.1893740
  Unit cell volume ucvol=  1.4724435E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
--  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
--  1.00000   1.00000    940714                znucl, zion, pspdat
-    1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    0   7.740  11.990    0   1.5855604        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
- Note: local psp for atom with Z=  1.0
-  pspatm : epsatm=    0.04198703
-         --- l  ekb(1:nproj) -->
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -744,12 +709,12 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Number of electrons calculated from density =    2.0000; Expected =    2.0000
  average of density, n =  0.013583
  r_s =    2.6000
- omega_plasma =   11.2421 [eV]
+ omega_plasma =   11.2422 [eV]
 
 
  calculating chi0 at frequencies [eV] :
   1    0.000000E+00    0.000000E+00
-  2    0.000000E+00    1.124212E+01
+  2    0.000000E+00    1.124220E+01
 
 
 --------------------------------------------------------------------------------
@@ -760,22 +725,22 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
 
-    2   0.000  -8.808  -3.130  -4.544  -4.544  -4.544  -4.544  -0.000   0.000
-       -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+    2   0.000  -8.809  -3.130  -4.545  -4.545  -4.545  -4.545  -0.000   0.000
+       -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
         0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
 
-    2  -0.000  -3.025   0.072  -0.512  -0.512  -0.512  -0.512  -0.000   0.000
-       -0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+    2  -0.000  -3.025   0.071  -0.512  -0.512  -0.512  -0.512  -0.000   0.000
+       -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =   4.1729
-  dielectric constant without local fields =   4.2116
+  dielectric constant =   4.1732
+  dielectric constant without local fields =   4.2119
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     80.47  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     80.48  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
@@ -787,7 +752,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
 
-   Upper and lower wings at the    2 th omega   0.0000  11.2421 [eV]
+   Upper and lower wings at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
       0.717  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.018   0.018
       0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
@@ -803,13 +768,13 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -10.747   0.000   0.000   0.000   0.000   0.000   0.000  -3.373  -2.600
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+    1 -10.748   0.000   0.000   0.000   0.000   0.000   0.000  -3.374  -2.600
+        0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
-    2   0.000  -8.219  -2.140  -3.374  -3.224  -3.374  -3.224   0.000   0.000
-       -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
+    2   0.000  -8.219  -2.141  -3.375  -3.224  -3.375  -3.224   0.000   0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.446   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.126  -0.463
         0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000
@@ -828,16 +793,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1  -7.938   0.000   0.000   0.000   0.000   0.000   0.000  -2.558  -2.243
         0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
-    2   0.000  -8.191  -2.196  -3.692  -3.692  -3.225  -3.315   0.000   0.000
-       -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
+    2   0.000  -8.191  -2.197  -3.692  -3.692  -3.225  -3.315   0.000   0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.056   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.041  -0.347
-       -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+        0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
-    2   0.000  -2.711   0.019  -0.321  -0.321   0.063  -0.539  -0.000   0.000
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
+    2   0.000  -2.711   0.019  -0.321  -0.321   0.063  -0.540  -0.000   0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     93.05  [%]
 
@@ -848,18 +813,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -4.451   0.000   0.000   0.000   0.000   0.000   0.000  -1.370  -1.392
-       -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000
+        0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000
 
-    2   0.000  -8.175  -2.695  -3.796  -3.550  -4.069  -4.069  -0.000   0.000
+    2   0.000  -8.175  -2.695  -3.796  -3.551  -4.069  -4.069  -0.000   0.000
         0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000   0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.581  -0.000  -0.000   0.000  -0.000  -0.000  -0.000   0.092  -0.266
         0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000
 
     2  -0.000  -3.004   0.023  -0.243  -0.707  -0.550  -0.550  -0.000  -0.000
-        0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000   0.000
+        0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000   0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     95.16  [%]
 
@@ -869,18 +834,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -10.180   0.000   0.000   0.000   0.000   0.000   0.000  -2.666  -3.664
-       -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
+    1 -10.181   0.000   0.000   0.000   0.000   0.000   0.000  -2.667  -3.665
+        0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-    2   0.000  -3.026  -2.170  -2.517  -2.052  -2.517  -2.052  -0.000   0.000
-       -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+    2   0.000  -3.027  -2.171  -2.518  -2.053  -2.518  -2.053  -0.000   0.000
+       -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.205  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.548  -0.430
+    1  -2.205  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.549  -0.430
         0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-    2  -0.000  -1.861  -0.035  -0.692  -0.750  -0.692  -0.750  -0.000  -0.000
+    2  -0.000  -1.861  -0.035  -0.692  -0.751  -0.692  -0.751  -0.000  -0.000
         0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     89.09  [%]
@@ -891,21 +856,21 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -8.881   0.000   0.000   0.000   0.000   0.000   0.000  -2.175  -3.610
-        0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
-
-    2   0.000  -3.157  -1.958  -2.438  -2.438  -2.518  -2.104  -0.000   0.000
-       -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
-
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
-       1       2       3       4       5       6       7       8       9
-    1  -1.978  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.529  -0.133
+    1  -8.882   0.000   0.000   0.000   0.000   0.000   0.000  -2.176  -3.611
         0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-    2  -0.000  -1.933   0.017  -0.747  -0.747  -0.680  -0.761  -0.000  -0.000
+    2   0.000  -3.158  -1.959  -2.439  -2.439  -2.519  -2.104  -0.000   0.000
        -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     90.07  [%]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -1.979  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.529  -0.133
+        0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
+
+    2  -0.000  -1.933   0.017  -0.747  -0.747  -0.680  -0.762  -0.000  -0.000
+       -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     90.08  [%]
 
 
 --------------------------------------------------------------------------------
@@ -913,16 +878,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -7.213   0.000   0.000   0.000   0.000   0.000   0.000  -1.841  -2.993
-       -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
+    1  -7.214   0.000   0.000   0.000   0.000   0.000   0.000  -1.841  -2.993
+        0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-    2   0.000  -3.255  -1.629  -2.411  -2.411  -2.411  -2.411  -0.000   0.000
+    2   0.000  -3.255  -1.630  -2.412  -2.412  -2.412  -2.412  -0.000   0.000
        -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.701  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.492  -0.020
-       -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
+        0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
     2  -0.000  -2.012   0.075  -0.747  -0.747  -0.747  -0.747  -0.000  -0.000
        -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
@@ -935,18 +900,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -9.343   0.000   0.000   0.000   0.000   0.000   0.000  -1.783  -4.253
-       -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
+    1  -9.344   0.000   0.000   0.000   0.000   0.000   0.000  -1.784  -4.254
+        0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
 
-    2   0.000  -2.662  -2.009  -1.552  -2.793  -2.296  -1.887  -0.000   0.000
-        0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+    2   0.000  -2.662  -2.010  -1.552  -2.794  -2.296  -1.888  -0.000   0.000
+        0.000   0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.624  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.562   0.180
-       -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000
+    1  -2.625  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.562   0.180
+        0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
-    2  -0.000  -1.626  -0.141  -0.662  -0.617  -0.704  -0.715  -0.000   0.000
+    2  -0.000  -1.626  -0.141  -0.663  -0.617  -0.704  -0.716  -0.000   0.000
         0.000   0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    8 :     87.65  [%]
@@ -957,18 +922,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -8.826   0.000   0.000   0.000   0.000   0.000   0.000  -1.741  -3.707
-        0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000   0.000
+    1  -8.826   0.000   0.000   0.000   0.000   0.000   0.000  -1.742  -3.708
+        0.000  -0.000   0.000   0.000   0.000   0.000   0.000  -0.000   0.000
 
-    2   0.000  -2.788  -1.948  -1.625  -2.752  -2.250  -2.250   0.000   0.000
+    2   0.000  -2.788  -1.949  -1.625  -2.752  -2.251  -2.251   0.000   0.000
         0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.502  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.557   0.336
-       -0.000  -0.000   0.000   0.000   0.000   0.000   0.000  -0.000   0.000
+    1  -2.502  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.558   0.336
+        0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000
 
-    2  -0.000  -1.686  -0.103  -0.678  -0.590  -0.737  -0.737  -0.000   0.000
+    2  -0.000  -1.686  -0.104  -0.678  -0.590  -0.737  -0.737  -0.000   0.000
         0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    9 :     88.39  [%]
@@ -979,16 +944,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -8.270  -0.000   0.000  -0.000   0.000  -0.000   0.000  -1.579  -3.746
-       -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
+    1  -8.270  -0.000   0.000  -0.000   0.000  -0.000   0.000  -1.580  -3.747
+        0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000   0.000
 
-    2  -0.000  -2.289  -1.765  -1.381  -2.461  -1.381  -2.461  -0.000   0.000
+    2  -0.000  -2.289  -1.766  -1.381  -2.462  -1.381  -2.462  -0.000   0.000
        -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.828  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.561  -0.151
-        0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+    1  -2.828  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.562  -0.151
+        0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
 
     2  -0.000  -1.406  -0.218  -0.615  -0.661  -0.615  -0.661  -0.000   0.000
         0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
@@ -1002,8 +967,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 4, mband: 20, nsppol: 2, nspinor: 1, nspden: 2, mpw: 280, }
-cutoff_energies: {ecut:  11.3, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 4, mband: 20, nsppol: 2, nspinor: 1, nspden: 2, mpw: 296, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -1069,7 +1034,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Number of electrons calculated from density =    2.0000; Expected =    2.0000
  average of density, n =  0.013583
  r_s =    2.6000
- omega_plasma =   11.2421 [eV]
+ omega_plasma =   11.2422 [eV]
 
 
  === KS Band Gaps ===
@@ -1119,12 +1084,12 @@ iteration_state: {dtset: 3, }
 kpoint     : [   0.125,    0.125,    0.125, ]
 spin       : 1
 KS_gap     :    8.420
-QP_gap     :    8.149
-Delta_QP_KS:   -0.271
+QP_gap     :    8.153
+Delta_QP_KS:   -0.267
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -8.251  -8.450 -12.656   4.251   0.628  -0.592  -8.422   0.028  -8.222
-        2   0.169  -9.612  -4.381  -5.637   0.598  -0.672  -9.855  -0.243  -0.074
+        1  -8.251  -8.451 -12.657   4.254   0.628  -0.593  -8.421   0.030  -8.221
+        2   0.169  -9.615  -4.382  -5.636   0.587  -0.705  -9.851  -0.237  -0.068
 ...
 
 
@@ -1133,12 +1098,12 @@ iteration_state: {dtset: 3, }
 kpoint     : [   0.125,    0.125,    0.125, ]
 spin       : 2
 KS_gap     :    8.420
-QP_gap     :    8.149
-Delta_QP_KS:   -0.271
+QP_gap     :    8.153
+Delta_QP_KS:   -0.266
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -8.251  -8.450 -12.656   4.251   0.628  -0.592  -8.422   0.028  -8.222
-        2   0.169  -9.612  -4.381  -5.637   0.598  -0.672  -9.855  -0.243  -0.074
+        1  -8.251  -8.451 -12.657   4.254   0.628  -0.593  -8.421   0.030  -8.221
+        2   0.169  -9.615  -4.382  -5.636   0.587  -0.705  -9.851  -0.237  -0.068
 ...
 
 
@@ -1151,8 +1116,8 @@ QP_gap     :    3.312
 Delta_QP_KS:    0.356
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -4.637  -9.646 -12.523   2.493   0.635  -0.575  -9.890  -0.244  -4.881
-        2  -1.682  -8.370  -3.629  -4.563   0.631  -0.585  -8.257   0.112  -1.569
+        1  -4.637  -9.647 -12.525   2.493   0.635  -0.575  -9.891  -0.244  -4.881
+        2  -1.682  -8.370  -3.629  -4.563   0.631  -0.585  -8.258   0.112  -1.570
 ...
 
 
@@ -1165,8 +1130,8 @@ QP_gap     :    3.312
 Delta_QP_KS:    0.356
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -4.637  -9.646 -12.523   2.493   0.635  -0.575  -9.890  -0.244  -4.881
-        2  -1.682  -8.370  -3.629  -4.563   0.631  -0.585  -8.257   0.112  -1.569
+        1  -4.637  -9.647 -12.525   2.493   0.635  -0.575  -9.891  -0.244  -4.881
+        2  -1.682  -8.371  -3.629  -4.563   0.631  -0.585  -8.258   0.112  -1.570
 ...
 
 
@@ -1175,12 +1140,12 @@ iteration_state: {dtset: 3, }
 kpoint     : [   0.375,    0.375,    0.375, ]
 spin       : 1
 KS_gap     :    2.643
-QP_gap     :    2.974
-Delta_QP_KS:    0.330
+QP_gap     :    2.972
+Delta_QP_KS:    0.329
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -3.366 -10.415 -13.296   2.307   0.649  -0.542 -10.788  -0.373  -3.739
-        2  -0.723  -8.226  -2.659  -5.639   0.589  -0.698  -8.269  -0.043  -0.765
+        1  -3.366 -10.416 -13.298   2.307   0.649  -0.542 -10.789  -0.373  -3.739
+        2  -0.723  -8.227  -2.660  -5.642   0.589  -0.697  -8.271  -0.044  -0.767
 ...
 
 
@@ -1189,12 +1154,12 @@ iteration_state: {dtset: 3, }
 kpoint     : [   0.375,    0.375,    0.375, ]
 spin       : 2
 KS_gap     :    2.643
-QP_gap     :    2.974
-Delta_QP_KS:    0.330
+QP_gap     :    2.972
+Delta_QP_KS:    0.329
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -3.366 -10.415 -13.296   2.307   0.649  -0.542 -10.788  -0.373  -3.739
-        2  -0.723  -8.226  -2.659  -5.639   0.589  -0.698  -8.269  -0.043  -0.765
+        1  -3.366 -10.416 -13.298   2.307   0.649  -0.542 -10.789  -0.373  -3.739
+        2  -0.723  -8.227  -2.660  -5.642   0.589  -0.697  -8.271  -0.044  -0.767
 ...
 
 
@@ -1205,8 +1170,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
-dimensions: {natom: 2, nkpt: 4, mband: 20, nsppol: 2, nspinor: 1, nspden: 2, mpw: 280, }
-cutoff_energies: {ecut:  11.3, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 4, mband: 20, nsppol: 2, nspinor: 1, nspden: 2, mpw: 296, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -1276,12 +1241,12 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Number of electrons calculated from density =    2.0000; Expected =    2.0000
  average of density, n =  0.013583
  r_s =    2.6000
- omega_plasma =   11.2421 [eV]
+ omega_plasma =   11.2422 [eV]
 
 
  calculating chi0 at frequencies [eV] :
   1    0.000000E+00    0.000000E+00
-  2    0.000000E+00    1.124212E+01
+  2    0.000000E+00    1.124220E+01
 
 
 --------------------------------------------------------------------------------
@@ -1292,22 +1257,22 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
 
-    2   0.000  -8.808  -3.130  -4.544  -4.544  -4.544  -4.544  -0.000   0.000
-       -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+    2   0.000  -8.809  -3.130  -4.545  -4.545  -4.545  -4.545  -0.000   0.000
+       -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
         0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
 
-    2  -0.000  -3.025   0.072  -0.512  -0.512  -0.512  -0.512  -0.000   0.000
-       -0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+    2  -0.000  -3.025   0.071  -0.512  -0.512  -0.512  -0.512  -0.000   0.000
+       -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =   4.1729
-  dielectric constant without local fields =   4.2116
+  dielectric constant =   4.1732
+  dielectric constant without local fields =   4.2119
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     80.47  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     80.48  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
@@ -1319,7 +1284,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
 
-   Upper and lower wings at the    2 th omega   0.0000  11.2421 [eV]
+   Upper and lower wings at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
       0.717  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.018   0.018
       0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
@@ -1335,16 +1300,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -10.747   0.000   0.000   0.000   0.000   0.000   0.000  -3.373  -2.600
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+    1 -10.748   0.000   0.000   0.000   0.000   0.000   0.000  -3.374  -2.600
+        0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
-    2   0.000  -8.219  -2.140  -3.374  -3.224  -3.374  -3.224   0.000   0.000
-       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
+    2   0.000  -8.219  -2.141  -3.375  -3.224  -3.375  -3.224   0.000   0.000
+       -0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.446   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.126  -0.463
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
+        0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
 
     2   0.000  -2.789  -0.029  -0.058  -0.576  -0.058  -0.576  -0.000  -0.000
        -0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
@@ -1360,15 +1325,15 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1  -7.938   0.000   0.000   0.000   0.000   0.000   0.000  -2.558  -2.243
         0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000
 
-    2   0.000  -8.191  -2.196  -3.692  -3.692  -3.225  -3.315   0.000   0.000
-        0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+    2   0.000  -8.191  -2.197  -3.692  -3.692  -3.225  -3.315   0.000   0.000
+        0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.056   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.041  -0.347
-       -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000
+        0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000
 
-    2   0.000  -2.711   0.019  -0.321  -0.321   0.063  -0.539  -0.000   0.000
+    2   0.000  -2.711   0.019  -0.321  -0.321   0.063  -0.540  -0.000   0.000
         0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     93.05  [%]
@@ -1380,18 +1345,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -4.451   0.000   0.000   0.000   0.000   0.000   0.000  -1.370  -1.392
-       -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000
+        0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000
 
-    2   0.000  -8.175  -2.695  -3.796  -3.550  -4.069  -4.069  -0.000   0.000
-        0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000   0.000
+    2   0.000  -8.175  -2.695  -3.796  -3.551  -4.069  -4.069  -0.000   0.000
+        0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000   0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.581  -0.000  -0.000   0.000  -0.000  -0.000  -0.000   0.092  -0.266
         0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000
 
     2  -0.000  -3.004   0.023  -0.243  -0.707  -0.550  -0.550  -0.000  -0.000
-        0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000   0.000
+        0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000   0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     95.16  [%]
 
@@ -1401,18 +1366,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -10.180   0.000   0.000   0.000   0.000   0.000   0.000  -2.666  -3.664
-       -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
-
-    2   0.000  -3.026  -2.170  -2.517  -2.052  -2.517  -2.052  -0.000   0.000
-        0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
-
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
-       1       2       3       4       5       6       7       8       9
-    1  -2.205  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.548  -0.430
+    1 -10.181   0.000   0.000   0.000   0.000   0.000   0.000  -2.667  -3.665
         0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
-    2  -0.000  -1.861  -0.035  -0.692  -0.750  -0.692  -0.750  -0.000  -0.000
+    2   0.000  -3.027  -2.171  -2.518  -2.053  -2.518  -2.053  -0.000   0.000
+        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
+
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -2.205  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.549  -0.430
+        0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+
+    2  -0.000  -1.861  -0.035  -0.692  -0.751  -0.692  -0.751  -0.000  -0.000
         0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     89.09  [%]
@@ -1423,21 +1388,21 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -8.881   0.000   0.000   0.000   0.000   0.000   0.000  -2.175  -3.610
-        0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
+    1  -8.882   0.000   0.000   0.000   0.000   0.000   0.000  -2.176  -3.611
+        0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-    2   0.000  -3.157  -1.958  -2.438  -2.438  -2.518  -2.104  -0.000   0.000
+    2   0.000  -3.158  -1.959  -2.439  -2.439  -2.519  -2.104  -0.000   0.000
        -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -1.978  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.529  -0.133
-        0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
+    1  -1.979  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.529  -0.133
+        0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-    2  -0.000  -1.933   0.017  -0.747  -0.747  -0.680  -0.761  -0.000  -0.000
+    2  -0.000  -1.933   0.017  -0.747  -0.747  -0.680  -0.762  -0.000  -0.000
        -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     90.07  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     90.08  [%]
 
 
 --------------------------------------------------------------------------------
@@ -1445,16 +1410,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -7.213   0.000   0.000   0.000   0.000   0.000   0.000  -1.841  -2.993
-       -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
+    1  -7.214   0.000   0.000   0.000   0.000   0.000   0.000  -1.841  -2.993
+        0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-    2   0.000  -3.255  -1.629  -2.411  -2.411  -2.411  -2.411  -0.000   0.000
+    2   0.000  -3.255  -1.630  -2.412  -2.412  -2.412  -2.412  -0.000   0.000
        -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.701  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.492  -0.020
-       -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
+        0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
     2  -0.000  -2.012   0.075  -0.747  -0.747  -0.747  -0.747  -0.000  -0.000
        -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
@@ -1467,18 +1432,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -9.343   0.000   0.000   0.000   0.000   0.000   0.000  -1.783  -4.253
-       -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000   0.000
+    1  -9.344   0.000   0.000   0.000   0.000   0.000   0.000  -1.784  -4.254
+        0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000   0.000
 
-    2   0.000  -2.662  -2.009  -1.552  -2.793  -2.296  -1.887  -0.000   0.000
+    2   0.000  -2.662  -2.010  -1.552  -2.794  -2.296  -1.888  -0.000   0.000
         0.000   0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.624  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.562   0.180
-       -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000   0.000
+    1  -2.625  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.562   0.180
+        0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000   0.000
 
-    2  -0.000  -1.626  -0.141  -0.662  -0.617  -0.704  -0.715  -0.000   0.000
+    2  -0.000  -1.626  -0.141  -0.663  -0.617  -0.704  -0.716  -0.000   0.000
         0.000   0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    8 :     87.65  [%]
@@ -1489,18 +1454,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -8.826   0.000   0.000   0.000   0.000   0.000   0.000  -1.741  -3.707
+    1  -8.826   0.000   0.000   0.000   0.000   0.000   0.000  -1.742  -3.708
         0.000  -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
 
-    2   0.000  -2.788  -1.948  -1.625  -2.752  -2.250  -2.250   0.000   0.000
-        0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000
+    2   0.000  -2.788  -1.949  -1.625  -2.752  -2.251  -2.251   0.000   0.000
+        0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.502  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.557   0.336
-       -0.000  -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
+    1  -2.502  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.558   0.336
+        0.000  -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
 
-    2  -0.000  -1.686  -0.103  -0.678  -0.590  -0.737  -0.737  -0.000   0.000
+    2  -0.000  -1.686  -0.104  -0.678  -0.590  -0.737  -0.737  -0.000   0.000
         0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    9 :     88.39  [%]
@@ -1511,15 +1476,15 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -8.270  -0.000   0.000  -0.000   0.000  -0.000   0.000  -1.579  -3.746
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
+    1  -8.270  -0.000   0.000  -0.000   0.000  -0.000   0.000  -1.580  -3.747
+        0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
 
-    2  -0.000  -2.289  -1.765  -1.381  -2.461  -1.381  -2.461  -0.000   0.000
+    2  -0.000  -2.289  -1.766  -1.381  -2.462  -1.381  -2.462  -0.000   0.000
        -0.000   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  11.2422 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.828  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.561  -0.151
+    1  -2.828  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.562  -0.151
         0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
     2  -0.000  -1.406  -0.218  -0.615  -0.661  -0.615  -0.661  -0.000   0.000
@@ -1534,8 +1499,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
-dimensions: {natom: 2, nkpt: 4, mband: 20, nsppol: 2, nspinor: 1, nspden: 2, mpw: 280, }
-cutoff_energies: {ecut:  11.3, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 4, mband: 20, nsppol: 2, nspinor: 1, nspden: 2, mpw: 296, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
 electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -1601,7 +1566,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Number of electrons calculated from density =    2.0000; Expected =    2.0000
  average of density, n =  0.013583
  r_s =    2.6000
- omega_plasma =   11.2421 [eV]
+ omega_plasma =   11.2422 [eV]
 
 
  === KS Band Gaps ===
@@ -1651,12 +1616,12 @@ iteration_state: {dtset: 5, }
 kpoint     : [   0.125,    0.125,    0.125, ]
 spin       : 1
 KS_gap     :    8.420
-QP_gap     :    8.149
-Delta_QP_KS:   -0.271
+QP_gap     :    8.154
+Delta_QP_KS:   -0.266
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -8.251  -8.450 -12.656   4.251   0.628  -0.591  -8.422   0.028  -8.222
-        2   0.169  -9.612  -4.381  -5.637   0.598  -0.672  -9.855  -0.242  -0.073
+        1  -8.251  -8.451 -12.657   4.254   0.628  -0.593  -8.421   0.030  -8.221
+        2   0.169  -9.615  -4.382  -5.635   0.587  -0.705  -9.851  -0.236  -0.067
 ...
 
 
@@ -1665,12 +1630,12 @@ iteration_state: {dtset: 5, }
 kpoint     : [   0.125,    0.125,    0.125, ]
 spin       : 2
 KS_gap     :    8.420
-QP_gap     :    8.149
-Delta_QP_KS:   -0.271
+QP_gap     :    8.154
+Delta_QP_KS:   -0.266
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -8.251  -8.450 -12.656   4.251   0.628  -0.591  -8.422   0.028  -8.222
-        2   0.169  -9.612  -4.381  -5.637   0.598  -0.672  -9.855  -0.242  -0.073
+        1  -8.251  -8.451 -12.657   4.254   0.628  -0.593  -8.421   0.030  -8.221
+        2   0.169  -9.615  -4.382  -5.635   0.587  -0.705  -9.851  -0.236  -0.067
 ...
 
 
@@ -1683,8 +1648,8 @@ QP_gap     :    3.312
 Delta_QP_KS:    0.356
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -4.637  -9.646 -12.523   2.493   0.635  -0.575  -9.890  -0.244  -4.881
-        2  -1.682  -8.370  -3.629  -4.563   0.631  -0.585  -8.257   0.112  -1.570
+        1  -4.637  -9.647 -12.525   2.493   0.635  -0.575  -9.891  -0.244  -4.881
+        2  -1.682  -8.370  -3.629  -4.563   0.631  -0.585  -8.258   0.112  -1.570
 ...
 
 
@@ -1697,8 +1662,8 @@ QP_gap     :    3.312
 Delta_QP_KS:    0.356
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -4.637  -9.646 -12.523   2.493   0.635  -0.575  -9.890  -0.244  -4.881
-        2  -1.682  -8.370  -3.629  -4.563   0.631  -0.585  -8.257   0.112  -1.570
+        1  -4.637  -9.647 -12.524   2.493   0.635  -0.575  -9.891  -0.244  -4.881
+        2  -1.682  -8.371  -3.629  -4.563   0.631  -0.585  -8.258   0.112  -1.570
 ...
 
 
@@ -1707,12 +1672,12 @@ iteration_state: {dtset: 5, }
 kpoint     : [   0.375,    0.375,    0.375, ]
 spin       : 1
 KS_gap     :    2.643
-QP_gap     :    2.974
-Delta_QP_KS:    0.331
+QP_gap     :    2.973
+Delta_QP_KS:    0.329
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -3.366 -10.415 -13.296   2.307   0.649  -0.542 -10.788  -0.373  -3.739
-        2  -0.723  -8.226  -2.659  -5.639   0.589  -0.698  -8.269  -0.042  -0.765
+        1  -3.366 -10.416 -13.298   2.307   0.649  -0.542 -10.789  -0.373  -3.739
+        2  -0.723  -8.227  -2.660  -5.642   0.589  -0.697  -8.271  -0.044  -0.766
 ...
 
 
@@ -1721,12 +1686,12 @@ iteration_state: {dtset: 5, }
 kpoint     : [   0.375,    0.375,    0.375, ]
 spin       : 2
 KS_gap     :    2.643
-QP_gap     :    2.974
-Delta_QP_KS:    0.331
+QP_gap     :    2.973
+Delta_QP_KS:    0.329
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -3.366 -10.415 -13.296   2.307   0.649  -0.542 -10.788  -0.373  -3.739
-        2  -0.723  -8.226  -2.659  -5.639   0.589  -0.698  -8.269  -0.042  -0.765
+        1  -3.366 -10.416 -13.298   2.307   0.649  -0.542 -10.789  -0.373  -3.739
+        2  -0.723  -8.227  -2.660  -5.642   0.589  -0.697  -8.271  -0.044  -0.766
 ...
 
 
@@ -1739,26 +1704,10 @@ data: !SigmaeeData |
              bdgw           1       2       1       2       1       2       1       2
                             1       2       1       2
            diemac      1.20000000E+01
-             ecut1     1.20000000E+01 Hartree
-             ecut2     1.13263669E+01 Hartree
-             ecut3     1.13263669E+01 Hartree
-             ecut4     1.13263669E+01 Hartree
-             ecut5     1.13263669E+01 Hartree
-          ecuteps1     4.30000000E+00 Hartree
-          ecuteps2     4.24738757E+00 Hartree
-          ecuteps3     4.24738757E+00 Hartree
-          ecuteps4     4.24738757E+00 Hartree
-          ecuteps5     4.24738757E+00 Hartree
-         ecutsigx1     8.49477515E+00 Hartree
-         ecutsigx2     8.49477515E+00 Hartree
-         ecutsigx3     8.49477515E+00 Hartree
-         ecutsigx4     8.49477515E+00 Hartree
-         ecutsigx5     8.49477515E+00 Hartree
-          ecutwfn1     1.20000000E+01 Hartree
-          ecutwfn2     1.13263669E+01 Hartree
-          ecutwfn3     1.13263669E+01 Hartree
-          ecutwfn4     1.13263669E+01 Hartree
-          ecutwfn5     1.13263669E+01 Hartree
+             ecut      1.20000000E+01 Hartree
+          ecuteps      4.30000000E+00 Hartree
+         ecutsigx      8.49477515E+00 Hartree
+          ecutwfn      1.20000000E+01 Hartree
            enunit           2
            etotal1    -9.9473984622E-01
            etotal2     0.0000000000E+00
@@ -1787,7 +1736,7 @@ data: !SigmaeeData |
            getwfk3          1
            getwfk4          1
            getwfk5          1
-         gw_icutcoul          3
+      gw_icutcoul           3
           inclvkb1          2
           inclvkb2          0
           inclvkb3          2
@@ -1816,11 +1765,7 @@ P           mkmem           4
            nbdbuf4          0
            nbdbuf5          0
            ndtset           5
-            ngfft1         18      18      18
-            ngfft2         16      16      16
-            ngfft3         16      16      16
-            ngfft4         16      16      16
-            ngfft5         16      16      16
+            ngfft          18      18      18
              nkpt           4
            nkptgw           3
            npweps1          0
@@ -2042,230 +1987,234 @@ P           mkmem           4
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    1.8543E-06 sec,    Wall time =    1.8547E-06 sec
+- CPU time =    4.3098E-06 sec,    Wall time =    4.3709E-06 sec
 
-- Total cpu        time (s,m,h):         27.0        0.45      0.007
-- Total wall clock time (s,m,h):         27.1        0.45      0.008
+- Total cpu        time (s,m,h):         28.8        0.48      0.008
+- Total wall clock time (s,m,h):         31.1        0.52      0.009
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           27.0, wall_time =           27.1
+- cpu_time =           28.8, wall_time =           31.1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- sigma/=fourdp                 20.301  75.3     20.344  75.1              2      -1.00        1.00       1.00
-- fourwf%(pot)                   1.687   6.3      1.699   6.3           6739      -1.00        0.99       0.99
-- ewald                          1.687   6.3      1.689   6.2              5      -1.00        1.00       1.00
-- projbd                         0.427   1.6      0.434   1.6           9878      -1.00        0.98       0.98
-- invars2                        0.238   0.9      0.240   0.9              5      -1.00        0.99       0.99
-- stress                         0.186   0.7      0.186   0.7              1      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.185   0.7      0.185   0.7              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.117   0.4      0.118   0.4             -1      -1.00        0.99       0.99
-- timing timab                   0.107   0.4      0.107   0.4             11      -1.00        1.00       1.00
-- pspini                         0.059   0.2      0.059   0.2              5      -1.00        1.00       1.00
-- abinit(2)                      0.053   0.2      0.054   0.2              1      -1.00        0.98       0.98
-- getghc-other                   0.050   0.2      0.047   0.2             -1      -1.00        1.08       1.08
-- nonlop(apply)                  0.035   0.1      0.035   0.1           6739      -1.00        0.98       0.98
-- xc:pot/=fourdp                 0.020   0.1      0.020   0.1             14      -1.00        1.00       1.00
-- fourdp                         0.018   0.1      0.019   0.1             91      -1.00        0.98       0.98
-- newkpt(excl. rwwf   )          0.011   0.0      0.011   0.0             -1      -1.00        0.98       0.98
-- fourwf%(den)                   0.010   0.0      0.010   0.0             56      -1.00        0.97       0.97
-- symrhg(no FFT)                 0.005   0.0      0.005   0.0             33      -1.00        1.00       1.00
-- setsym                         0.005   0.0      0.005   0.0              1      -1.00        1.00       1.00
-- vtowfk(contrib)                0.003   0.0      0.003   0.0             56      -1.00        1.00       1.00
-- kpgsph                         0.001   0.0      0.001   0.0            119      -1.00        1.02       1.02
-- forces                         0.000   0.0      0.000   0.0              1      -1.00        1.00       1.00
-- scfcv-scprqt                   0.000   0.0      0.000   0.0              7      -1.00        0.99       0.99
-- vtowfk  (1)                    0.000   0.0      0.000   0.0             56      -1.00        1.04       1.04
-- nonlop(forstr)                 0.000   0.0      0.000   0.0              8      -1.00        1.10       1.10
-- others (109)                   0.000   0.0      0.000   0.0             -1      -1.00        0.97       0.97
+- sigma/=fourdp                 21.389  74.3     23.266  74.7              2      -1.00        0.92       0.92
+- ewald                          1.693   5.9      1.693   5.4              5      -1.00        1.00       1.00
+- fourwf%(pot)                   1.641   5.7      1.608   5.2           6739      -1.00        1.02       1.02
+- projbd                         0.450   1.6      0.509   1.6           9878      -1.00        0.88       0.88
+- invars2                        0.385   1.3      0.384   1.2              5      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.181   0.6      0.186   0.6             -1      -1.00        0.97       0.97
+- stress                         0.176   0.6      0.175   0.6              1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.175   0.6      0.175   0.6              1      -1.00        1.00       1.00
+- timing timab                   0.110   0.4      0.112   0.4              9      -1.00        0.99       0.99
+- getghc-other                   0.086   0.3      0.069   0.2             -1      -1.00        1.24       1.24
+- abinit(2)                      0.081   0.3      0.080   0.3              1      -1.00        1.01       1.01
+- nonlop(apply)                  0.047   0.2      0.039   0.1           6739      -1.00        1.21       1.21
+- fourdp                         0.034   0.1      0.032   0.1             91      -1.00        1.07       1.07
+- pspini                         0.030   0.1      0.030   0.1              5      -1.00        1.01       1.01
+- xc:pot/=fourdp                 0.022   0.1      0.025   0.1             14      -1.00        0.88       0.88
+- newkpt(excl. rwwf   )          0.018   0.1      0.018   0.1             -1      -1.00        1.00       1.00
+- wfd_read_wfk                   0.011   0.0      0.011   0.0              4      -1.00        1.00       1.00
+- fourwf%(den)                   0.009   0.0      0.004   0.0             56      -1.00        2.18       2.18
+- setsym                         0.008   0.0      0.008   0.0              1      -1.00        1.05       1.05
+- vtowfk(contrib)                0.007   0.0      0.007   0.0             56      -1.00        1.03       1.03
+- symrhg(no FFT)                 0.006   0.0      0.006   0.0             33      -1.00        1.01       1.01
+- vtowfk  (1)                    0.001   0.0      0.001   0.0             56      -1.00        1.12       1.12
+- kpgsph                         0.001   0.0      0.002   0.0            119      -1.00        0.52       0.52
+- mkffnl                         0.001   0.0      0.001   0.0             64      -1.00        1.03       1.03
+- scfcv-scprqt                   0.001   0.0      0.001   0.0              7      -1.00        0.63       0.63
+- forces                         0.001   0.0      0.001   0.0              1      -1.00        0.54       0.54
+- inwffil(excl. calls)           0.000   0.0      0.001   0.0              1      -1.00        0.03       0.03
+- others (100)                   0.000   0.0      0.000   0.0             -1      -1.00     ******* **********
 -<END_TIMER>
 -
-- subtotal                      25.206  93.5     25.272  93.3                                  1.00       1.00
+- subtotal                      26.564  92.3     28.444  91.4                                  0.93       0.93
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          27.0, wall_time =          27.1
+- cpu_time =          28.8, wall_time =          31.1
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- sigma/=fourdp                 20.301  75.3     20.344  75.1              2      -1.00        1.00       1.00
-- fourwf%(pot)                   1.687   6.3      1.699   6.3           6739      -1.00        0.99       0.99
-- ewald                          1.687   6.3      1.689   6.2              5      -1.00        1.00       1.00
-- projbd                         0.427   1.6      0.434   1.6           9878      -1.00        0.98       0.98
-- invars2                        0.238   0.9      0.240   0.9              5      -1.00        0.99       0.99
-- stress                         0.186   0.7      0.186   0.7              1      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.185   0.7      0.185   0.7              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.117   0.4      0.118   0.4             -1      -1.00        0.99       0.99
-- timing timab                   0.107   0.4      0.107   0.4             11      -1.00        1.00       1.00
-- pspini                         0.059   0.2      0.059   0.2              5      -1.00        1.00       1.00
-- abinit(2)                      0.053   0.2      0.054   0.2              1      -1.00        0.98       0.98
-- getghc-other                   0.050   0.2      0.047   0.2             -1      -1.00        1.08       1.08
-- nonlop(apply)                  0.035   0.1      0.035   0.1           6739      -1.00        0.98       0.98
-- xc:pot/=fourdp                 0.020   0.1      0.020   0.1             14      -1.00        1.00       1.00
-- fourdp                         0.018   0.1      0.019   0.1             91      -1.00        0.98       0.98
-- newkpt(excl. rwwf   )          0.011   0.0      0.011   0.0             -1      -1.00        0.98       0.98
-- fourwf%(den)                   0.010   0.0      0.010   0.0             56      -1.00        0.97       0.97
-- symrhg(no FFT)                 0.005   0.0      0.005   0.0             33      -1.00        1.00       1.00
-- setsym                         0.005   0.0      0.005   0.0              1      -1.00        1.00       1.00
-- vtowfk(contrib)                0.003   0.0      0.003   0.0             56      -1.00        1.00       1.00
-- kpgsph                         0.001   0.0      0.001   0.0            119      -1.00        1.02       1.02
-- forces                         0.000   0.0      0.000   0.0              1      -1.00        1.00       1.00
-- scfcv-scprqt                   0.000   0.0      0.000   0.0              7      -1.00        0.99       0.99
-- vtowfk  (1)                    0.000   0.0      0.000   0.0             56      -1.00        1.04       1.04
-- nonlop(forstr)                 0.000   0.0      0.000   0.0              8      -1.00        1.10       1.10
-- others (109)                   0.000   0.0      0.000   0.0             -1      -1.00        0.97       0.97
+- sigma/=fourdp                 21.389  74.3     23.266  74.7              2      -1.00        0.92       0.92
+- ewald                          1.693   5.9      1.693   5.4              5      -1.00        1.00       1.00
+- fourwf%(pot)                   1.641   5.7      1.608   5.2           6739      -1.00        1.02       1.02
+- projbd                         0.450   1.6      0.509   1.6           9878      -1.00        0.88       0.88
+- invars2                        0.385   1.3      0.384   1.2              5      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.181   0.6      0.186   0.6             -1      -1.00        0.97       0.97
+- stress                         0.176   0.6      0.175   0.6              1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.175   0.6      0.175   0.6              1      -1.00        1.00       1.00
+- timing timab                   0.110   0.4      0.112   0.4              9      -1.00        0.99       0.99
+- getghc-other                   0.086   0.3      0.069   0.2             -1      -1.00        1.24       1.24
+- abinit(2)                      0.081   0.3      0.080   0.3              1      -1.00        1.01       1.01
+- nonlop(apply)                  0.047   0.2      0.039   0.1           6739      -1.00        1.21       1.21
+- fourdp                         0.034   0.1      0.032   0.1             91      -1.00        1.07       1.07
+- pspini                         0.030   0.1      0.030   0.1              5      -1.00        1.01       1.01
+- xc:pot/=fourdp                 0.022   0.1      0.025   0.1             14      -1.00        0.88       0.88
+- newkpt(excl. rwwf   )          0.018   0.1      0.018   0.1             -1      -1.00        1.00       1.00
+- wfd_read_wfk                   0.011   0.0      0.011   0.0              4      -1.00        1.00       1.00
+- fourwf%(den)                   0.009   0.0      0.004   0.0             56      -1.00        2.18       2.18
+- setsym                         0.008   0.0      0.008   0.0              1      -1.00        1.05       1.05
+- vtowfk(contrib)                0.007   0.0      0.007   0.0             56      -1.00        1.03       1.03
+- symrhg(no FFT)                 0.006   0.0      0.006   0.0             33      -1.00        1.01       1.01
+- vtowfk  (1)                    0.001   0.0      0.001   0.0             56      -1.00        1.12       1.12
+- kpgsph                         0.001   0.0      0.002   0.0            119      -1.00        0.52       0.52
+- mkffnl                         0.001   0.0      0.001   0.0             64      -1.00        1.03       1.03
+- scfcv-scprqt                   0.001   0.0      0.001   0.0              7      -1.00        0.63       0.63
+- forces                         0.001   0.0      0.001   0.0              1      -1.00        0.54       0.54
+- inwffil(excl. calls)           0.000   0.0      0.001   0.0              1      -1.00        0.03       0.03
+- others (100)                   0.000   0.0      0.000   0.0             -1      -1.00     ******* **********
 -<END_TIMER>
 
-- subtotal                      25.206  93.5     25.272  93.3                                  1.00       1.00
+- subtotal                      26.564  92.3     28.444  91.4                                  0.93       0.93
 
  Partitioning of abinit
-- abinit                        26.966 100.0     27.095 100.0              1                   1.00       1.00
+- abinit                        28.782 100.0     31.135 100.0              1                   0.92       0.92
  
-- abinit(1)                      0.017   0.1      0.018   0.1              1                   1.00       1.00
-- abinit(2)                      0.053   0.2      0.054   0.2              1                   0.98       0.98
-- indefo+macroin+invars2m        0.240   0.9      0.242   0.9              1                   0.99       0.99
-- abinit(4)                      0.348   1.3      0.351   1.3              1                   0.99       0.99
-- abinit(5)                      0.047   0.2      0.047   0.2              1                   1.00       1.00
-- driver                        26.428  98.0     26.527  97.9              1                   1.00       1.00
-- abinit(6)                      0.029   0.1      0.057   0.2              1                   0.51       0.51
-- timing timab                   0.107   0.4      0.107   0.4             11                   1.00       1.00
+- abinit(1)                      0.023   0.1      0.024   0.1              1                   0.97       0.97
+- abinit(2)                      0.081   0.3      0.080   0.3              1                   1.01       1.01
+- indefo+macroin+invars2m        0.387   1.3      0.387   1.2              1                   1.00       1.00
+- abinit(4)                      0.579   2.0      0.810   2.6              1                   0.71       0.71
+- abinit(5)                      0.063   0.2      0.064   0.2              1                   0.98       0.98
+- driver                        27.939  97.1     29.929  96.1              1                   0.93       0.93
+- abinit(6)                      0.084   0.3      0.214   0.7              1                   0.39       0.39
+- timing timab                   0.110   0.4      0.112   0.4              9                   0.99       0.99
 
-- subtotal                      26.966 100.0     27.095 100.0                                  1.00       1.00
+- subtotal                      28.782 100.0     31.135 100.0                                  0.92       0.92
 
  Partitioning of driver
-- driver                        26.428  98.0     26.527  97.9              1                   1.00       1.00
+- driver                        27.939  97.1     29.929  96.1              1                   0.93       0.93
  
-- gstateimg                      3.109  11.5      3.140  11.6              1                   0.99       0.99
-- screening                      3.015  11.2      3.040  11.2              2                   0.99       0.99
-- sigma                         20.302  75.3     20.344  75.1              2                   1.00       1.00
+- gstateimg                      3.270  11.4      3.371  10.8              1                   0.97       0.97
+- screening                      3.277  11.4      3.291  10.6              2                   1.00       1.00
+- sigma                         21.390  74.3     23.266  74.7              2                   0.92       0.92
 
-- subtotal                      26.428  98.0     26.527  97.9                                  1.00       1.00
+- subtotal                      27.939  97.1     29.929  96.1                                  0.93       0.93
 
  Partitioning of gstateimg+gstate
-- gstateimg                      3.109  11.5      3.140  11.6              1                   0.99       0.99
+- gstateimg                      3.270  11.4      3.371  10.8              1                   0.97       0.97
  
-- gstate->kpgsph                 0.016   0.1      0.016   0.1              2                   0.98       0.98
+- gstate->kpgsph                 0.027   0.1      0.028   0.1              2                   0.96       0.96
 - gstate(pspini)                 0.030   0.1      0.030   0.1              1                   1.00       1.00
-- gstate(...scfcv)               3.053  11.3      3.073  11.3              1                   0.99       0.99
-- gstate  (3)                    0.006   0.0      0.016   0.1              1                   0.37       0.37
+- gstate(...scfcv)               3.201  11.1      3.295  10.6              1                   0.97       0.97
+- gstate  (3)                    0.008   0.0      0.015   0.0              1                   0.56       0.56
 
-- subtotal                       3.109  11.5      3.140  11.6                                  0.99       0.99
+- subtotal                       3.270  11.4      3.371  10.8                                  0.97       0.97
 
  Partitioning of scfcv_core
-- scfcv_core                     3.053  11.3      3.073  11.3              1                   0.99       0.99
+- scfcv_core                     3.201  11.1      3.295  10.6              1                   0.97       0.97
  
-- scfcv_core(iniloop, setv       0.338   1.3      0.339   1.3              7                   1.00       1.00
-- scfcv_core(vtorho(f))          2.490   9.2      2.509   9.3              7                   0.99       0.99
-- scfcv_core(rhotov)             0.014   0.1      0.014   0.1              7                   1.00       1.00
-- scfcv_core(mix pot)            0.009   0.0      0.009   0.0              6                   1.00       1.00
-- scfcv_core(afterscfloop)       0.187   0.7      0.187   0.7              1                   1.00       1.00
-- scfcv_core(outscfcv)           0.014   0.1      0.014   0.1              1                   1.00       1.00
+- scfcv_core(iniloop, setv       0.338   1.2      0.339   1.1              7                   1.00       1.00
+- scfcv_core(vtorho(f))          2.621   9.1      2.626   8.4              7                   1.00       1.00
+- scfcv_core(rhotov)             0.014   0.0      0.014   0.0              7                   0.99       0.99
+- scfcv_core(mix pot)            0.009   0.0      0.010   0.0              6                   0.91       0.91
+- scfcv_core(afterscfloop)       0.177   0.6      0.178   0.6              1                   1.00       1.00
+- scfcv_core(outscfcv)           0.039   0.1      0.127   0.4              1                   0.31       0.31
 
-- subtotal                       3.053  11.3      3.073  11.3                                  0.99       0.99
+- subtotal                       3.201  11.1      3.295  10.6                                  0.97       0.97
 
  Partitioning of rhotov
-- rhotov                         0.014   0.1      0.014   0.1              7                   1.00       1.00
+- rhotov                         0.014   0.0      0.014   0.0              7                   0.98       0.98
  
-- rhotov(rhotoxc)                0.011   0.0      0.011   0.0              7                   1.00       1.00
+- rhotov(rhotoxc)                0.011   0.0      0.011   0.0              7                   0.96       0.96
 
-- subtotal                       0.014   0.1      0.014   0.1                                  1.00       1.00
+- subtotal                       0.014   0.0      0.014   0.0                                  0.98       0.98
 
  Partitioning of vtorho
-- vtorho                         2.490   9.2      2.509   9.3              7                   0.99       0.99
+- vtorho                         2.621   9.1      2.626   8.4              7                   1.00       1.00
  
-- vtowfk                         2.473   9.2      2.492   9.2             56                   0.99       0.99
-- vtorho(mkrho 2)                0.013   0.0      0.014   0.1             14                   0.98       0.98
+- vtowfk                         2.603   9.0      2.609   8.4             56                   1.00       1.00
+- vtorho(mkrho 2)                0.014   0.0      0.013   0.0             14                   1.07       1.07
 
-- subtotal                       2.490   9.2      2.509   9.3                                  0.99       0.99
+- subtotal                       2.621   9.1      2.626   8.4                                  1.00       1.00
 
  Partitioning of vtowfk
-- vtowfk                         2.473   9.2      2.492   9.2             56                   0.99       0.99
+- vtowfk                         2.603   9.0      2.609   8.4             56                   1.00       1.00
  
-- cgwf                           2.343   8.7      2.361   8.7             72                   0.99       0.99
-- vtowfk(subdiago)               0.028   0.1      0.028   0.1             72                   0.99       0.99
-- vtowfk(pw_orthon)              0.085   0.3      0.086   0.3             72                   0.99       0.99
-- fourwf%vtowfk                  0.010   0.0      0.010   0.0             56                   0.97       0.97
+- cgwf                           2.405   8.4      2.411   7.7             72                   1.00       1.00
+- vtowfk(subdiago)               0.028   0.1      0.031   0.1             72                   0.91       0.91
+- vtowfk(pw_orthon)              0.143   0.5      0.145   0.5             72                   0.99       0.99
+- vtowfk(2)                      0.010   0.0      0.010   0.0             -1                   0.96       0.96
 
-- subtotal                       2.473   9.2      2.492   9.2                                  0.99       0.99
+- subtotal                       2.603   9.0      2.609   8.4                                  1.00       1.00
 
  Partitioning of cgwf
-- cgwf                           2.343   8.7      2.361   8.7             72                   0.99       0.99
+- cgwf                           2.405   8.4      2.411   7.7             72                   1.00       1.00
  
-- getghc%cgwf                    1.772   6.6      1.781   6.6           6739                   0.99       0.99
-- cgwf-O(npw)                    0.144   0.5      0.145   0.5             -1                   0.99       0.99
-- projbd%cgwf                    0.427   1.6      0.434   1.6           9878                   0.98       0.98
+- getghc%cgwf                    1.774   6.2      1.716   5.5           6739                   1.03       1.03
+- cgwf-O(npw)                    0.181   0.6      0.186   0.6             -1                   0.97       0.97
+- projbd%cgwf                    0.450   1.6      0.509   1.6           9878                   0.88       0.88
 
-- subtotal                       2.343   8.7      2.361   8.7                                  0.99       0.99
+- subtotal                       2.405   8.4      2.411   7.7                                  1.00       1.00
 
  Partitioning of getghc
-- getghc                         1.772   6.6      1.781   6.6           6739                   0.99       0.99
+- getghc                         1.774   6.2      1.716   5.5           6739                   1.03       1.03
  
-- fourwf%getghc                  1.687   6.3      1.699   6.3           6739                   0.99       0.99
-- nonlop%getghc                  0.035   0.1      0.035   0.1           6739                   0.98       0.98
-- getghc-other                   0.050   0.2      0.047   0.2             -1                   1.08       1.08
+- fourwf%getghc                  1.641   5.7      1.608   5.2           6739                   1.02       1.02
+- nonlop%getghc                  0.047   0.2      0.039   0.1           6739                   1.21       1.21
+- getghc-other                   0.086   0.3      0.069   0.2             -1                   1.24       1.24
 
-- subtotal                       1.772   6.6      1.781   6.6                                  0.99       0.99
+- subtotal                       1.774   6.2      1.716   5.5                                  1.03       1.03
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                         1.696   6.3      1.709   6.3           6795                   0.99       0.99
+- fourwf                         1.650   5.7      1.612   5.2           6795                   1.02       1.02
  
-- fourwf%getghc                  1.687   6.3      1.699   6.3           6739                   0.99       0.99
-- fourwf%vtowfk                  0.010   0.0      0.010   0.0             56                   0.97       0.97
+- fourwf%getghc                  1.641   5.7      1.608   5.2           6739                   1.02       1.02
 
-- subtotal                       1.696   6.3      1.709   6.3                                  0.99       0.99
+- subtotal                       1.650   5.7      1.612   5.2                                  1.02       1.02
 
  Partitioning of screening
-- screening                      3.015  11.2      3.040  11.2              2                   0.99       0.99
+- screening                      3.277  11.4      3.291  10.6              2                   1.00       1.00
  
-- screening(init1)               0.133   0.5      0.134   0.5              2                   0.99       0.99
-- screening(wfs)                 0.021   0.1      0.022   0.1              2                   0.99       0.99
-- screening(1)                   0.015   0.1      0.015   0.1              2                   1.00       1.00
-- screening(density)             0.040   0.1      0.040   0.1              2                   0.99       0.99
-- screening(2)                   0.688   2.6      0.688   2.5              2                   1.00       1.00
-- screening(cchi0q0)             0.219   0.8      0.221   0.8              2                   0.99       0.99
-- screening(cchi0)               1.865   6.9      1.885   7.0             18                   0.99       0.99
-- screening(q-loop,end)          0.029   0.1      0.030   0.1             20                   0.97       0.97
+- screening(init1)               0.208   0.7      0.211   0.7              2                   0.99       0.99
+- screening(wfs)                 0.081   0.3      0.081   0.3              2                   1.00       1.00
+- screening(1)                   0.077   0.3      0.079   0.3              2                   0.98       0.98
+- screening(density)             0.276   1.0      0.276   0.9              2                   1.00       1.00
+- screening(2)                   0.672   2.3      0.673   2.2              2                   1.00       1.00
+- screening(cchi0q0)             0.251   0.9      0.251   0.8              2                   1.00       1.00
+- screening(cchi0)               1.677   5.8      1.684   5.4             18                   1.00       1.00
+- screening(q-loop,end)          0.028   0.1      0.030   0.1             20                   0.92       0.92
 
-- subtotal                       3.014  11.2      3.038  11.2                                  0.99       0.99
+- subtotal                       3.275  11.4      3.288  10.6                                  1.00       1.00
 
  Partitioning of sigma
-- sigma                         20.302  75.3     20.344  75.1              2                   1.00       1.00
+- sigma                         21.390  74.3     23.266  74.7              2                   0.92       0.92
  
-- sigma(Init1)                   0.016   0.1      0.016   0.1              4                   1.00       1.00
-- setup_sigma                    0.102   0.4      0.102   0.4              2                   0.99       0.99
-- sigma(make_vhxc)               0.713   2.6      0.714   2.6              2                   1.00       1.00
-- sigma(getW)                    0.013   0.0      0.013   0.0              2                   1.00       1.00
-- sigma(calc_sigx_me)            0.114   0.4      0.114   0.4              2                   1.00       1.00
-- sigma(calc_sigc_me)           19.307  71.6     19.349  71.4              6                   1.00       1.00
+- sigma(Init1)                   0.081   0.3      0.081   0.3              4                   1.00       1.00
+- setup_sigma                    0.197   0.7      0.197   0.6              2                   1.00       1.00
+- sigma(make_vhxc)               0.981   3.4      0.981   3.2              2                   1.00       1.00
+- sigma(vHxc_me)                 0.007   0.0      0.008   0.0              2                   0.92       0.92
+- sigma(getW)                    0.013   0.0      0.013   0.0              2                   0.98       0.98
+- sigma(calc_sigx_me)            0.368   1.3      0.368   1.2              2                   1.00       1.00
+- sigma(calc_sigc_me)           19.670  68.3     19.697  63.3              6                   1.00       1.00
 
-- subtotal                      20.279  75.2     20.322  75.0                                  1.00       1.00
+- subtotal                      21.327  74.1     21.355  68.6                                  1.00       1.00
 
  Partitioning of calc_sigc_me
-- calc_sigc_me                  19.307  71.6     19.349  71.4              6                   1.00       1.00
+- calc_sigc_me                  19.670  68.3     19.697  63.3              6                   1.00       1.00
  
-- calc_sigc_me(Init)             0.045   0.2      0.045   0.2              6                   1.00       1.00
-- calc_sigc_me(Init q)           0.042   0.2      0.043   0.2            544                   0.99       0.99
-- calc_sigc_me(loop)            19.218  71.3     19.260  71.1            544                   1.00       1.00
+- calc_sigc_me(Init)             0.236   0.8      0.237   0.8              6                   1.00       1.00
+- calc_sigc_me(Init q)           0.055   0.2      0.065   0.2            544                   0.84       0.84
+- calc_sigc_me(loop)            19.374  67.3     19.389  62.3            544                   1.00       1.00
 
-- subtotal                      19.306  71.6     19.348  71.4                                  1.00       1.00
+- subtotal                      19.666  68.3     19.691  63.2                                  1.00       1.00
 
  Partitioning of inwffil
-- inwffil                        0.011   0.0      0.012   0.0              1                   0.98       0.98
+- inwffil                        0.018   0.1      0.019   0.1              1                   0.96       0.96
  
-- inwffil(call newkpt)           0.011   0.0      0.012   0.0              1                   0.98       0.98
+- inwffil(call newkpt)           0.018   0.1      0.018   0.1              1                   1.01       1.01
 
-- subtotal                       0.011   0.0      0.012   0.0                                  0.98       0.98
+- subtotal                       0.018   0.1      0.019   0.1                                  0.96       0.96
 
  Partitioning of newkpt
-- newkpt                         0.011   0.0      0.012   0.0              1                   0.98       0.98
+- newkpt                         0.018   0.1      0.018   0.1              1                   1.01       1.01
  
-- newkpt(call wfconv)            0.011   0.0      0.011   0.0              8                   0.98       0.98
+- newkpt(call wfconv)            0.018   0.1      0.017   0.1              8                   1.05       1.05
 
-- subtotal                       0.011   0.0      0.011   0.0                                  0.98       0.98
+- subtotal                       0.018   0.1      0.018   0.1                                  1.00       1.00
 
  Partitioning of newvtr
 - newvtr                         0.009   0.0      0.009   0.0              6                   1.00       1.00
@@ -2274,57 +2223,51 @@ P           mkmem           4
 - subtotal                       0.009   0.0      0.009   0.0                                  1.00       1.00
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                         0.018   0.1      0.019   0.1             91                   0.98       0.98
+- fourdp                         0.034   0.1      0.032   0.1             91                   1.07       1.07
  
-- fourdp%(other)                 0.018   0.1      0.018   0.1             87                   0.98       0.98
+- fourdp%(other)                 0.033   0.1      0.032   0.1             87                   1.04       1.04
 
-- subtotal                       0.018   0.1      0.019   0.1                                  0.98       0.98
+- subtotal                       0.034   0.1      0.032   0.1                                  1.07       1.07
 
  Partitioning of afterscfloop
-- afterscfloop                   0.187   0.7      0.187   0.7              1                   1.00       1.00
+- afterscfloop                   0.177   0.6      0.178   0.6              1                   1.00       1.00
  
-- afterscfloop(forstr)           0.187   0.7      0.187   0.7              1                   1.00       1.00
+- afterscfloop(forstr)           0.177   0.6      0.177   0.6              1                   1.00       1.00
 
-- subtotal                       0.187   0.7      0.187   0.7                                  1.00       1.00
+- subtotal                       0.177   0.6      0.178   0.6                                  1.00       1.00
 
  Partitioning of forstr
-- forstr                         0.187   0.7      0.187   0.7              1                   1.00       1.00
+- forstr                         0.177   0.6      0.177   0.6              1                   1.00       1.00
  
-- forstr(stress)                 0.186   0.7      0.186   0.7              1                   1.00       1.00
+- forstr(stress)                 0.176   0.6      0.175   0.6              1                   1.01       1.01
 
-- subtotal                       0.187   0.7      0.187   0.7                                  1.00       1.00
+- subtotal                       0.177   0.6      0.177   0.6                                  1.00       1.00
 
  Partitioning of forstrnps
-- forstrnps                      0.000   0.0      0.000   0.0              1                   1.00       1.00
+- forstrnps                      0.001   0.0      0.001   0.0              1                   0.91       0.91
  
 
-- subtotal                       0.000   0.0      0.000   0.0                                  1.00       1.00
+- subtotal                       0.001   0.0      0.001   0.0                                  0.91       0.91
 
  Partitioning of outscfcv
-- outscfcv                       0.014   0.1      0.014   0.1              1                   1.00       1.00
+- outscfcv                       0.039   0.1      0.127   0.4              1                   0.31       0.31
  
-- outscfcv(prtelf)               0.013   0.0      0.013   0.0              1                   1.00       1.00
+- outscfcv(prtelf)               0.037   0.1      0.125   0.4              1                   0.30       0.30
 
-- subtotal                       0.013   0.0      0.013   0.0                                  1.00       1.00
--
--Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   0.030   0.1      0.030   0.1          30941                   1.00       1.00
--
-- forstrnps:synchr               0.000   0.0      0.000   0.0              2                   0.90       0.90
-- subtotal                       0.000   0.0      0.000   0.0                                  0.90       0.90
+- subtotal                       0.038   0.1      0.127   0.4                                  0.30       0.30
 
  Additional information
-- timana(1)                      0.000   0.0      0.000   0.0              1                   0.98       0.98
-- total timab                    0.346   1.3      0.347   1.3         186842                   1.00       1.00
-- fourwf                         1.696   6.3      1.709   6.3           6795                   0.99       0.99
-- mklocl(2)                      0.000   0.0      0.000   0.0              1                   1.00       1.00
-- nonlop(forstr)                 0.000   0.0      0.000   0.0              8                   1.10       1.10
-- nonlop(total)                  0.035   0.1      0.035   0.1           6747                   0.98       0.98
-- calc_sigc_me(1)                0.056   0.2      0.057   0.2          10880                   0.99       0.99
-- calc_sigc_me(rho_tw_g)         0.738   2.7      0.742   2.7          10880                   0.99       0.99
-- calc_sigc_me(2)               18.308  67.9     18.355  67.7          21760                   1.00       1.00
-- calc_sigc_me(sigma_me)         0.043   0.2      0.043   0.2          21760                   0.99       0.99
-- cchi0                          1.864   6.9      1.885   7.0             18                   0.99       0.99
+- timana(1)                      0.000   0.0      0.000   0.0              1                ******* **********
+- total timab                    0.667   2.3      0.677   2.2         154810                   0.99       0.99
+- fourwf                         1.650   5.7      1.612   5.2           6795                   1.02       1.02
+- mklocl(2)                      0.000   0.0      0.000   0.0              1                ******* **********
+- nonlop(forstr)                 0.000   0.0      0.000   0.0              8                ******* **********
+- nonlop(total)                  0.047   0.2      0.039   0.1           6747                   1.21       1.21
+- calc_sigc_me(1)                0.081   0.3      0.078   0.3          10880                   1.04       1.04
+- calc_sigc_me(rho_tw_g)         0.783   2.7      0.809   2.6          10880                   0.97       0.97
+- calc_sigc_me(2)               18.235  63.4     18.234  58.6          21760                   1.00       1.00
+- calc_sigc_me(sigma_me)         0.072   0.3      0.064   0.2          21760                   1.13       1.13
+- cchi0                          1.676   5.8      1.683   5.4             18                   1.00       1.00
 
  timana : in multi dataset mode, the more detailed analysis is not done.
 
@@ -2406,10 +2349,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         27.0  wall=         27.1
+- Proc.   0 individual time (sec): cpu=         28.8  wall=         31.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  23 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.0  wall=         27.1
+.Delivered  15 WARNINGs and  32 COMMENTs to log file.
++Overall time at end (sec) : cpu=         28.8  wall=         31.1
