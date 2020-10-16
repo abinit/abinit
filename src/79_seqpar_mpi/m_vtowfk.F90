@@ -349,6 +349,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
    resid_k(:)=zero
 
+   !call cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg(:, icg+1))
+
 !  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
 !  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
    do ispinor=1,my_nspinor

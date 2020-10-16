@@ -59,10 +59,9 @@ MODULE m_cgtools
  real(dp),public,parameter :: cg_cone(2)  = (/1._dp,0._dp/)
 
  ! Helper functions.
- public :: cg_setval
  public :: cg_tocplx
  public :: cg_fromcplx
- public :: cg_filter
+ public :: cg_kfilter
  public :: cg_setaug_zero
  public :: cg_to_reim
  public :: cg_from_reim
@@ -123,54 +122,6 @@ MODULE m_cgtools
 !***
 
 CONTAINS  !========================================================================================
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_cgtools/cg_setval
-!! NAME
-!!  cg_setval
-!!
-!! FUNCTION
-!!  Set cg=alpha.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cg_setval(n,cg,alpha)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: n
-!arrays
- real(dp),optional,intent(in) :: alpha(2)
- real(dp),intent(inout) :: cg(2,n)
-
-! *************************************************************************
-
- if (PRESENT(alpha)) then
-!$OMP PARALLEL
-!$OMP WORKSHARE
-   cg(1,:)=alpha(1)
-   cg(2,:)=alpha(2)
-!$OMP END WORKSHARE
-!$OMP END PARALLEL
- else
-!$OMP PARALLEL
-!$OMP WORKSHARE
-   cg(:,:)=zero
-!$OMP END WORKSHARE
-!$OMP END PARALLEL
- end if
-
-end subroutine cg_setval
 !!***
 
 !----------------------------------------------------------------------
@@ -268,41 +219,49 @@ end subroutine cg_fromcplx
 
 !----------------------------------------------------------------------
 
-!!****f* m_cgtools/cg_filter
+!!****f* m_cgtools/cg_kfilter
 !! NAME
-!!  cg_filter
+!!  cg_kfilter
 !!
 !! FUNCTION
-!!  Set all the elements of x to zero where mask is .TRUE.
 !!
 !! INPUTS
-!!  n=Specifies the number of elements in vectors x and y.
-!!  mask(n)=Logical array.
-!!
-!! SIDE EFFECTS
-!!  x(n)=See description.
+!!  nband=Number of vectors in icg1
 !!
 !! PARENTS
 !!
 !! SOURCE
 
-pure subroutine cg_filter(n, x, mask)
+pure subroutine cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: n
+ integer,intent(in) :: npw_k, my_nspinor, nband_k
 !arrays
- real(dp),intent(inout) :: x(2,n)
- logical,intent(in) :: mask(n)
+ real(dp), intent(in) :: kinpw(npw_k)
+ real(dp),intent(inout) :: cg(2,npw_k*my_nspinor*nband_k)
+
+!Local variables-------------------------------
+ integer :: ispinor, iband, igs, iwavef, ipw
 
 ! *************************************************************************
 
- where (mask)
-   x(1,:) = zero
-   x(2,:) = zero
- end where
+! Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
+! !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs, iwavef)
+ do ispinor=1,my_nspinor
+   igs=(ispinor-1)*npw_k
+   do iband=1,nband_k
+     iwavef=(iband-1)*npw_k*my_nspinor
+     do ipw=1+igs,npw_k+igs
+       if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
+         cg(1,ipw+iwavef)=zero
+         cg(2,ipw+iwavef)=zero
+       end if
+     end do
+   end do
+ end do
 
-end subroutine cg_filter
+end subroutine cg_kfilter
 !!***
 
 !----------------------------------------------------------------------

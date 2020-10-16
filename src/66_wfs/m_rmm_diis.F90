@@ -173,6 +173,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  ! =======================================
  ABI_CALLOC(h_ij, (2, nband, nband))
 
+ call timab(1633, 1, tsec) !"rmm_diis:build_hij
  do iband=1,nband
    is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
    if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
@@ -206,6 +207,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  call pack_matrix(h_ij, subham, nband, 2)
  ABI_FREE(h_ij)
  call xmpi_sum(subham, comm_spinorfft, ierr)
+ call timab(1633, 2, tsec) !"rmm_diis:build_hij
 
  ! =================
  ! Subspace rotation
@@ -237,13 +239,18 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  max_nlines_band = dtset%nline
  ! TODO: Don't reduce nline if MD
  !if dtset%
+ !if dtset%occopt == 2
  do iband=1,nband
    if (occ(iband) < tol3) max_nlines_band(iband) = max(dtset%nline / 2, 2)
  end do
  nbocc = nint(dtset%nelect / two)
- !accuracy_ene = dtset%toldfe
- accuracy_ene = tol10 / nbocc / four
+ if (dtset%toldfe /= 0) then
+   accuracy_ene = dtset%toldfe
+ else
+   accuracy_ene = tol9 / nbocc / four
+ end if
 
+ call timab(1634, 1, tsec) !"rmm_diis:band_opt"
  iband_loop: do iband=1,nband
    ! Compute H |phi_0> from subdiago cg.
    is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
@@ -377,6 +384,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
      cg(:,is:ie) = phi_now
    end if
  end do iband_loop
+ call timab(1634, 2, tsec) !"rmm_diis:band_opt"
 
  ! Final cleanup
  ABI_FREE(pcon)
