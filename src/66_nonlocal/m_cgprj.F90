@@ -401,7 +401,7 @@ contains
 !scalars
  integer,intent(in) :: istwf_k,lmnmax
  integer,intent(in) :: natom,nspinor,ntypat
- complex(dp),intent(in) :: alpha,beta
+ real(dp),intent(in) :: alpha(2),beta(2)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
@@ -427,10 +427,10 @@ contains
 !Some other dims
  mincat=min(NLO_MINCAT,maxval(nattyp))
  cplex=2;if (istwf_k>1) cplex=1
- alpha_zero = abs(alpha) < tol12
- beta_zero  = abs(beta)  < tol12
- alpha_im_zero = abs(dimag(alpha)) < tol12
- beta_im_zero  = abs(dimag(beta))  < tol12
+ alpha_zero = alpha(1)**2 + alpha(2)**2 < tol20
+ beta_zero  =  beta(1)**2 +  beta(2)**2 < tol20
+ alpha_im_zero = (abs(alpha(2)) < tol12) .or. cplex==1
+ beta_im_zero  = (abs(beta(2))  < tol12) .or. cplex==1 
 
 !Loop over atom types
  ia1=1;iatm=0
@@ -438,8 +438,8 @@ contains
    ia2=ia1+nattyp(itypat)-1;if (ia2<ia1) cycle
    nlmn=count(indlmn(3,:,itypat)>0)
 
-   ABI_ALLOCATE(ax,(2,nlmn))
-   ABI_ALLOCATE(by,(2,nlmn))
+   ABI_ALLOCATE(ax,(cplex,nlmn))
+   ABI_ALLOCATE(by,(cplex,nlmn))
 
 !  Loop on blocks of atoms inside type
    do ia3=ia1,ia2,mincat
@@ -448,21 +448,17 @@ contains
      do ispinor=1,nspinor
        do ia=1,nincat
          if (.not.alpha_zero) then
-           ax(1:cplex,1:nlmn) = dble(alpha)*cprj_x(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
+           ax(1:cplex,1:nlmn) = alpha(1)*cprj_x(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
            if (.not.alpha_im_zero) then
-             ax(1,1:nlmn) = ax(1,1:nlmn) - dimag(alpha)*cprj_x(iatm+ia,ispinor)%cp(2,1:nlmn)
-             if (cplex==2) then
-               ax(2,1:nlmn) = ax(2,1:nlmn) + dimag(alpha)*cprj_x(iatm+ia,ispinor)%cp(1,1:nlmn)
-             end if
+             ax(1,1:nlmn) = ax(1,1:nlmn) - alpha(2)*cprj_x(iatm+ia,ispinor)%cp(2,1:nlmn)
+             ax(2,1:nlmn) = ax(2,1:nlmn) + alpha(2)*cprj_x(iatm+ia,ispinor)%cp(1,1:nlmn)
            end if
          end if
          if (.not.beta_zero) then
-           by(1:cplex,1:nlmn) =  dble(beta)*cprj_y(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
+           by(1:cplex,1:nlmn) =  beta(1)*cprj_y(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
            if (.not.beta_im_zero) then
-             by(1,1:nlmn) = by(1,1:nlmn) - dimag(beta)*cprj_y(iatm+ia,ispinor)%cp(2,1:nlmn)
-             if (cplex==2) then
-               by(2,1:nlmn) = by(2,1:nlmn) + dimag(beta)*cprj_y(iatm+ia,ispinor)%cp(1,1:nlmn)
-             end if
+             by(1,1:nlmn) = by(1,1:nlmn) - beta(2)*cprj_y(iatm+ia,ispinor)%cp(2,1:nlmn)
+             by(2,1:nlmn) = by(2,1:nlmn) + beta(2)*cprj_y(iatm+ia,ispinor)%cp(1,1:nlmn)
            end if
          end if
          if (alpha_zero.and.beta_zero) then
