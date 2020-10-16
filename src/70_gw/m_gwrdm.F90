@@ -104,7 +104,7 @@ function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
    MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was not included in bdgw interval.& 
    &Restart the calculation starting bdgw from 1.")
  else
-   ! Sigma_c(iv) produced from a previous integration at the screening stage, is numerically not much stable and introduces bumps.
+   ! WARNING: Sigma_c(iv) produced from a previous integration at the screening stage, is numerically not much stable and introduces bumps.
    ! Unfortunately, the Green's function times Sigma_c(iv) does not decay fast enough with iv to overcome the bumps. These bumps are
    ! not pronouced for the linearized density matrix update, as two Green's functions are multiplied making the decay much faster with iv. 
    ! If a better way to produce more stable Sigma_c(iv) values is found, this subroutine can be use to evaluate GM Ecorr in the future. TODO
