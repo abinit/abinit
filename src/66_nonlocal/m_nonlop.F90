@@ -371,7 +371,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp), ABI_CONTIGUOUS pointer :: ph1d_(:,:),sij_(:,:)
  real(dp), pointer :: enl_(:,:,:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
-  integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
+ integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
 
 ! **********************************************************************
 

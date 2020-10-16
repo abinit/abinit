@@ -2008,13 +2008,6 @@ end subroutine mksubham
 !! compute gradient contribution from berry phase in finite
 !! electric field case
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cg(2,mcg)=input wavefunctions
 !!  cgq(2,mcgq) = wavefunctions at neighboring k points

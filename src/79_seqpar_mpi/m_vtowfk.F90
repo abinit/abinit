@@ -241,7 +241,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if (abs(dtset%rmm_diis) /= 0) then
    if (dtset%rmm_diis > 0) use_rmm_diis = istep > 3 + dtset%rmm_diis
    if (dtset%rmm_diis < 0) use_rmm_diis = .True.
-   if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigesolver.")
+   if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver.")
  end if
 
 !Parallelization over spinors management

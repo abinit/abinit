@@ -130,9 +130,9 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  integer,parameter :: ndat1 = 1, type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, level = 432, use_subovl0 = 0
  integer :: ii, ig, ib, cplex, nline, ierr, prtvol
  integer :: iband, cpopt, sij_opt, is, ie, mcg, mgsc, istwf_k, optekin, usepaw, iline
- integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft
+ integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc
  real(dp),parameter :: rdummy = zero
- real(dp) :: dotr, doti, lambda, rval
+ real(dp) :: dotr, doti, lambda, rval, accuracy_ene
  character(len=500) :: msg
 !arrays
  integer :: max_nlines_band(nband)
@@ -240,6 +240,9 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  do iband=1,nband
    if (occ(iband) < tol3) max_nlines_band(iband) = max(dtset%nline / 2, 2)
  end do
+ nbocc = nint(dtset%nelect / two)
+ !accuracy_ene = dtset%toldfe
+ accuracy_ene = tol10 / nbocc / four
 
  iband_loop: do iband=1,nband
    ! Compute H |phi_0> from subdiago cg.
@@ -264,7 +267,8 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
    diis%smat(:, 0, 0) = [one, zero]
 
    ! Band locking for NSCF or SCF if tolwfr > 0 is used.
-   if (resid(iband) < dtset%tolwfr) then ! .or. (dtset%tolwfr == zero .and. resid(iband) < tol20))
+   !if (resid(iband) < dtset%tolwfr) then
+   if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
       cycle iband_loop
    end if
 
@@ -341,7 +345,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
        call wrtout(std_out, msg, 'PERS')
      end if
 
-     if (exit_diis(iline, nline, hist_ene, hist_resid, dtset)) then
+     if (exit_diis(iline, nline, hist_ene, hist_resid, accuracy_ene, dtset)) then
        if (prtvol == -level) then
          write(msg, '(2a,i4,a,i2,a,es12.4,a)' ) ch10, &
           ' band: ',iband,' converged after: ',iline,' iterations with resid: ',resid(iband), ch10
@@ -387,8 +391,9 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
 end subroutine rmm_diis
 !!***
 
-logical function exit_diis(iline, nline, hist_ene, hist_resid, dtset) result(ans)
+logical function exit_diis(iline, nline, hist_ene, hist_resid, accuracy_ene, dtset) result(ans)
   integer,intent(in) :: iline, nline
+  real(dp),intent(in) :: accuracy_ene
   real(dp),intent(in) :: hist_ene(0:nline), hist_resid(0:nline)
   type(dataset_type),intent(in) :: dtset
 
@@ -405,7 +410,7 @@ logical function exit_diis(iline, nline, hist_ene, hist_resid, dtset) result(ans
     ! This is the only condition available for NSCF run.
     if (resid < dtset%tolwfr) ans = .True.
   else
-    !if (sqrt(resid) < dtset%toldfe / dtset%mband / four) ans = .True.  ! Similar to EDIFF/NBANDS/4
+    if (sqrt(abs(resid)) < accuracy_ene) ans = .True.  ! Similar to EDIFF/NBANDS/4
     ! band locking (occupied states).
     !if (resid < 1.0d0-20) ans = .True.
     !if (resid < dtset%tolwfr) ans = .True.
