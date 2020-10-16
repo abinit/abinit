@@ -869,21 +869,21 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
    ABI_ALLOCATE(enlout   ,(ndat))
    ABI_ALLOCATE(enlout_im,(ndat))
    signs=1
-   do idat=1,ndat
-     cprj_left_oneband => cprj_left(:,idat:idat)
-     call nonlop(choice,cpopt,cprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,1,&
-&     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
-&     cprjin_left=cprj_left_oneband,enlout_im=enlout_im)
-     csc(2*idat-1) = csc(2*idat-1) + enlout(1)
-     csc(2*idat  ) = csc(2*idat  ) + enlout_im(1)
-   end do
-!   call nonlop(choice,cpopt,cprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,1,&
-!&   nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
-!&   cprjin_left=cprj_left,enlout_im=enlout_im,ndat_left=ndat)
 !   do idat=1,ndat
-!     csc(2*idat-1) = csc(2*idat-1) + enlout(idat)
-!     csc(2*idat  ) = csc(2*idat  ) + enlout_im(idat)
+!     cprj_left_oneband => cprj_left(:,idat:idat)
+!     call nonlop(choice,cpopt,cprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,1,&
+!&     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
+!&     cprjin_left=cprj_left_oneband,enlout_im=enlout_im)
+!     csc(2*idat-1) = csc(2*idat-1) + enlout(1)
+!     csc(2*idat  ) = csc(2*idat  ) + enlout_im(1)
 !   end do
+   call nonlop(choice,cpopt,cprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,1,&
+&   nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
+&   cprjin_left=cprj_left,enlout_im=enlout_im,ndat_left=ndat)
+   do idat=1,ndat
+     csc(2*idat-1) = csc(2*idat-1) + enlout(idat)
+     csc(2*idat  ) = csc(2*idat  ) + enlout_im(idat)
+   end do
    ABI_DEALLOCATE(gsc)
    ABI_DEALLOCATE(gvnlxc)
    ABI_DEALLOCATE(enlout   )
