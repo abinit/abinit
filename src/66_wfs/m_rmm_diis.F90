@@ -140,6 +140,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
 !arrays
  integer :: max_nlines_band(nband)
  real(dp) :: tsec(2), hist_ene(0:dtset%nline), hist_resid(0:dtset%nline)
+ real(dp),target :: fake_gsc(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: ghc(:,:), gsc(:,:), gvnlxc(:,:), pcon(:)
  real(dp),allocatable :: residvec(:,:), kres(:,:), phi_now(:,:), evec(:,:), subham(:), h_ij(:,:,:)
@@ -153,7 +154,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  me_g0 = mpi_enreg%me_g0; comm_fft = mpi_enreg%comm_fft
  comm_spinorfft = mpi_enreg%comm_spinorfft; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
 
- gsc_ptr => null()
+ gsc_ptr => fake_gsc
  cpopt = -1
  if (usepaw == 1) then
    sij_opt = 1 ! Recompute S
