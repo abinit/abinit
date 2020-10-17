@@ -4232,7 +4232,7 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
   INTEGER                            :: itime
   INTEGER                            :: sp1
   INTEGER                            :: iflavor,iflavorb
-  INTEGER                            :: flavors, iflavor2 !,iflavor1,
+  INTEGER                            :: flavors !, iflavor2 !,iflavor1,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
   DOUBLE PRECISION                   :: dt
