@@ -165,27 +165,22 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  mcg=2*gs_hamk%npw_fft_k*my_nspinor*bandpp
  if (do_transpose) mcg=2*gs_hamk%npw_k*my_nspinor*blocksize
  if (size(cwavef)<mcg) then
-   msg='wrong size for cwavef!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for cwavef!')
  end if
  if (size(gwavef)<mcg) then
-   msg='wrong size for gwavef!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for gwavef!')
  end if
  if (size(gvnlxc)<mcg) then
-   msg='wrong size for gvnlxc!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for gvnlxc!')
  end if
  if (sij_opt==1) then
    if (size(swavef)<mcg) then
-     msg='wrong size for swavef!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for swavef!')
    end if
  end if
  if (gs_hamk%usepaw==1.and.cpopt>=0) then
    if (size(cwaveprj)<gs_hamk%natom*my_nspinor*bandpp) then
-     msg='wrong size for cwaveprj!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for cwaveprj!')
    end if
  end if
 
@@ -652,27 +647,23 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !Check sizes
  npw=hamk%npw_k;if (.not.do_transpose) npw=hamk%npw_fft_k
  if (size(cwavef)/=2*npw*my_nspinor*blocksize) then
-   msg = 'Incorrect size for cwavef!'
-   MSG_BUG(msg)
+   MSG_BUG('Incorrect size for cwavef!')
  end if
  if(choice/=0.and.signs==2) then
    if (paw_opt/=3) then
      if (size(gvnlc)/=2*npw*my_nspinor*blocksize) then
-       msg = 'Incorrect size for gvnlc!'
-       MSG_BUG(msg)
+       MSG_BUG('Incorrect size for gvnlc!')
      end if
    end if
    if(paw_opt>=3) then
      if (size(gsc)/=2*npw*my_nspinor*blocksize) then
-       msg = 'Incorrect size for gsc!'
-       MSG_BUG(msg)
+       MSG_BUG('Incorrect size for gsc!')
      end if
    end if
  end if
  if(cpopt>=0) then
    if (size(cwaveprj)/=hamk%natom*my_nspinor*mpi_enreg%bandpp) then
-     msg = 'Incorrect size for cwaveprj!'
-     MSG_BUG(msg)
+     MSG_BUG('Incorrect size for cwaveprj!')
    end if
  end if
 

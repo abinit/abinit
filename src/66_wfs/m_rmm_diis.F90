@@ -127,7 +127,8 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  real(dp),intent(out) :: eig(nband)
 
 !Local variables-------------------------------
- integer,parameter :: ndat1 = 1, type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, level = 432, use_subovl0 = 0
+ integer,parameter :: ndat1 = 1, type_calc0 = 0, option1 = 1, option2 = 2
+ integer,parameter :: tim_getghc = 0, level = 432, use_subovl0 = 0
  integer :: ii, ig, ib, cplex, nline, ierr, prtvol
  integer :: iband, cpopt, sij_opt, is, ie, mcg, mgsc, istwf_k, optekin, usepaw, iline
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc
@@ -139,9 +140,9 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
 !arrays
  integer :: max_nlines_band(nband)
  real(dp) :: tsec(2), hist_ene(0:dtset%nline), hist_resid(0:dtset%nline)
+ real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: ghc(:,:), gsc(:,:), gvnlxc(:,:), pcon(:)
  real(dp),allocatable :: residvec(:,:), kres(:,:), phi_now(:,:), evec(:,:), subham(:), h_ij(:,:,:)
- real(dp) :: subovl(use_subovl0)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_ptr(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
  type(rmm_diis_t) :: diis
@@ -149,13 +150,10 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
 ! *************************************************************************
 
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; prtvol = dtset%prtvol
- mcg = npw * nspinor * nband; mgsc = npw * nspinor * nband * usepaw
-
  me_g0 = mpi_enreg%me_g0; comm_fft = mpi_enreg%comm_fft
  comm_spinorfft = mpi_enreg%comm_spinorfft; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
 
  gsc_ptr => null()
-
  cpopt = -1
  if (usepaw == 1) then
    sij_opt = 1 ! Recompute S
@@ -168,14 +166,15 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  ABI_MALLOC(ghc, (2, npw*nspinor))
  ABI_MALLOC(gsc, (2, npw*nspinor*usepaw))
  ABI_MALLOC(gvnlxc, (2, npw*nspinor))
+ ABI_CALLOC(h_ij, (2, nband, nband))
 
  ! =======================================
  ! Apply H to input cg to compute <i|H|j>
  ! =======================================
- ABI_CALLOC(h_ij, (2, nband, nband))
 
  call timab(1633, 1, tsec) !"rmm_diis:build_hij
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
+
  do iband=1,nband
    is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
    if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
@@ -203,24 +202,29 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
    end if
 
  end do
+ !call cwtime_report(" build_hij", cpu, wall, gflops)
 
  ! Pack <i|H|j> to prepare call to subdiago.
  ABI_MALLOC(subham, (nband*(nband+1)))
+ do iband=1,nband
+   h_ij(2,iband,iband) = zero ! Force diagonal elements to be real
+ end do
  call pack_matrix(h_ij, subham, nband, 2)
  ABI_FREE(h_ij)
  call xmpi_sum(subham, comm_spinorfft, ierr)
  call timab(1633, 2, tsec) !"rmm_diis:build_hij
- call cwtime_report(" build_hij", cpu, wall, gflops)
+ !call cwtime_report(" pack_hij", cpu, wall, gflops)
 
  ! =================
  ! Subspace rotation
  ! =================
  call timab(585, 1, tsec) !"vtowfk(subdiago)"
  ABI_MALLOC(evec, (2*nband, nband))
+ mcg = npw * nspinor * nband; mgsc = npw * nspinor * nband * usepaw
  call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, dtset%paral_kgb, &
                subham, subovl, use_subovl0, usepaw, me_g0)
  call timab(585, 2, tsec)
- call cwtime_report(" subdiago", cpu, wall, gflops)
+ !call cwtime_report(" subdiago", cpu, wall, gflops)
 
  ABI_FREE(subham)
  ABI_FREE(evec)
@@ -390,7 +394,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
    end if
  end do iband_loop
  call timab(1634, 2, tsec) !"rmm_diis:band_opt"
- call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
+ !call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
 
  !call diis%print_stats()
 
