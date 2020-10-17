@@ -1,5 +1,5 @@
 
-.Version 9.2.2 of ABINIT 
+.Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,20 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 16 Oct 2020.
-- ( at 22h29 )
+.Starting date : Sat 17 Oct 2020.
+- ( at 19h46 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/TestBot_MPI24/tutoparal_tucrpa_2_MPI24/tucrpa_2.in
+- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/TestBot_MPI24/tutoparal_tucrpa_2_MPI24/tucrpa_2.in
 - output file    -> tucrpa_2_MPI24.out
 - root for input  files -> tucrpa_2_MPI24i
 - root for output files -> tucrpa_2_MPI24o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -200,22 +200,19 @@ _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
         dmft_solv2          0
         dmft_solv3          5
         dmft_solv4          5
-             ecut1     1.20000000E+01 Hartree
-             ecut2     1.20000000E+01 Hartree
-             ecut3     1.19824785E+01 Hartree
-             ecut4     1.19824785E+01 Hartree
+             ecut      1.20000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
-          ecuteps3     4.86788191E+00 Hartree
+          ecuteps3     5.00000000E+00 Hartree
           ecuteps4     0.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     0.00000000E+00 Hartree
-         ecutsigx4     2.99561963E+01 Hartree
+         ecutsigx4     3.00000000E+01 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
-          ecutwfn3     1.19824785E+01 Hartree
-          ecutwfn4     1.19824785E+01 Hartree
+          ecutwfn3     1.20000000E+01 Hartree
+          ecutwfn4     1.20000000E+01 Hartree
 -          fftalg         312
         freqremax1     0.00000000E+00 Hartree
         freqremax2     0.00000000E+00 Hartree
@@ -768,9 +765,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -788,9 +785,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -808,9 +805,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -11670,68 +11667,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  R(3)=  0.0000000  0.0000000  7.2605000  G(3)=  0.0000000  0.0000000  0.1377316
  Unit cell volume ucvol=  3.8273624E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
- Pseudopotential format is: paw10
- basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
- Spheres core radius: rc_sph= 2.20000000
- 1 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size= 910 , AA= 0.60796E-03 BB= 0.13983E-01
- Shapefunction is BESSEL type: shapef(r,l)=aa(1,l)*jl(q(1,l)*r)+aa(2,l)*jl(q(2,l)*r)
- Radius for shape functions =  2.02290427
- mmax=  910
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid 1
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 1
- Radial grid used for pseudo valence density is grid 1
- Mesh size for Vloc has been set to  744 to avoid numerical noise.
- Compensation charge density is not taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
- Pseudopotential format is: paw10
- basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
- Spheres core radius: rc_sph= 2.20669967
- 1 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1500 , AA= 0.22443E-03 BB= 0.85283E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions =  1.81361893
- mmax= 1500
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid 1
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 1
- Radial grid used for pseudo valence density is grid 1
- Mesh size for Vloc has been set to 1337 to avoid numerical noise.
- Compensation charge density is not taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
- Pseudopotential format is: paw10
- basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
- Spheres core radius: rc_sph= 1.41465230
- 1 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=2001 , AA= 0.72565E-03 BB= 0.58052E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions =  1.20231231
- mmax= 2001
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid 1
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 1
- Radial grid used for pseudo valence density is grid 1
- Mesh size for Vloc has been set to 1762 to avoid numerical noise.
- Compensation charge density is not taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -11847,8 +11782,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.3156 eV
-     The bare interaction (for a renorm. wfn ) =     23.0248 eV
+     The bare interaction (no renormalization) =     16.0038 eV
+     The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
  ==================================== 
@@ -12139,7 +12074,7 @@ Reading of the Wannier weights from data.plowann
         0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
 
     2   0.000 -26.907  -5.713  -0.338  -0.337  -0.342  -0.343  -7.557  -8.328
-        0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   5.1787
@@ -12151,10 +12086,10 @@ Reading of the Wannier weights from data.plowann
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.193  -0.000   0.000  -0.001   0.001  -0.001   0.001  -0.001  -0.000
-      0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+     -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       0.193  -0.000   0.000  -0.001   0.001  -0.001   0.001  -0.001  -0.000
-      0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000  -0.000
+     -0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000  -0.000
 
 
 
@@ -12165,7 +12100,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.200  -4.785  -3.833  -4.786  -3.838  -4.785  -3.833  -1.053  -1.117
-       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -4.785 -29.210  -9.319  -0.981  -1.233  -0.985  -1.235  -9.512  -8.589
        -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
@@ -12179,7 +12114,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.474   0.099  -0.177  -2.348  -2.348  -2.347  -2.348  -0.049   0.317
-       -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2   0.099 -25.389  -4.773  -0.305  -0.305  -0.306  -0.315  -5.832  -7.672
        -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12196,7 +12131,7 @@ Reading of the Wannier weights from data.plowann
        -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -3.065 -24.978  -7.306  -1.151  -1.021  -1.151  -1.028  -5.021  -6.966
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     40.87  [%]
 
@@ -12210,7 +12145,7 @@ Reading of the Wannier weights from data.plowann
        -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2   0.486 -22.218  -2.371  -0.048  -0.048  -0.044  -0.062  -3.860  -5.753
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     44.04  [%]
 
@@ -12238,7 +12173,7 @@ Reading of the Wannier weights from data.plowann
         0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -4.316 -30.403 -10.178  -1.165  -1.348  -1.169  -1.352  -9.046  -9.735
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    7 :     47.00  [%]
 
@@ -12252,7 +12187,7 @@ Reading of the Wannier weights from data.plowann
         0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
 
     2  -2.348 -28.882  -8.184  -0.305   0.074  -1.401  -1.403  -6.623  -7.443
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    8 :     52.73  [%]
 
@@ -12263,7 +12198,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.999  -7.963  -6.508  -3.062  -5.033  -7.964  -6.517  -0.944  -1.418
-        0.000   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2  -7.963 -32.136 -12.788  -1.147  -0.919  -3.310  -3.154  -6.503  -5.941
        -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
@@ -12277,10 +12212,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -2.039  -2.677  -2.039  -2.677  -4.315  -4.315  -0.281   0.197
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -2.039 -27.076  -7.283  -0.252  -0.036  -1.344  -1.355  -5.078  -6.860
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   10 :     47.01  [%]
 
@@ -12291,10 +12226,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.898  -5.426  -8.240  -5.421  -8.240 -10.067  -8.263  -1.594  -1.060
-        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -5.426 -26.473 -11.087  -0.790  -1.069  -3.022  -2.545  -3.640  -4.829
-       -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   11 :     39.48  [%]
 
@@ -12305,10 +12240,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -1.434  -2.874  -5.257  -6.483  -7.336  -7.338  -0.388   0.240
-        0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -1.434 -23.757  -5.085  -0.019   0.041  -1.122  -1.141  -3.438  -5.095
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   12 :     42.22  [%]
 
@@ -12333,7 +12268,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -2.677  -2.039  -2.038  -2.677  -4.315  -4.315   0.197  -0.281
-       -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
+        0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
 
     2  -2.677 -27.272  -7.283  -0.037   0.438  -1.173  -1.170  -6.871  -6.243
         0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12361,10 +12296,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -17.628  -5.963  -5.963   0.486  -0.315  -5.963  -5.964   0.012   0.012
-        0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000
 
     2  -5.963 -31.658 -12.391  -0.047   0.467  -3.304  -3.307  -5.423  -6.185
-       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   16 :     44.03  [%]
 
@@ -12375,10 +12310,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.201  -4.784  -3.833  -3.838  -4.785  -4.785  -3.838  -1.118  -1.387
-        0.000   0.000   0.000   0.000   0.000  -0.000   0.000  -0.000   0.000
+       -0.000   0.000   0.000   0.000   0.000  -0.000   0.000  -0.000   0.000
 
     2  -4.784 -29.208  -9.318  -1.226  -0.984  -0.987  -1.233  -7.824  -7.054
-       -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   17 :     43.81  [%]
 
@@ -12392,7 +12327,7 @@ Reading of the Wannier weights from data.plowann
         0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2  -5.258 -29.324 -11.557  -0.019   0.240  -3.091  -3.102  -4.197  -5.627
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   18 :     42.23  [%]
 
@@ -12403,7 +12338,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.998  -3.062  -5.032  -6.507  -7.964  -7.967  -6.512  -1.418  -1.084
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -3.062 -24.976  -7.304  -1.009  -1.159  -1.154  -1.024  -4.175  -5.929
        -0.000   0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000
@@ -12417,7 +12352,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -27.182  -4.268  -6.724  -4.268  -6.725  -9.340  -9.343  -0.607   0.190
-       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
+        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -4.268 -25.755  -9.697   0.148   0.190  -2.859  -2.877  -2.932  -4.047
        -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
@@ -12462,7 +12397,7 @@ Reading of the Wannier weights from data.plowann
         0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2  -2.676 -27.272  -7.284  -1.165  -1.170   0.435  -0.039  -8.868  -7.947
-        0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   23 :     47.01  [%]
 
@@ -12476,7 +12411,7 @@ Reading of the Wannier weights from data.plowann
        -0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
 
     2  -1.436 -23.759  -5.084  -1.122  -1.132   0.042  -0.030  -4.619  -6.665
-       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   24 :     42.22  [%]
 
@@ -12487,7 +12422,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -2.040  -2.678  -4.313  -4.314  -2.677  -2.038  -1.251  -1.147
-       -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -2.040 -27.077  -7.284  -1.340  -1.349  -0.037  -0.261  -6.598  -8.516
        -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000
@@ -12501,10 +12436,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.474  -2.348  -2.347  -2.348  -2.347  -0.177   0.099  -1.349  -1.349
-       -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -2.348 -28.882  -8.186  -1.393  -1.400   0.071  -0.311  -8.441  -9.185
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   26 :     52.73  [%]
 
@@ -12518,7 +12453,7 @@ Reading of the Wannier weights from data.plowann
         0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000   0.000
 
     2  -7.968 -32.135 -12.790  -3.306  -3.162  -1.163  -0.916 -11.003  -9.803
-       -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   27 :     40.86  [%]
 
@@ -12532,7 +12467,7 @@ Reading of the Wannier weights from data.plowann
        -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2  -5.420 -26.464 -11.098  -3.013  -2.535  -0.792  -1.072  -6.028  -8.298
-        0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000
+        0.000   0.000  -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   28 :     39.48  [%]
 
@@ -12543,7 +12478,7 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.999  -6.508  -7.964  -7.964  -6.517  -3.062  -5.032  -3.221  -3.636
-        0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000
 
     2  -6.508 -30.032 -12.795  -3.145  -2.825  -1.018  -1.090  -8.139 -10.114
         0.000   0.000   0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
@@ -12557,10 +12492,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.157  -7.338  -7.336  -6.482  -5.258  -1.435  -2.874  -3.602  -3.599
-       -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
+        0.000  -0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
     2  -7.338 -32.465 -13.588  -3.280  -3.100  -1.136  -0.966 -10.282 -10.935
-        0.000   0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
+        0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   30 :     42.24  [%]
 
@@ -12571,10 +12506,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.901 -10.065  -8.269  -5.427  -8.238  -5.427  -8.238  -2.828  -3.012
-       -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
+        0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000   0.000
 
     2 -10.065 -33.474 -14.730  -3.021  -3.419  -3.016  -3.414  -7.665  -6.847
-       -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   31 :     39.48  [%]
 
@@ -12588,7 +12523,7 @@ Reading of the Wannier weights from data.plowann
         0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000
 
     2  -6.989 -27.095 -13.315  -2.198  -2.955  -2.181  -2.971  -4.581  -5.807
-       -0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   32 :     38.60  [%]
 
@@ -12602,7 +12537,7 @@ Reading of the Wannier weights from data.plowann
         0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000
 
     2  -9.339 -33.266 -15.462  -2.863  -3.293  -2.857  -3.292  -7.228  -7.730
-       -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   33 :     40.36  [%]
 
@@ -12616,7 +12551,7 @@ Reading of the Wannier weights from data.plowann
        -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000
 
     2  -6.485 -31.054 -11.560  -3.281  -3.293   0.036   0.667 -10.326  -9.160
-       -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   34 :     42.23  [%]
 
@@ -12641,10 +12576,10 @@ Reading of the Wannier weights from data.plowann
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -17.628  -5.963  -5.964  -5.962  -5.965   0.486  -0.315  -3.702  -3.701
-       -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
+        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
 
     2  -5.963 -31.651 -12.398  -3.297  -3.309  -0.052   0.466  -9.690 -10.356
-       -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point   36 :     44.03  [%]
 
@@ -12682,9 +12617,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -12702,9 +12637,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -12722,9 +12657,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_release-9.2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -12857,8 +12792,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.3156 eV
-     The bare interaction (for a renorm. wfn ) =     23.0248 eV
+     The bare interaction (no renormalization) =     16.0038 eV
+     The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
  ==================================== 
@@ -13158,7 +13093,7 @@ Reading of the Wannier weights from data.plowann
    4 14.898 14.898 15.508 16.041 15.092
    5 15.715 15.092 15.114 15.092 16.567
 
-  Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   15.3789   -0.0000
+  Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   15.3789    0.0000
 
  (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=   16.2514    0.0000)
 
@@ -13170,7 +13105,7 @@ Reading of the Wannier weights from data.plowann
    4  0.478  0.478  0.400 16.041  0.482
    5  0.249  0.478  0.555  0.482 16.567
 
-   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667    0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667   -0.0000
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
@@ -13258,22 +13193,19 @@ Reading of the Wannier weights from data.plowann
         dmft_solv2          0
         dmft_solv3          5
         dmft_solv4          5
-             ecut1     1.20000000E+01 Hartree
-             ecut2     1.20000000E+01 Hartree
-             ecut3     1.19824785E+01 Hartree
-             ecut4     1.19824785E+01 Hartree
+             ecut      1.20000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
-          ecuteps3     4.86788191E+00 Hartree
+          ecuteps3     5.00000000E+00 Hartree
           ecuteps4     0.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     0.00000000E+00 Hartree
-         ecutsigx4     2.99561963E+01 Hartree
+         ecutsigx4     3.00000000E+01 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
-          ecutwfn3     1.19824785E+01 Hartree
-          ecutwfn4     1.19824785E+01 Hartree
+          ecutwfn3     1.20000000E+01 Hartree
+          ecutwfn4     1.20000000E+01 Hartree
            etotal1    -1.5192840910E+02
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
@@ -14486,10 +14418,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        223.1  wall=        223.2
+- Proc.   0 individual time (sec): cpu=        209.4  wall=        209.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       5353.0  wall=       5353.2
++Overall time at end (sec) : cpu=       5023.9  wall=       5024.1
