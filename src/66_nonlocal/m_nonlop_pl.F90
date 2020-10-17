@@ -247,7 +247,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  integer :: nproj,nspinso,rank
  integer :: sign,spaceComm,  isft
  real(dp) :: e2nl,e2nldd,enlk
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: indlmn_s(:,:,:),jproj(:)
  real(dp) :: amet(2,3,3,2,2),amet_lo(3,3),e2nl_tmp(6),eisnl(3),rank2(6)
@@ -268,20 +268,18 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
 !Test: spin orbit not allowed for choice=5,6
  if (nspinortot==2 .and. choice==6 ) then
-   message = 'nonlop_pl: For nspinortot=2, choice=6 is not yet allowed.'
-   MSG_BUG(message)
+   MSG_BUG('For nspinortot=2, choice=6 is not yet allowed.')
  end if
 
  if ((choice<1 .or. choice>6) .and. choice/=23 ) then
-   write(message,'(a,i0)')'  Does not presently support this choice=',choice
-   MSG_BUG(message)
+   write(msg,'(a,i0)')'Does not presently support this choice=',choice
+   MSG_BUG(msg)
  end if
 
 !Test: choice 51 and 52 only allowed with nonlop_ylm
 !JWZ, 01-Sep-08
  if (choice==51 .or. choice==52) then
-   message = 'nonlop_pl: choice 51 or 52 is not yet allowed.'
-   MSG_BUG(message)
+   MSG_BUG('choice 51 or 52 is not yet allowed.')
  end if
 
 !Define dimension of work arrays.
@@ -437,10 +435,10 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
      if(nloalg(2)<=0)then
 !      For nloalg(2)==0, it is needed to compute the phase factors.
        if(mincat>matblk)then
-         write(message,'(a,a,a,i4,a,i4,a)')&
-&         '  With nloc_mem<=0, mincat must be less than matblk.',ch10,&
-&         '  Their value is ',mincat,' and ',matblk,'.'
-         MSG_BUG(message)
+         write(msg,'(a,a,a,i4,a,i4,a)')&
+          'With nloc_mem<=0, mincat must be less than matblk.',ch10,&
+          'Their value is ',mincat,' and ',matblk,'.'
+         MSG_BUG(msg)
        end if
        call ph1d3d(ia3,ia4,kgin,matblk,natom,npwin,n1,n2,n3,phkxredin,ph1d,ph3din)
      end if
@@ -598,8 +596,8 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !                  jjs gives the starting address of the relevant components
                    jjs=1+((ilang-1)*ilang*(ilang+1))/6
                    if (ilang>4) then
-                     write(message,'(a,i0)')' ilang must fall in range [1..4] but value is ',ilang
-                     MSG_BUG(message)
+                     write(msg,'(a,i0)')' ilang must fall in range [1..4] but value is ',ilang
+                     MSG_BUG(msg)
                    end if
 
 !                  Metric & spinorial contraction from gxa to gxafac. The treatment
@@ -914,7 +912,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !                  ----  Accumulate elastic tensor contributions if requested.
 
                    if(choice==6) then
-!                    XG 081121 : Message to the person who has introduced this CPP option (sorry, I did not have to time to locate who did this ...)
+!                    XG 081121 : msg to the person who has introduced this CPP option (sorry, I did not have to time to locate who did this ...)
 !                    This section of ABINIT should be allowed by default to the user. I have found that on the contrary, the build
 !                    system defaults are such that this section is forbidden by default. You might restore this flag if at the same time,
 !                    you modify the build system in such a way that by default this section is included, and if the user wants, it can disable it.
@@ -1472,7 +1470,7 @@ subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
 !scalars
  integer :: ipw
  real(dp) :: scale
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1481,10 +1479,10 @@ subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
  if(istwf_k/=1)then
 
    if(option/=1 .and. option/=2)then
-     write(message,'(a,a,a,i0)')&
-&     'The argument option should be 1 or 2,',ch10,&
-&     'however, option=',option
-     MSG_BUG(message)
+     write(msg,'(a,a,a,i0)')&
+     'The argument option should be 1 or 2,',ch10,&
+     'however, option=',option
+     MSG_BUG(msg)
    end if
 
    scale=two
@@ -1579,15 +1577,15 @@ subroutine ddkten(compact,idir,rank,temp,tmpfac)
 
 !Local variables-------------------------------
 !scalars
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
  if(rank/=1 .and. rank/=2 .and. rank/=3)then
-   write(message, '(a,i10,a,a,a)' )&
-&   'Input rank=',rank,' not allowed.',ch10,&
-&   'Possible values are 1,2,3 only.'
-   MSG_BUG(message)
+   write(msg, '(a,i10,a,a,a)' )&
+   'Input rank=',rank,' not allowed.',ch10,&
+   'Possible values are 1,2,3 only.'
+   MSG_BUG(msg)
  end if
 
 !Take care of p angular momentum

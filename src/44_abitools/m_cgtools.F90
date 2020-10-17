@@ -435,7 +435,7 @@ subroutine cg_zcopy(n, x, y)
 
 ! *************************************************************************
 
- call zcopy(n,x,1,y,1)
+ call zcopy(n, x, 1, y, 1)
 
 end subroutine cg_zcopy
 !!***
