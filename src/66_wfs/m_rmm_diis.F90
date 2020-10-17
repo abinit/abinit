@@ -129,13 +129,13 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
 !Local variables-------------------------------
  integer,parameter :: ndat1 = 1, type_calc0 = 0, option1 = 1, option2 = 2
  integer,parameter :: tim_getghc = 0, level = 432, use_subovl0 = 0
- integer :: ii, ig, ib, cplex, nline, ierr, prtvol
- integer :: iband, cpopt, sij_opt, is, ie, mcg, mgsc, istwf_k, optekin, usepaw, iline
+ integer :: ig, ig0, ib, cplex, nline, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop
+ integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iline
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc
- logical :: end_with_trial_step
+ !logical :: end_with_trial_step
  real(dp),parameter :: rdummy = zero
  real(dp) :: dotr, doti, lambda, rval, accuracy_ene
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
 !arrays
  integer :: max_nlines_band(nband)
@@ -153,6 +153,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; prtvol = dtset%prtvol
  me_g0 = mpi_enreg%me_g0; comm_fft = mpi_enreg%comm_fft
  comm_spinorfft = mpi_enreg%comm_spinorfft; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
+ npwsp = npw * nspinor
 
  gsc_ptr => fake_gsc
  cpopt = -1
@@ -164,9 +165,13 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
    sij_opt = 0
  end if
 
- ABI_MALLOC(ghc, (2, npw*nspinor))
- ABI_MALLOC(gsc, (2, npw*nspinor*usepaw))
- ABI_MALLOC(gvnlxc, (2, npw*nspinor))
+ bsize = 5
+ bsize = nband + 1
+ nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
+
+ ABI_MALLOC(ghc, (2, npw*nspinor*bsize))
+ ABI_MALLOC(gsc, (2, npw*nspinor*bsize*usepaw))
+ ABI_MALLOC(gvnlxc, (2, npw*nspinor*bsize))
  ABI_CALLOC(h_ij, (2, nband, nband))
 
  ! =======================================
@@ -176,13 +181,15 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  call timab(1633, 1, tsec) !"rmm_diis:build_hij
  !call cwtime(cpu, wall, gflops, "start")
 
+if (bsize == 1 .or. .False.) then
+
  do iband=1,nband
-   is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
-   if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
+   igs = 1 + npw * nspinor * (iband - 1); ige = igs - 1 + npw * nspinor
+   if (usepaw == 1) gsc_ptr => gsc_all(:,igs:ige)
 
    ! By setting ieigen to iband, Fock contrib of this iband to the energy will be calculated
    !call fock_set_ieigen(gs_hamk%fockcommon, iband)
-   call getghc(cpopt, cg(:,is:ie), cprj_dum, ghc, gsc_ptr, gs_hamk, gvnlxc, &
+   call getghc(cpopt, cg(:,igs:ige), cprj_dum, ghc, gsc_ptr, gs_hamk, gvnlxc, &
                rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
 
    ! Compute <i|H|iband> for i=1,nband
@@ -190,12 +197,11 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
 
    if (istwf_k /= 1) then
      h_ij(:,:,iband) = two * h_ij(:,:,iband)
-
      if (istwf_k == 2 .and. me_g0 == 1) then
        ! Gamma k-point and I have G=0. Remove double counting term.
        do ib=1,nband
-         ig = 1 + npw * nspinor * (ib - 1)
-         h_ij(1,ib,iband) = h_ij(1,ib,iband) - cg(1,ig) * ghc(1,1)
+         ig0 = 1 + npw * nspinor * (ib - 1)
+         h_ij(1,ib,iband) = h_ij(1,ib,iband) - cg(1,ig0) * ghc(1,1)
        end do
      end if
      ! Force real matrix.
@@ -203,6 +209,47 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
    end if
 
  end do
+
+else
+
+ do iblock=1,nblocks
+   igs = 1 + (iblock - 1) * (npw * nspinor) * bsize
+   ige = igs + (npw * nspinor) * bsize - 1; ndat = bsize
+   if (ige > npw * nspinor * nband) then
+     ige = npw * nspinor * nband; ndat = (ige - igs + 1) / (npw * nspinor)
+   end if
+   ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
+
+   if (usepaw == 1) gsc_ptr => gsc_all(:,igs:ige)
+   call getghc(cpopt, cg(:,igs:ige), cprj_dum, ghc, gsc_ptr, gs_hamk, gvnlxc, &
+               rdummy, mpi_enreg, ndat, prtvol, sij_opt, tim_getghc, type_calc0)
+
+   ! Compute <i|H|iband> for i=1,nband
+   !call cg_zgemv("C", npw*nspinor, nband, cg, ghc, h_ij(:,:,iband))
+   call cg_zgemm("C", "N", npwsp, nband, ndat, cg, ghc, h_ij(:,:,ib_start))
+
+   if (istwf_k /= 1) then
+     do iband=ib_start, ib_stop
+       !write(std_out, *)" Block", iblock, "iband", iband
+       h_ij(:,:,iband) = two * h_ij(:,:,iband)
+
+       if (istwf_k == 2 .and. me_g0 == 1) then
+         ! Gamma k-point and I have G=0. Remove double counting term.
+         ig = 1 + (iband - ib_start) * npw * nspinor
+         do ib=1,nband
+           ig0 = 1 + npw * nspinor * (ib - 1)
+           h_ij(1,ib,iband) = h_ij(1,ib,iband) - cg(1,ig0) * ghc(1,ig)
+         end do
+       end if
+       ! Force real matrix.
+       h_ij(2,:,iband) = zero
+     end do
+   end if
+
+ end do
+
+end if
+
  !call cwtime_report(" build_hij", cpu, wall, gflops)
 
  ! Pack <i|H|j> to prepare call to subdiago.
@@ -241,6 +288,11 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  cplex = 2
  diis = rmm_diis_new(usepaw, istwf_k, npw, nspinor, ndat1, nline)
 
+ ABI_REMALLOC(ghc, (2, npw*nspinor))
+ ABI_REMALLOC(gsc, (2, npw*nspinor*usepaw))
+ ABI_REMALLOC(gvnlxc, (2, npw*nspinor))
+
+ ! Remalloc here because blocking is not yet implemented.
  ABI_MALLOC(pcon, (npw))
  ABI_MALLOC(residvec, (2, npw*nspinor))
  ABI_MALLOC(kres, (2, npw*nspinor))
@@ -263,9 +315,9 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  call timab(1634, 1, tsec) !"rmm_diis:band_opt"
  iband_loop: do iband=1,nband
    ! Compute H |phi_0> from subdiago cg.
-   is = 1 + npw * nspinor * (iband - 1); ie = is - 1 + npw * nspinor
-   phi_now = cg(:,is:ie)
-   if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
+   igs = 1 + npw * nspinor * (iband - 1); ige = igs - 1 + npw * nspinor
+   phi_now = cg(:,igs:ige)
+   if (usepaw == 1) gsc_ptr => gsc_all(:,igs:ige)
 
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
                         eig(iband), resid(iband), enlx(iband), residvec, normalize=.False.)
@@ -343,10 +395,10 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
      end if
 
      ! Compute H |phi_now>.
-     if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
+     if (usepaw == 1) gsc_ptr => gsc_all(:,igs:ige)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
-                          eig(iband:), resid(iband:), enlx(iband), residvec, normalize=.True.)
+                          eig(iband:), resid(iband:), enlx(iband:), residvec, normalize=.True.)
 
      ! Store residual R_i for i == iline and evaluate new enlx for NC.
      hist_ene(iline) = eig(iband)
@@ -378,7 +430,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
 
    ! Update wavefunction for this band
    ! TODO: End with trial step but then I have to move the check for exit at the end of the loop.
-   cg(:,is:ie) = phi_now
+   cg(:,igs:ige) = phi_now
 
    if (.False. .and. iline == nline + 1) then
      !write(std_out, *)" Performing Last trial step"
@@ -387,11 +439,11 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
                     optekin, pcon, kres, comm_bandspinorfft)
      !phi_now = phi_now + 0.1 * kres
      phi_now = phi_now + lambda * kres
-     if (usepaw == 1) gsc_ptr => gsc_all(:,is:ie)
+     if (usepaw == 1) gsc_ptr => gsc_all(:,igs:ige)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
                           eig(iband:), resid(iband:), enlx(iband), residvec, normalize=.True.)
-     cg(:,is:ie) = phi_now
+     cg(:,igs:ige) = phi_now
    end if
  end do iband_loop
  call timab(1634, 2, tsec) !"rmm_diis:band_opt"
@@ -456,11 +508,11 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_now, ghc, gsc, mpi_e
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
- integer :: istwf_k, usepaw, cpopt, sij_opt, idat, is, ie, npws
+ integer :: istwf_k, usepaw, cpopt, sij_opt, idat, is, ie, npwsp
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft
  real(dp),parameter :: rdummy = zero
  logical :: normalize_
- real(dp) :: rval, dotr, doti
+ real(dp) :: dotr, doti
 !arrays
  real(dp),allocatable :: gvnlxc(:, :)
  type(pawcprj_type) :: cprj_dum(1,1)
@@ -471,7 +523,7 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_now, ghc, gsc, mpi_e
  me_g0 = mpi_enreg%me_g0; comm_fft = mpi_enreg%comm_fft
  comm_spinorfft = mpi_enreg%comm_spinorfft; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  normalize_ = .True.; if (present(normalize)) normalize_ = normalize
- npws = npw * nspinor
+ npwsp = npw * nspinor
 
  cpopt = -1
  if (usepaw == 1) then
@@ -561,11 +613,11 @@ subroutine rmm_diis_free(diis)
 
 end subroutine rmm_diis_free
 
-subroutine rmm_diis_solve(diis, iline, npws, phi_now, residvec)
+subroutine rmm_diis_solve(diis, iline, npwsp, phi_now, residvec)
 
  class(rmm_diis_t),intent(in) :: diis
- integer,intent(in) :: iline, npws
- real(dp),intent(inout) :: phi_now(2, npws), residvec(2, npws)
+ integer,intent(in) :: iline, npwsp
+ real(dp),intent(inout) :: phi_now(2, npwsp), residvec(2, npwsp)
 
  integer :: cplex, ierr, lwork, npw, nspinor
  integer,allocatable :: ipiv(:)

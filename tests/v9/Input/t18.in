@@ -5,6 +5,7 @@
  #prtvol -432
 
  use_gemm_nonlop 1 # test nonlop with BLAS, requires useylm 1
+ #istwfk *1
 
 #First dataset : SCF run
  nband  30

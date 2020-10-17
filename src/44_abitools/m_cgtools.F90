@@ -871,16 +871,15 @@ end subroutine cg_zgemv
 !!
 !! SOURCE
 
-subroutine cg_zgemm(transa, transb, npws, ncola, ncolb, cg_a, cg_b, cg_c, alpha, beta)
+subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, alpha, beta)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws,ncola,ncolb
+ integer,intent(in) :: npwsp,ncola,ncolb
  real(dp),optional,intent(in) :: alpha(2),beta(2)
  character(len=1),intent(in) :: transa,transb
 !arrays
- real(dp),intent(in) :: cg_a(2,npws*ncola)
- real(dp),intent(in) :: cg_b(2,npws*ncolb)
+ real(dp),intent(in) :: cg_a(2,npwsp*ncola), cg_b(2,npwsp*ncolb)
  real(dp),intent(inout) :: cg_c(2,*)
 
 !Local variables-------------------------------
@@ -890,18 +889,18 @@ subroutine cg_zgemm(transa, transb, npws, ncola, ncolb, cg_a, cg_b, cg_c, alpha,
 
 ! *************************************************************************
 
- lda = npws
- ldb = npws
+ lda = npwsp
+ ldb = npwsp
 
- mm  = npws
+ mm  = npwsp
  nn  = ncolb
  kk  = ncola
 
  if (toupper(transa) /= 'N') then
    mm = ncola
-   kk = npws
+   kk = npwsp
  end if
- if (toupper(transb) /= 'N') nn = npws
+ if (toupper(transb) /= 'N') nn = npwsp
 
  ldc = mm
 
@@ -1029,13 +1028,13 @@ subroutine sqnorm_g(dotr,istwf_k,npwsp,vect,me_g0,comm)
    dotr = dotr * dotr
 
  else
-   if (istwf_k==2 .and. me_g0==1) then
+   if (istwf_k == 2 .and. me_g0 == 1) then
      ! Gamma k-point and I have G=0
      dotr=half*vect(1,1)**2
-     dotr = dotr + cg_real_zdotc(npwsp-1,vect(1,2),vect(1,2))
+     dotr = dotr + cg_real_zdotc(npwsp-1, vect(1,2), vect(1,2))
    else
      ! Other TR k-points
-     dotr = cg_real_zdotc(npwsp,vect,vect)
+     dotr = cg_real_zdotc(npwsp, vect, vect)
    end if
    dotr=two*dotr
  end if
@@ -2337,14 +2336,14 @@ end subroutine cg_vlocpsi
 !!  Cholesky orthonormalization of the vectors stored in cgblock (version optimized for NC wavefunctions).
 !!
 !! INPUTS
-!!  npws=Size of each vector (usually npw*nspinor)
+!!  npwsp=Size of each vector (usually npw*nspinor)
 !!  nband=Number of band in cgblock
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
 !!  me_g0=1 if this node has G=0.
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.
 !!
 !! SIDE EFFECTS
-!!  cgblock(2*npws*nband)
+!!  cgblock(2*npwsp*nband)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
@@ -2355,15 +2354,14 @@ end subroutine cg_vlocpsi
 !!
 !! SOURCE
 
-subroutine cgnc_cholesky(npws,nband,cgblock,istwfk,me_g0,comm_pw,use_gemm)
+subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws,nband,istwfk
- integer,intent(in) :: comm_pw,me_g0
+ integer,intent(in) :: npwsp, nband, istwfk, comm_pw, me_g0
  logical,optional,intent(in) :: use_gemm
 !arrays
- real(dp),intent(inout) :: cgblock(2*npws*nband)
+ real(dp),intent(inout) :: cgblock(2*npwsp*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -2384,7 +2382,7 @@ subroutine cgnc_cholesky(npws,nband,cgblock,istwfk,me_g0,comm_pw,use_gemm)
  if (istwfk==2) then
    ierr = 0
    do b1=1,nband
-     ptr = 2 + 2*(b1-1)*npws
+     ptr = 2 + 2*(b1-1)*npwsp
      if (ABS(cgblock(ptr)) > zero) then
        ierr = ierr + 1
        write(msg,'(a,i0,es13.6)')" Input b1, Im u(g=0) should be zero ",b1,cgblock(ptr)
@@ -2402,17 +2400,14 @@ subroutine cgnc_cholesky(npws,nband,cgblock,istwfk,me_g0,comm_pw,use_gemm)
  !
  ! 1) Calculate O_ij = <phi_i|phi_j>
  if (my_usegemm) then
-   call ABI_ZGEMM("Conjugate","Normal",nband,nband,npws,cone,cgblock,npws,cgblock,npws,czero,cf_ovlp,nband)
+   call ABI_ZGEMM("Conjugate","Normal",nband,nband,npwsp,cone,cgblock,npwsp,cgblock,npwsp,czero,cf_ovlp,nband)
  else
-   call ZHERK("U","C",nband,npws,one,cgblock,npws,zero,cf_ovlp,nband)
+   call ZHERK("U","C",nband,npwsp,one,cgblock,npwsp,zero,cf_ovlp,nband)
  end if
 
  if (istwfk==1) then
-   !
    ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) then
-     call xmpi_sum(cf_ovlp,comm_pw,ierr)
-   end if
+   if (comm_pw /= xmpi_comm_self) call xmpi_sum(cf_ovlp,comm_pw,ierr)
    !
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
    call ZPOTRF('U',nband,cf_ovlp,nband,ierr)
@@ -2429,7 +2424,7 @@ subroutine cgnc_cholesky(npws,nband,cgblock,istwfk,me_g0,comm_pw,use_gemm)
 
    if (istwfk==2 .and. me_g0==1) then
      ! Extract the real part at G=0 and subtract its contribution to the overlap.
-     call dcopy(nband,cgblock,2*npws,rcg0,1)
+     call dcopy(nband,cgblock, 2*npwsp, rcg0, 1)
      do b2=1,nband
        do b1=1,b2
          rovlp(b1,b2) = rovlp(b1,b2) - rcg0(b1)*rcg0(b2)
@@ -2438,9 +2433,7 @@ subroutine cgnc_cholesky(npws,nband,cgblock,istwfk,me_g0,comm_pw,use_gemm)
    end if
 
    ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) then
-     call xmpi_sum(rovlp,comm_pw,ierr)
-   end if
+   if (comm_pw /= xmpi_comm_self) call xmpi_sum(rovlp,comm_pw,ierr)
    !
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
    call DPOTRF('U',nband,rovlp,nband,ierr)
@@ -2455,13 +2448,13 @@ subroutine cgnc_cholesky(npws,nband,cgblock,istwfk,me_g0,comm_pw,use_gemm)
  end if
  !
  ! 3) Solve X U = cgblock. On exit cgblock is orthonormalized.
- call ZTRSM('Right','Upper','Normal','Normal',npws,nband,cone,cf_ovlp,nband,cgblock,npws)
+ call ZTRSM('Right','Upper','Normal','Normal',npwsp,nband,cone,cf_ovlp,nband,cgblock,npwsp)
 
 #ifdef DEBUG_MODE
  if (istwfk==2) then
    ierr = 0
    do b1=1,nband
-     ptr = 2 + 2*(b1-1)*npws
+     ptr = 2 + 2*(b1-1)*npwsp
      if (ABS(cgblock(ptr)) > zero) then
        ierr = ierr + 1
        write(msg,'(a,i0,es13.6)')" Output b1, Im u(g=0) should be zero ",b1,cgblock(ptr)
@@ -2486,18 +2479,17 @@ end subroutine cgnc_cholesky
 !!  Cholesky orthonormalization of the vectors stored in cgblock. (version for PAW wavefunctions).
 !!
 !! INPUTS
-!!  npws=Size of each vector (usually npw*nspinor)
+!!  npwsp=Size of each vector (usually npw*nspinor)
 !!  nband=Number of band in cgblock and gsc
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
 !!  me_g0=1 if this node has G=0.
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.
 !!
 !! SIDE EFFECTS
-!!  cgblock(2*npws*nband)
+!!  cgblock(2*npwsp*nband)
 !!    input: Input set of vectors |C>, S|C>
 !!    output: Orthonormalized set such as  <C|S|C> = 1
-!!  gsc(2*npws*nband)
-!!   destroyed in output.
+!!  gsc(2*npwsp*nband): destroyed in output.
 !!
 !! PARENTS
 !!      m_cgtools
@@ -2506,15 +2498,13 @@ end subroutine cgnc_cholesky
 !!
 !! SOURCE
 
-subroutine cgpaw_cholesky(npws,nband,cgblock,gsc,istwfk,me_g0,comm_pw)
+subroutine cgpaw_cholesky(npwsp, nband, cgblock, gsc, istwfk, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws,nband,istwfk
- integer,intent(in) :: me_g0,comm_pw
+ integer,intent(in) :: npwsp, nband, istwfk, me_g0, comm_pw
 !arrays
- real(dp),intent(inout) :: cgblock(2*npws*nband)
- real(dp),intent(inout) :: gsc(2*npws*nband)
+ real(dp),intent(inout) :: cgblock(2*npwsp*nband), gsc(2*npwsp*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -2528,16 +2518,13 @@ subroutine cgpaw_cholesky(npws,nband,cgblock,gsc,istwfk,me_g0,comm_pw)
 ! *************************************************************************
 
  ! 1) Calculate O_ij =  <phi_i|S|phi_j>
- ABI_MALLOC(cf_ovlp,(nband,nband))
+ ABI_MALLOC(cf_ovlp,(nband, nband))
 
- call ABI_ZGEMM("C","N",nband,nband,npws,cone,cgblock,npws,gsc,npws,czero,cf_ovlp,nband)
+ call ABI_ZGEMM("C","N",nband,nband,npwsp,cone,cgblock,npwsp,gsc,npwsp,czero,cf_ovlp,nband)
 
  if (istwfk==1) then
-   !
    ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) then
-     call xmpi_sum(cf_ovlp,comm_pw,ierr)
-   end if
+   if (comm_pw /= xmpi_comm_self) call xmpi_sum(cf_ovlp,comm_pw,ierr)
    !
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
    call ZPOTRF('U',nband,cf_ovlp,nband,ierr)
@@ -2554,19 +2541,17 @@ subroutine cgpaw_cholesky(npws,nband,cgblock,gsc,istwfk,me_g0,comm_pw)
 
    if (istwfk==2 .and. me_g0==1) then
      ! Extract the real part at G=0 and subtract its contribution to the overlap.
-     call dcopy(nband,cgblock,2*npws,rcg0,1)
-     call dcopy(nband,gsc,2*npws,rg0sc,1)
+     call dcopy(nband, cgblock, 2*npwsp, rcg0, 1)
+     call dcopy(nband, gsc, 2*npwsp, rg0sc, 1)
      do b2=1,nband
        do b1=1,b2
         rovlp(b1,b2) = rovlp(b1,b2) - rcg0(b1)*rg0sc(b2)
        end do
      end do
    end if
-   !
+
    ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) then
-     call xmpi_sum(rovlp,comm_pw,ierr)
-   end if
+   if (comm_pw /= xmpi_comm_self) call xmpi_sum(rovlp,comm_pw,ierr)
   !
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
    call DPOTRF('U',nband,rovlp,nband,ierr)
@@ -2579,12 +2564,12 @@ subroutine cgpaw_cholesky(npws,nband,cgblock,gsc,istwfk,me_g0,comm_pw)
    cf_ovlp = DCMPLX(rovlp)
    ABI_FREE(rovlp)
  end if
- !
+
  ! 3) Solve X U = cgblock.
- call ZTRSM('Right','Upper','Normal','Normal',npws,nband,cone,cf_ovlp,nband,cgblock,npws)
+ call ZTRSM('Right','Upper','Normal','Normal',npwsp,nband,cone,cf_ovlp,nband,cgblock,npwsp)
 
  ! 4) Solve Y U = gsc. On exit <cgblock|gsc> = 1
- call ZTRSM('Right','Upper','Normal','Normal',npws,nband,cone,cf_ovlp,nband,gsc,npws)
+ call ZTRSM('Right','Upper','Normal','Normal',npwsp,nband,cone,cf_ovlp,nband,gsc,npwsp)
 
  ABI_FREE(cf_ovlp)
 
@@ -2600,7 +2585,7 @@ end subroutine cgpaw_cholesky
 !! FUNCTION
 !!
 !! INPUTS
-!!  npws=Size of each vector (usually npw*nspinor)
+!!  npwsp=Size of each vector (usually npw*nspinor)
 !!  nband=Number of vectors in icg1
 !!
 !! SIDE EFFECTS
@@ -2612,13 +2597,13 @@ end subroutine cgpaw_cholesky
 !!
 !! SOURCE
 
-subroutine cgnc_normalize(npws, nband, cg, istwfk, me_g0, comm_pw)
+subroutine cgnc_normalize(npwsp, nband, cg, istwfk, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws,nband,istwfk,me_g0,comm_pw
+ integer,intent(in) :: npwsp,nband,istwfk,me_g0,comm_pw
 !arrays
- real(dp),intent(inout) :: cg(2*npws*nband)
+ real(dp),intent(inout) :: cg(2*npwsp*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -2631,10 +2616,10 @@ subroutine cgnc_normalize(npws, nband, cg, istwfk, me_g0, comm_pw)
 
 !$OMP PARALLEL DO PRIVATE(ptr) IF (nband > 1)
  do band=1,nband
-   ptr = 1 + 2*npws*(band-1)
-   norm(band) = cg_dznrm2(npws, cg(ptr))
+   ptr = 1 + 2*npwsp*(band-1)
+   norm(band) = cg_dznrm2(npwsp, cg(ptr))
    norm(band) = norm(band) ** 2
-   !norm(band) = cg_real_zdotc(npws, cg(ptr), cg(ptr))
+   !norm(band) = cg_real_zdotc(npwsp, cg(ptr), cg(ptr))
  end do
 
  if (istwfk > 1) then
@@ -2642,7 +2627,7 @@ subroutine cgnc_normalize(npws, nband, cg, istwfk, me_g0, comm_pw)
    if (istwfk == 2 .and. me_g0 == 1) then
 !$OMP PARALLEL DO PRIVATE(ptr) IF (nband >1)
      do band=1,nband
-       ptr = 1 + 2*npws*(band-1)
+       ptr = 1 + 2*npwsp*(band-1)
        norm(band) = norm(band) - cg(ptr)**2
      end do
    end if
@@ -2666,9 +2651,9 @@ subroutine cgnc_normalize(npws, nband, cg, istwfk, me_g0, comm_pw)
 
 !$OMP PARALLEL DO PRIVATE(ptr,alpha) IF (nband > 1)
  do band=1,nband
-   ptr = 1 + 2*npws*(band-1)
+   ptr = 1 + 2*npwsp*(band-1)
    alpha = [one / norm(band), zero]
-   call cg_zscal(npws, alpha, cg(ptr))
+   call cg_zscal(npwsp, alpha, cg(ptr))
  end do
 
 end subroutine cgnc_normalize
@@ -2683,14 +2668,14 @@ end subroutine cgnc_normalize
 !! FUNCTION
 !!
 !! INPUTS
-!!  npws=Size of each vector (usually npw*nspinor)
+!!  npwsp=Size of each vector (usually npw*nspinor)
 !!  nband1=Number of vectors in icg1
 !!  nband1=Number of vectors in cg2
 !!  comm_pw=MPI communicator.
 !!
 !! SIDE EFFECTS
-!!  cg2(2*npws*nband2)
-!!  icg1(2*npws*nband1)
+!!  cg2(2*npwsp*nband2)
+!!  icg1(2*npwsp*nband1)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
@@ -2701,16 +2686,16 @@ end subroutine cgnc_normalize
 !!
 !! SOURCE
 
-subroutine cgnc_gsortho(npws,nband1,icg1,nband2,iocg2,istwfk,normalize,me_g0,comm_pw)
+subroutine cgnc_gsortho(npwsp, nband1, icg1, nband2, iocg2, istwfk, normalize, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws,nband1,nband2,istwfk,me_g0
+ integer,intent(in) :: npwsp,nband1,nband2,istwfk,me_g0
  integer,optional,intent(in) :: comm_pw
  logical,intent(in) :: normalize
 !arrays
- real(dp),intent(in) :: icg1(2*npws*nband1)
- real(dp),intent(inout) :: iocg2(2*npws*nband2)
+ real(dp),intent(in) :: icg1(2*npwsp*nband1)
+ real(dp),intent(inout) :: iocg2(2*npwsp*nband2)
 
 !Local variables ------------------------------
 !scalars
@@ -2725,7 +2710,7 @@ subroutine cgnc_gsortho(npws,nband1,icg1,nband2,iocg2,istwfk,normalize,me_g0,com
  !proj = zero
 
  ! 1) Calculate <cg1|cg2>
- call cg_zgemm("C","N",npws,nband1,nband2,icg1,iocg2,proj)
+ call cg_zgemm("C","N",npwsp,nband1,nband2,icg1,iocg2,proj)
 
  if (istwfk>1) then
    ! nspinor is always 1 in this case.
@@ -2735,8 +2720,8 @@ subroutine cgnc_gsortho(npws,nband1,icg1,nband2,iocg2,istwfk,normalize,me_g0,com
    !
    if (istwfk==2 .and. me_g0==1) then
      ! Extract the real part at G=0 and subtract its contribution.
-     call dcopy(nband1,icg1, 2*npws,r_icg1, 1)
-     call dcopy(nband2,iocg2,2*npws,r_iocg2,1)
+     call dcopy(nband1,icg1, 2*npwsp,r_icg1, 1)
+     call dcopy(nband2,iocg2,2*npwsp,r_iocg2,1)
      do b2=1,nband2
        do b1=1,nband1
          proj(1,b1,b2) = proj(1,b1,b2) - r_icg1(b1) * r_iocg2(b2)
@@ -2747,19 +2732,15 @@ subroutine cgnc_gsortho(npws,nband1,icg1,nband2,iocg2,istwfk,normalize,me_g0,com
  end if
  !
  ! This is for the MPI version
- if (comm_pw /= xmpi_comm_self) then
-   call xmpi_sum(proj,comm_pw,ierr)
- end if
+ if (comm_pw /= xmpi_comm_self) call xmpi_sum(proj,comm_pw,ierr)
 
  ! 2) cg2 = cg2 - <cg1|cg2> cg1
- call cg_zgemm("N","N",npws,nband1,nband2,icg1,proj,iocg2,alpha=-cg_cone,beta=cg_cone)
+ call cg_zgemm("N","N",npwsp,nband1,nband2,icg1,proj,iocg2,alpha=-cg_cone,beta=cg_cone)
 
  ABI_FREE(proj)
 
  ! 3) Normalize iocg2 if required.
- if (normalize) then
-   call cgnc_normalize(npws,nband2,iocg2,istwfk,me_g0,comm_pw)
- end if
+ if (normalize) call cgnc_normalize(npwsp,nband2,iocg2,istwfk,me_g0,comm_pw)
 
 end subroutine cgnc_gsortho
 !!***
@@ -2774,14 +2755,14 @@ end subroutine cgnc_gsortho
 !!  Gram-Schmidt orthonormalization of the vectors stored in cgblock
 !!
 !! INPUTS
-!!  npws=Size of each vector (usually npw*nspinor)
+!!  npwsp=Size of each vector (usually npw*nspinor)
 !!  nband=Number of band in cgblock
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
 !!  me_g0=1 if this node has G=0.
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.
 !!
 !! SIDE EFFECTS
-!!  cgblock(2*npws*nband)
+!!  cgblock(2*npwsp*nband)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
@@ -2789,14 +2770,13 @@ end subroutine cgnc_gsortho
 !!
 !! SOURCE
 
-subroutine cgnc_gramschmidt(npws,nband,cgblock,istwfk,me_g0,comm_pw)
+subroutine cgnc_gramschmidt(npwsp, nband, cgblock, istwfk, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws,nband,istwfk
- integer,intent(in) :: comm_pw,me_g0
+ integer,intent(in) :: npwsp, nband, istwfk, comm_pw, me_g0
 !arrays
- real(dp),intent(inout) :: cgblock(2*npws*nband)
+ real(dp),intent(inout) :: cgblock(2*npwsp*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -2806,15 +2786,15 @@ subroutine cgnc_gramschmidt(npws,nband,cgblock,istwfk,me_g0,comm_pw)
 ! *************************************************************************
 
  ! Normalize the first vector.
- call cgnc_normalize(npws,1,cgblock(1),istwfk,me_g0,comm_pw)
+ call cgnc_normalize(npwsp,1,cgblock(1),istwfk,me_g0,comm_pw)
  if (nband == 1) RETURN
 
  ! Orthogonaluze b1 wrt to the bands in [1,b1-1].
  normalize = .TRUE.
  do b1=2,nband
-    opt = 1 + 2*npws*(b1-1)
-    nb2=b1-1
-    call cgnc_gsortho(npws,nb2,cgblock(1),1,cgblock(opt),istwfk,normalize,me_g0,comm_pw)
+   opt = 1 + 2*npwsp*(b1-1)
+   nb2=b1-1
+   call cgnc_gsortho(npwsp,nb2,cgblock(1),1,cgblock(opt),istwfk,normalize,me_g0,comm_pw)
  end do
 
 end subroutine cgnc_gramschmidt
@@ -2830,17 +2810,17 @@ end subroutine cgnc_gramschmidt
 !!  Normalize a set of PAW pseudo wavefunctions.
 !!
 !! INPUTS
-!!  npws=Size of each vector (usually npw*nspinor)
+!!  npwsp=Size of each vector (usually npw*nspinor)
 !!  nband=Number of band in cgblock and gsc
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
 !!  me_g0=1 if this node has G=0.
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.
 !!
 !! SIDE EFFECTS
-!!  cg(2*npws*nband)
+!!  cg(2*npwsp*nband)
 !!    input: Input set of vectors |C>
 !!    output: Normalized set such as  <C|S|C> = 1
-!!  gsc(2*npws*nband)
+!!  gsc(2*npwsp*nband)
 !!    input: Input set of vectors S|C>
 !!    output: New S|C> compute with the new |C>
 !!
@@ -2851,13 +2831,13 @@ end subroutine cgnc_gramschmidt
 !!
 !! SOURCE
 
-subroutine cgpaw_normalize(npws, nband, cg, gsc, istwfk, me_g0, comm_pw)
+subroutine cgpaw_normalize(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws, nband, istwfk, me_g0, comm_pw
+ integer,intent(in) :: npwsp, nband, istwfk, me_g0, comm_pw
 !arrays
- real(dp),intent(inout) :: cg(2*npws*nband), gsc(2*npws*nband)
+ real(dp),intent(inout) :: cg(2*npwsp*nband), gsc(2*npwsp*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -2870,8 +2850,8 @@ subroutine cgpaw_normalize(npws, nband, cg, gsc, istwfk, me_g0, comm_pw)
 
 !$OMP PARALLEL DO PRIVATE(ptr) IF (nband > 1)
  do band=1,nband
-   ptr = 1 + 2*npws*(band-1)
-   norm(band) = cg_real_zdotc(npws,gsc(ptr),cg(ptr))
+   ptr = 1 + 2*npwsp*(band-1)
+   norm(band) = cg_real_zdotc(npwsp,gsc(ptr),cg(ptr))
  end do
 
  if (istwfk>1) then
@@ -2879,7 +2859,7 @@ subroutine cgpaw_normalize(npws, nband, cg, gsc, istwfk, me_g0, comm_pw)
    if (istwfk==2 .and. me_g0==1) then
 !$OMP PARALLEL DO PRIVATE(ptr) IF (nband > 1)
      do band=1,nband
-       ptr = 1 + 2*npws*(band-1)
+       ptr = 1 + 2*npwsp*(band-1)
        norm(band) = norm(band) - gsc(ptr) * cg(ptr)
      end do
    end if
@@ -2904,10 +2884,10 @@ subroutine cgpaw_normalize(npws, nband, cg, gsc, istwfk, me_g0, comm_pw)
  ! Scale |C> and S|C>.
 !$OMP PARALLEL DO PRIVATE(ptr,alpha) IF (nband > 1)
  do band=1,nband
-   ptr = 1 + 2*npws*(band-1)
-   alpha = [one/norm(band), zero]
-   call cg_zscal(npws, alpha, cg(ptr))
-   call cg_zscal(npws, alpha, gsc(ptr))
+   ptr = 1 + 2*npwsp*(band-1)
+   alpha = [one / norm(band), zero]
+   call cg_zscal(npwsp, alpha, cg(ptr))
+   call cg_zscal(npwsp, alpha, gsc(ptr))
  end do
 
 end subroutine cgpaw_normalize
@@ -2924,10 +2904,10 @@ end subroutine cgpaw_normalize
 !!  with respect to an input block of states.
 !!
 !! INPUTS
-!!  npws=Size of each vector (usually npw*nspinor)
+!!  npwsp=Size of each vector (usually npw*nspinor)
 !!  nband1=Number of vectors in the input block icg1
-!!  icg1(2*npws*nband1)=Input block of vectors.
-!!  igsc1(2*npws*nband1)= S|C> for C in icg1.
+!!  icg1(2*npwsp*nband1)=Input block of vectors.
+!!  igsc1(2*npwsp*nband1)= S|C> for C in icg1.
 !!  nband2=Number of vectors to orthogonalize
 !!  normalize=True if output wavefunction must be normalized.
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
@@ -2935,7 +2915,7 @@ end subroutine cgpaw_normalize
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.
 !!
 !! SIDE EFFECTS
-!!  iocg2(2*npws*nband2), iogsc2(2*npws*nband1)
+!!  iocg2(2*npwsp*nband2), iogsc2(2*npwsp*nband1)
 !!    input: set of |C> and S|C> wher |C> is the set of states to orthogonalize
 !!    output: Orthonormalized set.
 !!
@@ -2946,16 +2926,16 @@ end subroutine cgpaw_normalize
 !!
 !! SOURCE
 
-subroutine cgpaw_gsortho(npws,nband1,icg1,igsc1,nband2,iocg2,iogsc2,istwfk,normalize,me_g0,comm_pw)
+subroutine cgpaw_gsortho(npwsp, nband1, icg1, igsc1, nband2, iocg2, iogsc2, istwfk, normalize, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws,nband1,nband2,istwfk,me_g0
+ integer,intent(in) :: npwsp, nband1, nband2, istwfk, me_g0
  integer,optional,intent(in) :: comm_pw
  logical,intent(in) :: normalize
 !arrays
- real(dp),intent(in) :: icg1(2*npws*nband1),igsc1(2*npws*nband1)
- real(dp),intent(inout) :: iocg2(2*npws*nband2),iogsc2(2*npws*nband2)
+ real(dp),intent(in) :: icg1(2*npwsp*nband1),igsc1(2*npwsp*nband1)
+ real(dp),intent(inout) :: iocg2(2*npwsp*nband2),iogsc2(2*npwsp*nband2)
 
 !Local variables ------------------------------
 !scalars
@@ -2969,7 +2949,7 @@ subroutine cgpaw_gsortho(npws,nband1,icg1,igsc1,nband2,iocg2,iogsc2,istwfk,norma
  ABI_MALLOC(proj,(2,nband1,nband2))
 
  ! 1) Calculate <cg1|cg2>
- call cg_zgemm("C","N",npws,nband1,nband2,igsc1,iocg2,proj)
+ call cg_zgemm("C","N",npwsp,nband1,nband2,igsc1,iocg2,proj)
 
  if (istwfk>1) then
    ! nspinor is always 1 in this case.
@@ -2979,34 +2959,30 @@ subroutine cgpaw_gsortho(npws,nband1,icg1,igsc1,nband2,iocg2,iogsc2,istwfk,norma
    !
    if (istwfk==2 .and. me_g0==1) then
      ! Extract the real part at G=0 and subtract its contribution.
-     call dcopy(nband1,igsc1,2*npws,r_icg1, 1)
-     call dcopy(nband2,iocg2,2*npws,r_iocg2,1)
+     call dcopy(nband1,igsc1,2*npwsp,r_icg1, 1)
+     call dcopy(nband2,iocg2,2*npwsp,r_iocg2,1)
      do b2=1,nband2
        do b1=1,nband1
          proj(1,b1,b2) = proj(1,b1,b2) - r_icg1(b1) * r_iocg2(b2)
        end do
      end do
    end if
-   !
+
  end if
- !
+
  ! This is for the MPI version
- if (comm_pw /= xmpi_comm_self) then
-   call xmpi_sum(proj,comm_pw,ierr)
- end if
+ if (comm_pw /= xmpi_comm_self) call xmpi_sum(proj,comm_pw,ierr)
 
  ! 2)
  !   cg2 = cg2 - <Scg1|cg2> cg1
  ! S cg2 = S cg2 - <Scg1|cg2> S cg1
- call cg_zgemm("N","N",npws,nband1,nband2,icg1,proj,iocg2,alpha=-cg_cone,beta=cg_cone)
- call cg_zgemm("N","N",npws,nband1,nband2,igsc1,proj,iogsc2,alpha=-cg_cone,beta=cg_cone)
+ call cg_zgemm("N","N",npwsp,nband1,nband2,icg1,proj,iocg2,alpha=-cg_cone,beta=cg_cone)
+ call cg_zgemm("N","N",npwsp,nband1,nband2,igsc1,proj,iogsc2,alpha=-cg_cone,beta=cg_cone)
 
  ABI_FREE(proj)
 
  ! 3) Normalize iocg2 and iogsc2 if required.
- if (normalize) then
-   call cgpaw_normalize(npws,nband2,iocg2,iogsc2,istwfk,me_g0,comm_pw)
- end if
+ if (normalize) call cgpaw_normalize(npwsp, nband2, iocg2, iogsc2, istwfk, me_g0, comm_pw)
 
 end subroutine cgpaw_gsortho
 !!***
@@ -3021,14 +2997,14 @@ end subroutine cgpaw_gsortho
 !!  Gram-Schmidt orthonormalization of the vectors stored in cg
 !!
 !! INPUTS
-!!  npws=Size of each vector (usually npw*nspinor)
+!!  npwsp=Size of each vector (usually npw*nspinor)
 !!  nband=Number of bands in cg
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
 !!  me_g0=1 if this node has G=0.
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.
 !!
 !! SIDE EFFECTS
-!!  cg(2*npws*nband), gsc(2*npws*nband)
+!!  cg(2*npwsp*nband), gsc(2*npwsp*nband)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
@@ -3036,13 +3012,13 @@ end subroutine cgpaw_gsortho
 !!
 !! SOURCE
 
-subroutine cgpaw_gramschmidt(npws,nband,cg,gsc,istwfk,me_g0,comm_pw)
+subroutine cgpaw_gramschmidt(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npws,nband,istwfk,comm_pw,me_g0
+ integer,intent(in) :: npwsp,nband,istwfk,comm_pw,me_g0
 !arrays
- real(dp),intent(inout) :: cg(2*npws*nband),gsc(2*npws*nband)
+ real(dp),intent(inout) :: cg(2*npwsp*nband),gsc(2*npwsp*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -3052,15 +3028,15 @@ subroutine cgpaw_gramschmidt(npws,nband,cg,gsc,istwfk,me_g0,comm_pw)
 ! *************************************************************************
 
  ! Normalize the first vector.
- call cgpaw_normalize(npws,1,cg(1),gsc(1),istwfk,me_g0,comm_pw)
+ call cgpaw_normalize(npwsp,1,cg(1),gsc(1),istwfk,me_g0,comm_pw)
  if (nband == 1) RETURN
 
  ! Orthogonalize b1 wrt to the bands in [1,b1-1].
  normalize = .TRUE.
  do b1=2,nband
-    opt = 1 + 2*npws*(b1-1)
-    nb2=b1-1
-    call cgpaw_gsortho(npws,nb2,cg(1),gsc(1),1,cg(opt),gsc(opt),istwfk,normalize,me_g0,comm_pw)
+   opt = 1 + 2*npwsp*(b1-1)
+   nb2=b1-1
+   call cgpaw_gsortho(npwsp,nb2,cg(1),gsc(1),1,cg(opt),gsc(opt),istwfk,normalize,me_g0,comm_pw)
  end do
 
 end subroutine cgpaw_gramschmidt
@@ -4362,7 +4338,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
 !Local variables-------------------------------
  integer :: iband,ii,ierr,rvectsize,vectsize,use_slk
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  ! real(dp) :: tsec(2)
  real(dp),allocatable :: evec_tmp(:,:),subovl_tmp(:),subham_tmp(:)
