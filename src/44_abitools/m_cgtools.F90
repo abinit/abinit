@@ -48,7 +48,7 @@ MODULE m_cgtools
  use m_xmpi
 
  use m_fstrings,      only : toupper
- use m_time,          only : cwtime, cwtime_report, timab, sec2str
+ use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit
 
  implicit none
@@ -4381,13 +4381,13 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
  rvectsize=npw_k*nspinor
  vectsize=2*rvectsize;if (me_g0==1) vectsize=vectsize-1
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
 
  !Impose Hermiticity on diagonal elements of subham (and subovl, if needed)
  ! MG FIXME: In these two calls we are aliasing the args
  call hermit(subham, subham, ierr, nband_k)
  if (use_subovl==1) call hermit(subovl, subovl, ierr, nband_k)
- call cwtime_report(" hermit", cpu, wall, gflops)
+ !call cwtime_report(" hermit", cpu, wall, gflops)
 
  ! Diagonalize the Hamitonian matrix
  if(istwf_k==2) then
@@ -4414,7 +4414,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
      call abi_xhpev('V','U',nband_k,subham,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
  end if
- call cwtime_report(" hdiago", cpu, wall, gflops)
+ !call cwtime_report(" hdiago", cpu, wall, gflops)
 
  !Normalize each eigenvector and set phase:
  !The problem with minus/plus signs might be present also if .not. use_subovl
@@ -4434,7 +4434,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
      end do
    end do
  end if
- call cwtime_report(" normev", cpu, wall, gflops)
+ !call cwtime_report(" normev", cpu, wall, gflops)
 
  !=====================================================
  ! Carry out rotation of bands C(G,n) according to evecs
@@ -4531,7 +4531,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
    ABI_FREE(work)
  end if
- call cwtime_report(" rotation", cpu, wall, gflops)
+ !call cwtime_report(" rotation", cpu, wall, gflops)
 
  contains
 

@@ -916,8 +916,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DEALLOCATE(eig_save)
  end if
 
-!Structured debugging : if prtvol=-level, stop here.
- if(prtvol==-level)then
+ if (prtvol==-level) then
+   ! Structured debugging: if prtvol=-level, stop here.
    write(msg,'(a,a,a,i0,a)')' vtowfk : exit ',ch10,'  prtvol=-',level,', debugging mode => stop '
    MSG_ERROR(msg)
  end if
