@@ -4267,49 +4267,49 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
     WRITE(cflavors,'(I4)') (flavors+1)*2
     string = '(1x,'//TRIM(ADJUSTL(cflavors))//'ES22.14)'
     DO itime = 1, sp1
-      WRITE(45,string) DBLE(itime-1)*dt, &
-      (/ (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors) /)
+!     WRITE(45,string) DBLE(itime-1)*dt, &
+!     (/ (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors) /)
       WRITE(oFile,string) DBLE(itime-1)*dt, &
       (/ (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors) /)
-      WRITE(46,*) DBLE(itime-1)*dt, &
-      & (/ ((op%Greens%oper(itime,iflavor,iflavorb), iflavor=1, flavors),iflavorb=1,flavors) /)
+!     WRITE(46,*) DBLE(itime-1)*dt, &
+!     & (/ ((op%Greens%oper(itime,iflavor,iflavorb), iflavor=1, flavors),iflavorb=1,flavors) /)
     END DO
-    DO itime = 1, sp1
-      WRITE(47,*) DBLE(itime-1)*dt, &
-      & (/ ((op%Greens%oper(itime,iflavor,iflavorb), iflavor=1, flavors),iflavorb=1,flavors) /)
-    END DO
+!   DO itime = 1, sp1
+!     WRITE(47,*) DBLE(itime-1)*dt, &
+!     & (/ ((op%Greens%oper(itime,iflavor,iflavorb), iflavor=1, flavors),iflavorb=1,flavors) /)
+!   END DO
 !  --- Print full non diagonal Gtau in Gtau_nd.dat
     WRITE(cflavors,'(I4)') (flavors*flavors+1)
-    write(47,*) "cflavors",cflavors
+!   write(47,*) "cflavors",cflavors
     string = '(1x,'//TRIM(ADJUSTL(cflavors))//'ES22.14)'
-    write(47,*) string
+!   write(47,*) string
     DO itime = 1, sp1
       WRITE(43,string) DBLE(itime-1)*dt, &
       & (/ ((op%Greens%oper(itime,iflavor,iflavorb), iflavorb=1, flavors),iflavor=1,flavors) /)
-      WRITE(44,*) DBLE(itime-1)*dt, &
-      & (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors)
-      WRITE(44,string) DBLE(itime-1)*dt, &
-      & (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors)
+!     WRITE(44,*) DBLE(itime-1)*dt, &
+!     & (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors)
+!     WRITE(44,string) DBLE(itime-1)*dt, &
+!     & (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors)
     END DO
       WRITE(43,*) 
   END IF
-     DO iflavor = 1, flavors
-       DO iflavor2 = 1, flavors
-           write(4436,*) "#",iflavor,iflavor2
-         do  itime=1,sp1
-           write(4436,*) DBLE(itime-1)*dt,real(op%Greens%oper(itime,iflavor,iflavor2))
-         enddo
-           write(4436,*) 
-       END DO
-     END DO
-     close(4436)
+!    DO iflavor = 1, flavors
+!      DO iflavor2 = 1, flavors
+!          write(4436,*) "#",iflavor,iflavor2
+!        do  itime=1,sp1
+!          write(4436,*) DBLE(itime-1)*dt,real(op%Greens%oper(itime,iflavor,iflavor2))
+!        enddo
+!          write(4436,*) 
+!      END DO
+!    END DO
+!    close(4436)
 
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
   CLOSE(43)
-  CLOSE(44)
-  CLOSE(45)
-  CLOSE(46)
-  CLOSE(47)
+! CLOSE(44)
+! CLOSE(45)
+! CLOSE(46)
+! CLOSE(47)
   !call flush_unit(43)
 
 END SUBROUTINE Ctqmcoffdiag_printGreen
