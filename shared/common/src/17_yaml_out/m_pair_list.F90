@@ -40,7 +40,7 @@ module m_pair_list
   use m_type_pair_list
   use m_errors
 
-  use m_fstrings, only : sjoin
+  use m_fstrings, only : sjoin, itoa
 
   implicit none
 
@@ -545,13 +545,14 @@ subroutine pair_list_increment(pl, key, cnt)
  character(kind=c_char,len=500) :: s
 
  call pair_list_get(pl, key, type_code, i, r, s)
- if (type_code == TC_EMPTY) then
+ select case (type_code)
+ case (TC_EMPTY, TC_NOTFOUND)
    call pair_list_set(pl, key, i=cnt)
- else if (type_code == TC_INT) then
+ case (TC_INT)
    call pair_list_set(pl, key, i=cnt + i)
- else
-   MSG_ERROR("Expecting value in dict of integer type")
- end if
+ case default
+   MSG_ERROR(sjoin("Expecting value in dict of integer type. got:", itoa(type_code)))
+ end select
 
 end subroutine pair_list_increment
 !!***

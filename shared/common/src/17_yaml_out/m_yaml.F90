@@ -255,6 +255,7 @@ end subroutine yaml_iterstart
 !!  [width]: optional, impose a minimum width of the field name side of the column (padding with spaces)
 !!  [int_fmt]: Default format for integers.
 !!  [real_fmt]: Default format for real.
+!!  [with_iter_state]: True if dict with iteration state should be added. Default: True
 !!
 !! PARENTS
 !!
@@ -262,7 +263,7 @@ end subroutine yaml_iterstart
 !!
 !! SOURCE
 
-type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_fmt) result(new)
+type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_fmt, with_iter_state) result(new)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: tag
@@ -270,9 +271,10 @@ type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_f
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
  character(len=*),optional,intent(in) :: int_fmt, real_fmt
+ logical,optional,intent(in) :: with_iter_state
 
 !Local variables-------------------------------
- logical :: nl
+ logical :: nl, with_iter_state_
  type(pair_list) :: dict
 ! *************************************************************************
 
@@ -284,9 +286,8 @@ type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_f
 
  call new%stream%push(ch10//'---'//' !'//trim(tag)//ch10)
 
- !with_iter_state_ = .True.; if (present(with_iter_state) with_iter_state_ = with_iter_state
- !if (with_iter_state_) then
- if (DTSET_IDX /= -1) then
+ with_iter_state_ = .True.; if (present(with_iter_state)) with_iter_state_ = with_iter_state
+ if (with_iter_state_ .and. DTSET_IDX /= -1) then
    ! Write dictionary with iteration state.
    call dict%set('dtset', i=DTSET_IDX)
    if (TIMIMAGE_IDX /= -1) call dict%set("timimage", i=TIMIMAGE_IDX)
@@ -296,7 +297,6 @@ type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_f
    call new%add_dict('iteration_state', dict, int_fmt="(i0)")
    call dict%free()
  end if
- !end if
 
  if (present(info)) then
    if (len_trim(info) /= 0) then

@@ -57,9 +57,11 @@ module m_rmm_diis
    integer :: istwf_k
    integer :: cplex
    integer :: max_niter
-   !integer :: npw
-   !integer :: nspinor
    integer :: npwsp
+   type(pair_list) :: stats
+
+   real(dp),allocatable :: hist_ene(:) ! (0:max_niter+1)
+   real(dp),allocatable :: hist_resid(:) !(0:dtset%nline)
 
    real(dp),allocatable :: resmat(:,:,:)
    real(dp),allocatable :: smat(:,:,:)
@@ -72,6 +74,7 @@ module m_rmm_diis
    procedure :: free => rmm_diis_free
    procedure :: solve => rmm_diis_solve
    procedure :: eval_mats => rmm_diis_eval_mats
+   procedure :: exit => rmm_diis_exit
 
  end type rmm_diis_t
 
@@ -142,7 +145,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  character(len=500) :: msg
 !arrays
  integer :: niter_band(nband)
- real(dp) :: tsec(2), hist_ene(0:dtset%nline), hist_resid(0:dtset%nline)
+ real(dp) :: tsec(2) !, hist_ene(0:dtset%nline), hist_resid(0:dtset%nline)
  real(dp),target :: fake_gsc(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: ghc(:,:), gsc(:,:), gvnlxc(:,:), pcon(:)
@@ -151,7 +154,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  type(pawcprj_type) :: cprj_dum(1,1)
  type(rmm_diis_t) :: diis
  type(yamldoc_t) :: ydoc
- type(pair_list) :: dict
 
 ! *************************************************************************
 
@@ -255,7 +257,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  optekin = 1
  !write(std_out,*)"optekin:", optekin
  max_niter = dtset%nline
- max_niter = dtset%nline - 1
+ !max_niter = dtset%nline - 1
 
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter)
 
@@ -305,17 +307,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    ! Compute <R0|R0> and <phi_0|S|phi_0>
    ! Assume input cg are already S-normalized.
    call sqnorm_g(resid(iband), istwf_k, npwsp, residvec, me_g0, comm_fft)
-   hist_resid(0) = resid(iband)
+   diis%hist_resid(0) = resid(iband)
    diis%resmat(:, 0, 0) = [resid(iband), zero]
    diis%smat(:, 0, 0) = [one, zero]
 
-   ! Band locking for NSCF or SCF if tolwfr > 0 is used.
+   ! BAND LOCKING for NSCF or SCF if tolwfr > 0 is used.
    if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
-      call dict%increment("locked_bands", 1)
+      call diis%stats%increment("locked_bands", 1)
       cycle iband_loop
    end if
 
-   hist_ene(0) = eig(iband)
+   diis%hist_ene(0) = eig(iband)
    diis%chain_resv(:,:,0) = residvec
 
    ! Store |phi_0>, |S phi_0>.
@@ -390,8 +392,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
                           eig(iband:), resid(iband:), enlx(iband:), residvec, normalize=.True.)
 
      ! Store residual R_i for i == iter and evaluate new enlx for NC.
-     hist_ene(iter) = eig(iband)
-     hist_resid(iter) = resid(iband)
+     diis%hist_ene(iter) = eig(iband)
+     diis%hist_resid(iter) = resid(iband)
      diis%chain_phi(:,:,iter) = phi_now
      diis%chain_resv(:, :, iter) = residvec
      if (usepaw == 1) diis%chain_sphi(:,:,iter) = gsc_ptr
@@ -399,11 +401,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      ! ============== CHECK FOR CONVERGENCE ========================
      if (prtvol == -level) then
        write(msg,"(1x, 2(i5), 2(f14.6),es12.4)") &
-         iter, iband, hist_ene(iter) * Ha_eV, (hist_ene(iter) - hist_ene(iter-1)) * Ha_meV, resid(iband)
+         iter, iband, diis%hist_ene(iter) * Ha_eV, (diis%hist_ene(iter) - diis%hist_ene(iter-1)) * Ha_meV, resid(iband)
        call wrtout(std_out, msg)
      end if
 
-     if (exit_diis(iter, niter_band(iband), hist_ene, hist_resid, accuracy_ene, dtset)) then
+     if (diis%exit(iter, niter_band(iband), accuracy_ene, dtset)) then
        if (prtvol == -level) then
          write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
           ' band: ',iband,' converged after: ',iter,' iterations with resid: ',resid(iband), ch10
@@ -419,9 +421,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    ! Update wavefunction for this band
    ! TODO: End with trial step but then I have to move the check for exit at the end of the loop.
-   end_with_trial_step = .False.
-   end_with_trial_step = .True.
+   !end_with_trial_step = .True.
    end_with_trial_step = iter == niter_band(iband) + 1
+   end_with_trial_step = .False.
    if (end_with_trial_step) then
      !write(std_out, *)" Performing last trial step"
      kres = residvec
@@ -460,7 +462,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
      if (prtvol == -level) then
        write(msg,"(1x, 2(i5), 2(f14.6),es12.4)") &
-         iter+1, iband, eig(iband) * Ha_eV, (eig(iband) - hist_ene(iter)) * Ha_meV, resid(iband)
+         iter+1, iband, eig(iband) * Ha_eV, (eig(iband) - diis%hist_ene(iter)) * Ha_meV, resid(iband)
        call wrtout(std_out, msg)
      end if
 
@@ -477,10 +479,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  !call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
 
  !call yaml_write_and_free_dict('RMM-DIIS', dict, std_out)
- ydoc = yamldoc_open('RMM-DIIS')
- call ydoc%add_dict("stats", dict)
+ ydoc = yamldoc_open('RMM-DIIS', with_iter_state=.False.)
+ call ydoc%add_dict("stats", diis%stats)
  call ydoc%write_and_free(std_out)
- call dict%free()
+ call diis%stats%free()
 
  ! Final cleanup
  ABI_FREE(pcon)
@@ -495,45 +497,52 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 end subroutine rmm_diis
 !!***
 
-logical function exit_diis(iter, niter_band, hist_ene, hist_resid, accuracy_ene, dtset) result(ans)
+logical function rmm_diis_exit(diis, iter, niter_band, accuracy_ene, dtset) result(ans)
 
-  integer,intent(in) :: iter, niter_band
-  real(dp),intent(in) :: accuracy_ene
-  real(dp),intent(in) :: hist_ene(0:niter_band), hist_resid(0:niter_band)
-  type(dataset_type),intent(in) :: dtset
+ class(rmm_diis_t),intent(in) :: diis
+ integer,intent(in) :: iter, niter_band
+ real(dp),intent(in) :: accuracy_ene
+ !real(dp),intent(in) :: hist_ene(0:niter_band), hist_resid(0:niter_band)
+ type(dataset_type),intent(in) :: dtset
 
-  real(dp) :: resid, deltae, deold
+ real(dp) :: resid, deltae, deold
 
-  resid = hist_resid(iter)
-  deold = hist_ene(1) - hist_ene(0)
-  deltae = hist_ene(iter) - hist_ene(iter-1)
+ resid = diis%hist_resid(iter)
+ deold = diis%hist_ene(1) - diis%hist_ene(0)
+ deltae = diis%hist_ene(iter) - diis%hist_ene(iter-1)
 
-  ans = .False.
-  if (abs(deltae) < dtset%tolrde * abs(deold) .and. iter /= niter_band) then
-  !if (abs(deltae) < 0.3_dp * abs(deold) .and. iter /= niter_band) then
-  ! This one seems much better.
-  !if (abs(deltae) < 0.03_dp * abs(deold) .and. iter /= niter_band) then
-    ans = .True.
-    return
-  end if
+ ans = .False.
+ ! Abinit default is 0.005
+ if (abs(deltae) < dtset%tolrde * abs(deold) .and. iter /= niter_band) then
+ !if (abs(deltae) < six * dtset%tolrde * abs(deold) .and. iter /= niter_band) then
 
-  if (dtset%iscf < 0) then
-    ! This is the only condition available for NSCF run.
-    if (resid < dtset%tolwfr) then
-      ans = .True.
-    end if
-  else
-    if (sqrt(abs(resid)) < accuracy_ene) then
-      ans = .True.  ! Similar to EDIFF/NBANDS/4
-    end if
-    if (resid < dtset%tolwfr) then
-      ans = .True.
-    end if
-    ! band locking (occupied states).
-    !if (resid < 1.0d0-20) ans = .True.
-  end if
+ !if (abs(deltae) < 0.3_dp * abs(deold) .and. iter /= niter_band) then
+ ! This one seems much better.
+ !if (abs(deltae) < 0.03_dp * abs(deold) .and. iter /= niter_band) then
+   call diis%stats%increment("deltae < tolrde * deold", 1)
+   ans = .True.
+   return
+ end if
 
-end function exit_diis
+ if (dtset%iscf < 0) then
+   ! This is the only condition available for NSCF run.
+   if (resid < dtset%tolwfr) then
+     call diis%stats%increment("resid < tolwfr", 1)
+     ans = .True.
+   end if
+
+ else
+   if (sqrt(abs(resid)) < accuracy_ene) then
+     call diis%stats%increment("resid < accuracy_ene", 1)
+     ans = .True.  ! Similar to EDIFF/NBANDS/4
+   end if
+   if (resid < dtset%tolwfr) then
+     call diis%stats%increment("resid < tolwfr", 1)
+     ans = .True.
+   end if
+ end if
+
+end function rmm_diis_exit
 !!***
 
 subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_now, ghc, gsc, mpi_enreg, prtvol, &
@@ -633,6 +642,9 @@ type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter) result
  diis%npwsp = npwsp
  diis%max_niter = max_niter
 
+ ABI_MALLOC(diis%hist_ene, (0:max_niter+1))
+ ABI_MALLOC(diis%hist_resid, (0:max_niter+1))
+
  ABI_MALLOC(diis%chain_phi, (2, npwsp, 0:max_niter))
  ABI_MALLOC(diis%chain_sphi, (2, npwsp*usepaw, 0:max_niter))
  ABI_MALLOC(diis%chain_resv, (2, npwsp, 0:max_niter))
@@ -642,13 +654,16 @@ type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter) result
 end function rmm_diis_new
 
 subroutine rmm_diis_free(diis)
-  class(rmm_diis_t),intent(inout) :: diis
+ class(rmm_diis_t),intent(inout) :: diis
 
-  ABI_SFREE(diis%chain_phi)
-  ABI_SFREE(diis%chain_sphi)
-  ABI_SFREE(diis%chain_resv)
-  ABI_SFREE(diis%resmat)
-  ABI_SFREE(diis%smat)
+ ABI_SFREE(diis%hist_ene)
+ ABI_SFREE(diis%hist_resid)
+ ABI_SFREE(diis%chain_phi)
+ ABI_SFREE(diis%chain_sphi)
+ ABI_SFREE(diis%chain_resv)
+ ABI_SFREE(diis%resmat)
+ ABI_SFREE(diis%smat)
+ call diis%stats%free()
 
 end subroutine rmm_diis_free
 
