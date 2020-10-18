@@ -137,8 +137,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  integer,parameter :: tim_getghc = 0, level = 432, use_subovl0 = 0
  integer :: ig, ig0, ib, cplex, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter
- integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc !, ii
- logical :: end_with_trial_step
+ integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc, ii
+ logical :: end_with_trial_step, use_prec_steepest_descent
  real(dp),parameter :: rdummy = zero
  real(dp) :: dotr, doti, lambda, rval, accuracy_ene
  !real(dp) :: cpu, wall, gflops
@@ -419,42 +419,48 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    end do iter_loop
 
-   ! Update wavefunction for this band
-   ! TODO: End with trial step but then I have to move the check for exit at the end of the loop.
+   ! End with trial step but only then if performed all the iterations (no exit from diis%exit)
    !end_with_trial_step = .True.
    end_with_trial_step = iter == niter_band(iband) + 1
-   end_with_trial_step = .False.
+   !end_with_trial_step = .False.
+
    if (end_with_trial_step) then
-     !write(std_out, *)" Performing last trial step"
      kres = residvec
      call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
                     optekin, pcon, kres, comm_spinorfft)
 
-#if 1
-     ! Final Preconditioned steepest descent:
-     ! Compute H |K R_0>
-     call getghc(cpopt, kres, cprj_dum, ghc, gsc, gs_hamk, gvnlxc, &
-                 rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
+     use_prec_steepest_descent = .False.
+     if (iband <= nbocc + 4 .and. resid(iband) > tol10) use_prec_steepest_descent = .True.
+     !write(std_out, *)" Performing last trial step with use_prec_steepest_descent: ", use_prec_steepest_descent
+     !use_prec_steepest_descent = .True.
+     !use_prec_steepest_descent = .False.
 
-     ! Compute residual: (H - e_0 S) |K R_0>
-     if (usepaw == 1) then
-       residvec = ghc - eig(iband) * gsc
+     if (use_prec_steepest_descent) then
+       ! Final Preconditioned steepest descent:
+       ! Compute H |K R_0>
+       call getghc(cpopt, kres, cprj_dum, ghc, gsc, gs_hamk, gvnlxc, &
+                   rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
+
+       ! Compute residual: (H - e_0 S) |K R_0>
+       if (usepaw == 1) then
+         residvec = ghc - eig(iband) * gsc
+       else
+         residvec = ghc - eig(iband) * kres
+       end if
+
+       ii = niter_band(iband)
+       call dotprod_g(dotr, doti, istwf_k, npwsp, option1, &
+                      diis%chain_resv(:,:,ii), residvec, me_g0, comm_spinorfft)
+       call sqnorm_g(rval, istwf_k, npwsp, residvec, me_g0, comm_spinorfft)
+
+       lambda = -dotr / rval
+       phi_now = diis%chain_phi(:,:,ii) + lambda * kres
+
      else
-       residvec = ghc - eig(iband) * kres
-     end if
+       !phi_now = phi_now + 0.1 * kres
+       phi_now = phi_now + lambda * kres
+     endif
 
-     iter = niter_band(iband)
-     call dotprod_g(dotr, doti, istwf_k, npwsp, option1, &
-                    diis%chain_resv(:,:,iter), residvec, me_g0, comm_spinorfft)
-     call sqnorm_g(rval, istwf_k, npwsp, residvec, me_g0, comm_spinorfft)
-
-     lambda = -dotr / rval
-     phi_now = diis%chain_phi(:,:,iter) + lambda * kres
-#else
-
-     !phi_now = phi_now + 0.1 * kres
-     phi_now = phi_now + lambda * kres
-#endif
      if (usepaw == 1) gsc_ptr => gsc_all(:,igs:ige)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
@@ -468,6 +474,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    end if
 
+   ! Update wavefunction for this band
    cg(:,igs:ige) = phi_now
 
    if (prtvol == -level .and. iter == niter_band(iband) + 1) then
@@ -502,7 +509,6 @@ logical function rmm_diis_exit(diis, iter, niter_band, accuracy_ene, dtset) resu
  class(rmm_diis_t),intent(in) :: diis
  integer,intent(in) :: iter, niter_band
  real(dp),intent(in) :: accuracy_ene
- !real(dp),intent(in) :: hist_ene(0:niter_band), hist_resid(0:niter_band)
  type(dataset_type),intent(in) :: dtset
 
  real(dp) :: resid, deltae, deold
@@ -512,14 +518,14 @@ logical function rmm_diis_exit(diis, iter, niter_band, accuracy_ene, dtset) resu
  deltae = diis%hist_ene(iter) - diis%hist_ene(iter-1)
 
  ans = .False.
- ! Abinit default is 0.005
- if (abs(deltae) < dtset%tolrde * abs(deold) .and. iter /= niter_band) then
- !if (abs(deltae) < six * dtset%tolrde * abs(deold) .and. iter /= niter_band) then
+ ! Abinit default is 0.005 (0.3 V)
+ !if (abs(deltae) < dtset%tolrde * abs(deold) .and. iter /= niter_band) then
+ if (abs(deltae) < 12 * dtset%tolrde * abs(deold) .and. iter /= niter_band) then
 
  !if (abs(deltae) < 0.3_dp * abs(deold) .and. iter /= niter_band) then
  ! This one seems much better.
  !if (abs(deltae) < 0.03_dp * abs(deold) .and. iter /= niter_band) then
-   call diis%stats%increment("deltae < tolrde * deold", 1)
+   call diis%stats%increment("deltae < 12 * tolrde * deold", 1)
    ans = .True.
    return
  end if
