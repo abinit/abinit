@@ -65,6 +65,7 @@ module m_pair_list
       procedure :: iter => pair_list_iter
       procedure :: restart => pair_list_restart
       procedure :: length => pair_list_length
+      procedure :: increment => pair_list_increment
   end type pair_list
 
 ! -------------------------------------------------------------------------------
@@ -201,7 +202,7 @@ end subroutine pair_list_get
 !! pair_list_look
 !!
 !! FUNCTION
-!!  pair_list variables have a cursor wich point onto an arbitrary element
+!!  pair_list has a cursor which point onto an arbitrary element
 !!  of the list. pair_list_look allow to extract the key-value pair from
 !!  that element
 !!
@@ -258,10 +259,10 @@ end subroutine pair_list_look
 !!      pair_list_look,pair_list_next_c
 !!
 !! SOURCE
-    subroutine pair_list_next(pl)
-      class(pair_list),intent(in) :: pl
-      call pair_list_next_c(pl%plc)
-    end subroutine pair_list_next
+  subroutine pair_list_next(pl)
+    class(pair_list),intent(in) :: pl
+    call pair_list_next_c(pl%plc)
+  end subroutine pair_list_next
 !!***
 
 !!****f* m_pair_list/pair_list_free
@@ -280,8 +281,10 @@ end subroutine pair_list_look
 !! SOURCE
 
 subroutine pair_list_free(pl)
+
   class(pair_list),intent(inout) :: pl
   call pair_list_free_c(pl%plc)
+
 end subroutine pair_list_free
 !!***
 
@@ -510,6 +513,47 @@ subroutine pair_list_iter(pl, key, type_code, i, r, s)
   if(type_code >= 0) call pair_list_next_c(pl%plc)
 
 end subroutine pair_list_iter
+!!***
+
+!!****f* m_pair_list/pair_list_increment
+!! NAME
+!! pair_list_increment
+!!
+!! FUNCTION
+!!  Increment integer value. Create key if not already present.
+!!
+!! INPUTS
+!!  pl <class(pair_list)>=
+!!  key <character(len=*)>=
+!!  cnt=Increment
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      pair_list_look,pair_list_next_c
+!!
+!! SOURCE
+
+subroutine pair_list_increment(pl, key, cnt)
+
+ class(pair_list),intent(in) :: pl
+ character(len=*),intent(in) :: key
+ integer,intent(in) :: cnt
+
+ integer(kind=c_int) :: i, type_code
+ real(kind=c_double) :: r
+ character(kind=c_char,len=500) :: s
+
+ call pair_list_get(pl, key, type_code, i, r, s)
+ if (type_code == TC_EMPTY) then
+   call pair_list_set(pl, key, i=cnt)
+ else if (type_code == TC_INT) then
+   call pair_list_set(pl, key, i=cnt + i)
+ else
+   MSG_ERROR("Expecting value in dict of integer type")
+ end if
+
+end subroutine pair_list_increment
 !!***
 
 end module m_pair_list

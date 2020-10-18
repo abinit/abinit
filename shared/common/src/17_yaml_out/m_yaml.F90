@@ -284,6 +284,8 @@ type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_f
 
  call new%stream%push(ch10//'---'//' !'//trim(tag)//ch10)
 
+ !with_iter_state_ = .True.; if (present(with_iter_state) with_iter_state_ = with_iter_state
+ !if (with_iter_state_) then
  if (DTSET_IDX /= -1) then
    ! Write dictionary with iteration state.
    call dict%set('dtset', i=DTSET_IDX)
@@ -294,6 +296,7 @@ type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_f
    call new%add_dict('iteration_state', dict, int_fmt="(i0)")
    call dict%free()
  end if
+ !end if
 
  if (present(info)) then
    if (len_trim(info) /= 0) then

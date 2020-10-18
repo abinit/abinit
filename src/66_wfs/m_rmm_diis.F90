@@ -31,12 +31,14 @@ module m_rmm_diis
  use m_dtset
  use m_cgtools
  use m_hide_blas
+ use m_yaml
 
  use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : sjoin, itoa
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : pack_matrix
  use m_hide_lapack,   only : xhegv_cplex
+ use m_pair_list,     only : pair_list
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_getghc,        only : getghc
@@ -52,7 +54,6 @@ module m_rmm_diis
 
  type,private :: rmm_diis_t
    integer :: usepaw
-   integer :: ndat
    integer :: istwf_k
    integer :: cplex
    integer :: max_niter
@@ -112,13 +113,14 @@ contains
 !!
 !! SOURCE
 
-subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nband, npw, nspinor, resid)
+subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, &
+                    mpi_enreg, nband, npw, nspinor, resid)
 
 !Arguments ------------------------------------
+ integer,intent(in) :: istep, ikpt, isppol, nband, npw, nspinor
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
  type(mpi_type),intent(in) :: mpi_enreg
- integer,intent(in) :: nband, npw, nspinor
  real(dp),intent(inout) :: cg(2,npw*nspinor*nband)
  real(dp),target,intent(inout) :: gsc_all(2,npw*nspinor*nband*dtset%usepaw)
  real(dp),intent(inout) :: enlx(nband)
@@ -147,6 +149,8 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  real(dp), ABI_CONTIGUOUS pointer :: gsc_ptr(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
  type(rmm_diis_t) :: diis
+ type(yamldoc_t) :: ydoc
+ type(pair_list) :: dict
 
 ! *************************************************************************
 
@@ -154,6 +158,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  me_g0 = mpi_enreg%me_g0; comm_fft = mpi_enreg%comm_fft
  comm_spinorfft = mpi_enreg%comm_spinorfft; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  npwsp = npw * nspinor
+ cplex = 2
 
  ! =======================================
  ! Apply H to input cg to compute <i|H|j>
@@ -249,9 +254,9 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  optekin = 1
  !write(std_out,*)"optekin:", optekin
  max_niter = dtset%nline
- max_niter = dtset%nline - 1
- cplex = 2
- diis = rmm_diis_new(usepaw, istwf_k, npw, nspinor, ndat1, max_niter)
+ !max_niter = dtset%nline - 1
+
+ diis = rmm_diis_new(usepaw, istwf_k, npw, nspinor, max_niter)
 
  ABI_REMALLOC(ghc, (2, npw*nspinor))
  ABI_REMALLOC(gsc, (2, npw*nspinor*usepaw))
@@ -269,8 +274,8 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  !if dtset%
  !if dtset%occopt == 2
  do iband=1,nband
-   !if (occ(iband) < tol3) niter_band(iband) = max(max_niter / 2, 2)
-   if (occ(iband) < tol3) niter_band(iband) = max(1 + max_niter / 2, 2)
+   if (occ(iband) < tol3) niter_band(iband) = max(max_niter / 2, 2)
+   !if (occ(iband) < tol3) niter_band(iband) = max(1 + max_niter / 2, 2)
  end do
 
  ! Define accuracy_ene for SCF
@@ -303,6 +308,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
 
    ! Band locking for NSCF or SCF if tolwfr > 0 is used.
    if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
+      call dict%increment("locked", 1)
       cycle iband_loop
    end if
 
@@ -321,10 +327,12 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
    !write(std_out,*)"kres(1:2):", kres(:, 1:2)
 
    if (prtvol == -level) then
-     write(msg,'(2(a5),2(a14),a12)')'iter', "band", "eigen_eV", "eigde_meV", "resid"
-     call wrtout(std_out, msg, "PERS")
-     write(msg,'(2(i5),2(f14.6,1x),es12.4)')0, iband, eig(iband) * Ha_eV, zero, resid(iband)
-     call wrtout(std_out, msg, "PERS")
+     call wrtout(std_out, &
+           sjoin("<BEGIN RMM-DIIS, istep:", itoa(istep), ", ikpt:", itoa(ikpt), ", spin: ", itoa(isppol), ">"))
+     write(msg,'(1a, 2(a5),2(a14),a12)')"#", 'iter', "band", "eigen_eV", "eigde_meV", "resid"
+     call wrtout(std_out, msg)
+     write(msg,'(1x, 2(i5),2(f14.6,1x),es12.4)')0, iband, eig(iband) * Ha_eV, zero, resid(iband)
+     call wrtout(std_out, msg)
    end if
 
    iter_loop: do iter=1,niter_band(iband)
@@ -348,6 +356,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
        ! where lambda minimizes the norm of the residual:
        !
        !    lambda = - Re{<R_0|(H - e_0 S)} |K R_0>} / |(H - e_0 S) |K R_0>|**2
+       !
        call dotprod_g(dotr, doti, istwf_k, npw*nspinor, option1, &
                       diis%chain_resv(:,:,0), residvec, me_g0, comm_spinorfft)
        call sqnorm_g(rval, istwf_k, npw*nspinor, residvec, me_g0, comm_spinorfft)
@@ -385,16 +394,16 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
 
      ! ============== CHECK FOR CONVERGENCE ========================
      if (prtvol == -level) then
-       write(msg,"(2(i5),2(f14.6,1x),es12.4)") &
+       write(msg,"(1x, 2(i5), 2(f14.6),es12.4)") &
          iter, iband, hist_ene(iter) * Ha_eV, (hist_ene(iter) - hist_ene(iter-1)) * Ha_meV, resid(iband)
-       call wrtout(std_out, msg, 'PERS')
+       call wrtout(std_out, msg)
      end if
 
      if (exit_diis(iter, niter_band(iband), hist_ene, hist_resid, accuracy_ene, dtset)) then
        if (prtvol == -level) then
-         write(msg, '(2a,i4,a,i2,a,es12.4,a)' ) ch10, &
+         write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
           ' band: ',iband,' converged after: ',iter,' iterations with resid: ',resid(iband), ch10
-         call wrtout(std_out, msg , "PERS")
+         call wrtout(std_out, sjoin("<END RMM-DIIS, msg='", msg, "'>"))
        end if
        exit iter_loop
      end if
@@ -408,7 +417,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
    ! TODO: End with trial step but then I have to move the check for exit at the end of the loop.
    end_with_trial_step = .False.
    !end_with_trial_step = .True.
-   end_with_trial_step = iter == niter_band(iband) + 1
+   !end_with_trial_step = iter == niter_band(iband) + 1
    if (end_with_trial_step) then
      !write(std_out, *)" Performing Last trial step"
      kres = residvec
@@ -424,10 +433,18 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
    end if
    cg(:,igs:ige) = phi_now
 
+   if (prtvol == -level .and. iter == niter_band(iband) + 1) then
+     call wrtout(std_out, "<END RMM-DIIS, msg='All iterations performed'>")
+   end if
+
  end do iband_loop
  call timab(1634, 2, tsec) !"rmm_diis:band_opt"
  !call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
- !call diis%print_stats()
+
+ ydoc = yamldoc_open('RMM-DIIS')
+ call ydoc%add_dict("stats", dict)
+ call ydoc%write_and_free(std_out)
+ call dict%free()
 
  ! Final cleanup
  ABI_FREE(pcon)
@@ -438,6 +455,7 @@ subroutine rmm_diis(cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, mpi_enreg, nban
  ABI_FREE(phi_now)
  ABI_FREE(gvnlxc)
  call diis%free()
+
 
 end subroutine rmm_diis
 !!***
@@ -454,9 +472,10 @@ logical function exit_diis(iter, niter_band, hist_ene, hist_resid, accuracy_ene,
   resid = hist_resid(iter)
   deold = hist_ene(1) - hist_ene(0)
   deltae = hist_ene(iter) - hist_ene(iter-1)
-  ans = .False.
 
-  if (abs(deltae) < dtset%tolrde * abs(deold) .and. iter /= niter_band) then
+  ans = .False.
+  !if (abs(deltae) < dtset%tolrde * abs(deold) .and. iter /= niter_band) then
+  if (abs(deltae) < 0.3_dp * abs(deold) .and. iter /= niter_band) then
     ans = .True.
     return
   end if
@@ -490,7 +509,7 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_now, ghc, gsc, mpi_e
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
  integer :: istwf_k, usepaw, cpopt, sij_opt, idat, is, ie, npwsp
- integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft
+ integer :: me_g0, comm_spinorfft, comm_fft
  real(dp),parameter :: rdummy = zero
  logical :: normalize_
  real(dp) :: dotr, doti
@@ -502,7 +521,7 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_now, ghc, gsc, mpi_e
 
  usepaw = gs_hamk%usepaw; istwf_k = gs_hamk%istwf_k
  me_g0 = mpi_enreg%me_g0; comm_fft = mpi_enreg%comm_fft
- comm_spinorfft = mpi_enreg%comm_spinorfft; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
+ comm_spinorfft = mpi_enreg%comm_spinorfft
  normalize_ = .True.; if (present(normalize)) normalize_ = normalize
  npwsp = npw * nspinor
 
@@ -550,11 +569,11 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_now, ghc, gsc, mpi_e
    end if
 
    ! Store residual R_i for i == iter and evaluate new enlx for NC.
-   call sqnorm_g(resid(idat), istwf_k, npw*nspinor, residvec(1,is), me_g0, comm_fft)
+   call sqnorm_g(resid(idat), istwf_k, npw*nspinor, residvec(1,is), me_g0, comm_spinorfft)
 
    if (usepaw == 0) then
      call dotprod_g(enlx(idat), doti, istwf_k, npw*nspinor, option1, &
-                    phi_now(1,is), gvnlxc(1,is), me_g0, comm_bandspinorfft)
+                    phi_now(1,is), gvnlxc(1,is), me_g0, comm_spinorfft)
    end if
  end do
 
@@ -563,14 +582,14 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_now, ghc, gsc, mpi_e
 end subroutine getghc_eigresid
 !!!***
 
-type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npw, nspinor, ndat, max_niter) result(diis)
+type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npw, nspinor, max_niter) result(diis)
 
- integer,intent(in) :: usepaw, istwf_k, npw, nspinor, ndat, max_niter
+ integer,intent(in) :: usepaw, istwf_k, npw, nspinor, max_niter
 
  diis%usepaw = usepaw
- diis%ndat = ndat
  diis%istwf_k = istwf_k
  diis%cplex = 2
+ !if (istwf_k /= 1) diis%cplex = 2
  diis%max_niter = max_niter
  diis%npw = npw
  diis%nspinor = nspinor
@@ -586,11 +605,11 @@ end function rmm_diis_new
 subroutine rmm_diis_free(diis)
   class(rmm_diis_t),intent(inout) :: diis
 
-  ABI_FREE(diis%chain_phi)
-  ABI_FREE(diis%chain_sphi)
-  ABI_FREE(diis%chain_resv)
-  ABI_FREE(diis%resmat)
-  ABI_FREE(diis%smat)
+  ABI_SFREE(diis%chain_phi)
+  ABI_SFREE(diis%chain_sphi)
+  ABI_SFREE(diis%chain_resv)
+  ABI_SFREE(diis%resmat)
+  ABI_SFREE(diis%smat)
 
 end subroutine rmm_diis_free
 
@@ -606,11 +625,11 @@ subroutine rmm_diis_solve(diis, iter, npwsp, phi_now, residvec)
  real(dp),allocatable :: wmat1(:,:,:), wmat2(:,:,:), wvec(:,:)
  complex(dp),allocatable :: work(:)
  character(len=500) :: msg
- logical,parameter :: solve_eigproblem = .False.
+ logical,parameter :: try_to_solve_eigproblem = .False.
 
  cplex = diis%cplex; npw = diis%npw; nspinor = diis%nspinor
 
- if (solve_eigproblem) then
+ if (try_to_solve_eigproblem) then
    ABI_MALLOC(diis_eig, (0:iter-1))
    ABI_MALLOC(wmat1, (cplex, 0:iter-1, 0:iter-1))
    ABI_MALLOC(wmat2, (cplex, 0:iter-1, 0:iter-1))
@@ -625,10 +644,11 @@ subroutine rmm_diis_solve(diis, iter, npwsp, phi_now, residvec)
    !write(std_out,*)"IMAG diis_vec:", wmat1(2,:,0)
    !ABI_CHECK(ierr == 0, "xhegv returned ierr != 0")
    if (ierr /= 0) then
-     call wrtout(std_out, sjoin("xhegv failed with:", msg, ch10, "at iter: ", itoa(iter), "exit iter_loop!"))
+     !call wrtout(std_out, sjoin("xhegv failed with:", msg, ch10, "at iter: ", itoa(iter), "exit iter_loop!"))
+     ABI_FREE(diis_eig)
      ABI_FREE(wmat1)
      ABI_FREE(wmat2)
-     ABI_FREE(diis_eig)
+     goto 10
    end if
 
    ! Take linear combination of chain_phi and chain_resv.
@@ -638,33 +658,35 @@ subroutine rmm_diis_solve(diis, iter, npwsp, phi_now, residvec)
    ABI_FREE(wmat1)
    ABI_FREE(wmat2)
    ABI_FREE(diis_eig)
-
- else
-   ! Solve system of linear equations.
-   ABI_CALLOC(wvec, (cplex, 0:iter))
-   wvec(1, iter) = -one
-   ABI_CALLOC(wmat1, (cplex, 0:iter, 0:iter))
-   wmat1(1,:,iter) = -one
-   wmat1(1,iter,:) = -one
-   wmat1(1,iter,iter) = zero
-   wmat1(:,0:iter-1, 0:iter-1) = diis%resmat(:, 0:iter-1, 0:iter-1)
-
-   ABI_MALLOC(ipiv, (0:iter))
-   ABI_MALLOC(work, (1))
-   lwork = -1
-   call zhesv("U", iter+1, 1, wmat1, iter+1, ipiv, wvec, iter+1, work, lwork, ierr)
-   lwork = int(work(1))
-   ABI_REMALLOC(work, (lwork))
-   call zhesv("U", iter+1, 1, wmat1, iter+1, ipiv, wvec, iter+1, work, lwork, ierr)
-   ABI_CHECK(ierr == 0, "zhesv returned ierr != 0")
-   ABI_FREE(ipiv)
-   ABI_FREE(work)
-   ABI_FREE(wmat1)
-
-   call cg_zgemv("N", npw*nspinor, iter, diis%chain_phi, wvec(:,0), phi_now)
-   call cg_zgemv("N", npw*nspinor, iter, diis%chain_resv, wvec(:,0), residvec)
-   ABI_FREE(wvec)
+   return
  end if
+
+10 continue
+
+ ! Solve system of linear equations.
+ ABI_CALLOC(wvec, (cplex, 0:iter))
+ wvec(1, iter) = -one
+ ABI_CALLOC(wmat1, (cplex, 0:iter, 0:iter))
+ wmat1(1,:,iter) = -one
+ wmat1(1,iter,:) = -one
+ wmat1(1,iter,iter) = zero
+ wmat1(:,0:iter-1, 0:iter-1) = diis%resmat(:, 0:iter-1, 0:iter-1)
+
+ ABI_MALLOC(ipiv, (0:iter))
+ ABI_MALLOC(work, (1))
+ lwork = -1
+ call zhesv("U", iter+1, 1, wmat1, iter+1, ipiv, wvec, iter+1, work, lwork, ierr)
+ lwork = int(work(1))
+ ABI_REMALLOC(work, (lwork))
+ call zhesv("U", iter+1, 1, wmat1, iter+1, ipiv, wvec, iter+1, work, lwork, ierr)
+ ABI_CHECK(ierr == 0, "zhesv returned ierr != 0")
+ ABI_FREE(ipiv)
+ ABI_FREE(work)
+ ABI_FREE(wmat1)
+
+ call cg_zgemv("N", npw*nspinor, iter, diis%chain_phi, wvec(:,0), phi_now)
+ call cg_zgemv("N", npw*nspinor, iter, diis%chain_resv, wvec(:,0), residvec)
+ ABI_FREE(wvec)
 
 end subroutine rmm_diis_solve
 

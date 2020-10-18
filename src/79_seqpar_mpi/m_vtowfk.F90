@@ -316,7 +316,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  ! Carry out UP TO dtset%nline steps, or until resid for every band is < dtset%tolwfr
- if (prtvol>2 .or. ikpt<=nkpt_max) then
+ if (prtvol>2 .or. ikpt <= nkpt_max) then
    write(msg,'(a,i5,2x,a,3f9.5,2x,a)')' non-scf iterations; kpt # ',ikpt,', k= (',gs_hamk%kpt_k,'), band residuals:'
    call wrtout(std_out,msg,'PERS')
  end if
@@ -427,7 +427,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
         else
          !call wrtout(std_out, "Calling rmms_diis after cwfw")
-         call rmm_diis(cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, gsc, &
+         call rmm_diis(istep, ikpt, isppol, cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, gsc, &
                        mpi_enreg, nband_k, npw_k, my_nspinor, resid_k)
        end if
 
