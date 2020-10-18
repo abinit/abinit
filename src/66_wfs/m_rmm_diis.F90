@@ -134,7 +134,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  integer,parameter :: tim_getghc = 0, level = 432, use_subovl0 = 0
  integer :: ig, ig0, ib, cplex, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter
- integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc
+ integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc !, ii
  logical :: end_with_trial_step
  real(dp),parameter :: rdummy = zero
  real(dp) :: dotr, doti, lambda, rval, accuracy_ene
@@ -255,7 +255,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  optekin = 1
  !write(std_out,*)"optekin:", optekin
  max_niter = dtset%nline
- !max_niter = dtset%nline - 1
+ max_niter = dtset%nline - 1
 
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter)
 
@@ -420,21 +420,52 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    ! Update wavefunction for this band
    ! TODO: End with trial step but then I have to move the check for exit at the end of the loop.
    end_with_trial_step = .False.
-   !end_with_trial_step = .True.
-   !end_with_trial_step = iter == niter_band(iband) + 1
+   end_with_trial_step = .True.
+   end_with_trial_step = iter == niter_band(iband) + 1
    if (end_with_trial_step) then
      !write(std_out, *)" Performing last trial step"
      kres = residvec
      call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
                     optekin, pcon, kres, comm_spinorfft)
+
+#if 1
+     ! Final Preconditioned steepest descent:
+     ! Compute H |K R_0>
+     call getghc(cpopt, kres, cprj_dum, ghc, gsc, gs_hamk, gvnlxc, &
+                 rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
+
+     ! Compute residual: (H - e_0 S) |K R_0>
+     if (usepaw == 1) then
+       residvec = ghc - eig(iband) * gsc
+     else
+       residvec = ghc - eig(iband) * kres
+     end if
+
+     iter = niter_band(iband)
+     call dotprod_g(dotr, doti, istwf_k, npwsp, option1, &
+                    diis%chain_resv(:,:,iter), residvec, me_g0, comm_spinorfft)
+     call sqnorm_g(rval, istwf_k, npwsp, residvec, me_g0, comm_spinorfft)
+
+     lambda = -dotr / rval
+     phi_now = diis%chain_phi(:,:,iter) + lambda * kres
+#else
+
      !phi_now = phi_now + 0.1 * kres
      phi_now = phi_now + lambda * kres
+#endif
      if (usepaw == 1) gsc_ptr => gsc_all(:,igs:ige)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
                           eig(iband:), resid(iband:), enlx(iband), residvec, normalize=.True.)
 
+     if (prtvol == -level) then
+       write(msg,"(1x, 2(i5), 2(f14.6),es12.4)") &
+         iter+1, iband, eig(iband) * Ha_eV, (eig(iband) - hist_ene(iter)) * Ha_meV, resid(iband)
+       call wrtout(std_out, msg)
+     end if
+
    end if
+
    cg(:,igs:ige) = phi_now
 
    if (prtvol == -level .and. iter == niter_band(iband) + 1) then
