@@ -65,9 +65,14 @@ MODULE m_hide_lapack
 
  private
 
+! ==========================
 ! Complex Hermitian matrices
+! ==========================
+! The _cplex version receives matrices declared as arr(cplex,N,M)
+! and calls the complex/real version depending on cplex (used e.g. for istwf_k = 2)
 
  public :: xheev   ! Computes all the eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix.
+ public :: xheev_cplex
 
  public :: xhpev   ! Computes all the eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix
                    ! in packed storage (Scalapack version not available)
@@ -80,13 +85,22 @@ MODULE m_hide_lapack
                    ! Eigenvalues and eigenvectors can be selected by specifying either a range of values or a range of
                    ! indices for the desired eigenvalues.
 
+ public :: xheevx_cplex
+
  public :: xhegvx  ! Computes selected eigenvalues, and optionally, eigenvectors
                    ! of a complex generalized Hermitian-definite eigenproblem,
                    ! of the form A*x=(lambda)*B*x, A*Bx=(lambda)*x, or B*A*x=(lambda)*x.
                    ! Eigenvalues and eigenvectors can be selected by specifying either a range of values or a range of
                    ! indices for the desired eigenvalues.
+ public :: xhegvx_cplex
 
+
+ public :: xhesv_cplex  ! Solve A * X = B, where A is an N-by-N Hermitian matrix and X and B are N-by-NRHS matrices.
+
+
+! ==============================
 ! Complex non-symmetric matrices
+! ==============================
 
  public :: xgeev   ! Computes for a complex nonsymmetric matrix A, the eigenvalues and, optionally,
                    ! the left and/or right eigenvectors.
@@ -99,10 +113,7 @@ MODULE m_hide_lapack
  interface xheev
    module procedure wrap_CHEEV
    module procedure wrap_ZHEEV
-   !module procedure wrap_DSYEV_ZHEEV
  end interface xheev
-
- public :: xheev_cplex
 
  interface xhpev
    module procedure wrap_CHPEV
@@ -117,17 +128,11 @@ MODULE m_hide_lapack
 
  interface xheevx
    module procedure wrap_ZHEEVX
-   !module procedure wrap_DSYEVX_ZHEEVX
  end interface xheevx
-
- public :: xheevx_cplex
 
  interface xhegvx
    module procedure wrap_ZHEGVX
-   !module procedure wrap_DSYGVX_ZHEGVX
  end interface xhegvx
-
- public :: xhegvx_cplex
 
  interface xgeev
    module procedure wrap_CGEEV
@@ -512,7 +517,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
 #endif
  end if
 
- if (ALL(cplex/=(/1,2/))) then
+ if (ALL(cplex/= [1, 2])) then
    write(msg,'(a,i0)')" Wrong value for cplex: ",cplex
    ierr = 1; return
  end if
@@ -3934,12 +3939,135 @@ subroutine test_xginv(msize,skinds,do_check,Tres,comm)
 
  ABI_FREE(cmat_dpc)
 
- if (allocated(cmat_dpc_check)) then
-   ABI_FREE(cmat_dpc_check)
- end if
+ ABI_SFREE(cmat_dpc_check)
 
 end subroutine test_xginv
 !!***
 
-END MODULE m_hide_lapack
+!!****f* m_cgtools/xhesv_cplex
+!! NAME
+!!   xhesv_cplex
+!!
+!! FUNCTION
+!! ZHESV computes the solution to a complex (real) system of linear equations
+!!    A * X = B,
+!!
+!! where A is an N-by-N Hermitian matrix and X and B are N-by-NRHS matrices.
+!! The value of cplex (1 or 2) defines whether we have a complex Hermitian or real symmetric matrix
+!!
+!! The diagonal pivoting method is used to factor A as
+!!    A = U * D * U**H,  if UPLO = 'U', or
+!!    A = L * D * L**H,  if UPLO = 'L',
+!!
+!! where U (or L) is a product of permutation and unit upper (lower)
+!! triangular matrices, and D is Hermitian and block diagonal with
+!! 1-by-1 and 2-by-2 diagonal blocks.  The factored form of A is then
+!! used to solve the system of equations A * X = B.
+!!
+!! INPUTS
+!!
+!![in]    UPLO
+!!          UPLO is CHARACTER*1
+!!          = 'U':  Upper triangle of A is stored;
+!!          = 'L':  Lower triangle of A is stored.
+!![in]    N
+!!          N is INTEGER
+!!          The number of linear equations, i.e., the order of the
+!!          matrix A.  N >= 0.
+!![in]    NRHS
+!!          NRHS is INTEGER
+!!          The number of right hand sides, i.e., the number of columns
+!!          of the matrix B.  NRHS >= 0.
+!![in,out]    A
+!!          A is COMPLEX*16 array, dimension (LDA,N)
+!!          On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+!!          N-by-N upper triangular part of A contains the upper
+!!          triangular part of the matrix A, and the strictly lower
+!!          triangular part of A is not referenced.  If UPLO = 'L', the
+!!          leading N-by-N lower triangular part of A contains the lower
+!!          triangular part of the matrix A, and the strictly upper
+!!          triangular part of A is not referenced.
+!!
+!!          On exit, if INFO = 0, the block diagonal matrix D and the
+!!          multipliers used to obtain the factor U or L from the
+!!          factorization A = U*D*U**H or A = L*D*L**H as computed by
+!!          ZHETRF.
+!![in,out]    B
+!!          B is COMPLEX*16 array, dimension (LDB,NRHS)
+!!          On entry, the N-by-NRHS right hand side matrix B.
+!!          On exit, if INFO = 0, the N-by-NRHS solution matrix X.
+!![out]   INFO
+!!          INFO is INTEGER
+!!          = 0: successful exit
+!!          < 0: if INFO = -i, the i-th argument had an illegal value
+!!          > 0: if INFO = i, D(i,i) is exactly zero.  The factorization
+!!               has been completed, but the block diagonal matrix D is
+!!               exactly singular, so the solution could not be computed.
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine xhesv_cplex(UPLO, cplex, N, NRHS, A, B, msg, info)
+
+!Arguments ------------------------------------
+ character(len=1),intent(in) :: UPLO
+ integer,intent(in) :: cplex, N, NRHS
+ real(dp),intent(inout) :: A(cplex, N, N)
+ real(dp),intent(inout) :: B(cplex, N, NRHS)
+ character(len=*),intent(out) :: msg
+ integer,intent(out) :: info
+
+!Local variables ------------------------------
+!scalars
+ integer :: lwork, lda, ldb
+ integer,allocatable :: ipiv(:)
+ real(dp),allocatable :: work(:,:)
+
+!************************************************************************
+
+ if (all(cplex /= [1, 2])) then
+   write(msg,'(a,i0)')" Wrong value for cplex: ",cplex
+   info = 1; return
+ end if
+
+ lda = N; ldb = N
+
+ ABI_MALLOC(ipiv, (N))
+ ABI_MALLOC(work, (cplex, 1))
+ lwork = -1
+
+ if (cplex == 2) then
+   ! Complex version
+   call zhesv(uplo, N, NRHS, A, lda, ipiv, B, ldb, work, lwork, info)
+   lwork = int(work(1, 1))
+   ABI_REMALLOC(work, (cplex, lwork))
+
+   call zhesv(uplo, N, NRHS, A, lda, ipiv, B, ldb, work, lwork, info)
+ else
+   ! Read version
+   call dsysv(uplo, N, NRHS, A, lda, ipiv, B, ldb, work, lwork, info)
+   lwork = int(work(1, 1))
+   ABI_REMALLOC(work, (cplex, lwork))
+
+   call dsysv(uplo, N, NRHS, A, lda, ipiv, B, ldb, work, lwork, info)
+ end if
+
+ ABI_FREE(ipiv)
+ ABI_FREE(work)
+
+ if (info < 0) then
+   write(msg,'(a,i0,a)')" The ",-info,"-th argument of ZPOTRI had an illegal value."
+ else if (info > 0) then
+   write(msg, "(a,i0,4a)") &
+     " D(i,i) is exactly zero for i= ", info, ch10, &
+     "The factorization has been completed, but the block diagonal matrix D is ", ch10, &
+     "exactly singular, so the solution could not be computed."
+ end if
+
+end subroutine xhesv_cplex
+!!***
+
+end module m_hide_lapack
 !!***

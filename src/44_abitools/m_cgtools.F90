@@ -747,7 +747,7 @@ end subroutine cg_zaxpy
 !!
 !! SOURCE
 
-subroutine cg_zaxpby(n,a,x,b,y)
+subroutine cg_zaxpby(n, a, x ,b, y)
 
 !Arguments ------------------------------------
 !scalars
@@ -1129,7 +1129,7 @@ subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
  end if
 
  !Reduction in case of parallelism
- if (xmpi_comm_size(comm)>1) then
+ if (xmpi_comm_size(comm) > 1) then
    if (option==1.or.istwf_k/=1) then
      call xmpi_sum(dotr,comm,ierr)
    else
