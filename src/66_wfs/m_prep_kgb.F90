@@ -75,7 +75,7 @@ contains
 !!  gvnlxc=matrix elements <G|Vnonlocal+VFockACE|C>
 !!  lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
 !!         Typically lambda is the eigenvalue (or its guess)
-!!  mpi_enreg=informations about mpi parallelization
+!!  mpi_enreg=information about mpi parallelization
 !!  prtvol=control print volume and debugging output
 !!  sij_opt= -PAW ONLY-  if  0, only matrix elements <G|H|C> have to be computed
 !!     (S=overlap)       if  1, matrix elements <G|S|C> have to be computed in gsc in addition to ghc
@@ -550,7 +550,7 @@ end subroutine prep_getghc
 !!                        - k point direction in the case (choice=5,signs=2)
 !!                        - strain component (1:6) in the case (choice=2,signs=2) or (choice=6,signs=1)
 !!  lambdablock(blocksize)=factor to be used when computing (Vln-lambda.S) - only for paw_opt=2
-!!  mpi_enreg=informations about mpi parallelization
+!!  mpi_enreg=information about mpi parallelization
 !!  nnlout=dimension of enlout (when signs=1):
 !!  ntypat=number of types of atoms in cell
 !!  paw_opt= define the nonlocal operator concerned with
@@ -864,7 +864,7 @@ end subroutine prep_nonlop
 !!  lmnmax=if useylm=1, max number of (l,m,n) comp. over all type of psps
 !!        =if useylm=0, max number of (l,n)   comp. over all type of psps
 !!  mgfft=maximum size of 1d ffts
-!!  mpi_enreg=informations about mpi parallelization
+!!  mpi_enreg=information about mpi parallelization
 !!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  mpssoang= 1+maximum (spin*angular momentum) for nonlocal pseudopotentials
 !!  natom=number of atoms in cell.
@@ -1351,7 +1351,7 @@ end subroutine prep_fourwf
 !! the value of mpi_enreg%distribfft%tab_fftwf2_distrib( (-kg_k_gather(2,i) )
 !!
 !! INPUTS
-!!  mpi_enreg          = informations about mpi parallelization
+!!  mpi_enreg          = information about mpi parallelization
 !!  bandpp             = number of couple of waves functions
 !!  nspinor            = number of spin
 !!  ndatarecv          = number of values received by the processor and sended
@@ -1619,7 +1619,7 @@ end subroutine prep_wavef_sym_do
 !! the value of mpi_enreg%distribfft%tab_fftwf2_distrib( (-kg_k_gather(2,i) )
 !!
 !! INPUTS
-!!  mpi_enreg          = informations about mpi parallelization
+!!  mpi_enreg          = information about mpi parallelization
 !!  bandpp             = number of groups of couple of waves functions
 !!  nspinor            = number of spin
 !!  ndatarecv          = number of values received by the processor and sended

@@ -168,13 +168,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ! Apply H to input cg to compute <i|H|j>
  ! =======================================
  gsc_ptr => fake_gsc
- cpopt = -1
+ cpopt = -1; sij_opt = 0
  if (usepaw == 1) then
-   sij_opt = 1 ! Recompute S
-   !cpopt = 0  ! <p_lmn|in> are computed and saved
+   sij_opt = 1 ! matrix elements <G|S|C> have to be computed in gsc in addition to ghc
    cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
- else
-   sij_opt = 0
  end if
 
  ! Treat states in groups of bsize bands to be able to use zgemm.
@@ -183,7 +180,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
 
  ABI_MALLOC(ghc, (2, npwsp*bsize))
- ABI_MALLOC(gsc, (2, npwsp*bsize*usepaw))
+ ABI_MALLOC(gsc, (2, npwsp*usepaw*bsize))
  ABI_MALLOC(gvnlxc, (2, npwsp*bsize))
  ABI_CALLOC(h_ij, (2, nband, nband))
 
@@ -235,7 +232,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ABI_FREE(h_ij)
  call xmpi_sum(subham, comm_spinorfft, ierr)
  call timab(1633, 2, tsec) !"rmm_diis:build_hij
- call cwtime_report(" pack_hij", cpu, wall, gflops)
+ !call cwtime_report(" pack_hij", cpu, wall, gflops)
 
  ! =================
  ! Subspace rotation
@@ -259,16 +256,14 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ! nline - 1 DIIS steps, then end with trial step (optional, see below)
  max_niter = dtset%nline - 1
 
-
+ diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter)
  !write(std_out,*)"optekin:", optekin
 
- diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter)
-
+ ! Remalloc here because blocking algorithm is not yet implemented in the DIIS part.
  ABI_REMALLOC(ghc, (2, npwsp))
  ABI_REMALLOC(gsc, (2, npwsp*usepaw))
  ABI_REMALLOC(gvnlxc, (2, npwsp))
 
- ! Remalloc here because blocking algorithm is not yet implemented in the DIIS part.
  ABI_MALLOC(pcon, (npw))
  ABI_MALLOC(residvec, (2, npwsp))
  ABI_MALLOC(kres, (2, npwsp))
@@ -296,7 +291,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    end if
  end if
 
- call wrtout(std_out, sjoin(" Using:", itoa(max_niter), "RMM-DIIS steps + trial step"))
+ call wrtout(std_out, sjoin(" Using max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
  call wrtout(std_out, sjoin(" Accuracy:", ftoa(accuracy_ene)))
 
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
@@ -309,41 +304,37 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
                         eig(iband), resid(iband), enlx(iband), residvec, normalize=.False.)
 
+   ! BAND LOCKING for NSCF or SCF if tolwfr > 0 is used.
+   !if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
+   !  call diis%stats%increment("locked_bands", 1)
+   !  cycle iband_loop
+   !end if
+
    ! Compute <R0|R0> and <phi_0|S|phi_0>
    ! Assume input cg are already S-normalized.
-   call sqnorm_g(resid(iband), istwf_k, npwsp, residvec, me_g0, comm_fft)
+   ! Store |phi_0>, |S phi_0>.
    diis%hist_resid(0) = resid(iband)
    diis%resmat(:, 0, 0) = [resid(iband), zero]
    diis%smat(:, 0, 0) = [one, zero]
-
-   ! BAND LOCKING for NSCF or SCF if tolwfr > 0 is used.
-   if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
-      call diis%stats%increment("locked_bands", 1)
-      cycle iband_loop
-   end if
-
    diis%hist_ene(0) = eig(iband)
    diis%chain_resv(:,:,0) = residvec
-
-   ! Store |phi_0>, |S phi_0>.
    diis%chain_phi(:,:,0) = phi_now
    if (usepaw == 1) diis%chain_sphi(:,:,0) = gsc_ptr
 
-   ! Precondition |R_0>, output in kres = |K R_0>
-   kres = residvec
-   !call cg_precon(residvec, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
-   call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
-                  optekin, pcon, kres, comm_spinorfft)
-   !write(std_out,*)"kres(1:2):", kres(:, 1:2)
-
    if (prtvol == -level) then
      call wrtout(std_out, &
-           sjoin("<BEGIN RMM-DIIS, istep:", itoa(istep), ", ikpt:", itoa(ikpt), ", spin: ", itoa(isppol), ">"))
+       sjoin("<BEGIN RMM-DIIS, istep:", itoa(istep), ", ikpt:", itoa(ikpt), ", spin: ", itoa(isppol), ">"))
      write(msg,'(1a, 2(a5), 4(a14), 1x, a6)')"#", 'iter', "band", "eigen_eV", "eigde_meV", "de/dold", "resid", "type"
      call wrtout(std_out, msg)
      write(msg,'(1x, 2(i5), 2(f14.6), 2(es14.6), 1x, a6)')0, iband, eig(iband) * Ha_eV, zero, zero, resid(iband), "SDIAG"
      call wrtout(std_out, msg)
    end if
+
+   ! Precondition |R_0>, output in kres = |K R_0>
+   kres = residvec
+   call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
+                  optekin, pcon, kres, comm_spinorfft)
+   !write(std_out,*)"kres(1:2):", kres(:, 1:2)
 
    iter_loop: do iter=1,niter_band(iband)
 
@@ -382,7 +373,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
        ! Precondition residual, output in kres.
        kres = residvec
-       !call cg_precon(residvec, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
        call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
                       optekin, pcon, kres, comm_spinorfft)
 
@@ -394,12 +384,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      if (usepaw == 1) gsc_ptr => gsc_all(:,igs:ige)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
-                          eig(iband:), resid(iband:), enlx(iband:), residvec, normalize=.True.)
+                          eig(iband), resid(iband:), enlx(iband), residvec, normalize=.True.)
 
      ! BAND LOCKING for NSCF or SCF if tolwfr > 0 is used.
      !if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
-     !   call diis%stats%increment("locked_bands", 1)
-     !   cycle iband_loop
+     !  call diis%stats%increment("locked_bands", 1)
+     !  cycle iband_loop
      !end if
 
      ! Store residual R_i for i == iter and evaluate new enlx for NC.
@@ -442,8 +432,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
                     optekin, pcon, kres, comm_spinorfft)
 
      ! Recomputing the preconditioned-direction and the new lambda that minimizes the residual
-     ! is more expensive but more accurate. So we do it only for the occupied states + a buffer
-     ! if they are still far from convergence. In all the other cases we reuse the previous lambda.
+     ! is more expensive but more accurate. So we do it only for the occupied states plus a buffer
+     ! if these bands still far from convergence. In all the other cases, we reuse the previous lambda.
 
      recompute_lambda = .False.
      if (iband <= nbocc + 4 .and. resid(iband) > tol10) recompute_lambda = .True.
@@ -452,7 +442,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
      if (recompute_lambda) then
        tag = "NEWLAM"
-       ! Final preconditioned steepest descent:
+       ! Final preconditioned steepest descent with new lambda.
        ! Compute H |K R_0>
        call getghc(cpopt, kres, cprj_dum, ghc, gsc, gs_hamk, gvnlxc, &
                    rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
@@ -473,9 +463,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
        phi_now = diis%chain_phi(:,:,ii) + lambda * kres
 
      else
+       ! Reuse previous value of lambda.
        tag = "FIXLAM"
-       !phi_now = phi_now + 0.1 * kres
        phi_now = phi_now + lambda * kres
+       !phi_now = phi_now + 0.1 * kres
      endif
 
      if (usepaw == 1) gsc_ptr => gsc_all(:,igs:ige)
@@ -493,7 +484,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    end if
 
-   ! Update wavefunction for this band
+   ! Update wavefunction for this band.
    cg(:,igs:ige) = phi_now
 
    if (prtvol == -level .and. iter == niter_band(iband) + 1) then
@@ -501,6 +492,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    end if
 
  end do iband_loop
+
  call timab(1634, 2, tsec) !"rmm_diis:band_opt"
  call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
 
@@ -542,25 +534,26 @@ logical function rmm_diis_exit(diis, iter, niter_band, accuracy_ene, dtset) resu
  ! Abinit default in the CG part is 0.005 (0.3 V).
  ! Here we enlarge it a bit
  if (abs(deltae) < 6 * dtset%tolrde * abs(deold) .and. iter /= niter_band) then
-   call diis%stats%increment("deltae < 6 * tolrde * deold", 1)
+ !if (abs(deltae) < 0.3 * abs(deold) .and. iter /= niter_band) then
+   call diis%stats%increment("'deltae < 6 * tolrde * deold'", 1)
    ans = .True.; return
  end if
 
  if (dtset%iscf < 0) then
    ! This is the only condition available for NSCF run.
    if (resid < dtset%tolwfr) then
-     call diis%stats%increment("resid < tolwfr", 1)
+     call diis%stats%increment("'resid < tolwfr'", 1)
      ans = .True.; return
    end if
 
  else
    if (resid < dtset%tolwfr) then
-     call diis%stats%increment("resid < tolwfr", 1)
+     call diis%stats%increment("'resid < tolwfr'", 1)
      ans = .True.; return
    end if
    if (sqrt(abs(resid)) < accuracy_ene) then
      ! Absolute criterion on eig diff
-     call diis%stats%increment("resid < accuracy_ene", 1)
+     call diis%stats%increment("'resid < accuracy_ene'", 1)
      ans = .True.; return
    end if
  end if
@@ -600,13 +593,10 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_now, ghc, gsc, mpi_e
  normalize_ = .True.; if (present(normalize)) normalize_ = normalize
  npwsp = npw * nspinor
 
- cpopt = -1
+ cpopt = -1; sij_opt = 0
  if (usepaw == 1) then
-   sij_opt = 1 ! Recompute S
-   !cpopt = 0  ! <p_lmn|in> are computed and saved
+   sij_opt = 1 ! matrix elements <G|S|C> have to be computed in gsc in addition to ghc
    cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
- else
-   sij_opt = 0
  end if
 
  if (usepaw == 0 .and. normalize_) then

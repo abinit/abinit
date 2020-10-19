@@ -1864,10 +1864,8 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,*)' initwf : enter, ikptsp_old,ikpt,spin,nkpt= ',ikptsp_old,ikpt,spin,nkpt
 !stop
-!ENDDEBUG
 
 #if 0
  MSG_WARNING("Entering new IO section")
@@ -1894,13 +1892,11 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
    end do
  end if
 
-!DEBUG
 !write(std_out,*)' initwf : before rwwf'
 !write(std_out,*)' formeig,icg,ikpt,spin=',formeig,icg,ikpt,spin
 !write(std_out,*)' nband_k,nband_disk,npw,nspinor=',nband_k,nband_disk,npw,nspinor
 !write(std_out,*)' unwff1=',unwff1
 !stop
-!ENDDEBUG
 
  if(mpi_enreg%paralbd==0)tim_rwwf=2
  if(mpi_enreg%paralbd==1)tim_rwwf=20
@@ -1921,9 +1917,8 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 
  ! Check the number of bands on disk file against desired number. These are not required to agree)
  if (nband_disk /= nband_k .and. ikpt<=nkpt_max) then
-   write(msg,'(2(a,i0),3a,i0,3a)')&
-   'For kpt number ',ikpt,' disk file has ',nband_disk,' bands',ch10,&
-   'but input file gave nband= ',nband_k,'.',ch10,&
+   write(msg,'(3(a,i0),3a)')&
+   'For kpt number: ',ikpt,' disk file has: ',nband_disk,' bands but input file gave nband: ',nband_k,'.',ch10,&
    'This is not fatal. Bands are skipped or filled with random numbers.'
    MSG_COMMENT(msg)
  end if

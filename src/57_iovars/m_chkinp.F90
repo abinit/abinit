@@ -3306,6 +3306,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  usefock and restrictions
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usefock',dt%usefock,2,(/0,1/),iout)
 
+   if (dt%use_gemm_nonlop == 1) then
+     if (dt%useylm /= 1) then
+       MSG_ERROR_NOSTOP('use_gemm_nonlop requires the input variable "useylm" to be 1',ierr)
+     end if
+   end if
+
 !  usekden
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usekden',dt%usekden,2,(/0,1/),iout)
    if(dt%usekden==0)then

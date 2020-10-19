@@ -4611,8 +4611,8 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  ! Nothing to do if ortalgo=-1
  if(ortalgo==-1) return
 
+ call wrtout(std_out, sjoin(" Begin orthogonalization with ortalgo:", itoa(ortalgo)))
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, sjoin("Begin orthogonalization with ortalgo:", itoa(ortalgo)))
 
  do ivec=1,nvec
    cgindex(ivec)=nelem*(ivec-1)+icg+1
