@@ -129,7 +129,6 @@ contains
 !! codvsn=code version
 !! Dtfil<type(datafiles_type)>=variables related to files
 !! Dtset<type(dataset_type)>=all input variables for this dataset
-!! Pawang<type(pawang_type)>=paw angular mesh and related data
 !! Pawrad(ntypat*usepaw)<type(pawrad_type)>=paw radial mesh and related data
 !! Pawtab(ntypat*usepaw)<type(pawtab_type)>=paw tabulated starting data
 !! Psps<type(pseudopotential_type)>=variables related to pseudopotentials
@@ -190,14 +189,13 @@ contains
 !!
 !! SOURCE
 
-subroutine rdmft(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,converged)
+subroutine rdmft(acell,codvsn,Dtfil,Dtset,Pawrad,Pawtab,Psps,rprim,converged)
 !Arguments ------------------------------------
 !scalars
  logical,intent(out) :: converged
  character(len=8),intent(in) :: codvsn
  type(Datafiles_type),intent(in) :: Dtfil
  type(Dataset_type),intent(inout) :: Dtset
- type(Pawang_type),intent(inout) :: Pawang
  type(Pseudopotential_type),intent(inout) :: Psps
 !arrays
  real(dp),intent(in) :: acell(3),rprim(3,3)
@@ -215,14 +213,14 @@ subroutine rdmft(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(pawfgr_type) :: Pawfgr
 
 !arrays
- integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18)
+ integer :: ngfftc(18),ngfftf(18)!,gwx_ngfft(18),gwc_ngfft(18) 
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rprimd(3,3),rmet(3,3)
 
 !************************************************************************
  write(msg,'(7a)')&
  ' RDMFT: Calculation of the GS energy ',ch10,ch10,&
- ' Incorporated in ABINIT by M. Rodriguez-Mayorga.'
+ ' Incorporated in ABINIT by M. Rodriguez-Mayorga. ',codvsn
  call wrtout([std_out, ab_out], msg)
 
 #if defined HAVE_GW_DPC

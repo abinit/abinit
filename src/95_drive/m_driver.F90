@@ -801,7 +801,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
    
    case(RUNL_RDMFT)
-     call rdmft(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
+     call rdmft(acell,codvsn,dtfil,dtset,pawrad,pawtab,psps,rprim,converged)
 
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)

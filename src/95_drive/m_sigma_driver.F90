@@ -222,8 +222,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: etot,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,ekin_energy,evext_energy,den_int,coef_hyb 
- real(dp) :: doti,ucvol,ucvol_local,vxcavg,vxcavg_qp
+ real(dp) :: etot,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
+ real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb 
+ real(dp) :: ucvol,ucvol_local,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  real(dp):: gwalpha,gwbeta,wmin,wmax,eik_new,rcut,gsqcut,boxcut,ecutf  
@@ -2597,7 +2598,6 @@ endif
      ! Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
      den_int=sum(gw_rhor(:,1))*ucvol_local/nfftf               ! Only restricted closed-shell calcs
      evext_energy=sum(gw_rhor(:,1)*vpsp(:))*ucvol_local/nfftf  ! Only restricted closed-shell calcs
-     !call dotprod_vn(1,gw_rhor,evext_energy,doti,nfftf,gwc_nfftot,1,1,vpsp,ucvol_local)!,mpi_comm_sphgrid=mpi_comm_sphgrid) !
      ! Proceed to compute the Fock matrix elements.  
      write(msg,'(a1)')  ' '
      call wrtout(std_out,msg,'COLL')
@@ -2797,32 +2797,37 @@ endif
      write(msg,'(a1)')  ' '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a110)') ' Band corrections Delta eik = <KS_i|K[NO]-a*K[KS]+vH[NO]-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik'
+     write(msg,'(a110)') ' Band corrections Delta eik = <KS_i|K[NO]-a*K[KS]+vH[NO]&
+           &-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a1)')  ' '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      do ikcalc=1,Sigp%nkptgw
-       write(msg,'(a116)')'------------------------------------------------------------------------------------------------------------------'
+       write(msg,'(a116)')'---------------------------------------------------------&
+               &---------------------------------------------------------'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a116)')' k-point  band      eik^GS        eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]    vH[NO]-vH[KS]'
+       write(msg,'(a116)')' k-point  band      eik^GS        eik^new     Delta eik  &
+         &      K[NO]       a*K[KS]         Vxc[KS]    vH[NO]-vH[KS]'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        do ib=b1gw,b2gw
-         delta_band_ibik=(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ikcalc,1))+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)&
-                        &-old_purex(ib,ikcalc)
+         delta_band_ibik=(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ikcalc,1))&
+         &+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)-old_purex(ib,ikcalc)
          eik_new=real(KS_BSt%eig(ib,ikcalc,1))+real(delta_band_ibik)
          write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5)') &
          & ikcalc,ib,real(KS_BSt%eig(ib,ikcalc,1))*Ha_eV,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
-         & real(Sr%x_mat(ib,ib,ikcalc,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,real(KS_me%vxcval(ib,ib,ikcalc,1))*Ha_eV, &
+         & real(Sr%x_mat(ib,ib,ikcalc,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,&
+         & real(KS_me%vxcval(ib,ib,ikcalc,1))*Ha_eV,&
          & real(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ikcalc,1))*Ha_eV
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
        enddo
      enddo
-     write(msg,'(a116)')'------------------------------------------------------------------------------------------------------------------'
+     write(msg,'(a116)')'------------------------------------------------------------&
+             &------------------------------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      !
@@ -2835,7 +2840,8 @@ endif
      write(msg,'(a1)')' '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+     write(msg,'(a98)')'---------------------------------------------------------------&
+             &----------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Ekinetic   = : ',ekin_energy,' Ha ,',ekin_energy*Ha_eV,' eV'
@@ -2859,7 +2865,8 @@ endif
      write(msg,'(a,2(es16.6,a))')' Enn        = : ',QP_energies%e_ewald,' Ha ,',QP_energies%e_ewald*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+     write(msg,'(a98)')'-----------------------------------------------------------------&
+             &--------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Etot       = : ',etot,' Ha ,',etot*Ha_eV,' eV'
@@ -2874,7 +2881,8 @@ endif
      write(msg,'(a)')' Vee[SD] (= Ehartree + Efock) energy obtained using GW 1-RDM:'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+     write(msg,'(a98)')'-------------------------------------------------------------------&
+             &------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      !

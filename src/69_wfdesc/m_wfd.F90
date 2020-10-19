@@ -5447,14 +5447,14 @@ implicit none
  integer,parameter :: nspinor1=1,nspden1=1,nsppol1=1,spin1=1
  integer,parameter :: ndat1=1,nnlout1=1,tim_nonlop0=0,idir0=0
  integer :: natom,ib,ispin,ik_ibz,npw_k,istwf_k,nkpg 
- integer :: choice,cpopt,cp_dim,paw_opt,signs,ierr
+ integer :: choice,cpopt,paw_opt,signs,ierr
  character(len=500) :: msg
  type(gs_hamiltonian_type) :: ham_k
  type(wave_t),pointer :: wave
 !arrays
  integer :: bks_distrb(Wfd%mband, Wfd%nkibz, Wfd%nsppol)
  integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
- real(dp) :: kpoint(3),enlout(1),nl(2)
+ real(dp) :: kpoint(3),enlout(1)
  real(dp),allocatable :: kpg_k(:,:),vnl_psi(:,:),vectin(:,:) 
  real(dp) :: opaw_psi(1,1) 
  real(dp),ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)

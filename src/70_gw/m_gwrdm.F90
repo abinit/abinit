@@ -88,7 +88,6 @@ function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
  complex(dpc),intent(in) :: sigcme_k(:,:,:,:)
 !Local variables ------------------------------
 !scalars
- character(len=500) :: msg
  integer :: ibdm!,unitt
  real(dp) :: ec_integrated,spin_fact,fact
 !arrays
@@ -101,8 +100,8 @@ function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
  fact=spin_fact*(1.0_dp/(two_pi*2.0_dp))
 
  if (ib1/=1) then
-   MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was not included in bdgw interval.& 
-   &Restart the calculation starting bdgw from 1.")
+   MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was &
+   &not included in bdgw interval. Restart the calculation starting bdgw from 1.")
  else
    ! WARNING: Sigma_c(iv) produced from a previous integration at the screening stage, is numerically not much stable and introduces bumps.
    ! Unfortunately, the Green's function times Sigma_c(iv) does not decay fast enough with iv to overcome the bumps. These bumps are
@@ -474,7 +473,6 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  real(dp),intent(in) :: occs(:,:)
 !Local variables ------------------------------
 !scalars
- character(len=500) :: msg
  integer :: ib1dm,ib2dm,dim_bands,kpoint
 !arrays
 !************************************************************************
@@ -533,7 +531,6 @@ subroutine print_tot_occ(sigma,kmesh,bands)
 
 !Arguments ------------------------------------
 !scalars
- real(dp) :: eh_energy
  type(sigma_t),intent(in) :: sigma
  type(kmesh_t),intent(in) :: kmesh
  type(ebands_t),intent(in) :: bands

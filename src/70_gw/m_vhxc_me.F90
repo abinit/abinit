@@ -477,7 +477,8 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
            end if
          end if
          if (Mflags%has_hbare==1) then
-           Mels%hbare(ib, jb, ik_ibz, is) = Mels%kinetic(ib, jb, ik_ibz, is) + SUM(u1cjg_u2dpc(1:nfftf) * veffh0(1:nfftf, is)) * nfftfm1
+           Mels%hbare(ib, jb, ik_ibz, is) = Mels%kinetic(ib, jb, ik_ibz, is) &
+                 + SUM(u1cjg_u2dpc(1:nfftf) * veffh0(1:nfftf, is)) * nfftfm1
            if (wfd%nspinor == 2 .and. wfd%nspden == 1) then
              cg1 => wave_ib%ug(npw_k+1:)
              Mels%hbare(ib, jb, ik_ibz, 2) = &
