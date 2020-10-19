@@ -677,15 +677,43 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
 
 !  ============== Accumulate contribution to <c|S|c> ===============
    if (choice==1) then
-     do ispinor=1,nspinor
-       do ia=1,nincat
-         do ilmn=1,nlmn
-           do iplex=1,cplex
-             enlout(1)=enlout(1)+gxfac_sij(iplex,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor)
+     if (present(enlout_im).and.cplex==2) then ! cplex=cplex_fac=2
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               enlout   (idat_left)=enlout   (idat_left)+gxfac_sij(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout   (idat_left)=enlout   (idat_left)+gxfac_sij(2,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)+gxfac_sij(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)-gxfac_sij(1,ilmn,ia,ispinor)*gx(2,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+             end do
            end do
          end do
        end do
-     end do
+     else if (present(enlout_im).and.cplex_fac==2) then ! cplex=1,cplex_fac=2
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               enlout   (idat_left)=enlout   (idat_left)+gxfac_sij(1,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               enlout_im(idat_left)=enlout_im(idat_left)+gxfac_sij(2,ilmn,ia,ispinor)*gx(1,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+             end do
+           end do
+         end do
+       end do
+     else ! only the real part is needed or the imaginary part is zero
+       do idat_left=1,ndat_left
+         do ispinor=1,nspinor
+           do ia=1,nincat
+             do ilmn=1,nlmn
+               do iplex=1,cplex
+                 enlout(idat_left)=enlout(idat_left)+gxfac_sij(1,ilmn,ia,ispinor)*gx(iplex,ilmn,ia,ispinor+(idat_left-1)*nspinor)
+               end do
+             end do
+           end do
+         end do
+       end do
+     end if
    end if
 
 !  ============== Accumulate contribution to <c|dS/d_atm_pos|c> ===============
