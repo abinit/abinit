@@ -34,7 +34,7 @@ module m_rmm_diis
  use m_yaml
 
  use defs_abitypes,   only : mpi_type
- use m_fstrings,      only : sjoin, itoa
+ use m_fstrings,      only : sjoin, itoa, ftoa
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : pack_matrix
  use m_hide_lapack,   only : xhegv_cplex, xhesv_cplex
@@ -141,11 +141,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  logical :: end_with_trial_step, recompute_lambda
  real(dp),parameter :: rdummy = zero
  real(dp) :: dotr, doti, lambda, rval, accuracy_ene
- !real(dp) :: cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
+ character(len=6) :: tag
 !arrays
  integer :: niter_band(nband)
- real(dp) :: tsec(2) !, hist_ene(0:dtset%nline), hist_resid(0:dtset%nline)
+ real(dp) :: tsec(2)
  real(dp),target :: fake_gsc(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: ghc(:,:), gsc(:,:), gvnlxc(:,:), pcon(:)
@@ -187,7 +188,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ABI_CALLOC(h_ij, (2, nband, nband))
 
  call timab(1633, 1, tsec) !"rmm_diis:build_hij
- !call cwtime(cpu, wall, gflops, "start")
+ call cwtime(cpu, wall, gflops, "start")
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize
@@ -223,7 +224,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
  end do
 
- !call cwtime_report(" build_hij", cpu, wall, gflops)
+ call cwtime_report(" build_hij", cpu, wall, gflops)
 
  ! Pack <i|H|j> to prepare call to subdiago.
  ABI_MALLOC(subham, (nband*(nband+1)))
@@ -234,7 +235,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ABI_FREE(h_ij)
  call xmpi_sum(subham, comm_spinorfft, ierr)
  call timab(1633, 2, tsec) !"rmm_diis:build_hij
- !call cwtime_report(" pack_hij", cpu, wall, gflops)
+ call cwtime_report(" pack_hij", cpu, wall, gflops)
 
  ! =================
  ! Subspace rotation
@@ -245,7 +246,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, dtset%paral_kgb, &
                subham, subovl, use_subovl0, usepaw, me_g0)
  call timab(585, 2, tsec)
- !call cwtime_report(" subdiago", cpu, wall, gflops)
+ call cwtime_report(" subdiago", cpu, wall, gflops)
 
  ABI_FREE(subham)
  ABI_FREE(evec)
@@ -257,7 +258,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  optekin = 1
  ! nline - 1 DIIS steps, then end with trial step (optional, see below)
  max_niter = dtset%nline - 1
- call wrtout(std_out, " Using:", itoa(max_niter), "RMM-DIIS steps + trial step")
+
+
  !write(std_out,*)"optekin:", optekin
 
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter)
@@ -293,6 +295,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      accuracy_ene = tol6 / nbocc / four
    end if
  end if
+
+ call wrtout(std_out, sjoin(" Using:", itoa(max_niter), "RMM-DIIS steps + trial step"))
+ call wrtout(std_out, sjoin(" Accuracy:", ftoa(accuracy_ene)))
 
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
  iband_loop: do iband=1,nband
@@ -334,9 +339,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    if (prtvol == -level) then
      call wrtout(std_out, &
            sjoin("<BEGIN RMM-DIIS, istep:", itoa(istep), ", ikpt:", itoa(ikpt), ", spin: ", itoa(isppol), ">"))
-     write(msg,'(1a, 2(a5),2(a14),a12)')"#", 'iter', "band", "eigen_eV", "eigde_meV", "resid"
+     write(msg,'(1a, 2(a5), 4(a14), 1x, a6)')"#", 'iter', "band", "eigen_eV", "eigde_meV", "de/dold", "resid", "type"
      call wrtout(std_out, msg)
-     write(msg,'(1x, 2(i5),2(f14.6,1x),es12.4)')0, iband, eig(iband) * Ha_eV, zero, resid(iband)
+     write(msg,'(1x, 2(i5), 2(f14.6), 2(es14.6), 1x, a6)')0, iband, eig(iband) * Ha_eV, zero, zero, resid(iband), "SDIAG"
      call wrtout(std_out, msg)
    end if
 
@@ -391,6 +396,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_now, ghc, gsc_ptr, mpi_enreg, prtvol, &
                           eig(iband:), resid(iband:), enlx(iband:), residvec, normalize=.True.)
 
+     ! BAND LOCKING for NSCF or SCF if tolwfr > 0 is used.
+     !if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
+     !   call diis%stats%increment("locked_bands", 1)
+     !   cycle iband_loop
+     !end if
+
      ! Store residual R_i for i == iter and evaluate new enlx for NC.
      diis%hist_ene(iter) = eig(iband)
      diis%hist_resid(iter) = resid(iband)
@@ -400,8 +411,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
      ! ============== CHECK FOR CONVERGENCE ========================
      if (prtvol == -level) then
-       write(msg,"(1x, 2(i5), 2(f14.6),es12.4)") &
-         iter, iband, diis%hist_ene(iter) * Ha_eV, (diis%hist_ene(iter) - diis%hist_ene(iter-1)) * Ha_meV, resid(iband)
+       write(msg,"(1x, 2(i5), 2(f14.6), 2(es14.6), 1x, a6)") &
+         iter, iband, diis%hist_ene(iter) * Ha_eV, (diis%hist_ene(iter) - diis%hist_ene(iter-1)) * Ha_meV, &
+         (diis%hist_ene(iter) - diis%hist_ene(iter-1)) / (diis%hist_ene(1) - diis%hist_ene(0)), &
+         resid(iband), "DIIS"
        call wrtout(std_out, msg)
      end if
 
@@ -428,16 +441,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
                     optekin, pcon, kres, comm_spinorfft)
 
-     ! Recomputing the p-direction and new lambda that minimizes the residual
-     ! is more expensive but more accurate so we do it only for "occupied" states that
-     ! are still far from convergence.
+     ! Recomputing the preconditioned-direction and the new lambda that minimizes the residual
+     ! is more expensive but more accurate. So we do it only for the occupied states + a buffer
+     ! if they are still far from convergence. In all the other cases we reuse the previous lambda.
 
      recompute_lambda = .False.
      if (iband <= nbocc + 4 .and. resid(iband) > tol10) recompute_lambda = .True.
-     !write(std_out, *)" Performing last trial step with recompute_lambda: ", recompute_lambda
      !recompute_lambda = .False.
+     !write(std_out, *)" Performing last trial step with recompute_lambda: ", recompute_lambda
 
      if (recompute_lambda) then
+       tag = "NEWLAM"
        ! Final preconditioned steepest descent:
        ! Compute H |K R_0>
        call getghc(cpopt, kres, cprj_dum, ghc, gsc, gs_hamk, gvnlxc, &
@@ -459,6 +473,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
        phi_now = diis%chain_phi(:,:,ii) + lambda * kres
 
      else
+       tag = "FIXLAM"
        !phi_now = phi_now + 0.1 * kres
        phi_now = phi_now + lambda * kres
      endif
@@ -469,8 +484,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
                           eig(iband:), resid(iband:), enlx(iband), residvec, normalize=.True.)
 
      if (prtvol == -level) then
-       write(msg,"(1x, 2(i5), 2(f14.6),es12.4)") &
-         iter+1, iband, eig(iband) * Ha_eV, (eig(iband) - diis%hist_ene(iter)) * Ha_meV, resid(iband)
+       write(msg,"(1x, 2(i5), 2(f14.6), 2(es14.6), 1x, a6)") &
+         iter, iband, eig(iband) * Ha_eV, (eig(iband) - diis%hist_ene(iter-1)) * Ha_meV, &
+         (eig(iband) - diis%hist_ene(iter-1)) / (diis%hist_ene(1) - diis%hist_ene(0)), &
+         resid(iband), trim(tag)
        call wrtout(std_out, msg)
      end if
 
@@ -485,7 +502,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
  end do iband_loop
  call timab(1634, 2, tsec) !"rmm_diis:band_opt"
- !call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
+ call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
 
  !call yaml_write_and_free_dict('RMM-DIIS', dict, std_out)
  ydoc = yamldoc_open('RMM-DIIS', with_iter_state=.False.)

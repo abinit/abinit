@@ -535,12 +535,12 @@ contains
      if(trialok==1)then
        nsym=nsym+1
        if(nsym>msym)then
-         write(message,'(3a,i0,4a)')&
-&         'The number of symmetries (including non-symmorphic translations)',ch10,&
-&         'is larger than maxnsym=',msym,ch10,&
-&         'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
-&         'or at least smaller than the present one.'
-         MSG_ERROR(message)
+         write(message,'(a,i0,2a,i0,4a)')&
+         'The number of symmetries (including non-symmorphic translations) is:', nsym, ch10,&
+         'is larger than maxnsym: ',msym,ch10,&
+         'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
+         'or at least smaller than the present one.'
+        MSG_ERROR(message)
        end if
        ntrial=ntrial+1
        symrel(:,:,nsym)=ptsymrel(:,:,isym)

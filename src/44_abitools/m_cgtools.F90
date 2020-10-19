@@ -47,7 +47,7 @@ MODULE m_cgtools
  use m_errors
  use m_xmpi
 
- use m_fstrings,      only : toupper
+ use m_fstrings,      only : toupper, itoa, sjoin
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit
 
@@ -2396,8 +2396,8 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
 
  my_usegemm=.FALSE.; if (PRESENT(use_gemm)) my_usegemm = use_gemm
 
- ABI_MALLOC(cf_ovlp,(nband,nband))
- !
+ ABI_MALLOC(cf_ovlp,(nband, nband))
+
  ! 1) Calculate O_ij = <phi_i|phi_j>
  if (my_usegemm) then
    call ABI_ZGEMM("Conjugate","Normal",nband,nband,npwsp,cone,cgblock,npwsp,cgblock,npwsp,czero,cf_ovlp,nband)
@@ -2405,17 +2405,13 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
    call ZHERK("U","C",nband,npwsp,one,cgblock,npwsp,zero,cf_ovlp,nband)
  end if
 
- if (istwfk==1) then
+ if (istwfk == 1) then
    ! Sum the overlap if PW are distributed.
    if (comm_pw /= xmpi_comm_self) call xmpi_sum(cf_ovlp,comm_pw,ierr)
-   !
-   ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
-   call ZPOTRF('U',nband,cf_ovlp,nband,ierr)
 
-   if (ierr/=0)  then
-     write(msg,'(a,i0)')' ZPOTRF returned info = ',ierr
-     MSG_ERROR(msg)
-   end if
+   ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
+   call ZPOTRF('U', nband, cf_ovlp, nband, ierr)
+   ABI_CHECK(ierr == 0, sjoin('ZPOTRF returned info: ', itoa(ierr)))
 
  else
    ! overlap is real. Note that nspinor is always 1 in this case.
@@ -2434,19 +2430,15 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
 
    ! Sum the overlap if PW are distributed.
    if (comm_pw /= xmpi_comm_self) call xmpi_sum(rovlp,comm_pw,ierr)
-   !
-   ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
-   call DPOTRF('U',nband,rovlp,nband,ierr)
 
-   if (ierr/=0)  then
-     write(msg,'(a,i0)')' DPOTRF returned info = ',ierr
-     MSG_ERROR(msg)
-   end if
+   ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
+   call DPOTRF('U', nband, rovlp, nband, ierr)
+   ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info: ', itoa(ierr)))
 
    cf_ovlp = DCMPLX(rovlp)
    ABI_FREE(rovlp)
  end if
- !
+
  ! 3) Solve X U = cgblock. On exit cgblock is orthonormalized.
  call ZTRSM('Right','Upper','Normal','Normal',npwsp,nband,cone,cf_ovlp,nband,cgblock,npwsp)
 
@@ -2460,7 +2452,7 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
        write(msg,'(a,i0,es13.6)')" Output b1, Im u(g=0) should be zero ",b1,cgblock(ptr)
      end if
    end do
-   ABI_CHECK(ierr==0,"Non zero imag part")
+   ABI_CHECK(ierr == 0, "Non zero imag part")
  end if
 #endif
 
@@ -4590,6 +4582,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  integer :: ierr,ii,ii0,ii1,ii2,ivec,ivec2
  integer :: rvectsiz,vectsize,cg_idx,gsc_idx
  real(dp) :: doti,dotr,sum,xnorm
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
 !arrays
  integer :: cgindex(nvec),gscindex(nvec)
@@ -4601,23 +4594,25 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 ! *************************************************************************
 
 #ifdef DEBUG_MODE
-!Make sure imaginary part at G=0 vanishes
+ !Make sure imaginary part at G=0 vanishes
  if (istwf_k==2) then
    do ivec=1,nvec
      if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>zero)then
-!      if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>tol16)then
+       ! if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>tol16)then
        write(msg,'(2a,3i0,2es16.6,a,a)')&
        ' For istwf_k=2,observed the following element of vecnm :',ch10,&
-       nelem,ivec,icg,vecnm(1:2,1+nelem*(ivec-1)+icg),ch10,&
-       '  with a non-negligible imaginary part.'
+       nelem,ivec,icg,vecnm(1:2,1+nelem*(ivec-1)+icg),ch10,'  with a non-negligible imaginary part.'
        MSG_BUG(msg)
      end if
    end do
  end if
 #endif
 
-!Nothing to do if ortalgo=-1
+ ! Nothing to do if ortalgo=-1
  if(ortalgo==-1) return
+
+ call cwtime(cpu, wall, gflops, "start")
+ call wrtout(std_out, sjoin("Begin orthogonalization with ortalgo:", itoa(ortalgo)))
 
  do ivec=1,nvec
    cgindex(ivec)=nelem*(ivec-1)+icg+1
@@ -4625,12 +4620,12 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  end do
 
  if (ortalgo==3) then
-!  =========================
-!  First (new new) algorithm
-!  =========================
-!  NEW VERSION: avoid copies, use ZHERK for NC
+   !  =========================
+   !  First (new new) algorithm
+   !  =========================
+   !  NEW VERSION: avoid copies, use ZHERK for NC
    cg_idx = cgindex(1)
-   if (useoverlap==1) then
+   if (useoverlap == 1) then
      gsc_idx = gscindex(1)
      call cgpaw_cholesky(nelem,nvec,vecnm(1,cg_idx),ovl_vecnm(1,gsc_idx),istwf_k,me_g0,comm)
    else
@@ -4638,10 +4633,10 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
    end if
 
  else if(ortalgo==1) then
-!  =======================
-!  Second (new) algorithm
-!  =======================
-!  This first algorithm seems to be more efficient especially in the parallel band-FFT mode.
+    !  =======================
+    !  Second (new) algorithm
+    !  =======================
+    !  This first algorithm seems to be more efficient especially in the parallel band-FFT mode.
 
    if(istwf_k==1) then
      vectsize=nelem
@@ -4739,7 +4734,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
    end if
 
  else if (ortalgo==4) then
-!  else if (ANY(ortalgo==(/0,2/))) then
+   ! else if (ANY(ortalgo==(/0,2/))) then
 
    cg_idx = cgindex(1)
    if (useoverlap==0) then
@@ -4750,12 +4745,12 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
    end if
 
  else if (ANY(ortalgo==(/0,2/))) then
-!  =======================
-!  Third (old) algorithm
-!  =======================
+   !  =======================
+   !  Third (old) algorithm
+   !  =======================
 
    do ivec=1,nvec
-!    Normalize each vecnm(n,m) in turn:
+     ! Normalize each vecnm(n,m) in turn:
 
      if (useoverlap==1) then ! Using overlap S...
        if(istwf_k/=2)then
@@ -5043,14 +5038,15 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
            end do
          end if
 
-       end if !        End use of time-reversal symmetry
+       end if ! End use of time-reversal symmetry
      end if  ! Test on "ivec"
-   end do !    end loop over vectors (or bands) with index ivec :
+   end do ! end loop over vectors (or bands) with index ivec :
 
  else
-   write(msg,'(a,i0)')"Wrong value for ortalgo: ",ortalgo
-   MSG_ERROR(msg)
- end if ! End of the second algorithm
+   MSG_ERROR(sjoin("Wrong value for ortalgo:", itoa(ortalgo)))
+ end if
+
+ call cwtime_report(" pw_orthon", cpu, wall, gflops)
 
 end subroutine pw_orthon
 !!***

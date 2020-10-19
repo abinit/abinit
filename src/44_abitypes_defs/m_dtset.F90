@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_dtset
+module m_dtset
 
  use defs_basis
  use m_abicore
@@ -1160,12 +1160,12 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 
      end if
 
-!    Here, treat the case when the number of allowed bands is not large enough
    else
-     write(msg, '(a,i0,8a)' )&
-     'Initialization of occ, with occopt: ',occopt,ch10,&
-     'There are not enough bands to get charge balance right',ch10,&
-     'Action: modify input file ... ',ch10,&
+     ! Here, treat the case when the number of allowed bands is not large enough
+     write(msg, '(a,i0,2a, es12.4, 6a)' )&
+     'Initialization of occ variables with occopt: ',occopt,ch10,&
+     'There are not enough bands to get charge balance right with nelect:', dtset%nelect, ch10, &
+     'Action: modify input file ',ch10,&
      '(check the pseudopotential charges, the variable charge,',ch10,&
      'and the declared number of bands, nband)'
      MSG_ERROR(msg)

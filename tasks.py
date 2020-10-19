@@ -316,9 +316,9 @@ def diff3(ctx, filename="run.abo"):
     files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
     if not files: return
     if len(files) > 2:
-        cmd = "%s %s" % (vimdiff, filee[-2], files[-1])
+        cmd = "%s %s %s %s" % (vimdiff, filename, files[-2], files[-1])
     else:
-        cmd = "%s %s" % (vimdiff, files[-1])
+        cmd = "%s %s %s" % (vimdiff, filename, files[-1])
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
 
