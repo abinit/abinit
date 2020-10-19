@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !!  Compute density matrix correction Galitskii-Migdal Ecorr, G = Go + Go Sigma Go (imaginary freqs. are used in Sigma_c) 
-!!  and associated quantities (natural orbitals, matrix elements, etc)
+!!  and associated quantities (natural orbitals, matrix elements, etc.)
 !! PARENTS
 !! 
 !! CHILDREN
