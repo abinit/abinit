@@ -14,7 +14,8 @@ optdriver2     3       # Screening calculation
 getwfk2       -1       # Obtain WFK file from previous dataset
 nband2         8       # Bands to be used in the screening calculation
 ecuteps2       5       # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
-nfreqim2      20       # Number of freqs (w') in Imag axis used in Gauss-Legendre quadrature integration of Sigma_c(iw) = G(iw,iw') W(iw') dw'
+nfreqim2      40       # Number of freqs (w') in Imag axis used in Gauss-Legendre quadrature integration of Sigma_c(iw) = G(iw,iw') W(iw') dw'
+gwrpacorr2     1
 ############
 # Dataset 3
 ############
@@ -28,7 +29,7 @@ getwfk3       -2       # Obtain WFK file from dataset 1
 getscr3       -1       # Obtain SCR file from previous dataset
 nband3         8       # Bands to be used in the Self-Energy calculation
 ecutsigx3    8.0
-nomegasi3     40       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
+nomegasi3     20       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
 
 nkptgw3        6       # number of k-point where to calculate the GW correction
 kptgw3                 # k-points in reduced coordinates, read from output
