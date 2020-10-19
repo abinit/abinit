@@ -8,13 +8,13 @@
  #istwfk *1
 
 #First dataset : SCF run
- nband  30
- nbdbuf 10
+ nband  24
+ nbdbuf 6
  #tolwfr  1.e-12
  tolvrs 1e-10
 
- ecut 8.00  
- pawecutdg 24.00
+ ecut 14.0  
+ pawecutdg 28.00
  diemac 10.0
 
 #Common data

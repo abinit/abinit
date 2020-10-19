@@ -317,7 +317,7 @@ def diff3(ctx, filename="run.abo"):
     if not files: return
     if len(files) > 2:
         cmd = "%s %s" % (vimdiff, filee[-2], files[-1])
-    else
+    else:
         cmd = "%s %s" % (vimdiff, files[-1])
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)

@@ -138,7 +138,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  integer :: ig, ig0, ib, cplex, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc, ii
- logical :: end_with_trial_step, use_prec_steepest_descent
+ logical :: end_with_trial_step, recompute_lambda
  real(dp),parameter :: rdummy = zero
  real(dp) :: dotr, doti, lambda, rval, accuracy_ene
  !real(dp) :: cpu, wall, gflops
@@ -255,9 +255,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ! =================
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1
+ ! nline - 1 DIIS steps, then end with trial step (optional, see below)
+ max_niter = dtset%nline - 1
+ call wrtout(std_out, " Using:", itoa(max_niter), "RMM-DIIS steps + trial step")
  !write(std_out,*)"optekin:", optekin
- max_niter = dtset%nline
- !max_niter = dtset%nline - 1
 
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter)
 
@@ -277,8 +278,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  !if dtset%
  !if dtset%occopt == 2
  do iband=1,nband
-   if (occ(iband) < tol3) niter_band(iband) = max(max_niter / 2, 2)
-   !if (occ(iband) < tol3) niter_band(iband) = max(1 + max_niter / 2, 2)
+   if (occ(iband) < tol3) niter_band(iband) = max(1 + max_niter / 2, 2)
  end do
 
  ! Define accuracy_ene for SCF
@@ -288,9 +288,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    if (dtset%toldfe /= 0) then
      accuracy_ene = dtset%toldfe / nbocc / four
    else
-     ! User is not using toldfe to stop the SCF cycle
+     ! We are not using toldfe to stop the SCF cycle
      ! so we are forced to hardcode a tolerance for the absolute diff in the KS eigenvalue.
-     accuracy_ene = tol8 / nbocc / four
+     accuracy_ene = tol6 / nbocc / four
    end if
  end if
 
@@ -419,8 +419,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    end do iter_loop
 
-   ! End with trial step but only then if performed all the iterations (no exit from diis%exit)
-   !end_with_trial_step = .True.
+   ! End with trial step but only if we performed all the iterations (no exit from diis%exit)
    end_with_trial_step = iter == niter_band(iband) + 1
    !end_with_trial_step = .False.
 
@@ -429,14 +428,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      call cg_precon(phi_now, zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
                     optekin, pcon, kres, comm_spinorfft)
 
-     use_prec_steepest_descent = .False.
-     if (iband <= nbocc + 4 .and. resid(iband) > tol10) use_prec_steepest_descent = .True.
-     !write(std_out, *)" Performing last trial step with use_prec_steepest_descent: ", use_prec_steepest_descent
-     !use_prec_steepest_descent = .True.
-     !use_prec_steepest_descent = .False.
+     ! Recomputing the p-direction and new lambda that minimizes the residual
+     ! is more expensive but more accurate so we do it only for "occupied" states that
+     ! are still far from convergence.
 
-     if (use_prec_steepest_descent) then
-       ! Final Preconditioned steepest descent:
+     recompute_lambda = .False.
+     if (iband <= nbocc + 4 .and. resid(iband) > tol10) recompute_lambda = .True.
+     !write(std_out, *)" Performing last trial step with recompute_lambda: ", recompute_lambda
+     !recompute_lambda = .False.
+
+     if (recompute_lambda) then
+       ! Final preconditioned steepest descent:
        ! Compute H |K R_0>
        call getghc(cpopt, kres, cprj_dum, ghc, gsc, gs_hamk, gvnlxc, &
                    rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
@@ -518,33 +520,31 @@ logical function rmm_diis_exit(diis, iter, niter_band, accuracy_ene, dtset) resu
  deltae = diis%hist_ene(iter) - diis%hist_ene(iter-1)
 
  ans = .False.
- ! Abinit default is 0.005 (0.3 V)
- !if (abs(deltae) < dtset%tolrde * abs(deold) .and. iter /= niter_band) then
- if (abs(deltae) < 12 * dtset%tolrde * abs(deold) .and. iter /= niter_band) then
 
- !if (abs(deltae) < 0.3_dp * abs(deold) .and. iter /= niter_band) then
- ! This one seems much better.
- !if (abs(deltae) < 0.03_dp * abs(deold) .and. iter /= niter_band) then
-   call diis%stats%increment("deltae < 12 * tolrde * deold", 1)
-   ans = .True.
-   return
+ ! Relative criterion on eig diff
+ ! Abinit default in the CG part is 0.005 (0.3 V).
+ ! Here we enlarge it a bit
+ if (abs(deltae) < 6 * dtset%tolrde * abs(deold) .and. iter /= niter_band) then
+   call diis%stats%increment("deltae < 6 * tolrde * deold", 1)
+   ans = .True.; return
  end if
 
  if (dtset%iscf < 0) then
    ! This is the only condition available for NSCF run.
    if (resid < dtset%tolwfr) then
      call diis%stats%increment("resid < tolwfr", 1)
-     ans = .True.
+     ans = .True.; return
    end if
 
  else
-   if (sqrt(abs(resid)) < accuracy_ene) then
-     call diis%stats%increment("resid < accuracy_ene", 1)
-     ans = .True.  ! Similar to EDIFF/NBANDS/4
-   end if
    if (resid < dtset%tolwfr) then
      call diis%stats%increment("resid < tolwfr", 1)
-     ans = .True.
+     ans = .True.; return
+   end if
+   if (sqrt(abs(resid)) < accuracy_ene) then
+     ! Absolute criterion on eig diff
+     call diis%stats%increment("resid < accuracy_ene", 1)
+     ans = .True.; return
    end if
  end if
 
