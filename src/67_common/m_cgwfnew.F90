@@ -401,14 +401,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 &           gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
            call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &           gs_hamk,mpi_enreg,nband,npw,nspinor,prtvol,tim_getcsc_band)
-!           do jband=1,nband
-!             cwavef => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
-!             cprj_cwavef => cprj_cwavef_bands(:,jband:jband)
-!             call getcsc(scprod(:,jband),cpopt,direc,cwavef,cprj_direc,cprj_cwavef,&
-!&             gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc_band)
-!           end do
-!           cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
-!           cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
            scprod = reshape(scprod_csc,(/2,nband/))
            call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &           direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
@@ -444,27 +436,25 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 &         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &         gs_hamk,mpi_enreg,nband,npw,nspinor,prtvol,tim_getcsc_band)
-!         do jband=1,nband
-!           cwavef => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
-!           cprj_cwavef => cprj_cwavef_bands(:,jband:jband)
-!           call getcsc(scprod(:,jband),cpopt,direc,cwavef,cprj_direc,cprj_cwavef,&
-!&           gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc_band)
-!         end do
          ! Projecting again out all bands (not normalized).
          scprod = reshape(scprod_csc,(/2,nband/))
          call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
          ! Apply projbd to cprj_direc
-         do jband=1,nband
-           cprj_cwavef => cprj_cwavef_bands(:,jband:jband)
-           cx_tmp  = (/one,zero/)
-           cx_tmp2 = (/-scprod(1,jband),-scprod(2,jband)/)
-           call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef,cx_tmp,cx_tmp2,&
-&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-&                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
-         end do
-!         cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
-         cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+         cx_tmp  = (/one,zero/)
+!         do jband=1,nband
+!           cprj_cwavef => cprj_cwavef_bands(:,jband:jband)
+!           cx_tmp  = (/one,zero/)
+!           cx_tmp2 = (/-scprod(1,jband),-scprod(2,jband)/)
+!           call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef,cx_tmp,cx_tmp2,&
+!&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!&                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
+!         end do
+         scprod_csc = -scprod_csc
+         call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef_bands,cx_tmp,scprod_csc,&
+&                 gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+&                 natom,gs_hamk%nattyp,nband,nspinor,gs_hamk%ntypat)
+!         cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
 
          ! ======================================================================
          ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
@@ -484,7 +474,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
            cx_tmp2 = (/zero,zero/)
            call cprj_axpby(cprj_conjgr,cprj_direc,cprj_direc,cx_tmp,cx_tmp2,&
 &                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-&                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
+&                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
 
            !LTEST
            if (prtvol==-level)then
@@ -510,7 +500,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
            cx_tmp2  = (/gamma,zero/)
            call cprj_axpby(cprj_conjgr,cprj_direc,cprj_conjgr,cx_tmp,cx_tmp2,&
 &                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-&                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
+&                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
          end if
 
          ! ======================================================================
@@ -549,7 +539,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          cx_tmp2  = (/-dotr,zero/)
          call cprj_axpby(cprj_direc,cprj_conjgr,cprj_cwavef,cx_tmp,cx_tmp2,&
 &         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-&         natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
+&         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
 
          ! ======================================================================
          ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
@@ -636,7 +626,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          cx_tmp2 = (/sintn,zero/)
          call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_direc,cx_tmp,cx_tmp2,&
 &         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-&         natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
+&         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
 
          ! ======================================================================
          ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
