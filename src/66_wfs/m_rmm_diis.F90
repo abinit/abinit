@@ -286,7 +286,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    end if
  end if
 
- diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, 1)
+ bsize = 1
+ diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize)
  !write(std_out,*)"optekin:", optekin
 
  call wrtout(std_out, sjoin(" Using max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
@@ -295,16 +296,19 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
  ! Remalloc here because blocking algorithm is not yet implemented in the DIIS part.
- bsize = 1
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
-
  ABI_MALLOC(pcon, (npw))
  ABI_MALLOC(residv_bk, (2, npwsp*bsize))
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
  ABI_MALLOC(phi_bk, (2, npwsp*bsize))
  !ABI_MALLOC(new_psi, (2, npwsp))
  !ABI_MALLOC(new_residvec, (2, npwsp))
+
+ ! We loop over nblocks, each block has ndat states.
+ ! Usually ndat == bsize except for the last block if mod(nband, bsize /= 0).
+ ! We try to operate on ndat states at once but in the middle of the algorithm
+ ! we need to optimize a single band as there are exit instructions.
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize
@@ -323,19 +327,19 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    ib_start = iband
 
-   ! Compute H |phi_0> from subdiago cg.
+   ! Compute H |phi_0> using cg from subdiago. Blocked call.
    ! Alternatively, one can compute the residuals before the subspace rotation and then rotate
    ! to save one call to getghc_eigresid.
-   igs = 1 + npwsp * (iband - 1); ige = igs - 1 + npwsp
+   igs = 1 + npwsp * (ib_start - 1); ige = igs - 1 + npwsp
    phi_bk = cg(:,igs:ige)
    if (usepaw == 1) ptr_gsc_bk => gsc_all(:,igs:ige)
 
-   call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
+   call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                         eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
 
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>.
    ! Aassuming input cg are already S-normalized.
-   do idat=1,ndat1
+   do idat=1,ndat
      diis%hist_resid(0, idat) = resid(ib_start+idat-1)
      diis%resmat(:, 0, 0, idat) = [resid(ib_start+idat-1), zero]
      diis%smat(:, 0, 0, idat) = [one, zero]
@@ -359,14 +363,14 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    ! Precondition |R_0>, output returned in kres_bk = |K R_0>
    kres_bk = residv_bk
-   call cg_precon_many(istwf_k, npw, nspinor, ndat1, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_spinorfft)
+   call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_spinorfft)
 
    ! Compute H |K R_0>
    call getghc(cpopt, kres_bk, cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
-               rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
+               rdummy, mpi_enreg, ndat, prtvol, sij_opt, tim_getghc, type_calc0)
 
    ! Compute residuals: (H - e_0 S) |K R_0>
-   call cg_residvecs(usepaw, npwsp, ndat1, eig(ib_start:), kres_bk, ghc_bk, gsc_bk, residv_bk)
+   call cg_residvecs(usepaw, npwsp, ndat, eig(ib_start:), kres_bk, ghc_bk, gsc_bk, residv_bk)
 
    ! Preconditioned steepest descent:
    !
@@ -377,12 +381,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    !
    !    lambda = - Re{<R_0|(H - e_0 S)} |K R_0>} / |(H - e_0 S) |K R_0>|**2
    !
-   call cg_norm2g(istwf_k, npwsp, ndat1, residv_bk, lambda_bk, me_g0, comm_spinorfft)
+   call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_spinorfft)
 
 #if 0
    ld1 = npwsp * (max_niter + 1); ld2 = npwsp
-   call cg_zdotg_lds(istwf_k, npwsp, ndat1, option1, ld1, diis%chain_resv, ld2, residv_bk, dots_bk, me_g0, comm_spinorfft)
-   do idat=1,ndat1
+   call cg_zdotg_lds(istwf_k, npwsp, ndat, option1, ld1, diis%chain_resv, ld2, residv_bk, dots_bk, me_g0, comm_spinorfft)
+   do idat=1,ndat
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      lambda_bk(idat) = -dots_bk(1,idat) / lambda_bk(idat)
      phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
@@ -390,7 +394,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
 #else
    !lamdas(ii) = -dots_bk(1, ii) / lambda_bk(ii)
-   do idat=1,ndat1
+   do idat=1,ndat
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      call dotprod_g(dotr, doti, istwf_k, npwsp, option1, &
                     diis%chain_resv(:,:,0,idat), residv_bk(:,jj), me_g0, comm_spinorfft)
@@ -401,15 +405,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    end do
 #endif
 
-   ! Loop over bands inside the block
+   ! Loop over bands inside the block: note ndat1.
    ! (it's not easy to block at this level because we have a different number of iterations
    ! and exit conditions for each band).
    !ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
    !do iband=ib_start, ib_stop
    !  ib = iband - ib_start + 1
+   !do idat=1, ndat
    idat = 1
    ibk = 1 + (idat - 1) * npwsp
    iek = idat * npwsp
+   !iband = ib_start + idat - 1
 
    iter_loop: do iter=1,max_niter_iband(iband)
 
@@ -479,6 +485,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    if (end_with_trial_step) then
      ! Bands in the block may have performed different number of iterations.
      ! Here we extract the values obtained in the last iteration to fill the bk arrays.
+     ! Note ndat instead of ndat1
 
      !do idat=1,ndat
      !  it = diis%last_iter(idat)
@@ -492,10 +499,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      phi_bk = diis%chain_phi(:,:,it, idat)
      kres_bk = diis%chain_resv(:, :, it, idat)
      !kres_bk = residv_bk
-
      ib_start = iband
 
-     call cg_precon_many(istwf_k, npw, nspinor, ndat1, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_spinorfft)
+     call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_spinorfft)
 
      ! Recomputing the preconditioned-direction and the new lambda that minimizes the residual
      ! is more expensive but more accurate. So we do it only for the occupied states plus a buffer
@@ -511,22 +517,22 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
        ! Final preconditioned steepest descent with new lambda.
        ! Compute H |K R_0>
        call getghc(cpopt, kres_bk, cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
-                   rdummy, mpi_enreg, ndat1, prtvol, sij_opt, tim_getghc, type_calc0)
+                   rdummy, mpi_enreg, ndat, prtvol, sij_opt, tim_getghc, type_calc0)
 
        ! Compute residual: (H - e_0 S) |K R_0>
-       call cg_residvecs(usepaw, npwsp, ndat1, eig(ib_start:), kres_bk, ghc_bk, gsc_bk, residv_bk)
+       call cg_residvecs(usepaw, npwsp, ndat, eig(ib_start:), kres_bk, ghc_bk, gsc_bk, residv_bk)
 
        !ld1 = npwsp * (max_niter + 1); ld2 = npwsp
-       !call cg_zdotg_lds(istwf_k, npwsp, ndat1, option1, ld1, cg1, ld2, residv_bk, dots_bk, me_g0, comm)
+       !call cg_zdotg_lds(istwf_k, npwsp, ndat, option1, ld1, cg1, ld2, residv_bk, dots_bk, me_g0, comm)
 
        it = max_niter_iband(iband)
        call dotprod_g(dotr, doti, istwf_k, npwsp, option1, &
                       diis%chain_resv(:,:,it,idat), residv_bk, me_g0, comm_spinorfft)
 
        !call sqnorm_g(rval, istwf_k, npwsp, residv_bk, me_g0, comm_spinorfft)
-       call cg_norm2g(istwf_k, npwsp, ndat1, residv_bk, lambda_bk, me_g0, comm_spinorfft)
+       call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_spinorfft)
 
-       do idat=1,ndat1
+       do idat=1,ndat
          jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
          lambda_bk(idat) = -dotr / lambda_bk(idat)
          phi_bk(:,jj:kk) = diis%chain_phi(:,:,it,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
@@ -535,7 +541,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      else
        ! Reuse previous value of lambda.
        tag = "FIXLAM"
-       do idat=1,ndat1
+       do idat=1,ndat
          jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
          phi_bk(:,jj:kk) = phi_bk(:,jj:kk) + lambda_bk(idat) * kres_bk(:,jj:kk)
        end do
@@ -544,7 +550,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
      if (usepaw == 1) ptr_gsc_bk => gsc_all(:,igs:ige)
 
-     call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
+     call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
 
      if (prtvol == -level) then
