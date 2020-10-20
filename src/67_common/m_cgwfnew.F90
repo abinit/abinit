@@ -43,6 +43,7 @@ module m_cgwf_paw
  use m_paw_overlap,   only : smatrix_k_paw
  use m_cgprj,         only : getcprj,cprj_axpby
  use m_cgwf,          only : mksubham
+ use m_fft,           only : fourwf
  !LTEST
  use testing
  !LTEST
@@ -144,23 +145,23 @@ subroutine cgwf_paw(cg,chkexit,cpus,eig,&
 
 !Local variables-------------------------------
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
-integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
+integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  integer,save :: nskip=0
  integer :: counter,cpopt,itypat
- integer :: ia,iband,ibandmin,ibandmax,jband,me_g0
+ integer :: i1,i2,i3,ia,iband,ibandmin,ibandmax,jband,me_g0
  integer :: ibdblock,iblock,igs
  integer :: iline,ipw,ispinor,istwf_k
- integer :: natom,ncpgr,nblock
+ integer :: n4,n5,n6,natom,ncpgr,nblock
  integer :: optekin,sij_opt
  integer :: useoverlap,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
- real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,xnorm
+ real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,weight_fft,xnorm
  real(dp) :: dot(2)
  character(len=500) :: message
  integer,allocatable :: dimlmn(:)
  real(dp) :: tsec(2),dotrr(1),dotii(1)
- real(dp),allocatable :: conjgr(:,:),gvnlxc(:,:)
- real(dp), pointer :: cwavef(:,:),cwavef_bands(:,:)
+ real(dp),allocatable :: conjgr(:,:),gvnlxc(:,:),denpot_dum(:,:,:),fofgout_dum(:,:)
+ real(dp), pointer :: cwavef(:,:),cwavef_bands(:,:),cwavef_r(:,:,:,:),direc_r(:,:,:,:)
  real(dp),allocatable :: direc(:,:),direc_tmp(:,:),pcon(:),scprod(:,:),scwavef_dum(:,:)
  real(dp),pointer :: scprod_csc(:),kinpw(:)
  real(dp) :: cx_tmp(2),cx_tmp2(2)
@@ -194,6 +195,8 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  useoverlap=0
 
  cpopt = 2
+
+ weight_fft = one
 
 !Initializations and allocations
  nblock=(nband-1)/nbdblock+1
@@ -230,6 +233,13 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  ABI_DATATYPE_ALLOCATE(cprj_cwavef_bands,(natom,nband))
  ABI_DATATYPE_ALLOCATE(cprj_direc ,(natom,nbdblock))
  ABI_DATATYPE_ALLOCATE(cprj_conjgr ,(natom,nbdblock))
+
+ n4=gs_hamk%ngfft(4);n5=gs_hamk%ngfft(5);n6=gs_hamk%ngfft(6)
+ ABI_ALLOCATE(cwavef_r,(2,n4,n5,n6))
+ ABI_ALLOCATE(direc_r, (2,n4,n5,n6))
+ ABI_ALLOCATE(denpot_dum, (0,0,0))
+ ABI_ALLOCATE(fofgout_dum, (0,0))
+
  ncpgr = 0 ! no need of gradients here
 !Dimensioning and allocation of <p_i|Cnk>
  ABI_ALLOCATE(dimlmn,(natom))
@@ -299,7 +309,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
      ! WARNING : It might be interesting to skip the following operation.
      ! The associated routines should be reexamined to see whether cwavef is not already normalized.
      call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
-&     gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
+&     gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
      xnorm=one/sqrt(dot(1))
      call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
 
@@ -320,9 +330,21 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          !LTEST
          call writeout(999,'iline',iline)
          call writeout(999,'getchc : chc')
+!         call writeout(999,'cwavef  (in)',cwavef)
          !LTEST
-         call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
-           &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
+         ! Compute wavefunction in real space
+         call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
+&          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+&          n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
+         !LTEST
+!         call fourwf(0,denpot_dum,fofgout_dum,cwavef,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
+!&          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+!&          n4,n5,n6,3,tim_fourwf,weight_fft,weight_fft) ! Optional arguments
+!         call writeout(999,'cwavef (bis)',cwavef)
+         !LTEST
+!
+         call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
+           &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
          lam0=chc
          eval=chc
          eig(iband)=chc
@@ -400,7 +422,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 &           gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &           gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
            call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
-&           gs_hamk,mpi_enreg,nband,npw,nspinor,prtvol,tim_getcsc_band)
+&           gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
            scprod = reshape(scprod_csc,(/2,nband/))
            call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &           direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
@@ -435,7 +457,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 &         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
-&         gs_hamk,mpi_enreg,nband,npw,nspinor,prtvol,tim_getcsc_band)
+&         gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
          ! Projecting again out all bands (not normalized).
          scprod = reshape(scprod_csc,(/2,nband/))
          call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
@@ -508,7 +530,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          ! ======================================================================
 
          call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
-&         gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
+&         gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
          dotr=dot(1)
 
          !LTEST
@@ -547,7 +569,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 
          ! Compute norm of direc
          call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
-&         gs_hamk,mpi_enreg,1,npw,nspinor,prtvol,tim_getcsc)
+&         gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
          xnorm=one/sqrt(abs(dot(1)))
 
          sij_opt=0
@@ -555,16 +577,20 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          !LTEST
          call writeout(999,'getchc : dhc')
          !LTEST
-         call getchc(dhc,doti,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,&
-           &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
+         ! Compute wavefunction in real space
+         call fourwf(0,denpot_dum,direc,fofgout_dum,direc_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
+&          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+&          n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
+         call getchc(dhc,doti,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,cwavef_r,direc_r,&
+           &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
          dhc=dhc*xnorm
 
          ! Compute <D|H|D> or <D|(H-zshift)^2|D>
          !LTEST
          call writeout(999,'getchc : dhd')
          !LTEST
-         call getchc(dhd,doti,cpopt,direc,direc,cprj_direc,cprj_direc,&
-&          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
+         call getchc(dhd,doti,cpopt,direc,direc,cprj_direc,cprj_direc,direc_r,direc_r,&
+&          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
          dhd=dhd*xnorm**2
 
          if(prtvol==-level)then
@@ -627,6 +653,14 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
          call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_direc,cx_tmp,cx_tmp2,&
 &         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+         do i3=1,gs_hamk%n6
+           do i2=1,gs_hamk%n5
+             do i1=1,gs_hamk%n4
+               cwavef_r(1,i1,i2,i3)=cwavef_r(1,i1,i2,i3)*costh+direc_r(1,i1,i2,i3)*sintn
+               cwavef_r(2,i1,i2,i3)=cwavef_r(2,i1,i2,i3)*costh+direc_r(2,i1,i2,i3)*sintn
+             end do
+           end do
+         end do
 
          ! ======================================================================
          ! =========== CHECK CONVERGENCE AGAINST TRIAL ENERGY ===================
@@ -646,8 +680,8 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
              call wrtout(std_out,message,'PERS')
            end if
            ! Update chc before exit
-           call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
-             &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
+           call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
+             &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
            eig(iband)=chc
 
            nskip=nskip+2*(nline-iline)  ! Number of one-way 3D ffts skipped
@@ -656,8 +690,8 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
 
          ! Update chc only if last iteration, otherwise it will be done at the beginning of the next one
          if (iline==nline) then
-           call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
-             &          gs_hamk,zero,mpi_enreg,1,npw,nspinor,prtvol,sij_opt,tim_getchc,type_calc)
+           call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
+             &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
            eig(iband)=chc
          end if
 
@@ -712,6 +746,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4
  ABI_DEALLOCATE(scprod)
 
  ABI_DEALLOCATE(direc_tmp)
+ ABI_DEALLOCATE(cwavef_r)
+ ABI_DEALLOCATE(direc_r)
+ ABI_DEALLOCATE(denpot_dum)
+ ABI_DEALLOCATE(fofgout_dum)
 
 ! Do not delete this line, needed to run with open MP
  write(unit=message,fmt=*) resid(1)

@@ -761,7 +761,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(862)='fourwf%suskmm !0 part 2         '
  names(871)='fourwf%suskmm !3 part 1         '
  names(872)='fourwf%suskmm !3 part 2         '
- names(873)='fourwf%getchc                   '; basic(873)=1
+ names(880)='fourwf%cgwf_paw                 '
 
  names(901)='newvtr(before selection)        '
  names(902)='newvtr(bef. prcref_PMA)         '
@@ -877,7 +877,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1364)='getcsc(bands)                   '
 
  names(1370)='getchc                          '
- names(1371)='getchc%other                    '
+ names(1371)='getchc%local                    '; basic(1371) = 1
+ names(1372)='getchc%kin                      '; basic(1372) = 1
+ names(1375)='getchc%other                    '
 
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
@@ -1168,7 +1170,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(8)
      tslots(:4)=(/803, 842,843,846/)
    case(9)
-     tslots(:10)=(/804, 845,847,848,850,854,858,859,861,862/)
+     tslots(:11)=(/804, 845,847,848,850,854,858,859,861,862,880/)
    case(10)
      tslots(:6)=(/805, 849,851,857,871,872/)
    case(11)
@@ -1283,7 +1285,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:4)=(/1210,1200,-1201,-1202/)
    case(47)
 !      Estimate the complement of cgwf_paw
-     tslots(:9)=(/1301,1300,-1200,-1211,-1363,-1364,-1370,-201,-211/)
+     tslots(:10)=(/1301,1300,-1200,-1211,-1363,-1364,-1370,-201,-211,-880/)
    case(48)
 !      Sum calls of getcsc
      tslots(:3)=(/1360,1363,1364/)
@@ -1292,7 +1294,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:4)=(/1362,1360,-1361,-236/)
    case(50)
 !      Estimate the complement of getchc
-     tslots(:4)=(/1371,1370,-235,-873/)
+     tslots(:5)=(/1375,1370,-235,-1371,-1372/)
 
    case default
      cycle
@@ -1580,7 +1582,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(16)
          list(:4)=(/200,841,221,98/)                           ; msg='getghc '
        case(17)
-         list(:20)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858/)
+         list(:21)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,880/)
          msg='fourwf (upwards partitioning)'
        case(18)
          list(:5)=(/933,934,936,937,938/)                      ; msg='outkss '
@@ -1681,7 +1683,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
          msg='low-level xgTransposer type '
        case(79)
-         list(:9)=(/1300,1200,1211,1363,1364,1370,201,211,1301/)
+         list(:10)=(/1300,1200,1211,1363,1364,1370,201,211,880,1301/)
          msg='cgwf_paw'
        case(80)
          list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1150/)
@@ -1693,7 +1695,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:4)=(/1360,1361,236,1362/)
          msg='getcsc'
        case(83)
-         list(:4)=(/1370,873,235,1371/)
+         list(:5)=(/1370,235,1371,1372,1375/)
          msg='getchc'
        case default
          cycle ! This allows to disable temporarily some partitionings
