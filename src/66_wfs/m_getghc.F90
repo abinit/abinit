@@ -142,6 +142,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp),intent(inout) :: cwavef(:,:)
  real(dp),intent(out) :: ghc(:,:),gvnlxc(:,:)
  type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
+ !MG: Passing these arrays assumed-shape has the drawback that client code is
+ !forced to use vec(2, npw*ndat) instead of the more user-friendly vec(2,npw,ndat)
 
 !Local variables-------------------------------
 !scalars
