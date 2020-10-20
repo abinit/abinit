@@ -699,7 +699,7 @@ end function cg_zdotu
 !!
 !! SOURCE
 
-subroutine cg_zaxpy(n,alpha,x,y)
+subroutine cg_zaxpy(n, alpha, x, y)
 
 !Arguments ------------------------------------
 !scalars
@@ -713,9 +713,9 @@ subroutine cg_zaxpy(n,alpha,x,y)
 ! *************************************************************************
 
  if (alpha(2) == zero) then
-   call daxpy(2*n,alpha(1),x,1,y,1)
+   call daxpy(2*n, alpha(1), x, 1, y, 1)
  else
-   call zaxpy(n,alpha,x,1,y,1)
+   call zaxpy(n, alpha, x, 1, y, 1)
  end if
 
 end subroutine cg_zaxpy
@@ -1007,7 +1007,7 @@ end function set_istwfk
 !!
 !! SOURCE
 
-subroutine sqnorm_g(dotr,istwf_k,npwsp,vect,me_g0,comm)
+subroutine sqnorm_g(dotr, istwf_k, npwsp, vect, me_g0, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -1086,7 +1086,7 @@ end subroutine sqnorm_g
 !!
 !! SOURCE
 
-subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
+subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3411,7 +3411,7 @@ end subroutine cg_normev
 !!  comm=MPI communicator
 !!
 !! OUTPUT
-!!  pcon(npw)=preconditionning matrix
+!!  pcon(npw)=preconditioning matrix
 !!  vect(2,npw*nspinor)=<G|(H-eval)|C_{n,k}>*(polynomial ratio)
 !!
 !! PARENTS
@@ -3429,7 +3429,8 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
  real(dp),intent(in) :: eval
 !arrays
  real(dp),intent(in) :: cg(2,npw*nspinor),kinpw(npw)
- real(dp),intent(inout) :: pcon(npw),vect(2,npw*nspinor)
+ real(dp),intent(inout) :: vect(2,npw*nspinor)
+ real(dp),intent(out) :: pcon(npw)
 
 !Local variables-------------------------------
 !scalars
@@ -3536,7 +3537,7 @@ end subroutine cg_precon
 !!           0 otherwise
 !!  optpcon= 0 the TPA preconditionning matrix does not depend on band
 !!           1 the TPA preconditionning matrix (not modified)
-!!           2 the TPA preconditionning matrix is independant of iterationnumber
+!!           2 the TPA preconditionning matrix is independant of iteration number
 !!  vectsize= size of vectors
 !!  mg_g0=1 if this node has Gamma, 0 otherwise.
 !!
