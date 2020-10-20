@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 20 Oct 2020.
-- ( at 10h14 )
+- ( at 14h08 )
   
 - input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t23/t23.in
 - output file    -> t23.out
@@ -2230,10 +2230,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         22.8  wall=         22.9
+- Proc.   0 individual time (sec): cpu=         22.5  wall=         22.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.8  wall=         22.9
++Overall time at end (sec) : cpu=         22.5  wall=         22.7
