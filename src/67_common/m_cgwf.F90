@@ -44,9 +44,6 @@ module m_cgwf
  use m_nonlop,      only : nonlop
  use m_paw_overlap,   only : smatrix_k_paw
  use m_cgprj,         only : getcprj
- !LTEST
- use testing
- !LTEST
 
  implicit none
 
@@ -54,7 +51,6 @@ module m_cgwf
 !!***
 
  public :: cgwf
- public :: mksubham
 
 !!***
 
@@ -254,12 +250,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  nblock=(nband-1)/nbdblock+1
  istwf_k=gs_hamk%istwf_k
  wfopta10=mod(wfoptalg,10)
- !LTEST
- call writeout(999,'wfoptalg',wfoptalg)
- call writeout(999,'wfopta10',wfopta10)
- call writeout(999,'ortalg',ortalg)
- xnorm=0.0_DP
- !LTEST
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
  cpopt=-1
@@ -493,25 +483,22 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
      ! WARNING : It might be interesting to skip the following operation.
      ! The associated routines should be reexamined to see whether cwavef is not already normalized.
-!LTEST
-!     if (gen_eigenpb) then
-!       call dotprod_g(dotr,doti,istwf_k,npw*nspinor,2,cwavef,scwavef,me_g0,mpi_enreg%comm_spinorfft)
-!       dotr=sqrt(dotr**2+doti**2); xnorm=one/sqrt(dotr)
-!       call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
-!       call cg_zscal(npw*nspinor,(/xnorm,zero/),scwavef)
-!     else
-!       call sqnorm_g(dotr,istwf_k,npw*nspinor,cwavef,me_g0,mpi_enreg%comm_fft)
-!       xnorm=one/sqrt(abs(dotr))
-!       call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
-!     end if
-!
-!     if (prtvol==-level) then
-!       write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
-!       call wrtout(std_out,message,'PERS')
-!     end if
-!
-     xnorm = one
-!LTEST
+     if (gen_eigenpb) then
+       call dotprod_g(dotr,doti,istwf_k,npw*nspinor,2,cwavef,scwavef,me_g0,mpi_enreg%comm_spinorfft)
+       dotr=sqrt(dotr**2+doti**2); xnorm=one/sqrt(dotr)
+       call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
+       call cg_zscal(npw*nspinor,(/xnorm,zero/),scwavef)
+     else
+       call sqnorm_g(dotr,istwf_k,npw*nspinor,cwavef,me_g0,mpi_enreg%comm_fft)
+       xnorm=one/sqrt(abs(dotr))
+       call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
+     end if
+
+     if (prtvol==-level) then
+       write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
+       call wrtout(std_out,message,'PERS')
+     end if
+
      ! Compute (or extract) <g|H|c>
      if (gen_eigenpb.and.(inonsc==1)) then
 
@@ -1216,24 +1203,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    !  ======================================================================
    !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
    !  ======================================================================
-   !LTEST
-!   call writeout(999,'iblock',iblock)
-!   call writeout(999,'ghc-cwavef',ghc-cwavef)
-!   call writeout(999,'gsc-cwavef',scwavef-cwavef)
-   !LTEST
    call mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &   isubh,isubo,mcg,mgsc,nband,nbdblock,npw,&
 &   nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
-   !LTEST
-   call sqnorm_g(dotr,istwf_k,npw*nspinor,cwavef,me_g0,mpi_enreg%comm_fft)
-   xnorm=xnorm+dotr
-!   call writeout(999,'subham',subham(isubh-2)-dotr)
-   !LTEST
 
  end do ! iblock End loop over block of bands
- !LTEST
-! call writeout(999,'xnorm',xnorm)
- !LTEST
 
  if (allocated(dimlmn_srt)) then
    ABI_DEALLOCATE(dimlmn_srt)
@@ -1889,18 +1863,12 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
        iwavef=(ii-1)*npw_k*nspinor+icg
        chcre=zero ; chcim=zero
        if (use_subvnlx==0) then
-         !LTEST
-         if (ii==iband) then
-        !LTEST
-           do ipw=1,npw_k*nspinor
-             cgreipw=cg(1,ipw+iwavef)
-             cgimipw=cg(2,ipw+iwavef)
-             chcre=chcre+cgreipw*ghc(1,ipw)+cgimipw*ghc(2,ipw)
-             chcim=chcim+cgreipw*ghc(2,ipw)-cgimipw*ghc(1,ipw)
-           end do
-        !LTEST
-        end if
-        !LTEST
+         do ipw=1,npw_k*nspinor
+           cgreipw=cg(1,ipw+iwavef)
+           cgimipw=cg(2,ipw+iwavef)
+           chcre=chcre+cgreipw*ghc(1,ipw)+cgimipw*ghc(2,ipw)
+           chcim=chcim+cgreipw*ghc(2,ipw)-cgimipw*ghc(1,ipw)
+         end do
 !        chc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),ghc)
        else
 #if 1

@@ -41,9 +41,6 @@ module m_getchc
  use m_fft,         only : fourwf
  use m_cgtools,     only : dotprod_g
  use m_getghc,      only : getghc,getghc_mGGA,getghc_nucdip
- !LTEST
- use testing
- !LTEST
 
  implicit none
 
@@ -174,9 +171,6 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
  real(dp), pointer :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
- !LTEST
- real(dp) :: chc_re_tmp,chc_im_tmp
- !LTEST
 
 ! *********************************************************************
 
@@ -276,14 +270,6 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
  ABI_ALLOCATE(gvnlxc,(0,0))
  ABI_ALLOCATE(gsc,(0,0))
 
-!LTEST
-! call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
-!&                 prtvol,sij_opt,tim_getchc,type_calc,&
-!&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
-!
-! call dotprod_g(chc_re_tmp,chc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!LTEST
-
 !============================================================
 ! Application of the local potential
 !============================================================
@@ -325,277 +311,6 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
      MSG_BUG('Only gs_ham%nvloc=1 is implemented')
    end if
 
-!LTEST
-!!  Eventually adjust load balancing for FFT (by changing FFT distrib)
-!   have_to_reequilibrate=.false.
-!   if (mpi_enreg%paral_kgb==1) then
-!     ikpt_this_proc=bandfft_kpt_get_ikpt()
-!     have_to_reequilibrate=bandfft_kpt(ikpt_this_proc)%have_to_reequilibrate
-!   end if
-!   if (have_to_reequilibrate) then
-!     npw_fft =  bandfft_kpt(ikpt_this_proc)%npw_fft
-!     sendcount_fft  => bandfft_kpt(ikpt_this_proc)%sendcount_fft(:)
-!     recvcount_fft  => bandfft_kpt(ikpt_this_proc)%recvcount_fft(:)
-!     senddisp_fft   => bandfft_kpt(ikpt_this_proc)%senddisp_fft(:)
-!     recvdisp_fft   => bandfft_kpt(ikpt_this_proc)%recvdisp_fft(:)
-!     indices_pw_fft => bandfft_kpt(ikpt_this_proc)%indices_pw_fft(:)
-!     kg_k_fft       => bandfft_kpt(ikpt_this_proc)%kg_k_fft(:,:)
-!     ABI_ALLOCATE(buff_wf,(2,npw_k1*ndat) )
-!     ABI_ALLOCATE(cwavef_fft,(2,npw_fft*ndat) )
-!     if(ndat>1) then
-!       ABI_ALLOCATE(cwavef_fft_tr, (2,npw_fft*ndat))
-!     end if
-!     do idat=1, ndat
-!       do ipw = 1 ,npw_k1
-!         buff_wf(1:2, idat + ndat*(indices_pw_fft(ipw)-1) ) = cwavef(1:2,ipw + npw_k1*(idat-1))
-!       end do
-!     end do
-!     if(ndat > 1) then
-!       call xmpi_alltoallv(buff_wf,2*ndat*sendcount_fft,2*ndat*senddisp_fft,  &
-!&       cwavef_fft_tr,2*ndat*recvcount_fft, 2*ndat*recvdisp_fft, mpi_enreg%comm_fft,ierr)
-!!      We need to transpose data
-!       do idat=1,ndat
-!         do ipw = 1 ,npw_fft
-!           cwavef_fft(1:2,  ipw + npw_fft*(idat-1)) = cwavef_fft_tr(1:2,  idat + ndat*(ipw-1))
-!         end do
-!       end do
-!     else
-!       call xmpi_alltoallv(buff_wf,2*sendcount_fft,2*senddisp_fft,  &
-!&       cwavef_fft,2*recvcount_fft, 2*recvdisp_fft, mpi_enreg%comm_fft,ierr)
-!     end if
-!   end if
-!
-!!  Apply the local potential to the wavefunction
-!!  Start from wavefunction in reciprocal space cwavef
-!!  End with function ghc in reciprocal space also.
-!   ABI_ALLOCATE(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*ndat))
-!   weight=one
-!
-!   if (nspinortot==2) then
-!     ABI_ALLOCATE(cwavef1,(2,npw_k1*ndat))
-!     ABI_ALLOCATE(cwavef2,(2,npw_k1*ndat))
-!     do idat=1,ndat
-!       do ipw=1,npw_k1
-!         cwavef1(1:2,ipw+(idat-1)*npw_k1)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k1)
-!         cwavef2(1:2,ipw+(idat-1)*npw_k1)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k1+shift1)
-!       end do
-!     end do
-!!    call cg_zcopy(npw_k1*ndat,cwavef(1,1),cwavef1)
-!!    call cg_zcopy(npw_k1*ndat,cwavef(1,1+shift1),cwavef2)
-!   end if
-!
-!!  Treat scalar local potentials
-!   if (gs_ham%nvloc==1) then
-!
-!     if (nspinortot==1) then
-!
-!       if (have_to_reequilibrate) then
-!         call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k2,&
-!&         gs_ham%istwf_k,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-!&         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
-!&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
-!       else
-!         call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
-!&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-!&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
-!&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
-!       end if
-!
-!     else ! nspinortot==2
-!
-!       if (nspinor1TreatedByThisProc) then
-!         ABI_ALLOCATE(ghc1,(2,npw_k2*ndat))
-!         call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-!&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-!&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
-!&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
-!         do idat=1,ndat
-!           do ipw =1, npw_k2
-!             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)
-!           end do
-!         end do
-!         ABI_DEALLOCATE(ghc1)
-!       end if ! spin 1 treated by this proc
-!
-!       if (nspinor2TreatedByThisProc) then
-!         ABI_ALLOCATE(ghc2,(2,npw_k2*ndat))
-!         call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-!&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-!&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-!&         use_gpu_cuda=gs_ham%use_gpu_cuda)
-!         do idat=1,ndat
-!           do ipw=1,npw_k2
-!             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc2(1:2,ipw+(idat-1)*npw_k2)
-!           end do
-!         end do
-!         ABI_DEALLOCATE(ghc2)
-!       end if ! spin 2 treated by this proc
-!
-!     end if ! npsinortot
-!
-!!    Treat non-collinear local potentials
-!   else if (gs_ham%nvloc==4) then
-!
-!     ABI_ALLOCATE(ghc1,(2,npw_k2*ndat))
-!     ABI_ALLOCATE(ghc2,(2,npw_k2*ndat))
-!     ABI_ALLOCATE(ghc3,(2,npw_k2*ndat))
-!     ABI_ALLOCATE(ghc4,(2,npw_k2*ndat))
-!     ghc1(:,:)=zero; ghc2(:,:)=zero; ghc3(:,:)=zero ;  ghc4(:,:)=zero
-!     ABI_ALLOCATE(vlocal_tmp,(gs_ham%n4,gs_ham%n5,gs_ham%n6))
-!!    ghc1=v11*phi1
-!     vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,1)
-!     if (nspinor1TreatedByThisProc) then
-!       call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-!&       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-!&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-!&       use_gpu_cuda=gs_ham%use_gpu_cuda)
-!     end if
-!!    ghc2=v22*phi2
-!     vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,2)
-!     if (nspinor2TreatedByThisProc) then
-!       call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-!&       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-!&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-!&       use_gpu_cuda=gs_ham%use_gpu_cuda)
-!     end if
-!     ABI_DEALLOCATE(vlocal_tmp)
-!     cplex=2
-!     ABI_ALLOCATE(vlocal_tmp,(cplex*gs_ham%n4,gs_ham%n5,gs_ham%n6))
-!!    ghc3=(re(v12)-im(v12))*phi1
-!     do i3=1,gs_ham%n6
-!       do i2=1,gs_ham%n5
-!         do i1=1,gs_ham%n4
-!           vlocal_tmp(2*i1-1,i2,i3)= gs_ham%vlocal(i1,i2,i3,3)
-!           vlocal_tmp(2*i1  ,i2,i3)=-gs_ham%vlocal(i1,i2,i3,4)
-!         end do
-!       end do
-!     end do
-!     if (nspinor1TreatedByThisProc) then
-!       call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
-!&       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-!&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-!&       use_gpu_cuda=gs_ham%use_gpu_cuda)
-!     end if
-!!    ghc4=(re(v12)+im(v12))*phi2
-!     if (nspinor2TreatedByThisProc) then
-!       do i3=1,gs_ham%n6
-!         do i2=1,gs_ham%n5
-!           do i1=1,gs_ham%n4
-!             vlocal_tmp(2*i1,i2,i3)=-vlocal_tmp(2*i1,i2,i3)
-!           end do
-!         end do
-!       end do
-!       call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
-!&       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-!&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-!&       use_gpu_cuda=gs_ham%use_gpu_cuda)
-!     end if
-!     ABI_DEALLOCATE(vlocal_tmp)
-!!    Build ghc from pieces
-!!    (v11,v22,Re(v12)+iIm(v12);Re(v12)-iIm(v12))(psi1;psi2): matrix product
-!     if (mpi_enreg%paral_spinor==0) then
-!       do idat=1,ndat
-!         do ipw=1,npw_k2
-!           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
-!           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
-!         end do
-!       end do
-!     else
-!       call xmpi_sum(ghc4,mpi_enreg%comm_spinor,ierr)
-!       call xmpi_sum(ghc3,mpi_enreg%comm_spinor,ierr)
-!       if (nspinor1TreatedByThisProc) then
-!         do idat=1,ndat
-!           do ipw=1,npw_k2
-!             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
-!           end do
-!         end do
-!       else if (nspinor2TreatedByThisProc) then
-!         do idat=1,ndat
-!           do ipw=1,npw_k2
-!             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
-!           end do
-!         end do
-!       end if
-!     end if
-!     ABI_DEALLOCATE(ghc1)
-!     ABI_DEALLOCATE(ghc2)
-!     ABI_DEALLOCATE(ghc3)
-!     ABI_DEALLOCATE(ghc4)
-!   end if ! nvloc
-!
-!   if (nspinortot==2)  then
-!     ABI_DEALLOCATE(cwavef1)
-!     ABI_DEALLOCATE(cwavef2)
-!   end if
-!   ABI_DEALLOCATE(work)
-!
-!!  Retrieve eventually original FFT distrib
-!   if(have_to_reequilibrate) then
-!     if(ndat > 1 ) then
-!       do idat=1,ndat
-!         do ipw = 1 ,npw_fft
-!           cwavef_fft_tr(1:2,  idat + ndat*(ipw-1)) = cwavef_fft(1:2,  ipw + npw_fft*(idat-1))
-!         end do
-!       end do
-!       call xmpi_alltoallv(cwavef_fft_tr,2*ndat*recvcount_fft, 2*ndat*recvdisp_fft, &
-!&       buff_wf,2*ndat*sendcount_fft,2*ndat*senddisp_fft, mpi_enreg%comm_fft,ierr)
-!     else
-!       call xmpi_alltoallv(cwavef_fft,2*recvcount_fft, 2*recvdisp_fft, &
-!&       buff_wf,2*sendcount_fft,2*senddisp_fft, mpi_enreg%comm_fft,ierr)
-!     end if
-!     do idat=1,ndat
-!       do ipw = 1 ,npw_k2
-!         ghc(1:2,ipw + npw_k2*(idat-1)) = buff_wf(1:2, idat + ndat*(indices_pw_fft(ipw)-1))
-!       end do
-!     end do
-!     ABI_DEALLOCATE(buff_wf)
-!     ABI_DEALLOCATE(cwavef_fft)
-!     if(ndat > 1) then
-!       ABI_DEALLOCATE(cwavef_fft_tr)
-!     end if
-!   end if
-!
-!!  Add metaGGA contribution
-!   if (associated(gs_ham%vxctaulocal)) then
-!     if (.not.k1_eq_k2) then
-!       MSG_BUG('metaGGA not allowed for k/=k_^prime!')
-!     end if
-!     if (size(gs_ham%vxctaulocal)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*4) then
-!       MSG_BUG('wrong sizes for vxctaulocal!')
-!     end if
-!     ABI_ALLOCATE(ghc_mGGA,(2,npw_k2*my_nspinor*ndat))
-!     call getghc_mGGA(cwavef,ghc_mGGA,gbound_k1,gs_ham%gprimd,gs_ham%istwf_k,kg_k1,kpt_k1,&
-!&     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
-!&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vxctaulocal,gs_ham%use_gpu_cuda)
-!     ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_mGGA(1:2,1:npw_k2*my_nspinor*ndat)
-!     ABI_DEALLOCATE(ghc_mGGA)
-!   end if
-!
-!   !  Add nuclear dipole moment contribution
-!   if (associated(gs_ham%vectornd)) then
-!     if (.not.k1_eq_k2) then
-!       MSG_BUG('nuclear dipole vector potential not allowed for k/=k_^prime!')
-!     end if
-!     if (size(gs_ham%vectornd)/=gs_ham%n4*gs_ham%n5*gs_ham%n6*gs_ham%nvloc*3) then
-!       MSG_BUG('wrong sizes for vectornd in getchc!')
-!     end if
-!     ABI_ALLOCATE(ghc_vectornd,(2,npw_k2*my_nspinor*ndat))
-!     call getghc_nucdip(cwavef,ghc_vectornd,gbound_k1,gs_ham%istwf_k,kg_k1,kpt_k1,&
-!&     gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,npw_k1,gs_ham%nvloc,&
-!&     gs_ham%n4,gs_ham%n5,gs_ham%n6,my_nspinor,gs_ham%vectornd,gs_ham%use_gpu_cuda)
-!     ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_vectornd(1:2,1:npw_k2*my_nspinor*ndat)
-!     ABI_DEALLOCATE(ghc_vectornd)
-!   end if
-!
-!   call dotprod_g(chc_re_tmp,chc_im_tmp,gs_ham%istwf_k,npw*nspinortot,2,cwavef_left,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!   if (abs(chc_re-chc_re_tmp)>tol8.or.abs(chc_im-chc_im_tmp)>tol8) then
-!     write(999,'(2es19.8e3)') chc_re,chc_im
-!     write(999,'(2es19.8e3)') chc_re_tmp,chc_im_tmp
-!     call writeout(999,'chc_re (dif)',chc_re-chc_re_tmp)
-!     call writeout(999,'chc_im (dif)',chc_im-chc_im_tmp)
-!     MSG_ERROR('ERROR in getchc : dif re or im is too large')
-!   end if
-!LTEST
    call timab(1371,2,tsec)
 
  else
@@ -636,53 +351,16 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
      paw_opt=gs_ham%usepaw ; if (sij_opt/=0) paw_opt=sij_opt+3
      lambda_ndat = lambda
 
-     !LTEST
-!     signs=2
-!     call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
-!&     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,cprjin_left=cwaveprj_left)
-!
-!     call dotprod_g(dotr,doti,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,gvnlxc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
      signs=1
-!     !LTEST
 
      call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
 &     cprjin_left=cwaveprj_left,enlout_im=enlout_im)
 
-!     !LTEST
-!     call writeout(999,'dotr    ',dotr)
-!     call writeout(999,'dotr bis',enlout(1))
-!     call writeout(999,'doti    ',doti)
-!     call writeout(999,'doti bis',enlout_im(1))
-!     !LTEST
      do idat=1,ndat
        chc_re = chc_re + enlout(idat)
        chc_im = chc_im + enlout_im(idat)
      end do
-
-!     if (gs_ham%usepaw==1 .and. has_fock)then
-!       if (fock_get_getghc_call(fock)==1) then
-!         ABI_ALLOCATE(gvnlc,(2,npw_k2*my_nspinor*ndat))
-!         gvnlc=gvnlxc
-!       endif
-!     endif
-
-!    Calculation of the Fock exact exchange contribution from the Fock or ACE operator
-!     if (has_fock) then
-!       if (fock_get_getghc_call(fock)==1) then
-!         if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
-!         do idat=1,ndat
-!           if (fock%use_ACE==0) then
-!             if (gs_ham%usepaw==1) cwaveprj_idat => cwaveprj_fock(:,(idat-1)*my_nspinor+1:idat*my_nspinor)
-!             call fock_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),cwaveprj_idat,&
-!&             gvnlxc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
-!           else
-!             call fock_ACE_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),&
-!&             gvnlxc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
-!           end if
-!         end do ! idat
-!       end if
-!     end if
 
    end if ! if(type_calc...
 
@@ -728,21 +406,6 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
  ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(gsc)
 
-!LTEST
-! if (abs(chc_re-chc_re_tmp)>tol8) then
-!   call writeout(999,'chc_re (dif)',chc_re-chc_re_tmp)
-!   call writeout(999,'chc_im (dif)',chc_im-chc_im_tmp)
-!   MSG_ERROR('ERROR in getchc : dif re is too large')
-! end if
-! if (abs(chc_im-chc_im_tmp)>tol8) then
-!   call writeout(999,'chc_re (dif)',chc_re-chc_re_tmp)
-!   call writeout(999,'chc_im (dif)',chc_im-chc_im_tmp)
-!   MSG_ERROR('ERROR in getchc : dif im is too large')
-! end if
-! call writeout(999,'chc_re_tmp',chc_re_tmp)
-! call writeout(999,'chc_im_tmp',chc_im_tmp)
-!LTEST
-!
  call timab(1370,2,tsec)
 
  DBG_EXIT("COLL")
@@ -824,11 +487,6 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  real(dp) :: tsec(2)
  real(dp),allocatable :: gsc(:,:),gvnlxc(:,:)
  real(dp),allocatable :: enlout(:),enlout_im(:)
- !LTEST
- real(dp) :: csc_re_tmp,csc_im_tmp
- real(dp), pointer :: cwavef_left_oneband(:,:)
- type(pawcprj_type),pointer :: cprj_left_oneband(:,:)
- !LTEST
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -850,27 +508,6 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  if (size(cprj_left,2)/=nspinor*ndat) then
    MSG_BUG('Wrong size for cprj_left')
  end if
-
- !LTEST
-! ABI_ALLOCATE(gsc,(2,nspinor*npw))
-! ABI_ALLOCATE(gvnlxc,(2,nspinor*npw))
-!
-! signs=2
-! call nonlop(choice,cpopt,cwaveprj,enlout,gs_ham,idir,(/zero/),mpi_enreg,ndat,&
-!& nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
-!
-! call dotprod_g(csc_re_tmp,csc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,gsc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-! ABI_DEALLOCATE(gsc)
-! ABI_DEALLOCATE(gvnlxc)
-
-! do idat=1,ndat
-!   band_shift = (idat-1)*npw*nspinor
-!   cwavef_left_oneband => cwavef_left(:,1+band_shift:npw*nspinor+band_shift)
-!   call timab(1361,1,tsec)
-!   call dotprod_g(csc(2*idat-1),csc(2*idat),gs_ham%istwf_k,npw*nspinor,2,cwavef_left_oneband,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!   call timab(1361,2,tsec)
-! end do
- !LTEST
 
  call timab(1361,1,tsec)
  call zgemv('C',npw*nspinor,ndat,cone,cwavef_left,npw*nspinor,cwavef,1,czero,csc,1)
@@ -896,19 +533,6 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
    ABI_DEALLOCATE(enlout   )
    ABI_DEALLOCATE(enlout_im)
  end if
-
-!LTEST
-! if (abs(csc_re-csc_re_tmp)>tol8) then
-!   call writeout(999,'csc_re (dif)',csc_re-csc_re_tmp)
-!   call writeout(999,'csc_im (dif)',csc_im-csc_im_tmp)
-!   MSG_ERROR('ERROR in getcsc : dif re is too large')
-! end if
-! if (abs(csc_im-csc_im_tmp)>tol8) then
-!   call writeout(999,'csc_re (dif)',csc_re-csc_re_tmp)
-!   call writeout(999,'csc_im (dif)',csc_im-csc_im_tmp)
-!   MSG_ERROR('ERROR in getcsc : dif im is too large')
-! end if
-!LTEST
 
  call timab(1360+tim_getcsc,2,tsec)
 

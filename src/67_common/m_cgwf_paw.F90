@@ -44,9 +44,6 @@ module m_cgwf_paw
  use m_cgprj,         only : getcprj,cprj_axpby
  use m_cgwf,          only : mksubham
  use m_fft,           only : fourwf
- !LTEST
- use testing
- !LTEST
 
  implicit none
 
@@ -212,11 +209,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  if (ortalg>=0) then
    MSG_BUG('cgwf_paw tested only for ortalg<0')
  end if
- !LTEST
- call writeout(999,'wfoptalg',wfoptalg)
- call writeout(999,'wfopta10',wfopta10)
- call writeout(999,'ortalg',ortalg)
- !LTEST
  optekin=0;if (wfoptalg>=10) optekin=1
  natom=gs_hamk%natom
  kinpw => gs_hamk%kinpw_k
@@ -287,9 +279,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
      ibdblock=iband-(iblock-1)*nbdblock
      counter=100*iband+inonsc
 
-     !LTEST
-     call writeout(999,'iband',iband)
-     !LTEST
      ! ======================================================================
      ! ========== INITIALISATION OF MINIMIZATION ITERATIONS =================
      ! ======================================================================
@@ -327,21 +316,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          ! === COMPUTE THE RESIDUAL ===
          ! Compute lambda = <C|H|C>
          sij_opt = 0
-         !LTEST
-         call writeout(999,'iline',iline)
-         call writeout(999,'getchc : chc')
-!         call writeout(999,'cwavef  (in)',cwavef)
-         !LTEST
          ! Compute wavefunction in real space
          call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
 &          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
 &          n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
-         !LTEST
-!         call fourwf(0,denpot_dum,fofgout_dum,cwavef,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-!&          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-!&          n4,n5,n6,3,tim_fourwf,weight_fft,weight_fft) ! Optional arguments
-!         call writeout(999,'cwavef (bis)',cwavef)
-         !LTEST
 !
          call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
            &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
@@ -489,12 +467,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 &                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
 
-           !LTEST
-           if (prtvol==-level)then
-             write(message,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
-             call wrtout(std_out,message,'PERS')
-           end if
-           !LTEST
          else
            gamma=dotgg/dotgp
            dotgp=dotgg
@@ -523,13 +495,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
 &         gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
          dotr=dot(1)
-
-         !LTEST
-         if (prtvol==-level)then
-           write(message,'(a,es16.6)')' cgwf: dotr = ',dotr
-           call wrtout(std_out,message,'PERS')
-         end if
-         !LTEST
 
          ! Project the conjugated gradient onto the current band
          ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
@@ -565,10 +530,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 
          sij_opt=0
          ! Compute dhc = Re{<D|H|C>}
-         !LTEST
-         call writeout(999,'getchc : dhc')
-         !LTEST
-         ! Compute wavefunction in real space
+         ! Compute direc in real space
          call fourwf(0,denpot_dum,direc,fofgout_dum,direc_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
 &          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
 &          n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
@@ -577,9 +539,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          dhc=dhc*xnorm
 
          ! Compute <D|H|D> or <D|(H-zshift)^2|D>
-         !LTEST
-         call writeout(999,'getchc : dhd')
-         !LTEST
          call getchc(dhd,doti,cpopt,direc,direc,cprj_direc,cprj_direc,direc_r,direc_r,&
 &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
          dhd=dhd*xnorm**2
