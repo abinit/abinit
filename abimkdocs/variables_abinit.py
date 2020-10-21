@@ -3934,7 +3934,7 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval="2 (tetra) except when [[eph_task]] = +4 where 1 is used as default.",
+    defaultval="2 (tetra) except when [[eph_task]] = 4 and when ([[eph_task]] = -4 and symsigma == 0), where 1 is used as default.",
     mnemonics="Electron-Phonon: INTegration METHod",
     added_in_version="before_v9",
     text=r"""
@@ -3953,13 +3953,13 @@ Phonon linewidths in metals (**eph_task** = 1):
     A negative value activates the adaptive Gaussian broadening.
     See also [[eph_fsewin]].
 
-Electron-phonon self-energy with **eph_task** = 4):
+Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
-:   The default is Lorentzian method with broadening specified by [[zcut]].
+:   The default is [[eph_intmeth]]==1, Lorentzian method with broadening specified by [[zcut]]. Note that [[eph_intmeth]]==2 is still in development for this case (ABINITv9.2).
 
 Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
 
-:   The default is Tetrahedron method
+:   The default is [[eph_intmeth]]==2, Tetrahedron method except when symsigma == 0, where it is [[eph_intmeth]]==1..
 """,
 ),
 
@@ -4027,7 +4027,7 @@ The choice is among:
 * 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
 * -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
 * 3 --> Compute phonon self-energy.
-* 4 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections. Generate SIGEPH.nc file.
+* 4 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function. Generate SIGEPH.nc file.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy). Generate SIGEPH.nc file.
 * 5 --> Interpolate DFPT potentials to produce a new DVDB file on the [[eph_ngqpt_fine]] q-mesh that can be read with [[getdvdb]]
 * -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]]. Note that, in this case,
