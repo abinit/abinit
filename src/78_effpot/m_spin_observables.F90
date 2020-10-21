@@ -114,8 +114,11 @@ contains
     complex(dp) :: i2pi = (0.0, two_pi)
 
     self%calc_thermo_obs=  (params%spin_calc_thermo_obs ==1)
-    self%calc_traj_obs= (params%spin_calc_traj_obs ==1)
-    self%calc_correlation_obs=(params%spin_calc_correlation_obs ==1)
+    !self%calc_traj_obs= (params%spin_calc_traj_obs ==1)
+    !self%calc_correlation_obs=(params%spin_calc_correlation_obs ==1)
+    self%calc_traj_obs= .False.
+    self%calc_correlation_obs= .False.
+
 
     self%nspin=supercell%spin%nspin
     self%nsublatt=maxval(supercell%spin%ispin_prim)

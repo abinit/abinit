@@ -2427,10 +2427,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%orbmag=0
    if (dtsets(idtset)%usepaw==0) then
      dtsets(idtset)%ortalg=2
-!    dtsets(idtset)%ortalg=999
    else
      dtsets(idtset)%ortalg=-2
-!    dtsets(idtset)%ortalg=999
    end if
 !  P
    dtsets(idtset)%paral_atom=paral_atom_default

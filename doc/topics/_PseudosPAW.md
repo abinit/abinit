@@ -9,33 +9,41 @@ their consequences with the ABINIT package.
 
 ## Introduction
 
-ABINIT can read many different types of norm-conserving pseudopotentials and
+ABINIT can read many different types of norm-conserving (NC) pseudopotentials and
 PAW atomic data. The names of the files to be used in an ABINIT run are to be
-provided in the [[help:abinit#intro1|"files" file]], one for each
-[[topic:AtomTypes|type of atom]]. Note that one cannot mix norm-conserving
-pseudopotentials with PAW atomic data files in a single ABINIT run, even for
-different datasets. One has to stick either to norm-conserving
-pseudopotentials or to PAW.
+provided in the input file, one for each [[topic:AtomTypes|type of atom]]. 
+The list of pseudopotentials with the [[pseudos]] input variable and (optionally)
+the directory where all pseudos are located with [[pp_dirpath]].
+
+Note that one **cannot mix** NC pseudopotentials with PAW atomic data files in a single ABINIT run, 
+even for different datasets. One has to stick either to NC pseudopotentials or to PAW.
+The ultrasoft formalims is not implemented.
 
 **Norm-conserving pseudopotential tables**
 
-There are several sets of norm-conserving pseudopotentials available for most
+There are several sets of NC pseudopotentials available for most
 elements of the periodic table, either in LDA or in GGA-PBE. The
 [[https://www.abinit.org/psp-tables|recommended one]]
 (GGA-PBE, [[ixc]]=11) comes from the ONCVPSP generator.
 For the formalism please consult [[cite:Hamann2013]]. 
 The generation and validation of the table is discussed in [[cite:Setten2018]].
 
-[Others](https://www.abinit.org/atomic-data-files) are also available.
+[Other tables](https://www.abinit.org/atomic-data-files) are also available.
 The Goedecker HGH table (e.g. LDA, [[ixc]]=1), also including spin-orbit
 is rather accurate, but requires often large
 [[ecut]]. The old Troullier-Martins type tables 
 are deprecated, because not accurate enough, and also not
 including spin-orbit coupling. The different formats for norm-conserving
-pseudopotentials are described in [[https://wiki.abinit.org/doku.php?id=developers:pseudos]].
-A much more flexible and powerful file format (PSM) has been recently proposed in [[cite:Garcia2018]].
+pseudopotentials are described in the Pseudos page of the [developers section](../developers).
+A much more flexible and powerful file format (PSML) has been recently proposed in [[cite:Garcia2018]].
 The format is supported by Abinit via the psml library that must be activated by user during 
 the configuration of the package.
+
+!!! important
+
+    Abinit can read NC pseudos in UPF1 format but not pseudos written following the 
+    more recent UPF2 specifications.
+    Also, ultrasoft or PAW pseudos in UPF1/UPF2 format are not supported.
 
 **PAW atomic data tables**
 
@@ -47,7 +55,7 @@ It uses the PAW-XML format.
 
 **Validation**
 
-Many pseudopotentials (norm-conserving as well as PAW) have been tested
+Many pseudopotentials (NC as well as PAW) have been tested
 against all-electron calculations, see the section "Documents and tools"
 paragraph about the "Delta" project on
 [[https://www.abinit.org/downloads/PAW2|the ABINIT web site PAW
@@ -69,8 +77,7 @@ and then used in ABINIT. There is also a dedicated tutorial to ATOMPAW/ABINIT.
 
 Norm-conserving pseudopotentials can be mixed, to generate "alchemical"
 pseudoatoms, see [[topic:AtomTypes]].
-
-
+This feature is not available for PAW.
 
 ## Related Input Variables
 

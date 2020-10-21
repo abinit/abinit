@@ -37,7 +37,7 @@ module m_psps
  use netcdf
 #endif
 
- use m_fstrings,      only : itoa, sjoin, yesno
+ use m_fstrings,      only : itoa, sjoin, yesno, atoi
  use m_io_tools,      only : open_file
  use m_symtk,         only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
@@ -103,7 +103,7 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
 
 !Local variables-------------------------------
 !scalars
- integer :: temp_unit
+ integer :: temp_unit, ii
  character(len=500) :: msg,errmsg
  character(len=70) :: testxml
 
@@ -117,13 +117,26 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
  end if
  rewind (unit=temp_unit,err=10,iomsg=errmsg)
 
- read(temp_unit,*,err=10,iomsg=errmsg) testxml
+ read(temp_unit, "(a)",err=10,iomsg=errmsg) testxml
  if(testxml(1:5)=='<?xml')then
    usexml = 1
    read(temp_unit,*,err=10,iomsg=errmsg) testxml
    if(testxml(1:4)=='<paw') xmlpaw = 1
  else
    usexml = 0
+   if (testxml(1:4) == '<UPF') then
+     ! Make sure this is not UPF version >= 2
+     ! "<UPF version="2.0.1">
+     ii = index(testxml, '"')
+     if (ii /= 0) then
+       if (atoi(testxml(ii+1:ii+1)) >= 2) then
+         MSG_ERROR(sjoin("UPF version >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Pseudo:", path))
+       end if
+     else
+       MSG_ERROR(sjoin("Cannot find version attributed in UPF file:", path))
+     end if
+
+   end if
  end if
 
  !Check if pseudopotential file is a Q-espresso UPF file

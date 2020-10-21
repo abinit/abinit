@@ -44,7 +44,7 @@ MODULE m_pspheads
  use defs_datatypes, only : pspheader_type
  use m_time,     only : timab
  use m_io_tools, only : open_file
- use m_fstrings, only : basename, lstrip, sjoin, startswith
+ use m_fstrings, only : basename, lstrip, sjoin, startswith, atoi
  use m_read_upf_pwscf,  only : read_pseudo
  use m_pawpsp,   only : pawpsp_read_header_xml,pawpsp_read_pawheader
  use m_pawxmlps, only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
@@ -135,12 +135,12 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
    ! Check if the file is written in XML
    usexml = 0
-   if (open_file(filnam(ipsp),msg, newunit=unt, form="formatted", status="old") /= 0) then
+   if (open_file(filnam(ipsp), msg, newunit=unt, form="formatted", status="old") /= 0) then
      MSG_ERROR(msg)
    end if
 
    rewind(unit=unt, err=10, iomsg=errmsg)
-   read(unt,*, err=10, iomsg=errmsg) testxml
+   read(unt, "(a)", err=10, iomsg=errmsg) testxml
 
    if(testxml(1:5)=='<?xml')then
      usexml = 1
@@ -152,6 +152,19 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      end if
    else
      usexml = 0
+   end if
+
+   if (testxml(1:4) == '<UPF') then
+     ! Make sure this is not UPF version >= 2
+     ! "<UPF version="2.0.1">
+     ii = index(testxml, '"')
+     if (ii /= 0) then
+       if (atoi(testxml(ii+1:ii+1)) >= 2) then
+         MSG_ERROR(sjoin("UPF >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Path:", filnam(ipsp)))
+       end if
+     else
+       MSG_ERROR(sjoin("Cannot find version attributed in UPF file:", filnam(ipsp)))
+     end if
    end if
 
    close(unit=unt, err=10, iomsg=errmsg)

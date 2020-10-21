@@ -14,7 +14,7 @@ nband1 500
 nband2 520
 
 #SCF cycle parameters
-tolvrs 1.d-3 nstep 3
+tolvrs 1.d-3 nstep 1  nline 2
 
 #K-points and sym
 occopt 3
@@ -313,7 +313,7 @@ prtvol 4
 #%% [files]
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   t31_MPI10.out, tolnlines = 1038, tolabs = 1.100e-06, tolrel = 0.22
+#%%   t31_MPI10.out, tolnlines = 0, tolabs = 0.000e-06, tolrel = 0.00, fld_options = -medium
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10

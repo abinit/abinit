@@ -66,6 +66,7 @@ inp_files = [
 "teph4zpr_5.in",
 "teph4zpr_6.in",
 "teph4zpr_7.in",
+"teph4zpr_8.in",
 #
 "tffield_1.in",
 "tffield_2.in",
