@@ -185,26 +185,6 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 !Keep track of total time spent in getchc:
  call timab(1370,1,tsec)
 
-!!Structured debugging if prtvol==-level
-! if(prtvol==-level)then
-!   write(msg,'(80a,a,a)') ('=',ii=1,80),ch10,' getchc : enter, debugging '
-!   call wrtout(std_out,msg,'PERS')
-! end if
-
- npw=gs_ham%npw_k
- nspinortot=gs_ham%nspinor
- ABI_ALLOCATE(ghc,(2,npw*nspinortot))
- ABI_ALLOCATE(gvnlxc,(0,0))
- ABI_ALLOCATE(gsc,(0,0))
-
-!LTEST
-! call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
-!&                 prtvol,sij_opt,tim_getchc,type_calc,&
-!&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
-!
-! call dotprod_g(chc_re_tmp,chc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!LTEST
-
 !Select k-dependent objects according to select_k input parameter
  select_k_=1;if (present(select_k)) select_k_=select_k
  if (select_k_==KPRIME_H_K) then
@@ -244,20 +224,6 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
    msg='wrong size for cwavef!'
    MSG_BUG(msg)
  end if
-! if (size(ghc)<2*npw_k2*my_nspinor*ndat) then
-!   msg='wrong size for ghc!'
-!   MSG_BUG(msg)
-! end if
-! if (size(gvnlxc)<2*npw_k2*my_nspinor*ndat) then
-!   msg='wrong size for gvnlxc!'
-!   MSG_BUG(msg)
-! end if
-! if (sij_opt==1) then
-!   if (size(gsc)<2*npw_k2*my_nspinor*ndat) then
-!     msg='wrong size for gsc!'
-!     MSG_BUG(msg)
-!   end if
-! end if
  if (gs_ham%usepaw==1.and.cpopt>=0) then
    if (size(cwaveprj)<gs_ham%natom*my_nspinor*ndat) then
      msg='wrong size for cwaveprj!'
@@ -303,6 +269,20 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
    nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
  end if
+
+ npw=gs_ham%npw_k
+ nspinortot=gs_ham%nspinor
+ ABI_ALLOCATE(ghc,(2,npw*nspinortot))
+ ABI_ALLOCATE(gvnlxc,(0,0))
+ ABI_ALLOCATE(gsc,(0,0))
+
+!LTEST
+! call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
+!&                 prtvol,sij_opt,tim_getchc,type_calc,&
+!&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
+!
+! call dotprod_g(chc_re_tmp,chc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!LTEST
 
 !============================================================
 ! Application of the local potential
@@ -870,14 +850,6 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  if (size(cprj_left,2)/=nspinor*ndat) then
    MSG_BUG('Wrong size for cprj_left')
  end if
-!!Compatibility tests
-! my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
-! if(gs_ham%usepaw==0) then
-!   MSG_BUG('Only compatible with PAW (usepaw=1) !')
-! end if
-! if(nband<0.and.(mcg<npw_k*my_nspinor.or.mgsc<npw_k*my_nspinor.or.mcprj<my_nspinor)) then
-!   MSG_BUG('Invalid value for mcg, mgsc or mcprj !')
-! end if
 
  !LTEST
 ! ABI_ALLOCATE(gsc,(2,nspinor*npw))
@@ -890,7 +862,6 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
 ! call dotprod_g(csc_re_tmp,csc_im_tmp,gs_ham%istwf_k,npw*nspinor,2,cwavef_left,gsc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 ! ABI_DEALLOCATE(gsc)
 ! ABI_DEALLOCATE(gvnlxc)
- !LTEST
 
 ! do idat=1,ndat
 !   band_shift = (idat-1)*npw*nspinor
@@ -899,6 +870,8 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
 !   call dotprod_g(csc(2*idat-1),csc(2*idat),gs_ham%istwf_k,npw*nspinor,2,cwavef_left_oneband,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 !   call timab(1361,2,tsec)
 ! end do
+ !LTEST
+
  call timab(1361,1,tsec)
  call zgemv('C',npw*nspinor,ndat,cone,cwavef_left,npw*nspinor,cwavef,1,czero,csc,1)
  call timab(1361,2,tsec)
@@ -923,12 +896,6 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
    ABI_DEALLOCATE(enlout   )
    ABI_DEALLOCATE(enlout_im)
  end if
-! !LTEST
-! call writeout(999,'dotr    ',dotr)
-! call writeout(999,'dotr bis',enlout(1))
-! call writeout(999,'doti    ',doti)
-! call writeout(999,'doti bis',enlout_im(1))
-! !LTEST
 
 !LTEST
 ! if (abs(csc_re-csc_re_tmp)>tol8) then
@@ -941,259 +908,13 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
 !   call writeout(999,'csc_im (dif)',csc_im-csc_im_tmp)
 !   MSG_ERROR('ERROR in getcsc : dif im is too large')
 ! end if
- !LTEST
-! call writeout(999,'chc_re_tmp',chc_re_tmp)
-!!Prepare some data
-! ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
-! ABI_ALLOCATE(scwavef,(2,npw_k*my_nspinor))
-! if (gs_ham%usecprj==1) then
-!   ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor))
-!   call pawcprj_alloc(cwaveprj,0,gs_ham%dimcprj)
-! else
-!   ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
-! end if
-! dimenl1=gs_ham%dimekb1;dimenl2=natom;tim_nonlop=0
-! choice=1;signs=2;cpopt=-1+3*gs_ham%usecprj;paw_opt=3;useylm=1
-! select_k_=1;if (present(select_k)) select_k_=select_k
-! me=mpi_enreg%me_kpt
-!
-!!Loop over bands
-! index_cprj=ibg;index_cg=icg;index_gsc=igsc
-! if (nband>0) then
-!   iband1=1;iband2=nband
-! else if (nband<0) then
-!   iband1=abs(nband);iband2=iband1
-!   index_cprj=index_cprj+(iband1-1)*my_nspinor
-!   index_cg  =index_cg  +(iband1-1)*npw_k*my_nspinor
-!   index_gsc =index_gsc +(iband1-1)*npw_k*my_nspinor
-! end if
-!
-! do iband=iband1,iband2
-!
-!   if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me.and.nband>0) then
-!     gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=zero
-!     index_cprj=index_cprj+my_nspinor
-!     index_cg=index_cg+npw_k*my_nspinor
-!     index_gsc=index_gsc+npw_k*my_nspinor
-!     cycle
-!   end if
-!
-!!  Retrieve WF at (n,k)
-!   cwavef(:,1:npw_k*my_nspinor)=cg(:,1+index_cg:npw_k*my_nspinor+index_cg)
-!   if (gs_ham%usecprj==1) then
-!     call pawcprj_copy(cprj(:,1+index_cprj:my_nspinor+index_cprj),cwaveprj)
-!   end if
-!
-!!  Compute <g|S|Cnk>
-!   call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_ham,0,(/zero/),mpi_enreg,1,1,paw_opt,&
-!&   signs,scwavef,tim_nonlop,cwavef,cwavef,select_k=select_k_)
-!
-!   gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=scwavef(:,1:npw_k*my_nspinor)
-!
-!!  End of loop over bands
-!   index_cprj=index_cprj+my_nspinor
-!   index_cg=index_cg+npw_k*my_nspinor
-!   index_gsc=index_gsc+npw_k*my_nspinor
-! end do
-!
-!!Reduction in case of parallelization
-! if ((xmpi_paral==1)) then
-!   call timab(48,1,tsec)
-!   call xmpi_sum(gsc,mpi_enreg%comm_band,ierr)
-!   call timab(48,2,tsec)
-! end if
-!
-!!Memory deallocation
-! ABI_DEALLOCATE(cwavef)
-! ABI_DEALLOCATE(scwavef)
-! if (gs_ham%usecprj==1) then
-!   call pawcprj_free(cwaveprj)
-! end if
-! ABI_DATATYPE_DEALLOCATE(cwaveprj)
-!
+!LTEST
+
  call timab(1360+tim_getcsc,2,tsec)
 
  DBG_EXIT("COLL")
 
 end subroutine getcsc
-!!***
-
-!!****f* ABINIT/multithreaded_getchc
-!!
-!! NAME
-!! multithreaded_getchc
-!!
-!! FUNCTION
-!!
-!! COPYRIGHT
-!! Copyright (C) 2016-2020 ABINIT group (JB)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! INPUTS
-!! cpopt=flag defining the status of cwaveprj%cp(:)=<Proj_i|Cnk> scalars (PAW only)
-!!       (same meaning as in nonlop.F90 routine)
-!!       if cpopt=-1, <p_lmn|in> (and derivatives) are computed here (and not saved)
-!!       if cpopt= 0, <p_lmn|in> are computed here and saved
-!!       if cpopt= 1, <p_lmn|in> and first derivatives are computed here and saved
-!!       if cpopt= 2  <p_lmn|in> are already in memory;
-!!       if cpopt= 3  <p_lmn|in> are already in memory; first derivatives are computed here and saved
-!!       if cpopt= 4  <p_lmn|in> and first derivatives are already in memory;
-!! cwavef(2,npw*my_nspinor*ndat)=planewave coefficients of wavefunction.
-!! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
-!! lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
-!!        Typically lambda is the eigenvalue (or its guess)
-!! mpi_enreg=informations about MPI parallelization
-!! ndat=number of FFT to do in parallel
-!! prtvol=control print volume and debugging output
-!! sij_opt= -PAW ONLY-  if  0, only matrix elements <G|H|C> have to be computed
-!!    (S=overlap)       if  1, matrix elements <G|S|C> have to be computed in gsc in addition to ghc
-!!                      if -1, matrix elements <G|H-lambda.S|C> have to be computed in ghc (gsc not used)
-!! tim_getchc=timing code of the calling subroutine(can be set to 0 if not attributed)
-!! type_calc= option governing which part of Hamitonian is to be applied:
-!             0: whole Hamiltonian
-!!            1: local part only
-!!            2: non-local+kinetic only (added to the exixting Hamiltonian)
-!!            3: local + kinetic only (added to the existing Hamiltonian)
-!! ===== Optional inputs =====
-!!   [kg_fft_k(3,:)]=optional, (k+G) vector coordinates to be used for the FFT tranformation
-!!                   instead of the one contained in gs_ham datastructure.
-!!                   Typically used for real WF (in parallel) which are FFT-transformed 2 by 2.
-!!   [kg_fft_kp(3,:)]=optional, (k^prime+G) vector coordinates to be used for the FFT tranformation
-!!   [select_k]=optional, option governing the choice of k points to be used.
-!!             gs_ham datastructure contains quantities needed to apply Hamiltonian
-!!             in reciprocal space between 2 kpoints, k and k^prime (equal in most cases);
-!!             if select_k=1, <k^prime|H|k>       is applied [default]
-!!             if select_k=2, <k|H|k^prime>       is applied
-!!             if select_k=3, <k|H|k>             is applied
-!!             if select_k=4, <k^prime|H|k^prime> is applied
-!!
-!! OUTPUT
-!!  ghc(2,npw*my_nspinor*ndat)=matrix elements <G|H|C> (if sij_opt>=0)
-!!                                          or <G|H-lambda.S|C> (if sij_opt=-1)
-!!  gvnlxc(2,npw*my_nspinor*ndat)=matrix elements <G|Vnonlocal|C> (if sij_opt>=0)
-!!                                            or <G|Vnonlocal-lambda.S|C> (if sij_opt=-1)
-!!  if (sij_opt=1)
-!!    gsc(2,npw*my_nspinor*ndat)=matrix elements <G|S|C> (S=overlap).
-!!
-!! SIDE EFFECTS
-!!  cwaveprj(natom,my_nspinor*(1+cpopt)*ndat)= wave function projected on nl projectors (PAW only)
-!!
-!! PARENTS
-!!      m_lobpcgwf,prep_getchc
-!!
-!! CHILDREN
-!!      getchc,mkl_set_num_threads,omp_set_nested
-!!
-!! SOURCE
-
-!subroutine multithreaded_getchc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
-!&                 prtvol,sij_opt,tim_getchc,type_calc,&
-!&                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
-!
-!#ifdef HAVE_OPENMP
-!   use omp_lib
-!#endif
-!
-!!Arguments ------------------------------------
-!!scalars
-! integer,intent(in) :: cpopt,ndat, prtvol
-! integer,intent(in) :: sij_opt,tim_getchc,type_calc
-! integer,intent(in),optional :: select_k
-! real(dp),intent(in) :: lambda
-! type(MPI_type),intent(in) :: mpi_enreg
-! type(gs_hamiltonian_type),intent(inout),target :: gs_ham
-!!arrays
-! integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
-! real(dp),intent(out),target :: gsc(:,:)
-! real(dp),intent(inout) :: cwavef(:,:)
-! real(dp),intent(out) :: ghc(:,:),gvnlxc(:,:)
-! type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
-!
-!!Local variables-------------------------------
-!!scalars
-! integer :: firstelt, lastelt
-! integer :: nthreads
-! integer :: ithread
-! integer :: chunk
-! integer :: residuchunk
-! integer :: firstband
-! integer :: lastband
-! integer :: spacedim
-!#ifdef HAVE_OPENMP
-! logical :: is_nested
-!#endif
-!
-! integer :: select_k_default
-!
-! ! *************************************************************************
-!
-! select_k_default = 1; if ( present(select_k) ) select_k_default = select_k
-!
-! spacedim = size(cwavef,dim=2)/ndat
-!
-!    !$omp parallel default (none) private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt, is_nested), &
-!    !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
-!    !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getchc,type_calc,select_k_default)
-!#ifdef HAVE_OPENMP
-! ithread = omp_get_thread_num()
-! nthreads = omp_get_num_threads()
-! is_nested = omp_get_nested()
-! call omp_set_nested(.false.)
-!#ifdef HAVE_LINALG_MKL_THREADS
-! call mkl_set_num_threads(1)
-!#endif
-!#else
-! ithread = 0
-! nthreads = 1
-!#endif
-! chunk = ndat/nthreads ! Divide by 2 to construct chunk of even number of bands
-! residuchunk = ndat - nthreads*chunk
-! if ( ithread < nthreads-residuchunk ) then
-!   firstband = ithread*chunk+1
-!   lastband = (ithread+1)*chunk
-! else
-!   firstband = (nthreads-residuchunk)*chunk + ( ithread -(nthreads-residuchunk) )*(chunk+1) +1
-!   lastband = firstband+chunk
-! end if
-!
-! if ( lastband /= 0 ) then
-!   firstelt = (firstband-1)*spacedim+1
-!   lastelt = lastband*spacedim
-!      ! Don't know how to manage optional arguments .... :(
-!   if ( present(kg_fft_k) ) then
-!     if (present(kg_fft_kp)) then
-!       call getchc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
-!       gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getchc,type_calc,&
-!       select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp)
-!     else
-!       call getchc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
-!       gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getchc,type_calc,&
-!       select_k=select_k_default,kg_fft_k=kg_fft_k)
-!     end if
-!   else
-!     if (present(kg_fft_kp)) then
-!       call getchc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
-!       gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getchc,type_calc,&
-!       select_k=select_k_default,kg_fft_kp=kg_fft_kp)
-!     else
-!       call getchc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
-!       gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getchc,type_calc,&
-!       select_K=select_k_default)
-!     end if
-!   end if
-! end if
-!#ifdef HAVE_OPENMP
-! call omp_set_nested(is_nested)
-!#ifdef HAVE_LINALG_MKL_THREADS
-! call mkl_set_num_threads(nthreads)
-!#endif
-!#endif
-!    !$omp end parallel
-!
-!end subroutine multithreaded_getchc
 !!***
 
 end module m_getchc

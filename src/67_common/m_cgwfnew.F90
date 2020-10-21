@@ -464,19 +464,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
          ! Apply projbd to cprj_direc
          cx_tmp  = (/one,zero/)
-!         do jband=1,nband
-!           cprj_cwavef => cprj_cwavef_bands(:,jband:jband)
-!           cx_tmp  = (/one,zero/)
-!           cx_tmp2 = (/-scprod(1,jband),-scprod(2,jband)/)
-!           call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef,cx_tmp,cx_tmp2,&
-!&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-!&                   natom,gs_hamk%nattyp,nspinor,gs_hamk%ntypat)
-!         end do
          scprod_csc = -scprod_csc
          call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef_bands,cx_tmp,scprod_csc,&
 &                 gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                 natom,gs_hamk%nattyp,nband,nspinor,gs_hamk%ntypat)
-!         cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
 
          ! ======================================================================
          ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
