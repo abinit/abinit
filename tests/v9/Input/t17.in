@@ -1,6 +1,8 @@
 # GS calculation with the CG + RMM-DIIS eigensolver and NC pseudos
 #
-rmm_diis  1       # Activate CG + RMM-DIIS.
+rmm_diis1  1       # Activate CG + RMM-DIIS.
+rmm_diis2 -1       # RMM-DIIS only
+
 boxcutmin 1.5
 
 # TODO: Likely bug is use_gemm_nonlop is used in multidataset mode.

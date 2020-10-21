@@ -149,7 +149,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc, ii, jj, kk, it, ld1, ld2, ibk, iek
- logical :: end_with_trial_step, recompute_lambda
+ logical :: end_with_trial_step, new_lambda
  real(dp),parameter :: rdummy = zero
  real(dp) :: dotr, doti, rval, accuracy_ene, cpu, wall, gflops
  character(len=500) :: msg
@@ -335,8 +335,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                         eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
 
-   ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>.
-   ! Assuming input cg are already S-normalized.
+   ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input cg are already S-normalized.
    do idat=1,ndat
      diis%hist_ene(0, idat) = eig(ib_start+idat-1)
      diis%hist_resid(0, idat) = resid(ib_start+idat-1)
@@ -349,7 +348,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      if (usepaw == 1) call cg_zcopy(npwsp, ptr_gsc_bk(1:,jj), diis%chain_sphi(:,:,0,idat))
    end do
 
-   ! Precondition |R_0>, output returned in kres_bk = |K R_0>
+   ! Precondition |R_0>, output in kres_bk = |K R_0>
    kres_bk = residv_bk
    call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_spinorfft)
 
@@ -360,12 +359,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    ! Compute residuals: (H - e_0 S) |K R_0>
    call cg_residvecs(usepaw, npwsp, ndat, eig(ib_start:), kres_bk, ghc_bk, gsc_bk, residv_bk)
 
-   ! Preconditioned steepest descent:
+   ! Line minimization with preconditioned steepest descent:
    !
    !    |phi_1> = |phi_0> + lambda |K R_0>
    !
-   ! where lambda minimizes the norm of the residual
-   ! and not the Rayleigh quotient as in the original Kresse's paper.
+   ! where lambda minimizes the norm of the residual (not the Rayleigh quotient as in Kresse's paper).
    !
    !    lambda = - Re{<R_0|(H - e_0 S)} |K R_0>} / |(H - e_0 S) |K R_0>|**2
    !
@@ -393,9 +391,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    end do
 #endif
 
-   ! Loop over bands inside the block: note ndat1.
-   ! (it's not easy to block at this level because we have a different number of iterations
-   ! and exit conditions for each band).
+   ! Loop over bands inside the block: note ndat1. It's not easy to block at this level because
+   ! we have a different number of iterations and exit conditions for each band.
    !ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
    !do iband=ib_start, ib_stop
    !  ib = iband - ib_start + 1
@@ -427,12 +424,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat1, phi_bk(:,ibk), ghc_bk(:,ibk), ptr_gsc_one, mpi_enreg, prtvol, &
                           eig(iband), resid(iband), enlx(iband), residv_bk(:,ibk), normalize=.True.)
 
-     ! BAND LOCKING for NSCF or SCF if tolwfr > 0 is used.
-     !if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
-     !  call diis%stats%increment("locked_bands", 1)
-     !  cycle iband_loop
-     !end if
-
      ! Store residual R_i for i == iter and evaluate new enlx for NC.
      diis%hist_ene(iter, idat) = eig(iband)
      diis%hist_resid(iter, idat) = resid(iband)
@@ -443,13 +434,14 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
      ! ============== CHECK FOR CONVERGENCE ========================
      if (diis%exit(iter, idat, max_niter_iband(iband), accuracy_ene, dtset)) then
-       !if (prtvol == -level) then
-       !  write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
-       !   ' band: ',iband,' converged after: ',iter,' iterations with resid: ',resid(iband), ch10
-       !  call wrtout(std_out, sjoin("<END RMM-DIIS, msg='", msg, "'>"))
-       !end if
        exit iter_loop
      end if
+
+     ! BAND LOCKING for NSCF or SCF if tolwfr > 0 is used.
+     !if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
+     !  call diis%stats%increment("locked_bands", 1)
+     !  cycle iband_loop
+     !end if
 
      ! Compute <R_i|R_j> and <i|S|j> for i=idat and j=iter
      if (iter /= max_niter_iband(iband)) call diis%eval_mats(iter, idat, me_g0, comm_spinorfft)
@@ -458,15 +450,16 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    !if (diis%last_iter(idat) == -1) diis%last_iter(idat) = max_niter_iband(iband) + 1
 
    ! End with trial step but only if we performed all the iterations (no exit from diis%exit)
-   ! Since we operate on blocks of bands, all the states in the block will get the same treatment.
-   ! This means that bands may have (hopefully slightly) different convergence behaviour depending on bsize.
+   ! Since we operate on blocks of bands, all the states in the block will receive the same treatment.
+   ! This means that one can observe a (hopefully) slightly different convergence behaviour depending on bsize.
+   !
    end_with_trial_step = iter == max_niter_iband(iband) + 1
    !end_with_trial_step = .False.
 
    if (end_with_trial_step) then
      ! Bands in the block may have performed different number of iterations.
-     ! Here we extract the values obtained in the last iteration to fill the bk arrays.
-     ! Note ndat instead of ndat1
+     ! Here we extract the values obtained in the last iteration to fill the _bk arrays.
+     ! Note ndat instead of ndat1 used inside iter_loop.
 
      !do idat=1,ndat
      !  it = diis%last_iter(idat)
@@ -479,7 +472,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      it = max_niter_iband(iband)
      phi_bk = diis%chain_phi(:,:,it, idat)
      kres_bk = diis%chain_resv(:, :, it, idat)
-     !kres_bk = residv_bk
      ib_start = iband
 
      call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_spinorfft)
@@ -488,12 +480,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      ! is more expensive but more accurate. So we do it only for the occupied states plus a buffer
      ! if these bands still far from convergence. In all the other cases, we reuse the previous lambda.
 
-     recompute_lambda = .False.
-     if (iband <= nbocc + 4 .and. resid(iband) > tol10) recompute_lambda = .True.
-     !recompute_lambda = .False.
-     !write(std_out, *)" Performing last trial step with recompute_lambda: ", recompute_lambda
+     new_lambda = .False.
+     if (iband <= nbocc + 4 .and. resid(iband) > tol10) new_lambda = .True.
+     !new_lambda = .False.
+     !write(std_out, *)" Performing last trial step with new_lambda: ", new_lambda
 
-     if (recompute_lambda) then
+     if (new_lambda) then
        tag = "NEWLAM"
        ! Final preconditioned steepest descent with new lambda.
        ! Compute H |K R_0>
@@ -520,7 +512,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
        end do
 
      else
-       ! Reuse previous value of lambda.
+       ! Reuse previous values of lambda.
        tag = "FIXLAM"
        do idat=1,ndat
          jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
@@ -535,6 +527,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
 
+     ! Push the last results just for printing purposes.
      do idat=1,ndat
        it = diis%last_iter(idat) + 1
        diis%last_iter(idat) = it
@@ -543,14 +536,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
        diis%step_type(it, idat) = tag
      end do
 
-   end if
+   end if ! end_with_trial_step
 
    ! Update wavefunction block.
    cg(:,igs:ige) = phi_bk
 
-   !if (prtvol == -level .and. iter == max_niter_iband(iband) + 1) then
+   !if (prtvol == -level) then
    call diis%print(ib_start, ndat, istep, ikpt, isppol)
-   !call wrtout(std_out, "<END RMM-DIIS, msg='All iterations performed'>")
    !end if
 
  end do iband_loop
@@ -629,8 +621,14 @@ logical function rmm_diis_exit(diis, iter, idat, niter_band, accuracy_ene, dtset
  return
 
 10 continue
- ! Caller will exit. Save the last iteration performed for this band in the block
+ ! Caller will exit.
  ans = .True.
+
+ !if (prtvol == -level) then
+ !  write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
+ !   ' band: ',iband,' converged after: ',iter,' iterations with resid: ',resid(iband), ch10
+ !  call wrtout(std_out, sjoin("<END RMM-DIIS, msg='", msg, "'>"))
+ !end if
 
 end function rmm_diis_exit
 !!***
