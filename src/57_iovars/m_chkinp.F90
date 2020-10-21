@@ -100,8 +100,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  logical :: twvl,allow
  logical :: wvlbigdft=.false.
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
- integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
+ integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,info,intimage,ierrgrp
+ integer :: ipsp,irank,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response
  integer :: fftalg,need_kden,usepaw,usewvl
@@ -112,7 +112,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: cond_values(4),nprojmax(0:3)
  integer :: gpu_devices(5)=(/-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),mat(3,3),rmet(3,3),rprimd(3,3),sgval(3),work(15),xredshift(3,1)
  real(dp),allocatable :: frac(:,:)
  character(len=32) :: cond_string(4)
  character(len=32) :: input_name
@@ -404,8 +404,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
 
 !  chksymbreak
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymbreak',dt%chksymbreak,3,(/0,1,-1/),iout)
-   if(dt%chksymbreak==1)then
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymbreak',dt%chksymbreak,2,(/0,1/),iout)
+
+!  chksymtnons
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymtnons',dt%chksymtnons,2,(/0,1/),iout)
+   if(dt%chksymtnons==1)then
 !    Check the values of tnons
      do isym=1,dt%nsym
        do ii=1,3
@@ -413,18 +416,36 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          if(abs(delta-nint(delta))>tol6)then
            delta=dt%tnons(ii,isym)*three*four
            if(abs(delta-nint(delta))>tol6)then
-             write(msg, '(8a,i4,2a,9i3,2a,3es16.6,4a)' ) ch10,&
+             ! Compute the pseudo-inverse of 1-symrel, then multiply tnons
+             mat(:,:)=zero; mat(1,1)=one; mat(2,2)=one; mat(3,3)=one
+             mat(:,:)=mat(:,:)-dt%symrel(:,:,isym)
+             xredshift(:,1)=dt%tnons(:,isym)
+             call dgelss(3,3,1,mat,3,xredshift(:,1),3,sgval,tol5,irank,work,15,info)
+             write(msg, '(8a,i4,2a,9i3,2a,3es16.6,3a,3es20.10)' ) ch10,&
 &             ' chkinp: WARNING -',ch10,&
-&             '   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
+&             '   Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
 &             '   which is neither a rational fraction in 1/8th nor in 1/12th :', ch10,&
 &             '   for the symmetry number ',isym,ch10,&
 &             '   symrel is ',dt%symrel(1:3,1:3,isym),ch10,&
 &             '   tnons is ',dt%tnons(1:3,isym),ch10,&
-&             '   Please, read the description of the input variable chksymbreak,',ch10,&
-&             '   then, if you feel confident, you might switch it to zero, or consult with the forum.'
-             !call wrtout(iout,msg,'COLL')
-             call wrtout(std_out,msg,'COLL')
-             !ierr=ierr+1 ! moved this to a warning: for slab geometries arbitrary tnons can appear along the vacuum direction
+&             '   The following shift of all reduced atomic positions might possibly remove this problem :',ch10,&
+&             xredshift(:,1)
+             write(msg, '(8a,i4,2a,9i3,2a,3es16.6,10a)' ) ch10,&
+&             ' chkinp: ERROR -',ch10,&
+&             '   Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
+&             '   which is neither a rational fraction in 1/8th nor in 1/12th :', ch10,&
+&             '   for the symmetry number ',isym,ch10,&
+&             '   symrel is ',dt%symrel(1:3,1:3,isym),ch10,&
+&             '   tnons is ',dt%tnons(1:3,isym),ch10,&
+&             '   Please, read the description of the input variable chksymtnons.',ch10,&
+&             '   If you are planning GW calculations, such tnons value is very problematic.',ch10,&
+&             '   You might shift your atomic positions to better align the FFT grid and the symmetry axes.',ch10,&
+&             '   See the suggestion given in the WARNING above. Possibly several shifts might be needed to get alignment.',ch10,&
+&             '   Also possibly, you might set chksymtnons=0, but do not be surprised if ABINIT crashes.' 
+             call wrtout(iout,msg,'COLL')
+             !call wrtout(std_out,msg,'COLL')
+             ierr=ierr+1 ! Previously a warning: for slab geometries arbitrary tnons can appear along the vacuum direction. 
+                         ! But then simply set chksymtnons=0 ...
            end if
          end if
        end do

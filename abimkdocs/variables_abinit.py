@@ -1566,49 +1566,75 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable governs the behaviour of the code when there are potential
-source of symmetry breaking, related e.g. to the k point grid or the presence
-of non-symmorphic translations which might not be coherent with the exchange-correlation grid.
+This variable governs the behaviour of the code when there is a potential
+source of symmetry breaking related to the k point grid.
 
-When **chksymbreak** = 1, the code stops (or issue a warning) if:
-
-  * (1) The k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
-  * (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
-    or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
+When **chksymbreak** = 1, the code stops if 
+the k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
 
 Note that the check is disabled when the number of k-points in the BZ is greater than 40 ** 3.
 
 When **chksymbreak** = 0, there is no such check.
 
-When **chksymbreak** = -1, the code stops if the condition (1) is met,
-but in case the condition (2) is met, there will be a trial to shift the
-atomic coordinates such as to obtain symmetry operations with the adequate non-symmorphic part.
-
 Explanation:
 In the ground-state calculation, such breaking of the symmetry is usually
 harmless. However, if the user is doing a calculation of phonons using DFPT
 ([[rfphon]] = 1), the convergence with respect to the number of k points will be
-much worse with a non-symmetric grid than with a symmetric one. Also, if the
-user is doing a GW calculation, the presence of non-symmorphic translations
-that are not coherent with the FFT grid might cause problems. In the GW part,
-indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
+worse with a non-symmetric grid than with a symmetric one. 
+
+So, it was decided to warn the user about such problem already at
+the level of the ground state calculations, although such warning might be irrelevant.
+
+If you encounter a problem outlined above, you have two choices: change your
+k point grid, to make it more symmetric, or ignore the problem, and set **chksymbreak** = 0.
+""",
+),
+
+Variable(
+    abivarname="chksymtnons",
+    varset="gstate",
+    vartype="integer",
+    topics=['crystal'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="CHecK SYMmetry of TNONS",
+    characteristics=['[[INPUT_ONLY]]'],
+    added_in_version="v9.2",
+    text=r"""
+This variable governs the behaviour of the code when there is a potential
+source of symmetry breaking, related to the presence
+of non-symmorphic translations which might not be coherent with the exchange-correlation grid.
+
+When **chksymtnons** = 1, the code stops if 
+the non-symmorphic translation part of the symmetry operations has components that are not zero,
+or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
+
+When **chksymtnons** = 0, there is no such check.
+
+Explanation:
+In the ground-state calculation, such breaking of the symmetry is usually
+harmless. However, if the user is doing a GW calculation, the presence of non-symmorphic translations
+that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault). 
+In the GW part, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
 for calculating both the polarizability and the self-energy. The wavefunctions
 in the full Brillouin zone are obtained from the irreducible wedge by applying
 the symmetry operations of the space group of the crystal. In the present
 implementation, the symmetrisation of the wavefunctions is done in real space
 on the FFT mesh that, therefore, has to be coherent both with the rotational
 part as well as with the fractional translation of each symmetry operation. If
-the condition (2) is met, the GW code will not be able to find a symmetry
+the condition above is met, the GW code will not be able to find a symmetry
 preserving FFT mesh.
 
-So, it was decided to warn the user about these possible problems already at
+So, it was decided to warn the user about such problem already at
 the level of the ground state calculations, although such warning might be irrelevant.
 
-If you encounter a problem outlined above, you have two choices: change your
+If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
 symmetric point; or ignore the problem, and set **chksymbreak** = 0.
+ABINIT makes a suggestion of a possible global translation.
 """,
 ),
+
 
 Variable(
     abivarname="chneut",

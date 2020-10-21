@@ -1081,16 +1081,16 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  if (paral_fft_==1) then
    ! For the time being, one need ngfft(2) and ngfft(3) to be multiple of nproc_fft
    if(modulo(ngfft(2),nproc_fft)/=0)then
-     write(msg,'(3a,i5,a,i5)')&
-      'The second dimension of the FFT grid, ngfft(2), should be',&
-      'a multiple of the number of processors for the FFT, nproc_fft.',&
+     write(msg,'(4a,i5,a,i5)')&
+      'The second dimension of the FFT grid, ngfft(2), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
       'However, ngfft(2)=',ngfft(2),' and nproc_fft=',nproc_fft
      MSG_BUG(msg)
    end if
    if(modulo(ngfft(3),nproc_fft)/=0)then
-     write(msg,'(3a,i5,a,i5)')&
-      'The third dimension of the FFT grid, ngfft(3), should be',&
-      'a multiple of the number of processors for the FFT, nproc_fft.',&
+     write(msg,'(4a,i5,a,i5)')&
+      'The third dimension of the FFT grid, ngfft(3), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
       'However, ngfft(3)=',ngfft(3),' and nproc_fft=',nproc_fft
      MSG_BUG(msg)
    end if
