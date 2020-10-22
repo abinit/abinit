@@ -160,7 +160,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  real(dp),target :: fake_gsc_bk(0,0), fake_gsc_one(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: evec(:,:), subham(:), h_ij(:,:,:)
- real(dp),allocatable :: ghc_bk(:,:), gsc_bk(:,:), gvnlxc_bk(:,:), pcon(:), lambda_bk(:), dots_bk(:,:)
+ real(dp),allocatable :: ghc_bk(:,:), gsc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), dots_bk(:,:) !pcon(:),
  real(dp),allocatable :: residv_bk(:,:), kres_bk(:,:), phi_bk(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: ptr_gsc_bk(:,:), ptr_gsc_one(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
@@ -287,6 +287,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  end if
 
  bsize = 1
+ nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize)
  !write(std_out,*)"optekin:", optekin
 
@@ -298,11 +299,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ! Remalloc here because blocking algorithm is not yet implemented in the DIIS part.
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
- ABI_MALLOC(pcon, (npw))
  ABI_MALLOC(gsc_bk, (2, npwsp*usepaw*bsize))
- ABI_MALLOC(residv_bk, (2, npwsp*bsize))
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
  ABI_MALLOC(phi_bk, (2, npwsp*bsize))
+ ABI_MALLOC(residv_bk, (2, npwsp*bsize))
+
+ ABI_REMALLOC(ghc_bk, (2, npwsp*bsize))
+ ABI_REMALLOC(gvnlxc_bk, (2, npwsp*bsize))
 
  ! We loop over nblocks, each block has ndat states.
  ! Usually ndat == bsize except for the last block if mod(nband, bsize /= 0).
@@ -316,6 +319,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    ib_start = 1 + (iblock - 1) * bsize
    ib_stop = min(iblock * bsize, nband)
    diis%last_iter = -1
+   !print *, "treating: igs, ige, ndat", igs, ige, ndat
+   !print *, "treating: ib_start, ib_stop", ib_start, ib_stop
  end do
 
  iband_loop: do iband=1,nband
@@ -409,16 +414,22 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
      if (iter > 1) then
        ! Solve DIIS equations to get phi_bk for iter > 1
+       !do idat=1,ndat
+       !ibk = 1 + (idat - 1) * npwsp; iek = idat * npwsp
        call diis%solve(iter, npwsp, idat, phi_bk(:,ibk), residv_bk(:,ibk), comm_spinorfft)
 
        ! Precondition residual, output in kres_bk.
        kres_bk(:,ibk:iek) = residv_bk(:,ibk:iek)
+       !end do
 
-       call cg_precon(phi_bk(:,ibk), zero, istwf_k, gs_hamk%kinpw_k, npw, nspinor, me_g0, &
-                      optekin, pcon, kres_bk(:,ibk), comm_spinorfft)
+       call cg_precon_many(istwf_k, npw, nspinor, ndat1, phi_bk(:,ibk), optekin, gs_hamk%kinpw_k, &
+                           kres_bk(:,ibk), me_g0, comm_spinorfft)
 
        ! Compute phi_bk with the lambda obtained at iteration #1
+       !do idat=1,ndat
+       !ibk = 1 + (idat - 1) * npwsp; iek = idat * npwsp
        phi_bk(:,ibk:iek) = phi_bk(:,ibk:iek) + lambda_bk(idat) * kres_bk(:,ibk:iek)
+       !end do
      end if
 
      ! Compute H |phi_now>. This is wrong if blocked
@@ -428,12 +439,14 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
                           eig(iband), resid(iband), enlx(iband), residv_bk(:,ibk), normalize=.True.)
 
      ! Store residual R_i for i == iter and evaluate new enlx for NC.
+     !do idat=1,ndat
      diis%hist_ene(iter, idat) = eig(iband)
      diis%hist_resid(iter, idat) = resid(iband)
      diis%step_type(iter, idat) = "DIIS"
      diis%chain_phi(:,:,iter, idat) = phi_bk(:,ibk:iek)
      diis%chain_resv(:, :, iter, idat) = residv_bk(:,ibk:iek)
      if (usepaw == 1) diis%chain_sphi(:,:,iter,idat) = ptr_gsc_one
+     !end do
 
      ! ============== CHECK FOR CONVERGENCE ========================
      if (diis%exit(iter, idat, max_niter_iband(iband), accuracy_ene, dtset)) then
@@ -562,7 +575,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ! Final cleanup
  ABI_FREE(lambda_bk)
  ABI_FREE(dots_bk)
- ABI_FREE(pcon)
  ABI_FREE(ghc_bk)
  ABI_FREE(gsc_bk)
  ABI_FREE(residv_bk)
@@ -1227,7 +1239,7 @@ end subroutine cg_zdotg_lds
 subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect, me_g0, comm)
 
  integer,intent(in) :: istwf_k, npw, nspinor, optekin, ndat, me_g0, comm
- real(dp),intent(in) :: cg(2*npw,ndat), kinpw(npw)
+ real(dp),intent(in) :: cg(2*npw*nspinor,ndat), kinpw(npw)
  real(dp),intent(inout) :: vect(2*npw*nspinor,ndat)
 
  integer :: idat
