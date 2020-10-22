@@ -109,7 +109,7 @@
 #%% test_chain = t62.in, t63.in, t64.in, t65.in
 #%% [files]
 #%% files_to_test = 
-#%%   t62.stdout, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
+#%%   t62.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
 #%%   t62o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
 #%% [paral_info]
 #%% max_nprocs = 10

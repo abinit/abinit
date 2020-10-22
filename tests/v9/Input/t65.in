@@ -65,7 +65,7 @@ shiftk2   0.0 0.0 0.0
 #%% test_chain = t62.in, t63.in, t64.in, t65.in
 #%% [files]
 #%% files_to_test = 
-#%%   t65.stdout, tolnlines = 30, tolabs = 20.0, tolrel = 5.0e-2
+#%%   t65.out, tolnlines = 30, tolabs = 20.0, tolrel = 5.0e-2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
