@@ -66,7 +66,7 @@ module m_rmm_diis
 
    real(dp),allocatable :: hist_ene(:,:)
    real(dp),allocatable :: hist_resid(:,:)
-   character(len=5),allocatable :: step_type(:,:)
+   character(len=6),allocatable :: step_type(:,:)
    ! (0:max_niter+1, bsize)
    ! 0 is the initial step, then DIIS iterations (whose number my depend on the band)
    ! followed by an optional trial step.
@@ -148,11 +148,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  integer,parameter :: tim_getghc = 0, level = 432, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter
- integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc, ii, jj, kk, it, ld1, ld2, ibk, iek
+ integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc, jj, kk, it, ld1, ld2, ibk, iek !ii,
  logical :: end_with_trial_step, new_lambda
  real(dp),parameter :: rdummy = zero
- real(dp) :: dotr, doti, rval, accuracy_ene, cpu, wall, gflops
- character(len=500) :: msg
+ real(dp) :: accuracy_ene, cpu, wall, gflops, dotr, doti !, rval,
+ !character(len=500) :: msg
  character(len=6) :: tag
 !arrays
  integer :: max_niter_iband(nband)
@@ -161,7 +161,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: evec(:,:), subham(:), h_ij(:,:,:)
  real(dp),allocatable :: ghc_bk(:,:), gsc_bk(:,:), gvnlxc_bk(:,:), pcon(:), lambda_bk(:), dots_bk(:,:)
- real(dp),allocatable :: residv_bk(:,:), kres_bk(:,:), phi_bk(:,:) !, new_psi(:,:), new_residvec(:,:)
+ real(dp),allocatable :: residv_bk(:,:), kres_bk(:,:), phi_bk(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: ptr_gsc_bk(:,:), ptr_gsc_one(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
  type(rmm_diis_t) :: diis
@@ -184,7 +184,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
  end if
 
- ! Treat states in groups of bsize bands to be able to use zgemm.
+ ! Treat states in groups of bsize bands to be able to call zgemm.
  bsize = 4
  if (dtset%userib /= 0) bsize = abs(dtset%userib)
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
@@ -303,8 +303,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ABI_MALLOC(residv_bk, (2, npwsp*bsize))
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
  ABI_MALLOC(phi_bk, (2, npwsp*bsize))
- !ABI_MALLOC(new_psi, (2, npwsp))
- !ABI_MALLOC(new_residvec, (2, npwsp))
 
  ! We loop over nblocks, each block has ndat states.
  ! Usually ndat == bsize except for the last block if mod(nband, bsize /= 0).
@@ -339,8 +337,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    do idat=1,ndat
      diis%hist_ene(0, idat) = eig(ib_start+idat-1)
      diis%hist_resid(0, idat) = resid(ib_start+idat-1)
-     diis%resmat(:, 0, 0, idat) = [resid(ib_start+idat-1), zero]
-     diis%smat(:, 0, 0, idat) = [one, zero]
+     if (diis%cplex == 2) then
+       diis%resmat(:, 0, 0, idat) = [resid(ib_start+idat-1), zero]
+       diis%smat(:, 0, 0, idat) = [one, zero]
+     else
+       diis%resmat(:, 0, 0, idat) = resid(ib_start+idat-1)
+       diis%smat(:, 0, 0, idat) = one
+     end if
      diis%step_type(0, idat) = "SDIAG"
      jj = 1 + (idat - 1) * npwsp
      call cg_zcopy(npwsp, residv_bk(1,jj), diis%chain_resv(:,:,0,idat))
@@ -566,13 +569,27 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ABI_FREE(kres_bk)
  ABI_FREE(phi_bk)
  ABI_FREE(gvnlxc_bk)
- !ABI_FREE(new_psi)
- !ABI_FREE(new_residvec)
 
  call diis%free()
 
 end subroutine rmm_diis
 !!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 logical function rmm_diis_exit(diis, iter, idat, niter_band, accuracy_ene, dtset) result(ans)
 
@@ -633,6 +650,22 @@ logical function rmm_diis_exit(diis, iter, idat, niter_band, accuracy_ene, dtset
 end function rmm_diis_exit
 !!***
 
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 subroutine rmm_diis_print(diis, ib_start, ndat, istep, ikpt, isppol)
 
  class(rmm_diis_t),intent(in) :: diis
@@ -668,6 +701,23 @@ subroutine rmm_diis_print(diis, ib_start, ndat, istep, ikpt, isppol)
  call wrtout(std_out, "<END RMM-DIIS>")
 
 end subroutine rmm_diis_print
+!!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg, prtvol, &
                            eig, resid, enlx, residvecs, normalize)
@@ -687,7 +737,6 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
  integer :: istwf_k, usepaw, cpopt, sij_opt, npwsp, me_g0, comm_spinorfft, comm_fft
  real(dp),parameter :: rdummy = zero
  logical :: normalize_
- real(dp) :: dotr, doti
 !arrays
  real(dp),allocatable :: gvnlxc(:, :)
  real(dp) :: dots(2, ndat)
@@ -736,6 +785,22 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
 end subroutine getghc_eigresid
 !!!***
 
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize) result(diis)
 
  integer,intent(in) :: usepaw, istwf_k, npwsp, max_niter, bsize
@@ -755,10 +820,27 @@ type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize)
  ABI_MALLOC(diis%chain_phi, (2, npwsp, 0:max_niter, bsize))
  ABI_MALLOC(diis%chain_sphi, (2, npwsp*usepaw, 0:max_niter, bsize))
  ABI_MALLOC(diis%chain_resv, (2, npwsp, 0:max_niter, bsize))
- ABI_CALLOC(diis%resmat, (2, 0:max_niter, 0:max_niter, bsize)) ! <R_i|R_j>
- ABI_CALLOC(diis%smat, (2, 0:max_niter, 0:max_niter, bsize))   ! <i|S|j>
+ ABI_CALLOC(diis%resmat, (diis%cplex, 0:max_niter, 0:max_niter, bsize)) ! <R_i|R_j>
+ ABI_CALLOC(diis%smat, (diis%cplex, 0:max_niter, 0:max_niter, bsize))   ! <i|S|j>
 
 end function rmm_diis_new
+!!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine rmm_diis_free(diis)
  class(rmm_diis_t),intent(inout) :: diis
@@ -776,6 +858,23 @@ subroutine rmm_diis_free(diis)
  call diis%stats%free()
 
 end subroutine rmm_diis_free
+!!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine rmm_diis_solve(diis, iter, npwsp, idat, new_psi, new_residvec, comm_spinorfft)
 
@@ -862,6 +961,23 @@ subroutine rmm_diis_solve(diis, iter, npwsp, idat, new_psi, new_residvec, comm_s
  ABI_FREE(wvec)
 
 end subroutine rmm_diis_solve
+!!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine rmm_diis_eval_mats(diis, iter, idat, me_g0, comm_spinorfft)
 
@@ -877,7 +993,11 @@ subroutine rmm_diis_eval_mats(diis, iter, idat, me_g0, comm_spinorfft)
    call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
                   diis%chain_resv(:,:,ii,idat), diis%chain_resv(:,:,iter,idat), me_g0, xmpi_comm_self)
    if (ii == iter) doti = zero
-   diis%resmat(:, ii, iter, idat) = [dotr, doti]
+   if (diis%cplex == 2) then
+     diis%resmat(:, ii, iter, idat) = [dotr, doti]
+   else
+     diis%resmat(:, ii, iter, idat) = dotr
+   end if
 
    ! <i|S|j> assume normalized wavefunctions for ii == iter
    if (ii == iter) then
@@ -891,7 +1011,11 @@ subroutine rmm_diis_eval_mats(diis, iter, idat, me_g0, comm_spinorfft)
                       diis%chain_phi(:,:,ii,idat), diis%chain_sphi(:,:,iter,idat), me_g0, xmpi_comm_self)
      end if
    end if
-   diis%smat(:, ii, iter, idat) = [dotr, doti]
+   if (diis%cplex == 2) then
+     diis%smat(:, ii, iter, idat) = [dotr, doti]
+   else
+     diis%smat(:, ii, iter, idat) = dotr
+   end if
  end do
 
  if (xmpi_comm_size(comm_spinorfft) > 1) then
@@ -901,6 +1025,22 @@ subroutine rmm_diis_eval_mats(diis, iter, idat, me_g0, comm_spinorfft)
 
 end subroutine rmm_diis_eval_mats
 !!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine cg_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, comm)
 
@@ -914,7 +1054,6 @@ subroutine cg_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, com
 
  do idat=1,ndat
    call dotprod_g(eig(idat), doti, istwf_k, npwsp, option1, ghc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
-
    if (usepaw == 1) then
      call dotprod_g(dotr, doti, istwf_k, npwsp, option1, gsc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
      eig(idat) = eig(idat) / dotr
@@ -924,6 +1063,23 @@ subroutine cg_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, com
  if (xmpi_comm_size(comm) > 1) call xmpi_sum(eig, comm, ierr)
 
 end subroutine cg_eigens
+!!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine cg_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
 
@@ -945,6 +1101,23 @@ subroutine cg_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
  end if
 
 end subroutine cg_residvecs
+!!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
 
@@ -961,6 +1134,23 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
  if (xmpi_comm_size(comm) > 1) call xmpi_sum(norms, comm, ierr)
 
 end subroutine cg_norm2g
+!!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine cg_zdotg(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
 
@@ -968,7 +1158,7 @@ subroutine cg_zdotg(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
  real(dp),intent(in) :: cg1(2*npwsp,ndat), cg2(2*npwsp,ndat)
  real(dp),intent(out) :: dots(2,ndat)
 
- integer :: idat, ierr, ig1, ig2
+ integer :: idat, ierr
  real(dp) :: dotr, doti
 
  do idat=1,ndat
@@ -979,7 +1169,23 @@ subroutine cg_zdotg(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
  if (xmpi_comm_size(comm) > 1) call xmpi_sum(dots, comm, ierr)
 
 end subroutine cg_zdotg
+!!***
 
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine cg_zdotg_lds(istwf_k, npwsp, ndat, option, ld1, cg1, ld2, cg2, dots, me_g0, comm)
 
@@ -1000,6 +1206,23 @@ subroutine cg_zdotg_lds(istwf_k, npwsp, ndat, option, ld1, cg1, ld2, cg2, dots, 
  if (xmpi_comm_size(comm) > 1) call xmpi_sum(dots, comm, ierr)
 
 end subroutine cg_zdotg_lds
+!!***
+
+!!****f* m_cgtools/foobar
+!! NAME
+!!   foobar
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect, me_g0, comm)
 
@@ -1020,6 +1243,7 @@ subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect,
  !if (xmpi_comm_size(comm) > 1) call xmpi_sum(dots, comm, ierr)
 
 end subroutine cg_precon_many
+!!***
 
 end module m_rmm_diis
 !!***

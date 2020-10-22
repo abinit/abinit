@@ -2368,9 +2368,9 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
  integer :: ierr,b1,b2
 #ifdef DEBUG_MODE
  integer :: ptr
+ character(len=500) :: msg
 #endif
  logical :: my_usegemm
- character(len=500) :: msg
 !arrays
  real(dp) :: rcg0(nband)
  real(dp),allocatable :: rovlp(:,:)
@@ -4584,7 +4584,9 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  integer :: rvectsiz,vectsize,cg_idx,gsc_idx
  real(dp) :: doti,dotr,sum,xnorm
  real(dp) :: cpu, wall, gflops
+#ifdef DEBUG_MODE
  character(len=500) :: msg
+#endif
 !arrays
  integer :: cgindex(nvec),gscindex(nvec)
  real(dp) :: buffer2(2),tsec(2)
