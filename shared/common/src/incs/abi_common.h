@@ -63,7 +63,7 @@
  2) Traditional CPP
 **/
 
-#if defined (FC_INTEL)
+#if defined (FC_INTEL) || (FC_AOCC)
 #define CONCAT(x,y) x ## y
 #else
 #define CONCAT(x,y) x/**/y

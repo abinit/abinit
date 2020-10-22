@@ -58,29 +58,31 @@ cat <<EOF
 Core build parameters
 ---------------------
 
-  * C compiler       : ${abi_cc_vendor} version ${abi_cc_version}
-  * Fortran compiler : ${abi_fc_vendor} version ${abi_fc_version}
-  * architecture     : ${abi_cpu_vendor} ${abi_cpu_model} (${abi_cpu_bits} bits)
-  * debugging        : ${abi_debug_flavor}
-  * optimizations    : ${abi_optim_flavor}
+  * C compiler        : ${abi_cc_vendor} version ${abi_cc_version}
+  * Fortran compiler  : ${abi_fc_vendor} version ${abi_fc_version}
+  * architecture      : ${abi_cpu_vendor} ${abi_cpu_model} (${abi_cpu_bits} bits)
+  * debugging         : ${abi_debug_flavor}
+  * optimizations     : ${abi_optim_flavor}
 
-  * OpenMP enabled   : ${abi_openmp_enable} (collapse: ${tmp_omp_collapse})
-  * MPI    enabled   : ${abi_mpi_enable} (flavor: ${abi_mpi_flavor})
-  * MPI    in-place  : ${abi_mpi_inplace_enable}
-  * MPI-IO enabled   : ${abi_mpi_io_enable}
-  * GPU    enabled   : ${abi_gpu_enable} (flavor: ${abi_gpu_flavor})
+  * OpenMP enabled    : ${abi_openmp_enable} (collapse: ${tmp_omp_collapse})
+  * MPI    enabled    : ${abi_mpi_enable} (flavor: ${abi_mpi_flavor})
+  * MPI    in-place   : ${abi_mpi_inplace_enable}
+  * MPI-IO enabled    : ${abi_mpi_io_enable}
+  * GPU    enabled    : ${abi_gpu_enable} (flavor: ${abi_gpu_flavor})
 
-  * LibXML2 enabled  : ${abi_libxml2_enable}
-  * LibPSML enabled  : ${sd_libpsml_enable}
-  * XMLF90  enabled  : ${sd_xmlf90_enable}
-  * HDF5 enabled     : ${sd_hdf5_enable} (MPI support: ${sd_hdf5_mpi_ok})
-  * NetCDF enabled   : ${sd_netcdf_enable} (MPI support: ${sd_netcdf_mpi_ok})
-  * NetCDF-F enabled : ${sd_netcdf_fortran_enable} (MPI support: ${sd_netcdf_fortran_mpi_ok})
+  * LibXML2 enabled   : ${abi_libxml2_enable}
+  * LibPSML enabled   : ${sd_libpsml_enable}
+  * XMLF90  enabled   : ${sd_xmlf90_enable}
+  * HDF5 enabled      : ${sd_hdf5_enable} (MPI support: ${sd_hdf5_mpi_ok})
+  * NetCDF enabled    : ${sd_netcdf_enable} (MPI support: ${sd_netcdf_mpi_ok})
+  * NetCDF-F enabled  : ${sd_netcdf_fortran_enable} (MPI support: ${sd_netcdf_fortran_mpi_ok})
 
-  * FFT flavor       : ${sd_fft_flavor} (libs: ${tmp_rep_fft_libs})
-  * LINALG flavor    : ${sd_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
+  * FFT flavor        : ${sd_fft_flavor} (libs: ${tmp_rep_fft_libs})
+  * LINALG flavor     : ${sd_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
+  * SCALAPACK enabled : ${sd_linalg_has_scalapack}
+  * ELPA enabled      : ${sd_linalg_has_elpa}
 
-  * Build workflow   : ${abi_build_steps}
+  * Build workflow    : ${abi_build_steps}
 
 ${abi_opt_deprecated_count} deprecated options have been used:${abi_opt_deprecated_used}.
 

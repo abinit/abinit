@@ -382,6 +382,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA], [
         [Define to 1 if you have the ELPA Fortran 2008 API support.])
     fi
   fi
+  AC_SUBST(sd_linalg_has_elpa)
 ]) # _SD_LINALG_CHECK_ELPA
 
 
