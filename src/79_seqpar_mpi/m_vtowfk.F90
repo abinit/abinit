@@ -274,6 +274,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
    gsc=zero
+ else
+   ABI_ALLOCATE(gsc,(0,0))
  end if
 
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then
@@ -484,7 +486,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
-   if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
+   if ((wfoptalg/=14 .and. wfoptalg /= 1 .and. .not. enable_cgwf_paw).or.dtset%ortalg>0) then
      call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
 &     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if
@@ -493,7 +495,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  DEBUG seq==par comment next block
 !  Fix phases of all bands
    if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
-     if ( .not. newlobpcg ) then
+     if ( .not. newlobpcg .and. .not. enable_cgwf_paw ) then
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
      else
        ! GSC is local to vtowfk and is completely useless since everything
@@ -974,9 +976,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DEALLOCATE(subvnlx)
    ABI_DEALLOCATE(subovl)
  end if
- if ( .not. newlobpcg .and. .not. enable_cgwf_paw) then
-   ABI_DEALLOCATE(gsc)
- end if
+! if ( .not. newlobpcg .and. .not. enable_cgwf_paw) then
+ ABI_DEALLOCATE(gsc)
+! end if
 
  if(wfoptalg==3) then
    ABI_DEALLOCATE(eig_save)

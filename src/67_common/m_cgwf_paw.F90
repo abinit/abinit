@@ -42,7 +42,6 @@ module m_cgwf_paw
  use m_nonlop,        only : nonlop
  use m_paw_overlap,   only : smatrix_k_paw
  use m_cgprj,         only : getcprj,cprj_axpby
- use m_cgwf,          only : mksubham
  use m_fft,           only : fourwf
 
  implicit none
