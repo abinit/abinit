@@ -32,7 +32,8 @@ module m_ingeo
  use m_sort
  use m_dtset
 
- use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, symmetrize_rprimd, symmetrize_xred, symatm
+ use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, &
+&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred, symatm
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
@@ -846,6 +847,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
        !If the group closure is not obtained which should be exceptional, try with a larger tolsym (three times larger)
        if(ierr/=0)then
+         MSG_WARNING('Will try to obtain group closure by using a tripled tolsym.')
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
            nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,two*tolsym,typat,use_inversion,xred,&
            chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
@@ -853,9 +855,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          MSG_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
        endif
 
-       ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
-       ! and recompute the symmetry operations (tnons might not be accurate enough)
+       ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize tnons for gliding or screw operations, 
+       ! symmetrize the atomic positions and recompute the symmetry operations 
        if(tolsym>1.00001e-8)then
+         call symmetrize_tnons(nsym,symrel,tnons,tolsym)
          ABI_ALLOCATE(indsym,(4,natom,nsym))
          ABI_ALLOCATE(symrec,(3,3,nsym))
          do isym=1,nsym
@@ -954,6 +957,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
         ' decrease tolsym to 1.0e-8 or lower,',ch10,&
         'or use input primitive vectors that are accurate to better than 1.0e-8.'
      MSG_WARNING(msg)
+
      call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tol8)
      call mkradim(acell,rprim,rprimd)
    end if
@@ -1128,6 +1132,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ABI_DEALLOCATE(intarr)
  ABI_DEALLOCATE(dprarr)
+
+!DEBUG
+!write(std_out,'(a)')' m_ingeo : end ingeo '
+!ENDDEBUG
 
 end subroutine ingeo
 !!***
