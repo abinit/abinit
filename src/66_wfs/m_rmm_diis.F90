@@ -61,7 +61,7 @@ module m_rmm_diis
    integer :: npwsp
    type(pair_list) :: stats
 
-   integer,allocatable :: last_iter(:)
+   integer :: last_iter
    ! (bsize)
 
    real(dp),allocatable :: hist_ene(:,:)
@@ -84,8 +84,8 @@ module m_rmm_diis
    procedure :: free => rmm_diis_free
    procedure :: solve => rmm_diis_solve
    procedure :: eval_mats => rmm_diis_eval_mats
-   procedure :: exit => rmm_diis_exit
-   procedure :: print => rmm_diis_print
+   procedure :: exit_iter => rmm_diis_exit_iter
+   procedure :: print_block => rmm_diis_print_block
 
  end type rmm_diis_t
 
@@ -147,7 +147,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2
  integer,parameter :: tim_getghc = 0, level = 432, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat
- integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter
+ integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc, jj, kk, it, ld1, ld2, ibk, iek !ii,
  logical :: end_with_trial_step, new_lambda
  real(dp),parameter :: rdummy = zero
@@ -155,7 +155,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  !character(len=500) :: msg
  character(len=6) :: tag
 !arrays
- integer :: max_niter_iband(nband)
+ !integer :: max_niter_iband(nband)
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
@@ -264,15 +264,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ! nline - 1 DIIS steps, then end with trial step (optional, see below)
  max_niter = dtset%nline - 1
 
- ! Reduce number of niter iterations for empty states.
- max_niter_iband = max_niter
- ! TODO: Don't reduce niter if MD
- !if dtset%
- !if dtset%occopt == 2
- do iband=1,nband
-   if (occ(iband) < tol3) max_niter_iband(iband) = max(1 + max_niter / 2, 2)
- end do
-
  ! Define accuracy_ene for SCF
  nbocc = count(occ > zero)
  accuracy_ene = zero
@@ -286,8 +277,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    end if
  end if
 
- bsize = 1
- nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize)
  !write(std_out,*)"optekin:", optekin
 
@@ -296,16 +285,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
- ! Remalloc here because blocking algorithm is not yet implemented in the DIIS part.
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
  ABI_MALLOC(gsc_bk, (2, npwsp*usepaw*bsize))
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
  ABI_MALLOC(phi_bk, (2, npwsp*bsize))
  ABI_MALLOC(residv_bk, (2, npwsp*bsize))
-
- ABI_REMALLOC(ghc_bk, (2, npwsp*bsize))
- ABI_REMALLOC(gvnlxc_bk, (2, npwsp*bsize))
 
  ! We loop over nblocks, each block has ndat states.
  ! Usually ndat == bsize except for the last block if mod(nband, bsize /= 0).
@@ -319,6 +304,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    ib_start = 1 + (iblock - 1) * bsize
    ib_stop = min(iblock * bsize, nband)
    diis%last_iter = -1
+
+   ! Reduce number of niter iterations for empty states.
+   ! TODO: Don't reduce niter if MD
+   !if dtset%
+   !if dtset%occopt == 2
+   max_niter_block = max_niter
+   if (all(occ(ib_start:ib_stop) < tol3)) max_niter_block = max(1 + max_niter / 2, 2)
    !print *, "treating: igs, ige, ndat", igs, ige, ndat
    !print *, "treating: ib_start, ib_stop", ib_start, ib_stop
 
@@ -394,8 +386,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    end do
 #endif
 
-   iter_loop: do iter=1,3
-   !iter_loop: do iter=1,max_niter_iband(iband)
+   iter_loop: do iter=1,max_niter_block
 
      if (iter > 1) then
        ! Solve DIIS equations to get phi_bk for iter > 1
@@ -416,7 +407,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
        end do
      end if
 
-     ! Compute H |phi_now>. This is wrong if blocked
+     ! Compute H |phi_now>.
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start:), resid(ib_start), enlx(ib_start), residv_bk, normalize=.True.)
 
@@ -432,61 +423,34 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      end do
 
      ! ============== CHECK FOR CONVERGENCE ========================
-     !if (diis%exit(iter, idat, max_niter_iband(iband), accuracy_ene, dtset)) then
-     !  exit iter_loop
-     !end if
-
-     ! BAND LOCKING for NSCF or SCF if tolwfr > 0 is used.
-     !if (resid(iband) < dtset%tolwfr .or. sqrt(abs(resid(iband))) < accuracy_ene) then
-     !  call diis%stats%increment("locked_bands", 1)
-     !  cycle iband_loop
-     !end if
-     diis%last_iter(:) = iter
-
-     ! Compute <R_i|R_j> and <i|S|j> for i=idat and j=iter
-     !if (iter /= max_niter_iband(iband))
-     if (iter /= 3) then
-       call diis%eval_mats(iter, ndat, me_g0, comm_spinorfft)
+     if (diis%exit_iter(iter, ndat, max_niter_block, accuracy_ene, dtset)) then
+       exit iter_loop
      end if
 
+     ! Compute <R_i|R_j> and <i|S|j> for i=idat and j=iter
+     if (iter /= max_niter_block) call diis%eval_mats(iter, ndat, me_g0, comm_spinorfft)
+
    end do iter_loop
-   !if (diis%last_iter(idat) == -1) diis%last_iter(idat) = max_niter_iband(iband) + 1
 
    ! End with trial step but only if we performed all the iterations (no exit from diis%exit)
    ! Since we operate on blocks of bands, all the states in the block will receive the same treatment.
    ! This means that one can observe a (hopefully) slightly different convergence behaviour depending on bsize.
    !
-   !end_with_trial_step = iter == max_niter_iband(iband) + 1
-   end_with_trial_step = .False.
+   end_with_trial_step = iter == max_niter_block + 1
+   !end_with_trial_step = .False.
    !end_with_trial_step = .True.
 
    if (end_with_trial_step) then
-     ! Bands in the block may have performed different number of iterations.
-     ! Here we extract the values obtained in the last iteration to fill the _bk arrays.
-     ! Note ndat instead of ndat1 used inside iter_loop.
 
-     !do idat=1,ndat
-     !  it = diis%last_iter(idat)
-     !  jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
-     !  phi_bk(:,jj:kk) = diis%chain_phi(:,:,it,idat)
-     !  kres_bk(:jj:kk) = diis%chain_resv(:,:,it,idat)
-     !end do
-
-     !idat = 1
-     !it = max_niter_iband(iband)
-     !phi_bk = diis%chain_phi(:,:,it, idat)
-     !kres_bk = diis%chain_resv(:, :, it, idat)
-     !ib_start = iband
      kres_bk = residv_bk
-
      call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_spinorfft)
 
      ! Recomputing the preconditioned-direction and the new lambda that minimizes the residual
-     ! is more expensive but more accurate. So we do it only for the occupied states plus a buffer
+     ! is more expensive but more accurate. Do it only for the occupied states plus a buffer
      ! if these bands still far from convergence. In all the other cases, we reuse the previous lambda.
 
      new_lambda = .False.
-     !if (iband <= nbocc + 4 .and. resid(iband) > tol10) new_lambda = .True.
+     if (ib_stop <= nbocc + 4 .and. any(resid(ib_start:ib_stop) > tol10)) new_lambda = .True.
      !new_lambda = .False.
      !new_lambda = .True.
      !write(std_out, *)" Performing last trial step with new_lambda: ", new_lambda
@@ -506,11 +470,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
        call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_spinorfft)
 
-       !it = max_niter_iband(iband)
+       it = diis%last_iter
        do idat=1,ndat
          jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
-         !it = 3 ! XXXXX
-         it = diis%last_iter(idat) ! FIXME
          call dotprod_g(dotr, doti, istwf_k, npwsp, option1, &
                         diis%chain_resv(:,:,it,idat), residv_bk(:,jj), me_g0, comm_spinorfft)
 
@@ -529,29 +491,24 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
      endif
 
-     ! Finally recompute eig, resid, enlx and portion of gsc_all
-     !if (usepaw == 1) ptr_gsc_bk => gsc_all(:,igs:ige)
+     ! Finally recompute eig, resid, enlx and portion of ptr_gsc_bk
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
 
      ! Push the last results just for printing purposes.
-     !do idat=1,ndat
-     !  it = diis%last_iter(idat) + 1
-     !  diis%last_iter(idat) = it
-     !  diis%hist_ene(it, idat) = eig(ib_start+idat-1)
-     !  diis%hist_resid(it, idat) = resid(ib_start+idat-1)
-     !  diis%step_type(it, idat) = tag
-     !end do
+     do idat=1,ndat
+       it = diis%last_iter + 1
+       diis%hist_ene(it, idat) = eig(ib_start+idat-1)
+       diis%hist_resid(it, idat) = resid(ib_start+idat-1)
+       diis%step_type(it, idat) = tag
+     end do
 
    end if ! end_with_trial_step
 
    ! Update wavefunction block.
    cg(:,igs:ige) = phi_bk
 
-   !if (prtvol == -level) then
-   !call diis%print(ib_start, ndat, istep, ikpt, isppol)
-   !end if
-
+   if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
  end do ! iblock
 
  call timab(1634, 2, tsec) !"rmm_diis:band_opt"
@@ -594,55 +551,55 @@ end subroutine rmm_diis
 !!
 !! SOURCE
 
-logical function rmm_diis_exit(diis, iter, idat, niter_band, accuracy_ene, dtset) result(ans)
+logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene, dtset) result(ans)
 
  class(rmm_diis_t),intent(inout) :: diis
- integer,intent(in) :: iter, idat, niter_band
+ integer,intent(in) :: iter, ndat, niter_block
  real(dp),intent(in) :: accuracy_ene
  type(dataset_type),intent(in) :: dtset
 
+ integer :: idat, checks(ndat)
  real(dp) :: resid, deltae, deold
 
- resid = diis%hist_resid(iter, idat)
- deold = diis%hist_ene(1, idat) - diis%hist_ene(0, idat)
- deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
- diis%last_iter(idat) = iter
-
+ diis%last_iter = iter
+ checks = 0
  ans = .False.
 
- ! Relative criterion on eig diff
- ! Abinit default in the CG part is 0.005 (0.3 V).
- ! Here we enlarge it a bit
- if (abs(deltae) < 6 * dtset%tolrde * abs(deold) .and. iter /= niter_band) then
- !if (abs(deltae) < 0.3 * abs(deold) .and. iter /= niter_band) then
-   call diis%stats%increment("'deltae < 6 * tolrde * deold'", 1)
-   goto 10
- end if
+ do idat=1,ndat
+   resid = diis%hist_resid(iter, idat)
+   deold = diis%hist_ene(1, idat) - diis%hist_ene(0, idat)
+   deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
 
- if (dtset%iscf < 0) then
-   ! This is the only condition available for NSCF run.
-   if (resid < dtset%tolwfr) then
-     call diis%stats%increment("'resid < tolwfr'", 1)
-     goto 10
+   ! Relative criterion on eig diff
+   ! Abinit default in the CG part is 0.005 (0.3 V).
+   ! Here we enlarge it a bit
+   if (abs(deltae) < 6 * dtset%tolrde * abs(deold) .and. iter /= niter_block) then
+   !if (abs(deltae) < 0.3 * abs(deold) .and. iter /= niter_block) then
+     !call diis%stats%increment("'deltae < 6 * tolrde * deold'", 1)
+     checks(idat) = 1; cycle
    end if
 
- else
-   if (resid < dtset%tolwfr) then
-     call diis%stats%increment("'resid < tolwfr'", 1)
-     goto 10
-   end if
-   if (sqrt(abs(resid)) < accuracy_ene) then
-     ! Absolute criterion on eig diff
-     call diis%stats%increment("'resid < accuracy_ene'", 1)
-     goto 10
-   end if
- end if
+   if (dtset%iscf < 0) then
+     ! This is the only condition available for NSCF run.
+     if (resid < dtset%tolwfr) then
+       call diis%stats%increment("'resid < tolwfr'", 1)
+       checks(idat) = 2; cycle
+     end if
 
- return
+   else
+     if (resid < dtset%tolwfr) then
+       call diis%stats%increment("'resid < tolwfr'", 1)
+       checks(idat) = 2; cycle
+     end if
+     if (sqrt(abs(resid)) < accuracy_ene) then
+       ! Absolute criterion on eig diff
+       call diis%stats%increment("'resid < accuracy_ene'", 1)
+       checks(idat) = 3; cycle
+     end if
+   end if
+ end do ! idat
 
-10 continue
- ! Caller will exit.
- ans = .True.
+ ans = all(checks /= 0)
 
  !if (prtvol == -level) then
  !  write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
@@ -650,7 +607,7 @@ logical function rmm_diis_exit(diis, iter, idat, niter_band, accuracy_ene, dtset
  !  call wrtout(std_out, sjoin("<END RMM-DIIS, msg='", msg, "'>"))
  !end if
 
-end function rmm_diis_exit
+end function rmm_diis_exit_iter
 !!***
 
 !!****f* m_cgtools/foobar
@@ -669,7 +626,7 @@ end function rmm_diis_exit
 !!
 !! SOURCE
 
-subroutine rmm_diis_print(diis, ib_start, ndat, istep, ikpt, isppol)
+subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
 
  class(rmm_diis_t),intent(in) :: diis
  integer,intent(in) :: ib_start, ndat, istep, ikpt, isppol
@@ -679,7 +636,7 @@ subroutine rmm_diis_print(diis, ib_start, ndat, istep, ikpt, isppol)
  character(len=500) :: msg
 
  call wrtout(std_out, &
-   sjoin("<BEGIN RMM-DIIS, istep:", itoa(istep), ", ikpt:", itoa(ikpt), ", spin: ", itoa(isppol), ">"))
+   sjoin("<BEGIN RMM-DIIS-BLOCK, istep:", itoa(istep), ", ikpt:", itoa(ikpt), ", spin: ", itoa(isppol), ">"))
 
  do idat=1,ndat
    write(msg,'(1a, 2(a5), 4(a14), 1x, a6)') &
@@ -687,7 +644,7 @@ subroutine rmm_diis_print(diis, ib_start, ndat, istep, ikpt, isppol)
 
    iband = ib_start + idat - 1
    deold = diis%hist_ene(1, idat) - diis%hist_ene(0, idat)
-   do iter=0,diis%last_iter(idat)
+   do iter=0,diis%last_iter
 
      deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
      dedold = zero; absdiff = zero
@@ -701,9 +658,9 @@ subroutine rmm_diis_print(diis, ib_start, ndat, istep, ikpt, isppol)
        diis%hist_resid(iter, idat), diis%step_type(iter, idat); call wrtout(std_out, msg)
    end do
  end do
- call wrtout(std_out, "<END RMM-DIIS>")
+ call wrtout(std_out, "<END RMM-DIIS-BLOCK>")
 
-end subroutine rmm_diis_print
+end subroutine rmm_diis_print_block
 !!***
 
 !!****f* m_cgtools/foobar
@@ -815,7 +772,6 @@ type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize)
  diis%max_niter = max_niter
  diis%bsize = bsize
 
- ABI_MALLOC(diis%last_iter, (bsize))
  ABI_MALLOC(diis%hist_ene, (0:max_niter+1, bsize))
  ABI_MALLOC(diis%hist_resid, (0:max_niter+1, bsize))
  ABI_MALLOC(diis%step_type, (0:max_niter+1, bsize))
@@ -848,7 +804,6 @@ end function rmm_diis_new
 subroutine rmm_diis_free(diis)
  class(rmm_diis_t),intent(inout) :: diis
 
- ABI_SFREE(diis%last_iter)
  ABI_SFREE(diis%hist_ene)
  ABI_SFREE(diis%hist_resid)
  ABI_SFREE(diis%step_type)
