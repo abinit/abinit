@@ -311,6 +311,11 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
        call wrtout(std_out,message,'PERS')
      end if
 
+     ! Compute wavefunction in real space
+     call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
+&      gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+&      n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
+
      ! ======================================================================
      ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
      ! ======================================================================
@@ -320,11 +325,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          ! === COMPUTE THE RESIDUAL ===
          ! Compute lambda = <C|H|C>
          sij_opt = 0
-         ! Compute wavefunction in real space
-         call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-&          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-&          n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
-!
          call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
            &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
          lam0=chc
