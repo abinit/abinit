@@ -479,9 +479,10 @@ contains
            end if
          end do
        end do
+
+!      End loop inside block of atoms
+       iatm=iatm+nincat
      end do
-!    End loop inside block of atoms
-     iatm=iatm+nincat
 
      ABI_DEALLOCATE(ax)
      ABI_DEALLOCATE(by)

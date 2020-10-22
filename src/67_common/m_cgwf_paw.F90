@@ -160,7 +160,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  real(dp), pointer :: cwavef(:,:),cwavef_bands(:,:),cwavef_r(:,:,:,:),direc_r(:,:,:,:)
  real(dp),allocatable :: direc(:,:),direc_tmp(:,:),pcon(:),scprod(:,:),scwavef_dum(:,:)
  real(dp),pointer :: scprod_csc(:),kinpw(:)
- real(dp) :: cx_tmp(2),cx_tmp2(2)
+ real(dp) :: z_tmp(2),z_tmp2(2)
  type(pawcprj_type),allocatable,target :: cprj_cwavef_bands(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:)
  type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_conjgr(:,:)
@@ -299,7 +299,12 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
      call getcsc(dot,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,&
 &     gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
      xnorm=one/sqrt(dot(1))
-     call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
+     z_tmp = (/xnorm,zero/)
+     call cg_zscal(npw*nspinor,z_tmp,cwavef)
+     z_tmp2 = (/zero,zero/)
+     call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_cwavef,z_tmp,z_tmp2,&
+&             gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+&             natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
 
      if (prtvol==-level) then
        write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
@@ -440,9 +445,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
          ! Apply projbd to cprj_direc
-         cx_tmp  = (/one,zero/)
+         z_tmp  = (/one,zero/)
          scprod_csc = -scprod_csc
-         call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef_bands,cx_tmp,scprod_csc,&
+         call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef_bands,z_tmp,scprod_csc,&
 &                 gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                 natom,gs_hamk%nattyp,nband,nspinor,gs_hamk%ntypat)
 
@@ -460,9 +465,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            gamma=zero
            dotgp=dotgg
            call cg_zcopy(npw*nspinor,direc,conjgr)
-           cx_tmp  = (/one,zero/)
-           cx_tmp2 = (/zero,zero/)
-           call cprj_axpby(cprj_conjgr,cprj_direc,cprj_direc,cx_tmp,cx_tmp2,&
+           z_tmp  = (/one,zero/)
+           z_tmp2 = (/zero,zero/)
+           call cprj_axpby(cprj_conjgr,cprj_direc,cprj_direc,z_tmp,z_tmp2,&
 &                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
 
@@ -480,9 +485,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
              conjgr(1,ipw)=direc(1,ipw)+gamma*conjgr(1,ipw)
              conjgr(2,ipw)=direc(2,ipw)+gamma*conjgr(2,ipw)
            end do
-           cx_tmp   = (/one,zero/)
-           cx_tmp2  = (/gamma,zero/)
-           call cprj_axpby(cprj_conjgr,cprj_direc,cprj_conjgr,cx_tmp,cx_tmp2,&
+           z_tmp   = (/one,zero/)
+           z_tmp2  = (/gamma,zero/)
+           call cprj_axpby(cprj_conjgr,cprj_direc,cprj_conjgr,z_tmp,z_tmp2,&
 &                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
          end if
@@ -512,9 +517,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
              direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
            end do
          end if
-         cx_tmp   = (/one,zero/)
-         cx_tmp2  = (/-dotr,zero/)
-         call cprj_axpby(cprj_direc,cprj_conjgr,cprj_cwavef,cx_tmp,cx_tmp2,&
+         z_tmp   = (/one,zero/)
+         z_tmp2  = (/-dotr,zero/)
+         call cprj_axpby(cprj_direc,cprj_conjgr,cprj_cwavef,z_tmp,z_tmp2,&
 &         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
 
@@ -597,9 +602,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
            cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
          end do
-         cx_tmp  = (/costh,zero/)
-         cx_tmp2 = (/sintn,zero/)
-         call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_direc,cx_tmp,cx_tmp2,&
+         z_tmp  = (/costh,zero/)
+         z_tmp2 = (/sintn,zero/)
+         call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_direc,z_tmp,z_tmp2,&
 &         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
          do i3=1,gs_hamk%n6
