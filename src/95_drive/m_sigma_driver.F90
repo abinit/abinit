@@ -2641,6 +2641,7 @@ endif
      !
      ! Use the Wfd with new name (Wfd_nato_all) because it will contain the GW@1RDM nat. orbs. (bands)
      !
+     MSG_COMMENT("The Wfd bands will contain the nat. orbs. ones from now on")
      Wfd_nato_all => Wfd
      call Wfd_nato_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_nato_all (KS->NO)
      call xmpi_barrier(Wfd%comm)
