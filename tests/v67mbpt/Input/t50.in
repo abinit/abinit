@@ -104,8 +104,8 @@ ixc 7
 #%% [files]
 #%% files_to_test = 
 #%%  t50.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
-#%%  t50o_DS4_T0001_EXC_MDF,  tolnlines = 800, tolabs = 2.2e-1, tolrel = 3.0e-1, fld_options =  -ridiculous;
-#%%  t50o_DS4_T0005_EXC_MDF,  tolnlines = 800, tolabs = 1.5e-1, tolrel = 2.0e-1, fld_options =  -ridiculous;
+#%%  t50o_DS4_T0001_EXC_MDF,  tolnlines = 800, tolabs = 2.2e-1, tolrel = 1.0e1, fld_options =  -ridiculous;
+#%%  t50o_DS4_T0005_EXC_MDF,  tolnlines = 800, tolabs = 1.5e-1, tolrel = 3.0e-1, fld_options =  -ridiculous;
 #%%  t50o_DS4_T0010_EXC_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 1
