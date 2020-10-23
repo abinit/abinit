@@ -250,7 +250,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(ppmodel_t) :: PPm
  type(sigparams_t) :: Sigp
  type(sigma_t) :: Sr
- type(wfd_t),target :: Wfd,Wfdf,Wfd_nato_master,Wfd_nato_all  
+ type(wfd_t),target :: Wfd,Wfdf,Wfd_nato_master
+ type(wfd_t),pointer :: Wfd_nato_all  
  type(wave_t),pointer :: wave
  type(wvl_data) :: Wvl
 !arrays
@@ -2611,13 +2612,6 @@ endif
      write(msg,'(a1)')  ' '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     ! Allocate the new Wfd_nato_all
-     call wfd_init(Wfd_nato_all,Cryst,Pawtab,Psps,keep_ur_dm2,mband,nband_dm,Kmesh%nibz,Sigp%nsppol,bdm2_mask,&
-       Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-       Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                     ! Build new Wfd_nato_all
-     call Wfd_nato_all%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))    ! Read WFK and store it in Wfd_nato_all
-     call Wfd_nato_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_nato_all (KS->NO)
-     call xmpi_barrier(Wfd%comm)
      !
      ! Coulomb <KS_i|Vh[NO]|KS_j>
      !
@@ -2633,7 +2627,7 @@ endif
      ABI_MALLOC(tmp_kstab,(2,Wfd%nkibz,Wfd%nsppol))
      tmp_kstab=0
      do spin=1,Sigp%nsppol
-       do ikcalc=1,Sigp%nkptgw 
+       do ikcalc=1,Sigp%nkptgw
          ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
          tmp_kstab(1,ik_ibz,spin)=Sigp%minbnd(ikcalc,spin)
          tmp_kstab(2,ik_ibz,spin)=Sigp%maxbnd(ikcalc,spin)
@@ -2643,6 +2637,12 @@ endif
      & ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
      & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
      ABI_FREE(tmp_kstab)
+     call xmpi_barrier(Wfd%comm)
+     !
+     ! Use the Wfd with new name (Wfd_nato_all) because it will contain the GW@1RDM nat. orbs. (bands)
+     !
+     Wfd_nato_all => Wfd
+     call Wfd_nato_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_nato_all (KS->NO)
      call xmpi_barrier(Wfd%comm)
      !
      ! Build all <NO_i|Vnl|NO_i> terms and save them on nl_bks(band,k,spin)
@@ -2786,7 +2786,7 @@ endif
        ABI_FREE(Umat)
        ABI_FREE(mat2rot)
      end do
-     call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating Wfd_nato_all
+     call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
      ABI_FREE(keep_ur_dm2)
      ABI_FREE(bdm2_mask)
      ABI_FREE(nband_dm)
@@ -2901,8 +2901,6 @@ endif
    if (gwcalctyp==21 .and. gw1rdm>0) then
      ABI_FREE(keep_ur_dm)
      ABI_FREE(bdm_mask)
-     Wfd_nato_all%bks_comm = xmpi_comm_null
-     call Wfd_nato_all%free()
      ABI_FREE(dm1) 
      ABI_FREE(nateigv) 
      ABI_FREE(potk)     
