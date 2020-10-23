@@ -122,7 +122,7 @@ subroutine cgwf_paw(cg,chkexit,cpus,eig,&
 &                filnam_ds1,gs_hamk,icg,ikpt,inonsc,&
 &                isppol,mcg,mpi_enreg,&
 &                nband,nbdblock,nkpt,nline,npw,&
-&                nspinor,nsppol,ortalg,prtvol,quit,resid,&
+&                nspinor,nsppol,ortalg,prtvol,quit,resid,subham,&
 &                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
  integer,intent(in) :: chkexit,icg,ikpt,inonsc,isppol
@@ -137,14 +137,14 @@ subroutine cgwf_paw(cg,chkexit,cpus,eig,&
 !arrays
  real(dp),intent(inout),target :: cg(2,mcg)
  real(dp), intent(inout) :: eig(nband)
- real(dp),intent(out) :: resid(nband)
+ real(dp),intent(out) :: resid(nband),subham(nband*(nband+1))
 
 !Local variables-------------------------------
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
 integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  integer,save :: nskip=0
  integer :: counter,cpopt,itypat
- integer :: i1,i2,i3,ia,iband,ibandmin,ibandmax,jband,me_g0
+ integer :: i1,i2,i3,ia,iband,ibandmin,ibandmax,isubh,jband,me_g0
  integer :: ibdblock,iblock,igs
  integer :: iline,ipw,ispinor,istwf_k
  integer :: n4,n5,n6,natom,ncpgr,nblock
@@ -157,12 +157,14 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  integer,allocatable :: dimlmn(:)
  real(dp) :: tsec(2),dotrr(1),dotii(1)
  real(dp),allocatable :: conjgr(:,:),gvnlxc(:,:),denpot_dum(:,:,:),fofgout_dum(:,:)
- real(dp), pointer :: cwavef(:,:),cwavef_bands(:,:),cwavef_r(:,:,:,:),direc_r(:,:,:,:)
- real(dp),allocatable :: direc(:,:),direc_tmp(:,:),pcon(:),scprod(:,:),scwavef_dum(:,:)
+ real(dp), pointer :: cwavef(:,:),cwavef_left(:,:),cwavef_bands(:,:)
+ real(dp), pointer :: cwavef_r(:,:,:,:),cwavef_r_left(:,:,:,:)
+ real(dp),allocatable,target :: cwavef_r_bands(:,:,:,:,:)
+ real(dp),allocatable :: direc(:,:),direc_tmp(:,:),pcon(:),scprod(:,:),scwavef_dum(:,:),direc_r(:,:,:,:)
  real(dp),pointer :: scprod_csc(:),kinpw(:)
  real(dp) :: z_tmp(2),z_tmp2(2)
  type(pawcprj_type),allocatable,target :: cprj_cwavef_bands(:,:)
- type(pawcprj_type),pointer :: cprj_cwavef(:,:)
+ type(pawcprj_type),pointer :: cprj_cwavef(:,:),cprj_cwavef_left(:,:)
  type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_conjgr(:,:)
 
 ! *********************************************************************
@@ -226,7 +228,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  ABI_DATATYPE_ALLOCATE(cprj_conjgr ,(natom,nbdblock))
 
  n4=gs_hamk%ngfft(4);n5=gs_hamk%ngfft(5);n6=gs_hamk%ngfft(6)
- ABI_ALLOCATE(cwavef_r,(2,n4,n5,n6))
+ ABI_ALLOCATE(cwavef_r_bands,(2,n4,n5,n6,nband))
  ABI_ALLOCATE(direc_r, (2,n4,n5,n6))
  ABI_ALLOCATE(denpot_dum, (0,0,0))
  ABI_ALLOCATE(fofgout_dum, (0,0))
@@ -264,6 +266,8 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
    end do
  end do
 
+ isubh = 1
+
  ! Loop over blocks of bands. In the standard band-sequential algorithm, nblock=nband.
  do iblock=1,nblock
    counter=100*iblock*nbdblock+inonsc
@@ -292,6 +296,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
      ! Extraction of the vector that is iteratively updated
      cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
      cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+     cwavef_r => cwavef_r_bands(:,:,:,:,iband)
 
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
      ! WARNING : It might be interesting to skip the following operation.
@@ -670,6 +675,21 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
    !  ======================================================================
    !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
    !  ======================================================================
+
+   do iband=1,nband
+     cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
+     cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+     cwavef_r => cwavef_r_bands(:,:,:,:,iband)
+     do jband=1,iband
+       cwavef_left => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
+       cprj_cwavef_left => cprj_cwavef_bands(:,jband:jband)
+       cwavef_r_left => cwavef_r_bands(:,:,:,:,jband)
+       call getchc(subham(isubh),subham(isubh+1),cpopt,cwavef,cwavef_left,&
+         &          cprj_cwavef_left,cprj_cwavef,cwavef_r,cwavef_r_left,&
+         &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
+       isubh = isubh + 2
+     end do
+   end do
 
  end do ! iblock End loop over block of bands
 

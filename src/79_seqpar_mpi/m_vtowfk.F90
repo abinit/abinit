@@ -415,7 +415,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          call cgwf_paw(cg,dtset%chkexit,cpus,eig_k,dtfil%filnam_ds(1),&
 &         gs_hamk,icg,ikpt,inonsc,isppol,mcg,&
 &         mpi_enreg,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,my_nspinor,&
-&         dtset%nsppol,dtset%ortalg,prtvol,quit,resid_k,dtset%tolrde,dtset%tolwfr,wfoptalg)
+&         dtset%nsppol,dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
        else
          call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
 &         gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
@@ -447,7 +447,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
 
-   if( .not. wfopta10 == 1 .and. .not. newlobpcg .and. .not. enable_cgwf_paw ) then
+   if( .not. wfopta10 == 1 .and. .not. newlobpcg ) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
      call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &     mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
