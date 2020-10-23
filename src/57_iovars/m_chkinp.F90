@@ -417,7 +417,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        problem_isym_now=0
        do ii=1,3
          delta8=dt%tnons(ii,isym)*eight ; delta12=dt%tnons(ii,isym)*three*four
-         if(abs(delta8-nint(delta8))>tol8 .or. abs(delta12-nint(delta12))>tol8)then
+         if(abs(delta8-nint(delta8))>tol8 .and. abs(delta12-nint(delta12))>tol8)then
            ! There is a problem with tnons for this isym. Will trigger an error.
            problem_isym_now=1
          endif
@@ -439,7 +439,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
            tnons_new(:)=dt%tnons(:,isym2)+xredshift(:,1)-matmul(dt%symrel(:,:,isym2),xredshift(:,1))
            do jj=1,3
              delta8_2=tnons_new(jj)*eight ; delta12_2=tnons_new(jj)*three*four
-             if(abs(delta8_2-nint(delta8_2))>tol8 .or. (delta12_2-nint(delta12_2))>tol8) fixed_problem=0
+             if(abs(delta8_2-nint(delta8_2))>tol8 .and. abs(delta12_2-nint(delta12_2))>tol8) fixed_problem=0
            enddo
          enddo
          if(fixed_problem==1)exit
@@ -462,7 +462,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
            write(std_out,'(a,3es20.10)') '        ',dt%xred_orig(:,iatom,1)+xredshift(:,1)
          enddo
        endif
-       write(msg, '(8a,i4,2a,9i3,2a,3es16.6,10a)' ) ch10,&
+       write(msg, '(8a,i4,2a,9i3,2a,3es20.10,10a)' ) ch10,&
 &        ' chkinp: ERROR -',ch10,&
 &        '   Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
 &        '   which is neither a rational fraction in 1/8th nor in 1/12th :', ch10,&
