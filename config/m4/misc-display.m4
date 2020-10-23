@@ -82,6 +82,10 @@ Core build parameters
   * SCALAPACK enabled : ${sd_linalg_has_scalapack}
   * ELPA enabled      : ${sd_linalg_has_elpa}
 
+  * FCFLAGS           : ${FCFLAGS}
+  * FCFLAGS_OPTIM     : ${FCFLAGS_OPTIM}
+  * CPATH             : ${CPATH}
+
   * Build workflow    : ${abi_build_steps}
 
 ${abi_opt_deprecated_count} deprecated options have been used:${abi_opt_deprecated_used}.
