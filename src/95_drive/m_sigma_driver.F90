@@ -219,7 +219,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,icsing_eff,usefock_ixc,nqlwl,xclevel_ixc 
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: etot,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -262,7 +262,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:),qlwl(:,:) 
+ real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -748,7 +748,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
  ! MRM: also initialize the Wfd_nato_master for GW 1-RDM if required.
- ! Warning, this should be replaced by copy but copy fails due to band allocation differences. Do it in the future! FIXME 
+ ! Warning, this should be replaced by copy but copy fails due to bands being allocated in different manners. Do it in the future! FIXME 
  if (gwcalctyp==21 .and. gw1rdm>0) then
    call wfd_init(Wfd_nato_master,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bdm_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
@@ -2556,7 +2556,7 @@ endif
 
    call xmpi_barrier(Wfd%comm)
 
-   ! MRM: print WFK and DEN files, and build band corrections.
+   ! MRM: print WFK and DEN files, build band corrections, and compute new energies.
    if (gwcalctyp==21 .and. gw1rdm>0) then
      ABI_MALLOC(old_purex,(b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(new_hartr,(b1gw:b2gw,Sigp%nkptgw))
@@ -2569,7 +2569,7 @@ endif
      old_purex(:,:)=czero
      new_hartr(:,:)=czero
      !
-     ! Warining!
+     ! WARNING! 
      ! MRM: only the master has bands on Wfd_nato_master so it prints everything and computes gw_rhor 
      !
      call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
@@ -2638,8 +2638,37 @@ endif
      & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
      ABI_FREE(tmp_kstab)
      call xmpi_barrier(Wfd%comm)
+     do ikcalc=1,Sigp%nkptgw                                                 
+       ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
+       ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
+       ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+       do ib=b1gw,b2gw
+         new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)  ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
+       end do
+     end do
      !
-     ! Use the Wfd with new name (Wfd_nato_all) because it will contain the GW@1RDM nat. orbs. (bands)
+     ! Exchange a*<KS_i|K[KS]|KS_j> and save old K 
+     !
+     call setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,ngfftf,comm) ! Build Vcp_ks and Vcp_full  
+     call xmpi_barrier(Wfd%comm)
+     if(coef_hyb>tol8) then
+       do ikcalc=1,Sigp%nkptgw                                                 
+         ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
+         ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
+         ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,KS_BSt,Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),& ! Notice we need KS occs 
+         & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&                                   ! and band energy diffs       
+         & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+         ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
+         call xmpi_barrier(Wfd%comm)
+         do ib=b1gw,b2gw
+           old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ikcalc,1)              ! Save old alpha*<i|K[KS]|i> from the GS calc. for Delta eik
+         enddo
+       end do
+     endif
+     call xmpi_barrier(Wfd%comm)
+     !
+     ! Use the Wfd with new name (Wfd_nato_all) because it will contain the GW 1RDM nat. orbs. (bands)
      !
      MSG_COMMENT("The Wfd bands will contain the nat. orbs. ones from now on")
      Wfd_nato_all => Wfd
@@ -2659,76 +2688,13 @@ endif
        end do
      end do
      !
-     ! Exchange <NO_i|K[NO]|NO_j> and save old K and new J matrices
+     ! Exchange <NO_i|K[NO]|NO_j> 
      !
-      ! Build Vcp_ks and Vcp_full
-     if (Dtset%gw_nqlwl==0) then
-       nqlwl=1
-       ABI_MALLOC(qlwl,(3,nqlwl))
-       qlwl(:,1)= GW_Q0_DEFAULT
-     else
-       nqlwl=Dtset%gw_nqlwl
-       ABI_MALLOC(qlwl,(3,nqlwl))
-       qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
-     end if
-     rcut=Dtset%rcut
-     icsing_eff=Dtset%gw_icutcoul
-      ! 1st part: Use a Vcp_full to compute the full Coulomb interaction for NOs
-     if (Gsph_x%ng > Gsph_c%ng) then
-       call vcoul_init(Vcp_full,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
-        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
-     else
-       call vcoul_init(Vcp_full,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
-        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
-     end if
-      ! 2nd part: Use a Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
-     coef_hyb=zero
-     call get_xclevel(Dtset%ixc,xclevel_ixc,usefock_ixc) ! usefock is 0 for 0.0 Fock contrib in KS-GS calc
-     if (usefock_ixc==1)then
-       if (abs(Dtset%hyb_mixing)>tol8) then
-         coef_hyb=abs(Dtset%hyb_mixing)
-         if(abs(coef_hyb+999.0d0)<tol8) then ! HF
-           coef_hyb=1.0d0
-         end if
-       else if(abs(Dtset%hyb_mixing_sr)>tol8)then
-         coef_hyb=abs(Dtset%hyb_mixing_sr)
-         icsing_eff=5
-       end if
-       if (abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8) then
-         rcut=one/Dtset%hyb_range_fock
-       end if
-     end if
-     if (Gsph_x%ng > Gsph_c%ng) then
-       call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
-        Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
-     else
-       call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
-        Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
-     end if
-     ABI_FREE(qlwl)
-     ! Now compute the "residual" Coulomb interactions. 
-     Vcp_ks%vc_sqrt_resid=sqrt(coef_hyb*Vcp_ks%vc_sqrt**2)
-     Vcp_ks%i_sz_resid=coef_hyb*Vcp_ks%i_sz
      ! Get the matrix elements and save them on Sr%x_mat 
      do ikcalc=1,Sigp%nkptgw                                                 
        ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
        ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
        ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-       if(coef_hyb>tol8) then
-         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,KS_BSt,Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),& ! Notice we need KS occs 
-         & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&                                   ! and band energy diffs       
-         & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
-         ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
-         call xmpi_barrier(Wfd%comm)
-         do ib=b1gw,b2gw
-           old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ikcalc,1)              ! Save old alpha*<i|K[KS]|i> from the GS calc. for Delta eik
-           new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)    ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
-         enddo
-       else
-         do ib=b1gw,b2gw
-           new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)  ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
-         enddo
-       endif
        call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp_full,Kmesh,Qmesh,Ltg_k(ikcalc),& 
        & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_nato_all,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
        & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
@@ -2736,10 +2702,10 @@ endif
      call xmpi_barrier(Wfd%comm)
      call vcoul_free(Vcp_ks)
      call vcoul_free(Vcp_full)
-     ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)                            ! Save the new total exchange energy 
+     ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)                            ! Save the new total exchange energy Ex = Ex[GW.1RDM] 
      !
      ! Transform      <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>,
-     !                <KS_i|J[NO]|KS_j> -> <NO_i|K[NO]|NO_j>,
+     !                <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>,
      ! and              <KS_i|T|KS_j>   ->   <NO_i|T|NO_j>
      !
      do ikcalc=1,Sigp%nkptgw                                                 
@@ -4672,6 +4638,105 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &  Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Cryst%ucvol,Psps%znuclpsp)
 
 end subroutine paw_qpscgw
+!!***
+
+!!****f* ABINIT/setup_vcp
+!! NAME
+!! setup_vcp
+!!
+!! FUNCTION
+!!  Initialize the Vcp and compute the corresponding residue.
+!!
+!! INPUTS
+!! Dtset<type(dataset_type)>=all input variables for this dataset
+!! Gsph_c<gsphere_t>=Info on the G-sphere for W and Sigma_c
+!! Gsph_x<gsphere_t>=Info on the G-sphere for and Sigma_x
+!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
+!! Qmesh <kmesh_t>=Structure describing the q-point sampling.
+!! ngfft(18)=information on the fine FFT grid used for densities and potentials.
+!! Cryst<crystal_t>=Info on unit cell and symmetries.
+!! comm=Information about the xmpi_world
+!!
+!! OUTPUT
+!! Vcp_full<vcoul_t>= Datatype gathering information on the coulombian interaction and the cutoff technique.
+!! Vcp_ks<vcoul_t>= Datatype gathering information on the coulombian interaction and the cutoff technique.
+!! coef_hyb=real variable containing the amount of GLOBAL hybridization
+!!
+!! PARENTS
+!!      m_sigma_driver
+!!
+!! CHILDREN
+!!
+subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,ngfftf,comm)
+!Arguments ------------------------------------
+!scalars
+ type(Dataset_type),intent(inout) :: Dtset
+ type(gsphere_t) :: Gsph_x,Gsph_c
+ type(crystal_t) :: Cryst
+ type(kmesh_t) :: Kmesh,Qmesh
+ type(vcoul_t),intent(inout) :: Vcp_ks,Vcp_full
+ integer :: comm
+ real(dp),intent(inout) :: coef_hyb 
+!arrays
+ integer :: ngfftf(18) 
+ 
+!Local variables-------------------------------
+!scalars
+ integer :: usefock_ixc,nqlwl,xclevel_ixc,icsing_eff 
+ real(dp) :: rcut
+!arrays
+ real(dp),allocatable :: qlwl(:,:)
+
+ ! Build Vcp_ks and Vcp_full
+ if (Dtset%gw_nqlwl==0) then
+   nqlwl=1
+   ABI_MALLOC(qlwl,(3,nqlwl))
+   qlwl(:,1)= GW_Q0_DEFAULT
+ else
+   nqlwl=Dtset%gw_nqlwl
+   ABI_MALLOC(qlwl,(3,nqlwl))
+   qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
+ end if
+ rcut=Dtset%rcut
+ icsing_eff=Dtset%gw_icutcoul
+ ! 1st part: Use a Vcp_full to compute the full Coulomb interaction for NOs
+ if (Gsph_x%ng > Gsph_c%ng) then
+   call vcoul_init(Vcp_full,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+ else
+   call vcoul_init(Vcp_full,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+ end if
+ ! 2nd part: Use a Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
+ coef_hyb=zero
+ call get_xclevel(Dtset%ixc,xclevel_ixc,usefock_ixc) ! usefock is 0 for 0.0 Fock contrib in KS-GS calc
+ if (usefock_ixc==1)then
+   if (abs(Dtset%hyb_mixing)>tol8) then
+     coef_hyb=abs(Dtset%hyb_mixing)
+     if(abs(coef_hyb+999.0d0)<tol8) then ! HF
+       coef_hyb=1.0d0
+     end if
+   else if(abs(Dtset%hyb_mixing_sr)>tol8)then
+     coef_hyb=abs(Dtset%hyb_mixing_sr)
+     icsing_eff=5
+   end if
+   if (abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8) then
+     rcut=one/Dtset%hyb_range_fock
+   end if
+ end if
+ if (Gsph_x%ng > Gsph_c%ng) then
+   call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+    Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+ else
+   call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icsing_eff,Dtset%vcutgeo,&
+    Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+ end if
+ ABI_FREE(qlwl)
+ ! Now compute the "residual" Coulomb interactions. 
+ Vcp_ks%vc_sqrt_resid=sqrt(coef_hyb*Vcp_ks%vc_sqrt**2)
+ Vcp_ks%i_sz_resid=coef_hyb*Vcp_ks%i_sz
+
+end subroutine setup_vcp
 !!***
 
 end module m_sigma_driver
