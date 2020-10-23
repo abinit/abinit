@@ -68,7 +68,7 @@ module m_rmm_diis
    real(dp),allocatable :: hist_resid(:,:)
    character(len=6),allocatable :: step_type(:,:)
    ! (0:max_niter+1, bsize)
-   ! 0 is the initial step, then DIIS iterations (whose number my depend on the band)
+   ! 0 is the initial step, then DIIS iterations (whose number may depend on the block)
    ! followed by an optional trial step.
 
    real(dp),allocatable :: resmat(:,:,:,:)
@@ -185,7 +185,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  end if
 
  ! Treat states in groups of bsize bands to be able to call zgemm.
- bsize = 4
+ !bsize = 4
+ bsize = 8
  if (dtset%userib /= 0) bsize = abs(dtset%userib)
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
 
@@ -290,7 +291,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
 
  ! We loop over nblocks, each block has ndat states.
- ! Usually ndat == bsize except for the last block if mod(nband, bsize /= 0).
+ ! Convergence behaviour may depend on bsize as branches are taken according to
+ ! the status of all bands in the block.
+ ! Using gemm_nonlop leads to a significant speedup when applying Vnl.
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize
@@ -518,9 +521,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 end subroutine rmm_diis
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_rmm_diis/rmm_diis_exit_iter
 !! NAME
-!!   foobar
+!!  rmm_diis_exit_iter
 !!
 !! FUNCTION
 !!
@@ -594,9 +597,9 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
 end function rmm_diis_exit_iter
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_rmm_diis/rmm_diis_print_block
 !! NAME
-!!   foobar
+!!  rmm_diis_print_block
 !!
 !! FUNCTION
 !!
@@ -647,9 +650,9 @@ subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
 end subroutine rmm_diis_print_block
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_rmm_diis/getghc_eigresid
 !! NAME
-!!   foobar
+!!  getghc_eigresid
 !!
 !! FUNCTION
 !!
@@ -729,9 +732,9 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
 end subroutine getghc_eigresid
 !!!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_rmm_diis/rmm_diis_new
 !! NAME
-!!   foobar
+!!  rmm_diis_new
 !!
 !! FUNCTION
 !!
@@ -769,9 +772,9 @@ type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize)
 end function rmm_diis_new
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_rmm_diis/rmm_diis_free
 !! NAME
-!!   foobar
+!!  rmm_diis_free
 !!
 !! FUNCTION
 !!
@@ -802,9 +805,9 @@ subroutine rmm_diis_free(diis)
 end subroutine rmm_diis_free
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_rmm_diis/rmm_diis_solve
 !! NAME
-!!   foobar
+!!  rmm_diis_solve
 !!
 !! FUNCTION
 !!
@@ -907,9 +910,9 @@ subroutine rmm_diis_solve(diis, iter, npwsp, idat, new_psi, new_residvec, comm_s
 end subroutine rmm_diis_solve
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_rmm_diis/rmm_diis_eval_mats
 !! NAME
-!!   foobar
+!!  rmm_diis_eval_mats
 !!
 !! FUNCTION
 !!
@@ -972,9 +975,9 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm_spinorfft)
 end subroutine rmm_diis_eval_mats
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_cgtools/cg_eigens
 !! NAME
-!!   foobar
+!!  cg_eigens
 !!
 !! FUNCTION
 !!
@@ -998,6 +1001,7 @@ subroutine cg_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, com
  integer :: idat, ierr
  real(dp) :: dotr, doti
 
+!$OMP PARALLEL DO PROVATE(dotr)
  do idat=1,ndat
    call dotprod_g(eig(idat), doti, istwf_k, npwsp, option1, ghc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
    if (usepaw == 1) then
@@ -1011,9 +1015,9 @@ subroutine cg_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, com
 end subroutine cg_eigens
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_cgtools/cg_residvecs
 !! NAME
-!!   foobar
+!!  cg_residvecs
 !!
 !! FUNCTION
 !!
@@ -1037,10 +1041,12 @@ subroutine cg_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
  integer :: idat
 
  if (usepaw == 1) then
+!$OMP PARALLEL DO
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * gsc(:,idat)
    end do
  else
+!$OMP PARALLEL DO
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * cg(:,idat)
    end do
@@ -1049,9 +1055,9 @@ subroutine cg_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
 end subroutine cg_residvecs
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_cgtools/cg_norm2g
 !! NAME
-!!   foobar
+!!  cg_norm2g
 !!
 !! FUNCTION
 !!
@@ -1073,6 +1079,7 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
 
  integer :: idat, ierr
 
+!$OMP PARALLEL DO PRIVATE(dotr, doti)
  do idat=1,ndat
    call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
  end do
@@ -1082,9 +1089,9 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
 end subroutine cg_norm2g
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_cgtools/cg_zdotg
 !! NAME
-!!   foobar
+!!  cg_zdotg
 !!
 !! FUNCTION
 !!
@@ -1107,6 +1114,7 @@ subroutine cg_zdotg(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
  integer :: idat, ierr
  real(dp) :: dotr, doti
 
+!$OMP PARALLEL DO PRIVATE(dotr, doti)
  do idat=1,ndat
    call dotprod_g(dotr, doti, istwf_k, npwsp, option, cg1(:,idat), cg2(:,idat), me_g0, xmpi_comm_self)
    dots(:, idat) = [dotr, doti]
@@ -1117,9 +1125,9 @@ subroutine cg_zdotg(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
 end subroutine cg_zdotg
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_cgtools/cg_zdotg_lds
 !! NAME
-!!   foobar
+!!  cg_zdotg_lds
 !!
 !! FUNCTION
 !!
@@ -1154,9 +1162,9 @@ subroutine cg_zdotg_lds(istwf_k, npwsp, ndat, option, ld1, cg1, ld2, cg2, dots, 
 end subroutine cg_zdotg_lds
 !!***
 
-!!****f* m_cgtools/foobar
+!!****f* m_cgtools/cg_precon_many
 !! NAME
-!!   foobar
+!!  cg_precon_many
 !!
 !! FUNCTION
 !!
@@ -1181,8 +1189,7 @@ subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect,
 
  ABI_MALLOC(pcon, (npw))
  do idat=1,ndat
-   call cg_precon(cg(:,idat), zero, istwf_k, kinpw, npw, nspinor, me_g0, &
-                   optekin, pcon, vect(:,idat), comm)
+   call cg_precon(cg(:,idat), zero, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pcon, vect(:,idat), comm)
  end do
  ABI_FREE(pcon)
 
@@ -1230,6 +1237,7 @@ subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
 
 ! *************************************************************************
 
+!$OMP PARALLEL DO
  do idat=1,ndat
    call daxpy(2*npwsp, alphas(idat), x(1,idat), 1, y(1,idat), 1)
  end do

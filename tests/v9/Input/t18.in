@@ -11,7 +11,7 @@
  nband  22
  nbdbuf 6
  #tolwfr  1.e-12
- tolvrs 1e-10
+ tolvrs 1e-8
 
  ecut 12.0  
  pawecutdg 24.00
