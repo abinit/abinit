@@ -67,7 +67,7 @@
  typat  2*1
  wtk  1
  znucl  1.0
- chksymbreak 0
+ chksymtnons 0
 
 
  pp_dirpath "$ABI_PSPDIR"

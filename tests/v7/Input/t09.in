@@ -22,7 +22,7 @@
 !K-points and occupations
  kptopt 1 ngkpt 2 2 2     ! Monkhosrt pack 2x2x2
  occopt 7 tsmear 0.001    ! Processed as metallic
- chksymbreak 0 nsym 0     ! Allow all symetries; don't check them
+ chksymtnons 0 nsym 0     ! Allow all symetries; don't check them
 
 !Self-consistent cycle for the electronic relaxation
  toldfe 1.0d-10           ! Stopping criterium
