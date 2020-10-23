@@ -1193,7 +1193,8 @@ end subroutine matpointsym
 !!
 !! INPUTS
 !!  enforce= if 0, only check; if =1, enforce exactly the holohedry
-!!  iholohedry=required holohegral group
+!!  iholohedry=required holohegral group (uses its absolute value, since when the multiplicity of the cell is 
+!!   more than one, the sign of iholohedry is changed).
 !!  iholohedry=1   triclinic      1bar
 !!  iholohedry=2   monoclinic     2/m
 !!  iholohedry=3   orthorhombic   mmm
@@ -1231,13 +1232,19 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 !scalars
  integer :: allequal,ii,orth
  real(dp):: aa,scprod1
-!character(len=500) :: msg
+ character(len=500) :: msg
 !arrays
  integer :: ang90(3),equal(3)
  real(dp) :: length(3),metric(3,3),norm(3),rbasis(3,3),rconv(3,3),rconv_new(3,3)
  real(dp) :: rnormalized(3,3),symmetrized_length(3)
 
 !**************************************************************************
+
+ if(abs(iholohedry)<1 .or. abs(iholohedry)>7)then
+   write(msg, '(a,i0)' )&
+&    'Abs(iholohedry) should be between 1 and 7, while iholohedry=',iholohedry 
+   MSG_BUG(msg)
+ end if
 
  do ii=1,3
    metric(:,ii)=cell_base(1,:)*cell_base(1,ii)+&
@@ -1266,18 +1273,18 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 !ENDDEBUG
 
  foundc=0
- if(iholohedry==1)                                      foundc=1
- if(iholohedry==2 .and. ang90(1)+ang90(3)==2 )          foundc=1
- if(iholohedry==3 .and. orth==1)                        foundc=1
- if(iholohedry==4 .and. orth==1 .and.          &
-& (equal(3)==1 .or. equal(2)==1 .or. equal(1)==1) ) foundc=1
- if(iholohedry==5 .and. allequal==1 .and. &
-& (abs(metric(1,2)-metric(2,3))<tolsym*metric(2,2)) .and. &
-& (abs(metric(1,2)-metric(1,3))<tolsym*metric(1,1))         )      foundc=1
- if(iholohedry==6 .and. equal(3)==1 .and. &
-& ang90(1)==1 .and. ang90(2)==1 .and. &
-& (2*metric(1,2)-metric(1,1))<tolsym*metric(1,1) )      foundc=1
- if(iholohedry==7 .and. orth==1 .and. allequal==1)      foundc=1
+ if(abs(iholohedry)==1)                                      foundc=1
+ if(abs(iholohedry)==2 .and. ang90(1)+ang90(3)==2 )          foundc=1
+ if(abs(iholohedry)==3 .and. orth==1)                        foundc=1
+ if(abs(iholohedry)==4 .and. orth==1 .and.          &
+&  (equal(3)==1 .or. equal(2)==1 .or. equal(1)==1) ) foundc=1
+ if(abs(iholohedry)==5 .and. allequal==1 .and. &
+&  (abs(metric(1,2)-metric(2,3))<tolsym*metric(2,2)) .and. &
+&  (abs(metric(1,2)-metric(1,3))<tolsym*metric(1,1))         )      foundc=1
+ if(abs(iholohedry)==6 .and. equal(3)==1 .and. &
+&   ang90(1)==1 .and. ang90(2)==1 .and. &
+&   (2*metric(1,2)-metric(1,1))<tolsym*metric(1,1) )      foundc=1
+ if(abs(iholohedry)==7 .and. orth==1 .and. allequal==1)      foundc=1
 
 !DEBUG
 !write(std_out, '(a,i4)' )' holocell : foundc=',foundc
@@ -1286,12 +1293,14 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 !-------------------------------------------------------------------------------------
 !Possibly enforce the holohedry (if it is to be enforced !)
 
- if(foundc==0.and.enforce==1.and.iholohedry/=1)then
+ if(foundc==0.and.enforce==1.and.abs(iholohedry)/=1)then
 
 !  Copy the cell_base vectors, and possibly fix the tetragonal axis to be the c-axis
-   if(iholohedry==4.and.equal(1)==1)then
+!  XG20201016 WARNING : in principle, one should NOT use the 'equal' information, since precisely this enforcement
+!  has the aim to reinstall the symmetries while they are broken !!
+   if(abs(iholohedry)==4.and.equal(1)==1)then
      rconv(:,3)=cell_base(:,1) ; rconv(:,1)=cell_base(:,2) ; rconv(:,2)=cell_base(:,3)
-   else if (iholohedry==4.and.equal(2)==1)then
+   else if (abs(iholohedry)==4.and.equal(2)==1)then
      rconv(:,3)=cell_base(:,2) ; rconv(:,2)=cell_base(:,1) ; rconv(:,1)=cell_base(:,3)
    else
      rconv(:,:)=cell_base(:,:)
@@ -1304,7 +1313,7 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 
 !  Take care of the first conventional vector aligned with rbasis(:,3) (or aligned with the trigonal axis if rhombohedral)
 !  and choice of the first normalized direction
-   if(iholohedry==5)then
+   if(abs(iholohedry)==5)then
      rbasis(:,3)=third*(rconv(:,1)+rconv(:,2)+rconv(:,3))
    else
      rbasis(:,3)=rconv(:,3)
@@ -1314,7 +1323,7 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 
 !  Projection of the first conventional vector perpendicular to rbasis(:,3)
 !  and choice of the first normalized direction
-   scprod1=sum(rnormalized(:,3)*cell_base(:,1))
+   scprod1=sum(rnormalized(:,3)*rconv(:,1))
    rbasis(:,1)=rconv(:,1)-rnormalized(:,3)*scprod1
    norm(1)=sqrt(sum(rbasis(:,1)**2))
    rnormalized(:,1)=rbasis(:,1)/norm(1)
@@ -1325,30 +1334,30 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
    rnormalized(3,2)=rnormalized(1,3)*rnormalized(2,1)-rnormalized(2,3)*rnormalized(1,1)
 
 !  Compute the vectors of the conventional cell, on the basis of iholohedry
-   if(iholohedry==2)then
+   if(abs(iholohedry)==2)then
      rconv_new(:,3)=rconv(:,3)
      rconv_new(:,1)=rconv(:,1)
      rconv_new(:,2)=rnormalized(:,2)*length(2) ! Now, the y axis is perpendicular to the two others, that have not been changed
-   else if(iholohedry==3.or.iholohedry==4.or.iholohedry==7)then
-     if(iholohedry==7)then
+   else if(abs(iholohedry)==3.or.abs(iholohedry)==4.or.abs(iholohedry)==7)then
+     if(abs(iholohedry)==7)then
        symmetrized_length(1:3)=sum(length(:))*third
-     else if(iholohedry==4)then
+     else if(abs(iholohedry)==4)then
        symmetrized_length(3)=length(3)
        symmetrized_length(1:2)=half*(length(1)+length(2))
-     else if(iholohedry==3)then
+     else if(abs(iholohedry)==3)then
        symmetrized_length(:)=length(:)
      end if
      do ii=1,3
        rconv_new(:,ii)=rnormalized(:,ii)*symmetrized_length(ii)
      end do
-   else if(iholohedry==5)then
+   else if(abs(iholohedry)==5)then
 !    In the normalized basis, they have coordinates (a,0,c), and (-a/2,+-sqrt(3)/2*a,c)
 !    c is known, but a is computed from the knowledge of the average length of the initial vectors
      aa=sqrt(sum(length(:)**2)*third-norm(3)**2)
      rconv_new(:,1)=aa*rnormalized(:,1)+rbasis(:,3)
      rconv_new(:,2)=aa*half*(-rnormalized(:,1)+sqrt(three)*rnormalized(:,2))+rbasis(:,3)
      rconv_new(:,3)=aa*half*(-rnormalized(:,1)-sqrt(three)*rnormalized(:,2))+rbasis(:,3)
-   else if(iholohedry==6)then
+   else if(abs(iholohedry)==6)then
 
 !    In the normalized basis, they have coordinates (a,0,0), (-a/2,+-sqrt(3)/2*a,0), and (0,0,c)
 !    c is known, but a is computed from the knowledge of the average length of the initial vectors
@@ -1358,32 +1367,10 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
      rconv_new(:,3)=rconv(:,3)
    end if
 
-!! WRONG TEST
-!  Check whether the modification make sense
-!   do ii=1,3
-!     do jj=1,3
-!       reldiff=(rconv_new(ii,jj)-rconv(ii,jj))/length(jj)
-!!      Allow for twice tolsym
-!       if(abs(reldiff)>two*tolsym)then
-!         write(msg,'(a,6(2a,3es14.6))')&
-!!         This is CRAZY : one detects symmetry problems above tolsym, and then requires the lattice vectors
-!!         not to be modify by more than 2 tolsym !!!
-!&         'Failed rectification of lattice vectors to comply with Bravais lattice identification, modifs are too large',ch10,&
-!&         '  rconv    =',rconv(:,1),ch10,&
-!&         '            ',rconv(:,2),ch10,&
-!&         '            ',rconv(:,3),ch10,&
-!&         '  rconv_new=',rconv_new(:,1),ch10,&
-!&         '            ',rconv_new(:,2),ch10,&
-!&         '            ',rconv_new(:,3)
-!         MSG_ERROR_CLASS(msg, "TolSymError")
-!       end if
-!     end do
-!   end do
-
 !  Copy back the cell_base vectors
-   if(iholohedry==4.and.equal(1)==1)then
+   if(abs(iholohedry)==4.and.equal(1)==1)then
      cell_base(:,3)=rconv_new(:,2) ; cell_base(:,2)=rconv_new(:,1) ; cell_base(:,1)=rconv_new(:,3)
-   else if (iholohedry==4.and.equal(2)==1)then
+   else if (abs(iholohedry)==4.and.equal(2)==1)then
      cell_base(:,3)=rconv_new(:,1) ; cell_base(:,1)=rconv_new(:,2) ; cell_base(:,2)=rconv_new(:,3)
    else
      cell_base(:,:)=rconv_new(:,:)

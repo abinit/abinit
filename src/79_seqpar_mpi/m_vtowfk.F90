@@ -361,8 +361,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      if(wfopta10==4.or.wfopta10==1) then
        if (istwf_k/=1.and.istwf_k/=2) then !no way to use lobpcg
          write(message,'(3a)')&
-&         'Only istwfk=1 or 2 are allowed with wfoptalg=4/14 !',ch10,&
-&         'Action: put istwfk to 1 or remove k points with half integer coordinates.'
+          'Only istwfk=1 or 2 are allowed with wfoptalg=4/14 !',ch10,&
+          'Action: put istwfk to 1 or remove k points with half integer coordinates.'
          MSG_ERROR(message)
        end if
 
@@ -435,9 +435,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    if( .not. wfopta10 == 1 .and. .not. newlobpcg ) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
-     call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
-&     mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
-&     subham,subovl,use_subovl,gs_hamk%usepaw,mpi_enreg%me_g0)
+     call subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, &
+       mcg, mgsc, nband_k, npw_k, my_nspinor, dtset%paral_kgb, &
+       subham, subovl, use_subovl, gs_hamk%usepaw, mpi_enreg%me_g0)
      call timab(585,2,tsec)
    end if
 
@@ -473,8 +473,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
    if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
-     call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
-&     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+     call pw_orthon(icg, igsc, istwf_k, mcg, mgsc, npw_k*my_nspinor, nband_k, ortalgo, gsc, gs_hamk%usepaw, cg, &
+      mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
    end if
    call timab(583,2,tsec)
 
@@ -564,61 +564,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
  end if
 
-#undef DEV_NEW_CODE
-!#define DEV_NEW_CODE
-
 !The code below is more efficient if paral_kgb==1 (less MPI communications)
 !however OMP is not compatible with paral_kgb since we should define
 !which threads performs the call to MPI_ALL_REDUCE.
 !This problem can be easily solved by removing MPI_enreg from meanvalue_g so that
 !the MPI call is done only once outside the OMP parallel region.
 
-#ifdef DEV_NEW_CODE
-!Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
-!!$OMP PARALLEL DO PRIVATE(iband,ar)
- do iblock=1,nblockbd
-
-!  Compute kinetic energy of each band
-   do iblocksize=1,blocksize
-     iband=(iblock-1)*blocksize+iblocksize
-
-     call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-&     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0)
-
-     ek_k(iband)=ar
-
-     if(paw_dmft%use_dmft==1) then
-       do iband1=1,nband_k
-         call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-&         cg(:,1+(iband -1)*npw_k*my_nspinor+icg:iband *npw_k*my_nspinor+icg),&
-&         cg(:,1+(iband1-1)*npw_k*my_nspinor+icg:iband1*npw_k*my_nspinor+icg),paw_dmft%use_dmft,ar_im=ar_im)
-         ek_k_nd(1,iband,iband1)=ar
-         ek_k_nd(2,iband,iband1)=ar_im
-       end do
-     end if
-!    if(use_dmft==1) then
-!    do iband1=1,nband_k
-!    call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-!    &         cg(:,1+(iband -1)*npw_k*my_nspinor+icg:iband *npw_k*my_nspinor+icg),&
-!    &         cg(:,1+(iband1-1)*npw_k*my_nspinor+icg:iband1*npw_k*my_nspinor+icg),use_dmft)
-!    ek_k_nd(iband,iband1)=ar
-!    end do
-!    end if
-
-   end do
- end do
-!TODO: xmpi_sum is missing but I have to understand the logic used to deal with the different
-!MPI options and communicators.
-#endif
-
-
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
    occblock=maxval(occ_k(1+(iblock-1)*blocksize:iblock*blocksize))
    cwavef(:,:)=cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
 
-#ifndef DEV_NEW_CODE
 !  Compute kinetic energy of each band
    do iblocksize=1,blocksize
      iband=(iblock-1)*blocksize+iblocksize
@@ -639,7 +595,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        end do
      end if
    end do
-#endif
 
    if(iscf>0)then
      ! In case of fixed occupation numbers, accumulates the partial density
