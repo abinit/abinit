@@ -106,7 +106,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: nproc,nspden,nspinor,nsppol,optdriver,problem_isym,problem_isym_now,response
  integer :: fftalg,need_kden,usepaw,usewvl
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- real(dp) :: delta8,delta8_2,delta12,delta12_2,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
+ real(dp) :: delta8,delta8_2,delta9,delta9_2,delta10,delta10_2,delta12,delta12_2,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: msg
  type(dataset_type) :: dt
 !arrays
@@ -417,7 +417,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        problem_isym_now=0
        do ii=1,3
          delta8=dt%tnons(ii,isym)*eight ; delta12=dt%tnons(ii,isym)*three*four
-         if(abs(delta8-nint(delta8))>tol8 .and. abs(delta12-nint(delta12))>tol8)then
+         delta9=dt%tnons(ii,isym)*nine ; delta10=dt%tnons(ii,isym)*ten
+         if(abs(delta8-nint(delta8))>tol8 .and. abs(delta12-nint(delta12))>tol8 .and. &
+&           abs(delta9-nint(delta9))>tol8 .and. abs(delta10-nint(delta10))>tol8      )then
            ! There is a problem with tnons for this isym. Will trigger an error.
            problem_isym_now=1
          endif
@@ -439,7 +441,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
            tnons_new(:)=dt%tnons(:,isym2)+xredshift(:,1)-matmul(dt%symrel(:,:,isym2),xredshift(:,1))
            do jj=1,3
              delta8_2=tnons_new(jj)*eight ; delta12_2=tnons_new(jj)*three*four
-             if(abs(delta8_2-nint(delta8_2))>tol8 .and. abs(delta12_2-nint(delta12_2))>tol8) fixed_problem=0
+             delta9_2=tnons_new(jj)*nine ; delta10_2=tnons_new(jj)*ten
+             if(abs(delta8_2-nint(delta8_2))>tol8 .and. abs(delta12_2-nint(delta12_2))>tol8 .and. &
+&               abs(delta9_2-nint(delta9_2))>tol8 .and. abs(delta10_2-nint(delta10_2))>tol8) fixed_problem=0
            enddo
          enddo
          if(fixed_problem==1)exit
@@ -465,14 +469,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        write(msg, '(8a,i4,2a,9i3,2a,3es20.10,10a)' ) ch10,&
 &        ' chkinp: ERROR -',ch10,&
 &        '   Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
-&        '   which is neither a rational fraction in 1/8th nor in 1/12th :', ch10,&
+&        '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
 &        '   for the symmetry number ',problem_isym,ch10,&
 &        '   symrel is ',dt%symrel(1:3,1:3,problem_isym),ch10,&
 &        '   tnons is ',dt%tnons(1:3,problem_isym),ch10,&
 &        '   So, your atomic positions are not aligned with the FFT grid.',ch10,&
 &        '   Please, read the description of the input variable chksymtnons.',ch10,&
-&        '   If you are planning GW calculations, such tnons value is very problematic.',ch10,&
-&        '   You might set chksymtnons=0, but do not be surprised if ABINIT crashes for GW.',ch10,&
+&        '   If you are planning GW or BSE calculations, such tnons value is very problematic.',ch10,&
+&        '   Otherwise, you might set chksymtnons=0. But do not be surprised if ABINIT crashes for GW or BSE.',ch10,&
 &        '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
        call wrtout(std_out,msg,'COLL')
        if(fixed_problem==1)then
