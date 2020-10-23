@@ -1,6 +1,6 @@
 
-.Version 9.3.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu8.3 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,7 +14,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  7 Oct 2020.
+.Starting date : Thu 22 Oct 2020.
 - ( at 10h44 )
   
 - input  file    -> /home/olivier/Projects/gitlab/abinit/build/Test_suite/v9_t62-t63-t64-t65/t65.in
@@ -511,7 +511,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.1403E+00  1.2538E+00  1.5184E+00  1.5586E+00  1.6729E+00  1.9308E+00
   1.9497E+00  2.0315E+00  2.2594E+00  2.4946E+00  2.5164E+00  2.5223E+00
   2.6744E+00  2.6809E+00
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  1.26223E-05
+  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  1.26207E-05
  Non-SCF case, kpt    3 (  0.43750  0.31250  0.00000), residuals and eigenvalues=
   3.98E-13  2.86E-12  3.28E-12  9.28E-12  1.02E-11  3.86E-12  7.50E-13  2.84E-11
   1.11E-12  5.61E-11  8.17E-11  1.96E-12  2.49E-11  1.05E-11  6.53E-12  5.27E-11
@@ -555,7 +555,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.2324E+00  1.3172E+00  1.4269E+00  1.5380E+00  1.6774E+00  1.9364E+00
   2.0408E+00  2.1252E+00  2.1710E+00  2.4377E+00  2.4605E+00  2.5673E+00
   2.6532E+00  2.7696E+00
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  3.15967E-04
+  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  3.15900E-04
  Non-SCF case, kpt    8 ( -0.31250  0.25000  0.06250), residuals and eigenvalues=
   9.07E-13  4.62E-13  5.58E-11  4.03E-13  8.90E-12  5.84E-13  2.72E-11  5.06E-11
   1.94E-12  6.80E-13  1.15E-11  8.43E-11  4.43E-11  5.69E-11  1.65E-11  4.92E-11
@@ -577,12 +577,12 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  Non-SCF case, kpt   10 (  0.43750  0.37500  0.06250), residuals and eigenvalues=
   7.37E-11  3.55E-12  3.91E-13  7.45E-12  1.16E-13  2.06E-11  9.11E-11  5.32E-13
   3.39E-12  2.60E-12  5.48E-11  6.39E-11  7.62E-12  8.23E-11  4.41E-11  5.35E-11
-  3.91E-12  4.62E-11  2.41E-08  1.27E-03
+  3.91E-12  4.62E-11  2.41E-08  1.26E-03
  -1.6854E-01  3.4500E-01  4.1942E-01  5.5525E-01  6.7920E-01  8.6525E-01
   1.4707E+00  1.6425E+00  1.7070E+00  1.7719E+00  1.7911E+00  1.8560E+00
   1.9305E+00  1.9885E+00  1.9985E+00  2.0712E+00  2.1366E+00  2.3002E+00
   2.5912E+00  2.7277E+00
-  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  1.26630E-03
+  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  1.26654E-03
 
 
 --- !ResultsGS
@@ -664,7 +664,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#  10, nband= 20, wtk=  0.00586, kpt=  0.4375  0.3750  0.0625 (reduced coord)
   -0.16854    0.34500    0.41942    0.55525    0.67920    0.86525    1.47075    1.64254
    1.70697    1.77193    1.79108    1.85596    1.93050    1.98848    1.99853    2.07124
-   2.13660    2.30019    2.59122    2.72773
+   2.13660    2.30019    2.59122    2.72771
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -749,9 +749,9 @@ meta: {optdriver: 7, eph_task: -4, }
  Number of bands in e-ph self-energy sum: 1
  From bsum_start: 1 to bsum_stop: 1
  Symsigma: 1 Timrev: 1
- Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Tetrahedron method
  Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ eph_winfact:  1.10 
  Only the Imaginary part of Sigma will be computed.
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
@@ -761,10 +761,10 @@ meta: {optdriver: 7, eph_task: -4, }
  Number of q-points in the IBZ: 145
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
- No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 6
  sigma_erange: -0.200 -0.200  (eV)
- List of K-points for self-energy corrections:
+ Including all final {mk+q} states inside energy window: [***** ***** ] [eV]
+ List of k-points for self-energy corrections:
    1     1  [ 4.3750E-01,  0.0000E+00,  0.0000E+00]   1    1
    2     1  [-4.3750E-01,  6.2500E-02,  0.0000E+00]   1    1
    3     1  [ 5.0000E-01,  1.8750E-01,  0.0000E+00]   1    1
@@ -1282,4 +1282,4 @@ P           mkmem2        145
 
  Calculation completed.
 .Delivered   4 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.0  wall=         13.2
++Overall time at end (sec) : cpu=         21.2  wall=         24.2
