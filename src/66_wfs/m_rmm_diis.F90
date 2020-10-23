@@ -100,6 +100,7 @@ contains
 !! This routine updates the wave functions at a given k-point, using the RMM-DIIS method.
 !!
 !! INPUTS
+!!  istep,ikpt,isppol
 !!  dtset <type(dataset_type)>=all input variales for this dataset
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (hartree)
@@ -151,16 +152,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  integer :: me_g0, comm_spinorfft, comm_bandspinorfft, comm_fft, nbocc, jj, kk, it, ld1, ld2, ibk, iek !ii,
  logical :: end_with_trial_step, new_lambda
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene, cpu, wall, gflops, dotr, doti !, rval,
+ real(dp) :: accuracy_ene, cpu, wall, gflops, dotr, doti
  !character(len=500) :: msg
  character(len=6) :: tag
 !arrays
- !integer :: max_niter_iband(nband)
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: evec(:,:), subham(:), h_ij(:,:,:)
- real(dp),allocatable :: ghc_bk(:,:), gsc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), dots_bk(:,:) !pcon(:),
+ real(dp),allocatable :: ghc_bk(:,:), gsc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), dots_bk(:,:)
  real(dp),allocatable :: residv_bk(:,:), kres_bk(:,:), phi_bk(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: ptr_gsc_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
@@ -227,7 +227,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      end do
    end if
 
- end do
+ end do ! iblock
 
  call cwtime_report(" build_hij", cpu, wall, gflops)
 
@@ -240,7 +240,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ABI_FREE(h_ij)
  call xmpi_sum(subham, comm_spinorfft, ierr)
  call timab(1633, 2, tsec) !"rmm_diis:build_hij
- !call cwtime_report(" pack_hij", cpu, wall, gflops)
 
  ! =================
  ! Subspace rotation
@@ -261,6 +260,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ! =================
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1
+ !write(std_out,*)"optekin:", optekin
  ! nline - 1 DIIS steps, then end with trial step (optional, see below)
  max_niter = dtset%nline - 1
 
@@ -278,24 +278,19 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  end if
 
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize)
- !write(std_out,*)"optekin:", optekin
-
- call wrtout(std_out, sjoin(" Using max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
- call wrtout(std_out, sjoin(" Accuracy:", ftoa(accuracy_ene)))
-
+ call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
+ call wrtout(std_out, sjoin(" Block size:", itoa(bsize), " accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
- ABI_MALLOC(gsc_bk, (2, npwsp*usepaw*bsize))
- ABI_MALLOC(kres_bk, (2, npwsp*bsize))
  ABI_MALLOC(phi_bk, (2, npwsp*bsize))
+ ABI_MALLOC(gsc_bk, (2, npwsp*bsize*usepaw))
  ABI_MALLOC(residv_bk, (2, npwsp*bsize))
+ ABI_MALLOC(kres_bk, (2, npwsp*bsize))
 
  ! We loop over nblocks, each block has ndat states.
  ! Usually ndat == bsize except for the last block if mod(nband, bsize /= 0).
- ! We try to operate on ndat states at once but in the middle of the algorithm
- ! we need to optimize a single band as there are exit instructions.
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize
@@ -303,7 +298,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    ndat = (ige - igs + 1) / npwsp
    ib_start = 1 + (iblock - 1) * bsize
    ib_stop = min(iblock * bsize, nband)
-   diis%last_iter = -1
 
    ! Reduce number of niter iterations for empty states.
    ! TODO: Don't reduce niter if MD
@@ -311,15 +305,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    !if dtset%occopt == 2
    max_niter_block = max_niter
    if (all(occ(ib_start:ib_stop) < tol3)) max_niter_block = max(1 + max_niter / 2, 2)
-   !print *, "treating: igs, ige, ndat", igs, ige, ndat
-   !print *, "treating: ib_start, ib_stop", ib_start, ib_stop
 
    ! Compute H |phi_0> using cg from subdiago. Blocked call.
    ! Alternatively, one can compute the residuals before the subspace rotation and then rotate
    ! to save one call to getghc_eigresid.
-   ! Extract bands in the block.
 
-   phi_bk = cg(:,igs:ige)
+   ! Extract bands in the block. phi_bk = cg(:,igs:ige)
+   call cg_zcopy(npwsp * ndat, cg(:,igs), phi_bk)
    if (usepaw == 1) ptr_gsc_bk => gsc_all(:,igs:ige)
 
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
@@ -344,7 +336,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    end do
 
    ! Precondition |R_0>, output in kres_bk = |K R_0>
-   kres_bk = residv_bk
+   call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
    call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_spinorfft)
 
    ! Compute H |K R_0>
@@ -393,25 +385,22 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
        do idat=1,ndat
          ibk = 1 + (idat - 1) * npwsp; iek = idat * npwsp
          call diis%solve(iter, npwsp, idat, phi_bk(:,ibk), residv_bk(:,ibk), comm_spinorfft)
-
-         ! Precondition residual, output in kres_bk.
-         kres_bk(:,ibk:iek) = residv_bk(:,ibk:iek)
        end do
+
+       ! Precondition residual, output in kres_bk.
+       call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
        call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, &
                           kres_bk, me_g0, comm_spinorfft)
 
-       ! Compute phi_bk with the lambda obtained at iteration #1
-       do idat=1,ndat
-         ibk = 1 + (idat - 1) * npwsp; iek = idat * npwsp
-         phi_bk(:,ibk:iek) = phi_bk(:,ibk:iek) + lambda_bk(idat) * kres_bk(:,ibk:iek)
-       end do
+       ! Compute phi_bk with the lambda(ndat) obtained at iteration #1
+       call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
      end if
 
-     ! Compute H |phi_now>.
+     ! Compute H |phi_now> and evaluate new enlx for NC.
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
-                          eig(ib_start:), resid(ib_start), enlx(ib_start), residv_bk, normalize=.True.)
+                          eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
 
-     ! Store residual R_i for i == iter and evaluate new enlx for NC.
+     ! Store new residual.
      do idat=1,ndat
        diis%hist_ene(iter, idat) = eig(ib_start+idat-1)
        diis%hist_resid(iter, idat) = resid(ib_start+idat-1)
@@ -423,11 +412,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      end do
 
      ! ============== CHECK FOR CONVERGENCE ========================
-     if (diis%exit_iter(iter, ndat, max_niter_block, accuracy_ene, dtset)) then
-       exit iter_loop
-     end if
+     if (diis%exit_iter(iter, ndat, max_niter_block, accuracy_ene, dtset)) exit iter_loop
 
-     ! Compute <R_i|R_j> and <i|S|j> for i=idat and j=iter
+     ! Compute <R_i|R_j> and <i|S|j> for j=iter
      if (iter /= max_niter_block) call diis%eval_mats(iter, ndat, me_g0, comm_spinorfft)
 
    end do iter_loop
@@ -442,7 +429,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    if (end_with_trial_step) then
 
-     kres_bk = residv_bk
+     call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
      call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_spinorfft)
 
      ! Recomputing the preconditioned-direction and the new lambda that minimizes the residual
@@ -453,10 +440,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      if (ib_stop <= nbocc + 4 .and. any(resid(ib_start:ib_stop) > tol10)) new_lambda = .True.
      !new_lambda = .False.
      !new_lambda = .True.
-     !write(std_out, *)" Performing last trial step with new_lambda: ", new_lambda
 
      if (new_lambda) then
        tag = "NEWLAM"
+       !write(std_out, *)" Performing last trial step with new computation of lambda"
        ! Final preconditioned steepest descent with new lambda.
        ! Compute H |K R_0>
        call getghc(cpopt, kres_bk, cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
@@ -483,21 +470,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      else
        ! Reuse previous values of lambda.
        tag = "FIXLAM"
-       do idat=1,ndat
-         jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
-         phi_bk(:,jj:kk) = phi_bk(:,jj:kk) + lambda_bk(idat) * kres_bk(:,jj:kk)
-         !phi_bk = phi_bk + 0.1 * kres_bk
-       end do
-
+       !phi_bk = phi_bk + 0.1 * kres_bk
+       call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
      endif
 
-     ! Finally recompute eig, resid, enlx and portion of ptr_gsc_bk
+     ! Finally recompute eig, resid, enlx and ptr_gsc_bk if PAW.
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
 
      ! Push the last results just for printing purposes.
+     it = diis%last_iter + 1
      do idat=1,ndat
-       it = diis%last_iter + 1
        diis%hist_ene(it, idat) = eig(ib_start+idat-1)
        diis%hist_resid(it, idat) = resid(ib_start+idat-1)
        diis%step_type(it, idat) = tag
@@ -505,8 +488,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    end if ! end_with_trial_step
 
-   ! Update wavefunction block.
-   cg(:,igs:ige) = phi_bk
+   ! Update wavefunction block. cg(:,igs:ige) = phi_bk
+   call cg_zcopy(npwsp * ndat, phi_bk, cg(:,igs))
 
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
  end do ! iblock
@@ -560,10 +543,10 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
 
  integer :: idat, checks(ndat)
  real(dp) :: resid, deltae, deold
+ character(len=50) :: msg_list(ndat)
 
  diis%last_iter = iter
  checks = 0
- ans = .False.
 
  do idat=1,ndat
    resid = diis%hist_resid(iter, idat)
@@ -575,37 +558,38 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
    ! Here we enlarge it a bit
    if (abs(deltae) < 6 * dtset%tolrde * abs(deold) .and. iter /= niter_block) then
    !if (abs(deltae) < 0.3 * abs(deold) .and. iter /= niter_block) then
-     !call diis%stats%increment("'deltae < 6 * tolrde * deold'", 1)
-     checks(idat) = 1; cycle
+     checks(idat) = 1; msg_list(idat) = "deltae < 6 * tolrde * deold"; cycle
    end if
 
    if (dtset%iscf < 0) then
      ! This is the only condition available for NSCF run.
      if (resid < dtset%tolwfr) then
-       call diis%stats%increment("'resid < tolwfr'", 1)
-       checks(idat) = 2; cycle
+       checks(idat) = 1; msg_list(idat) = 'resid < tolwfr'; cycle
      end if
 
    else
+     ! Condition available for SCF run.
      if (resid < dtset%tolwfr) then
-       call diis%stats%increment("'resid < tolwfr'", 1)
-       checks(idat) = 2; cycle
+       checks(idat) = 1; msg_list(idat) = 'resid < tolwfr'; cycle
      end if
      if (sqrt(abs(resid)) < accuracy_ene) then
        ! Absolute criterion on eig diff
-       call diis%stats%increment("'resid < accuracy_ene'", 1)
-       checks(idat) = 3; cycle
+       checks(idat) = 1; msg_list(idat) = 'resid < accuracy_ene'; cycle
      end if
    end if
  end do ! idat
 
  ans = all(checks /= 0)
-
- !if (prtvol == -level) then
- !  write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
- !   ' band: ',iband,' converged after: ',iter,' iterations with resid: ',resid(iband), ch10
- !  call wrtout(std_out, sjoin("<END RMM-DIIS, msg='", msg, "'>"))
- !end if
+ if (ans) then
+   do idat=1,ndat
+     call diis%stats%increment(msg_list(idat), 1)
+   end do
+   !if (prtvol == -level) then
+   !  write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
+   !   ' band: ',iband,' converged after: ',iter,' iterations with resid: ',resid(iband), ch10
+   !  call wrtout(std_out, sjoin("<END RMM-DIIS, msg='", msg, "'>"))
+   !end if
+ end if
 
 end function rmm_diis_exit_iter
 !!***
@@ -850,6 +834,8 @@ subroutine rmm_diis_solve(diis, iter, npwsp, idat, new_psi, new_residvec, comm_s
  cplex = diis%cplex
  my_rank = xmpi_comm_rank(comm_spinorfft); nprocs = xmpi_comm_size(comm_spinorfft)
 
+ !do idat=1,ndat
+
  if (try_to_solve_eigproblem) then
    ABI_MALLOC(diis_eig, (0:iter-1))
    ABI_MALLOC(wmat1, (cplex, 0:iter-1, 0:iter-1))
@@ -947,40 +933,40 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm_spinorfft)
  real(dp) :: dotr, doti
 
  do idat=1,ndat
- do ii=0,iter
-   ! <R_i|R_j>
-   call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
-                  diis%chain_resv(:,:,ii,idat), diis%chain_resv(:,:,iter,idat), me_g0, xmpi_comm_self)
-   if (ii == iter) doti = zero
-   if (diis%cplex == 2) then
-     diis%resmat(:, ii, iter, idat) = [dotr, doti]
-   else
-     diis%resmat(:, ii, iter, idat) = dotr
-   end if
-
-   ! <i|S|j> assume normalized wavefunctions for ii == iter
-   if (ii == iter) then
-     dotr = one; doti = zero
-   else
-     if (diis%usepaw == 0) then
-       call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
-                      diis%chain_phi(:,:,ii,idat), diis%chain_phi(:,:,iter,idat), me_g0, xmpi_comm_self)
+   do ii=0,iter
+     ! <R_i|R_j>
+     call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
+                    diis%chain_resv(:,:,ii,idat), diis%chain_resv(:,:,iter,idat), me_g0, xmpi_comm_self)
+     if (ii == iter) doti = zero
+     if (diis%cplex == 2) then
+       diis%resmat(:, ii, iter, idat) = [dotr, doti]
      else
-       call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
-                      diis%chain_phi(:,:,ii,idat), diis%chain_sphi(:,:,iter,idat), me_g0, xmpi_comm_self)
+       diis%resmat(:, ii, iter, idat) = dotr
      end if
-   end if
-   if (diis%cplex == 2) then
-     diis%smat(:, ii, iter, idat) = [dotr, doti]
-   else
-     diis%smat(:, ii, iter, idat) = dotr
-   end if
- end do
 
- if (xmpi_comm_size(comm_spinorfft) > 1) then
-   call xmpi_sum(diis%resmat(:,0:iter,iter,idat), comm_spinorfft, ierr)
-   call xmpi_sum(diis%smat(:,0:iter,iter, idat), comm_spinorfft, ierr)
- endif
+     ! <i|S|j> assume normalized wavefunctions for ii == iter
+     if (ii == iter) then
+       dotr = one; doti = zero
+     else
+       if (diis%usepaw == 0) then
+         call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
+                        diis%chain_phi(:,:,ii,idat), diis%chain_phi(:,:,iter,idat), me_g0, xmpi_comm_self)
+       else
+         call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
+                        diis%chain_phi(:,:,ii,idat), diis%chain_sphi(:,:,iter,idat), me_g0, xmpi_comm_self)
+       end if
+     end if
+     if (diis%cplex == 2) then
+       diis%smat(:, ii, iter, idat) = [dotr, doti]
+     else
+       diis%smat(:, ii, iter, idat) = dotr
+     end if
+   end do
+
+   if (xmpi_comm_size(comm_spinorfft) > 1) then
+     call xmpi_sum(diis%resmat(:,0:iter,iter,idat), comm_spinorfft, ierr)
+     call xmpi_sum(diis%smat(:,0:iter,iter, idat), comm_spinorfft, ierr)
+   endif
  end do
 
 end subroutine rmm_diis_eval_mats
@@ -1203,6 +1189,52 @@ subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect,
  !if (xmpi_comm_size(comm) > 1) call xmpi_sum(dots, comm, ierr)
 
 end subroutine cg_precon_many
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_zaxpy_many_areal
+!! NAME
+!!  cg_zaxpy_many_areal
+!!
+!! FUNCTION
+!!  Computes y = alpha*x + y
+!!
+!! INPUTS
+!!  n = Specifies the number of elements in vectors x and y.
+!!  ndat
+!!  alpha(ndat) = Specifies the scalar alpha.
+!!  x = Array
+!!
+!! SIDE EFFECTS
+!!  y = Array. In output, y contains the updated vector.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npwsp, ndat
+ real(dp),intent(in) :: alphas(ndat)
+!arrays
+ real(dp),intent(in) :: x(2*npwsp, ndat)
+ real(dp),intent(inout) :: y(2*npwsp, ndat)
+
+!Local variables-------------------------------
+ integer :: idat
+
+! *************************************************************************
+
+ do idat=1,ndat
+   call daxpy(2*npwsp, alphas(idat), x(1,idat), 1, y(1,idat), 1)
+ end do
+
+end subroutine cg_zaxpy_many_areal
 !!***
 
 end module m_rmm_diis

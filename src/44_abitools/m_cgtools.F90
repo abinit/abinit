@@ -709,7 +709,6 @@ subroutine cg_zaxpy(n, alpha, x, y)
  real(dp),intent(in) :: x(2*n)
  real(dp),intent(inout) :: y(2*n)
 
-
 ! *************************************************************************
 
  if (alpha(2) == zero) then
