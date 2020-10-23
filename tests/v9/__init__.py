@@ -35,6 +35,7 @@ inp_files = [
 # DFPT
 "t41.in",
 "t42.in",
+"t43.in",
 # Electron-phonon
 "t50.in",
 "t51.in",

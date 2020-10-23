@@ -1959,7 +1959,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    ! TODO: generalize for other q-point little groups.
    if (sum(abs(qphon)) < DDB_QTOL) then
      call symanal(bravais,0,genafm,nsym,nsym,ptgroupma,Crystal%rprimd,spgroup,&
-&      Crystal%symafm,Crystal%symrel,Crystal%tnons,tol3,verbose=.TRUE.)
+&      Crystal%symafm,Crystal%symrel,Crystal%tnons,tol5,verbose=.TRUE.)
      call dfpt_symph(ab_out,ddb%acell,eigvec,Crystal%indsym,natom,nsym,phfrq,ddb%rprim,Crystal%symrel)
    end if
 

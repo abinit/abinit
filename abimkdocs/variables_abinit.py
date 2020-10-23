@@ -17862,8 +17862,14 @@ their action on the direct (or real) space primitive translations.
 It turns out that these can always be expressed as integers.
 Always give the identity matrix even if no other symmetries hold, e.g.
 [[symrel]] 1 0 0 0 1 0 0 0 1.
+
 Also note that for this array, as for all others, the array elements are filled
-in a columnwise order as is usual for Fortran.
+in a columnwise order as is usual for Fortran.  Explicitly,
+[[symrel]] 1 0 0 -1 -1 0 0 0 1 for symmetry operation isym is stored internally as 
+symrel(1,1,isym)=1, symrel(1,2)=-1, ...
+The atom located at xred(1:3) is send to location 
+xred_sym(jj)=symrel(jj,1,isym)*xred(1)+symrel(jj,2,isym)*xred(2)+symrel(jj,3,isym)*xred(3)+tnons(jj).
+
 The relation between the above symmetry matrices [[symrel]], expressed in the
 basis of primitive translations, and the same symmetry matrices expressed in
 cartesian coordinates, is as follows. Denote the matrix whose columns are the
