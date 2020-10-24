@@ -63,5 +63,5 @@ usekden 1
 #%%   Test automatic correction of rprimd, tnons and xred, as well as final
 #%%   proposal of atomic positions that would given tolerated values of tnons
 #%%   if chksymtnons is not set to zero.
-#%% topics = Crystal
+#%% topics = crystal
 #%%<END TEST_INFO>

@@ -1594,7 +1594,7 @@ Variable(
     abivarname="chksymtnons",
     varset="gstate",
     vartype="integer",
-    topics=['crystal_basic'],
+    topics=['crystal_useful'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="CHecK SYMmetry of TNONS",
@@ -1602,17 +1602,17 @@ Variable(
     added_in_version="v9.2",
     text=r"""
 This variable governs the behaviour of the code when there is a potential
-source of symmetry breaking, related to the presence
-of non-symmorphic translations which might not be coherent with the exchange-correlation grid.
+symmetry breaking, related to the presence
+of non-symmorphic translations not leaving the FFT exchange-correlation grid invariant.
 
 When **chksymtnons** = 1, the code stops if 
-the non-symmorphic translation part of the symmetry operations has components that are not zero,
-or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
+the non-symmorphic translation part of the symmetry operations has components that are not zero
+or simple fractions, with 2, 3, 4, 5, 6, 8, 9, 10 or 12 as denominators.
 
 When **chksymtnons** = 0, there is no such check.
 
 Explanation:
-In the ground-state calculation, such breaking of the symmetry is usually
+In ground-state or DFPT calculation, such breaking of the symmetry is usually
 harmless. However, if the user is doing a GW calculation, the presence of non-symmorphic translations
 that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault). 
 In the GW part, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
@@ -1622,16 +1622,16 @@ the symmetry operations of the space group of the crystal. In the present
 implementation, the symmetrisation of the wavefunctions is done in real space
 on the FFT mesh that, therefore, has to be coherent both with the rotational
 part as well as with the fractional translation of each symmetry operation. If
-the condition above is met, the GW code will not be able to find a symmetry
-preserving FFT mesh.
+the condition above (2, 3, 4, 5, 6, 7, 8, 9, 10, or 12 as denominator) is not met, 
+the GW code will not be able to find a symmetry preserving FFT mesh.
 
 So, it was decided to warn the user about such problem already at
-the level of the ground state calculations, although such warning might be irrelevant.
+the level of the ground-state calculations, although such warning might be irrelevant.
 
 If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
-symmetric point; or ignore the problem, and set **chksymbreak** = 0.
-ABINIT makes a suggestion of a possible global translation.
+symmetric point; or ignore the problem, and set **chksymtnons** = 0.
+ABINIT makes a suggestion of a possible global translation, and corresponding translated atomic positions..
 """,
 ),
 
@@ -18156,6 +18156,13 @@ system of coordinates, see "[[xred]]"). If all elements of the space group
 leave 0 0 0 invariant, then these are all 0.
 When the symmetry finder is used (see [[nsym]]), [[tnons]] is computed
 automatically.
+
+For the ground-state and DFPT drivers of ABINIT, the value of tnons is unrestricted.
+However, for GW and BSE, the symmetry operations must leave the FFT grid invariant.
+Preparatory (Ground-state) runs must also use the same atomic geometry, hence the same tnons.
+As ABINIT cannot guess whether the user has in mind to do a GW or BSE run after the GS run,
+a conservative approach is implemented, requiring such match of symmetry operations
+and FFT grid also in the GS case. See more details in the section describing the input variable [[chksymtnons]].
 
 See also [[symafm]] for the complete description of the symmetry operation.
 """,
