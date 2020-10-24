@@ -9,6 +9,7 @@ rprim     1.0000000000E+00 -6.8780443909E-07 -1.5175935869E-37
           6.1232339957E-17  1.0605752387E-16  1.0000000000E+00
 acell     6.8737601012E+00  6.8737601012E+00  2.2206443012E+01
 chkprim 0
+chksymtnons 0
 tolsym 1.0e-3
 
 # Definition of the atom types
@@ -34,10 +35,10 @@ nshiftk 1
 shiftk    0.0 0.0 0.0
 
 # Definition of the planewave basis set (at convergence 16 Rydberg 8 Hartree)
-ecut 10.0         # Maximal kinetic energy cut-off, in Hartree
+ecut 5.0         # Maximal kinetic energy cut-off, in Hartree
 
 # Definition of the SCF procedure
-nstep   10        # Maximal number of SCF cycles
+nstep   1        # Maximal number of SCF cycles
 diemac  12.0
 ixc -208012  # TB09 .
 usekden 1

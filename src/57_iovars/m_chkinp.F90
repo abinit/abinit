@@ -409,67 +409,70 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  chksymtnons
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymtnons',dt%chksymtnons,2,(/0,1/),iout)
-   if(dt%chksymtnons==1)then
-!    Check the values of tnons
-     problem_isym=0
-     fixed_problem=0
-     do isym=1,dt%nsym
-       problem_isym_now=0
-       do ii=1,3
-         delta8=dt%tnons(ii,isym)*eight ; delta12=dt%tnons(ii,isym)*three*four
-         delta9=dt%tnons(ii,isym)*nine ; delta10=dt%tnons(ii,isym)*ten
-         if(abs(delta8-nint(delta8))>tol8 .and. abs(delta12-nint(delta12))>tol8 .and. &
-&           abs(delta9-nint(delta9))>tol8 .and. abs(delta10-nint(delta10))>tol8      )then
-           ! There is a problem with tnons for this isym. Will trigger an error.
-           problem_isym_now=1
-         endif
+
+!  Check the values of tnons
+   problem_isym=0
+   fixed_problem=0
+   do isym=1,dt%nsym
+     problem_isym_now=0
+     do ii=1,3
+       delta8=dt%tnons(ii,isym)*eight ; delta12=dt%tnons(ii,isym)*three*four
+       delta9=dt%tnons(ii,isym)*nine ; delta10=dt%tnons(ii,isym)*ten
+       if(abs(delta8-nint(delta8))>tol8 .and. abs(delta12-nint(delta12))>tol8 .and. &
+&         abs(delta9-nint(delta9))>tol8 .and. abs(delta10-nint(delta10))>tol8      )then
+         ! There is a problem with tnons for this isym. Will trigger an error.
+         problem_isym_now=1
+       endif
+     enddo
+     !Declare the first symmetry operation that induces a problem
+     if(problem_isym_now==1 .and. problem_isym==0) problem_isym=isym
+
+     ! However, also try to propose a solution.
+     if(problem_isym_now==1)then
+       ! Compute the pseudo-inverse of symrel-1, then multiply tnons
+       mat(:,:)=zero; mat(1,1)=one; mat(2,2)=one; mat(3,3)=one
+       ! This is symrel-1
+       mat(:,:)=dt%symrel(:,:,isym)-mat(:,:)
+       xredshift(:,1)=dt%tnons(:,isym)
+       call dgelss(3,3,1,mat,3,xredshift(:,1),3,sgval,tol5,irank,work,15,info)
+       ! xredshift(:,1) is now the tentative shift, to be tested for all symmetries
+       fixed_problem=1
+       do isym2=1, dt%nsym
+         tnons_new(:)=dt%tnons(:,isym2)+xredshift(:,1)-matmul(dt%symrel(:,:,isym2),xredshift(:,1))
+         do jj=1,3
+           delta8_2=tnons_new(jj)*eight ; delta12_2=tnons_new(jj)*three*four
+           delta9_2=tnons_new(jj)*nine ; delta10_2=tnons_new(jj)*ten
+           if(abs(delta8_2-nint(delta8_2))>tol8 .and. abs(delta12_2-nint(delta12_2))>tol8 .and. &
+&             abs(delta9_2-nint(delta9_2))>tol8 .and. abs(delta10_2-nint(delta10_2))>tol8) fixed_problem=0
+         enddo
        enddo
-       !Declare the first symmetry operation that induces a problem
-       if(problem_isym_now==1 .and. problem_isym==0) problem_isym=isym
+       if(fixed_problem==1)exit
+     endif
+   end do ! isym
 
-       ! However, also try to propose a solution.
-       if(problem_isym_now==1)then
-         ! Compute the pseudo-inverse of symrel-1, then multiply tnons
-         mat(:,:)=zero; mat(1,1)=one; mat(2,2)=one; mat(3,3)=one
-         ! This is symrel-1
-         mat(:,:)=dt%symrel(:,:,isym)-mat(:,:)
-         xredshift(:,1)=dt%tnons(:,isym)
-         call dgelss(3,3,1,mat,3,xredshift(:,1),3,sgval,tol5,irank,work,15,info)
-         ! xredshift(:,1) is now the tentative shift, to be tested for all symmetries
-         fixed_problem=1
-         do isym2=1, dt%nsym
-           tnons_new(:)=dt%tnons(:,isym2)+xredshift(:,1)-matmul(dt%symrel(:,:,isym2),xredshift(:,1))
-           do jj=1,3
-             delta8_2=tnons_new(jj)*eight ; delta12_2=tnons_new(jj)*three*four
-             delta9_2=tnons_new(jj)*nine ; delta10_2=tnons_new(jj)*ten
-             if(abs(delta8_2-nint(delta8_2))>tol8 .and. abs(delta12_2-nint(delta12_2))>tol8 .and. &
-&               abs(delta9_2-nint(delta9_2))>tol8 .and. abs(delta10_2-nint(delta10_2))>tol8) fixed_problem=0
-           enddo
-         enddo
-         if(fixed_problem==1)exit
-       endif
-     end do ! isym
-
-     if(problem_isym/=0)then
-       if(fixed_problem==1)then
-         write(msg, '(7a,3es20.10)' ) ch10,&
-&          ' chkinp: COMMENT -',ch10,&
-&          '   Chksymtnons=1 . Found potentially symmetry-breaking value of tnons. ', ch10,&
-&          '   The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:',ch10,&
-&          xredshift(:,1)
+   if(problem_isym/=0)then
+     if(fixed_problem==1)then
+       write(msg, '(2a)' ) ch10,' chkinp: COMMENT -'
+       call wrtout(std_out,msg,'COLL')
+       write(msg, '(4a,3es20.10)' )  &
+&        '   Found potentially symmetry-breaking value of tnons. ', ch10,&
+&        '   The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:',ch10,&
+&        xredshift(:,1)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(iout,msg,'COLL')
+       write(msg, '(4a)' ) ch10,&
+&        '   For your convenience, you might cut+paste the shifted new atomic positions (for image 1 only):',ch10,&
+&        '   xred'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(iout,msg,'COLL')
+       do iatom=1,dt%natom
+         write(msg,'(a,3es20.10)') '        ',dt%xred_orig(:,iatom,1)+xredshift(:,1)
          call wrtout(std_out,msg,'COLL')
          call wrtout(iout,msg,'COLL')
-         write(msg, '(4a)' ) ch10,&
-&          '   For your convenience, you might cut+paste the shifted new atomic positions (for image 1 only):',ch10,&
-&          '   xred'
-         call wrtout(std_out,msg,'COLL')
-         call wrtout(iout,msg,'COLL')
-         do iatom=1,dt%natom
-           write(msg,'(a,3es20.10)') '        ',dt%xred_orig(:,iatom,1)+xredshift(:,1)
-           call wrtout(std_out,msg,'COLL')
-           call wrtout(iout,msg,'COLL')
-         enddo
-       endif
+       enddo
+     endif
+
+     if(dt%chksymtnons==1)then
        write(msg, '(8a,i4,2a,9i3,2a,3es20.10,10a)' ) ch10,&
 &        ' chkinp: ERROR -',ch10,&
 &        '   Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
