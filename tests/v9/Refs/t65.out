@@ -582,7 +582,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.4707E+00  1.6425E+00  1.7070E+00  1.7719E+00  1.7911E+00  1.8560E+00
   1.9305E+00  1.9885E+00  1.9985E+00  2.0712E+00  2.1366E+00  2.3002E+00
   2.5912E+00  2.7277E+00
-  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  1.26654E-03
+  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  1.26354E-03
 
 
 --- !ResultsGS
@@ -751,7 +751,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Symsigma: 1 Timrev: 1
  Method for q-space integration:  Tetrahedron method
  Tolerance for integration weights <     1.000000E-12     1.000000E-12
- eph_winfact:  1.10 
+ eph_phwinfact:  1.10 
  Only the Imaginary part of Sigma will be computed.
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
