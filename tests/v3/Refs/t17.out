@@ -991,7 +991,7 @@ tolerances: {tolvrs: 1.00E-06, }
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  6.0000000000E+00  6.0000000000E+00 Bohr
               amu      2.80855000E+01
-      chksymbreak           0
+      chksymtnons           0
            diemac      1.00000000E+00
            diemix      3.33333333E-01
              ecut      7.00000000E+00 Hartree
