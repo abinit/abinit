@@ -1594,7 +1594,7 @@ Variable(
     abivarname="chksymtnons",
     varset="gstate",
     vartype="integer",
-    topics=['crystal'],
+    topics=['crystal_basic'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="CHecK SYMmetry of TNONS",
