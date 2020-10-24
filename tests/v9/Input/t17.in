@@ -9,7 +9,7 @@ rprim     1.0000000000E+00 -6.8780443909E-07 -1.5175935869E-37
           6.1232339957E-17  1.0605752387E-16  1.0000000000E+00
 acell     6.8737601012E+00  6.8737601012E+00  2.2206443012E+01
 chkprim 0
-chksymtnons 0
+chksymtnons 2
 tolsym 1.0e-3
 
 # Definition of the atom types

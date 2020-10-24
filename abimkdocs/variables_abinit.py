@@ -1606,16 +1606,20 @@ symmetry breaking, related to the presence
 of non-symmorphic translations not leaving the FFT exchange-correlation grid invariant.
 
 When **chksymtnons** = 1, the code stops if 
-the non-symmorphic translation part of the symmetry operations has components that are not zero
-or simple fractions, with 2, 3, 4, 5, 6, 8, 9, 10 or 12 as denominators.
+the non-symmorphic translation part of the symmetry operations has components that are not zero,
+or simple fractions with 2, 3, 4, 5, 6, 8, 9, 10 or 12 as denominators. Also, suggestions
+to bypass the problem are made in the output file.
 
-When **chksymtnons** = 0, there is no such check.
+When **chksymtnons** = 2, the code makes similar check, but does not stop after providing
+in the output file suggestions to bypass the problem.
+
+When **chksymtnons** = 0, the code skips the check.
 
 Explanation:
-In ground-state or DFPT calculation, such breaking of the symmetry is usually
-harmless. However, if the user is doing a GW calculation, the presence of non-symmorphic translations
+In ground-state or DFPT calculations, such breaking of the symmetry is harmless. 
+However, for a GW or BSE calculation, the presence of non-symmorphic translations
 that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault). 
-In the GW part, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
+In the GW or BSE parts, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
 for calculating both the polarizability and the self-energy. The wavefunctions
 in the full Brillouin zone are obtained from the irreducible wedge by applying
 the symmetry operations of the space group of the crystal. In the present
@@ -1623,15 +1627,16 @@ implementation, the symmetrisation of the wavefunctions is done in real space
 on the FFT mesh that, therefore, has to be coherent both with the rotational
 part as well as with the fractional translation of each symmetry operation. If
 the condition above (2, 3, 4, 5, 6, 7, 8, 9, 10, or 12 as denominator) is not met, 
-the GW code will not be able to find a symmetry preserving FFT mesh.
+the GW/BSE code will not be able to find a symmetry preserving FFT mesh.
 
 So, it was decided to warn the user about such problem already at
 the level of the ground-state calculations, although such warning might be irrelevant.
 
 If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
-symmetric point; or ignore the problem, and set **chksymtnons** = 0.
-ABINIT makes a suggestion of a possible global translation, and corresponding translated atomic positions..
+symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0.
+If **chksymtnons** = 2, ABINIT makes a suggestion of a possible global translation, 
+and corresponding translated atomic positions.
 """,
 ),
 
