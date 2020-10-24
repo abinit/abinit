@@ -236,9 +236,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
 
- ! Decide whether RMM-DIIS eigensolve should be used depending on istep
+ ! Decide whether RMM-DIIS eigensolver should be activated.
+ ! rmm_diis > 0 --> Activate it after (3 + rmm_diis) iterations with wfoptalg algorithm.
+ ! rmm_diis < 0 --> Start with RMM-DIIS directly (risky)
  use_rmm_diis = .False.
- if (abs(dtset%rmm_diis) /= 0) then
+ if (abs(dtset%rmm_diis) /= 0 .and. dtset%use_gpu_cuda == 0) then
    if (dtset%rmm_diis > 0) use_rmm_diis = istep > 3 + dtset%rmm_diis
    if (dtset%rmm_diis < 0) use_rmm_diis = .True.
    if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver.")
@@ -274,7 +276,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  n1=gs_hamk%ngfft(1); n2=gs_hamk%ngfft(2); n3=gs_hamk%ngfft(3)
 
- if ( .not. newlobpcg ) then
+ if ((.not. newlobpcg) .or. use_rmm_diis) then
    igsc=0
    mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
 
@@ -347,6 +349,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
      if (use_subovl==1)subovl(:)=zero
    end if
+
    resid_k(:)=zero
 
    !call cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg(:, icg+1))
@@ -383,25 +386,32 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    ============ MINIMIZATION OF BANDS: LOBPCG ==============================
 !    =========================================================================
        if (wfopta10==4) then
-         if ( .not. newlobpcg ) then
-           call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
-!          In case of FFT parallelism, exchange subspace arrays
-           spaceComm=mpi_enreg%comm_bandspinorfft
-           call xmpi_sum(subham,spaceComm,ierr)
-           if (gs_hamk%usepaw==0) then
-             if (wfopta10==4) then
-               call xmpi_sum(totvnlx,spaceComm,ierr)
-             else
-               call xmpi_sum(subvnlx,spaceComm,ierr)
-             end if
-           end if
-           if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
+
+         if (use_rmm_diis) then
+           call rmm_diis(istep, ikpt, isppol, cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, gsc, &
+                         mpi_enreg, nband_k, npw_k, my_nspinor, resid_k)
          else
-           call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,mpi_enreg,&
-&           nband_k,npw_k,my_nspinor,prtvol,resid_k)
+
+           if ( .not. newlobpcg ) then
+             call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
+&             nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
+             ! In case of FFT parallelism, exchange subspace arrays
+             spaceComm=mpi_enreg%comm_bandspinorfft
+             call xmpi_sum(subham,spaceComm,ierr)
+             if (gs_hamk%usepaw==0) then
+               if (wfopta10==4) then
+                 call xmpi_sum(totvnlx,spaceComm,ierr)
+               else
+                 call xmpi_sum(subvnlx,spaceComm,ierr)
+               end if
+             end if
+             if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
+           else
+             call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,mpi_enreg,&
+&             nband_k,npw_k,my_nspinor,prtvol,resid_k)
+           end if
+
          end if
-!        In case of FFT parallelism, exchange subspace arrays
 
 !    =========================================================================
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
@@ -417,16 +427,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      else
        ! use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
        ! use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
+
        if (.not. use_rmm_diis) then
-         !call wrtout(std_out, "Calling cgwf")
          call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
            gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
            mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
            dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
            subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
 
-        else
-         !call wrtout(std_out, "Calling rmms_diis after cwfw")
+       else
          call rmm_diis(istep, ikpt, isppol, cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, gsc, &
                        mpi_enreg, nband_k, npw_k, my_nspinor, resid_k)
        end if
@@ -455,7 +464,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
    do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
-   if (use_rmm_diis) do_subdiago = .False.
+   if (use_rmm_diis) do_subdiago = .False.  ! subdiago is already performed before RMM-DIIS.
 
    if (do_subdiago) then
      if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
@@ -492,12 +501,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  =============== ORTHOGONALIZATION OF WFs (if needed) ====================
 !  =========================================================================
 
-!  Re-orthonormalize the wavefunctions at this k point--
-!  this is redundant but is performed to combat rounding error in wavefunction orthogonality
+!  Re-orthonormalize the wavefunctions at this k point.
+!  this step is redundant but is performed to combat rounding error in wavefunction orthogonality.
+!  It's mandatory if RMM-DIIS.
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
-   ortalgo=mpi_enreg%paral_kgb
-   do_ortho = ((wfoptalg/=14 .and. wfoptalg /= 1) .or. dtset%ortalg > 0)
+   ortalgo = mpi_enreg%paral_kgb
+   !ortalgo = 3
+   do_ortho = ((wfoptalg/=14 .and. wfoptalg /= 1) .or. dtset%ortalg > 0 .or. use_rmm_diis)
    if (do_ortho) then
      if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
      call pw_orthon(icg, igsc, istwf_k, mcg, mgsc, npw_k*my_nspinor, nband_k, ortalgo, gsc, gs_hamk%usepaw, cg, &
@@ -835,6 +846,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ! Norm-conserving or FockACE: Compute nonlocal+FockACE part of total energy: rotate subvnlx elements
  ! Note the two calls. For (old) lobpcgwf we have a (nband_k, nband_k) matrix, whereas cgwf
  ! returns results in packed form.
+ ! CHEBYSHEV, NEW LOBPCG and RMM-DIIS are smarter and return enlx_k directly
  !
  rotate_subvnlx = gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg
  if (use_rmm_diis) rotate_subvnlx = .False.
@@ -908,9 +920,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DEALLOCATE(subvnlx)
    ABI_DEALLOCATE(subovl)
  end if
- if ( .not. newlobpcg ) then
-   ABI_DEALLOCATE(gsc)
- end if
+
+ ABI_SFREE(gsc)
 
  if(wfoptalg==3) then
    ABI_DEALLOCATE(eig_save)

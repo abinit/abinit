@@ -97,9 +97,9 @@ contains
 !!
 !! SOURCE
 
-subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
-&                      mpi_enreg,prtvol,sij_opt,cpopt,cwaveprj,&
-&                      already_transposed) ! optional argument
+subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksize, &
+                       mpi_enreg, prtvol, sij_opt, cpopt, cwaveprj, &
+                       already_transposed) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -109,7 +109,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(mpi_type),intent(inout) :: mpi_enreg
 !arrays
- real(dp),intent(inout) :: cwavef(:,:),gvnlxc (:,:),gwavef(:,:),swavef(:,:)
+ real(dp),intent(in) :: cwavef(:,:)
+ real(dp),intent(inout) :: gvnlxc (:,:),gwavef(:,:),swavef(:,:)
  type(pawcprj_type), intent(inout) :: cwaveprj(:,:)
 
 !Local variables-------------------------------
@@ -117,7 +118,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  integer,parameter :: tim_getghc=6
  integer :: bandpp,bandpp_sym,idatarecv0,ier,ikpt_this_proc,iscalc,mcg,my_nspinor
  integer :: nbval,ndatarecv,ndatarecv_tot,ndatasend_sym,nproc_band,nproc_fft
- integer :: old_me_g0,spaceComm=0
+ integer :: old_me_g0,spaceComm
  logical :: flag_inv_sym, do_transpose
  !character(len=500) :: msg
 !arrays
