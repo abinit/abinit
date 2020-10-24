@@ -1,5 +1,5 @@
 # Check of not tolerated value of tnons, and associated suggestions for correction.
-
+  
 nband   16
 tolvrs 1.0e-10
 
@@ -9,6 +9,7 @@ rprim     1.0000000000E+00 -6.8780443909E-07 -1.5175935869E-37
           6.1232339957E-17  1.0605752387E-16  1.0000000000E+00
 acell     6.8737601012E+00  6.8737601012E+00  2.2206443012E+01
 chkprim 0
+tolsym 1.0e-3
 
 # Definition of the atom types
 ntypat   2
@@ -37,9 +38,8 @@ ecut 10.0         # Maximal kinetic energy cut-off, in Hartree
 
 # Definition of the SCF procedure
 nstep   10        # Maximal number of SCF cycles
-toldfe  1.0d-8    # Will stop when this tolerance is achieved on total energy
 diemac  12.0
-ixc -208012
+ixc -208012  # TB09 .
 usekden 1
 
  pp_dirpath "$ABI_PSPDIR"
@@ -49,12 +49,13 @@ usekden 1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test =
-#%%   t17.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = 
+#%%   t17.out , tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
-#%% max_nprocs = 28
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. Gonze
+#%% references = 
 #%% keywords = 
 #%% description =
 #%%   InN non-primitive cell, doubled wurtzite, rather inaccurate rprimd and xred.
@@ -63,4 +64,3 @@ usekden 1
 #%%   if chksymtnons is not set to zero.
 #%% topics = Crystal
 #%%<END TEST_INFO>
-

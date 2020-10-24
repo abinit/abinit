@@ -458,12 +458,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &          '   The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:',ch10,&
 &          xredshift(:,1)
          call wrtout(std_out,msg,'COLL')
+         call wrtout(iout,msg,'COLL')
          write(msg, '(4a)' ) ch10,&
 &          '   For your convenience, you might cut+paste the shifted new atomic positions (for image 1 only):',ch10,&
 &          '   xred'
          call wrtout(std_out,msg,'COLL')
+         call wrtout(iout,msg,'COLL')
          do iatom=1,dt%natom
-           write(std_out,'(a,3es20.10)') '        ',dt%xred_orig(:,iatom,1)+xredshift(:,1)
+           write(msg,'(a,3es20.10)') '        ',dt%xred_orig(:,iatom,1)+xredshift(:,1)
+           call wrtout(std_out,msg,'COLL')
+           call wrtout(iout,msg,'COLL')
          enddo
        endif
        write(msg, '(8a,i4,2a,9i3,2a,3es20.10,10a)' ) ch10,&
@@ -3943,7 +3947,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  if (ierr==1) then
    write(msg,'(4a)')ch10,&
    ' Checking consistency of input data against itself revealed some problem(s).',ch10,&
-   ' So, stopping. The details of the problem(s) are given in the log file.'
+   ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).'
    call wrtout(iout,msg,'COLL')   
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
