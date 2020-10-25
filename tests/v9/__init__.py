@@ -29,6 +29,7 @@ inp_files = [
 "t14.in", # optic
 "t15.in", # check slight misalignment of rprim, with large tolsym
 "t16.in", # check slightly incorrect xred, with large tolsym
+"t17.in", # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
 # GW/BSE
 "t21.in", # HF exchange checking q->0 terms
 "t22.in", # AC GW
