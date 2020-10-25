@@ -906,12 +906,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
          end if
          call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
-&         gbound_k =my_bandfft_kpt%gbound, &
-&         kinpw_k  =my_bandfft_kpt%kinpw_gather, &
-&         kg_k     =my_bandfft_kpt%kg_k_gather, &
-&         kpg_k    =my_bandfft_kpt%kpg_k_gather, &
-         ffnl_k   =my_bandfft_kpt%ffnl_gather, &
-         ph3d_k   =my_bandfft_kpt%ph3d_gather)
+           gbound_k =my_bandfft_kpt%gbound, &
+           kinpw_k  =my_bandfft_kpt%kinpw_gather, &
+           kg_k     =my_bandfft_kpt%kg_k_gather, &
+           kpg_k    =my_bandfft_kpt%kpg_k_gather, &
+           ffnl_k   =my_bandfft_kpt%ffnl_gather, &
+           ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
 
 !      Build inverse of overlap matrix for chebfi
@@ -1260,7 +1260,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            end do
          end do
 
-         !  Test residm
+         ! Test residm
          if (paw_dmft%use_dmft>0 .and. residm>tol4 .and. dtset%dmftcheck>=0) then
            if(dtset%dmft_entropy>0)  then
              write(message,'(a,e12.3)')&

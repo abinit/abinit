@@ -138,7 +138,7 @@ contains
 !!
 !! SOURCE
 
-subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc_all, &
+subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc_all, &
                     mpi_enreg, nband, npw, nspinor, resid)
 
 !Arguments ------------------------------------
@@ -150,7 +150,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  real(dp),target,intent(inout) :: gsc_all(2,npw*nspinor*nband*dtset%usepaw)
  real(dp),intent(inout) :: enlx(nband)
  real(dp),intent(inout) :: resid(nband)
- real(dp),intent(in) :: occ(nband)
+ real(dp),intent(in) :: occ(nband), kinpw(npw)
  real(dp),intent(out) :: eig(nband)
 
 !Local variables-------------------------------
@@ -323,6 +323,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ! the status of all bands in the block.
  ! Using gemm_nonlop leads to a significant speedup when applying Vnl.
 
+ !gs_hamk%kinpw_k is not kinpw
+ !ABI_CHECK_IEQ(size(gs_hamk%kinpw_k), size(kinpw), "diff in size")
+ !ABI_CHECK(all(gs_hamk%kinpw_k == kinpw), "diff in kinpw values")
+ ! TODO: Transpose only once per block and then work already_transposed = .True.
+
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize
    ige = min(iblock * npwsp * bsize, npwsp * nband)
@@ -343,6 +348,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    ! Extract bands in the block. phi_bk = cg(:,igs:ige)
    call cg_zcopy(npwsp * ndat, cg(:,igs), phi_bk)
+   !phi_bk => cg(:,igs:ige)
    if (usepaw == 1) ptr_gsc_bk => gsc_all(:,igs:ige)
 
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
@@ -370,7 +376,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    ! Precondition |R_0>, output in kres_bk = |K R_0>
    call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
-   call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_bandspinorfft)
+   call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
 
    ! Compute H |K R_0>
    if (paral_kgb == 0) then
@@ -424,7 +430,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
        ! Precondition residual, output in kres_bk.
        call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
-       call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, &
+       call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, &
                            kres_bk, me_g0, comm_bandspinorfft)
 
        ! Compute phi_bk with the lambda(ndat) obtained at iteration #1
@@ -468,7 +474,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    if (end_with_trial_step) then
 
      call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
-     call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, gs_hamk%kinpw_k, kres_bk, me_g0, comm_bandspinorfft)
+     call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
 
      ! Recomputing the preconditioned-direction and the new lambda that minimizes the residual
      ! is more expensive but more accurate. Do it only for the occupied states plus a buffer
@@ -792,9 +798,9 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
 
  !write(std_out, *)" In getghc_eigresid:"
  !do idat=1,ndat
- !  write(std_out, *)"eig:", eig(idat), "idat:", idat
- !  write(std_out, *)"resid:", resid(idat), "idat:", idat
- !  write(std_out, *)"enlx:", enlx(idat), "idat:", idat
+ !  write(std_out, *)" eig:", eig(idat), "idat:", idat
+ !  write(std_out, *)" resid:", resid(idat), "idat:", idat
+ !  write(std_out, *)" enlx:", enlx(idat), "idat:", idat
  !end do
  !write(std_out, *)""
 
@@ -1114,7 +1120,7 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx
 
  if (my_rank == master) then
    do idat=1,ndat
-     iter = imin_loc(diis%hist_resid(0:ilast, idat))  !back = .True.
+     iter = imin_loc(diis%hist_resid(0:ilast, idat)) ! back = .True.
      iter = iter - 1
      if (iter /= ilast .and. &
          diis%hist_resid(iter, idat) < 0.1_dp * diis%hist_resid(ilast, idat)) take_iter(idat) = iter
@@ -1208,11 +1214,13 @@ subroutine cg_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
  integer :: idat
 
  if (usepaw == 1) then
+   ! (H - e) |psi>
 !$OMP PARALLEL DO
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * gsc(:,idat)
    end do
  else
+   ! (H - eS) |psi>
 !$OMP PARALLEL DO
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * cg(:,idat)

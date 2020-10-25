@@ -341,6 +341,7 @@ module m_hamiltonian
   real(dp), pointer :: kinpw_k(:) => null()
    ! kinpw_k(npw_fft_k)
    ! (modified) kinetic energy for each plane wave at k
+   ! CAVEAT: In band mode, this array is NOT EQUIVALENT to kinpw(npw_k)
 
   real(dp), pointer :: kinpw_kp(:) => null()
    ! kinpw_kp(npw_fft_kp)
