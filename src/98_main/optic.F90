@@ -300,9 +300,13 @@ program optic
      write(msg, "(12a)")ch10,&
 &      ' Check the consistency of the wavefunction files (esp. k point and number of bands). ',ch10,&
 &      ' Will compare, pairwise ( 1/2, 2/3, 3/4 ), the four following files :',ch10,&
-&      trim(wfkfile),ch10,trim(infiles(1)),ch10,trim(infiles(2)),ch10,trim(infiles(3))
+&      trim(wfkfile)
+     ! split the write since long filenames can bust the 500 char limit of 'msg'
      call wrtout(std_out,msg,'COLL')
-
+     do ii=1,3
+       write(msg, "(12a)")trim(infiles(ii))
+       call wrtout(std_out,msg,'COLL')
+     enddo
 !DEBUG
 !  stop
 !ENDDEBUG
