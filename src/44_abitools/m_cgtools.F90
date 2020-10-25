@@ -816,23 +816,16 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
 
 ! *************************************************************************
 
- lda = nrows
- mm  = nrows
- nn  = 1
- kk  = ncols
+ my_alpha = cg_cone;  if (present(alpha)) my_alpha = alpha
+ my_beta  = cg_czero; if (present(beta))  my_beta  = beta
 
+ lda = nrows; mm = nrows; nn = 1; kk = ncols
  if (toupper(trans) /= 'N') then
-   mm = ncols
-   kk = nrows
+   mm = ncols; kk = nrows
  end if
+ ldb = kk; ldc = mm
 
- ldb = kk
- ldc = mm
-
- my_alpha = cg_cone;  if (PRESENT(alpha)) my_alpha = alpha
- my_beta  = cg_czero; if (PRESENT(beta))  my_beta  = beta
-
- call ZGEMM(trans,"N",mm,nn,kk,my_alpha,cgmat,lda,vec,ldb,my_beta,matvec,ldc)
+ call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
  ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
 
  !call ZGEMV(trans,mm,nn,my_alpha,cgmat,lda,vec,1,my_beta,matvec,1)
@@ -847,9 +840,8 @@ end subroutine cg_zgemv
 !!  cg_zgemm
 !!
 !! FUNCTION
-!!  The ?gemm routines perform a matrix-matrix operation with general matrices.
-!!  The operation is defined as C := alpha*op(A)*op(B) + beta*C,
-!!  where:
+!!  The cg_zgemm routines perform a matrix-matrix operation with general matrices.
+!!  The operation is defined as C := alpha*op(A)*op(B) + beta*C, where:
 !!
 !!  op(x) is one of op(x) = x, or op(x) = x', or op(x) = conjg(x'),
 !!

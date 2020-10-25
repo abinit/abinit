@@ -96,6 +96,7 @@ module m_rmm_diis
 
 
  integer,parameter, private :: level = 432
+ logical,parameter, private :: timeit = .False.
 
 contains
 !!***
@@ -159,7 +160,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nbocc, jj, kk, it, ibk, iek !ii, ld1, ld2,
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
- logical :: timeit = .False.
+
  logical :: end_with_trial_step, new_lambda
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops, dotr, doti
@@ -444,6 +445,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
        diis%chain_phi(:,:,iter, idat) = phi_bk(:,ibk:iek)
        diis%chain_resv(:, :, iter, idat) = residv_bk(:,ibk:iek)
        if (usepaw == 1) diis%chain_sphi(:,:,iter,idat) = ptr_gsc_bk(:,ibk:iek)
+       !call cg_zcopy(nwsp, phi_bk(:,ibk), diis%chain_phi(:,:,iter,idat))
+       !call cg_zcopy(npwsp, residv_bk(:,ibk), diis%chain_resv(:,:,iter,idat))
+       !if (usepaw == 1) call cg_zcopy(npwsp, ptr_gsc_bk(:,ibk), diis%chain_sphi(:,:,iter,idat)
      end do
 
      ! === CHECK FOR CONVERGENCE ====
@@ -534,7 +538,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
    ! Update wavefunction block. cg(:,igs:ige) = phi_bk
    call cg_zcopy(npwsp * ndat, phi_bk, cg(:,igs))
-
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
  end do ! iblock
 
@@ -787,13 +790,13 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
 
  ABI_FREE(gvnlxc)
 
- !write(std_out, *)" Entering getghc_eigresid"
+ !write(std_out, *)" In getghc_eigresid:"
  !do idat=1,ndat
- !  write(std_out, *)"eig:", eig(idat), "idat", idat
- !  write(std_out, *)"enlx:", enlx(idat), "idat", idat
- !  !!write(std_out, *)"resid:", resid(idat)
+ !  write(std_out, *)"eig:", eig(idat), "idat:", idat
+ !  write(std_out, *)"resid:", resid(idat), "idat:", idat
+ !  write(std_out, *)"enlx:", enlx(idat), "idat:", idat
  !end do
- !write(std_out, *)" Exiting getghc_eigresid"
+ !write(std_out, *)""
 
 end subroutine getghc_eigresid
 !!***
@@ -901,57 +904,60 @@ subroutine rmm_diis_solve(diis, iter, npwsp, ndat, phi_bk, residv_bk, comm)
  integer :: cplex, ierr, nprocs, my_rank, ii, idat, ibk, iek
  real(dp) :: noise
  real(dp),allocatable :: diis_eig(:)
- real(dp),allocatable :: wmat1(:,:,:), wmat2(:,:,:), wvec(:,:), alphas(:,:)
+ real(dp),allocatable :: wmat1(:,:,:), wmat2(:,:,:), wvec(:,:,:), alphas(:,:)
  character(len=500) :: msg
  logical,parameter :: try_to_solve_eigproblem = .False.
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  cplex = diis%cplex
 
- do idat=1,ndat
+ if (try_to_solve_eigproblem) then
 
-   if (try_to_solve_eigproblem) then
-     ABI_MALLOC(diis_eig, (0:iter-1))
-     ABI_MALLOC(wmat1, (cplex, 0:iter-1, 0:iter-1))
-     ABI_MALLOC(wmat2, (cplex, 0:iter-1, 0:iter-1))
-     wmat1 = diis%resmat(:, 0:iter-1, 0:iter-1, idat)
-     wmat2 = diis%smat(:, 0:iter-1, 0:iter-1, idat)
-     !do ii=0,iter-1; write(std_out, *) "diis_resmat:", wmat1(:,ii,:); end do
-     !do ii=0,iter-1; write(std_out, *) "diis_smat:", wmat2(:,ii,:); end do
-     ABI_CHECK(cplex == 2, "cplex 1 not coded")
+   !do idat=1,ndat ! TODO
+   ABI_MALLOC(diis_eig, (0:iter-1))
+   ABI_MALLOC(wmat1, (cplex, 0:iter-1, 0:iter-1))
+   ABI_MALLOC(wmat2, (cplex, 0:iter-1, 0:iter-1))
+   wmat1 = diis%resmat(:, 0:iter-1, 0:iter-1, idat)
+   wmat2 = diis%smat(:, 0:iter-1, 0:iter-1, idat)
+   !do ii=0,iter-1; write(std_out, *) "diis_resmat:", wmat1(:,ii,:); end do
+   !do ii=0,iter-1; write(std_out, *) "diis_smat:", wmat2(:,ii,:); end do
+   ABI_CHECK(cplex == 2, "cplex 1 not coded")
 
-     call xhegv_cplex(1, "V", "U", cplex, iter, wmat1, wmat2, diis_eig, msg, ierr)
-     !write(std_out,*)"diis_eig:", diis_eig(0)
-     !write(std_out,*)"RE diis_vec  :", wmat1(1,:,0)
-     !write(std_out,*)"IMAG diis_vec:", wmat1(2,:,0)
-     !ABI_CHECK(ierr == 0, "xhegv returned ierr != 0")
-     if (ierr /= 0) then
-       !call wrtout(std_out, sjoin("xhegv failed with:", msg, ch10, "at iter: ", itoa(iter), "exit iter_loop!"))
-       ABI_FREE(diis_eig)
-       ABI_FREE(wmat1)
-       ABI_FREE(wmat2)
-       goto 10
-     end if
-
-     ! Take linear combination of chain_phi and chain_resv.
-     call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wmat1(:,:,0), phi_bk(:,:, idat))
-     call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wmat1(:,:,0), residv_bk(:,:,idat))
-
+   call xhegv_cplex(1, "V", "U", cplex, iter, wmat1, wmat2, diis_eig, msg, ierr)
+   !write(std_out,*)"diis_eig:", diis_eig(0)
+   !write(std_out,*)"RE diis_vec  :", wmat1(1,:,0)
+   !write(std_out,*)"IMAG diis_vec:", wmat1(2,:,0)
+   !ABI_CHECK(ierr == 0, "xhegv returned ierr != 0")
+   if (ierr /= 0) then
+     !call wrtout(std_out, sjoin("xhegv failed with:", msg, ch10, "at iter: ", itoa(iter), "exit iter_loop!"))
+     ABI_FREE(diis_eig)
      ABI_FREE(wmat1)
      ABI_FREE(wmat2)
-     ABI_FREE(diis_eig)
-     cycle
+     goto 10
    end if
+   !end do
 
-   10 continue
+   ! Take linear combination of chain_phi and chain_resv.
+   call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wmat1(:,:,0), phi_bk(:,:, idat))
+   call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wmat1(:,:,0), residv_bk(:,:,idat))
 
-   ! Solve system of linear equations.
-   ! Only master works so that we are sure we have the same solution.
-   ABI_CALLOC(wvec, (cplex, 0:iter))
+   ABI_FREE(wmat1)
+   ABI_FREE(wmat2)
+   ABI_FREE(diis_eig)
+   !cycle
+ end if
 
-   if (my_rank == master) then
-     wvec(1, iter) = -one
-     ABI_CALLOC(wmat1, (cplex, 0:iter, 0:iter))
+ 10 continue
+
+ ! Solve system of linear equations.
+ ! Only master works so that we are sure we have the same solution.
+ ABI_CALLOC(wvec, (cplex, 0:iter, ndat))
+
+ if (my_rank == master) then
+   ABI_MALLOC(wmat1, (cplex, 0:iter, 0:iter))
+   do idat=1,ndat
+     wvec(1, iter, idat) = -one
+     wmat1 = zero
      wmat1(1,:,iter) = -one
      wmat1(1,iter,:) = -one
      wmat1(1,iter,iter) = zero
@@ -962,39 +968,42 @@ subroutine rmm_diis_solve(diis, iter, npwsp, ndat, phi_bk, residv_bk, comm)
      !  write(std_out, *)"wmat1:", wmat1(:, ii, :)
      !end do
 
-     call xhesv_cplex("U", cplex, iter+1, 1, wmat1, wvec, msg, ierr)
-
+     call xhesv_cplex("U", cplex, iter+1, 1, wmat1, wvec(:,:,idat), msg, ierr)
      ABI_CHECK(ierr == 0, msg)
-     ABI_FREE(wmat1)
+
      if (diis%prtvol == -level) then
-       write(std_out,*)"wvec:", wvec
-       write(std_out,*)"sum(wvec):", sum(wvec(:, 0:iter-1), dim=2)
+       write(std_out,*)"wvec:", wvec(:,:,idat)
+       write(std_out,*)"sum(wvec):", sum(wvec(:, 0:iter-1, idat), dim=2)
      end if
-     !if (cplex == 2) then
-     !  coefficients should sum up to 1 but sometimes we get a small imaginary part
-     !  here we remove it
-     !  noise = sum(wvec(2, 0:iter-1), dim=2)
-     !  wvec(2, 0:iter-1) = wvec(2, 0:iter-1) / (noise * iter)
-     !end do
-   end if
+     if (cplex == 2) then
+       ! coefficients should sum up to 1 but sometimes we get a small imaginary part. here we remove it
+       noise = sum(wvec(2, 0:iter-1, idat))
+       wvec(2, 0:iter-1, idat) = wvec(2, 0:iter-1, idat) - noise * iter
+     end if
+   end do
+   ABI_FREE(wmat1)
+ end if
 
-   ! Master broadcasts data.
-   if (nprocs > 1) call xmpi_bcast(wvec, master, comm, ierr)
+ ! Master broadcasts data.
+ if (nprocs > 1) call xmpi_bcast(wvec, master, comm, ierr)
 
+ do idat=1,ndat
    if (cplex == 2) then
-     call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wvec(:,0), phi_bk(:,:,idat))
-     call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wvec(:,0), residv_bk(:,:,idat))
+     call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wvec(:,0,idat), phi_bk(:,:,idat))
+     call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wvec(:,0,idat), residv_bk(:,:,idat))
    else
-     ! TODO: DGEMV
      ABI_CALLOC(alphas, (2, 0:iter))
-     alphas(1,:) = wvec(1,:)
+     alphas(1,:) = wvec(1,:,idat)
      call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), alphas, phi_bk(:,:,idat))
      call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), alphas, residv_bk(:,:,idat))
+
+     ! TODO: DGEMV
+     !call cg_dgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), alphas, phi_bk(:,:,idat))
+     !call cg_dgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), alphas, residv_bk(:,:,idat))
      ABI_FREE(alphas)
    end if
-   ABI_FREE(wvec)
-
- end do ! idat
+ end do
+ ABI_FREE(wvec)
 
 end subroutine rmm_diis_solve
 !!***
