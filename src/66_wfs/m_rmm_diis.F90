@@ -38,13 +38,12 @@ module m_rmm_diis
  use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : sjoin, itoa, ftoa
  use m_time,          only : timab, cwtime, cwtime_report
- use m_numeric_tools, only : pack_matrix
+ use m_numeric_tools, only : pack_matrix, imin_loc
  use m_hide_lapack,   only : xhegv_cplex, xhesv_cplex
  use m_pair_list,     only : pair_list
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_getghc,        only : getghc
- !use m_bandfft_kpt,   only : bandfft_kpt, bandfft_kpt_get_ikpt
  !use m_fock,         only : fock_set_ieigen, fock_set_getghc_call
 
  implicit none
@@ -62,6 +61,7 @@ module m_rmm_diis
    integer :: bsize
    integer :: max_niter
    integer :: npwsp
+   integer :: prtvol
    type(pair_list) :: stats
 
    integer :: last_iter
@@ -69,7 +69,8 @@ module m_rmm_diis
 
    real(dp),allocatable :: hist_ene(:,:)
    real(dp),allocatable :: hist_resid(:,:)
-   character(len=6),allocatable :: step_type(:,:)
+   real(dp),allocatable :: hist_enlx(:,:)
+   character(len=7),allocatable :: step_type(:,:)
    ! (0:max_niter+1, bsize)
    ! 0 is the initial step, then DIIS iterations (whose number may depend on the block)
    ! followed by an optional trial step.
@@ -89,8 +90,12 @@ module m_rmm_diis
    procedure :: eval_mats => rmm_diis_eval_mats
    procedure :: exit_iter => rmm_diis_exit_iter
    procedure :: print_block => rmm_diis_print_block
+   procedure :: rollback => rmm_diis_rollback
 
  end type rmm_diis_t
+
+
+ integer,parameter, private :: level = 432
 
 contains
 !!***
@@ -149,11 +154,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2
- integer,parameter :: tim_getghc = 0, level = 432, use_subovl0 = 0
+ integer,parameter :: tim_getghc = 0, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb, comm
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nbocc, jj, kk, it, ibk, iek !ii, ld1, ld2,
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
+ logical :: timeit = .False.
  logical :: end_with_trial_step, new_lambda
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops, dotr, doti
@@ -202,7 +208,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ABI_CALLOC(h_ij, (2, nband, nband))
 
  call timab(1633, 1, tsec) !"rmm_diis:build_hij
- call cwtime(cpu, wall, gflops, "start")
+ if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize
@@ -210,7 +216,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    ndat = (ige - igs + 1) / npwsp
    ib_start = 1 + (iblock - 1) * bsize
    ib_stop = min(iblock * bsize, nband)
-   !write(std_out,*)"iblock:", iblock, "ndat", ndat, "igs:", igs, "ige:", ige
 
    if (usepaw == 1) ptr_gsc_bk => gsc_all(:,igs:ige)
 
@@ -245,7 +250,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
  end do ! iblock
 
- call cwtime_report(" build_hij", cpu, wall, gflops)
+ if (timeit) call cwtime_report(" build_hij", cpu, wall, gflops)
 
  ! Pack <i|H|j> to prepare call to subdiago.
  ABI_MALLOC(subham, (nband*(nband+1)))
@@ -256,9 +261,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  ABI_FREE(h_ij)
  call xmpi_sum(subham, comm_bandspinorfft, ierr)
  call timab(1633, 2, tsec) !"rmm_diis:build_hij
- do it=1,nband*(nband+1)
-    write(std_out,*)"subham:", it, subham(it)
- end do
+
+ !do it=1,nband*(nband+1)
+ !  write(std_out,*)"subham:", it, subham(it)
+ !end do
 
  ! ========================
  ! Subspace diagonalization
@@ -269,7 +275,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, paral_kgb, &
                subham, subovl, use_subovl0, usepaw, me_g0)
  call timab(585, 2, tsec)
- call cwtime_report(" subdiago", cpu, wall, gflops)
+ if (timeit) call cwtime_report(" subdiago", cpu, wall, gflops)
 
  ABI_FREE(subham)
  ABI_FREE(evec)
@@ -296,7 +302,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
    end if
  end if
 
- diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize)
+ diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
  call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
  call wrtout(std_out, sjoin(" Block size:", itoa(bsize), " accuracy_ene: ", ftoa(accuracy_ene)))
  !if (paral_kgb == 1) then
@@ -342,9 +348,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
                         eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
 
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input cg are already S-normalized.
+   diis%resmat = zero
    do idat=1,ndat
      diis%hist_ene(0, idat) = eig(ib_start+idat-1)
      diis%hist_resid(0, idat) = resid(ib_start+idat-1)
+     diis%hist_enlx(0, idat) = enlx(ib_start+idat-1)
      if (diis%cplex == 2) then
        diis%resmat(:, 0, 0, idat) = [resid(ib_start+idat-1), zero]
        diis%smat(:, 0, 0, idat) = [one, zero]
@@ -411,10 +419,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
      if (iter > 1) then
        ! Solve DIIS equations to get phi_bk for iter > 1
-       do idat=1,ndat
-         ibk = 1 + (idat - 1) * npwsp; iek = idat * npwsp
-         call diis%solve(iter, npwsp, idat, phi_bk(:,ibk), residv_bk(:,ibk), comm_bandspinorfft)
-       end do
+       call diis%solve(iter, npwsp, ndat, phi_bk, residv_bk, comm_bandspinorfft)
 
        ! Precondition residual, output in kres_bk.
        call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
@@ -427,12 +432,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
 
      ! Compute H |phi_now> and evaluate new enlx for NC.
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
-                            eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
+                          eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
 
      ! Store new residual.
      do idat=1,ndat
        diis%hist_ene(iter, idat) = eig(ib_start+idat-1)
        diis%hist_resid(iter, idat) = resid(ib_start+idat-1)
+       diis%hist_enlx(iter, idat) = enlx(ib_start+idat-1)
        diis%step_type(iter, idat) = "DIIS"
        ibk = 1 + (idat - 1) * npwsp; iek = idat * npwsp
        diis%chain_phi(:,:,iter, idat) = phi_bk(:,ibk:iek)
@@ -440,7 +446,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
        if (usepaw == 1) diis%chain_sphi(:,:,iter,idat) = ptr_gsc_bk(:,ibk:iek)
      end do
 
-     ! ============== CHECK FOR CONVERGENCE ========================
+     ! === CHECK FOR CONVERGENCE ====
      if (diis%exit_iter(iter, ndat, max_niter_block, accuracy_ene, dtset, comm_bandspinorfft)) exit iter_loop
 
      ! Compute <R_i|R_j> and <i|S|j> for j=iter
@@ -512,16 +518,19 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
 
-     ! Push the last results just for printing purposes.
+     ! Push the last results just for printing purposes and increment last_iter.
      it = diis%last_iter + 1
      do idat=1,ndat
        diis%hist_ene(it, idat) = eig(ib_start+idat-1)
        diis%hist_resid(it, idat) = resid(ib_start+idat-1)
+       diis%hist_enlx(it, idat) = enlx(ib_start+idat-1)
        diis%step_type(it, idat) = tag
      end do
      diis%last_iter = diis%last_iter + 1
 
    end if ! end_with_trial_step
+
+   !call diis%rollback(npwsp, ndat, phi_bk, ptr_gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
 
    ! Update wavefunction block. cg(:,igs:ige) = phi_bk
    call cg_zcopy(npwsp * ndat, phi_bk, cg(:,igs))
@@ -530,10 +539,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, gsc
  end do ! iblock
 
  call timab(1634, 2, tsec) !"rmm_diis:band_opt"
- call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
+ if (timeit) call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
 
  !call yaml_write_and_free_dict('RMM-DIIS', dict, std_out)
- ydoc = yamldoc_open('RMM-DIIS', with_iter_state=.False.)
+ ydoc = yamldoc_open("RMM-DIIS", with_iter_state=.False.)
  call ydoc%add_dict("stats", diis%stats)
  call ydoc%write_and_free(std_out)
  call diis%stats%free()
@@ -589,9 +598,9 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
  real(dp) :: resid, deltae, deold
  character(len=50) :: msg_list(ndat)
 
- diis%last_iter = iter
- if (xmpi_comm_rank(comm) /= master) goto 10
+ diis%last_iter = iter !; if (iter == niter_block) return
 
+ if (xmpi_comm_rank(comm) /= master) goto 10
  checks = 0
  do idat=1,ndat
    resid = diis%hist_resid(iter, idat)
@@ -599,8 +608,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
    deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
 
    ! Relative criterion on eig diff
-   ! Abinit default in the CG part is 0.005 (0.3 V).
-   ! Here we enlarge it a bit
+   ! Abinit default in the CG part is 0.005 (0.3 V). Here we enlarge it a bit
    if (abs(deltae) < 6 * dtset%tolrde * abs(deold) .and. iter /= niter_block) then
    !if (abs(deltae) < 0.3 * abs(deold) .and. iter /= niter_block) then
      checks(idat) = 1; msg_list(idat) = "deltae < 6 * tolrde * deold"; cycle
@@ -627,9 +635,9 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
  ans = all(checks /= 0)
  if (ans) then
    do idat=1,ndat
-     call diis%stats%increment(msg_list(idat), 1)
+     call diis%stats%increment(trim(msg_list(idat)), 1)
    end do
-   !if (prtvol == -level) then
+   !if (diis%prtvol == -level) then
    !  write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
    !   ' band: ',iband,' converged after: ',iter,' iterations with resid: ',resid(iband), ch10
    !  call wrtout(std_out, sjoin("<END RMM-DIIS, msg='", msg, "'>"))
@@ -668,7 +676,8 @@ subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
  character(len=500) :: msg
 
  call wrtout(std_out, &
-   sjoin("<BEGIN RMM-DIIS-BLOCK, istep:", itoa(istep), ", ikpt:", itoa(ikpt), ", spin: ", itoa(isppol), ">"))
+   sjoin("<BEGIN RMM-DIIS-BLOCK, istep:", itoa(istep), ", ikpt:", itoa(ikpt), ", spin: ", itoa(isppol), ">"), &
+   pre_newlines=1)
 
  do idat=1,ndat
    write(msg,'(1a, 2(a5), 4(a14), 1x, a6)') &
@@ -677,7 +686,6 @@ subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
    iband = ib_start + idat - 1
    deold = diis%hist_ene(1, idat) - diis%hist_ene(0, idat)
    do iter=0,diis%last_iter
-
      deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
      dedold = zero; absdiff = zero
      if (iter > 0) then
@@ -691,7 +699,7 @@ subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
    end do
  end do
 
- call wrtout(std_out, "<END RMM-DIIS-BLOCK>")
+ call wrtout(std_out, "<END RMM-DIIS-BLOCK>", newlines=1)
 
 end subroutine rmm_diis_print_block
 !!***
@@ -766,7 +774,7 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
  ! PAW normalization must be done here.
  if (usepaw == 1 .and. normalize_) call cgpaw_normalize(npwsp, ndat, cg, gsc, istwf_k, me_g0, comm)
 
- ! Compute new approximated eigenvalues, resid-vectors and residuals.
+ ! Compute new approximated eigenvalues, residue vectors and residuals.
  call cg_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, comm)
  call cg_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
  call cg_norm2g(istwf_k, npwsp, ndat, residvecs, resid, me_g0, comm)
@@ -806,9 +814,9 @@ end subroutine getghc_eigresid
 !!
 !! SOURCE
 
-type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize) result(diis)
+type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize, prtvol) result(diis)
 
- integer,intent(in) :: usepaw, istwf_k, npwsp, max_niter, bsize
+ integer,intent(in) :: usepaw, istwf_k, npwsp, max_niter, bsize, prtvol
 
  diis%usepaw = usepaw
  diis%istwf_k = istwf_k
@@ -816,9 +824,11 @@ type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize)
  diis%npwsp = npwsp
  diis%max_niter = max_niter
  diis%bsize = bsize
+ diis%prtvol = prtvol
 
  ABI_MALLOC(diis%hist_ene, (0:max_niter+1, bsize))
  ABI_MALLOC(diis%hist_resid, (0:max_niter+1, bsize))
+ ABI_MALLOC(diis%hist_enlx, (0:max_niter+1, bsize))
  ABI_MALLOC(diis%step_type, (0:max_niter+1, bsize))
 
  ABI_MALLOC(diis%chain_phi, (2, npwsp, 0:max_niter, bsize))
@@ -847,10 +857,12 @@ end function rmm_diis_new
 !! SOURCE
 
 subroutine rmm_diis_free(diis)
+
  class(rmm_diis_t),intent(inout) :: diis
 
  ABI_SFREE(diis%hist_ene)
  ABI_SFREE(diis%hist_resid)
+ ABI_SFREE(diis%hist_enlx)
  ABI_SFREE(diis%step_type)
  ABI_SFREE(diis%chain_phi)
  ABI_SFREE(diis%chain_sphi)
@@ -879,14 +891,15 @@ end subroutine rmm_diis_free
 !!
 !! SOURCE
 
-subroutine rmm_diis_solve(diis, iter, npwsp, idat, new_psi, new_residvec, comm)
+subroutine rmm_diis_solve(diis, iter, npwsp, ndat, phi_bk, residv_bk, comm)
 
  class(rmm_diis_t),intent(in) :: diis
- integer,intent(in) :: iter, npwsp, comm, idat
- real(dp),intent(out) :: new_psi(2, npwsp), new_residvec(2, npwsp)
+ integer,intent(in) :: iter, npwsp, comm, ndat
+ real(dp),intent(inout) :: phi_bk(2, npwsp, ndat), residv_bk(2, npwsp, ndat)
 
  integer,parameter :: master = 0
- integer :: cplex, ierr, nprocs, my_rank
+ integer :: cplex, ierr, nprocs, my_rank, ii, idat, ibk, iek
+ real(dp) :: noise
  real(dp),allocatable :: diis_eig(:)
  real(dp),allocatable :: wmat1(:,:,:), wmat2(:,:,:), wvec(:,:), alphas(:,:)
  character(len=500) :: msg
@@ -895,77 +908,93 @@ subroutine rmm_diis_solve(diis, iter, npwsp, idat, new_psi, new_residvec, comm)
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  cplex = diis%cplex
 
- ! TODO
- !do idat=1,ndat
+ do idat=1,ndat
 
- if (try_to_solve_eigproblem) then
-   ABI_MALLOC(diis_eig, (0:iter-1))
-   ABI_MALLOC(wmat1, (cplex, 0:iter-1, 0:iter-1))
-   ABI_MALLOC(wmat2, (cplex, 0:iter-1, 0:iter-1))
-   wmat1 = diis%resmat(:, 0:iter-1, 0:iter-1, idat)
-   wmat2 = diis%smat(:, 0:iter-1, 0:iter-1, idat)
-   !do ii=0,iter-1; write(std_out, *) "diis_resmat:", wmat1(:,ii,:); end do
-   !do ii=0,iter-1; write(std_out, *) "diis_smat:", wmat2(:,ii,:); end do
-   ABI_CHECK(cplex == 2, "cplex 1 not coded")
+   if (try_to_solve_eigproblem) then
+     ABI_MALLOC(diis_eig, (0:iter-1))
+     ABI_MALLOC(wmat1, (cplex, 0:iter-1, 0:iter-1))
+     ABI_MALLOC(wmat2, (cplex, 0:iter-1, 0:iter-1))
+     wmat1 = diis%resmat(:, 0:iter-1, 0:iter-1, idat)
+     wmat2 = diis%smat(:, 0:iter-1, 0:iter-1, idat)
+     !do ii=0,iter-1; write(std_out, *) "diis_resmat:", wmat1(:,ii,:); end do
+     !do ii=0,iter-1; write(std_out, *) "diis_smat:", wmat2(:,ii,:); end do
+     ABI_CHECK(cplex == 2, "cplex 1 not coded")
 
-   call xhegv_cplex(1, "V", "U", cplex, iter, wmat1, wmat2, diis_eig, msg, ierr)
-   !write(std_out,*)"diis_eig:", diis_eig(0)
-   !write(std_out,*)"RE diis_vec  :", wmat1(1,:,0)
-   !write(std_out,*)"IMAG diis_vec:", wmat1(2,:,0)
-   !ABI_CHECK(ierr == 0, "xhegv returned ierr != 0")
-   if (ierr /= 0) then
-     !call wrtout(std_out, sjoin("xhegv failed with:", msg, ch10, "at iter: ", itoa(iter), "exit iter_loop!"))
-     ABI_FREE(diis_eig)
+     call xhegv_cplex(1, "V", "U", cplex, iter, wmat1, wmat2, diis_eig, msg, ierr)
+     !write(std_out,*)"diis_eig:", diis_eig(0)
+     !write(std_out,*)"RE diis_vec  :", wmat1(1,:,0)
+     !write(std_out,*)"IMAG diis_vec:", wmat1(2,:,0)
+     !ABI_CHECK(ierr == 0, "xhegv returned ierr != 0")
+     if (ierr /= 0) then
+       !call wrtout(std_out, sjoin("xhegv failed with:", msg, ch10, "at iter: ", itoa(iter), "exit iter_loop!"))
+       ABI_FREE(diis_eig)
+       ABI_FREE(wmat1)
+       ABI_FREE(wmat2)
+       goto 10
+     end if
+
+     ! Take linear combination of chain_phi and chain_resv.
+     call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wmat1(:,:,0), phi_bk(:,:, idat))
+     call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wmat1(:,:,0), residv_bk(:,:,idat))
+
      ABI_FREE(wmat1)
      ABI_FREE(wmat2)
-     goto 10
+     ABI_FREE(diis_eig)
+     cycle
    end if
 
-   ! Take linear combination of chain_phi and chain_resv.
-   call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wmat1(:,:,0), new_psi)
-   call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wmat1(:,:,0), new_residvec)
+   10 continue
 
-   ABI_FREE(wmat1)
-   ABI_FREE(wmat2)
-   ABI_FREE(diis_eig)
-   return
- end if
+   ! Solve system of linear equations.
+   ! Only master works so that we are sure we have the same solution.
+   ABI_CALLOC(wvec, (cplex, 0:iter))
 
-10 continue
+   if (my_rank == master) then
+     wvec(1, iter) = -one
+     ABI_CALLOC(wmat1, (cplex, 0:iter, 0:iter))
+     wmat1(1,:,iter) = -one
+     wmat1(1,iter,:) = -one
+     wmat1(1,iter,iter) = zero
+     wmat1(:,0:iter-1, 0:iter-1) = diis%resmat(:, 0:iter-1, 0:iter-1, idat)
 
- ! Solve system of linear equations.
- ! Only master works so that we are sure we have the same solution.
- ABI_CALLOC(wvec, (cplex, 0:iter))
+     !write(std_out, *)"iter:", iter, "cplex:", cplex
+     !do ii=0,iter
+     !  write(std_out, *)"wmat1:", wmat1(:, ii, :)
+     !end do
 
- if (my_rank == master) then
-   wvec(1, iter) = -one
-   ABI_CALLOC(wmat1, (cplex, 0:iter, 0:iter))
-   wmat1(1,:,iter) = -one
-   wmat1(1,iter,:) = -one
-   wmat1(1,iter,iter) = zero
-   wmat1(:,0:iter-1, 0:iter-1) = diis%resmat(:, 0:iter-1, 0:iter-1, idat)
+     call xhesv_cplex("U", cplex, iter+1, 1, wmat1, wvec, msg, ierr)
 
-   call xhesv_cplex("U", cplex, iter+1, 1, wmat1, wvec, msg, ierr)
-   ABI_CHECK(ierr == 0, msg)
-   ABI_FREE(wmat1)
-   write(std_out,*)"wvec(:,:):", wvec
- end if
+     ABI_CHECK(ierr == 0, msg)
+     ABI_FREE(wmat1)
+     if (diis%prtvol == -level) then
+       write(std_out,*)"wvec:", wvec
+       write(std_out,*)"sum(wvec):", sum(wvec(:, 0:iter-1), dim=2)
+     end if
+     !if (cplex == 2) then
+     !  coefficients should sum up to 1 but sometimes we get a small imaginary part
+     !  here we remove it
+     !  noise = sum(wvec(2, 0:iter-1), dim=2)
+     !  wvec(2, 0:iter-1) = wvec(2, 0:iter-1) / (noise * iter)
+     !end do
+   end if
 
- ! Master broadcasts data.
- if (nprocs > 1) call xmpi_bcast(wvec, master, comm, ierr)
+   ! Master broadcasts data.
+   if (nprocs > 1) call xmpi_bcast(wvec, master, comm, ierr)
 
- if (cplex == 2) then
-   call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wvec(:,0), new_psi)
-   call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wvec(:,0), new_residvec)
- else
-   ABI_CALLOC(alphas, (2, 0:iter))
-   alphas(1,:) = wvec(1,:)
-   call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), alphas, new_psi)
-   call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), alphas, new_residvec)
-   ABI_FREE(alphas)
- end if
+   if (cplex == 2) then
+     call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wvec(:,0), phi_bk(:,:,idat))
+     call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wvec(:,0), residv_bk(:,:,idat))
+   else
+     ! TODO: DGEMV
+     ABI_CALLOC(alphas, (2, 0:iter))
+     alphas(1,:) = wvec(1,:)
+     call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), alphas, phi_bk(:,:,idat))
+     call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), alphas, residv_bk(:,:,idat))
+     ABI_FREE(alphas)
+   end if
+   ABI_FREE(wvec)
 
- ABI_FREE(wvec)
+ end do ! idat
 
 end subroutine rmm_diis_solve
 !!***
@@ -1034,12 +1063,70 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
      call xmpi_sum(diis%resmat(:,0:iter,iter,idat), comm, ierr)
      call xmpi_sum(diis%smat(:,0:iter,iter, idat), comm, ierr)
    endif
-   write(std_out,*)"resmat:", diis%resmat(:,0:iter,iter,idat)
-   write(std_out,*)"smat:", diis%smat(:,0:iter,iter, idat)
+   if (diis%prtvol == -level) then
+     write(std_out,*)"iter, idat, resmat:", iter, idat, diis%resmat(:,0:iter,iter,idat)
+     !write(std_out,*)"iter, idat smat:", iter, idat, diis%smat(:,0:iter,iter,idat)
+   end if
 
  end do ! idat
 
 end subroutine rmm_diis_eval_mats
+!!***
+
+!!****f* m_rmm_diis/rmm_diis_rollback
+!! NAME
+!!  rmm_diis_rollback
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx, comm)
+
+ class(rmm_diis_t),intent(inout) :: diis
+ integer,intent(in) :: npwsp, comm, ndat
+ real(dp),intent(inout) :: phi_bk(2, npwsp, ndat), gsc_bk(2, npwsp, ndat*diis%usepaw)
+ real(dp),intent(inout) :: eig(ndat), resid(ndat), enlx(ndat)
+
+ integer,parameter :: master = 0
+ integer :: nprocs, my_rank, ii, idat, iter, ierr, ilast, take_iter(ndat)
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ take_iter = -1
+ ilast = diis%last_iter
+
+ if (my_rank == master) then
+   do idat=1,ndat
+     iter = imin_loc(diis%hist_resid(0:ilast, idat))  !back = .True.
+     iter = iter - 1
+     if (iter /= ilast .and. &
+         diis%hist_resid(iter, idat) < 0.1_dp * diis%hist_resid(ilast, idat)) take_iter(idat) = iter
+   end do
+ end if
+ if (nprocs > 1) call xmpi_bcast(take_iter, master, comm, ierr)
+
+ if (any(take_iter /= -1)) then
+   do idat=1,ndat
+     iter = take_iter(idat); if (iter == -1) cycle
+     diis%step_type(iter, idat) = trim(diis%step_type(iter, idat)) // "*"
+     eig(idat) = diis%hist_ene(iter, idat)
+     resid(idat) = diis%hist_resid(iter, idat)
+     enlx(idat) = diis%hist_enlx(iter, idat)
+     phi_bk(:,:,idat) = diis%chain_phi(:,:,iter,idat)
+     if (diis%usepaw == 1) gsc_bk(:,:,idat) = diis%chain_sphi(:,:,iter,idat)
+     call diis%stats%increment("rollbacks", 1)
+   end do
+ end if
+
+end subroutine rmm_diis_rollback
 !!***
 
 !!****f* m_cgtools/cg_eigens

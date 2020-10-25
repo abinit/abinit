@@ -235,16 +235,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
-
- ! Decide whether RMM-DIIS eigensolver should be activated.
- ! rmm_diis > 0 --> Activate it after (3 + rmm_diis) iterations with wfoptalg algorithm.
- ! rmm_diis < 0 --> Start with RMM-DIIS directly (risky)
- use_rmm_diis = .False.
- if (abs(dtset%rmm_diis) /= 0 .and. dtset%use_gpu_cuda == 0) then
-   if (dtset%rmm_diis > 0) use_rmm_diis = istep > 3 + dtset%rmm_diis
-   if (dtset%rmm_diis < 0) use_rmm_diis = .True.
-   if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver.")
- end if
+ igsc=0
 
 !Parallelization over spinors management
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
@@ -275,14 +266,29 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  n1=gs_hamk%ngfft(1); n2=gs_hamk%ngfft(2); n3=gs_hamk%ngfft(3)
+ mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
+
+ ! Decide whether RMM-DIIS eigensolver should be activated.
+ ! rmm_diis > 0 --> Activate it after (3 + rmm_diis) iterations with wfoptalg algorithm.
+ ! rmm_diis < 0 --> Start with RMM-DIIS directly (risky)
+ use_rmm_diis = .False.
+ if (abs(dtset%rmm_diis) /= 0 .and. dtset%use_gpu_cuda == 0) then
+   if (dtset%rmm_diis > 0) use_rmm_diis = istep > 3 + dtset%rmm_diis
+   if (dtset%rmm_diis < 0) use_rmm_diis = .True.
+   if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver.")
+ end if
 
  if ((.not. newlobpcg) .or. use_rmm_diis) then
-   igsc=0
-   mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
-
    ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
    gsc=zero
  end if
+
+ !if (use_rmm_diis) then
+ !  if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
+ !  ortalgo = mpi_enreg%paral_kgb
+ !  call pw_orthon(icg, igsc, istwf_k, mcg, mgsc, npw_k*my_nspinor, nband_k, ortalgo, gsc, gs_hamk%usepaw, cg, &
+ !   mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
+ !end if
 
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then
    !chebfi already does this stuff inside
@@ -465,6 +471,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  =========================================================================
    do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
    if (use_rmm_diis) do_subdiago = .False.  ! subdiago is already performed before RMM-DIIS.
+   !do_subdiago = .True.
 
    if (do_subdiago) then
      if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
@@ -509,6 +516,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ortalgo = mpi_enreg%paral_kgb
    !ortalgo = 3
    do_ortho = ((wfoptalg/=14 .and. wfoptalg /= 1) .or. dtset%ortalg > 0 .or. use_rmm_diis)
+   !do_ortho = .True.
    if (do_ortho) then
      if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
      call pw_orthon(icg, igsc, istwf_k, mcg, mgsc, npw_k*my_nspinor, nband_k, ortalgo, gsc, gs_hamk%usepaw, cg, &

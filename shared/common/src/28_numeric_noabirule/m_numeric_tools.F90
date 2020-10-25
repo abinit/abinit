@@ -1719,7 +1719,7 @@ end function imax_loc_rdp
 !!
 !! SOURCE
 
-pure function imin_loc_int(arr,mask)
+pure function imin_loc_int(arr, mask)
 
 !Arguments ------------------------------------
 !scalars

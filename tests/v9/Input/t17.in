@@ -1,7 +1,9 @@
 # GS calculation with the CG + RMM-DIIS eigensolver and NC pseudos
-#
+ndtset 2
+
 rmm_diis1  1       # Activate CG + RMM-DIIS.
 rmm_diis2 -1       # RMM-DIIS only
+#paral_kgb 1
 
 boxcutmin 1.5
 
@@ -9,8 +11,6 @@ boxcutmin 1.5
 #use_gemm_nonlop1 1 # test nonlop with BLAS, requires useylm 1
 #useylm1 1
 #useylm2 0
-
-ndtset 2
 #istwfk *1
 
 nspinor1 1
