@@ -96,7 +96,8 @@ module m_rmm_diis
 
 
  integer,parameter, private :: level = 432
- logical,parameter, private :: timeit = .False.
+ !logical,parameter, private :: timeit = .False.
+ logical,parameter, private :: timeit = .True.
 
 contains
 !!***
@@ -373,6 +374,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call cg_zcopy(npwsp, phi_bk(1,jj), diis%chain_phi(:,:,0,idat))
      if (usepaw == 1) call cg_zcopy(npwsp, ptr_gsc_bk(1:,jj), diis%chain_sphi(:,:,0,idat))
    end do
+   if (timeit) call cwtime_report(" first getghc_eigresid ", cpu, wall, gflops)
 
    ! Precondition |R_0>, output in kres_bk = |K R_0>
    call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
@@ -421,6 +423,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      !write(std_out, *)"lambda, dotr, rval ", lambda_bk(1), dotr, rval
    end do
 #endif
+   if (timeit) call cwtime_report(" KR0 ", cpu, wall, gflops)
 
    iter_loop: do iter=1,max_niter_block
 
@@ -467,6 +470,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end_with_trial_step = iter == max_niter_block + 1
    !end_with_trial_step = .False.
    !end_with_trial_step = .True.
+   if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
 
    if (end_with_trial_step) then
 
@@ -534,6 +538,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        diis%step_type(it, idat) = tag
      end do
      diis%last_iter = diis%last_iter + 1
+     if (timeit) call cwtime_report(" last_trial_step ", cpu, wall, gflops)
 
    end if ! end_with_trial_step
 
@@ -1363,13 +1368,14 @@ subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect,
  real(dp),allocatable :: pcon(:)
 
  ! TODO: Optimized version for MPI with ndat > 1
+ !return
  ABI_MALLOC(pcon, (npw))
  do idat=1,ndat
    call cg_precon(cg(:,idat), zero, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pcon, vect(:,idat), comm)
  end do
  ABI_FREE(pcon)
 
- !call cg_kine(istwf_k, npw, nspinor, ndat, cg, me_g0, comm)
+ !call cg_kinene(istwf_k, npw, nspinor, ndat, cg, me_g0, comm)
 
 end subroutine cg_precon_many
 !!***
