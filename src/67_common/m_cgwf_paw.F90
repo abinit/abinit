@@ -477,6 +477,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            call cprj_axpby(cprj_conjgr,cprj_direc,cprj_direc,z_tmp,z_tmp2,&
 &                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+           if (prtvol==-level)then
+             write(message,'(a,es16.6)')' cgwf: dotgg = ',dotgg
+             call wrtout(std_out,message,'PERS')
+           end if
 
          else
            gamma=dotgg/dotgp
@@ -700,8 +704,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
    isubh=1
    do iband=1,nband
      do jband=1,iband
-       write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
-       call wrtout(std_out,message,'PERS')
+       if (jband<=10) then
+         write(message,'(i7,2es16.6)')isubh,subham(isubh:isubh+1)
+         call wrtout(std_out,message,'PERS')
+       end if
        isubh=isubh+2
      end do
    end do
