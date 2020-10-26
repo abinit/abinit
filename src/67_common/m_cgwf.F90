@@ -181,7 +181,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
- integer,parameter :: level=113,tim_getghc=1,tim_projbd=1
+ integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
  integer,save :: nskip=0
  integer :: choice,counter,cpopt,ddkflag,dimenlc1,dimenlr1,dimenl2,iat,iatom,itypat
  integer :: iband,ibandmin,ibandmax,me_g0
@@ -399,6 +399,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    end if
  end if ! finite_field
 
+  !LTEST
+!  write(999,'(a,es17.8e3)') 'vloc',sum(abs(gs_hamk%vlocal))
+!  write(999,'(a,es17.8e3)') 'kin',sum(abs(gs_hamk%kinpw_k))
+  !LTEST
+
  ! ======================================================================
  ! If generalized eigenproblem: has to know <g|S|c> for all
  ! bands (for orthogonalization purpose); take benefit of this
@@ -421,13 +426,18 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        sij_opt=1
        if (finite_field .and. gs_hamk%usepaw == 1) then
          call getghc(0,cwavef,cprj_band_srt,ghc,scwavef,gs_hamk,gvnlxc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
          call pawcprj_put(gs_hamk%atindx,cprj_band_srt,cprj_k,natom,iband,0,ikpt,&
 &         1,isppol,mband,1,natom,1,mband,dimlmn,nspinor,nsppol,0,&
 &         mpicomm=spaceComm_distrb,proc_distrb=mpi_enreg%proc_distrb)
        else
+         !LTEST
+!         call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
+!           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+!         ghc=zero
+         !LTEST
          call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
        end if
 
        call cg_zcopy(npw*nspinor,ghc,ghc_all(1,1+icg_shift-icg))
@@ -480,6 +490,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        call cg_zcopy(npw*nspinor,gsc(1,1+igsc_shift),scwavef)
      end if
 
+     !LTEST
+!     write(999,'(a,i5)') 'iband',iband
+!     write(999,'(a,es17.8e3)') 'cwave 1',sum(abs(cwavef))
+     !LTEST
+
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
      ! WARNING : It might be interesting to skip the following operation.
      ! The associated routines should be reexamined to see whether cwavef is not already normalized.
@@ -493,6 +508,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        xnorm=one/sqrt(abs(dotr))
        call cg_zscal(npw*nspinor,(/xnorm,zero/),cwavef)
      end if
+     !LTEST
+!     write(999,'(a,es17.8e3)') 'cwavef 2',sum(abs(cwavef))
+     !LTEST
 
      if (prtvol==-level) then
        write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
@@ -513,7 +531,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        call fock_set_ieigen(gs_hamk%fockcommon,iband)
        sij_opt=0
        call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlxc,&
-&       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+         &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
      end if
 
 
@@ -528,7 +546,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          work(:,:)=ghc(:,:)-zshift(iband)*cwavef(:,:)
        end if
        call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnlx_dummy,&
-&       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+         &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
        if (gen_eigenpb) then
          ghc(:,:)=ghc(:,:)-zshift(iband)*swork(:,:)
        else
@@ -606,6 +624,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (prtvol==-level) then
            write(message,'(a,i0,2f14.6)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
            call wrtout(std_out,message,'PERS')
+           !LTEST
+!           write(999,'(a,es17.8e3)') 'eval',eval
+!           flush(999)
+!           MSG_ERROR('stop here')
+           !LTEST
          end if
 
          ! ======================================================================
@@ -774,6 +797,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            gamma=zero
            dotgp=dotgg
            call cg_zcopy(npw*nspinor,direc,conjgr)
+           if (prtvol==-level)then
+             write(message,'(a,es16.6)')' cgwf: dotgg = ',dotgg
+             call wrtout(std_out,message,'PERS')
+           end if
 
          else
            gamma=dotgg/dotgp
@@ -844,7 +871,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          sij_opt=0;if (gen_eigenpb) sij_opt=1
 
          call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
 
          if(wfopta10==2 .or. wfopta10==3)then
            ! Minimisation of the residual, so compute <G|(H-zshift)^2|D>
@@ -858,7 +885,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            end if
 
            call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnlx_dummy,&
-&           eval,mpi_enreg,1,prtvol,0,tim_getghc,0)
+             &           eval,mpi_enreg,1,prtvol,0,tim_getghc,type_calc)
 
            if (gen_eigenpb) then
              gh_direc(:,:)=gh_direc(:,:)-zshift(iband)*swork(:,:)
@@ -1239,12 +1266,14 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    if (use_subvnlx==0) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
    do iband=1,nband
      do ii=1,iband
-       if (use_subvnlx==1) then
-         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
-       else
-         write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
+       if (ii<=10) then
+         if (use_subvnlx==1) then
+           write(message,'(i7,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
+         else
+           write(message,'(i7,2es16.6)')isubh,subham(isubh:isubh+1)
+         end if
+         call wrtout(std_out,message,'PERS')
        end if
-       call wrtout(std_out,message,'PERS')
        isubh=isubh+2
      end do
    end do
