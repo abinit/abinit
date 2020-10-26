@@ -155,11 +155,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  real(dp),intent(out) :: eig(nband)
 
 !Local variables-------------------------------
- integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2
- integer,parameter :: tim_getghc = 0, use_subovl0 = 0
+ integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb !, comm
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
- integer :: me_g0, nbocc, jj, kk, it, ibk, iek !ii, ld1, ld2,
+ integer :: me_g0, nbocc, jj, kk, it, ibk, iek, cplex !ii, ld1, ld2,
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
  logical :: end_with_trial_step, new_lambda
  real(dp),parameter :: rdummy = zero
@@ -206,7 +205,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
  ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
- ABI_CALLOC(h_ij, (2, nband, nband))
+ cplex = 2; if (istwf_k == 2) cplex = 1
+ ABI_CALLOC(h_ij, (cplex, nband, nband))
 
  call timab(1633, 1, tsec) !"rmm_diis:build_hij
  if (timeit) call cwtime(cpu, wall, gflops, "start")
@@ -230,7 +230,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    ! Compute <i|H|j> for i=1,nband and all j in block
    ! TODO: Optimize for istwf_k == 2
-   call cg_zgemm("C", "N", npwsp, nband, ndat, cg, ghc_bk, h_ij(:,:,ib_start))
+   if (cplex == 2) then
+     call cg_zgemm("C", "N", npwsp, nband, ndat, cg, ghc_bk, h_ij(:,:,ib_start))
+   else
+     call dgemm("T", "N", nband, ndat, 2*npwsp, one, cg, 2*npwsp, ghc_bk, 2*npwsp, zero, h_ij(:,:,ib_start), nband)
+     !integer M, integer N, integer K, double precision ALPHA,
+     !double precision, dimension(lda,*) A, integer LDA,
+     !double precision, dimension(ldb,*) B, integer LDB,
+     !double precision BETA,
+     !double precision, dimension(ldc,*) C, integer LDC
+     !)
+   end if
 
    if (istwf_k /= 1) then
      do iband=ib_start, ib_stop
@@ -246,7 +256,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        end if
 
        ! Force real matrix.
-       h_ij(2,:,iband) = zero
+       if (cplex == 2) h_ij(2,:,iband) = zero
      end do
    end if
 
@@ -256,10 +266,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  ! Pack <i|H|j> to prepare call to subdiago.
  ABI_MALLOC(subham, (nband*(nband+1)))
- do iband=1,nband
-   h_ij(2,iband,iband) = zero ! Force diagonal elements to be real
- end do
- call pack_matrix(h_ij, subham, nband, 2)
+ if (cplex == 2) then
+   do iband=1,nband
+     h_ij(2,iband,iband) = zero ! Force diagonal elements to be real
+   end do
+ end if
+ if (cplex == 2) then
+   call pack_matrix(h_ij, subham, nband, 2)
+ else
+   call my_pack_matrix(nband, h_ij, subham)
+ end if
+
  ABI_FREE(h_ij)
  call xmpi_sum(subham, comm_bandspinorfft, ierr)
  call timab(1633, 2, tsec) !"rmm_diis:build_hij
@@ -327,7 +344,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !gs_hamk%kinpw_k is not kinpw
  !ABI_CHECK_IEQ(size(gs_hamk%kinpw_k), size(kinpw), "diff in size")
  !ABI_CHECK(all(gs_hamk%kinpw_k == kinpw), "diff in kinpw values")
- ! TODO: Transpose only once per block and then work already_transposed = .True.
+ ! TODO: Transpose only once per block and then work with already_transposed = .True.
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize
@@ -405,27 +422,28 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_bandspinorfft)
    if (timeit) call cwtime_report(" cg_norm2g ", cpu, wall, gflops)
 
-#if 0
-   ld1 = npwsp * (max_niter + 1); ld2 = npwsp
-   call cg_zdotg_lds(istwf_k, npwsp, ndat, option1, ld1, diis%chain_resv, ld2, residv_bk, dots_bk, me_g0, comm_bandspinorfft)
-   do idat=1,ndat
-     jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
-     lambda_bk(idat) = -dots_bk(1,idat) / lambda_bk(idat)
-     phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
-   end do
-
-#else
+   !ld1 = npwsp * (max_niter + 1); ld2 = npwsp
+   !call cg_zdotg_lds(istwf_k, npwsp, ndat, option1, ld1, diis%chain_resv, ld2, residv_bk, dots_bk, me_g0, comm_bandspinorfft)
+   !do idat=1,ndat
+   !  jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
+   !  lambda_bk(idat) = -dots_bk(1,idat) / lambda_bk(idat)
+   !  phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
+   !end do
    !lamdas(ii) = -dots_bk(1, ii) / lambda_bk(ii)
+
    do idat=1,ndat
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
-     call dotprod_g(dotr, doti, istwf_k, npwsp, option1, &
-                    diis%chain_resv(:,:,0,idat), residv_bk(:,jj), me_g0, comm_bandspinorfft)
-
-     lambda_bk(idat) = -dotr / lambda_bk(idat)
-     phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
-     !write(std_out, *)"lambda, dotr, rval ", lambda_bk(1), dotr, rval
+     call dotprod_g(dots_bk(1,idat), dots_bk(2,idat), istwf_k, npwsp, option1, &
+                    diis%chain_resv(:,:,0,idat), residv_bk(:,jj), me_g0, xmpi_comm_self)
    end do
-#endif
+   call xmpi_sum(dots_bk, comm_bandspinorfft, ierr)
+
+   do idat=1,ndat
+     lambda_bk(idat) = -dots_bk(1,idat) / lambda_bk(idat)
+     jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
+     phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
+   end do
+
    if (timeit) call cwtime_report(" KR0 ", cpu, wall, gflops)
 
    iter_loop: do iter=1,max_niter_block
@@ -506,18 +524,19 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        ! Compute residual: (H - e_0 S) |K R_0>
        call cg_residvecs(usepaw, npwsp, ndat, eig(ib_start:), kres_bk, ghc_bk, gsc_bk, residv_bk)
 
-       !ld1 = npwsp * (max_niter + 1); ld2 = npwsp
-       !call cg_zdotg_lds(istwf_k, npwsp, ndat, option1, ld1, cg1, ld2, residv_bk, dots_bk, me_g0, comm)
-
        call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_bandspinorfft)
 
        it = diis%last_iter
        do idat=1,ndat
          jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
-         call dotprod_g(dotr, doti, istwf_k, npwsp, option1, &
-                        diis%chain_resv(:,:,it,idat), residv_bk(:,jj), me_g0, comm_bandspinorfft)
+         call dotprod_g(dots_bk(1,idat), dots_bk(2,idat), istwf_k, npwsp, option1, &
+                        diis%chain_resv(:,:,it,idat), residv_bk(:,jj), me_g0, xmpi_comm_self)
+       end do
+       call xmpi_sum(dots_bk, comm_bandspinorfft, ierr)
 
-         lambda_bk(idat) = -dotr / lambda_bk(idat)
+       do idat=1,ndat
+         lambda_bk(idat) = -dots_bk(1,idat) / lambda_bk(idat)
+         jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
          phi_bk(:,jj:kk) = diis%chain_phi(:,:,it,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
        end do
 
@@ -914,7 +933,7 @@ subroutine rmm_diis_solve(diis, iter, npwsp, ndat, phi_bk, residv_bk, comm)
  real(dp),intent(inout) :: phi_bk(2, npwsp, ndat), residv_bk(2, npwsp, ndat)
 
  integer,parameter :: master = 0
- integer :: cplex, ierr, nprocs, my_rank, ii, idat !, ibk, iek
+ integer :: cplex, ierr, nprocs, my_rank, idat !, ibk, iek, ii,
  real(dp) :: noise
  real(dp),allocatable :: diis_eig(:)
  real(dp),allocatable :: wmat1(:,:,:), wmat2(:,:,:), wvec(:,:,:), alphas(:,:)
@@ -1005,15 +1024,27 @@ subroutine rmm_diis_solve(diis, iter, npwsp, ndat, phi_bk, residv_bk, comm)
      call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wvec(:,0,idat), phi_bk(:,:,idat))
      call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wvec(:,0,idat), residv_bk(:,:,idat))
    else
+#if 0
      ABI_CALLOC(alphas, (2, 0:iter))
      alphas(1,:) = wvec(1,:,idat)
      call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), alphas, phi_bk(:,:,idat))
      call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), alphas, residv_bk(:,:,idat))
-
-     ! TODO: DGEMV
-     !call cg_dgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), alphas, phi_bk(:,:,idat))
-     !call cg_dgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), alphas, residv_bk(:,:,idat))
      ABI_FREE(alphas)
+#else
+     ! TODO: DGEMV
+     ABI_MALLOC(alphas, (1, 0:iter))
+     alphas(1,:) = wvec(1,:,idat)
+     call dgemv("N", 2*npwsp, iter, one, diis%chain_phi(:,:,:,idat), 2*npwsp, alphas, 1, zero, phi_bk(:,:,idat), 1)
+     call dgemv("N", 2*npwsp, iter, one, diis%chain_resv(:,:,:,idat), 2*npwsp, alphas, 1, zero, residv_bk(:,:,idat), 1)
+
+     !call dgemv(character 	TRANS, integer 	M, integer 	N, double precision 	ALPHA,
+     !           double precision, dimension(lda,*) 	A, integer 	LDA,
+     !           double precision, dimension(*) 	X, integer 	INCX,
+     !           double precision 	BETA, double precision, dimension(*) 	Y,integer 	INCY)
+
+     ABI_FREE(alphas)
+#endif
+
    end if
  end do
  ABI_FREE(wvec)
@@ -1428,6 +1459,51 @@ subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
  end do
 
 end subroutine cg_zaxpy_many_areal
+!!***
+
+
+!!****f* m_numeric_tools/pack_matrix
+!! NAME
+!! pack_matrix
+!!
+!! FUNCTION
+!! Packs a matrix into hermitian format
+!!
+!! INPUTS
+!! N: size of matrix
+!! cplx: 2 if matrix is complex, 1 for real matrix.
+!! mat_in(cplx, N*N)= matrix to be packed
+!!
+!! OUTPUT
+!! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine my_pack_matrix(n, mat_in, mat_out)
+
+ integer, intent(in) :: N
+ real(dp), intent(in) :: mat_in(N, N)
+ real(dp), intent(out) :: mat_out(2, N*(N+1)/2)
+
+!local variables
+ integer :: isubh, i, j
+
+ ! *************************************************************************
+
+ isubh = 1
+ do j=1,N
+   do i=1,j
+     mat_out(1,isubh) = mat_in(i, j)
+     mat_out(2,isubh) = zero
+     isubh = isubh + 1
+   end do
+ end do
+
+end subroutine my_pack_matrix
 !!***
 
 end module m_rmm_diis
