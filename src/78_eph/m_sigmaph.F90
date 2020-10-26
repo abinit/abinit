@@ -701,6 +701,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(sigmaph_t) :: sigma, sigma_restart
  type(ddkop_t) :: ddkop
  type(rf2_t) :: rf2
+ type(crystal_t) :: pot_cryst
  type(hdr_type) :: pot_hdr
  type(phstore_t) :: phstore
  character(len=500) :: msg
@@ -1119,6 +1120,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call wrtout(unts, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
+   pot_cryst = pot_hdr%get_crystal()
+   if (cryst%compare(pot_cryst, header="Comparing input crystal with POT crystal") /= 0) then
+     MSG_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
+   end if
+   call pot_cryst%free()
    call pot_hdr%free()
  end if
 

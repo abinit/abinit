@@ -275,7 +275,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      MSG_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1')
    end if
 
-!  Take into account a possible change of paral_kgb (change of thwe default algorithm)
+!  Take into account a possible change of paral_kgb (change of the default algorithm)
    if (.not.wfoptalg_read) then
      if (dtsets(idtset)%usepaw==0) dtsets(idtset)%wfoptalg=0
      if (dtsets(idtset)%usepaw/=0) dtsets(idtset)%wfoptalg=10
@@ -417,8 +417,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        end if
      else if(dtsets(idtset)%npkpt*dtsets(idtset)%npfft*dtsets(idtset)%npband*dtsets(idtset)%npspinor < nproc)then
        write(message,'(2a)')&
-&       'The number of processor must not be greater than npfft*npband*npkpt*npsinor ',&
-&       'when npfft or npkpt or npband or nspinor are chosen manually in the input file.'
+&       'The number of processor must not be greater than npfft*npband*npkpt*npspinor ',&
+&       'when npfft or npkpt or npband or npspinor are chosen manually in the input file.'
        MSG_ERROR(message)
      end if
    end if
@@ -836,9 +836,7 @@ end do ! isppol
    symrel(:,:,1:nsym)=dtsets(idtset)%symrel(:,:,1:nsym)
    ecut_eff=ecut*dilatmx**2
 
-   if (usepaw==1) then
-     call wrtout(std_out,'getng is called for the coarse grid:','COLL')
-   end if
+   if (usepaw==1) call wrtout(std_out,'getng is called for the coarse grid:')
    kpt=k0; if (response==1.and.usepaw==1) kpt=qphon ! this is temporary
 
    call getng(dtsets(idtset)%boxcutmin,ecut_eff,gmet,kpt,me_fft,mgfft,nfft,&
@@ -891,7 +889,7 @@ end do ! isppol
    if (usepaw==1) then
      ecutdg_eff=dtsets(idtset)%pawecutdg*dtsets(idtset)%dilatmx**2
      ngfftdg(:)=dtsets(idtset)%ngfftdg(:)
-     call wrtout(std_out,'getng is called for the fine grid:','COLL')
+     call wrtout(std_out,'getng is called for the fine grid:')
 !    Start with the coarse mesh as an initial guess for the fine mesh
 !    This ensures that the fine mesh will not be any coarser than the coarse mesh in each dimension
      ngfftc(:) = ngfft(1:3)
@@ -1149,8 +1147,8 @@ end subroutine mpi_setup
    mpw = nint(ucvol*((two*ecut_eff)**1.5_dp)/(six*pi**2)) ! Crude estimation
    if (all(dtset%istwfk(1:dtset%nkpt)>1)) mpw=mpw/2+1
    call kpgcount(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,dtset%kpt,ngmax,ngmin,dtset%nkpt)
-   write(msg,'(a,i8)') ' getmpw sequential formula gave: ',mpw
-   call wrtout(std_out,msg,'COLL')
+   write(msg,'(a,i0)') ' getmpw sequential formula gave: ',mpw
+   call wrtout(std_out,msg)
  end if
 
  ! Parallelization over images
@@ -1296,7 +1294,7 @@ end subroutine mpi_setup
 !  >> banddp level
    bpp_min=max(1,dtset%bandpp)
    bpp_max=mband
-   if (wf_algo_global==ALGO_LOBPCG_OLD) bpp_max=max(4,nint(mband/10.)) ! reasonnable bandpp max
+   if (wf_algo_global==ALGO_LOBPCG_OLD) bpp_max=max(4,nint(mband/10.)) ! reasonable bandpp max
    if (tread(8)==1) bpp_max=dtset%bandpp
    if (wf_algo_global==ALGO_CHEBFI) bpp_min=1 ! bandpp not used with ChebFi
    if (wf_algo_global==ALGO_CHEBFI) bpp_max=1
@@ -1524,7 +1522,7 @@ end subroutine mpi_setup
 &  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
    MSG_WARNING(msg)
    if (max_ncpus>0) then
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout(ab_out,msg)
      call flush_unit(ab_out)
    end if
    iexit=iexit+1
@@ -1629,7 +1627,7 @@ end subroutine mpi_setup
 &     ' Searching for all possible proc distributions for this input with #CPUs<=',nthreads*nproc,&
 &     ' and ',nthreads,' openMP threads:',ch10
    end if
-   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
    !Titles of columns
    msgttl='~'
    if (with_image)  msgttl=trim(msgttl)//'~~~~~~~~~~~'
@@ -1644,7 +1642,7 @@ end subroutine mpi_setup
    if (with_thread) msgttl=trim(msgttl)//'~~~~~~~~~~~~~'
    msgttl=trim(msgttl)//'~~~~~~~~~~~'   ! CPUs
    msgttl=' '//trim(msgttl)
-   call wrtout(std_out,msgttl,'COLL');if(max_ncpus>0) call wrtout(ab_out,msgttl,'COLL')
+   call wrtout(std_out,msgttl);if(max_ncpus>0) call wrtout(ab_out,msgttl)
    msg='|'
    if (with_image)  msg=trim(msg)//'   npimage|'
    if (with_pert)   msg=trim(msg)//'    nppert|'
@@ -1658,7 +1656,7 @@ end subroutine mpi_setup
    if (with_thread) msg=trim(msg)//'       #CPUs|'
    msg=trim(msg)//'    WEIGHT|'
    msg=' '//trim(msg)
-   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
    msg='|'
    write(strg,'(i4,a,i4,a)') npi_min,'<<',npi_max,'|';if (with_image)  msg=trim(msg)//trim(strg)
    write(strg,'(i4,a,i4,a)') npp_min,'<<',npp_max,'|';if (with_pert)   msg=trim(msg)//trim(strg)
@@ -1672,8 +1670,8 @@ end subroutine mpi_setup
    write(strg,'(i4,a,i6,a)') nthreads,'<<',nthreads*nproc,'|';if (with_thread) msg=trim(msg)//trim(strg)
    write(strg,'(a,i6,a)')   '  <=',nthreads*nproc,'|';                 msg=trim(msg)//trim(strg)
    msg=' '//trim(msg)
-   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msgttl,'COLL');if(max_ncpus>0) call wrtout(ab_out,msgttl,'COLL')
+   call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
+   call wrtout(std_out,msgttl);if(max_ncpus>0) call wrtout(ab_out,msgttl)
    !Loop over selected choices
    do jj=mcount,mcount-ncount+1,-1
      ii=isort(jj)
@@ -1690,12 +1688,12 @@ end subroutine mpi_setup
      write(strg,'(i12,a)') nthreads*my_distp(7,ii),'|';if (with_thread) msg=trim(msg)//trim(strg)
      write(strg,'(f10.3,a)') weight(jj)  ,'|';                 msg=trim(msg)//trim(strg)
      msg=' '//trim(msg)
-     call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
    end do
    !End of tab
-   call wrtout(std_out,msgttl,'COLL');if(max_ncpus>0) call wrtout(ab_out,msgttl,'COLL')
+   call wrtout(std_out,msgttl);if(max_ncpus>0) call wrtout(ab_out,msgttl)
    write(msg,'(a,i6,a,i6,a)')' Only the best possible choices for nproc are printed...'
-   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
  end if ! mcount>0
 
 !Determine an optimal number of bands
@@ -1720,7 +1718,7 @@ end subroutine mpi_setup
    write(strg,'(a,i0)') ' npkpt='   ,npk;if (with_kpt)    msg=trim(msg)//trim(strg)
    write(strg,'(a,i0)') ' npspinor=',nps;if (with_spinor) msg=trim(msg)//trim(strg)
    write(strg,'(a,i0)') ' npfft='   ,npf;if (with_fft)    msg=trim(msg)//trim(strg)
-   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
    ib1=mband-int(mband*relative_nband_range);if (my_algo(icount)==ALGO_CHEBFI) ib1=mband
    ib2=mband+int(mband*relative_nband_range)
    ABI_ALLOCATE(nproc_best,(1+ib2-ib1))
@@ -1743,7 +1741,7 @@ end subroutine mpi_setup
    do ii=1+ib2-ib1,max(ib2-ib1-MAXBAND_PRINT,1),-1
      write(msg,'(3(a,i6),a,i3,a,i5,a)') '     nband=',nband_best(ii),' using ',nproc1*nproc_best(ii)*nthreads,&
 &        ' CPUs =',nproc1*nproc_best(ii),' MPI x',nthreads,' threads (npband=',nproc_best(ii),')'
-     call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
      if (nband_best(ii)==mband) kk=nproc_best(ii)
    end do
    if (kk==maxval(nproc_best(:))) then
@@ -1753,7 +1751,7 @@ end subroutine mpi_setup
      if (my_algo(icount)==ALGO_CHEBFI) then
        write(msg,'(a,i6,a)') ' >>> The present nband value (',mband,') seems to be a good choice!'
      end if
-     call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
    end if
    ABI_DEALLOCATE(nproc_best)
    ABI_DEALLOCATE(nband_best)
@@ -1764,7 +1762,7 @@ end subroutine mpi_setup
 &   ' >>> Note that with the "Chebyshev Filtering" algorithm, it is often',ch10,&
 &   '     better to increase the number of bands (10% more or a few tens more).',ch10,&
 &   '     Advice: increase nband and put nbdbuf input variable to (nband_new-nband_old).'
-   call wrtout(std_out,msg,'COLL');if(max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
  end if
 
 !Refinement of the process distribution by mean of a LinAlg routines benchmarking
@@ -1784,7 +1782,7 @@ end subroutine mpi_setup
 &       'npimage','|','npkpt' ,'|','npspinor'  ,'|','npfft'     ,'|','npband','|',' bandpp ' ,'|',&
 &       'nproc'  ,'|','weight','|','new weight','|','best npslk','|','linalggpu' ,'|'
      end if
-     call wrtout(std_out,msg,'COLL');if (max_ncpus > 0) call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,msg);if (max_ncpus > 0) call wrtout(ab_out,msg)
    end if
    acc_k=zero
    ncount=min(MAXBENCH,mcount);if (autoparal==3) ncount=1
@@ -1820,7 +1818,7 @@ end subroutine mpi_setup
 &         my_distp(5,ii),'|',my_distp(6,ii),'|',my_distp(7,ii),'|',weight(jj),'=>', weight0,' |',&
 &         my_distp(9,ii),'|',use_linalg_gpu,'|'
        end if
-       call wrtout(std_out,msg,'COLL');if (max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,msg);if (max_ncpus>0) call wrtout(ab_out,msg)
 !      We store the best value in weight(mcount) and keep icount
        if (weight0 > weight(mcount)) then
          icount=ii;weight(mcount)=weight0
@@ -1882,7 +1880,7 @@ end subroutine mpi_setup
 &   ' Launch a parallel version of ABINIT with a distribution of processors among the above list,',ch10,&
 &   ' and the associated input variables (npkpt, npband, npfft, bandpp, etc.).',ch10,&
 &   ' The higher weight should be better.'
-   call wrtout(std_out,msg,'COLL');if (max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg);if (max_ncpus>0) call wrtout(ab_out,msg)
  end if
 
  if (mcount>0) then
@@ -1894,7 +1892,7 @@ end subroutine mpi_setup
 
 !Final line
  write(msg,'(a,100("="),2a)') " ",ch10,ch10
- call wrtout(std_out,msg,'COLL');if (max_ncpus>0) call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg);if (max_ncpus>0) call wrtout(ab_out,msg)
 
 !max_ncpus requires a stop
  if (max_ncpus>0) then

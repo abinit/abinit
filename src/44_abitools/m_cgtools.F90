@@ -58,7 +58,6 @@ MODULE m_cgtools
  real(dp),public,parameter :: cg_czero(2) = (/0._dp,0._dp/)
  real(dp),public,parameter :: cg_cone(2)  = (/1._dp,0._dp/)
 
-
  ! Helper functions.
  public :: cg_setval
  public :: cg_tocplx
@@ -89,7 +88,8 @@ MODULE m_cgtools
  public :: set_istwfk               ! Returns the value of istwfk associated to the input k-point.
  public :: sqnorm_g                 ! Square of the norm in reciprocal space.
  public :: dotprod_g                ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
- public :: matrixelmt_g             ! matrix element <wf1|O|wf2> of two wavefunctions, in reciprocal space, for an operator diagonal in G-space.
+ public :: matrixelmt_g             ! matrix element <wf1|O|wf2> of two wavefunctions, in reciprocal space,
+                                    ! for an operator diagonal in G-space.
  public :: dotprod_v                ! Dot product of two potentials (integral over FFT grid).
  public :: dotprod_vn
  public :: sqnorm_v                 ! Compute square of the norm of a potential (integral over FFT grid).
@@ -105,11 +105,13 @@ MODULE m_cgtools
  public :: cgnc_gramschmidt         ! Gram-Schmidt orthogonalization for NC wavefunctions.
  public :: cgpaw_normalize          ! Normalize PAW wavefunctions.
  public :: cgpaw_gramschmidt        ! Gram-Schmidt orthogonalization for PAW wavefuncion
- public :: projbd                   ! Project out vector "direc" onto the bands i.e. direc=direc-$sum_{j/=i} { <cg_{j}|direc>.|cg_{j}> }$
+ public :: projbd                   ! Project out vector "direc" onto the bands i.e.
+                                    ! direc=direc-$sum_{j/=i} { <cg_{j}|direc>.|cg_{j}> }$
  public :: cg_envlop                ! Multiply random number values in cg by envelope function to lower initial kinetic energy.
  public :: cg_normev                ! Normalize a set of num eigenvectors of complex length ndim
  public :: cg_precon                ! precondition $<G|(H-e_{n,k})|C_{n,k}>$
- public :: cg_precon_block          ! precondition $<G|(H-e_{n,k})|C_{n,k}>$ for a block of band in the case of real WFs (istwfk/=1)
+ public :: cg_precon_block          ! precondition $<G|(H-e_{n,k})|C_{n,k}>$ for a block of band
+                                    ! in the case of real WFs (istwfk/=1)
  public :: cg_zprecon_block         ! precondition $<G|(H-e_{n,k})|C_{n,k}>$ for a block of band
  public :: fxphas_seq               ! Fix phase of all bands. Keep normalization but maximize real part
  public :: overlap_g                ! Compute the scalar product between WF at two different k-points
@@ -117,12 +119,6 @@ MODULE m_cgtools
  public :: pw_orthon                ! Normalize nvec complex vectors each of length nelem and then
                                     ! orthogonalize by modified Gram-Schmidt.
 !***
-
- !integer,parameter,private :: MIN_SIZE = 5000
- !complex(spc),private,parameter :: czero_spc =(0._sp,0._sp)
- !complex(spc),private,parameter :: cone_spc  =(1._sp,0._sp)
- !complex(dpc),private,parameter :: czero_dpc =(0._dp,0._dp)
- !complex(dpc),private,parameter :: cone_dpc  =(1._dp,0._dp)
 
 CONTAINS  !========================================================================================
 !!***
@@ -143,8 +139,6 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -196,8 +190,6 @@ end subroutine cg_setval
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -244,12 +236,10 @@ end subroutine cg_tocplx
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
-subroutine cg_fromcplx(n,icplx,ocg)
+subroutine cg_fromcplx(n, icplx, ocg)
 
 !Arguments ------------------------------------
 !scalars
@@ -386,8 +376,6 @@ end subroutine cg_setaug_zero
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -427,8 +415,6 @@ end subroutine cg_to_reim
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -474,8 +460,6 @@ end subroutine cg_from_reim
 !!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_mkrho,m_dfpt_vtowfk,m_iowf
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -515,8 +499,6 @@ end subroutine cg_zcopy
 !!      m_cgtools,m_cgwf
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -753,8 +735,6 @@ end function cg_zdotu
 !!      lapackprof,m_cgwf,m_dfpt_cgwf,m_rf2_init
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -803,8 +783,6 @@ end subroutine cg_zaxpy
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -855,8 +833,6 @@ end subroutine cg_zaxpby
 !!      lapackprof,m_cgtools
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -930,8 +906,6 @@ end subroutine cg_zgemv
 !!      lapackprof,m_cgtools,m_sigmaph
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1069,8 +1043,6 @@ end function set_istwfk
 !!      m_cgwf,m_dfpt_cgwf,m_dfpt_vtowfk,m_dft_energy,m_epjdos,m_rf2_init
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1152,8 +1124,6 @@ end subroutine sqnorm_g
 !!      m_phpi,m_rf2,m_rf2_init
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1242,8 +1212,6 @@ end subroutine dotprod_g
 !!      m_dfpt_vtowfk
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1259,7 +1227,7 @@ subroutine matrixelmt_g(ai,ar,diag,istwf_k,needimag,npw,nspinor,vect1,vect2,me_g
 !Local variables-------------------------------
 !scalars
  integer :: i1,ierr,ipw
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: buffer2(2)
  !real(dp),allocatable :: re_prod(:), im_prod(:)
@@ -1267,10 +1235,10 @@ subroutine matrixelmt_g(ai,ar,diag,istwf_k,needimag,npw,nspinor,vect1,vect2,me_g
 ! *************************************************************************
 
  if (nspinor==2 .and. istwf_k/=1) then
-   write(message,'(a,a,a,i6,a,i6)')&
-&   'When istwf_k/=1, nspinor must be 1,',ch10,&
-&   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
-   MSG_BUG(message)
+   write(msg,'(a,a,a,i6,a,i6)')&
+   'When istwf_k/=1, nspinor must be 1,',ch10,&
+   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
+   MSG_BUG(msg)
  end if
 
 #if 0
@@ -1400,11 +1368,8 @@ end subroutine matrixelmt_g
 !!      m_epjdos
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
-
 
 subroutine dotprod_v(cplex,dotr,nfft,nspden,opt_storage,pot1,pot2,comm)
 
@@ -1507,8 +1472,6 @@ end subroutine dotprod_v
 !!      m_rhotoxc,m_setvtr
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1752,8 +1715,6 @@ end subroutine dotprod_vn
 !!      m_dfpt_rhotov,m_dfpt_vtorho,m_rhotov,m_vtorho
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1841,8 +1802,6 @@ end subroutine sqnorm_v
 !!      m_rhotov,m_rhotoxc
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1905,8 +1864,6 @@ end subroutine mean_fftr
 !!      m_cut3d,m_epjdos
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1978,8 +1935,6 @@ end subroutine cg_getspin
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2140,8 +2095,6 @@ end subroutine cg_gsph2box
 !!      m_dfti,m_fft,m_fftw3
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2247,8 +2200,6 @@ end subroutine cg_box2gsph
 !!      m_dfti,m_fft,m_fftw3
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2327,8 +2278,6 @@ end subroutine cg_addtorho
 !!      m_dfti,m_fftw3
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2442,8 +2391,6 @@ end subroutine cg_vlocpsi
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2595,8 +2542,6 @@ end subroutine cgnc_cholesky
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2703,8 +2648,6 @@ end subroutine cgpaw_cholesky
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2796,8 +2739,6 @@ end subroutine cgnc_normalize
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2948,8 +2889,6 @@ end subroutine cgnc_gramschmidt
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3047,8 +2986,6 @@ end subroutine cgpaw_normalize
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3234,13 +3171,11 @@ end subroutine cgpaw_gramschmidt
 !!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_nstwf,m_getgh1c
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
 subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
-&                 npw,nspinor,scg,scprod,scprod_io,tim_projbd,useoverlap,me_g0,comm)
+                  npw,nspinor,scg,scprod,scprod_io,tim_projbd,useoverlap,me_g0,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3374,8 +3309,6 @@ end subroutine projbd
 !!      m_inwffil
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3467,8 +3400,6 @@ end subroutine cg_envlop
 !!      m_cgtools
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3484,7 +3415,7 @@ subroutine cg_normev(cg,npw,nband)
 !scalars
  integer :: ii,jj
  real(dp) :: den,evim,evre,phim,phre,xnorm
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -3497,12 +3428,12 @@ subroutine cg_normev(cg,npw,nband)
    end do
 
    if((xnorm-one)**2>tol6)then
-     write(message,'(6a,i6,a,es16.6,3a)' )ch10,&
-&     'normev: ',ch10,&
-&     'Starting xnorm should be close to one (tol is tol6).',ch10,&
-&     'However, for state number',ii,', xnorm=',xnorm,ch10,&
-&     'It might be that your LAPACK library has not been correctly installed.'
-     MSG_BUG(message)
+     write(msg,'(6a,i6,a,es16.6,3a)' )ch10,&
+     'normev: ',ch10,&
+     'Starting xnorm should be close to one (tol is tol6).',ch10,&
+     'However, for state number',ii,', xnorm=',xnorm,ch10,&
+     'It might be that your LAPACK library has not been correctly installed.'
+     MSG_BUG(msg)
    end if
 
    xnorm=1.0d0/sqrt(xnorm)
@@ -3562,8 +3493,6 @@ end subroutine cg_normev
 !!      m_cgwf,m_dfpt_cgwf
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3581,7 +3510,7 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
 !scalars
  integer :: ierr,ig,igs,ipw1,ispinor
  real(dp) :: ek0,ek0_inv,fac,poly,xx
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
 
@@ -3624,10 +3553,10 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
  call timab(48,2,tsec)
 
  if(ek0<1.0d-10)then
-   write(message,'(3a)')&
-&   'The mean kinetic energy of a wavefunction vanishes.',ch10,&
-&   'It is reset to 0.1 Ha.'
-   MSG_WARNING(message)
+   write(msg,'(3a)')&
+   'The mean kinetic energy of a wavefunction vanishes.',ch10,&
+   'It is reset to 0.1 Ha.'
+   MSG_WARNING(msg)
    ek0=0.1_dp
  end if
 
@@ -3702,8 +3631,6 @@ end subroutine cg_precon
 !!      m_lobpcg
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3723,7 +3650,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !scalars
  integer :: iblocksize,ierr,ig,igs,ipw1,ispinor
  real(dp) :: fac,poly,xx
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: ek0(:),ek0_inv(:)
@@ -3854,10 +3781,10 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 
      do iblocksize=1,blocksize
        if(ek0(iblocksize)<1.0d-10)then
-         write(message, '(4a)' )ch10,&
-&         'cg_precon_block: the mean kinetic energy of a wavefunction vanishes.',ch10,&
-&         'it is reset to 0.1ha.'
-         MSG_WARNING(message)
+         write(msg, '(4a)' )ch10,&
+         'cg_precon_block: the mean kinetic energy of a wavefunction vanishes.',ch10,&
+         'it is reset to 0.1ha.'
+         MSG_WARNING(msg)
          ek0(iblocksize)=0.1_dp
        end if
      end do
@@ -3995,8 +3922,6 @@ end subroutine cg_precon_block
 !!      m_lobpcg
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4018,7 +3943,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !scalars
  integer :: iblocksize,ierr,ig,igs,ispinor
  real(dp) :: fac,poly,xx
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: ek0(:),ek0_inv(:)
@@ -4156,17 +4081,10 @@ end subroutine cg_zprecon_block
 !!  cg(2,mcg)=same array with altered phase.
 !!  gsc(2,mgsc)= same array with altered phase.
 !!
-!! NOTES
-!! When the sign of the real part was fixed (modif v3.1.3g.6), the
-!! test Tv3#5 , dataset 5, behaved differently than previously.
-!! This should be cleared up.
-!!
 !! PARENTS
 !!      m_dynmat,m_rayleigh_ritz
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4183,7 +4101,7 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
  integer :: iband,ii,indx
  real(dp) :: cim,cre,gscim,gscre,quotient,root1,root2,saa,sab,sbb,theta
  real(dp) :: thppi,xx,yy
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: cimb(:),creb(:),saab(:),sabb(:),sbbb(:) !,sarr(:,:)
 
@@ -4258,11 +4176,11 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
          end do
        end if
      else
-       write(message,'(a,i0,5a)')&
-&       'The eigenvector with band ',iband,' has zero norm.',ch10,&
-&       'This usually happens when the number of bands (nband) is comparable to the number of planewaves (mpw)',ch10,&
-&       'Action: Check the parameters of the calculation. If nband ~ mpw, then decrease nband or, alternatively, increase ecut'
-       MSG_ERROR(message)
+       write(msg,'(a,i0,5a)')&
+       'The eigenvector with band ',iband,' has zero norm.',ch10,&
+       'This usually happens when the number of bands (nband) is comparable to the number of planewaves (mpw)',ch10,&
+       'Action: Check the parameters of the calculation. If nband ~ mpw, then decrease nband or, alternatively, increase ecut'
+       MSG_ERROR(msg)
      end if
 
      xx=cos(theta)
@@ -4397,8 +4315,6 @@ end subroutine fxphas_seq
 !!      m_berrytk,m_dfpt_fef
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4474,14 +4390,13 @@ end subroutine overlap_g
 !!      m_rayleigh_ritz,m_vtowfk
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
 !!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
 subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
-&                   mcg,mgsc,nband_k,npw_k,nspinor,paral_kgb,&
-&                   subham,subovl,use_subovl,usepaw,me_g0)
+                    mcg,mgsc,nband_k,npw_k,nspinor,paral_kgb,&
+                    subham,subovl,use_subovl,usepaw,me_g0)
 
  use m_linalg_interfaces
  use m_abi_linalg
@@ -4495,7 +4410,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 
 !Local variables-------------------------------
  integer :: iband,ii,ierr,rvectsize,vectsize,use_slk
- character(len=500) :: message
+ character(len=500) :: msg
  ! real(dp) :: tsec(2)
  real(dp),allocatable :: evec_tmp(:,:),subovl_tmp(:),subham_tmp(:)
  real(dp),allocatable :: work(:,:)
@@ -4556,10 +4471,10 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
    do iband=1,nband_k
      do ii=1,nband_k
        if(abs(evec(2*ii,iband))>1.0d-10)then
-         write(message,'(3a,2i0,2es16.6,a,a)')ch10,&
-&         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
-&         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
-         MSG_BUG(message)
+         write(msg,'(3a,2i0,2es16.6,a,a)')ch10,&
+         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
+         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
+         MSG_BUG(msg)
        end if
      end do
    end do
@@ -4725,8 +4640,6 @@ end subroutine subdiago
 !!      lapackprof,m_inwffil,m_vtowfk
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 

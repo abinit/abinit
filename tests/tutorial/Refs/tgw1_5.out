@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h46 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 10h40 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_5.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_5.in
 - output file    -> tgw1_5.out
 - root for input  files -> tgw1_5i
 - root for output files -> tgw1_5o
@@ -27,16 +27,16 @@
 ================================================================================
  Values of the parameters that define the memory need for DATASET 11.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -44,16 +44,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -61,16 +61,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 21.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -78,16 +78,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -95,16 +95,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 31.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -112,16 +112,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 32.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -129,16 +129,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 41.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -146,16 +146,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 42.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -163,16 +163,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 51.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -180,16 +180,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 52.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -197,16 +197,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 61.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -214,16 +214,16 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET 62.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =         100        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.869 Mbytes of memory.
+P This job should need less than                       3.511 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.434 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -240,21 +240,21 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
              bdgw           4       5
-             ecut      7.56385066E+00 Hartree
-          ecuteps11    2.26915520E+00 Hartree
-          ecuteps12    2.26915520E+00 Hartree
-          ecuteps21    3.78192533E+00 Hartree
-          ecuteps22    3.78192533E+00 Hartree
-          ecuteps31    4.53831040E+00 Hartree
-          ecuteps32    4.53831040E+00 Hartree
-          ecuteps41    5.10559920E+00 Hartree
-          ecuteps42    5.10559920E+00 Hartree
-          ecuteps51    6.80746559E+00 Hartree
-          ecuteps52    6.80746559E+00 Hartree
-          ecuteps61    7.56385066E+00 Hartree
-          ecuteps62    7.56385066E+00 Hartree
-         ecutsigx      7.56385066E+00 Hartree
-          ecutwfn      7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
+          ecuteps11    3.00000000E+00 Hartree
+          ecuteps12    3.00000000E+00 Hartree
+          ecuteps21    4.00000000E+00 Hartree
+          ecuteps22    4.00000000E+00 Hartree
+          ecuteps31    5.00000000E+00 Hartree
+          ecuteps32    5.00000000E+00 Hartree
+          ecuteps41    6.00000000E+00 Hartree
+          ecuteps42    6.00000000E+00 Hartree
+          ecuteps51    7.00000000E+00 Hartree
+          ecuteps52    7.00000000E+00 Hartree
+          ecuteps61    8.00000000E+00 Hartree
+          ecuteps62    8.00000000E+00 Hartree
+         ecutsigx      8.00000000E+00 Hartree
+          ecutwfn      8.00000000E+00 Hartree
 -          fftalg         312
            getscr11         0
            getscr12        -1
@@ -278,7 +278,7 @@ P           mkmem           1
             natom           2
             nband         100
            ndtset          12
-            ngfft          18      18      18
+            ngfft          20      20      20
              nkpt           1
            nkptgw           1
            npweps11        59
@@ -421,8 +421,8 @@ P           mkmem           1
 
 --- !DatasetInfo
 iteration_state: {dtset: 11, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -448,8 +448,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -498,10 +498,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Remaining bands to be divided among processors   nbcw = 96
 - Number of bands treated by each node ~96
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -515,24 +515,24 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.709  -0.000  -0.524  -0.000  -0.524   0.000  -0.524  -0.000
-       -0.000   0.000 -16.920   0.000  -0.162   0.000  -0.162  -0.000  -0.162
+    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524   0.000  -0.524  -0.000
+       -0.000   0.000 -16.920   0.000  -0.161   0.000  -0.161  -0.000  -0.161
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.934  -0.000  -0.082   0.000  -0.082   0.000  -0.082  -0.000
-       -0.000   0.000  -2.134   0.000   0.098   0.000   0.098  -0.000   0.098
+    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083   0.000  -0.083  -0.000
+       -0.000   0.000  -2.135   0.000   0.098   0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  99.2682
-  dielectric constant without local fields = 140.5307
+  dielectric constant =  99.2195
+  dielectric constant without local fields = 140.4463
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     88.89  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     88.92  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
@@ -547,10 +547,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -561,8 +561,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 12, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -613,10 +613,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  === KS Band Gaps ===
@@ -666,16 +666,16 @@ QP_gap     :    2.984
 Delta_QP_KS:    0.454
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.652 -17.103   4.560   0.787  -0.271 -12.353  -0.700   5.215
-        3   5.915 -11.652 -17.103   4.560   0.787  -0.271 -12.353  -0.700   5.215
-        4   5.915 -11.652 -17.103   4.560   0.787  -0.271 -12.353  -0.700   5.215
-        5   8.445  -9.700  -3.222  -6.789   0.794  -0.259  -9.947  -0.247   8.198
-        6   8.445  -9.700  -3.222  -6.789   0.794  -0.259  -9.947  -0.247   8.198
-        7   8.445  -9.700  -3.222  -6.789   0.794  -0.259  -9.947  -0.247   8.198
+        2   5.915 -11.653 -17.103   4.559   0.787  -0.271 -12.354  -0.700   5.215
+        3   5.915 -11.653 -17.103   4.559   0.787  -0.271 -12.354  -0.700   5.215
+        4   5.915 -11.653 -17.103   4.559   0.787  -0.271 -12.354  -0.700   5.215
+        5   8.445  -9.701  -3.222  -6.790   0.795  -0.259  -9.948  -0.247   8.198
+        6   8.445  -9.701  -3.222  -6.790   0.795  -0.259  -9.948  -0.247   8.198
+        7   8.445  -9.701  -3.222  -6.790   0.795  -0.259  -9.948  -0.247   8.198
 ...
 
 
- New Fermi energy :        2.464588E-01 Ha ,    6.706484E+00 eV
+ New Fermi energy :        2.464594E-01 Ha ,    6.706502E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -690,8 +690,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 21, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -746,10 +746,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Remaining bands to be divided among processors   nbcw = 96
 - Number of bands treated by each node ~96
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -763,42 +763,42 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.709  -0.000  -0.524  -0.000  -0.524   0.000  -0.524  -0.000
-       -0.000   0.000 -16.920   0.000  -0.162   0.000  -0.162  -0.000  -0.162
+    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524   0.000  -0.524  -0.000
+       -0.000   0.000 -16.920   0.000  -0.161   0.000  -0.161  -0.000  -0.161
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.934  -0.000  -0.082   0.000  -0.082   0.000  -0.082  -0.000
-       -0.000   0.000  -2.134   0.000   0.098   0.000   0.098  -0.000   0.098
+    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083   0.000  -0.083  -0.000
+       -0.000   0.000  -2.135   0.000   0.098   0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.4254
-  dielectric constant without local fields = 140.5307
+  dielectric constant =  98.3794
+  dielectric constant without local fields = 140.4463
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     87.10  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     87.13  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -809,8 +809,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 22, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -861,10 +861,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  === KS Band Gaps ===
@@ -914,21 +914,21 @@ QP_gap     :    3.079
 Delta_QP_KS:    0.549
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.652 -17.103   4.430   0.785  -0.273 -12.454  -0.802   5.113
-        3   5.915 -11.652 -17.103   4.430   0.785  -0.273 -12.454  -0.802   5.113
-        4   5.915 -11.652 -17.103   4.430   0.785  -0.273 -12.454  -0.802   5.113
-        5   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
-        6   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
-        7   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
+        2   5.915 -11.653 -17.103   4.429   0.785  -0.273 -12.455  -0.802   5.114
+        3   5.915 -11.653 -17.103   4.429   0.785  -0.273 -12.455  -0.802   5.114
+        4   5.915 -11.653 -17.103   4.429   0.785  -0.273 -12.455  -0.802   5.114
+        5   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.252   8.193
+        6   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.252   8.193
+        7   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.252   8.193
 ...
 
 
- New Fermi energy :        2.444994E-01 Ha ,    6.653167E+00 eV
+ New Fermi energy :        2.445019E-01 Ha ,    6.653235E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.0794 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.0794 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.0792 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.0792 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -938,8 +938,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 31, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -994,10 +994,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Remaining bands to be divided among processors   nbcw = 96
 - Number of bands treated by each node ~96
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -1011,24 +1011,24 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.709  -0.000  -0.524  -0.000  -0.524   0.000  -0.524  -0.000
-       -0.000   0.000 -16.920   0.000  -0.162   0.000  -0.162  -0.000  -0.162
+    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524   0.000  -0.524  -0.000
+       -0.000   0.000 -16.920   0.000  -0.161   0.000  -0.161  -0.000  -0.161
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.934  -0.000  -0.082   0.000  -0.082   0.000  -0.082  -0.000
-       -0.000   0.000  -2.134   0.000   0.098   0.000   0.098  -0.000   0.098
+    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083   0.000  -0.083  -0.000
+       -0.000   0.000  -2.135   0.000   0.098   0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.4217
-  dielectric constant without local fields = 140.5307
+  dielectric constant =  98.3757
+  dielectric constant without local fields = 140.4463
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.73  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.75  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
@@ -1043,10 +1043,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1057,8 +1057,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 32, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -1109,10 +1109,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  === KS Band Gaps ===
@@ -1162,21 +1162,21 @@ QP_gap     :    3.099
 Delta_QP_KS:    0.569
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.652 -17.103   4.405   0.785  -0.274 -12.473  -0.821   5.094
-        3   5.915 -11.652 -17.103   4.405   0.785  -0.274 -12.473  -0.821   5.094
-        4   5.915 -11.652 -17.103   4.405   0.785  -0.274 -12.473  -0.821   5.094
-        5   8.445  -9.700  -3.222  -6.795   0.794  -0.260  -9.952  -0.251   8.194
-        6   8.445  -9.700  -3.222  -6.795   0.794  -0.260  -9.952  -0.251   8.194
-        7   8.445  -9.700  -3.222  -6.795   0.794  -0.260  -9.952  -0.251   8.194
+        2   5.915 -11.653 -17.103   4.405   0.785  -0.274 -12.474  -0.820   5.095
+        3   5.915 -11.653 -17.103   4.405   0.785  -0.274 -12.474  -0.820   5.095
+        4   5.915 -11.653 -17.103   4.405   0.785  -0.274 -12.474  -0.820   5.095
+        5   8.445  -9.701  -3.222  -6.796   0.794  -0.260  -9.953  -0.252   8.194
+        6   8.445  -9.701  -3.222  -6.796   0.794  -0.260  -9.953  -0.252   8.194
+        7   8.445  -9.701  -3.222  -6.796   0.794  -0.260  -9.953  -0.252   8.194
 ...
 
 
- New Fermi energy :        2.441671E-01 Ha ,    6.644124E+00 eV
+ New Fermi energy :        2.441685E-01 Ha ,    6.644164E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.0994 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.0994 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.0991 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.0991 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -1186,8 +1186,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 41, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -1242,10 +1242,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Remaining bands to be divided among processors   nbcw = 96
 - Number of bands treated by each node ~96
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -1259,24 +1259,24 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.709  -0.000  -0.524  -0.000  -0.524   0.000  -0.524  -0.000
-       -0.000   0.000 -16.920   0.000  -0.162   0.000  -0.162  -0.000  -0.162
+    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524   0.000  -0.524  -0.000
+       -0.000   0.000 -16.920   0.000  -0.161   0.000  -0.161  -0.000  -0.161
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.934  -0.000  -0.082   0.000  -0.082   0.000  -0.082  -0.000
-       -0.000   0.000  -2.134   0.000   0.098   0.000   0.098  -0.000   0.098
+    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083   0.000  -0.083  -0.000
+       -0.000   0.000  -2.135   0.000   0.098   0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.3494
-  dielectric constant without local fields = 140.5307
+  dielectric constant =  98.3057
+  dielectric constant without local fields = 140.4463
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.43  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.46  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
@@ -1291,10 +1291,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1305,8 +1305,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 42, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -1357,10 +1357,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  === KS Band Gaps ===
@@ -1406,25 +1406,25 @@ iteration_state: {dtset: 42, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.530
-QP_gap     :    3.114
-Delta_QP_KS:    0.584
+QP_gap     :    3.113
+Delta_QP_KS:    0.583
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.652 -17.103   4.386   0.785  -0.273 -12.489  -0.836   5.079
-        3   5.915 -11.652 -17.103   4.386   0.785  -0.273 -12.489  -0.836   5.079
-        4   5.915 -11.652 -17.103   4.386   0.785  -0.273 -12.489  -0.836   5.079
-        5   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
-        6   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
-        7   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
+        2   5.915 -11.653 -17.103   4.386   0.785  -0.274 -12.489  -0.835   5.080
+        3   5.915 -11.653 -17.103   4.386   0.785  -0.274 -12.489  -0.835   5.080
+        4   5.915 -11.653 -17.103   4.386   0.785  -0.274 -12.489  -0.835   5.080
+        5   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
+        6   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
+        7   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
 ...
 
 
- New Fermi energy :        2.438588E-01 Ha ,    6.635735E+00 eV
+ New Fermi energy :        2.438775E-01 Ha ,    6.636244E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.1138 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1138 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1128 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1128 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -1434,8 +1434,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 51, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -1490,10 +1490,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Remaining bands to be divided among processors   nbcw = 96
 - Number of bands treated by each node ~96
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -1507,24 +1507,24 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.709  -0.000  -0.524  -0.000  -0.524   0.000  -0.524  -0.000
-       -0.000   0.000 -16.920   0.000  -0.162   0.000  -0.162  -0.000  -0.162
+    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524   0.000  -0.524  -0.000
+       -0.000   0.000 -16.920   0.000  -0.161   0.000  -0.161  -0.000  -0.161
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.934  -0.000  -0.082   0.000  -0.082   0.000  -0.082  -0.000
-       -0.000   0.000  -2.134   0.000   0.098   0.000   0.098  -0.000   0.098
+    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083   0.000  -0.083  -0.000
+       -0.000   0.000  -2.135   0.000   0.098   0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.3147
-  dielectric constant without local fields = 140.5307
+  dielectric constant =  98.2718
+  dielectric constant without local fields = 140.4463
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.18  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.22  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
@@ -1539,10 +1539,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1553,8 +1553,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 52, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -1605,10 +1605,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  === KS Band Gaps ===
@@ -1654,25 +1654,25 @@ iteration_state: {dtset: 52, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.530
-QP_gap     :    3.123
-Delta_QP_KS:    0.593
+QP_gap     :    3.122
+Delta_QP_KS:    0.592
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.652 -17.103   4.374   0.785  -0.275 -12.497  -0.845   5.071
-        3   5.915 -11.652 -17.103   4.374   0.785  -0.275 -12.497  -0.845   5.071
-        4   5.915 -11.652 -17.103   4.374   0.785  -0.275 -12.497  -0.845   5.071
-        5   8.445  -9.700  -3.222  -6.796   0.794  -0.260  -9.952  -0.252   8.193
-        6   8.445  -9.700  -3.222  -6.796   0.794  -0.260  -9.952  -0.252   8.193
-        7   8.445  -9.700  -3.222  -6.796   0.794  -0.260  -9.952  -0.252   8.193
+        2   5.915 -11.653 -17.103   4.375   0.785  -0.274 -12.497  -0.844   5.071
+        3   5.915 -11.653 -17.103   4.375   0.785  -0.274 -12.497  -0.844   5.071
+        4   5.915 -11.653 -17.103   4.375   0.785  -0.274 -12.497  -0.844   5.071
+        5   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
+        6   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
+        7   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
 ...
 
 
- New Fermi energy :        2.437216E-01 Ha ,    6.632002E+00 eV
+ New Fermi energy :        2.437266E-01 Ha ,    6.632138E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.1229 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1229 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1217 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1217 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -1682,8 +1682,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 61, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -1738,10 +1738,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Remaining bands to be divided among processors   nbcw = 96
 - Number of bands treated by each node ~96
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -1755,24 +1755,24 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-       -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
+        0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.709  -0.000  -0.524  -0.000  -0.524   0.000  -0.524  -0.000
-       -0.000   0.000 -16.920   0.000  -0.162   0.000  -0.162  -0.000  -0.162
+    2   0.000 -24.710  -0.000  -0.524   0.000  -0.524   0.000  -0.524  -0.000
+       -0.000   0.000 -16.920   0.000  -0.161   0.000  -0.161  -0.000  -0.161
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.934  -0.000  -0.082   0.000  -0.082   0.000  -0.082  -0.000
-       -0.000   0.000  -2.134   0.000   0.098   0.000   0.098  -0.000   0.098
+    2   0.000  -6.935  -0.000  -0.083   0.000  -0.083   0.000  -0.083  -0.000
+       -0.000   0.000  -2.135   0.000   0.098   0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  98.3128
-  dielectric constant without local fields = 140.5307
+  dielectric constant =  98.2700
+  dielectric constant without local fields = 140.4463
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.16  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     86.19  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
@@ -1787,10 +1787,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1801,8 +1801,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 62, }
-dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -1853,10 +1853,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  === KS Band Gaps ===
@@ -1902,25 +1902,25 @@ iteration_state: {dtset: 62, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.530
-QP_gap     :    3.124
-Delta_QP_KS:    0.593
+QP_gap     :    3.122
+Delta_QP_KS:    0.592
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   5.915 -11.652 -17.103   4.373   0.784  -0.275 -12.498  -0.845   5.070
-        3   5.915 -11.652 -17.103   4.373   0.784  -0.275 -12.498  -0.845   5.070
-        4   5.915 -11.652 -17.103   4.373   0.784  -0.275 -12.498  -0.845   5.070
-        5   8.445  -9.700  -3.222  -6.796   0.793  -0.260  -9.952  -0.252   8.193
-        6   8.445  -9.700  -3.222  -6.796   0.793  -0.260  -9.952  -0.252   8.193
-        7   8.445  -9.700  -3.222  -6.796   0.793  -0.260  -9.952  -0.252   8.193
+        2   5.915 -11.653 -17.103   4.374   0.785  -0.274 -12.498  -0.845   5.070
+        3   5.915 -11.653 -17.103   4.374   0.785  -0.274 -12.498  -0.845   5.070
+        4   5.915 -11.653 -17.103   4.374   0.785  -0.274 -12.498  -0.845   5.070
+        5   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
+        6   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
+        7   8.445  -9.701  -3.222  -6.797   0.794  -0.260  -9.954  -0.253   8.193
 ...
 
 
- New Fermi energy :        2.437018E-01 Ha ,    6.631463E+00 eV
+ New Fermi energy :        2.437039E-01 Ha ,    6.631520E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.1235 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1235 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1224 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1224 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 == END DATASET(S) ==============================================================
@@ -1930,21 +1930,21 @@ data: !SigmaeeData |
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
              bdgw           4       5
-             ecut      7.56385066E+00 Hartree
-          ecuteps11    2.26915520E+00 Hartree
-          ecuteps12    2.26915520E+00 Hartree
-          ecuteps21    3.78192533E+00 Hartree
-          ecuteps22    3.78192533E+00 Hartree
-          ecuteps31    4.53831040E+00 Hartree
-          ecuteps32    4.53831040E+00 Hartree
-          ecuteps41    5.10559920E+00 Hartree
-          ecuteps42    5.10559920E+00 Hartree
-          ecuteps51    6.80746559E+00 Hartree
-          ecuteps52    6.80746559E+00 Hartree
-          ecuteps61    7.56385066E+00 Hartree
-          ecuteps62    7.56385066E+00 Hartree
-         ecutsigx      7.56385066E+00 Hartree
-          ecutwfn      7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
+          ecuteps11    3.00000000E+00 Hartree
+          ecuteps12    3.00000000E+00 Hartree
+          ecuteps21    4.00000000E+00 Hartree
+          ecuteps22    4.00000000E+00 Hartree
+          ecuteps31    5.00000000E+00 Hartree
+          ecuteps32    5.00000000E+00 Hartree
+          ecuteps41    6.00000000E+00 Hartree
+          ecuteps42    6.00000000E+00 Hartree
+          ecuteps51    7.00000000E+00 Hartree
+          ecuteps52    7.00000000E+00 Hartree
+          ecuteps61    8.00000000E+00 Hartree
+          ecuteps62    8.00000000E+00 Hartree
+         ecutsigx      8.00000000E+00 Hartree
+          ecutwfn      8.00000000E+00 Hartree
            etotal11    0.0000000000E+00
            etotal12    0.0000000000E+00
            etotal21    0.0000000000E+00
@@ -2004,7 +2004,7 @@ P           mkmem           1
             natom           2
             nband         100
            ndtset          12
-            ngfft          18      18      18
+            ngfft          20      20      20
              nkpt           1
            nkptgw           1
            npweps11        59
@@ -2140,10 +2140,41 @@ P           mkmem           1
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         26.4        0.44      0.007
+- Total wall clock time (s,m,h):         30.0        0.50      0.008
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           26.4, wall_time =           30.0
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 21.049  79.8     24.599  82.1              6      -1.00        0.86       0.86
+- ewald                          1.028   3.9      1.032   3.4             12      -1.00        1.00       1.00
+- invars2                        0.588   2.2      0.588   2.0             12      -1.00        1.00       1.00
+- pspini                         0.426   1.6      0.430   1.4             12      -1.00        0.99       0.99
+- others (123)                   0.297   1.1      0.298   1.0             -1      -1.00        1.00       1.00
+-<END_TIMER>
+-
+- subtotal                      23.388  88.7     26.947  89.9                                  0.87       0.87
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          26.4, wall_time =          30.0
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 21.049  79.8     24.599  82.1              6      -1.00        0.86       0.86
+- ewald                          1.028   3.9      1.032   3.4             12      -1.00        1.00       1.00
+- invars2                        0.588   2.2      0.588   2.0             12      -1.00        1.00       1.00
+- pspini                         0.426   1.6      0.430   1.4             12      -1.00        0.99       0.99
+- others (123)                   0.297   1.1      0.298   1.0             -1      -1.00        1.00       1.00
+-<END_TIMER>
 
+- subtotal                      23.388  88.7     26.947  89.9                                  0.87       0.87
 
 ================================================================================
 
@@ -2223,10 +2254,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         24.0  wall=         28.4
+- Proc.   0 individual time (sec): cpu=         26.4  wall=         30.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  52 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.0  wall=         28.4
+.Delivered  12 WARNINGs and 100 COMMENTs to log file.
++Overall time at end (sec) : cpu=         26.4  wall=         30.0

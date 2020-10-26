@@ -35,10 +35,10 @@
 #%% extra_inputs = t58.ddb.in.gz
 #%% files_to_test = 
 #%%   t58.out, tolnlines = 10, tolabs = 5e-2, tolrel = 0.20;
-#%%   t58.out_PHDOS_msqd, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%%   t58.out_PHDOS_by_atom, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%%   t58.out_MSQD_T, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%%   t58.out_MSQV_T, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t58_PHDOS_msqd, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t58_PHDOS_by_atom, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t58_MSQD_T, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t58_MSQV_T, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]
