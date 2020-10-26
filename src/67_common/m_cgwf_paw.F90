@@ -256,12 +256,18 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 
      cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
      cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+     cwavef_r => cwavef_r_bands(:,:,:,:,iband)
 
      call getcprj(1,0,cwavef,cprj_cwavef,&
 &      gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &      gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
 &      gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &      gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+
+     ! Compute wavefunction in real space
+     call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
+&      gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+&      n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
 
    end do
  end do
@@ -315,11 +321,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
        write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
        call wrtout(std_out,message,'PERS')
      end if
-
-     ! Compute wavefunction in real space
-     call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-&      gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-&      n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
 
      ! ======================================================================
      ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
@@ -676,7 +677,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
    !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
    !  ======================================================================
 
-   do iband=1,nband
+   do iband=ibandmin,ibandmax
      cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
      cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
      cwavef_r => cwavef_r_bands(:,:,:,:,iband)
@@ -685,9 +686,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
        cprj_cwavef_left => cprj_cwavef_bands(:,jband:jband)
        cwavef_r_left => cwavef_r_bands(:,:,:,:,jband)
        call getchc(subham(isubh),subham(isubh+1),cpopt,cwavef,cwavef_left,&
-         &          cprj_cwavef_left,cprj_cwavef,cwavef_r,cwavef_r_left,&
+         &          cprj_cwavef,cprj_cwavef_left,cwavef_r,cwavef_r_left,&
          &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
-       isubh = isubh + 2
+       isubh=isubh+2
      end do
    end do
 
@@ -695,9 +696,13 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 
  ! Debugging ouputs
  if(prtvol==-level)then
+   isubh=1
    do iband=1,nband
-       write(message,'(i5,es16.6)')iband,eig(iband)
+     do jband=1,iband
+       write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
        call wrtout(std_out,message,'PERS')
+       isubh=isubh+2
+     end do
    end do
  end if
 
@@ -720,7 +725,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  ABI_DEALLOCATE(scprod)
 
  ABI_DEALLOCATE(direc_tmp)
- ABI_DEALLOCATE(cwavef_r)
+ ABI_DEALLOCATE(cwavef_r_bands)
  ABI_DEALLOCATE(direc_r)
  ABI_DEALLOCATE(denpot_dum)
  ABI_DEALLOCATE(fofgout_dum)

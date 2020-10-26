@@ -449,9 +449,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    if( .not. wfopta10 == 1 .and. .not. newlobpcg ) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
-     call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
-&     mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
-&     subham,subovl,use_subovl,gs_hamk%usepaw,mpi_enreg%me_g0)
+     if (.not.enable_cgwf_paw) then
+       call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
+&       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
+&       subham,subovl,use_subovl,gs_hamk%usepaw,mpi_enreg%me_g0)
+     else
+       call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
+&       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
+&       subham,subovl,use_subovl,0,mpi_enreg%me_g0)
+     end if
      call timab(585,2,tsec)
    end if
 
