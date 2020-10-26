@@ -266,7 +266,6 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 
  npw=gs_ham%npw_k
  nspinortot=gs_ham%nspinor
- ABI_ALLOCATE(ghc,(2,npw*nspinortot))
  ABI_ALLOCATE(gvnlxc,(0,0))
  ABI_ALLOCATE(gsc,(0,0))
 
@@ -313,18 +312,15 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 
    call timab(1371,2,tsec)
 
- else
-   chc_re = zero
-   chc_im = zero
  end if ! type_calc
 
- if ((type_calc==0).or.(type_calc==2).or.(type_calc==3)) then
+ if ((type_calc==0).or.(type_calc==2).or.(type_calc==3).or.(type_calc==4)) then
 
 !============================================================
 ! Application of the non-local potential and the Fock potential
 !============================================================
 
-   if ((type_calc==0).or.(type_calc==2)) then
+  if ((type_calc==0).or.(type_calc==2).or.(type_calc==4)) then
 
      signs=1 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=15
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
@@ -351,8 +347,6 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
      paw_opt=gs_ham%usepaw ; if (sij_opt/=0) paw_opt=sij_opt+3
      lambda_ndat = lambda
 
-     signs=1
-
      call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
 &     cprjin_left=cwaveprj_left,enlout_im=enlout_im)
@@ -368,41 +362,41 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 ! Assemble kinetic, local, nonlocal and Fock contributions
 !============================================================
 
-   call timab(1372,1,tsec)
-!  Add modified kinetic contributions
-   !  to <CP|H|C(n,k)>.
-   do idat=1,ndat
-!    !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
-     do ispinor=1,my_nspinor
-       do ig=1,npw_k2
-         igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
-         if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-           chc_re = chc_re +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
-           chc_re = chc_re +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
-           chc_im = chc_im +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(re,igspinor)
-           chc_im = chc_im -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(im,igspinor)
-         end if
-       end do ! ig
-     end do ! ispinor
-   end do ! idat
-
-!  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc
-!   if (gs_ham%usepaw==1 .and. has_fock)then
-!     gvnlxc=gvnlxc-gvnlc
-!     ABI_DEALLOCATE(gvnlc)
-!   endif
+   if (type_calc==0.or.type_calc==2.or.type_calc==3) then
+     call timab(1372,1,tsec)
+!    Add modified kinetic contributions
+     !  to <CP|H|C(n,k)>.
+     do idat=1,ndat
+!      !!$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+       do ispinor=1,my_nspinor
+         do ig=1,npw_k2
+           igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+           if(kinpw_k2(ig)<huge(zero)*1.d-11)then
+             chc_re = chc_re +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+             chc_re = chc_re +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
+             chc_im = chc_im +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(re,igspinor)
+             chc_im = chc_im -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(im,igspinor)
+           end if
+         end do ! ig
+       end do ! ispinor
+     end do ! idat
+!    Special case of PAW + Fock : only return Fock operator contribution in gvnlxc
+!     if (gs_ham%usepaw==1 .and. has_fock)then
+!       gvnlxc=gvnlxc-gvnlc
+!       ABI_DEALLOCATE(gvnlc)
+!     endif
 !
-!   if ((type_calc==0).or.(type_calc==2)) then
-!     if (has_fock.and.gs_ham%usepaw==1.and.cpopt<2) then
-!       call pawcprj_free(cwaveprj_fock)
-!       ABI_DATATYPE_DEALLOCATE(cwaveprj_fock)
+!     if ((type_calc==0).or.(type_calc==2)) then
+!       if (has_fock.and.gs_ham%usepaw==1.and.cpopt<2) then
+!         call pawcprj_free(cwaveprj_fock)
+!         ABI_DATATYPE_DEALLOCATE(cwaveprj_fock)
+!       end if
 !     end if
-!   end if
-   call timab(1372,2,tsec)
+     call timab(1372,2,tsec)
+   end if
 
  end if ! type_calc
 
- ABI_DEALLOCATE(ghc)
  ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(gsc)
 
