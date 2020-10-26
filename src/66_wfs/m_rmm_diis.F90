@@ -160,7 +160,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nbocc, jj, kk, it, ibk, iek !ii, ld1, ld2,
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
-
  logical :: end_with_trial_step, new_lambda
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops, dotr, doti
@@ -229,6 +228,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end if
 
    ! Compute <i|H|j> for i=1,nband and all j in block
+   ! TODO: Optimize for istwf_k == 2
    call cg_zgemm("C", "N", npwsp, nband, ndat, cg, ghc_bk, h_ij(:,:,ib_start))
 
    if (istwf_k /= 1) then
@@ -448,12 +448,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        diis%hist_enlx(iter, idat) = enlx(ib_start+idat-1)
        diis%step_type(iter, idat) = "DIIS"
        ibk = 1 + (idat - 1) * npwsp; iek = idat * npwsp
-       diis%chain_phi(:,:,iter, idat) = phi_bk(:,ibk:iek)
-       diis%chain_resv(:, :, iter, idat) = residv_bk(:,ibk:iek)
-       if (usepaw == 1) diis%chain_sphi(:,:,iter,idat) = ptr_gsc_bk(:,ibk:iek)
-       !call cg_zcopy(nwsp, phi_bk(:,ibk), diis%chain_phi(:,:,iter,idat))
-       !call cg_zcopy(npwsp, residv_bk(:,ibk), diis%chain_resv(:,:,iter,idat))
-       !if (usepaw == 1) call cg_zcopy(npwsp, ptr_gsc_bk(:,ibk), diis%chain_sphi(:,:,iter,idat)
+       call cg_zcopy(npwsp, phi_bk(:,ibk), diis%chain_phi(:,:,iter,idat))
+       call cg_zcopy(npwsp, residv_bk(:,ibk), diis%chain_resv(:,:,iter,idat))
+       if (usepaw == 1) call cg_zcopy(npwsp, ptr_gsc_bk(:,ibk), diis%chain_sphi(:,:,iter,idat))
      end do
 
      ! === CHECK FOR CONVERGENCE ====
@@ -540,7 +537,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    end if ! end_with_trial_step
 
-   !call diis%rollback(npwsp, ndat, phi_bk, ptr_gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
+   if (dtset%userib == 1) then
+     call diis%rollback(npwsp, ndat, phi_bk, ptr_gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
+   end if
 
    ! Update wavefunction block. cg(:,igs:ige) = phi_bk
    call cg_zcopy(npwsp * ndat, phi_bk, cg(:,igs))
@@ -977,10 +976,10 @@ subroutine rmm_diis_solve(diis, iter, npwsp, ndat, phi_bk, residv_bk, comm)
      call xhesv_cplex("U", cplex, iter+1, 1, wmat1, wvec(:,:,idat), msg, ierr)
      ABI_CHECK(ierr == 0, msg)
 
-     if (diis%prtvol == -level) then
-       write(std_out,*)"wvec:", wvec(:,:,idat)
-       write(std_out,*)"sum(wvec):", sum(wvec(:, 0:iter-1, idat), dim=2)
-     end if
+     !if (diis%prtvol == -level) then
+     !  write(std_out,*)"wvec:", wvec(:,:,idat)
+     !  write(std_out,*)"sum(wvec):", sum(wvec(:, 0:iter-1, idat), dim=2)
+     !end if
      if (cplex == 2) then
        ! coefficients should sum up to 1 but sometimes we get a small imaginary part. here we remove it
        noise = sum(wvec(2, 0:iter-1, idat))
@@ -1056,7 +1055,6 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
 
      ! <i|S|j> assume normalized wavefunctions for ii == iter. Note rescaling by 1/np
      if (ii == iter) then
-       !dotr = one; doti = zero
        dotr = one / nprocs; doti = zero
      else
        if (diis%usepaw == 0) then
@@ -1078,10 +1076,10 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
      call xmpi_sum(diis%resmat(:,0:iter,iter,idat), comm, ierr)
      call xmpi_sum(diis%smat(:,0:iter,iter, idat), comm, ierr)
    endif
-   if (diis%prtvol == -level) then
-     write(std_out,*)"iter, idat, resmat:", iter, idat, diis%resmat(:,0:iter,iter,idat)
-     !write(std_out,*)"iter, idat smat:", iter, idat, diis%smat(:,0:iter,iter,idat)
-   end if
+   !if (diis%prtvol == -level) then
+   !  write(std_out,*)"iter, idat, resmat:", iter, idat, diis%resmat(:,0:iter,iter,idat)
+   !  !write(std_out,*)"iter, idat smat:", iter, idat, diis%smat(:,0:iter,iter,idat)
+   !end if
 
  end do ! idat
 
@@ -1137,6 +1135,8 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx
      enlx(idat) = diis%hist_enlx(iter, idat)
      phi_bk(:,:,idat) = diis%chain_phi(:,:,iter,idat)
      if (diis%usepaw == 1) gsc_bk(:,:,idat) = diis%chain_sphi(:,:,iter,idat)
+     !call cg_zcopy(npwsp, diis%chain_phi(:,:,iter,idat), phi_bk(:,:,idat))
+     !if (usepaw == 1) call cg_zcopy(npwsp, diis%chain_sphi(:,:,iter,idat), gsc_bk(:,:,idat))
      call diis%stats%increment("rollbacks", 1)
    end do
  end if
@@ -1368,6 +1368,8 @@ subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect,
    call cg_precon(cg(:,idat), zero, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pcon, vect(:,idat), comm)
  end do
  ABI_FREE(pcon)
+
+ !call cg_kine(istwf_k, npw, nspinor, ndat, cg, me_g0, comm)
 
 end subroutine cg_precon_many
 !!***

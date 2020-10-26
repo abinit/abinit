@@ -777,11 +777,11 @@ end subroutine cg_zaxpby
 !! FUNCTION
 !! The ?gemv routines perform a matrix-vector operation defined as
 !!
-!! y := alpha*A*x + beta*y,
+!!      y := alpha*A*x + beta*y,
 !! or
-!! y := alpha*A'*x + beta*y,
+!!      y := alpha*A'*x + beta*y,
 !! or
-!! y := alpha*conjg(A')*x + beta*y,
+!!      y := alpha*conjg(A')*x + beta*y,
 !!
 !! where: alpha and beta are scalars, x and y are vectors, A is an m-by-n matrix.
 !! default is alpha = 1 and beta = 0.
