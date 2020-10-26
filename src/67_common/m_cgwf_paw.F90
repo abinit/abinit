@@ -316,6 +316,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
      call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_cwavef,z_tmp,z_tmp2,&
 &             gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &             natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+     cwavef_r=cwavef_r*xnorm
 
      if (prtvol==-level) then
        write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
