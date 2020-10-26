@@ -156,7 +156,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2
  integer,parameter :: tim_getghc = 0, use_subovl0 = 0
- integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb, comm
+ integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb !, comm
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nbocc, jj, kk, it, ibk, iek !ii, ld1, ld2,
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
@@ -743,7 +743,7 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
- integer :: istwf_k, usepaw, cpopt, sij_opt, npwsp, me_g0, comm, idat, ikpt_this_proc
+ integer :: istwf_k, usepaw, cpopt, sij_opt, npwsp, me_g0, comm !, ikpt_this_proc !idat,
  real(dp),parameter :: rdummy = zero
  logical :: normalize_
 !arrays
@@ -906,7 +906,7 @@ subroutine rmm_diis_solve(diis, iter, npwsp, ndat, phi_bk, residv_bk, comm)
  real(dp),intent(inout) :: phi_bk(2, npwsp, ndat), residv_bk(2, npwsp, ndat)
 
  integer,parameter :: master = 0
- integer :: cplex, ierr, nprocs, my_rank, ii, idat, ibk, iek
+ integer :: cplex, ierr, nprocs, my_rank, ii, idat !, ibk, iek
  real(dp) :: noise
  real(dp),allocatable :: diis_eig(:)
  real(dp),allocatable :: wmat1(:,:,:), wmat2(:,:,:), wvec(:,:,:), alphas(:,:)
@@ -1110,7 +1110,7 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx
  real(dp),intent(inout) :: eig(ndat), resid(ndat), enlx(ndat)
 
  integer,parameter :: master = 0
- integer :: nprocs, my_rank, ii, idat, iter, ierr, ilast, take_iter(ndat)
+ integer :: nprocs, my_rank, idat, iter, ierr, ilast, take_iter(ndat)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  take_iter = -1
