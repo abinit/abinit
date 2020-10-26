@@ -379,6 +379,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Precondition |R_0>, output in kres_bk = |K R_0>
    call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
    call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
+   if (timeit) call cwtime_report(" first cg_precon ", cpu, wall, gflops)
 
    ! Compute H |K R_0>
    if (paral_kgb == 0) then
@@ -391,6 +392,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    ! Compute residuals: (H - e_0 S) |K R_0>
    call cg_residvecs(usepaw, npwsp, ndat, eig(ib_start:), kres_bk, ghc_bk, gsc_bk, residv_bk)
+   if (timeit) call cwtime_report(" cg_residvecs ", cpu, wall, gflops)
 
    ! Line minimization with preconditioned steepest descent:
    !
@@ -401,6 +403,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    !    lambda = - Re{<R_0|(H - e_0 S)} |K R_0>} / |(H - e_0 S) |K R_0>|**2
    !
    call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_bandspinorfft)
+   if (timeit) call cwtime_report(" cg_norm2g ", cpu, wall, gflops)
 
 #if 0
    ld1 = npwsp * (max_niter + 1); ld2 = npwsp

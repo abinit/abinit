@@ -78,7 +78,8 @@ MODULE m_cgtools
  public :: cg_zaxpby
 
  ! Blas2
- public :: cg_zgemv
+ public :: cg_zgemv         ! alpha*A*x + beta*y,
+ !public :: cg_dgemv
 
  ! Blas3
  public :: cg_zgemm
@@ -775,7 +776,7 @@ end subroutine cg_zaxpby
 !!  cg_zgemv
 !!
 !! FUNCTION
-!! The ?gemv routines perform a matrix-vector operation defined as
+!! The cg_zgemv routines perform a **complex** matrix-vector operation defined as:
 !!
 !!      y := alpha*A*x + beta*y,
 !! or
@@ -783,8 +784,8 @@ end subroutine cg_zaxpby
 !! or
 !!      y := alpha*conjg(A')*x + beta*y,
 !!
-!! where: alpha and beta are scalars, x and y are vectors, A is an m-by-n matrix.
-!! default is alpha = 1 and beta = 0.
+!! where: alpha and beta are COMPLEX scalars, x and y are COMPLEX vectors, A is a m-by-n COMPLEX matrix.
+!! Default is: alpha = 1 and beta = 0.
 !!
 !! INPUTS
 !!
@@ -801,18 +802,17 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nrows,ncols
- real(dp),optional,intent(in) :: alpha(2),beta(2)
+ integer,intent(in) :: nrows, ncols
+ real(dp),optional,intent(in) :: alpha(2), beta(2)
  character(len=1),intent(in) :: trans
 !arrays
- real(dp),intent(in) :: cgmat(2,nrows*ncols)
- real(dp),intent(in) :: vec(2,*)
+ real(dp),intent(in) :: cgmat(2,nrows*ncols), vec(2,*)
  real(dp),intent(inout) :: matvec(2,*)
 
 !Local variables-------------------------------
 !scalars
- integer :: mm,nn,kk,lda,ldb,ldc
- real(dp) :: my_alpha(2),my_beta(2)
+ integer :: mm, nn, kk, lda, ldb, ldc
+ real(dp) :: my_alpha(2), my_beta(2)
 
 ! *************************************************************************
 
@@ -831,6 +831,69 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
  !call ZGEMV(trans,mm,nn,my_alpha,cgmat,lda,vec,1,my_beta,matvec,1)
 
 end subroutine cg_zgemv
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_dgemv
+!! NAME
+!!  cg_dgemv
+!!
+!! FUNCTION
+!! The cg_dgemv routines perform a **complex** matrix-vector operation defined as:
+!!
+!!      y := alpha*A*x + beta*y,
+!! or
+!!      y := alpha*A'*x + beta*y,
+!! or
+!!      y := alpha*conjg(A')*x + beta*y,
+!!
+!! where: alpha and beta are REAL scalars, x and y are COMPLEX vectors, A is an m-by-n COMPLEX matrix.
+!! Default is: alpha = 1 and beta = 0.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+!subroutine cg_dgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
+!
+!!Arguments ------------------------------------
+!!scalars
+! integer,intent(in) :: nrows,ncols
+! real(dp),optional,intent(in) :: alpha(2),beta(2)
+! character(len=1),intent(in) :: trans
+!!arrays
+! real(dp),intent(in) :: cgmat(2,nrows*ncols), vec(2,*)
+! real(dp),intent(inout) :: matvec(2,*)
+!
+!!Local variables-------------------------------
+!!scalars
+! integer :: mm, nn, kk, lda, ldb,l dc
+! real(dp) :: my_alpha, my_beta
+!
+!! *************************************************************************
+!
+! my_alpha = one;  if (present(alpha)) my_alpha = alpha
+! my_beta  = zero; if (present(beta))  my_beta  = beta
+!
+! lda = nrows; mm = nrows; nn = 1; kk = ncols
+! if (toupper(trans) /= 'N') then
+!   mm = ncols; kk = nrows
+! end if
+! ldb = kk; ldc = mm
+!
+! call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
+! ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
+!
+! !call ZGEMV(trans,mm,nn,my_alpha,cgmat,lda,vec,1,my_beta,matvec,1)
+!
+!end subroutine cg_dgemv
 !!***
 
 !----------------------------------------------------------------------
