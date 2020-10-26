@@ -82,7 +82,7 @@ subroutine iorho( task, fname, cell, mesh, nsm, maxp, nspin, f, found )
       logical           found
 
 ! Internal variables and arrays
-      character*11 fform
+      character(len=11) :: fform
       integer   i2, i3, ind, ip, is, np, ns
 
       if(.false.)write(11,*)nsm
@@ -383,9 +383,9 @@ subroutine thetaft(n,L,lav,ft)
 !       0         lav/2               L-lav/2     L
 !
         integer n,j
-        real*8 L,lav
-        real*8 ft(2*n)
-        real*8 pi
+        real(kind=kind(0.0d0)) :: L,lav
+        real(kind=kind(0.0d0)) :: ft(2*n)
+        real(kind=kind(0.0d0)) :: pi
 
         pi=4.0d0*datan(1.0d0)
 
