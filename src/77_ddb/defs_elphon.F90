@@ -706,13 +706,13 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
  real(dp) :: tmp_mat(2,nbranch,nbranch)
  real(dp) :: tmp_mat2(2,nbranch,nbranch)
  real(dp) :: ss_allatoms(2,nbranch,nbranch)
- real(dp) :: c_one(2), c_zero(2)
+ complex(dpc) :: c_one, c_zero
  real(dp),allocatable :: gkk_qpt_new(:,:,:),gkk_qpt_tmp(:,:,:)
 
 ! *********************************************************************
 
- c_one = (/one,zero/)
- c_zero = (/zero,zero/)
+ c_one = dcmplx(one,zero)
+ c_zero = dcmplx(zero,zero)
 
  natom = Cryst%natom
  nsym  = Cryst%nsym
@@ -962,13 +962,9 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  real(dp) :: tmp_tensor(2,3,3)
  real(dp) :: tmp_tensor2(2,3,3)
  real(dp) :: ss_allatoms(nbranch,nbranch)
- real(dp) :: c_one(2), c_zero(2)
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:),gkk_qpt_tmp(:,:,:,:)
 
 ! *********************************************************************
-
- c_one = (/one,zero/)
- c_zero = (/zero,zero/)
 
  gprimd = crystal%gprimd
  rprimd = crystal%rprimd

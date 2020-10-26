@@ -2282,7 +2282,7 @@ module m_xg
       end do
       average = average / dble(xgBlock%cols*xgBlock%rows)
     case (SPACE_C)
-      averageC = cmplx(0.d0,0.d0)
+      averageC = dcmplx(0.d0,0.d0)
       do i = 1, xgBlock%cols
         averageC = averageC + sum(xgBlock%vecC(1:xgBlock%rows,i))
       end do
@@ -2315,7 +2315,7 @@ module m_xg
       end do
       deviation = sqrt( deviation / dble(xgBlock%cols*xgBlock%rows) )
     case (SPACE_C)
-      deviationC = cmplx(0.d0,0.d0)
+      deviationC = dcmplx(0.d0,0.d0)
       do i = 1, xgBlock%cols
         deviationC = deviationC + sum((xgBlock%vecC(1:xgBlock%rows,i)-average)*(xgBlock%vecC(1:xgBlock%rows,i)-average))
       end do

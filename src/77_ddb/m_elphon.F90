@@ -3099,7 +3099,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !arrays
  integer :: ndiv(nqpath-1)
  integer, allocatable :: indxprtqpt(:)
- real(dp),parameter :: c0(2)=(/0._dp,0._dp/),c1(2)=(/1._dp,0._dp/)
+ complex(dpc),parameter :: c0=dcmplx(0._dp,0._dp),c1=dcmplx(1._dp,0._dp)
  real(dp) :: displ_cart(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: displ_red(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: eigval(3*Cryst%natom)
@@ -4221,13 +4221,13 @@ subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprim
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:,:),gkk_qpt_tmp(:,:,:,:,:)
 
  real(dp) :: ss_allatoms(2,elph_ds%nbranch,elph_ds%nbranch)
- real(dp) :: c_one(2), c_zero(2)
+ complex(dpc) :: c_one, c_zero
 
 
 ! *********************************************************************
 
- c_one = (/one,zero/)
- c_zero = (/zero,zero/)
+ c_one = dcmplx(one,zero)
+ c_zero = dcmplx(zero,zero)
 
 !Generation of the gkk matrices relative to the q points
 !of the set which samples the entire Brillouin zone

@@ -2999,7 +2999,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
        ABI_ALLOCATE(ipiv,(nbdmix))
 !      The smn is destroyed by the following inverse call
-       call zgesv(nbdmix,nbdmix,smn,nbdmix,ipiv,mmn,nbdmix,ierr)
+       call zgesv(nbdmix,nbdmix,smn,nbdmix,ipiv,dcmplx(mmn),nbdmix,ierr)
        ABI_DEALLOCATE(ipiv)
 !DEBUG
        if(ierr/=0)then
