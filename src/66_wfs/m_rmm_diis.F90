@@ -593,7 +593,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !end if
 
 #if 1
- ! Recompute eigenvalues, residuals with orthogonalized wavefunctions.
+ ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
+ ! Important to improve accuracy
+ ! Perhaps this step can skipped at the beginning of the SCF cycle
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize
    ige = min(iblock * npwsp * bsize, npwsp * nband)
@@ -605,16 +607,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg(:,igs), ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                         eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
-
-   ! Push the last results just for printing purposes and increment last_iter.
-   !it = diis%last_iter + 1
-   !do idat=1,ndat
-   !  diis%hist_ene(it, idat) = eig(ib_start+idat-1)
-   !  diis%hist_resid(it, idat) = resid(ib_start+idat-1)
-   !  diis%hist_enlx(it, idat) = enlx(ib_start+idat-1)
-   !  diis%step_type(it, idat) = tag
-   !end do
-   !diis%last_iter = diis%last_iter + 1
  end do
 #endif
 
@@ -651,7 +643,7 @@ real(dp) function limit_lambda(lambda) result(new_lam)
     new_lam = sign(one, lambda)
   else if (abs(lambda) < tol1) then
     if (abs(lambda) > tol12)  then
-      new_lam = tol1 * (lambda / abs(lambda))
+      new_lam = tol1 * sign(one, lambda)
     else
       new_lam = tol12
     end if
