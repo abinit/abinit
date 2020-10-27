@@ -144,7 +144,7 @@ integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
 integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  integer,save :: nskip=0
  integer :: counter,cpopt,itypat
- integer :: i1,i2,i3,ia,iband,ibandmin,ibandmax,isubh,jband,me_g0
+ integer :: i1,i2,i3,ia,iband,ibandmin,ibandmax,isubh,isubh0,jband,me_g0
  integer :: ibdblock,iblock,igs
  integer :: iline,ipw,ispinor,istwf_k
  integer :: n4,n5,n6,natom,ncpgr,nblock
@@ -274,6 +274,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  end do
 
  isubh = 1
+ isubh0=1
 
  ! Loop over blocks of bands. In the standard band-sequential algorithm, nblock=nband.
  do iblock=1,nblock
@@ -338,8 +339,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          ! === COMPUTE THE RESIDUAL ===
          ! Compute lambda = <C|H|C>
          sij_opt = 0
-         call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
+         call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
            &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
+         chc=z_tmp(1)
          lam0=chc
          eval=chc
          eig(iband)=chc
@@ -555,13 +557,15 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          call fourwf(0,denpot_dum,direc,fofgout_dum,direc_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
 &          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
 &          n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
-         call getchc(dhc,doti,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,cwavef_r,direc_r,&
+         call getchc(z_tmp,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,cwavef_r,direc_r,&
            &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
+         dhc=z_tmp(1)
          dhc=dhc*xnorm
 
          ! Compute <D|H|D> or <D|(H-zshift)^2|D>
-         call getchc(dhd,doti,cpopt,direc,direc,cprj_direc,cprj_direc,direc_r,direc_r,&
+         call getchc(z_tmp,cpopt,direc,direc,cprj_direc,cprj_direc,direc_r,direc_r,&
 &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
+         dhd=z_tmp(1)
          dhd=dhd*xnorm**2
 
          if(prtvol==-level)then
@@ -651,9 +655,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
              call wrtout(std_out,message,'PERS')
            end if
            ! Update chc before exit
-           call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
+           call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
              &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
-           eig(iband)=chc
+           eig(iband)=z_tmp(1)
 
            nskip=nskip+2*(nline-iline)  ! Number of one-way 3D ffts skipped
            exit                         ! Exit from the loop on iline
@@ -661,9 +665,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 
          ! Update chc only if last iteration, otherwise it will be done at the beginning of the next one
          if (iline==nline) then
-           call getchc(chc,doti,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
+           call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
              &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
-           eig(iband)=chc
+           eig(iband)=z_tmp(1)
          end if
 
        end do ! END LOOP FOR A GIVEN BAND Note that there are three "exit" instructions inside
@@ -696,16 +700,18 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
      ! Compute local+kinetic part
      call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
        &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,3)
+     isubh=isubh0
      do jband=1,iband
        cwavef_left => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
-       cprj_cwavef_left => cprj_cwavef_bands(:,jband:jband)
        call dotprod_g(subham(isubh),subham(isubh+1),istwf_k,npw*nspinor,2,cwavef_left,direc,me_g0,mpi_enreg%comm_spinorfft)
-       ! Add the nonlocal part
-       call getchc(subham(isubh),subham(isubh+1),cpopt,cwavef,cwavef,&
-         &          cprj_cwavef,cprj_cwavef_left,cwavef_r,cwavef_r,&
-         &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,4)
        isubh=isubh+2
      end do
+     cprj_cwavef_left => cprj_cwavef_bands(:,1:iband)
+     ! Add the nonlocal part
+     call getchc(subham(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef,&
+       &          cprj_cwavef,cprj_cwavef_left,cwavef_r,cwavef_r,&
+       &          gs_hamk,zero,mpi_enreg,iband,prtvol,sij_opt,tim_getchc,4)
+     isubh0=isubh
    end do
 
  end do ! iblock End loop over block of bands

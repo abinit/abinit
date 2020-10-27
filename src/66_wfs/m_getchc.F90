@@ -126,7 +126,7 @@ contains
 !!
 !! SOURCE
 
-subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,cwavef_left_r,&
+subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,cwavef_left_r,&
 &                 gs_ham,lambda,mpi_enreg,ndat,&
 &                 prtvol,sij_opt,tim_getchc,type_calc,&
 &                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
@@ -137,7 +137,7 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
  integer,intent(in) :: sij_opt,tim_getchc,type_calc
  integer,intent(in),optional :: select_k
  real(dp),intent(in) :: lambda
- real(dp),intent(out) :: chc_re,chc_im
+ real(dp),intent(inout) :: chc(2*ndat)
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
 !arrays
@@ -214,12 +214,12 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 
 !Check sizes
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
- if (size(cwavef)<2*npw_k1*my_nspinor*ndat) then
+ if (size(cwavef)<2*npw_k1*my_nspinor) then
    msg='wrong size for cwavef!'
    MSG_BUG(msg)
  end if
  if (gs_ham%usepaw==1.and.cpopt>=0) then
-   if (size(cwaveprj)<gs_ham%natom*my_nspinor*ndat) then
+   if (size(cwaveprj)<gs_ham%natom*my_nspinor) then
      msg='wrong size for cwaveprj!'
      MSG_BUG(msg)
    end if
@@ -280,31 +280,31 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
    if (.not.associated(gs_ham%vlocal)) then
      MSG_BUG("We need vlocal in gs_ham!")
    end if
+   if (ndat>1) then
+     MSG_ERROR("ndat should be 1 for the local part")
+   end if
 
 !  fourwf can only process with one value of istwf_k
    if (.not.k1_eq_k2) then
      MSG_BUG('vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
-!   nffttot = gs_ham%n4*gs_ham%n5*gs_ham%n6
    nffttot = gs_ham%ngfft(1)*gs_ham%ngfft(2)*gs_ham%ngfft(3)
 !  Treat scalar local potentials
    if (gs_ham%nvloc==1) then
 
-     chc_re = zero
-     chc_im = zero
+     chc = zero
      do i3=1,gs_ham%n6
        do i2=1,gs_ham%n5
          do i1=1,gs_ham%n4
-           z_tmp(1) = cwavef_r(1,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)+cwavef_r(2,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
+           z_tmp(1) = cwavef_r(1,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3+(ndat-1)*gs_ham%n4)+cwavef_r(2,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
            z_tmp(2) = cwavef_r(2,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)-cwavef_r(1,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
-           chc_re = chc_re + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(1)
-           chc_im = chc_im + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(2)
+           chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(1)
+           chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(2)
          end do
        end do
      end do
-     chc_re = chc_re / dble(nffttot)
-     chc_im = chc_im / dble(nffttot)
+     chc = chc / dble(nffttot)
 
    else
      MSG_BUG('Only gs_ham%nvloc=1 is implemented')
@@ -347,13 +347,13 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
      paw_opt=gs_ham%usepaw ; if (sij_opt/=0) paw_opt=sij_opt+3
      lambda_ndat = lambda
 
-     call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
+     call nonlop(choice,cpopt_here,cwaveprj,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,1,&
 &     nnlout,paw_opt,signs,gsc,tim_nonlop,cwavef,gvnlxc,select_k=select_k_,&
-&     cprjin_left=cwaveprj_left,enlout_im=enlout_im)
+&     cprjin_left=cwaveprj_left,enlout_im=enlout_im,ndat_left=ndat)
 
      do idat=1,ndat
-       chc_re = chc_re + enlout(idat)
-       chc_im = chc_im + enlout_im(idat)
+       chc(2*idat-1) = chc(2*idat-1) + enlout(idat)
+       chc(2*idat  ) = chc(2*idat  ) + enlout_im(idat)
      end do
 
    end if ! if(type_calc...
@@ -363,6 +363,11 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
 !============================================================
 
    if (type_calc==0.or.type_calc==2.or.type_calc==3) then
+
+     if (ndat>1) then
+       MSG_ERROR("ndat should be 1 for the kinetic part")
+     end if
+
      call timab(1372,1,tsec)
 !    Add modified kinetic contributions
      !  to <CP|H|C(n,k)>.
@@ -372,10 +377,10 @@ subroutine getchc(chc_re,chc_im,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,
          do ig=1,npw_k2
            igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
            if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-             chc_re = chc_re +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
-             chc_re = chc_re +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
-             chc_im = chc_im +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(re,igspinor)
-             chc_im = chc_im -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(im,igspinor)
+             chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(re,igspinor)
+             chc(1) = chc(1) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(im,igspinor)
+             chc(2) = chc(2) +  kinpw_k2(ig)*cwavef(im,igspinor)*cwavef_left(re,igspinor)
+             chc(2) = chc(2) -  kinpw_k2(ig)*cwavef(re,igspinor)*cwavef_left(im,igspinor)
            end if
          end do ! ig
        end do ! ispinor
