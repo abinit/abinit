@@ -502,7 +502,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
  real(dp),allocatable :: work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,tbloc
+ integer :: istwf_k,tbloc
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_mat,Slk_vec
  type(processor_scalapack) :: Slk_processor
@@ -1673,7 +1673,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
  real(dp),allocatable :: work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,tbloc
+ integer :: istwf_k,tbloc
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_mat,Slk_vec
  type(processor_scalapack) :: Slk_processor
@@ -2212,7 +2212,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
  real(dp),allocatable :: work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,tbloc
+ integer :: istwf_k,tbloc
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
  type(processor_scalapack) :: Slk_processor
