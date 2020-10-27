@@ -39,7 +39,7 @@ pseudos "Pseudodojo_paw_pbe_standard/Ga.xml, Pseudodojo_paw_pbe_standard/As.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t18.out, tolnlines = 35, tolabs = 2.e-04, tolrel = 0.9;
+#%%   t18.out, tolnlines = 35, tolabs = 2.e-04, tolrel = 1.1;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

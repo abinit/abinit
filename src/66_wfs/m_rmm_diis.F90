@@ -162,7 +162,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
  logical :: end_with_trial_step, new_lambda
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene, cpu, wall, gflops, dotr, doti
+ real(dp) :: accuracy_ene, cpu, wall, gflops !, dotr, doti
  !character(len=500) :: msg
  character(len=6) :: tag
 !arrays
@@ -592,7 +592,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !  end if
  !end if
 
-#if 0
+#if 1
  ! Recompute eigenvalues, residuals with orthogonalized wavefunctions.
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize
@@ -833,7 +833,7 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
- integer :: istwf_k, usepaw, cpopt, sij_opt, npwsp, me_g0, comm !, ikpt_this_proc !idat,
+ integer :: istwf_k, usepaw, cpopt, sij_opt, npwsp, me_g0, comm
  real(dp),parameter :: rdummy = zero
  logical :: normalize_
 !arrays
