@@ -49,6 +49,7 @@ inp_files = [
 "-t61.in", # disabled for now
 "t62.in",
 "t63.in",
+"t64.in",
 "t71.in",
 "t72.in",
 "t73.in",
