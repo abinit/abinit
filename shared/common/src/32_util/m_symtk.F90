@@ -535,7 +535,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
      do sym3=1,nsym
        iseq = (all(prd_symrel == symrel(:,:,sym3) ) .and. &
                isinteger(prd_tnons - tnons(:,sym3), tnons_tol) .and. &
-               prd_symafm == symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail.
+               prd_symafm == symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail. XG 2020_10_24 Not anymore
 
        ! The rotational part is in the group but with different magnetic part!
        if (iseq) then

@@ -845,7 +845,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
          chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
 
-       !If the group closure is not obtained which should be exceptional, try with a larger tolsym (three times larger)
+       !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
        if(ierr/=0)then
          MSG_WARNING('Will try to obtain group closure by using a tripled tolsym.')
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
