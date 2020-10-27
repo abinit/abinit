@@ -83,7 +83,6 @@ Core build parameters
   * ELPA enabled      : ${sd_linalg_has_elpa}
 
   * FCFLAGS           : ${FCFLAGS}
-  * FCFLAGS_OPTIM     : ${FCFLAGS_OPTIM}
   * CPATH             : ${CPATH}
 
   * Build workflow    : ${abi_build_steps}
