@@ -283,13 +283,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    gsc=zero
  end if
 
- !if (use_rmm_diis) then
- !  if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
- !  ortalgo = mpi_enreg%paral_kgb
- !  call pw_orthon(icg, igsc, istwf_k, mcg, mgsc, npw_k*my_nspinor, nband_k, ortalgo, gsc, gs_hamk%usepaw, cg, &
- !   mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
- !end if
-
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then
    !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
@@ -510,13 +503,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !  Re-orthonormalize the wavefunctions at this k point.
 !  this step is redundant but is performed to combat rounding error in wavefunction orthogonality.
-!  It's mandatory if RMM-DIIS.
+!  This step is performed inside rmm_diis if RMM-DIIS is activated.
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo = mpi_enreg%paral_kgb
-   !ortalgo = 3
-   do_ortho = ((wfoptalg/=14 .and. wfoptalg /= 1) .or. dtset%ortalg > 0 .or. use_rmm_diis)
-   !do_ortho = .True.
+   do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1) .or. dtset%ortalg > 0
+   if (use_rmm_diis) do_ortho = .False.
+
    if (do_ortho) then
      if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
      call pw_orthon(icg, igsc, istwf_k, mcg, mgsc, npw_k*my_nspinor, nband_k, ortalgo, gsc, gs_hamk%usepaw, cg, &
@@ -524,8 +517,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
    call timab(583,2,tsec)
 
-!  DEBUG seq==par comment next block
-!  Fix phases of all bands
+   ! DEBUG seq==par comment next block
+   ! Fix phases of all bands
    if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
      if ( .not. newlobpcg ) then
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)

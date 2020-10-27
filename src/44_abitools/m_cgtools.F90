@@ -3882,7 +3882,7 @@ end subroutine cg_precon_block
 !!           0 otherwise
 !!  optpcon= 0 the TPA preconditionning matrix does not depend on band
 !!           1 the TPA preconditionning matrix (not modified)
-!!           2 the TPA preconditionning matrix is independant of iterationnumber
+!!           2 the TPA preconditionning matrix is independant of iteration number
 !!  vectsize= size of vectors
 !!  comm=MPI communicator.
 !!
