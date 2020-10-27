@@ -642,8 +642,9 @@ real(dp) function limit_lambda(lambda) result(new_lam)
 
   real(dp),intent(in) :: lambda
 
+  !write(std_out, *)"input lambda:", lambda
   new_lam = lambda
-  return
+  !return
 
   ! restrict the value of abs(lambda) in [0.1, 1.0]
   if (abs(lambda) > one) then
@@ -656,8 +657,7 @@ real(dp) function limit_lambda(lambda) result(new_lam)
     end if
   end if
 
-  write(std_out, *)"input lambda:", lambda
-  write(std_out, *)"new lambda:", new_lam
+  !write(std_out, *)"new lambda:", new_lam
 
 end function limit_lambda
 
@@ -784,9 +784,9 @@ subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
    iband = ib_start + idat - 1
    deold = diis%hist_ene(1, idat) - diis%hist_ene(0, idat)
    do iter=0,diis%last_iter
-     deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
      dedold = zero; absdiff = zero
      if (iter > 0) then
+       deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
        dedold = deltae / deold
        absdiff = (diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat))
      end if
