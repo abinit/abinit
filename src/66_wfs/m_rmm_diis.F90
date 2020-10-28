@@ -307,7 +307,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  nb_pocc = count(occ > zero)
  accuracy_ene = zero
  if (dtset%iscf > 0) then
-   if (dtset%toldfe /= 0) then
+   if (dtset%toldfe /= zero) then
      accuracy_ene = dtset%toldfe / nb_pocc / four
    else
      ! We are not using toldfe to stop the SCF cycle
@@ -319,7 +319,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
  call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
  call wrtout(std_out, sjoin( &
-   " Number of blocks:", itoa(nblocks), "nb_pocc", itoa(nb_pocc), " accuracy_ene: ", ftoa(accuracy_ene)))
+   " Number of blocks:", itoa(nblocks), ", number of 'partiallly' occupied states:", itoa(nb_pocc), &
+   ", accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
  ABI_MALLOC(lambda_bk, (bsize))
@@ -436,8 +437,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
        ! Precondition residual, output in kres_bk.
        call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
-       call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, &
-                           kres_bk, me_g0, comm_bandspinorfft)
+       call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
 
        ! Compute phi_bk with the lambda(ndat) obtained at iteration #1
        call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
@@ -588,9 +588,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
  ! This step is important to improve accuracy but we try to avoid it at the beginning of the SCF cycle
 
- !recompute_eigresid_after_ortho = sum(resid(1:nb_pocc) / nb_pocc) < tol10
  recompute_eigresid_after_ortho = .True.
+ recompute_eigresid_after_ortho = sum(resid(1:nb_pocc) / nb_pocc < tol10
+
  if (recompute_eigresid_after_ortho) then
+   call wrtout(std_out, " Recomputing eigenvalues and residuals after orthogonalization...")
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize
      ige = min(iblock * npwsp * bsize, npwsp * nband)
@@ -603,6 +605,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
                           eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
    end do
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
+ else
+   call wrtout(std_out, " Still far from converged. Eigenvalues, residuals and NC enlx wont' be recomputed.")
  end if
 
  !call yaml_write_dict('RMM-DIIS', "stats", dict%stats, std_out, with_iter_state=.False.)
@@ -689,10 +693,10 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
    deold = diis%hist_ene(1, idat) - diis%hist_ene(0, idat)
    deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
 
-   ! Relative criterion on eigevaluae differerence.
+   ! Relative criterion on eigenvalue differerence.
    ! Abinit default in the CG part is 0.005 that is really to low (it's 0.3 in V).
-   ! Here we increase it depending whether the state is occupied or not
-   fact = 0.6_dp; if (abs(occ_bk(idat)) < tol_occupied) fact = six
+   ! Here we increase it depending whether the state is occupied or empty
+   fact = six * ten; if (abs(occ_bk(idat)) < tol_occupied) fact = six
    if (abs(deltae) < fact * dtset%tolrde * abs(deold)) then
      checks(idat) = 1; msg_list(idat) = "deltae < fact * tolrde * deold"; cycle
    end if
@@ -712,7 +716,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
      if (resid < dtset%tolwfr) then
        checks(idat) = 1; msg_list(idat) = 'resid < tolwfr'; cycle
      end if
-     fact = one; if (abs(occ_bk(idat)) < tol_occupied) fact = tol2
+     fact = 10**2; if (abs(occ_bk(idat)) < tol_occupied) fact = one
      if (sqrt(abs(resid)) < fact * accuracy_ene) then
        ! Absolute criterion on eigenvalue difference. Assuming error on Etot ~ band_energy.
        checks(idat) = 1; msg_list(idat) = 'resid < accuracy_ene'; cycle
@@ -1136,17 +1140,17 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
  class(rmm_diis_t),intent(inout) :: diis
  integer,intent(in) :: iter, ndat, me_g0, comm
 
- integer,parameter :: option2 = 2
- integer :: ii, ierr, idat, nprocs
+ integer :: ii, ierr, idat, nprocs, option
  real(dp) :: dotr, doti
 
  nprocs = xmpi_comm_size(comm)
+ option = 2; if (diis%cplex == 1) option = 1
 
  do idat=1,ndat
 
    do ii=0,iter
      ! <R_i|R_j>
-     call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
+     call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option, &
                     diis%chain_resv(:,:,ii,idat), diis%chain_resv(:,:,iter,idat), me_g0, xmpi_comm_self)
      if (ii == iter) doti = zero
      if (diis%cplex == 2) then
@@ -1160,10 +1164,10 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
        dotr = one / nprocs; doti = zero
      else
        if (diis%usepaw == 0) then
-         call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
+         call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option, &
                         diis%chain_phi(:,:,ii,idat), diis%chain_phi(:,:,iter,idat), me_g0, xmpi_comm_self)
        else
-         call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option2, &
+         call dotprod_g(dotr, doti, diis%istwf_k, diis%npwsp, option, &
                         diis%chain_phi(:,:,ii,idat), diis%chain_sphi(:,:,iter,idat), me_g0, xmpi_comm_self)
        end if
      end if
@@ -1184,6 +1188,11 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
    !end if
 
  end do ! idat
+
+ !if (nprocs > 1) then
+ !  call xmpi_sum(diis%resmat(:,0:iter,iter,1:ndat), comm, ierr)
+ !  call xmpi_sum(diis%smat(:,0:iter,iter, 1:ndat), comm, ierr)
+ !endif
 
 end subroutine rmm_diis_eval_mats
 !!***
