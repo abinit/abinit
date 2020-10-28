@@ -99,6 +99,7 @@ module m_rmm_diis
  !logical,parameter, private :: timeit = .True.
 
  real(dp),parameter :: tol_occupied = tol3
+ !real(dp),parameter :: tol_occupied = tol2
 
 contains
 !!***
@@ -159,7 +160,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb !, comm
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
- integer :: me_g0, nbocc, jj, kk, it, ibk, iek, cplex, ortalgo !ii, ld1, ld2,
+ integer :: me_g0, nb_pocc, jj, kk, it, ibk, iek, cplex, ortalgo !ii, ld1, ld2,
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
  logical :: end_with_trial_step, new_lambda, recompute_eigresid_after_ortho
  real(dp),parameter :: rdummy = zero
@@ -303,22 +304,22 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  max_niter = max(dtset%nline - 1, 1)
 
  ! Define accuracy_ene for SCF
- nbocc = count(occ > zero)
+ nb_pocc = count(occ > zero)
  accuracy_ene = zero
  if (dtset%iscf > 0) then
    if (dtset%toldfe /= 0) then
-     accuracy_ene = dtset%toldfe / nbocc / four
+     accuracy_ene = dtset%toldfe / nb_pocc / four
    else
      ! We are not using toldfe to stop the SCF cycle
      ! so we are forced to hardcode a tolerance for the absolute diff in the KS eigenvalue.
-     accuracy_ene = tol6 / nbocc / four
+     accuracy_ene = tol6 / nb_pocc / four
    end if
  end if
 
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
  call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
- call wrtout(std_out, sjoin(" Number of blocks:", itoa(nblocks), " accuracy_ene: ", ftoa(accuracy_ene)))
- !if (paral_kgb == 1) call wrtout(std_out, sjoin(" npband:", itoa(mpi_enreg%nproc_band), " bandpp: ", itoa(mpi_enreg%bandpp)))
+ call wrtout(std_out, sjoin( &
+   " Number of blocks:", itoa(nblocks), "nb_pocc", itoa(nb_pocc), " accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
  ABI_MALLOC(lambda_bk, (bsize))
@@ -485,7 +486,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ! if these bands still far from convergence. In all the other cases, we reuse the previous lambda.
 
      new_lambda = .False.
-     if (ib_start <= nbocc .or. ib_stop <= nint(1.2_dp * nbocc) .and. &
+     if (ib_start <= nb_pocc .or. ib_stop <= nint(1.2_dp * nb_pocc) .and. &
          any(resid(ib_start:ib_stop) > tol6)) new_lambda = .True.
      !new_lambda = .False.
      !new_lambda = .True.
@@ -584,10 +585,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !  end if
  !end if
 
+ ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
+ ! This step is important to improve accuracy but we try to avoid it at the beginning of the SCF cycle
+
+ !recompute_eigresid_after_ortho = sum(resid(1:nb_pocc) / nb_pocc) < tol10
  recompute_eigresid_after_ortho = .True.
  if (recompute_eigresid_after_ortho) then
-   ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
-   ! This step is important to improve accuracy but, perhaps, can skipped at the beginning of the SCF cycle
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize
      ige = min(iblock * npwsp * bsize, npwsp * nband)
@@ -634,11 +637,11 @@ contains
   if (abs(lambda) > one) then
     new_lam = sign(one, lambda)
   else if (abs(lambda) < tol1) then
-    if (abs(lambda) > tol12)  then
+    !if (abs(lambda) > tol12)  then
       new_lam = tol1 * sign(one, lambda)
-    else
-      new_lam = tol12
-    end if
+    !else
+    !  new_lam = tol12
+    !end if
   end if
 
   !write(std_out, *)"new lambda:", new_lam
@@ -686,13 +689,12 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
    deold = diis%hist_ene(1, idat) - diis%hist_ene(0, idat)
    deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
 
-   ! Relative criterion on eig diff
+   ! Relative criterion on eigevaluae differerence.
    ! Abinit default in the CG part is 0.005 that is really to low (it's 0.3 in V).
    ! Here we increase it depending whether the state is occupied or not
-   fact = 0.6_dp; if (abs(occ_bk(idat)) < tol_occupied) fact = 6
-
+   fact = 0.6_dp; if (abs(occ_bk(idat)) < tol_occupied) fact = six
    if (abs(deltae) < fact * dtset%tolrde * abs(deold)) then
-    checks(idat) = 1; msg_list(idat) = "deltae < fact * tolrde * deold"; cycle
+     checks(idat) = 1; msg_list(idat) = "deltae < fact * tolrde * deold"; cycle
    end if
 
    !if (abs(deltae/deold) > 10.0_dp) then
