@@ -15,7 +15,7 @@ tolvrs1    1.0d-6
 
 # Dataset 1: band + FFT parallelism. 
 # Read previous WFK, decrease tolvrs and reconverge with RMM-DIIS only.
-rmm_diis2 -1
+rmm_diis2 -3
 npband2 2 bandpp2 16 npfft2 2
 tolvrs2    1.0d-10
 getwfk2 -1

@@ -272,9 +272,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ! rmm_diis > 0 --> Activate it after (3 + rmm_diis) iterations with wfoptalg algorithm.
  ! rmm_diis < 0 --> Start with RMM-DIIS directly (risky)
  use_rmm_diis = .False.
- if (abs(dtset%rmm_diis) /= 0 .and. dtset%use_gpu_cuda == 0) then
-   if (dtset%rmm_diis > 0) use_rmm_diis = istep > 3 + dtset%rmm_diis
-   if (dtset%rmm_diis < 0) use_rmm_diis = .True.
+ if (dtset%rmm_diis /= 0 .and. dtset%use_gpu_cuda == 0) then
+   use_rmm_diis = istep > 3 + dtset%rmm_diis
    if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver.")
  end if
 

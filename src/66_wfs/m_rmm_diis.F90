@@ -94,7 +94,6 @@ module m_rmm_diis
 
  end type rmm_diis_t
 
-
  integer,parameter, private :: level = 432
  logical,parameter, private :: timeit = .False.
  !logical,parameter, private :: timeit = .True.
@@ -160,7 +159,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nbocc, jj, kk, it, ibk, iek, cplex, ortalgo !ii, ld1, ld2,
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
- logical :: end_with_trial_step, new_lambda
+ logical :: end_with_trial_step, new_lambda, recompute_eigresid_after_ortho
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops !, dotr, doti
  !character(len=500) :: msg
@@ -214,8 +213,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    igs = 1 + (iblock - 1) * npwsp * bsize
    ige = min(iblock * npwsp * bsize, npwsp * nband)
    ndat = (ige - igs + 1) / npwsp
-   ib_start = 1 + (iblock - 1) * bsize
-   ib_stop = min(iblock * bsize, nband)
+   ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
 
    if (usepaw == 1) ptr_gsc_bk => gsc_all(1:2,igs:ige)
 
@@ -228,17 +226,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end if
 
    ! Compute <i|H|j> for i=1,nband and all j in block
-   ! TODO: Optimize for istwf_k == 2
    if (cplex == 2) then
      call cg_zgemm("C", "N", npwsp, nband, ndat, cg, ghc_bk, h_ij(:,:,ib_start))
    else
      call dgemm("T", "N", nband, ndat, 2*npwsp, one, cg, 2*npwsp, ghc_bk, 2*npwsp, zero, h_ij(:,:,ib_start), nband)
-     !integer M, integer N, integer K, double precision ALPHA,
-     !double precision, dimension(lda,*) A, integer LDA,
-     !double precision, dimension(ldb,*) B, integer LDB,
-     !double precision BETA,
-     !double precision, dimension(ldc,*) C, integer LDC
-     !)
    end if
 
    if (istwf_k /= 1) then
@@ -324,10 +315,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
  call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
- call wrtout(std_out, sjoin(" Block size:", itoa(bsize), " accuracy_ene: ", ftoa(accuracy_ene)))
- !if (paral_kgb == 1) then
- !  call wrtout(std_out, sjoin(" npband:", itoa(mpi_enreg%nproc_band), " bandpp: ", itoa(mpi_enreg%bandpp)))
- !end if
+ call wrtout(std_out, sjoin(" Number of blocks:", itoa(nblocks), " accuracy_ene: ", ftoa(accuracy_ene)))
+ !if (paral_kgb == 1) call wrtout(std_out, sjoin(" npband:", itoa(mpi_enreg%nproc_band), " bandpp: ", itoa(mpi_enreg%bandpp)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
  ABI_MALLOC(lambda_bk, (bsize))
@@ -347,8 +336,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    igs = 1 + (iblock - 1) * npwsp * bsize
    ige = min(iblock * npwsp * bsize, npwsp * nband)
    ndat = (ige - igs + 1) / npwsp
-   ib_start = 1 + (iblock - 1) * bsize
-   ib_stop = min(iblock * bsize, nband)
+   ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
 
    ! Reduce number of niter iterations for empty states.
    ! TODO: Don't reduce niter if MD
@@ -435,7 +423,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
    end do
-
    if (timeit) call cwtime_report(" KR0 ", cpu, wall, gflops)
 
    iter_loop: do iter=1,max_niter_block
@@ -495,7 +482,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ! if these bands still far from convergence. In all the other cases, we reuse the previous lambda.
 
      new_lambda = .False.
-     if (ib_stop <= nbocc + 4 .and. any(resid(ib_start:ib_stop) > tol10)) new_lambda = .True.
+     if (ib_start <= nbocc .or. ib_stop <= nint(1.2_dp * nbocc) .and. &
+         any(resid(ib_start:ib_stop) > tol6)) new_lambda = .True.
      !new_lambda = .False.
      !new_lambda = .True.
 
@@ -575,10 +563,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !do_ortho = .True.
  !if (do_ortho) then
    if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
-   call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc_All, gs_hamk%usepaw, cg, &
+   call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc_all, gs_hamk%usepaw, cg, &
     mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
  !end if
  call timab(583,2,tsec)
+ if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
  ! DEBUG seq==par comment next block
  ! Fix phases of all bands
@@ -592,25 +581,25 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !  end if
  !end if
 
-#if 1
- ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
- ! Important to improve accuracy
- ! Perhaps this step can skipped at the beginning of the SCF cycle
- do iblock=1,nblocks
-   igs = 1 + (iblock - 1) * npwsp * bsize
-   ige = min(iblock * npwsp * bsize, npwsp * nband)
-   ndat = (ige - igs + 1) / npwsp
-   ib_start = 1 + (iblock - 1) * bsize
-   ib_stop = min(iblock * bsize, nband)
+ recompute_eigresid_after_ortho = .True.
+ if (recompute_eigresid_after_ortho) then
+   ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
+   ! This step is important to improve accuracy but, perhaps, can skipped at the beginning of the SCF cycle
+   do iblock=1,nblocks
+     igs = 1 + (iblock - 1) * npwsp * bsize
+     ige = min(iblock * npwsp * bsize, npwsp * nband)
+     ndat = (ige - igs + 1) / npwsp
+     ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
 
-   if (usepaw == 1) ptr_gsc_bk => gsc_all(1:2,igs:ige)
+     if (usepaw == 1) ptr_gsc_bk => gsc_all(1:2,igs:ige)
 
-   call getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg(:,igs), ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
-                        eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
- end do
-#endif
+     call getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg(:,igs), ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
+                          eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
+   end do
+   if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
+ end if
 
- !call yaml_write_and_free_dict('RMM-DIIS', dict, std_out)
+ !call yaml_write_dict('RMM-DIIS', "stats", dict%stats, std_out, with_iter_state=.False.)
  ydoc = yamldoc_open("RMM-DIIS", with_iter_state=.False.)
  call ydoc%add_dict("stats", diis%stats)
  call ydoc%write_and_free(std_out)
@@ -684,7 +673,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
  real(dp) :: resid, deltae, deold
  character(len=50) :: msg_list(ndat)
 
- diis%last_iter = iter !; if (iter == niter_block) return
+ diis%last_iter = iter
 
  if (xmpi_comm_rank(comm) /= master) goto 10
  checks = 0
@@ -695,9 +684,9 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
 
    ! Relative criterion on eig diff
    ! Abinit default in the CG part is 0.005 (0.3 V). Here we enlarge it a bit
-   if (abs(deltae) < 6 * dtset%tolrde * abs(deold) .and. iter /= niter_block) then
-   !if (abs(deltae) < 0.3 * abs(deold) .and. iter /= niter_block) then
-     checks(idat) = 1; msg_list(idat) = "deltae < 6 * tolrde * deold"; cycle
+   !if (abs(deltae) < 6 * dtset%tolrde * abs(deold)) then
+   if (abs(deltae) < 0.6 * dtset%tolrde * abs(deold)) then
+    checks(idat) = 1; msg_list(idat) = "deltae < 6 * tolrde * deold"; cycle
    end if
 
    !if (abs(deltae/deold) > 10.0_dp) then
@@ -783,7 +772,7 @@ subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
        absdiff = (diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat))
      end if
 
-     write(msg,"(1x, 2(i5), 2(f14.6), 2(es14.6), 1x, a6)") &
+     write(msg,"(1x, 2(i5), 4(es14.6), 1x, a6)") &
        iter, iband, diis%hist_ene(iter, idat) * Ha_eV, absdiff * Ha_meV, dedold, &
        diis%hist_resid(iter, idat), diis%step_type(iter, idat); call wrtout(std_out, msg)
    end do

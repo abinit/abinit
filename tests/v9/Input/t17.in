@@ -2,7 +2,7 @@
 ndtset 2
 
 rmm_diis1  1       # Activate CG + RMM-DIIS.
-rmm_diis2 -1       # RMM-DIIS only
+rmm_diis2 -3       # RMM-DIIS only
 #paral_kgb 1
 
 boxcutmin 1.5

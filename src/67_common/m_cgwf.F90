@@ -478,7 +478,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      end if
 
      ! Normalize incoming wf (and S.wf, if generalized eigenproblem):
-     ! WARNING : It might be interesting to skip the following operation.
+     ! WARNING: It might be interesting to skip the following operation.
      ! The associated routines should be reexamined to see whether cwavef is not already normalized.
      if (gen_eigenpb) then
        call dotprod_g(dotr,doti,istwf_k,npw*nspinor,2,cwavef,scwavef,me_g0,mpi_enreg%comm_spinorfft)

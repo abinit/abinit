@@ -476,7 +476,7 @@ subroutine cg_zscal(n, a, x)
 ! *************************************************************************
 
  if (a(2) == zero) then
-   call zdscal(n, a, x, 1)
+   call dscal(2*n, a(1), x, 1)
  else
    call zscal(n, a, x, 1)
  end if
@@ -2691,8 +2691,7 @@ subroutine cgnc_normalize(npwsp, nband, cg, istwfk, me_g0, comm_pw)
  end do
 
  if (ierr /= 0) then
-   write(msg,'(a,i0,a)')" Found ",ierr," vectors with norm <= zero!"
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin("Found ", itoa(ierr)," vectors with norm <= zero!"))
  end if
 
 !$OMP PARALLEL DO PRIVATE(ptr,alpha) IF (nband > 1)
