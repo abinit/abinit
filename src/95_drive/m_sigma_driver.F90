@@ -258,7 +258,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18)  
  integer,allocatable :: nq_spl(:),nlmn_atm(:),my_spins(:)
  integer,allocatable :: tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),l_size_atm(:),qp_vbik(:,:)
- integer,allocatable :: nband_dm(:,:)             
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
@@ -284,12 +283,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:),nateigv(:,:,:,:),old_purex(:,:),new_hartr(:,:),mat2rot(:,:),Umat(:,:)  
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
-!complex(dpc),pointer :: sigcme_p(:,:,:,:)
  complex(dpc),allocatable :: sigcme_k(:,:,:,:)
  complex(dpc), allocatable :: rhot1_q_m(:,:,:,:,:,:,:)
  complex(dpc), allocatable :: M1_q_m(:,:,:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:)
- logical,allocatable :: bdm_mask(:,:,:),keep_ur_dm(:,:,:),bdm2_mask(:,:,:),keep_ur_dm2(:,:,:)  
+ logical,allocatable :: bdm_mask(:,:,:),bdm2_mask(:,:,:)
  type(esymm_t),target,allocatable :: KS_sym(:,:)
  type(esymm_t),pointer :: QP_sym(:,:)
  type(pawcprj_type),allocatable :: Cp1(:,:) !,Cp2(:,:)
@@ -642,16 +640,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  if (gwcalctyp==21 .and. gw1rdm>0) then
    ABI_MALLOC(bdm_mask  ,(mband,Kmesh%nibz,Sigp%nsppol))
-   ABI_MALLOC(keep_ur_dm,(mband,Kmesh%nibz,Sigp%nsppol))
-   keep_ur_dm=.FALSE.; bdm_mask=.FALSE.
+   bdm_mask=.FALSE.
    if (my_rank==0) then
-     keep_ur_dm=.TRUE.; bdm_mask=.TRUE.
+     bdm_mask=.TRUE.
    end if
    ABI_MALLOC(bdm2_mask  ,(mband,Kmesh%nibz,Sigp%nsppol))
-   ABI_MALLOC(keep_ur_dm2,(mband,Kmesh%nibz,Sigp%nsppol))
-   ABI_MALLOC(nband_dm,(Kmesh%nibz,Sigp%nsppol))
-   keep_ur_dm2=.FALSE.; bdm2_mask=.FALSE.
-   nband_dm=mband
+   bdm2_mask=.FALSE.
  end if
  ABI_MALLOC(nband,(Kmesh%nibz,Sigp%nsppol))
  nband=mband
@@ -750,12 +744,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! MRM: also initialize the Wfd_nato_master for GW 1-RDM if required.
  ! Warning, this should be replaced by copy but copy fails due to bands being allocated in different manners. Do it in the future! FIXME 
  if (gwcalctyp==21 .and. gw1rdm>0) then
+   bdm2_mask=bks_mask ! As bks_mask is going to be removed, save it in bdm2_mask to use it in Evext_nl
    call wfd_init(Wfd_nato_master,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bdm_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,xmpi_comm_self)!comm)  ! MPI_COMM_SELF 
    call Wfd_nato_master%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
-   bdm2_mask=bks_mask
-   keep_ur_dm2=keep_ur
  end if
 
  if (Dtset%pawcross==1) then
@@ -763,10 +756,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
  end if
-! if (gwcalctyp==21) then
-!   ABI_FREE(keep_ur_dm)
-!   ABI_FREE(bdm_mask)
-! endif
  ABI_FREE(bks_mask)
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
@@ -2509,21 +2498,18 @@ endif
        ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
        ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
-!      sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:) ! Causes annoying Fortran runtime warning on abiref.
        ABI_MALLOC(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
        sigcme_k=czero
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
          call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_c,Vcp,Kmesh,Qmesh,&
 &         Ltg_k(ikcalc),Pawtab,Pawang,Paw_pwff,Psps,Wfd,QP_sym,&
-!&         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_p)
 &         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
          ! Compute correlated part using the coarse gwc_ngfft mesh.
          if (x1rdm/=1) then
            call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
 &           Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
-!&           gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_p) 
 &           gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
          else
            write(msg,'(a44,i5)')  ' Skipping the calc. of Sigma_c for k-point: ',ikcalc
@@ -2556,8 +2542,14 @@ endif
 
    call xmpi_barrier(Wfd%comm)
 
-   ! MRM: print WFK and DEN files, build band corrections, and compute new energies.
+   ! MRM: first clean all non-req. arrays. Then, print WFK and DEN files, build band corrections, and compute new energies.
    if (gwcalctyp==21 .and. gw1rdm>0) then
+     ABI_FREE(dm1) 
+     ABI_FREE(potk)     
+     ABI_FREE(dm1k) 
+     ABI_FREE(freqs)
+     ABI_FREE(weights) 
+     call em1results_free(Er) ! We no longer need Er for GW@KS-DFT 1RDM 
      ABI_MALLOC(old_purex,(b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(new_hartr,(b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
@@ -2572,8 +2564,8 @@ endif
      ! WARNING! 
      ! MRM: only the master has bands on Wfd_nato_master so it prints everything and computes gw_rhor 
      !
-     call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
-     call print_tot_occ(Sr,Kmesh,QP_BSt)                           
+     call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3)) ! All procs. update the QP_BSt and the Hdr_sigma
+     call print_tot_occ(Sr,Kmesh,QP_BSt) ! Compute averaged occ = \sum _k weight_k occ_k                           
      if (my_rank==0 .and. (dtset%prtwf == 1 .or. dtset%prtden == 1)) then
        call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs
        if (dtset%prtwf == 1) then 
@@ -2595,6 +2587,8 @@ endif
      ! We no longer need Wfd_nato_master. 
      Wfd_nato_master%bks_comm = xmpi_comm_null
      call Wfd_nato_master%free()
+     ABI_FREE(bdm_mask) ! The master already used bdm_mask
+     ABI_FREE(occs)     ! Occs were already placed in QP_BSt
      call xmpi_barrier(Wfd%comm)
      ! Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
      den_int=sum(gw_rhor(:,1))*ucvol_local/nfftf               ! Only restricted closed-shell calcs
@@ -2670,7 +2664,7 @@ endif
      !
      ! Use the Wfd with new name (Wfd_nato_all) because it will contain the GW 1RDM nat. orbs. (bands)
      !
-     MSG_COMMENT("The Wfd bands will contain the nat. orbs. ones from now on")
+     MSG_COMMENT("From now on, the Wfd bands will contain the nat. orbs. ones")
      Wfd_nato_all => Wfd
      call Wfd_nato_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_nato_all (KS->NO)
      call xmpi_barrier(Wfd%comm)
@@ -2687,6 +2681,8 @@ endif
          end do
        end do
      end do
+     call xmpi_barrier(Wfd%comm)
+     ABI_FREE(bdm2_mask)
      !
      ! Exchange <NO_i|K[NO]|NO_j> 
      !
@@ -2754,10 +2750,6 @@ endif
        ABI_FREE(mat2rot)
      end do
      call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
-     ABI_FREE(keep_ur_dm2)
-     ABI_FREE(bdm2_mask)
-     ABI_FREE(nband_dm)
-     call xmpi_barrier(Wfd%comm)
      !
      ! Compute and print Delta eik
      !
@@ -2864,17 +2856,9 @@ endif
      ABI_FREE(gw_vhartr)
    endif  
    call xmpi_barrier(Wfd%comm)
-   ! Finally, deallocate all arrays used for 1-RDM update
+   ! Finally, deallocate the last missing array used for 1-RDM update
    if (gwcalctyp==21 .and. gw1rdm>0) then
-     ABI_FREE(keep_ur_dm)
-     ABI_FREE(bdm_mask)
-     ABI_FREE(dm1) 
      ABI_FREE(nateigv) 
-     ABI_FREE(potk)     
-     ABI_FREE(dm1k) 
-     ABI_FREE(occs)
-     ABI_FREE(freqs)
-     ABI_FREE(weights) 
    end if  
 
    call xmpi_barrier(Wfd%comm)
@@ -2896,11 +2880,9 @@ endif
      ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
      ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
 
-!    sigcme_p => sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)   ! Causes annoying Fortran runtime warning on abiref.
      ABI_MALLOC(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
      sigcme_k=sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)
 
-!    call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_p,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
      call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_k,QP_BSt%eig,Sr,Dtset%prtvol,Dtfil,Wfd%comm)
      ABI_DEALLOCATE(sigcme_k)
      !
@@ -3009,7 +2991,7 @@ endif
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(KS_Bst, ncid))
-     NCF_CHECK(sigma_ncwrite(Sigp, Er, Sr, ncid))
+     NCF_CHECK(sigma_ncwrite(Sigp, Er, Sr, ncid)) ! Warning if gw1rdm>0 then Er is no longer present.
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)
@@ -3112,7 +3094,9 @@ endif
  call vcoul_free(Vcp)
  call cryst%free()
  call sigma_free(Sr)
- call em1results_free(Er)
+ if(gw1rdm==0) then
+   call em1results_free(Er)
+ end if
  call ppm_free(PPm)
  call Hdr_sigma%free()
  call Hdr_wfk%free()
