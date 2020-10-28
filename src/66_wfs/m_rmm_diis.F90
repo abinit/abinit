@@ -98,6 +98,8 @@ module m_rmm_diis
  logical,parameter, private :: timeit = .False.
  !logical,parameter, private :: timeit = .True.
 
+ real(dp),parameter :: tol_occupied = tol3
+
 contains
 !!***
 
@@ -343,7 +345,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    !if dtset%
    !if dtset%occopt == 2
    max_niter_block = max_niter
-   if (all(occ(ib_start:ib_stop) < tol3)) max_niter_block = max(1 + max_niter / 2, 2)
+   if (all(occ(ib_start:ib_stop) < tol_occupied)) max_niter_block = max(1 + max_niter / 2, 2)
 
    ! Compute H |phi_0> using cg from subdiago. Blocked call.
    ! Alternatively, one can compute the residuals before the subspace rotation and then rotate
@@ -457,7 +459,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      end do
 
      ! === CHECK FOR CONVERGENCE ====
-     if (diis%exit_iter(iter, ndat, max_niter_block, accuracy_ene, dtset, comm_bandspinorfft)) exit iter_loop
+     if (diis%exit_iter(iter, ndat, max_niter_block, occ(ib_start:), accuracy_ene, &
+                        dtset, comm_bandspinorfft)) exit iter_loop
 
      ! Compute <R_i|R_j> and <i|S|j> for j=iter
      if (iter /= max_niter_block) call diis%eval_mats(iter, ndat, me_g0, comm_bandspinorfft)
@@ -619,7 +622,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 contains
 
-real(dp) function limit_lambda(lambda) result(new_lam)
+ real(dp) function limit_lambda(lambda) result(new_lam)
 
   real(dp),intent(in) :: lambda
 
@@ -661,16 +664,17 @@ end subroutine rmm_diis
 !!
 !! SOURCE
 
-logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene, dtset, comm) result(ans)
+logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accuracy_ene, dtset, comm) result(ans)
 
  class(rmm_diis_t),intent(inout) :: diis
  integer,intent(in) :: iter, ndat, niter_block, comm
+ real(dp),intent(in) :: occ_bk(ndat)
  real(dp),intent(in) :: accuracy_ene
  type(dataset_type),intent(in) :: dtset
 
  integer,parameter :: master = 0
  integer :: idat, ierr, checks(ndat)
- real(dp) :: resid, deltae, deold
+ real(dp) :: resid, deltae, deold , fact
  character(len=50) :: msg_list(ndat)
 
  diis%last_iter = iter
@@ -683,10 +687,12 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
    deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
 
    ! Relative criterion on eig diff
-   ! Abinit default in the CG part is 0.005 (0.3 V). Here we enlarge it a bit
-   !if (abs(deltae) < 6 * dtset%tolrde * abs(deold)) then
-   if (abs(deltae) < 0.6 * dtset%tolrde * abs(deold)) then
-    checks(idat) = 1; msg_list(idat) = "deltae < 6 * tolrde * deold"; cycle
+   ! Abinit default in the CG part is 0.005 that is really to low (it's 0.3 in V).
+   ! Here we increase it depending whether the state is occupied or not
+   fact = 0.6_dp; if (abs(occ_bk(idat)) < tol_occupied) fact = 6
+
+   if (abs(deltae) < fact * dtset%tolrde * abs(deold)) then
+    checks(idat) = 1; msg_list(idat) = "deltae < fact * tolrde * deold"; cycle
    end if
 
    !if (abs(deltae/deold) > 10.0_dp) then
@@ -704,8 +710,9 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, accuracy_ene,
      if (resid < dtset%tolwfr) then
        checks(idat) = 1; msg_list(idat) = 'resid < tolwfr'; cycle
      end if
-     if (sqrt(abs(resid)) < accuracy_ene) then
-       ! Absolute criterion on eig diff
+     fact = one; if (abs(occ_bk(idat)) < tol_occupied) fact = tol2
+     if (sqrt(abs(resid)) < fact * accuracy_ene) then
+       ! Absolute criterion on eigenvalue difference. Assuming error on Etot ~ band_energy.
        checks(idat) = 1; msg_list(idat) = 'resid < accuracy_ene'; cycle
      end if
    end if
