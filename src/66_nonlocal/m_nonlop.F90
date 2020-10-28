@@ -48,6 +48,7 @@ module m_nonlop
 !!***
 
  public :: nonlop
+ integer,public,save :: nonlop_counter = 0
 !!***
 
 contains
@@ -379,6 +380,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !Keep track of time spent in this routine (selection of different slots for different choices)
  call timab(220+tim_nonlop,1,tsec)
+
+ nonlop_counter = nonlop_counter + ndat
 
  only_SO_=0; if (present(only_SO)) only_SO_=only_SO
  my_nspinor=max(1,hamk%nspinor/mpi_enreg%nproc_spinor)

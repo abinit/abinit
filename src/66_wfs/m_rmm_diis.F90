@@ -200,7 +200,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  ! Treat states in groups of bsize bands to be able to call zgemm.
  bsize = 8  ! default for paral_kgb = 0
- if (dtset%userib /= 0) bsize = abs(dtset%userib)
+ !if (dtset%userib /= 0) bsize = abs(dtset%userib)
  if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
 
@@ -331,9 +331,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
 
  ! We loop over nblocks, each block has ndat states.
- ! Convergence behaviour may depend on bsize as branches are taken according to
- ! the status of all bands in the block.
- ! Using gemm_nonlop leads to a significant speedup when applying Vnl.
+ ! - Convergence behaviour may depend on bsize as branches are taken according to
+ !   the status of all bands in the block.
+ ! - Using gemm_nonlop leads to a significant speedup when applying Vnl.
  ! TODO: Transpose only once per block and then work with already_transposed = .True.
 
  do iblock=1,nblocks
@@ -589,7 +589,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! This step is important to improve accuracy but we try to avoid it at the beginning of the SCF cycle
 
  recompute_eigresid_after_ortho = .True.
- recompute_eigresid_after_ortho = sum(resid(1:nb_pocc) / nb_pocc < tol10
+ !recompute_eigresid_after_ortho = sum(resid(1:nb_pocc)) / nb_pocc < tol8
+ !recompute_eigresid_after_ortho = maxval(resid(1:nb_pocc)) < tol6
 
  if (recompute_eigresid_after_ortho) then
    call wrtout(std_out, " Recomputing eigenvalues and residuals after orthogonalization...")
@@ -635,7 +636,7 @@ contains
 
   !write(std_out, *)"input lambda:", lambda
   new_lam = lambda
-  !return
+  if (dtset%userie == 1) return
 
   ! restrict the value of abs(lambda) in [0.1, 1.0]
   if (abs(lambda) > one) then
@@ -726,9 +727,11 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
 
  ans = all(checks /= 0)
  if (ans) then
-   do idat=1,ndat
-     call diis%stats%increment(trim(msg_list(idat)), 1)
-   end do
+   if (iter /= niter_block) then
+     do idat=1,ndat
+       call diis%stats%increment(trim(msg_list(idat)), 1)
+     end do
+   end if
    !if (diis%prtvol == -level) then
    !  write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
    !   ' band: ',iband,' converged after: ',iter,' iterations with resid: ',resid(iband), ch10

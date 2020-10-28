@@ -50,7 +50,7 @@ module m_vtowfk
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
- use m_nonlop,      only : nonlop
+ use m_nonlop,      only : nonlop, nonlop_counter
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
 
@@ -276,6 +276,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    use_rmm_diis = istep > 3 + dtset%rmm_diis
    if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver.")
  end if
+ nonlop_counter = 0
 
  if ((.not. newlobpcg) .or. use_rmm_diis) then
    ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
@@ -481,6 +482,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call wrtout(std_out,msg,'PERS')
      end do
    end if
+
+   call wrtout(std_out, sjoin("Number of states treated in nonlop:", itoa(nonlop_counter)))
 
 !  THIS CHANGE OF SHIFT DOES NOT WORK WELL
 !  Update zshift in the case of wfoptalg==3

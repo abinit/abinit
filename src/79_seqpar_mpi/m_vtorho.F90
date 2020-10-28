@@ -41,6 +41,7 @@ module m_vtorho
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
+ use m_fstrings,           only : sjoin, itoa
  use m_time,               only : timab
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
@@ -440,8 +441,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Test optforces (to prevent memory overflow)
  if (optforces/=0.and.optforces/=1) then
-   write(message,'(a,i0)')' wrong value for optforces = ',optforces
-   MSG_BUG(message)
+   MSG_BUG(sjoin('wrong value for optforces: ',itoa(optforces)))
  end if
 
  iscf=dtset%iscf
