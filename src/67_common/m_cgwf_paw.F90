@@ -375,7 +375,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          call sqnorm_g(resid(iband),istwf_k,npw*nspinor,direc,me_g0,mpi_enreg%comm_fft)
 
          if (prtvol==-level) then
-           write(message,'(a,i0,2f14.6)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
+           write(message,'(a,i0,2es21.10e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
            call wrtout(std_out,message,'PERS')
          end if
 
@@ -420,6 +420,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 &           gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
            call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &           gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
+           if (iline==1) then
+             scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
+           end if
            scprod = reshape(scprod_csc,(/2,nband/))
            call projbd(cg,direc,iband,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &           direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
@@ -455,16 +458,52 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 &         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &         gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
+         if (iline==1) then
+           scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
+         end if
          ! Projecting again out all bands (not normalized).
          scprod = reshape(scprod_csc,(/2,nband/))
          call projbd(cg,direc,-1,icg,icg,istwf_k,mcg,mcg,nband,npw,nspinor,&
 &         direc,scprod,1,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+         if (iline==1) then
+           z_tmp = -scprod_csc(2*iband-1:2*iband)*(1.0_dp/xnorm-1.0_dp)
+           do ispinor=1,nspinor
+             igs=(ispinor-1)*npw
+             do ipw=1+igs,npw+igs
+               direc(1,ipw)=direc(1,ipw) + z_tmp(1)*cwavef(1,ipw) - z_tmp(2)*cwavef(2,ipw)
+               direc(2,ipw)=direc(2,ipw) + z_tmp(1)*cwavef(2,ipw) + z_tmp(2)*cwavef(1,ipw)
+             end do
+           end do
+         end if
+         !LTEST
+         write(std_out,'(a,es21.10e3)') 'direc',sum(abs(direc))
+         !LTEST
          ! Apply projbd to cprj_direc
-         z_tmp  = (/one,zero/)
+         z_tmp = (/one,zero/)
          scprod_csc = -scprod_csc
          call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef_bands,z_tmp,scprod_csc,&
 &                 gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                 natom,gs_hamk%nattyp,nband,nspinor,gs_hamk%ntypat)
+         if (iline==1) then
+           z_tmp2 = scprod_csc(2*iband-1:2*iband)*(1.0_dp/xnorm-1.0_dp)
+           call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef,z_tmp,z_tmp2,&
+&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+&                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+         end if
+         !LTEST
+!         call getcprj(1,0,direc,cprj_conjgr,&
+!&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+!&         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+!&         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+!&         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+!         do jband=1,natom
+!           dotr=sum(abs(cprj_conjgr(jband,1)%cp-cprj_direc(jband,1)%cp))
+!           if (dotr>tol12) then
+!             write(std_out,'(a,es21.10e3)') 'dif:',dotr
+!             MSG_ERROR('stop here')
+!           end if
+!         end do
+         !LTEST
 
          ! ======================================================================
          ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
@@ -486,7 +525,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 &                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
            if (prtvol==-level)then
-             write(message,'(a,es16.6)')' cgwf: dotgg = ',dotgg
+             write(message,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
              call wrtout(std_out,message,'PERS')
            end if
 
@@ -495,7 +534,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            dotgp=dotgg
 
            if (prtvol==-level)then
-             write(message,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
+             write(message,'(a,2es21.10e3)')' cgwf: dotgg,gamma = ',dotgg,gamma
              call wrtout(std_out,message,'PERS')
            end if
 
@@ -518,6 +557,11 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          call getcsc(dot,cpopt,conjgr,cwavef,cprj_conjgr,cprj_cwavef,&
 &         gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
          dotr=dot(1)
+         doti=dot(2)
+         !LTEST
+         write(std_out,'(a,es21.10e3)') 'dotr',dotr
+         write(std_out,'(a,es21.10e3)') 'doti',doti
+         !LTEST
 
          ! Project the conjugated gradient onto the current band
          ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
@@ -536,8 +580,13 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
              direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
            end do
          end if
+         !LTEST
+         write(std_out,'(a,es21.10e3)') 'cwavef',sum(abs(cwavef))
+         write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
+         write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
+         !LTEST
          z_tmp   = (/one,zero/)
-         z_tmp2  = (/-dotr,zero/)
+         z_tmp2  = (/-dotr,-doti/)
          call cprj_axpby(cprj_direc,cprj_conjgr,cprj_cwavef,z_tmp,z_tmp2,&
 &         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 &         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
@@ -550,6 +599,9 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          call getcsc(dot,cpopt,direc,direc,cprj_direc,cprj_direc,&
 &         gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
          xnorm=one/sqrt(abs(dot(1)))
+         !LTEST
+         write(std_out,'(a,es21.10e3)') 'xnorm (D)',xnorm
+         !LTEST
 
          sij_opt=0
          ! Compute dhc = Re{<D|H|C>}
@@ -569,7 +621,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          dhd=dhd*xnorm**2
 
          if(prtvol==-level)then
-           write(message,'(a,3f14.6)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
+           write(message,'(a,3es21.10e3)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
            call wrtout(std_out,message,'PERS')
          end if
 
@@ -658,7 +710,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
              &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
            eig(iband)=z_tmp(1)
-
            nskip=nskip+2*(nline-iline)  ! Number of one-way 3D ffts skipped
            exit                         ! Exit from the loop on iline
          end if
@@ -722,7 +773,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
    do iband=1,nband
      do jband=1,iband
        if (jband<=10) then
-         write(message,'(i7,2es16.6)')isubh,subham(isubh:isubh+1)
+         write(message,'(i7,2es21.10e3)')isubh,subham(isubh:isubh+1)
          call wrtout(std_out,message,'PERS')
        end if
        isubh=isubh+2
