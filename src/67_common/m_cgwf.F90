@@ -622,7 +622,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          call sqnorm_g(resid(iband),istwf_k,npw*nspinor,vresid,me_g0,mpi_enreg%comm_fft)
 
          if (prtvol==-level) then
-           write(message,'(a,i0,2f14.6)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
+           write(message,'(a,i0,2es21.10e3)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
            call wrtout(std_out,message,'PERS')
            !LTEST
 !           write(999,'(a,es17.8e3)') 'eval',eval
@@ -766,6 +766,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! Projecting again out all bands (not normalized).
          call projbd(cg,direc,-1,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
 &         gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
+         !LTEST
+         write(std_out,'(a,es21.10e3)') 'direc',sum(abs(direc))
+         !LTEST
 
          ! ======================================================================
          ! ================= COMPUTE THE CONJUGATE-GRADIENT =====================
@@ -798,7 +801,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            dotgp=dotgg
            call cg_zcopy(npw*nspinor,direc,conjgr)
            if (prtvol==-level)then
-             write(message,'(a,es16.6)')' cgwf: dotgg = ',dotgg
+             write(message,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
              call wrtout(std_out,message,'PERS')
            end if
 
@@ -807,7 +810,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            dotgp=dotgg
 
            if (prtvol==-level)then
-             write(message,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
+             write(message,'(a,2es21.10e3)')' cgwf: dotgg,gamma = ',dotgg,gamma
              call wrtout(std_out,message,'PERS')
            end if
 
@@ -835,6 +838,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          else
            call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,cwavef,conjgr,me_g0,mpi_enreg%comm_spinorfft)
          end if
+         !LTEST
+         write(std_out,'(a,es21.10e3)') 'dotr',dotr
+         write(std_out,'(a,es21.10e3)') 'doti',doti
+         !LTEST
 
          ! Project the conjugated gradient onto the current band
          ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
@@ -853,7 +860,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              direc(2,ipw)=conjgr(2,ipw)-dotr*cwavef(2,ipw)
            end do
          end if
-
+         !LTEST
+         write(std_out,'(a,es21.10e3)') 'cwavef',sum(abs(cwavef))
+         write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
+         write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
+         !LTEST
          ! In case of generalized eigenproblem, normalization of direction vector
          ! cannot be done here (because S|D> is not known here).
          if (.not.gen_eigenpb) then
@@ -899,6 +910,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            call dotprod_g(dotr,doti,istwf_k,npw*nspinor,1,direc,gs_direc,me_g0,mpi_enreg%comm_spinorfft)
            xnorm=one/sqrt(abs(dotr))
          end if
+         !LTEST
+         write(std_out,'(a,es21.10e3)') 'xnorm (D)',xnorm
+         !LTEST
 
          ! Compute dhc = Re{<D|H|C>}
          call dotprod_g(dhc,doti,istwf_k,npw*nspinor,1,direc,ghc,me_g0,mpi_enreg%comm_spinorfft)
@@ -909,7 +923,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          dhd=dhd*xnorm**2
 
          if(prtvol==-level)then
-           write(message,'(a,3f14.6)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
+           write(message,'(a,3es21.10e3)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
            call wrtout(std_out,message,'PERS')
          end if
 
@@ -1268,9 +1282,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      do ii=1,iband
        if (ii<=10) then
          if (use_subvnlx==1) then
-           write(message,'(i7,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
+           write(message,'(i7,4es21.10e3)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
          else
-           write(message,'(i7,2es16.6)')isubh,subham(isubh:isubh+1)
+           write(message,'(i7,2es21.10e3)')isubh,subham(isubh:isubh+1)
          end if
          call wrtout(std_out,message,'PERS')
        end if
