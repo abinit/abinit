@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 14 Oct 2020.
-- ( at 22h07 )
+.Starting date : Sat 24 Oct 2020.
+- ( at 01h30 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI4/paral_t25_MPI4/t25.in
 - output file    -> t25_MPI4.out
@@ -56,6 +56,7 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
            bandpp           2
+      chksymtnons           0
      densfor_pred           6
            diemac      1.20000000E+01
              ecut      1.50000000E+01 Hartree
@@ -472,6 +473,7 @@ total_energy_dc_eV  : -2.83486659839064E+02
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
            bandpp           2
+      chksymtnons           0
      densfor_pred           6
            diemac      1.20000000E+01
              ecut      1.50000000E+01 Hartree
@@ -620,10 +622,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  19 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.1  wall=          7.0
+.Delivered   1 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.9  wall=          8.1

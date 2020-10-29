@@ -36,7 +36,7 @@
   typat 2*1  znucl 14.
   xred 0.00 0.00 0.00
        0.22 0.25 0.26
-  chksymbreak 0
+ chksymtnons 0
 
 # 6-Definition of special K-points:
 # ---------------------------------

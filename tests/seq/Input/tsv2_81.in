@@ -34,7 +34,7 @@ getden3   1
 tolwfr3   1.0d-9
 
  xred   0.00 0.0 0.02
- chksymbreak 0
+ chksymtnons 0
  shiftk 0.5 0.5 0.5
  acell  3*9
  ecut 5
