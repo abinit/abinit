@@ -165,7 +165,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
  logical :: end_with_trial_step, new_lambda !, recompute_eigresid_after_ortho
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene, cpu, wall, gflops, resmax !, dotr, doti
+ real(dp) :: accuracy_ene, cpu, wall, gflops, max_res !, dotr, doti
  !character(len=500) :: msg
  character(len=6) :: tag
 !arrays
@@ -188,8 +188,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !comm = mpi_enreg%comm_spinorfft; if (mpi_enreg%paral_kgb == 1) comm = mpi_enreg%comm_bandspinorfft
  comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  npwsp = npw * nspinor
-
-
 
  ! =======================================
  ! Apply H to input cg to compute <i|H|j>
@@ -305,18 +303,19 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! =================
  ! Prepare DIIS loop
  ! =================
+ ! We should never increase accuracy_level during the SCF cycle
  nb_pocc = count(occ > tol_occupied)
- !write(std_out, *) "resid", resid
- resmax = maxval(resid(1:nb_pocc))
+ max_res = maxval(resid(1:nb_pocc))
  accuracy_level = 1
- if (resmax < tol8) accuracy_level = 2
- if (resmax < tol14) accuracy_level = 3
+ if (max_res < tol5) accuracy_level = 2
+ if (max_res < tol9) accuracy_level = 3
+ if (istep == 1) accuracy_level = 1
  !accuracy_level = 3
 
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1 ! optekin = 0
-
  !write(std_out,*)"optekin:", optekin
+
  ! nline - 1 DIIS steps, then end with trial step (optional, see below)
  max_niter = max(dtset%nline - 1, 1)
 
@@ -324,11 +323,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  accuracy_ene = zero
  if (dtset%iscf > 0) then
    if (dtset%toldfe /= zero) then
-     accuracy_ene = dtset%toldfe * 10**(-accuracy_level + 2) !/ nb_pocc
+     accuracy_ene = dtset%toldfe * ten**(-accuracy_level + 2) !/ nb_pocc
    else
      ! We are not using toldfe to stop the SCF cycle
      ! so we are forced to hardcode a tolerance for the absolute diff in the KS eigenvalue.
-     accuracy_ene = tol8 * 10**(-accuracy_level + 2) !/ nb_pocc
+     accuracy_ene = tol8 * ten**(-accuracy_level + 2) !/ nb_pocc
    end if
  end if
 
@@ -337,7 +336,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  call wrtout(std_out, sjoin( &
    " Number of blocks:", itoa(nblocks), ", number of 'partiallly' occupied states:", itoa(nb_pocc)))
  call wrtout(std_out, sjoin( &
-   "accuracy_level:", itoa(accuracy_level), ", accuracy_ene: ", ftoa(accuracy_ene)))
+   " Max_input_resid", ftoa(max_res), "accuracy_level:", itoa(accuracy_level), ", accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
  ABI_MALLOC(lambda_bk, (bsize))
@@ -503,8 +502,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ! if these bands still far from convergence. In all the other cases, we reuse the previous lambda.
 
      new_lambda = .False.
-     if (ib_start <= nb_pocc .or. ib_stop <= nint(1.2_dp * nb_pocc) .and. &
-         any(resid(ib_start:ib_stop) > tol6)) new_lambda = .True.
+     !if (ib_start <= nb_pocc .or. ib_stop <= nint(1.2_dp * nb_pocc) .and. &
+     !    any(resid(ib_start:ib_stop) > tol6)) new_lambda = .True.
      !new_lambda = .False.
      !new_lambda = .True.
      !if (accuracy_level == 1) new_lambda = .True.
@@ -597,7 +596,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !recompute_eigresid_after_ortho = sum(resid(1:nb_pocc)) / nb_pocc < tol8
  !recompute_eigresid_after_ortho = maxval(resid(1:nb_pocc)) < tol6
 
- if (diis%accuracy_level == 3) then
+ if (any(diis%accuracy_level == [2, 3])) then
    call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize
@@ -635,27 +634,28 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 contains
 
- real(dp) function limit_lambda(lambda) result(new_lam)
+ real(dp) function limit_lambda(lambda) result(new_lambda)
 
   real(dp),intent(in) :: lambda
+  real(dp) :: max_lambda, min_lambda
 
   !write(std_out, *)"input lambda:", lambda
-  new_lam = lambda
-  !if (dtset%userie == 1) return
+  new_lambda = lambda
   if (accuracy_level == 1) return
+  max_lambda = one
+  min_lambda = tol1
 
   ! restrict the value of abs(lambda) in [0.1, 1.0]
-  if (abs(lambda) > one) then
-    new_lam = sign(one, lambda)
-  else if (abs(lambda) < tol1) then
+  if (abs(lambda) > max_lambda) then
+    new_lambda = sign(max_lambda, lambda)
+  else if (abs(lambda) < min_lambda) then
     !if (abs(lambda) > tol12)  then
-      new_lam = tol1 * sign(one, lambda)
+      new_lambda = sign(min_lambda, lambda)
     !else
-    !  new_lam = tol12
+    !  new_lambda = tol12
     !end if
   end if
-
-  !write(std_out, *)"new lambda:", new_lam
+  !write(std_out, *)"new lambda:", new_lambda
 
 end function limit_lambda
 
@@ -730,7 +730,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
      end if
 
      ! Absolute criterion on eigenvalue difference. Assuming error on Etot ~ band_energy.
-     fact = 10; if (abs(occ_bk(idat)) < tol_occupied) fact = one
+     fact = ten; if (abs(occ_bk(idat)) < tol_occupied) fact = one
      if (sqrt(abs(resid)) < fact * accuracy_ene) then
        checks(idat) = 1; msg_list(idat) = 'resid < accuracy_ene'; cycle
      end if
@@ -741,7 +741,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
  if (diis%accuracy_level == 1) then
    ans = count(checks /= 0) >= half * ndat
  else if (diis%accuracy_level == 2) then
-   ans = count(checks /= 0) >= four_thirds * ndat
+   ans = count(checks /= 0) >= 0.75_dp * ndat
  else if (diis%accuracy_level == 3) then
    ans = all(checks /= 0)
  end if
@@ -749,7 +749,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
  if (ans) then
    if (iter /= niter_block) then
      do idat=1,ndat
-       call diis%stats%increment(trim(msg_list(idat)), 1)
+       if (checks(idat) /= 0) call diis%stats%increment(msg_list(idat), 1)
      end do
    end if
    !if (diis%prtvol == -level) then
