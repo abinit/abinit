@@ -127,6 +127,7 @@ contains
 !!  ek_k_nd(2,nband_k,nband_k*use_dmft)=contribution to kinetic energy,
 !!     including non-diagonal terms, at this k-point (usefull if use_dmft)
 !!  resid_k(nband_k)=residuals for each band over all k points, BEFORE the band rotation.
+!!   In input: previous residuals.
 !!  ==== if optforces>0 ====
 !!    grnl_k(3*natom,nband_k)=nonlocal gradients, at this k-point
 !!  ==== if (gs_hamk%usepaw==0) ====
@@ -182,7 +183,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp), intent(out) :: eig_k(nband_k),ek_k(nband_k),dphase_k(3),ek_k_nd(2,nband_k,nband_k*paw_dmft%use_dmft)
  real(dp), intent(out) :: enlx_k(nband_k)
  real(dp), intent(out) :: grnl_k(3*natom,nband_k*optforces)
- real(dp), intent(out) :: resid_k(nband_k)
+ real(dp), intent(inout) :: resid_k(nband_k)
  real(dp), intent(inout) :: cg(2,mcg),rhoaug(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc)
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
 
@@ -348,7 +349,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      if (use_subovl==1)subovl(:)=zero
    end if
 
-   resid_k(:)=zero
+   !resid_k(:)=zero
 
    !call cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg(:, icg+1))
 
@@ -482,7 +483,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
    end if
 
-   call wrtout(std_out, sjoin(" Number of states treated in nonlop:", itoa(nonlop_counter)))
+   call wrtout(std_out, sjoin(" Number of applications of Vnl:", itoa(nonlop_counter)))
 
 !  THIS CHANGE OF SHIFT DOES NOT WORK WELL
 !  Update zshift in the case of wfoptalg==3

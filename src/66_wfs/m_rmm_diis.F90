@@ -165,7 +165,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
  logical :: end_with_trial_step, new_lambda !, recompute_eigresid_after_ortho
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene, cpu, wall, gflops !, resmax, dotr, doti
+ real(dp) :: accuracy_ene, cpu, wall, gflops, resmax !, dotr, doti
  !character(len=500) :: msg
  character(len=6) :: tag
 !arrays
@@ -188,6 +188,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !comm = mpi_enreg%comm_spinorfft; if (mpi_enreg%paral_kgb == 1) comm = mpi_enreg%comm_bandspinorfft
  comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  npwsp = npw * nspinor
+
+
 
  ! =======================================
  ! Apply H to input cg to compute <i|H|j>
@@ -304,11 +306,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Prepare DIIS loop
  ! =================
  nb_pocc = count(occ > tol_occupied)
- accuracy_level = 3
- !resmax = maxval(resid(1:nb_pocc)
- !accuracy_level = 1
- !if (resmax < tol8) accuracy_level = 2
- !if (resmax < tol14) accuracy_level = 3
+ !write(std_out, *) "resid", resid
+ resmax = maxval(resid(1:nb_pocc))
+ accuracy_level = 1
+ if (resmax < tol8) accuracy_level = 2
+ if (resmax < tol14) accuracy_level = 3
+ !accuracy_level = 3
 
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1 ! optekin = 0
@@ -691,6 +694,8 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
  diis%last_iter = iter
 
  if (xmpi_comm_rank(comm) /= master) goto 10
+
+ ! The each band. Tolerances depend on accuracy_level and occupation of the state.
  checks = 0
 
  do idat=1,ndat
@@ -725,13 +730,14 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
      end if
 
      ! Absolute criterion on eigenvalue difference. Assuming error on Etot ~ band_energy.
-     fact = 10**2; if (abs(occ_bk(idat)) < tol_occupied) fact = one
+     fact = 10; if (abs(occ_bk(idat)) < tol_occupied) fact = one
      if (sqrt(abs(resid)) < fact * accuracy_ene) then
        checks(idat) = 1; msg_list(idat) = 'resid < accuracy_ene'; cycle
      end if
    end if
  end do ! idat
 
+ ! Depending on the accuracy_level either full block or fraction of it must pass the test in order to exit.
  if (diis%accuracy_level == 1) then
    ans = count(checks /= 0) >= half * ndat
  else if (diis%accuracy_level == 2) then

@@ -453,7 +453,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      energies%e_fockdc=zero
    end if
    grnl(:)=zero
-   resid(:) = zero ! JWZ 13 May 2010. resid and eigen need to be fully zeroed each time before use
+   !resid(:) = zero ! JWZ 13 May 2010. resid and eigen need to be fully zeroed each time before use
+                   ! MG: Each proc will set the (kpt,spin) slice of resid that is not treated to zero
+                   ! inside the loop so that can call xmpi_sum at the end
+                   ! Don't set resid to zero here because the previous values should be passed to the eigensolver.
    eigen(:) = zero
    bdtot_index=0
    ibg=0;icg=0
@@ -840,8 +843,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (optforces>0) grnl_k(:,:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
-       resid_k(:)=zero
-       !resid_k(:) = resid(1+bdtot_index : nband_k+bdtot_index)
+       resid_k(:) = resid(1+bdtot_index : nband_k+bdtot_index)
+       !resid_k(:)=zero
        zshift(:)=dtset%eshift
 
        ABI_ALLOCATE(kg_k,(3,npw_k))
