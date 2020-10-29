@@ -847,6 +847,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        kpoint(:)=dtset%kptns(:,ikpt)
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
        resid_k(:)=zero
+       !resid_k(:) = resid(1+bdtot_index : nband_k+bdtot_index)
        zshift(:)=dtset%eshift
 
        ABI_ALLOCATE(kg_k,(3,npw_k))

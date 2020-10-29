@@ -55,6 +55,8 @@ module m_rmm_diis
 !!***
 
  type,private :: rmm_diis_t
+
+   integer :: accuracy_level
    integer :: usepaw
    integer :: istwf_k
    integer :: cplex
@@ -151,8 +153,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  type(mpi_type),intent(inout) :: mpi_enreg
  real(dp),intent(inout) :: cg(2,npw*nspinor*nband)
  real(dp),target,intent(inout) :: gsc_all(2,npw*nspinor*nband*dtset%usepaw)
- real(dp),intent(inout) :: enlx(nband)
- real(dp),intent(inout) :: resid(nband)
+ real(dp),intent(inout) :: enlx(nband), resid(nband)
  real(dp),intent(in) :: occ(nband), kinpw(npw)
  real(dp),intent(out) :: eig(nband)
 
@@ -160,9 +161,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb !, comm
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
- integer :: me_g0, nb_pocc, jj, kk, it, ibk, iek, cplex, ortalgo !ii, ld1, ld2,
+ integer :: me_g0, nb_pocc, jj, kk, it, ibk, iek, cplex, ortalgo, accuracy_level !ii, ld1, ld2,
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
- logical :: end_with_trial_step, new_lambda, recompute_eigresid_after_ortho
+ logical :: end_with_trial_step, new_lambda !, recompute_eigresid_after_ortho
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops !, dotr, doti
  !character(len=500) :: msg
@@ -199,14 +200,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  end if
 
  ! Treat states in groups of bsize bands to be able to call zgemm.
- bsize = 8  ! default for paral_kgb = 0
- !if (dtset%userib /= 0) bsize = abs(dtset%userib)
+ bsize = 8  ! default for paral_kgb = 0 !if (dtset%userib /= 0) bsize = abs(dtset%userib)
  if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
 
+ cplex = 2; if (istwf_k == 2) cplex = 1
  ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
  ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
- cplex = 2; if (istwf_k == 2) cplex = 1
  ABI_CALLOC(h_ij, (cplex, nband, nband))
 
  call timab(1633, 1, tsec) !"rmm_diis:build_hij
@@ -227,6 +227,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call prep_getghc(cg(:,igs:ige), gs_hamk, gvnlxc_bk, ghc_bk, ptr_gsc_bk, rdummy, ndat, &
                       mpi_enreg, prtvol, sij_opt, cpopt, cprj_dum, already_transposed=.False.)
    end if
+   !ghc_all(:,igs:ige) = ghc_bk(:,igs:ige)
 
    ! Compute <i|H|j> for i=1,nband and all j in block
    if (cplex == 2) then
@@ -286,6 +287,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
  call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, paral_kgb, &
                subham, subovl, use_subovl0, usepaw, me_g0)
+
+ !if (usepaw == 0) then
+ !ABI_MALLOC(totvnlx, (2*nband_k,nband_k))
+ !!call cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
+ !ABI_FREE(totvnlx)
+ !end if
+
  call timab(585, 2, tsec)
  if (timeit) call cwtime_report(" subdiago", cpu, wall, gflops)
 
@@ -295,28 +303,33 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! =================
  ! Prepare DIIS loop
  ! =================
+ nb_pocc = count(occ > zero)
+ accuracy_level = 3
+ !resmax = maxval(resid(1:nb_pocc)
+ !accuracy_level = 1
+ !if (resmax < tol8)) accuracy_level = 2
+ !if (resmax < tol14)) accuracy_level = 3
+
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
- optekin = 1
- !optekin = 0
+ optekin = 1 !optekin = 0
 
  !write(std_out,*)"optekin:", optekin
  ! nline - 1 DIIS steps, then end with trial step (optional, see below)
  max_niter = max(dtset%nline - 1, 1)
 
  ! Define accuracy_ene for SCF
- nb_pocc = count(occ > zero)
  accuracy_ene = zero
  if (dtset%iscf > 0) then
    if (dtset%toldfe /= zero) then
-     accuracy_ene = dtset%toldfe / nb_pocc / four
+     accuracy_ene = dtset%toldfe * 10**(-accuracy_level + 2) !/ nb_pocc
    else
      ! We are not using toldfe to stop the SCF cycle
      ! so we are forced to hardcode a tolerance for the absolute diff in the KS eigenvalue.
-     accuracy_ene = tol6 / nb_pocc / four
+     accuracy_ene = tol8 * 10**(-accuracy_level + 2) !/ nb_pocc
    end if
  end if
 
- diis = rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
+ diis = rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
  call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
  call wrtout(std_out, sjoin( &
    " Number of blocks:", itoa(nblocks), ", number of 'partiallly' occupied states:", itoa(nb_pocc), &
@@ -490,6 +503,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
          any(resid(ib_start:ib_stop) > tol6)) new_lambda = .True.
      !new_lambda = .False.
      !new_lambda = .True.
+     !if (accuracy_level == 1) new_lambda = .True.
 
      if (new_lambda) then
        tag = "NEWLAM"
@@ -573,26 +587,14 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
- ! DEBUG seq==par comment next block
- ! Fix phases of all bands
- !if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
- !  if ( .not. newlobpcg ) then
- !    call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
- !  else
- !    ! GSC is local to vtowfk and is completely useless since everything
- !    ! is calcultated in my lobpcg, we don't care about the phase of gsc !
- !    call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
- !  end if
- !end if
-
  ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
  ! This step is important to improve accuracy but we try to avoid it at the beginning of the SCF cycle
-
- recompute_eigresid_after_ortho = .True.
+ !
+ !recompute_eigresid_after_ortho = .True.
  !recompute_eigresid_after_ortho = sum(resid(1:nb_pocc)) / nb_pocc < tol8
  !recompute_eigresid_after_ortho = maxval(resid(1:nb_pocc)) < tol6
 
- if (recompute_eigresid_after_ortho) then
+ if (diis%accuracy_level == 3) then
    call wrtout(std_out, " Recomputing eigenvalues and residuals after orthogonalization...")
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize
@@ -636,7 +638,8 @@ contains
 
   !write(std_out, *)"input lambda:", lambda
   new_lam = lambda
-  if (dtset%userie == 1) return
+  !if (dtset%userie == 1) return
+  if (accuracy_level == 1) return
 
   ! restrict the value of abs(lambda) in [0.1, 1.0]
   if (abs(lambda) > one) then
@@ -689,6 +692,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
 
  if (xmpi_comm_rank(comm) /= master) goto 10
  checks = 0
+
  do idat=1,ndat
    resid = diis%hist_resid(iter, idat)
    deold = diis%hist_ene(1, idat) - diis%hist_ene(0, idat)
@@ -697,7 +701,9 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
    ! Relative criterion on eigenvalue differerence.
    ! Abinit default in the CG part is 0.005 that is really to low (it's 0.3 in V).
    ! Here we increase it depending whether the state is occupied or empty
-   fact = six * ten; if (abs(occ_bk(idat)) < tol_occupied) fact = six
+   fact = ten; if (abs(occ_bk(idat)) < tol_occupied) fact = one
+   if (diis%accuracy_level == 1) fact = fact * six * ten
+   if (diis%accuracy_level == 2) fact = fact * ten
    if (abs(deltae) < fact * dtset%tolrde * abs(deold)) then
      checks(idat) = 1; msg_list(idat) = "deltae < fact * tolrde * deold"; cycle
    end if
@@ -717,15 +723,23 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
      if (resid < dtset%tolwfr) then
        checks(idat) = 1; msg_list(idat) = 'resid < tolwfr'; cycle
      end if
+
+     ! Absolute criterion on eigenvalue difference. Assuming error on Etot ~ band_energy.
      fact = 10**2; if (abs(occ_bk(idat)) < tol_occupied) fact = one
      if (sqrt(abs(resid)) < fact * accuracy_ene) then
-       ! Absolute criterion on eigenvalue difference. Assuming error on Etot ~ band_energy.
        checks(idat) = 1; msg_list(idat) = 'resid < accuracy_ene'; cycle
      end if
    end if
  end do ! idat
 
- ans = all(checks /= 0)
+ if (diis%accuracy_level == 1) then
+   ans = count(checks /= 0) >= half * ndat
+ else if (diis%accuracy_level == 2) then
+   ans = count(checks /= 0) >= four_thirds * ndat
+ else if (diis%accuracy_level == 3) then
+   ans = all(checks /= 0)
+ end if
+
  if (ans) then
    if (iter /= niter_block) then
      do idat=1,ndat
@@ -909,10 +923,11 @@ end subroutine getghc_eigresid
 !!
 !! SOURCE
 
-type(rmm_diis_t) function rmm_diis_new(usepaw, istwf_k, npwsp, max_niter, bsize, prtvol) result(diis)
+type(rmm_diis_t) function rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol) result(diis)
 
- integer,intent(in) :: usepaw, istwf_k, npwsp, max_niter, bsize, prtvol
+ integer,intent(in) :: accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol
 
+ diis%accuracy_level = accuracy_level
  diis%usepaw = usepaw
  diis%istwf_k = istwf_k
  diis%cplex = 2; if (istwf_k == 2) diis%cplex = 1

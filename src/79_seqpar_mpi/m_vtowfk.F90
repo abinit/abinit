@@ -483,7 +483,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
    end if
 
-   call wrtout(std_out, sjoin("Number of states treated in nonlop:", itoa(nonlop_counter)))
+   call wrtout(std_out, sjoin(" Number of states treated in nonlop:", itoa(nonlop_counter)))
 
 !  THIS CHANGE OF SHIFT DOES NOT WORK WELL
 !  Update zshift in the case of wfoptalg==3
@@ -526,7 +526,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
      else
        ! GSC is local to vtowfk and is completely useless since everything
-       ! is calcultated in my lobpcg, we don't care about the phase of gsc !
+       ! is calculated in my lobpcg, we don't care about the phase of gsc !
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
      end if
    end if
