@@ -384,11 +384,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
  type(oper_type) :: dft_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
-
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
-
 !Variables for BigDFT
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
@@ -742,12 +740,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Continue to initialize the Hamiltonian
      call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
-     if (with_vxctau) then
-       call gs_hamk%load_spin(isppol,vxctaulocal=vxctaulocal)
-     end if
-     if (has_vectornd) then
-       call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
-     end if
+     if (with_vxctau) call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
+     if (has_vectornd) call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
 
      call timab(982,2,tsec)
 
@@ -868,9 +862,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Compute (k+G) vectors (only if useylm=1)
        nkpg=3*optforces*dtset%nloalg(3)
        ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
-       if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) then
-         call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
-       end if
+       if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
 
 !      Compute nonlocal form factors ffnl at all (k+G):
        ider=0;idir=0;dimffnl=1
@@ -903,9 +895,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Load band-FFT tabs (transposed k-dependent arrays)
        if (mpi_enreg%paral_kgb==1) then
-         if (istep<=1) then
-           call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
-         end if
+         if (istep<=1) call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
          call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
            gbound_k =my_bandfft_kpt%gbound, &
            kinpw_k  =my_bandfft_kpt%kinpw_gather, &
@@ -943,9 +933,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
        if (usefock) call fock_updateikpt(fock%fock_common,ikpt,isppol)
        if (psps%usepaw==1 .and. usefock) then
-         if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
-           fock%fock_common%forces_ikpt=zero
-         end if
+         if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
        end if
 
 !      Compute the eigenvalues, wavefunction, residuals,
@@ -1013,9 +1001,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ_k(iband)*grnl_k(:,iband)
              if (usefock) then
                energies%e_fock=energies%e_fock + half*fock%fock_common%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
-               if (usefock_ACE==0)then
-                 energies%e_fock0=energies%e_fock
-               endif
+               if (usefock_ACE==0) energies%e_fock0=energies%e_fock
              endif
            end if
          end do
@@ -1084,9 +1070,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
    call timab(988,1,tsec)
    if (usefock) then
-     if(fock%fock_common%optfor) then
-       call xmpi_sum(fock%fock_common%forces,mpi_enreg%comm_kpt,ierr)
-     end if
+     if(fock%fock_common%optfor) call xmpi_sum(fock%fock_common%forces,mpi_enreg%comm_kpt,ierr)
    end if
 !  Electric field: compute string-averaged change in Zak phase
 !  along each direction, store it in dphase(idir)
@@ -1165,9 +1149,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(48,1,tsec)
        call xmpi_sum(buffer1,mpi_enreg%comm_kpt,ierr)
 !      if(mpi_enreg%paral_kgb/=1.and.paw_dmft%use_dmft==1) then
-       if(paw_dmft%use_dmft==1) then
-         call xmpi_sum(buffer2,mpi_enreg%comm_kpt,ierr)
-       end if
+       if(paw_dmft%use_dmft==1) call xmpi_sum(buffer2,mpi_enreg%comm_kpt,ierr)
        call timab(48,2,tsec)
 
 !      Unpack eigen,resid,eknk,enlxnk,grnlnk in buffer1

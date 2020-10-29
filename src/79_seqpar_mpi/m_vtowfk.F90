@@ -126,8 +126,7 @@ contains
 !!  ek_k(nband_k)=contribution from each band to kinetic energy, at this k-point
 !!  ek_k_nd(2,nband_k,nband_k*use_dmft)=contribution to kinetic energy,
 !!     including non-diagonal terms, at this k-point (usefull if use_dmft)
-!!  resid_k(nband_k)=residuals for each band over all k points,
-!!                   BEFORE the band rotation.
+!!  resid_k(nband_k)=residuals for each band over all k points, BEFORE the band rotation.
 !!  ==== if optforces>0 ====
 !!    grnl_k(3*natom,nband_k)=nonlocal gradients, at this k-point
 !!  ==== if (gs_hamk%usepaw==0) ====

@@ -165,7 +165,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
  logical :: end_with_trial_step, new_lambda !, recompute_eigresid_after_ortho
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene, cpu, wall, gflops !, dotr, doti
+ real(dp) :: accuracy_ene, cpu, wall, gflops !, resmax, dotr, doti
  !character(len=500) :: msg
  character(len=6) :: tag
 !arrays
@@ -303,15 +303,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! =================
  ! Prepare DIIS loop
  ! =================
- nb_pocc = count(occ > zero)
+ nb_pocc = count(occ > tol_occupied)
  accuracy_level = 3
  !resmax = maxval(resid(1:nb_pocc)
  !accuracy_level = 1
- !if (resmax < tol8)) accuracy_level = 2
- !if (resmax < tol14)) accuracy_level = 3
+ !if (resmax < tol8) accuracy_level = 2
+ !if (resmax < tol14) accuracy_level = 3
 
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
- optekin = 1 !optekin = 0
+ optekin = 1 ! optekin = 0
 
  !write(std_out,*)"optekin:", optekin
  ! nline - 1 DIIS steps, then end with trial step (optional, see below)
@@ -332,8 +332,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  diis = rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
  call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations + final trial step."))
  call wrtout(std_out, sjoin( &
-   " Number of blocks:", itoa(nblocks), ", number of 'partiallly' occupied states:", itoa(nb_pocc), &
-   ", accuracy_ene: ", ftoa(accuracy_ene)))
+   " Number of blocks:", itoa(nblocks), ", number of 'partiallly' occupied states:", itoa(nb_pocc)))
+ call wrtout(std_out, sjoin( &
+   "accuracy_level:", itoa(accuracy_level), ", accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
  ABI_MALLOC(lambda_bk, (bsize))
@@ -541,7 +542,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      else
        ! Reuse previous values of lambda.
        tag = "FIXLAM"
-       !phi_bk = phi_bk + 0.1 * kres_bk
        call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
      endif
 
@@ -582,7 +582,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !if (do_ortho) then
    if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
    call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc_all, gs_hamk%usepaw, cg, &
-    mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
+                  mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
  !end if
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
@@ -595,7 +595,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !recompute_eigresid_after_ortho = maxval(resid(1:nb_pocc)) < tol6
 
  if (diis%accuracy_level == 3) then
-   call wrtout(std_out, " Recomputing eigenvalues and residuals after orthogonalization...")
+   call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize
      ige = min(iblock * npwsp * bsize, npwsp * nband)
@@ -609,7 +609,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end do
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
  else
-   call wrtout(std_out, " Still far from converged. Eigenvalues, residuals and NC enlx wont' be recomputed.")
+   call wrtout(std_out, " Still far from convergenve. Eigenvalues, residuals and NC enlx won't be recomputed.")
  end if
 
  !call yaml_write_dict('RMM-DIIS', "stats", dict%stats, std_out, with_iter_state=.False.)
