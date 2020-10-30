@@ -2857,7 +2857,6 @@ endif
      ! Clean GW1RDM_me
      !
      call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
-     ABI_FREE(nl_bks)
      ABI_FREE(old_purex)
      ABI_FREE(new_hartr)
    endif 
