@@ -151,7 +151,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
  type(mpi_type),intent(inout) :: mpi_enreg
- real(dp),intent(inout) :: cg(2,npw*nspinor*nband)
+ real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
  real(dp),target,intent(inout) :: gsc_all(2,npw*nspinor*nband*dtset%usepaw)
  real(dp),intent(inout) :: enlx(nband), resid(nband)
  real(dp),intent(in) :: occ(nband), kinpw(npw)
@@ -174,8 +174,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: evec(:,:), subham(:), h_ij(:,:,:)
  real(dp),allocatable :: ghc_bk(:,:), gsc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), dots_bk(:,:)
- real(dp),allocatable :: residv_bk(:,:), kres_bk(:,:), phi_bk(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: ptr_gsc_bk(:,:)
+ real(dp),allocatable :: residv_bk(:,:), kres_bk(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: ptr_gsc_bk(:,:), phi_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
  type(rmm_diis_t) :: diis
  type(yamldoc_t) :: ydoc
@@ -304,7 +304,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (max_res < tol5) accuracy_level = 2
  if (max_res < tol9) accuracy_level = 3
  if (istep == 1) accuracy_level = 1
- accuracy_level = 3
+
+ if (usepaw == 1) accuracy_level = 3 ! # FIXME
+ !accuracy_level = 3
+
 
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1 ! optekin = 0
@@ -335,7 +338,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
- ABI_MALLOC(phi_bk, (2, npwsp*bsize))
+ !ABI_MALLOC(phi_bk, (2, npwsp*bsize))
  ABI_MALLOC(gsc_bk, (2, npwsp*bsize*usepaw))
  ABI_MALLOC(residv_bk, (2, npwsp*bsize))
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
@@ -364,8 +367,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! to save one call to getghc_eigresid.
 
    ! Extract bands in the block. phi_bk = cg(:,igs:ige)
-   call cg_zcopy(npwsp * ndat, cg(:,igs), phi_bk)
-   !phi_bk => cg(:,igs:ige)
+   !call cg_zcopy(npwsp * ndat, cg(:,igs), phi_bk)
+   phi_bk => cg(:,igs:ige)
    if (usepaw == 1) ptr_gsc_bk => gsc_all(1:2,igs:ige)
 
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
@@ -477,7 +480,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      if (iter /= max_niter_block) call diis%eval_mats(iter, ndat, me_g0, comm_bandspinorfft)
    end do iter_loop
 
-   ! End with trial step but only if we performed all the iterations (no exit from diis%exit)
+   ! End with trial step but only if we performed all the iterations (i.e. no exit from diis%exit)
    ! Since we operate on blocks of bands, all the states in the block will receive the same treatment.
    ! This means that one can observe a (hopefully) slightly different convergence behaviour depending on bsize.
    !
@@ -546,7 +549,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
 
-     ! Push the last results just for printing purposes and increment last_iter.
+     ! Insert the last results in the history just for printing purposes and increment last_iter.
      it = diis%last_iter + 1
      do idat=1,ndat
        diis%hist_ene(it, idat) = eig(ib_start+idat-1)
@@ -565,7 +568,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
 
    ! Update wavefunction block. cg(:,igs:ige) = phi_bk
-   call cg_zcopy(npwsp * ndat, phi_bk, cg(:,igs))
+   !call cg_zcopy(npwsp * ndat, phi_bk, cg(:,igs))
  end do ! iblock
 
  call timab(1634, 2, tsec) !"rmm_diis:band_opt"
@@ -574,18 +577,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
  ortalgo = mpi_enreg%paral_kgb
  !ortalgo = 3
- !do_ortho = ((wfoptalg/=14 .and. wfoptalg /= 1) .or. dtset%ortalg > 0 .or. use_rmm_diis)
- !do_ortho = .True.
- !if (do_ortho) then
-   if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
-   call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc_all, gs_hamk%usepaw, cg, &
-                  mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
- !end if
+ if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
+ call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc_all, gs_hamk%usepaw, cg, &
+                mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
  ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
  ! This step is important to improve accuracy but we try to avoid it at the beginning of the SCF cycle
+ ! TODO: Rotate enlx using output of Cholesky decomposition.
  !
  !recompute_eigresid_after_ortho = .True.
  !recompute_eigresid_after_ortho = sum(resid(1:nb_pocc)) / nb_pocc < tol8
@@ -631,7 +631,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ABI_FREE(gsc_bk)
  ABI_FREE(residv_bk)
  ABI_FREE(kres_bk)
- ABI_FREE(phi_bk)
+ !ABI_FREE(phi_bk)
  ABI_FREE(gvnlxc_bk)
 
  call diis%free()
@@ -697,11 +697,9 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
  real(dp) :: resid, deltae, deold , fact
  character(len=50) :: msg_list(ndat)
 
- diis%last_iter = iter
+ diis%last_iter = iter; if (xmpi_comm_rank(comm) /= master) goto 10
 
- if (xmpi_comm_rank(comm) /= master) goto 10
-
- ! The each band. Tolerances depend on accuracy_level and occupation of the state.
+ ! Tolerances depend on accuracy_level and occupation of the state.
  checks = 0
 
  do idat=1,ndat
@@ -726,20 +724,20 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
      end if
 
    else
-     ! Condition available for SCF run.
+     ! Conditions available for SCF run.
      if (resid < dtset%tolwfr) then
        checks(idat) = 1; msg_list(idat) = 'resid < tolwfr'; cycle
      end if
 
      ! Absolute criterion on eigenvalue difference. Assuming error on Etot ~ band_energy.
-     fact = ten; if (abs(occ_bk(idat)) > tol_occupied) fact = one
+     fact = one; if (abs(occ_bk(idat)) < tol_occupied) fact = ten
      if (sqrt(abs(resid)) < fact * accuracy_ene) then
        checks(idat) = 1; msg_list(idat) = 'resid < accuracy_ene'; cycle
      end if
    end if
  end do ! idat
 
- ! Depending on the accuracy_level either full block or fraction of it must pass the test in order to exit.
+ ! Depending on the accuracy_level either full block or a fraction of it must pass the test in order to exit.
  if (diis%accuracy_level == 1) then
    ans = count(checks /= 0) >= half * ndat
  else if (diis%accuracy_level == 2) then
@@ -754,11 +752,6 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
        if (checks(idat) /= 0) call diis%stats%increment(msg_list(idat), 1)
      end do
    end if
-   !if (diis%prtvol == -level) then
-   !  write(msg, '(a,i4,a,i2,a,es12.4,a)' )&
-   !   ' band: ',iband,' converged after: ',iter,' iterations with resid: ',resid(iband), ch10
-   !  call wrtout(std_out, sjoin("<END RMM-DIIS, msg='", msg, "'>"))
-   !end if
  end if
 
  ! Broadcast final decision to all ranks.
