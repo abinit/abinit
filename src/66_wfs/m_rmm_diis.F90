@@ -163,7 +163,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nb_pocc, jj, kk, it, ibk, iek, cplex, ortalgo, accuracy_level !ii, ld1, ld2,
  integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
- logical :: end_with_trial_step, new_lambda !, recompute_eigresid_after_ortho
+ logical :: end_with_trial_step, new_lambda, recompute_eigresid_after_ortho
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops, max_res !, dotr, doti
  !character(len=500) :: msg
@@ -288,12 +288,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, paral_kgb, &
                subham, subovl, use_subovl0, usepaw, me_g0)
 
- !if (usepaw == 0) then
- !ABI_MALLOC(totvnlx, (2*nband_k,nband_k))
- !!call cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
- !ABI_FREE(totvnlx)
- !end if
-
  call timab(585, 2, tsec)
  if (timeit) call cwtime_report(" subdiago", cpu, wall, gflops)
 
@@ -310,7 +304,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (max_res < tol5) accuracy_level = 2
  if (max_res < tol9) accuracy_level = 3
  if (istep == 1) accuracy_level = 1
- !accuracy_level = 3
+ accuracy_level = 3
 
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1 ! optekin = 0
@@ -507,6 +501,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      !new_lambda = .False.
      !new_lambda = .True.
      !if (accuracy_level == 1) new_lambda = .True.
+     !if (accuracy_level == 3) new_lambda = .True.
 
      if (new_lambda) then
        tag = "NEWLAM"
@@ -564,9 +559,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    end if ! end_with_trial_step
 
-   if (dtset%useric == 1) then
+   !if (dtset%useric == 1) then
      call diis%rollback(npwsp, ndat, phi_bk, ptr_gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
-   end if
+   !end if
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
 
    ! Update wavefunction block. cg(:,igs:ige) = phi_bk
@@ -595,8 +590,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !recompute_eigresid_after_ortho = .True.
  !recompute_eigresid_after_ortho = sum(resid(1:nb_pocc)) / nb_pocc < tol8
  !recompute_eigresid_after_ortho = maxval(resid(1:nb_pocc)) < tol6
+ !recompute_eigresid_after_ortho =  any(diis%accuracy_level == [2, 3]
+ recompute_eigresid_after_ortho = diis%accuracy_level == 3
+ !recompute_eigresid_after_ortho = .False.
 
- if (any(diis%accuracy_level == [2, 3])) then
+ if (recompute_eigresid_after_ortho) then
    call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize
@@ -613,6 +611,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  else
    call wrtout(std_out, " Still far from convergenve. Eigenvalues, residuals and NC enlx won't be recomputed.")
  end if
+
+ !if (usepaw == 0) then
+ !ABI_MALLOC(totvnlx, (2*nband_k,nband_k))
+ !!call cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
+ !ABI_FREE(totvnlx)
+ !end if
 
  !call yaml_write_dict('RMM-DIIS', "stats", dict%stats, std_out, with_iter_state=.False.)
  ydoc = yamldoc_open("RMM-DIIS", with_iter_state=.False.)
@@ -641,11 +645,13 @@ contains
 
   !write(std_out, *)"input lambda:", lambda
   new_lambda = lambda
+  return
   if (accuracy_level == 1) return
-  max_lambda = one
-  min_lambda = tol1
+  !if (accuracy_level == 3) return
 
   ! restrict the value of abs(lambda) in [0.1, 1.0]
+  max_lambda = one
+  min_lambda = tol1
   if (abs(lambda) > max_lambda) then
     new_lambda = sign(max_lambda, lambda)
   else if (abs(lambda) < min_lambda) then
@@ -706,16 +712,12 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
    ! Relative criterion on eigenvalue differerence.
    ! Abinit default in the CG part is 0.005 that is really to low (it's 0.3 in V).
    ! Here we increase it depending whether the state is occupied or empty
-   fact = ten; if (abs(occ_bk(idat)) < tol_occupied) fact = one
-   if (diis%accuracy_level == 1) fact = fact * six * ten
+   fact = six; if (abs(occ_bk(idat)) < tol_occupied) fact = six * ten
+   if (diis%accuracy_level == 1) fact = fact * five * ten
    if (diis%accuracy_level == 2) fact = fact * ten
    if (abs(deltae) < fact * dtset%tolrde * abs(deold)) then
      checks(idat) = 1; msg_list(idat) = "deltae < fact * tolrde * deold"; cycle
    end if
-
-   !if (abs(deltae/deold) > 10.0_dp) then
-   !  checks(idat) = 1; msg_list(idat) = "deltae/deold > 10"; cycle
-   !end if
 
    if (dtset%iscf < 0) then
      ! This is the only condition available for NSCF run.
@@ -730,7 +732,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
      end if
 
      ! Absolute criterion on eigenvalue difference. Assuming error on Etot ~ band_energy.
-     fact = ten; if (abs(occ_bk(idat)) < tol_occupied) fact = one
+     fact = ten; if (abs(occ_bk(idat)) > tol_occupied) fact = one
      if (sqrt(abs(resid)) < fact * accuracy_ene) then
        checks(idat) = 1; msg_list(idat) = 'resid < accuracy_ene'; cycle
      end if
@@ -1256,7 +1258,7 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx
      iter = imin_loc(diis%hist_resid(0:ilast, idat)) ! back = .True.
      iter = iter - 1
      if (iter /= ilast .and. &
-         diis%hist_resid(iter, idat) < tol1 * diis%hist_resid(ilast, idat)) take_iter(idat) = iter
+         diis%hist_resid(iter, idat) < half * diis%hist_resid(ilast, idat)) take_iter(idat) = iter
    end do
  end if
  if (nprocs > 1) call xmpi_bcast(take_iter, master, comm, ierr)
@@ -1268,10 +1270,8 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx
      eig(idat) = diis%hist_ene(iter, idat)
      resid(idat) = diis%hist_resid(iter, idat)
      enlx(idat) = diis%hist_enlx(iter, idat)
-     phi_bk(:,:,idat) = diis%chain_phi(:,:,iter,idat)
-     if (diis%usepaw == 1) gsc_bk(:,:,idat) = diis%chain_sphi(:,:,iter,idat)
-     !call cg_zcopy(npwsp, diis%chain_phi(:,:,iter,idat), phi_bk(:,:,idat))
-     !if (usepaw == 1) call cg_zcopy(npwsp, diis%chain_sphi(:,:,iter,idat), gsc_bk(:,:,idat))
+     call cg_zcopy(npwsp, diis%chain_phi(:,:,iter,idat), phi_bk(:,:,idat))
+     if (diis%usepaw == 1) call cg_zcopy(npwsp, diis%chain_sphi(:,:,iter,idat), gsc_bk(:,:,idat))
      call diis%stats%increment("rollbacks", 1)
    end do
  end if
@@ -1422,15 +1422,32 @@ subroutine cg_zdotg(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
  real(dp),intent(out) :: dots(2,ndat)
 
  integer :: idat, ierr
- real(dp) :: dotr, doti
+ real(dp) :: dotr, doti, re_dots(ndat)
 
 !$OMP PARALLEL DO PRIVATE(dotr, doti)
  do idat=1,ndat
    call dotprod_g(dotr, doti, istwf_k, npwsp, option, cg1(:,idat), cg2(:,idat), me_g0, xmpi_comm_self)
-   dots(:, idat) = [dotr, doti]
+   if (istwf_k == 2) then
+     re_dots(idat) = dotr
+   else
+     dots(:, idat) = [dotr, doti]
+   end if
  end do
 
- if (xmpi_comm_size(comm) > 1) call xmpi_sum(dots, comm, ierr)
+ if (xmpi_comm_size(comm) > 1) then
+   if (istwf_k == 2) then
+     call xmpi_sum(re_dots, comm, ierr)
+   else
+     call xmpi_sum(dots, comm, ierr)
+   end if
+ end if
+
+ if (istwf_k == 2) then
+   do idat=1,ndat
+     dots(1,idat) = re_dots(idat)
+     dots(2,idat) = zero
+   end do
+ end if
 
 end subroutine cg_zdotg
 !!***

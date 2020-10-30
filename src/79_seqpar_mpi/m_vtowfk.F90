@@ -274,7 +274,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  use_rmm_diis = .False.
  if (dtset%rmm_diis /= 0 .and. dtset%use_gpu_cuda == 0) then
    use_rmm_diis = istep > 3 + dtset%rmm_diis
-   if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver.")
+   !if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver.")
  end if
  nonlop_counter = 0
 
