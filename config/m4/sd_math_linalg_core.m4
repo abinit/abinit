@@ -589,6 +589,11 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       sd_linalg_vendor_blas_libs="-lacml -lacml_mv"
       ;;
 
+    aocl)
+      sd_linalg_vendor_provided="blas lapack blacs scalapack"
+      sd_linalg_vendor_blas_libs="-lblis -lflame"
+      ;;
+
     asl)
       sd_linalg_vendor_provided="blas lapack lapacke blacs scalapack"
       sd_linalg_vendor_blas_libs="-lasl"
