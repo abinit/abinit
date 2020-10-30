@@ -99,20 +99,21 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !scalars
  logical :: twvl,allow
  logical :: wvlbigdft=.false.
- integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
- integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
+ integer :: bantot,fixed_problem,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,info,intimage,ierrgrp
+ integer :: ipsp,irank,isppol,isym,isym2,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr,all_nprocs
- integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response
+ integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
+ integer :: nproc,nspden,nspinor,nsppol,optdriver,problem_isym,problem_isym_now,response
  integer :: fftalg,need_kden,usepaw,usewvl
- real(dp) :: delta,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
+ integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ real(dp) :: delta8,delta8_2,delta9,delta9_2,delta10,delta10_2,delta12,delta12_2,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: msg
  type(dataset_type) :: dt
 !arrays
  integer :: cond_values(4),nprojmax(0:3)
  integer :: gpu_devices(5)=(/-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),mat(3,3),rmet(3,3),rprimd(3,3),sgval(3),tnons_new(3),work(15),xredshift(3,1)
  real(dp),allocatable :: frac(:,:)
  character(len=32) :: cond_string(4)
  character(len=32) :: input_name
@@ -403,29 +404,102 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
 
 !  chksymbreak
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymbreak',dt%chksymbreak,3,(/0,1,-1/),iout)
-   if(dt%chksymbreak==1)then
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymbreak',dt%chksymbreak,2,(/0,1/),iout)
+
+!  chksymtnons
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymtnons',dt%chksymtnons,3,(/0,1,2/),iout)
+
+   if(dt%chksymtnons>0)then
 !    Check the values of tnons
+     problem_isym=0
+     fixed_problem=0
      do isym=1,dt%nsym
+       problem_isym_now=0
        do ii=1,3
-         delta=dt%tnons(ii,isym)*eight
-         if(abs(delta-nint(delta))>tol6)then
-           delta=dt%tnons(ii,isym)*three*four
-           if(abs(delta-nint(delta))>tol6)then
-             write(msg, '(5a,i4,2a,9i3,2a,3es16.6,4a)' )&
-              ' Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
-              ' which is neither a rational fraction in 1/8th nor in 1/12th:', ch10,&
-              ' for the symmetry number: ',isym,ch10,&
-              ' symrel is: ',dt%symrel(1:3,1:3,isym),ch10,&
-              ' tnons is: ',dt%tnons(1:3,isym),ch10,&
-              ' Please, read the description of the input variable chksymbreak,',ch10,&
-              ' then, if you feel confident, you might switch it to zero, or consult with the forum.'
-             MSG_WARNING(msg)
-             ! moved this to a warning: for slab geometries arbitrary tnons can appear along the vacuum direction
-           end if
-         end if
-       end do
-     end do
+         delta8=dt%tnons(ii,isym)*eight ; delta12=dt%tnons(ii,isym)*three*four
+         delta9=dt%tnons(ii,isym)*nine ; delta10=dt%tnons(ii,isym)*ten
+         if(abs(delta8-nint(delta8))>tol8 .and. abs(delta12-nint(delta12))>tol8 .and. &
+&           abs(delta9-nint(delta9))>tol8 .and. abs(delta10-nint(delta10))>tol8      )then
+           ! There is a problem with tnons for this isym. Will trigger an error.
+           problem_isym_now=1
+         endif
+       enddo
+       !Declare the first symmetry operation that induces a problem
+       if(problem_isym_now==1 .and. problem_isym==0) problem_isym=isym
+
+       ! However, also try to propose a solution.
+       if(problem_isym_now==1)then
+         ! Compute the pseudo-inverse of symrel-1, then multiply tnons
+         mat(:,:)=zero; mat(1,1)=one; mat(2,2)=one; mat(3,3)=one
+         ! This is symrel-1
+         mat(:,:)=dt%symrel(:,:,isym)-mat(:,:)
+         xredshift(:,1)=dt%tnons(:,isym)
+         call dgelss(3,3,1,mat,3,xredshift(:,1),3,sgval,tol5,irank,work,15,info)
+         ! xredshift(:,1) is now the tentative shift, to be tested for all symmetries
+         fixed_problem=1
+         do isym2=1, dt%nsym
+           tnons_new(:)=dt%tnons(:,isym2)+xredshift(:,1)-matmul(dt%symrel(:,:,isym2),xredshift(:,1))
+           do jj=1,3
+             delta8_2=tnons_new(jj)*eight ; delta12_2=tnons_new(jj)*three*four
+             delta9_2=tnons_new(jj)*nine ; delta10_2=tnons_new(jj)*ten
+             if(abs(delta8_2-nint(delta8_2))>tol8 .and. abs(delta12_2-nint(delta12_2))>tol8 .and. &
+&               abs(delta9_2-nint(delta9_2))>tol8 .and. abs(delta10_2-nint(delta10_2))>tol8) fixed_problem=0
+           enddo
+         enddo
+         if(fixed_problem==1)exit
+       endif
+     end do ! isym
+
+     if(problem_isym/=0)then
+       if(fixed_problem==1)then
+         write(msg, '(2a)' ) ch10,' chkinp: COMMENT -'
+         call wrtout(std_out,msg,'COLL')
+         write(msg, '(4a,3es20.10)' )  &
+&          '   Found potentially symmetry-breaking value of tnons. ', ch10,&
+&          '   The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:',ch10,&
+&          xredshift(:,1)
+         call wrtout(std_out,msg,'COLL')
+         if(dt%chksymtnons==1)then
+           call wrtout(iout,msg,'COLL')
+         endif
+         write(msg, '(4a)' ) ch10,&
+&          '   For your convenience, you might cut+paste the shifted new atomic positions (for image 1 only):',ch10,&
+&          '   xred'
+         call wrtout(std_out,msg,'COLL')
+         if(dt%chksymtnons==1)then    
+           call wrtout(iout,msg,'COLL')
+         endif
+         do iatom=1,dt%natom
+           write(msg,'(a,3es20.10)') '        ',dt%xred_orig(:,iatom,1)+xredshift(:,1)
+           call wrtout(std_out,msg,'COLL')
+           if(dt%chksymtnons==1)then    
+             call wrtout(iout,msg,'COLL')
+           endif
+         enddo
+       endif
+
+       if(dt%chksymtnons==1)then
+         write(msg, '(8a,i4,2a,9i3,2a,3es20.10,10a)' ) ch10,&
+&          ' chkinp: ERROR -',ch10,&
+&          '   Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
+&          '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
+&          '   for the symmetry number ',problem_isym,ch10,&
+&          '   symrel is ',dt%symrel(1:3,1:3,problem_isym),ch10,&
+&          '   tnons is ',dt%tnons(1:3,problem_isym),ch10,&
+&          '   So, your atomic positions are not aligned with the FFT grid.',ch10,&
+&          '   Please, read the description of the input variable chksymtnons.',ch10,&
+&          '   If you are planning GW or BSE calculations, such tnons value is very problematic.',ch10,&
+&          '   Otherwise, you might set chksymtnons=0. But do not be surprised if ABINIT crashes for GW or BSE.',ch10,&
+&          '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
+         call wrtout(std_out,msg,'COLL')
+         if(fixed_problem==1)then
+           write(msg, '(a)' ) '   ABINIT has detected such a possible shift. See the suggestion given in the COMMENT above.'
+           call wrtout(std_out,msg,'COLL')
+         endif
+         ierr=ierr+1 ! Previously a warning: for slab geometries arbitrary tnons can appear along the vacuum direction.
+                     ! But then simply set chksymtnons=0 ...
+       endif
+     endif
    end if
 
 !  constraint_kind
@@ -3895,6 +3969,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  ierr=sum(ierr_dtset(1:ndtset_alloc)/mpi_enregs(1:ndtset_alloc)%nproc)
 
  if (ierr==1) then
+   write(msg,'(4a)')ch10,&
+   ' Checking consistency of input data against itself revealed some problem(s).',ch10,&
+   ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).'
+   call wrtout(iout,msg,'COLL')   
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above.'

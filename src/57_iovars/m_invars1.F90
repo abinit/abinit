@@ -2124,6 +2124,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
+   dtsets(idtset)%chksymtnons=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
 !  D

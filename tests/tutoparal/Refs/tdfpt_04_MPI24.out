@@ -53,6 +53,7 @@ _ WF disk file :    246.916 Mbytes ; DEN or POT disk file :      1.320 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.5589045315E+00  7.5589045315E+00  5.2912331721E+01 Bohr
               amu      1.37327000E+02  4.78800000E+01  1.59994000E+01
+      chksymtnons           0
              ecut      1.50000000E+01 Hartree
 -          fftalg         312
            irdwfk           1
@@ -7856,6 +7857,7 @@ tolerances: {tolwfr: 1.00E-22, }
  -outvars: echo values of variables after computation  --------
             acell      7.5589045315E+00  7.5589045315E+00  5.2912331721E+01 Bohr
               amu      1.37327000E+02  4.78800000E+01  1.59994000E+01
+      chksymtnons           0
              ecut      1.50000000E+01 Hartree
            etotal      1.5686236959E+01
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

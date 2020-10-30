@@ -153,7 +153,7 @@ _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.148 Mbytes.
         bs_loband4          0
         bs_loband5          0
         bs_loband6          0       0
-      chksymbreak           0
+      chksymtnons           0
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      4.50000000E+00 Hartree
@@ -1613,7 +1613,7 @@ tolerances: {tolvrs: 1.00E-08, }
         bs_loband4          0
         bs_loband5          0
         bs_loband6          0       0
-      chksymbreak           0
+      chksymtnons           0
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      4.50000000E+00 Hartree
