@@ -2565,14 +2565,16 @@ endif
      ! MRM: only the master has bands on Wfd_nato_master so it prints everything and computes gw_rhor 
      !
      call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3)) ! All procs. update the QP_BSt and the Hdr_sigma
-     call print_tot_occ(Sr,Kmesh,QP_BSt) ! Compute averaged occ = \sum _k weight_k occ_k                           
+     call print_tot_occ(Sr,Kmesh,QP_BSt) ! Compute unit cell (averaged) occ = \sum _k weight_k occ_k                           
+     if (my_rank==0) then
+       call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                          ! Let it use bdm_mask and build NOs
+       call Wfd_nato_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)     ! Construct the density
+     end if
      if (my_rank==0 .and. (dtset%prtwf == 1 .or. dtset%prtden == 1)) then
-       call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs
        if (dtset%prtwf == 1) then 
          gw1rdm_fname=dtfil%fnameabo_wfk                                         
-         call Wfd_nato_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)      ! Print WFK file, QP_BSt contains nat. orbs.
+         call Wfd_nato_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)   ! Print WFK file, here QP_BSt contains nat. orb. occs.
        end if
-       call Wfd_nato_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)     ! Construct the density
        if (dtset%prtden == 1) then 
          gw1rdm_fname=dtfil%fnameabo_den
          call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&        ! Print DEN file  
@@ -2587,10 +2589,12 @@ endif
      ! We no longer need Wfd_nato_master. 
      Wfd_nato_master%bks_comm = xmpi_comm_null
      call Wfd_nato_master%free()
+     call xmpi_barrier(Wfd%comm)
      ABI_FREE(bdm_mask) ! The master already used bdm_mask
      ABI_FREE(occs)     ! Occs were already placed in QP_BSt
-     call xmpi_barrier(Wfd%comm)
+     !
      ! Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
+     !
      den_int=sum(gw_rhor(:,1))*ucvol_local/nfftf               ! Only restricted closed-shell calcs
      evext_energy=sum(gw_rhor(:,1)*vpsp(:))*ucvol_local/nfftf  ! Only restricted closed-shell calcs
      ! Proceed to compute the Fock matrix elements.  
@@ -2630,8 +2634,11 @@ endif
      call calc_vhxc_me(Wfd,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&           ! Build matrix elements from gw_vhartr -> GW1RDM_me
      & ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
      & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
-     ABI_FREE(tmp_kstab)
      call xmpi_barrier(Wfd%comm)
+     ABI_FREE(tmp_kstab)
+     ABI_FREE(gw_rhor)
+     ABI_FREE(gw_rhog)
+     ABI_FREE(gw_vhartr)
      do ikcalc=1,Sigp%nkptgw                                                 
        ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
        ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
@@ -2661,6 +2668,7 @@ endif
        end do
      endif
      call xmpi_barrier(Wfd%comm)
+     call vcoul_free(Vcp_ks)
      !
      ! Use the Wfd with new name (Wfd_nato_all) because it will contain the GW 1RDM nat. orbs. (bands)
      !
@@ -2682,6 +2690,7 @@ endif
        end do
      end do
      call xmpi_barrier(Wfd%comm)
+     ABI_FREE(nl_bks)
      ABI_FREE(bdm2_mask)
      !
      ! Exchange <NO_i|K[NO]|NO_j> 
@@ -2696,7 +2705,6 @@ endif
        & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
      end do
      call xmpi_barrier(Wfd%comm)
-     call vcoul_free(Vcp_ks)
      call vcoul_free(Vcp_full)
      ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)                            ! Save the new total exchange energy Ex = Ex[GW.1RDM] 
      !
@@ -2750,6 +2758,7 @@ endif
        ABI_FREE(mat2rot)
      end do
      call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
+     ABI_FREE(nateigv) 
      !
      ! Compute and print Delta eik
      !
@@ -2851,16 +2860,8 @@ endif
      ABI_FREE(nl_bks)
      ABI_FREE(old_purex)
      ABI_FREE(new_hartr)
-     ABI_FREE(gw_rhor)
-     ABI_FREE(gw_rhog)
-     ABI_FREE(gw_vhartr)
-   endif  
-   call xmpi_barrier(Wfd%comm)
-   ! Finally, deallocate the last missing array used for 1-RDM update
-   if (gwcalctyp==21 .and. gw1rdm>0) then
-     ABI_FREE(nateigv) 
-   end if  
-
+   endif 
+ 
    call xmpi_barrier(Wfd%comm)
 
   ! MRM: skip the rest for gw1rdm>0 and gwcalctyp/=21 
