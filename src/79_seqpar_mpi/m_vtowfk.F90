@@ -483,8 +483,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
    end if
 
-   call wrtout(std_out, sjoin(" Number of applications of Vnl:", itoa(nonlop_counter)))
-
 !  THIS CHANGE OF SHIFT DOES NOT WORK WELL
 !  Update zshift in the case of wfoptalg==3
 !  if(wfoptalg==3 .and. inonsc/=1)then
@@ -562,6 +560,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
+ call wrtout(std_out, sjoin(" Number of Vnl applications:", itoa(nonlop_counter)))
 
 !###################################################################
 
