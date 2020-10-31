@@ -96,6 +96,8 @@ module m_rmm_diis
    procedure :: exit_iter => rmm_diis_exit_iter
    procedure :: print_block => rmm_diis_print_block
    procedure :: rollback => rmm_diis_rollback
+   procedure :: push_hist => rmm_diis_push_hist
+   procedure :: push_iter => rmm_diis_push_iter
 
  end type rmm_diis_t
 
@@ -330,20 +332,21 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (prev_accuracy_level == 2 .and. ncalls_with_this_accuracy >= 25) raise_acc = 3
  if (prev_accuracy_level == 3 .and. ncalls_with_this_accuracy >= 25) raise_acc = 4
  raise_acc = max(raise_acc, prev_accuracy_level)
- print *, "rmm_diis_status:", rmm_diis_status
- print *, "rmm_prev_acc:", prev_accuracy_level, "rmm_raise_acc:", raise_acc
+ !print *, "rmm_diis_status:", rmm_diis_status
+ !print *, "rmm_prev_acc:", prev_accuracy_level, "rmm_raise_acc:", raise_acc
 
  ! Define tolerance for occupied states on the basis of prev_accuracy_level.
  ! and compute max of residuals for this set.
- tol_occupied = tol3; if (any(prev_accuracy_level == [1, 2])) tol_occupied = tol2
+ tol_occupied = tol3
+ if (any(prev_accuracy_level == [1])) tol_occupied = tol2
  nb_pocc = count(occ > tol_occupied)
  max_res_pocc = maxval(resid(1:nb_pocc))
 
  ! Defin accuracy_level of this iteration.
  accuracy_level = 1
  if (max_res_pocc < tol6) accuracy_level = 2
- if (max_res_pocc < tol12) accuracy_level = 3
- if (max_res_pocc < tol16) accuracy_level = 4
+ if (max_res_pocc < tol10) accuracy_level = 3
+ if (max_res_pocc < tol15) accuracy_level = 4
  accuracy_level = max(prev_accuracy_level, accuracy_level, raise_acc)
  if (istep == 1) accuracy_level = 2  ! FIXME: Differenciate between restart or rmm_diis - 3.
  if (first_call) accuracy_level = 1
@@ -374,6 +377,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      accuracy_ene = tol8 * ten**(-accuracy_level + 2) !/ nb_pocc
    end if
  end if
+
+ recompute_eigresid_after_ortho = diis%accuracy_level >= 2
+ !recompute_eigresid_after_ortho = diis%accuracy_level >= 3
+ !recompute_eigresid_after_ortho = .False.
+ if (usepaw == 1) recompute_eigresid_after_ortho = .True. ! # FIXME
 
  !if (dtset%fftcore_mixprec == 1 .and. accuracy_level <= 2)
  !if (accuracy_level <= 2) prev_mixprec = fftcore_set_mixprec(1)
@@ -422,30 +430,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    if (usepaw == 1) ptr_gsc_bk => gsc_all(1:2,igs:ige)
 
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
-                        eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
+                        eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, gvnlxc_bk, normalize=.False.)
    !write(std_out,*)"eig", eig(ib_start:ib_stop), resid(ib_start:ib_stop), enlx(ib_start:ib_stop)
 
-   !call diis%push_iter(0, ndat, eig, resid, enlx, phi_bk, residv_bk, ptr_gsc_bk, "SDIAG")
-
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input cg are already S-normalized.
-   do idat=1,ndat
-     diis%hist_ene(0, idat) = eig(ib_start+idat-1)
-     diis%hist_resid(0, idat) = resid(ib_start+idat-1)
-     diis%hist_enlx(0, idat) = enlx(ib_start+idat-1)
-     if (diis%cplex == 2) then
-       diis%resmat(:, 0, 0, idat) = [resid(ib_start+idat-1), zero]
-       if (diis%use_smat == 1) diis%smat(:, 0, 0, idat) = [one, zero]
-     else
-       diis%resmat(:, 0, 0, idat) = resid(ib_start+idat-1)
-       if (diis%use_smat == 1) diis%smat(:, 0, 0, idat) = one
-     end if
-     !write(std_out, *)"res0", diis%resmat(:, 0, 0, idat)
-     diis%step_type(0, idat) = "SDIAG"
-     jj = 1 + (idat - 1) * npwsp
-     call cg_zcopy(npwsp, residv_bk(:,jj), diis%chain_resv(:,:,0,idat))
-     call cg_zcopy(npwsp, phi_bk(:,jj), diis%chain_phi(:,:,0,idat))
-     if (usepaw == 1) call cg_zcopy(npwsp, ptr_gsc_bk(:,jj), diis%chain_sphi(:,:,0,idat))
-   end do
+   call diis%push_iter(0, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), phi_bk, residv_bk, ptr_gsc_bk, "SDIAG")
+
    if (timeit) call cwtime_report(" first getghc_eigresid ", cpu, wall, gflops)
 
    ! Precondition |R_0>, output in kres_bk = |K R_0>
@@ -509,7 +499,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
      ! Compute H |phi_now> and evaluate new enlx for NC.
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
-                          eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
+                          eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, gvnlxc_bk, normalize=.True.)
 
      ! Take another step with the same lambda
      !if (iter == 1) then
@@ -521,19 +511,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      !  end do
      !end if
 
-     !call diis%push_iter(iter, ndat, eig, resid, enlx, phi_bk, residv_bk, ptr_gsc_bk, "DIIS")
-
      ! Store new residual.
-     do idat=1,ndat
-       diis%hist_ene(iter, idat) = eig(ib_start+idat-1)
-       diis%hist_resid(iter, idat) = resid(ib_start+idat-1)
-       diis%hist_enlx(iter, idat) = enlx(ib_start+idat-1)
-       diis%step_type(iter, idat) = "DIIS"
-       ibk = 1 + (idat - 1) * npwsp; iek = idat * npwsp
-       call cg_zcopy(npwsp, phi_bk(:,ibk), diis%chain_phi(:,:,iter,idat))
-       call cg_zcopy(npwsp, residv_bk(:,ibk), diis%chain_resv(:,:,iter,idat))
-       if (usepaw == 1) call cg_zcopy(npwsp, ptr_gsc_bk(:,ibk), diis%chain_sphi(:,:,iter,idat))
-     end do
+     call diis%push_iter(iter, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), phi_bk, residv_bk, ptr_gsc_bk, "DIIS")
 
      ! === CHECK FOR CONVERGENCE ====
      if (diis%exit_iter(iter, ndat, max_niter_block, occ(ib_start:), accuracy_ene, &
@@ -548,13 +527,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! This means that one can observe a (hopefully) slightly different convergence behaviour depending on bsize.
    !
    end_with_trial_step = .True.
-   !end_with_trial_step = .False.
-   !if (iter == max_niter_block + 1) end_with_trial_step = .True.
-   !end_with_trial_step = .True.
-   !end_with_trial_step = .False.
-   !if (accuracy_level > 1 .and. iter == max_niter_block + 1) end_with_trial_step = .True.
-   !end_with_trial_step = accuracy_level >= 2
-
    if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
 
    if (end_with_trial_step) then
@@ -566,8 +538,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ! is more expensive but more accurate.
      ! Do it only for the occupied states plus a buffer
      ! if these bands still far from convergence. In all the other cases, we reuse the previous lambda.
-     !if (ib_start <= nb_pocc .or. ib_stop <= nint(1.2_dp * nb_pocc) .and. &
-     !    any(resid(ib_start:ib_stop) > tol6)) recompute_lambda = .True.
      !recompute_lambda = .False.
      !recompute_lambda = .True.
 
@@ -609,23 +579,22 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
      endif
 
-     ! Finally recompute eig, resid, enlx (and ptr_gsc_bk if PAW).
-     call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
-                          eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
+     if (.not. recompute_eigresid_after_ortho .or. usepaw == 1) then ! FIXME
+       ! Finally recompute eig, resid, enlx (and ptr_gsc_bk if PAW).
+       call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
+                            eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, gvnlxc_bk, normalize=.True.)
 
-     ! Insert the last results in the history just for printing purposes and increment last_iter.
-     it = diis%last_iter + 1
-     do idat=1,ndat
-       diis%hist_ene(it, idat) = eig(ib_start+idat-1)
-       diis%hist_resid(it, idat) = resid(ib_start+idat-1)
-       diis%hist_enlx(it, idat) = enlx(ib_start+idat-1)
-       diis%step_type(it, idat) = tag
-     end do
-     diis%last_iter = diis%last_iter + 1
-     if (timeit) call cwtime_report(" last_trial_step ", cpu, wall, gflops)
+       ! Insert the last results in the history just for printing purposes and increment last_iter.
+       call diis%push_hist(diis%last_iter + 1, ndat, eig, resid, enlx, tag)
+       if (timeit) call cwtime_report(" last_trial_step ", cpu, wall, gflops)
+
+       !TODO: For PAW one should recompute S
+
+     end if
+
    end if ! end_with_trial_step
 
-   do_rollback = .True.
+   do_rollback = .False.
    if (do_rollback) then
      call diis%rollback(npwsp, ndat, phi_bk, ptr_gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
    end if
@@ -658,8 +627,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !    ABI_FREE(totvnlx)
  !  end if
  !
- recompute_eigresid_after_ortho = diis%accuracy_level >= 3
- !recompute_eigresid_after_ortho = .False.
 
  if (recompute_eigresid_after_ortho) then
    call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
@@ -672,7 +639,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      if (usepaw == 1) ptr_gsc_bk => gsc_all(1:2,igs:ige)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg(:,igs), ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
-                          eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
+                          eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, gvnlxc_bk, normalize=.False.)
+
+     ! Insert the last results in the history just for printing purposes and increment last_iter.
+     call diis%push_hist(diis%last_iter + 1, ndat, eig, resid, enlx, "ORTH")
    end do
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
  else
@@ -726,6 +696,91 @@ contains
 end function limit_lambda
 
 end subroutine rmm_diis
+!!***
+
+!!****f* m_rmm_diis/rmm_diis_push_hist
+!! NAME
+!!  rmm_diis_push_hist
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine rmm_diis_push_hist(diis, iter, ndat, eig_bk, resid_bk, enlx_bk, tag)
+
+ class(rmm_diis_t),intent(inout) :: diis
+ integer,intent(in) :: iter, ndat
+ real(dp),intent(in) :: eig_bk(ndat), resid_bk(ndat), enlx_bk(ndat)
+ character(len=*),intent(in) :: tag
+
+ diis%last_iter = iter
+ diis%hist_ene(iter, 1:ndat) = eig_bk
+ diis%hist_resid(iter, 1:ndat) = resid_bk
+ diis%hist_enlx(iter, 1:ndat) = enlx_bk
+ diis%step_type(iter, 1:ndat) = tag
+
+end subroutine rmm_diis_push_hist
+!!***
+
+!!****f* m_rmm_diis/rmm_diis_push_iter
+!! NAME
+!!  rmm_diis_push_iter
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine rmm_diis_push_iter(diis, iter, ndat, eig_bk, resid_bk, enlx_bk, phi_bk, residv_bk, gsc_bk, tag)
+
+ class(rmm_diis_t),intent(inout) :: diis
+ integer,intent(in) :: iter, ndat
+ real(dp),intent(in) :: eig_bk(ndat), resid_bk(ndat), enlx_bk(ndat)
+ real(dp),intent(in) :: phi_bk(2, diis%npwsp*ndat), residv_bk(2, diis%npwsp*ndat), gsc_bk(2, diis%npwsp*ndat*diis%usepaw)
+ character(len=*),intent(in) :: tag
+
+ integer :: idat, ibk
+
+ diis%last_iter = iter
+ diis%hist_ene(iter, 1:ndat) = eig_bk
+ diis%hist_resid(iter, 1:ndat) = resid_bk
+ diis%hist_enlx(iter, 1:ndat) = enlx_bk
+ diis%step_type(iter, 1:ndat) = tag
+
+ do idat=1,ndat
+   if (iter == 0) then
+     if (diis%cplex == 2) then
+       diis%resmat(:, 0, 0, idat) = [resid_bk(idat), zero]
+       if (diis%use_smat == 1) diis%smat(:, 0, 0, idat) = [one, zero]
+     else
+       diis%resmat(:, 0, 0, idat) = resid_bk(idat)
+       if (diis%use_smat == 1) diis%smat(:, 0, 0, idat) = one
+     end if
+   end if
+   !write(std_out, *)"res0", diis%resmat(:, 0, 0, idat)
+   diis%step_type(iter, idat) = tag
+   ibk = 1 + (idat - 1) * diis%npwsp
+   call cg_zcopy(diis%npwsp, phi_bk(:,ibk), diis%chain_phi(:,:,iter,idat))
+   call cg_zcopy(diis%npwsp, residv_bk(:,ibk), diis%chain_resv(:,:,iter,idat))
+   if (diis%usepaw == 1) call cg_zcopy(diis%npwsp, gsc_bk(:,ibk), diis%chain_sphi(:,:,iter,idat))
+ end do
+
+end subroutine rmm_diis_push_iter
 !!***
 
 !!****f* m_rmm_diis/rmm_diis_exit_iter
@@ -891,7 +946,7 @@ end subroutine rmm_diis_print_block
 !! SOURCE
 
 subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg, prtvol, &
-                           eig, resid, enlx, residvecs, normalize)
+                           eig, resid, enlx, residvecs, gvnlxc, normalize)
 
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -901,6 +956,7 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
  type(mpi_type),intent(inout) :: mpi_enreg
  real(dp),intent(out) :: eig(ndat), resid(ndat), enlx(ndat)
  real(dp),intent(out) :: residvecs(2, npw*nspinor*ndat)
+ real(dp),intent(out) :: gvnlxc(2, npw*nspinor*ndat)
  logical,optional,intent(in) :: normalize
 
 !Local variables-------------------------------
@@ -910,7 +966,6 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
  real(dp) :: cpu, wall, gflops
  logical :: normalize_
 !arrays
- real(dp),allocatable :: gvnlxc(:, :)
  real(dp) :: dots(2, ndat)
  type(pawcprj_type) :: cprj_dum(1,1)
 
@@ -931,8 +986,6 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
 
  ! NC normalization.
  if (usepaw == 0 .and. normalize_) call cgnc_normalize(npwsp, ndat, cg, istwf_k, me_g0, comm)
-
- ABI_MALLOC(gvnlxc, (2, npwsp*ndat))
 
  ! Compute H |cg>
  !call fock_set_ieigen(gs_hamk%fockcommon, iband)
@@ -957,8 +1010,6 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
    call cg_zdotg(istwf_k, npwsp, ndat, option1, cg, gvnlxc, dots, me_g0, comm)
    enlx = dots(1,:)
  end if
-
- ABI_FREE(gvnlxc)
 
  !write(std_out, *)" In getghc_eigresid:"
  !do idat=1,ndat
@@ -1002,10 +1053,10 @@ type(rmm_diis_t) function rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, m
  diis%bsize = bsize
  diis%prtvol = prtvol
 
- ABI_MALLOC(diis%hist_ene, (0:max_niter+1, bsize))
- ABI_MALLOC(diis%hist_resid, (0:max_niter+1, bsize))
- ABI_MALLOC(diis%hist_enlx, (0:max_niter+1, bsize))
- ABI_MALLOC(diis%step_type, (0:max_niter+1, bsize))
+ ABI_MALLOC(diis%hist_ene, (0:max_niter+2, bsize))
+ ABI_MALLOC(diis%hist_resid, (0:max_niter+2, bsize))
+ ABI_MALLOC(diis%hist_enlx, (0:max_niter+2, bsize))
+ ABI_MALLOC(diis%step_type, (0:max_niter+2, bsize))
 
  ABI_MALLOC(diis%chain_phi, (2, npwsp, 0:max_niter, bsize))
  ABI_MALLOC(diis%chain_sphi, (2, npwsp*usepaw, 0:max_niter, bsize))
