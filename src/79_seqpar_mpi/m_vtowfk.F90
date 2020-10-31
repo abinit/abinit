@@ -142,6 +142,7 @@ contains
 !!  rhoaug(n4,n5,n6,nvloc)= density in electrons/bohr**3, on the augmented fft grid.
 !!                    (cumulative, so input as well as output). Update only
 !!                    for occopt<3 (fixed occupation numbers)
+!!  rmm_diis_status: Status of the RMM-DIIS eigensolver. See m_rmm_diis.
 !!
 !! PARENTS
 !!      m_vtorho
@@ -161,7 +162,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 & eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 & ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj,mkgq,mpi_enreg,&
 & mpw,natom,nband_k,nkpt,istep,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
-& pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift)
+& pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift, rmm_diis_status)
 
 !Arguments ------------------------------------
  integer, intent(in) :: ibg,icg,ikpt,iscf,isppol,mband_cprj,mcg,mcgq,mcprj,mkgq,mpw
@@ -177,6 +178,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(paw_dmft_type), intent(in)  :: paw_dmft
  integer, intent(in) :: kg_k(3,npw_k)
  integer, intent(in) :: npwarr(nkpt),pwind(pwind_alloc,2,3)
+ integer, intent(inout) :: rmm_diis_status(2)
  real(dp), intent(in) :: cgq(2,mcgq),kinpw(npw_k),occ_k(nband_k)
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),pwnsfacq(2,mkgq)
  real(dp), intent(in) :: zshift(nband_k)
@@ -388,7 +390,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
          if (use_rmm_diis) then
            call rmm_diis(istep, ikpt, isppol, cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw, gsc, &
-                         mpi_enreg, nband_k, npw_k, my_nspinor, resid_k)
+                         mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
          else
 
            if ( .not. newlobpcg ) then
@@ -436,7 +438,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
        else
          call rmm_diis(istep, ikpt, isppol, cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw, gsc, &
-                       mpi_enreg, nband_k, npw_k, my_nspinor, resid_k)
+                       mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
        end if
 
      end if

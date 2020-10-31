@@ -71,6 +71,11 @@
 
 #define BYTE_SIZE(array)  PRODUCT(SHAPE(array)) * DBLE(KIND(array))
 
+/* var = var + increment
+ * Because Fortran does not provide inplace add.
+*/ 
+#define IADD(var, increment) var = var + increment
+
 /*
  * ABI_  abinit macros.
  * DBG_  macros for debugging. Defined only if abinit is compiled in DEBUG_MODE.
@@ -229,9 +234,7 @@
 
 /* Shorthand versions */
 #define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
-
 #define ABI_FREE(ARR) ABI_DEALLOCATE(ARR)
-
 #define ABI_STAT_MALLOC(ARR,SIZE,ierr) ABI_STAT_ALLOCATE(ARR,SIZE,ierr)
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90

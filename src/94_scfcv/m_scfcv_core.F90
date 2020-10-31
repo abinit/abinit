@@ -372,7 +372,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  integer,allocatable :: dimcprj(:),dimcprj_srt(:)
  integer,allocatable :: gbound_diel(:,:),irrzondiel(:,:,:),kg_diel(:,:)
  integer,allocatable :: l_size_atm(:)
- integer,allocatable :: indsym_dum(:,:,:),symrec_dum(:,:,:)
+ integer,allocatable :: indsym_dum(:,:,:),symrec_dum(:,:,:), rmm_diis_status(:,:,:)
  logical,pointer :: lmselect_ep(:,:)
  real(dp) :: dielar(7),dphase(3),dummy2(6),favg(3),gmet(3,3),gprimd(3,3)
  real(dp) :: kpt_diel(3),pel(3),pel_cg(3),pelev(3),pion(3),ptot(3),qpt(3),red_ptot(3) !!REC
@@ -400,7 +400,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  type(scf_history_type) :: scf_history_wf
  type(constrained_dft_t) :: constrained_dft
-
  type(paw_an_type),allocatable :: paw_an(:)
  type(paw_ij_type),allocatable :: paw_ij(:)
  type(pawfgrtab_type),allocatable,save :: pawfgrtab(:)
@@ -1004,8 +1003,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  quitsum_request = xmpi_request_null; timelimit_exit = 0
  istep_updatedfock=0
 
+ ABI_ICALLOC(rmm_diis_status, (2, dtset%nkpt, dtset%nsppol))
+
 ! start SCF loop
  do istep=1,max(1,nstep)
+
    ! Handle time limit condition.
    if (istep == 1) prev = abi_wtime()
    if (istep  > 1) then
@@ -1169,9 +1171,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
      !Fock energy
      energies%e_exactX=zero
-     if (fock%fock_common%optfor) then
-       fock%fock_common%forces=zero
-     end if
+     if (fock%fock_common%optfor) fock%fock_common%forces=zero
 
      if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf .or. &
 &        (fock%fock_common%nnsclo_hf>1 .and. fock%fock_common%scf_converged) ) then
@@ -1246,25 +1246,20 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        !Should place a test on whether there should be the final exit of the istep loop.
        !This test should use focktoldfe.
        !This should update the info in fock%fock_common%fock_converged.
-       !For the time being, fock%fock_common%fock_converged=.false. , so the loop end with the maximal value of nstep always,
+       !For the time being, fock%fock_common%fock_converged=.false., so the loop end with the maximal value of nstep always,
        !except when nnsclo_hf==1 (so the Fock operator is always updated), in which case, the usual exit tests (toldfe, tolvrs, etc)
        !work fine.
        !if(fock%fock_common%nnsclo_hf==1 .and. fock%fock_common%use_ACE==0)then
-       if(fock%fock_common%nnsclo_hf==1)then
-         fock%fock_common%fock_converged=.TRUE.
-       end if
+       if(fock%fock_common%nnsclo_hf==1) fock%fock_common%fock_converged=.TRUE.
 
        !Depending on fockoptmix, possibly restart the mixing procedure for the potential
-       if(mod(dtset%fockoptmix,10)==1)then
-         istep_mix=1
-       end if
+       if(mod(dtset%fockoptmix,10)==1) istep_mix=1
      else
        istep_updatedfock=istep_updatedfock+1
      end if
 
      !Used locally
      hyb_mixing=fock%fock_common%hyb_mixing ; hyb_mixing_sr=fock%fock_common%hyb_mixing_sr
-
    end if ! usefock
 
 !  Initialize/update data in the electron-positron case
@@ -1342,13 +1337,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     taur=taur,vxc_hybcomp=vxc_hybcomp,vxctau=vxctau,add_tfw=tfw_activated,xcctau3d=xcctau3d)
 
      ! set the zero of the potentials here
-     if(dtset%usepotzero==2) then
-       vpsp(:) = vpsp(:) + ecore / ( zion * ucvol )
-     end if
+     if(dtset%usepotzero==2) vpsp(:) = vpsp(:) + ecore / ( zion * ucvol )
 
-     if(dtset%optdriver==RUNL_GWLS) then
-       call build_vxc(vxc,nfftf,dtset%nspden)
-     end if
+     if(dtset%optdriver==RUNL_GWLS) call build_vxc(vxc,nfftf,dtset%nspden)
 
      if ((nhatgrdim>0.and.nstep>0).or.dummy_nhatgr) then
        ABI_DEALLOCATE(nhatgr)
@@ -1362,9 +1353,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        call destroy_distribfft(rec_set%mpi%distribfft)
        call init_distribfft(rec_set%mpi%distribfft,'c',rec_set%mpi%nproc_fft,rec_set%ngfftrec(2),rec_set%ngfftrec(3))
        call init_distribfft(rec_set%mpi%distribfft,'f',rec_set%mpi%nproc_fft,dtset%ngfft(2),dtset%ngfft(3))
-       if(initialized==0) then
-         call first_rec(dtset,psps,rec_set)
-       end if
+       if(initialized==0) call first_rec(dtset,psps,rec_set)
      end if
 
 !    End the condition of atomic position change or istep==1
@@ -1470,12 +1459,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !  Write out occupancies to dtpawuj-dataset
    if (dtset%usepawu/=0.and.dtset%macro_uj>0.and.istep>1.and.ipositron/=1) then
      call pawuj_red(dtset,dtpawuj,fatvshift,my_natom,dtset%natom,dtset%ntypat,&
-     paw_ij,pawrad,pawtab,ndtpawuj,&
-&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     paw_ij,pawrad,pawtab,ndtpawuj,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if
 
    call timab(241,2,tsec)
-
 
 !  No need to continue and call vtorho, when nstep==0
    if(nstep==0)exit
@@ -1565,7 +1552,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     pawrhoij,pawtab,phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &     pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,rmet,rprimd,&
 &     susmat,symrec,taug,taur,nvtauresid,ucvol_local,usecprj,wffnew,with_vectornd,&
-&     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
+&     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
      MSG_WARNING('THOMAS FERMI')
@@ -1833,9 +1820,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      end if
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
-     if (usefock==1) then
-       energies%e_fockdc=two*energies%e_fock
-     end if
+     if (usefock==1) energies%e_fockdc=two*energies%e_fock
 
      if (.not.wvlbigdft) then
 ! TODO: add nvtauresid if needed (for forces?)
@@ -1930,11 +1915,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !  The initialisation of the gstate run should be done when this point is reached
    initialized=1
 
-   !if (dtset%useria == -4242) then
-   !  call gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_ij, mpi_enreg, &
-   !     rprimd, xred, eigen, npwarr, kg, ylm, ngfft, dtset%nfft, ngfftf, nfftf, vtrial) !electronpositron) ! Optional arguments
-   !end if
-
 !  This is to save the density for restart.
    if (iwrite_fftdatar(mpi_enreg)) then
 
@@ -1989,12 +1969,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    if (ipositron/=0) electronpositron%istep_scf=electronpositron%istep_scf+1
 
    call timab(245,2,tsec)
-
  end do ! istep
 
- if(allocated(nhatgr))then
-   ABI_DEALLOCATE(nhatgr)
- endif
+ ABI_FREE(rmm_diis_status)
+ ABI_SFREE(nhatgr)
 
  ! Avoid pending requests if itime == ntime.
  call xmpi_wait(quitsum_request,ierr)
@@ -2008,11 +1986,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  end if
 
  if (usefock==1)then
-   if(wfmixalg/=0)then
-     call scf_history_free(scf_history_wf)
-   end if
+   if(wfmixalg/=0) call scf_history_free(scf_history_wf)
  end if
-
 
  if (quit==1.and.nstep==1) initialized=1
 
@@ -2263,9 +2238,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 ! Deallocate exact exchange data at the end of the calculation
  if (usefock==1) then
-   if (fock%fock_common%use_ACE/=0) then
-     call fock_ACE_destroy(fock%fockACE)
-   end if
+   if (fock%fock_common%use_ACE/=0) call fock_ACE_destroy(fock%fockACE)
    call fock_common_destroy(fock%fock_common)
    call fock_BZ_destroy(fock%fock_BZ)
    call fock_destroy(fock)
@@ -3092,20 +3065,18 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        icg=icg+my_nspinor*nband_k*npw_k
        icg_hist=icg_hist+my_nspinor*nbdmix*npw_k
 
-!      End big k point loop
-     end do
-!    End loop over spins
-   end do
+     end do ! End big k point loop
+   end do ! End loop over spins
 
  end if ! istep>=2
 
  if(wfmixalg>2 .and. istep>1)then
 
 !DEBUG
-!      write(std_out,*)' '
-!      write(std_out,*)' Entering the residual minimisation part '
-!      write(std_out,*)' '
-!      call flush(std_out)
+!  write(std_out,*)' '
+!  write(std_out,*)' Entering the residual minimisation part '
+!  write(std_out,*)' '
+!  call flush(std_out)
 !ENDDEBUG
 
    call timab(48,1,tsec)

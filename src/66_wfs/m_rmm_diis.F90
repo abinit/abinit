@@ -100,8 +100,8 @@ module m_rmm_diis
  end type rmm_diis_t
 
  integer,parameter, private :: level = 432
- !logical,parameter, private :: timeit = .False.
- logical,parameter, private :: timeit = .True.
+ logical,parameter, private :: timeit = .False.
+ !logical,parameter, private :: timeit = .True.
 
 contains
 !!***
@@ -133,6 +133,7 @@ contains
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
+!!  rmm_diis_status(2): Status of the eigensolver.
 !!
 !! PARENTS
 !!      m_vtowfk
@@ -144,7 +145,7 @@ contains
 !! SOURCE
 
 subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc_all, &
-                    mpi_enreg, nband, npw, nspinor, resid)
+                    mpi_enreg, nband, npw, nspinor, resid, rmm_diis_status)
 
 !Arguments ------------------------------------
  integer,intent(in) :: istep, ikpt, isppol, nband, npw, nspinor
@@ -156,16 +157,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  real(dp),intent(inout) :: enlx(nband), resid(nband)
  real(dp),intent(in) :: occ(nband), kinpw(npw)
  real(dp),intent(out) :: eig(nband)
+ integer,intent(inout) :: rmm_diis_status(2)
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb !, comm
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
- integer :: me_g0, nb_pocc, jj, kk, it, ibk, iek, cplex, ortalgo, accuracy_level, prev_mixprec !ii, ld1, ld2,
- integer :: comm_bandspinorfft !, comm_spinorfft, comm_fft
- logical :: end_with_trial_step, new_lambda, recompute_eigresid_after_ortho
+ integer :: me_g0, nb_pocc, jj, kk, it, ibk, iek, cplex, ortalgo, accuracy_level, raise_acc, prev_mixprec !ii, ld1, ld2,
+ integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_this_accuracy !, comm_spinorfft, comm_fft
+ logical :: end_with_trial_step, recompute_lambda, recompute_eigresid_after_ortho, first_call, do_rollback
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene, cpu, wall, gflops, max_res, tol_occupied !, dotr, doti
+ real(dp) :: accuracy_ene, cpu, wall, gflops, max_res_pocc, tol_occupied !, dotr, doti
  !character(len=500) :: msg
  character(len=6) :: tag
 !arrays
@@ -309,33 +311,56 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !  4: Ultimate precision. Try to reach the same accuracy as the other eigenvalue solvers.
  !     This means: using similar convergence criteria as in the other solvers.
 
- ! TODO: We should never increase accuracy_level during the SCF cycle this means that the routine
+ ! We are now allowed to decrease accuracy_level during the SCF cycle this means that the routine
  ! must receive a table diis_accuracy(2, nkpt, nsppol)
  ! The first entry gives the previous accuracy.
  ! The second entry gives the number of iterations already performed with this level.
  !
- !
- tol_occupied = tol3
- !tol_occupied = tol2
- !tol_occupied = five * tol3
- !tol_occupied = tol3
+ if (all(rmm_diis_status == 0)) then
+   ! This is the first time we call rmm_diis.
+   prev_accuracy_level = 1; ncalls_with_this_accuracy = 0
+   first_call = .True.
+ else
+   prev_accuracy_level = rmm_diis_status(1); ncalls_with_this_accuracy = rmm_diis_status(2)
+   first_call = .False.
+ end if
+ ! Decide whether we should move to the next level
+ raise_acc = 0
+ if (prev_accuracy_level == 1 .and. ncalls_with_this_accuracy >= 15) raise_acc = 2
+ if (prev_accuracy_level == 2 .and. ncalls_with_this_accuracy >= 25) raise_acc = 3
+ if (prev_accuracy_level == 3 .and. ncalls_with_this_accuracy >= 25) raise_acc = 4
+ raise_acc = max(raise_acc, prev_accuracy_level)
+ print *, "rmm_diis_status:", rmm_diis_status
+ print *, "rmm_prev_acc:", prev_accuracy_level, "rmm_raise_acc:", raise_acc
 
+ ! Define tolerance for occupied states on the basis of prev_accuracy_level.
+ ! and compute max of residuals for this set.
+ tol_occupied = tol3; if (any(prev_accuracy_level == [1, 2])) tol_occupied = tol2
  nb_pocc = count(occ > tol_occupied)
- max_res = maxval(resid(1:nb_pocc))
+ max_res_pocc = maxval(resid(1:nb_pocc))
+
+ ! Defin accuracy_level of this iteration.
  accuracy_level = 1
- if (max_res < tol5) accuracy_level = 2
- if (max_res < tol9) accuracy_level = 3
- if (max_res < tol14) accuracy_level = 4
- if (istep == 1) accuracy_level = 2
+ if (max_res_pocc < tol6) accuracy_level = 2
+ if (max_res_pocc < tol12) accuracy_level = 3
+ if (max_res_pocc < tol16) accuracy_level = 4
+ accuracy_level = max(prev_accuracy_level, accuracy_level, raise_acc)
+ if (istep == 1) accuracy_level = 2  ! FIXME: Differenciate between restart or rmm_diis - 3.
+ if (first_call) accuracy_level = 1
  if (usepaw == 1) accuracy_level = 3 ! # FIXME
- !accuracy_level = 3
+
+ ! Update rmm_diis_status. Reset number of calls if we moved to a new accuracy_level.
+ rmm_diis_status(1) = accuracy_level
+ if (accuracy_level /= prev_accuracy_level) rmm_diis_status(2) = 0
+ rmm_diis_status(2) = rmm_diis_status(2) + 1
 
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1 ! optekin = 0
  !write(std_out,*)"optekin:", optekin
 
- ! nline - 1 DIIS steps, then end with trial step (optional, see below)
+ ! nline - 1 DIIS steps (usually 3), then end with trial step (optional, see below)
  max_niter = max(dtset%nline - 1, 1)
+ !if (accuracy_ene == 1) max_niter = max(dtset%nline - 2, 1)
  if (accuracy_ene >= 4) max_niter = dtset%nline
 
  ! Define accuracy_ene for SCF
@@ -351,15 +376,16 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  end if
 
  !if (dtset%fftcore_mixprec == 1 .and. accuracy_level <= 2)
- if (accuracy_level <= 2) prev_mixprec = fftcore_set_mixprec(1)
+ !if (accuracy_level <= 2) prev_mixprec = fftcore_set_mixprec(1)
 
  diis = rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
  diis%tol_occupied = tol_occupied
  call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations + optional final trial step."))
  call wrtout(std_out, sjoin( &
-   " Number of blocks:", itoa(nblocks), ", number of 'partiallly' occupied states:", itoa(nb_pocc)))
+   " Number of blocks:", itoa(nblocks), ", nb_pocc:", itoa(nb_pocc)))
  call wrtout(std_out, sjoin( &
-   " Prev max_resid", ftoa(max_res), "accuracy_level:", itoa(accuracy_level), ", accuracy_ene: ", ftoa(accuracy_ene)))
+   " Max_input_resid_pocc", ftoa(max_res_pocc), "accuracy_level:", itoa(accuracy_level), &
+   ", accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
  ABI_MALLOC(lambda_bk, (bsize))
@@ -398,6 +424,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                         eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.False.)
    !write(std_out,*)"eig", eig(ib_start:ib_stop), resid(ib_start:ib_stop), enlx(ib_start:ib_stop)
+
+   !call diis%push_iter(0, ndat, eig, resid, enlx, phi_bk, residv_bk, ptr_gsc_bk, "SDIAG")
 
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input cg are already S-normalized.
    do idat=1,ndat
@@ -442,7 +470,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    !
    !    |phi_1> = |phi_0> + lambda |K R_0>
    !
-   ! where lambda minimizes the norm of the residual (not the Rayleigh quotient as in Kresse's paper).
+   ! where lambda minimizes the residual (not the Rayleigh quotient as in Kresse's paper).
    !
    !    lambda = - Re{<R_0|(H - e_0 S)} |K R_0>} / |(H - e_0 S) |K R_0>|**2
    !
@@ -483,6 +511,18 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, ptr_gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start:), resid(ib_start:), enlx(ib_start:), residv_bk, normalize=.True.)
 
+     ! Take another step with the same lambda
+     !if (iter == 1) then
+     !  call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
+     !  call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
+     !  do idat=1,ndat
+     !    jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
+     !    phi_bk(:,jj:kk) = diis%chain_phi(:,:,iter-1,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
+     !  end do
+     !end if
+
+     !call diis%push_iter(iter, ndat, eig, resid, enlx, phi_bk, residv_bk, ptr_gsc_bk, "DIIS")
+
      ! Store new residual.
      do idat=1,ndat
        diis%hist_ene(iter, idat) = eig(ib_start+idat-1)
@@ -521,17 +561,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
      call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
 
-     new_lambda = diis%accuracy_level >= 4
+     recompute_lambda = diis%accuracy_level >= 4
      ! Recomputing the preconditioned-direction and the new lambda that minimizes the residual
      ! is more expensive but more accurate.
      ! Do it only for the occupied states plus a buffer
      ! if these bands still far from convergence. In all the other cases, we reuse the previous lambda.
      !if (ib_start <= nb_pocc .or. ib_stop <= nint(1.2_dp * nb_pocc) .and. &
-     !    any(resid(ib_start:ib_stop) > tol6)) new_lambda = .True.
-     !new_lambda = .False.
-     !new_lambda = .True.
+     !    any(resid(ib_start:ib_stop) > tol6)) recompute_lambda = .True.
+     !recompute_lambda = .False.
+     !recompute_lambda = .True.
 
-     if (new_lambda) then
+     if (recompute_lambda) then
        tag = "NEWLAM"
        !write(std_out, *)" Performing last trial step with new computation of lambda"
        ! Final preconditioned steepest descent with new lambda.
@@ -547,7 +587,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
        ! Compute residual: (H - e_0 S) |K R_0>
        call cg_residvecs(usepaw, npwsp, ndat, eig(ib_start:), kres_bk, ghc_bk, gsc_bk, residv_bk)
-
        call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_bandspinorfft)
 
        it = diis%last_iter
@@ -586,7 +625,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      if (timeit) call cwtime_report(" last_trial_step ", cpu, wall, gflops)
    end if ! end_with_trial_step
 
-   call diis%rollback(npwsp, ndat, phi_bk, ptr_gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
+   do_rollback = .True.
+   if (do_rollback) then
+     call diis%rollback(npwsp, ndat, phi_bk, ptr_gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
+   end if
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
 
    ! wavefunction block. phi_bk => cg(:,igs:ige) has been updated.
@@ -604,7 +646,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
- ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
+ ! Recompute eigenvalues, residuals, and enlx(ndat)  after orthogonalization.
  ! This step is important to improve the convergence of the total energy
  ! but we try to avoid it at the beginning of the SCF cycle
  ! TODO: Rotate enlx using output of Cholesky decomposition but this also means that rollback must be disabled.
@@ -641,7 +683,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ydoc = yamldoc_open("RMM-DIIS", with_iter_state=.False.)
  call ydoc%add_dict("stats", diis%stats)
  call ydoc%write_and_free(std_out)
- call diis%stats%free()
+ call diis%free()
 
  ! Final cleanup
  ABI_FREE(lambda_bk)
@@ -652,9 +694,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ABI_FREE(kres_bk)
  ABI_FREE(gvnlxc_bk)
 
- call diis%free()
-
- if (accuracy_level <= 2) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
+ !if (accuracy_level <= 2) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
 
 contains
 
