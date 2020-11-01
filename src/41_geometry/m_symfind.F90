@@ -1694,6 +1694,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
    iholohedry=list_holo(index)
 
 !  DEBUG
+!  write(std_out,*)
 !  write(std_out,*)' symlatt : trial holohedry',iholohedry
 !  ENDDEBUG
 
@@ -1727,6 +1728,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          cell_base(:,1)=minim(:,ia)
          cell_base(:,2)=minim(:,ib)
          cell_base(:,3)=minim(:,itrial)
+!DEBUG
+!      write(std_out,*)' cell_base(:,1)=',cell_base(:,1)
+!      write(std_out,*)' cell_base(:,2)=',cell_base(:,2)
+!      write(std_out,*)' cell_base(:,3)=',cell_base(:,3)
+!ENDDEBUG
 !        Checks that the basis vectors are OK for the target holohedry
          call holocell(cell_base,0,foundc,iholohedry,tolsym)
        else if(abs(reduceda-0.5d0)<tolsym)then
@@ -2583,6 +2589,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !DEBUG
 !write(std_out,'(a)') ' symlatt : exit '
+!stop
 !ENDDEBUG
 
 end subroutine symlatt

@@ -190,7 +190,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
- real(dp),allocatable :: tnons_cart(:,:)
+ real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
@@ -866,8 +866,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          end do
          call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
          call symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
-         ABI_DEALLOCATE(indsym)
-         ABI_DEALLOCATE(symrec)
 
          write(msg,'(a,es12.3,11a)')&
           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
@@ -881,6 +879,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
            nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
            chrgat=chrgat,nucdipmom=nucdipmom)
+
+         !Needs one more resymmetrization, for the tnons
+         ABI_ALLOCATE(tnons_new,(3,nsym))
+         call symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred,tnons_new,tolsym)
+         tnons(:,:)=tnons_new(:,:)
+         ABI_DEALLOCATE(indsym)
+         ABI_DEALLOCATE(symrec)
+         ABI_DEALLOCATE(tnons_new)
 
        end if
      end if
