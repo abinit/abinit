@@ -194,8 +194,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 ! *************************************************************************
 
- usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; prtvol = dtset%prtvol
- paral_kgb = mpi_enreg%paral_kgb
+ usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
+ prtvol = dtset%prtvol; prtvol = -level
  me_g0 = mpi_enreg%me_g0 !; comm_fft = mpi_enreg%comm_fft; comm_spinorfft = mpi_enreg%comm_spinorfft;
  !comm = mpi_enreg%comm_spinorfft; if (mpi_enreg%paral_kgb == 1) comm = mpi_enreg%comm_bandspinorfft
  comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
@@ -236,8 +236,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (prev_accuracy_level == 2 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 3
  if (prev_accuracy_level == 3 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 4
  raise_acc = max(raise_acc, prev_accuracy_level)
- !print *, "rmm_diis_status:", rmm_diis_status
- !print *, "rmm_prev_acc:", prev_accuracy_level, "rmm_raise_acc:", raise_acc
 
  ! Define tolerance for occupied states on the basis of prev_accuracy_level.
  ! and compute max of residuals for this set.
@@ -254,16 +252,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  accuracy_level = max(prev_accuracy_level, accuracy_level, raise_acc)
  if (istep == 1) accuracy_level = 2  ! FIXME: Differenciate between restart or rmm_diis - 3.
  if (first_call .and. max_res_pocc == zero) accuracy_level = 1
- if (usepaw == 1) accuracy_level = 3 ! # FIXME
+
+ !print *, "rmm_diis_status:", rmm_diis_status
+ !print *, "rmm_prev_acc:", prev_accuracy_level, "rmm_raise_acc:", raise_acc
+ !print *, "accuracy_level:", accuracy_level, "rmm_raise_acc:", raise_acc
 
  ! Update rmm_diis_status. Reset number of calls if we moved to a new accuracy_level.
  rmm_diis_status(1) = accuracy_level
  if (accuracy_level /= prev_accuracy_level) rmm_diis_status(2) = 0
  rmm_diis_status(2) = rmm_diis_status(2) + 1
-
- optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
- optekin = 1 ! optekin = 0
- !write(std_out,*)"optekin:", optekin
 
  ! Perform max_niter DIIS steps (usually 3 as nline default is 4),
  ! we always end with trial step after DIIS (see below)
@@ -286,14 +283,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  recompute_eigresid_after_ortho = accuracy_level >= 2
  !recompute_eigresid_after_ortho = accuracy_level >= 3
  !recompute_eigresid_after_ortho = .False.
- if (usepaw == 1) recompute_eigresid_after_ortho = .True. ! # FIXME
 
- use_fft_mixprec = .False.
  use_fft_mixprec = dtset%mixprec == 1 .and. accuracy_level < 2
+ !use_fft_mixprec = .True.
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(1)
 
- !call subspace_rotation(cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc_all, &
- !                       mpi_enreg, nband, npw, nspinor)
+ optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
+ optekin = 1 ! optekin = 0
+
+ !call subspace_rotation(cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc_all, mpi_enreg, nband, npw, nspinor)
 
  ! =======================================
  ! Apply H to input cg to compute <i|H|j>
@@ -513,12 +511,16 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call diis%push_iter(iter, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), phi_bk, residv_bk, gsc_bk, "DIIS")
 
      ! === CHECK FOR CONVERGENCE ====
-     if (diis%exit_iter(iter, ndat, max_niter_block, occ(ib_start:), accuracy_ene, &
+     if (diis%exit_iter(iter, ndat, max_niter_block, occ(ib_start), accuracy_ene, &
                         dtset, comm_bandspinorfft)) exit iter_loop
 
      ! Compute <R_i|R_j> and <i|S|j> for j=iter
      if (iter /= max_niter_block) call diis%eval_mats(iter, ndat, me_g0, comm_bandspinorfft)
    end do iter_loop
+
+   ! High energy states may have larger residuals at the end of the iter_loop especially if we reduce the
+   ! number of iterations. Here we select the trial states in the chain with smaller resid.
+   call diis%rollback(npwsp, ndat, phi_bk, gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
 
    ! End with trial step but only if we performed all the iterations (i.e. no exit from diis%exit)
    ! Since we operate on blocks of bands, all the states in the block will receive the same treatment.
@@ -577,33 +579,23 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
      endif
 
-     if (.not. recompute_eigresid_after_ortho .or. usepaw == 1) then ! FIXME
-       ! Finally recompute eig, resid, enlx (and gsc_bk if PAW).
+     if (.not. recompute_eigresid_after_ortho) then
+       ! Compute eig, resid, enlx (and gsc_bk if PAW) before orthogonalize.
        call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
 
        ! Insert the last results in the history just for printing purposes and increment last_iter.
-       call diis%push_hist(diis%last_iter + 1, ndat, eig, resid, enlx, tag)
+       call diis%push_hist(diis%last_iter + 1, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), tag)
        if (timeit) call cwtime_report(" last_trial_step ", cpu, wall, gflops)
-
-       !TODO: For PAW one should recompute S
-
-       ! We can be more agressive and take another step with the same lambda.
-       !call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
-       !call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
-       !do idat=1,ndat
-       !  jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
-       !  phi_bk(:,jj:kk) = phi_bk(:,jj:kk) + lambda_bk(idat) * kres_bk(:,jj:kk)
-       !end do
-       !if (usepaw == 0) call cgnc_normalize(npwsp, ndat, phi_bk, istwf_k, me_g0, comm_bandspinorfft)
+     else
+       ! TODO: Need to recompute S only for pw_orthon
+       if (usepaw == 1) then
+       call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+                            eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
+       end if
      end if
 
    end if ! end_with_trial_step
-
-   do_rollback = .False.
-   if (do_rollback) then
-     call diis%rollback(npwsp, ndat, phi_bk, gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
-   end if
 
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
  end do ! iblock
@@ -619,8 +611,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ortalgo = mpi_enreg%paral_kgb
  !ortalgo = 3
  if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
- call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc_all, gs_hamk%usepaw, cg, &
-                mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
+ call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc_all, usepaw, cg, me_g0, comm_bandspinorfft)
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
@@ -642,7 +633,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg(:,igs), ghc_bk, gsc_bk, mpi_enreg, prtvol, &
-                          eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
+                          eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
+                          normalize=.False.)
+                          !normalize=.True.)
    end do
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
  else
@@ -654,11 +647,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  !call yaml_write_dict('RMM-DIIS', "stats", dict%stats, std_out, with_iter_state=.False.)
  ydoc = yamldoc_open("RMM-DIIS", with_iter_state=.False.)
- call ydoc%add_dict("stats", diis%stats)
+ call ydoc%add_dict("diis_stats", diis%stats)
  call ydoc%write_and_free(std_out)
  call diis%free()
 
- ! Final cleanup
+ ! Final cleanup.
  ABI_FREE(lambda_bk)
  ABI_FREE(dots_bk)
  ABI_FREE(ghc_bk)
@@ -812,7 +805,8 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
  real(dp) :: resid, deltae, deold , fact
  character(len=50) :: msg_list(ndat)
 
- diis%last_iter = iter; if (xmpi_comm_rank(comm) /= master) goto 10
+ diis%last_iter = iter
+ if (xmpi_comm_rank(comm) /= master) goto 10
 
  ! Tolerances depend on accuracy_level and occupation of the state.
  checks = 0
@@ -825,9 +819,9 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
    ! Relative criterion on eigenvalue differerence.
    ! Abinit default in the CG part is 0.005 that is really to low (0.3 in V).
    ! Here we increase it depending whether the state is occupied or empty
-   fact = one; if (abs(occ_bk(idat)) < diis%tol_occupied) fact = five
-   if (diis%accuracy_level == 1) fact = fact * 50
-   if (diis%accuracy_level == 2) fact = fact * 25
+   fact = one !; if (abs(occ_bk(idat)) < diis%tol_occupied) fact = five
+   if (diis%accuracy_level == 1) fact = fact * 18
+   if (diis%accuracy_level == 2) fact = fact * 12
    if (diis%accuracy_level == 3) fact = fact * six
    if (abs(deltae) < fact * dtset%tolrde * abs(deold)) then
      checks(idat) = 1; msg_list(idat) = "deltae < fact * tolrde * deold"; cycle
@@ -855,8 +849,9 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
 
  ! Depending on the accuracy_level either full block or a fraction of it must pass the test in order to exit.
  nok = count(checks /= 0)
- if (diis%accuracy_level == 1) ans = nok >= half * ndat
- if (diis%accuracy_level == 2) ans = nok >= 0.75_dp * ndat
+ !nok = count(checks /= 0, mask=abs(occ_bk) < diis%tol_occupied)
+ if (diis%accuracy_level == 1) ans = nok >= 0.70_dp * ndat
+ if (diis%accuracy_level == 2) ans = nok >= 0.80_dp * ndat
  if (diis%accuracy_level == 3) ans = nok >= 0.90_dp * ndat
  if (diis%accuracy_level == 4) ans = nok == ndat
 
@@ -1013,9 +1008,7 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
 
  !write(std_out, *)" In getghc_eigresid:"
  !do idat=1,ndat
- !  write(std_out, *)" eig:", eig(idat), "idat:", idat
- !  write(std_out, *)" resid:", resid(idat), "idat:", idat
- !  write(std_out, *)" enlx:", enlx(idat), "idat:", idat
+ !  write(std_out, *)" idat:", idat, " eig:", eig(idat), " resid:", resid(idat), " enlx:", enlx(idat)
  !end do
  !write(std_out, *)""
 
@@ -1055,9 +1048,8 @@ type(rmm_diis_t) function rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, m
 
  ABI_MALLOC(diis%hist_ene, (0:max_niter+2, bsize))
  ABI_MALLOC(diis%hist_resid, (0:max_niter+2, bsize))
- ABI_MALLOC(diis%hist_enlx, (0:max_niter+2, bsize))
+ ABI_CALLOC(diis%hist_enlx, (0:max_niter+2, bsize))
  ABI_MALLOC(diis%step_type, (0:max_niter+2, bsize))
-
  ABI_MALLOC(diis%chain_phi, (2, npwsp, 0:max_niter, bsize))
  ABI_MALLOC(diis%chain_sphi, (2, npwsp*usepaw, 0:max_niter, bsize))
  ABI_MALLOC(diis%chain_resv, (2, npwsp, 0:max_niter, bsize))
@@ -1237,17 +1229,11 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
      !call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), alphas, residv_bk(:,:,idat))
      !ABI_FREE(alphas)
 
-     ! TODO: DGEMV
+     ! Use DGEMV
      ABI_MALLOC(alphas, (1, 0:iter))
      alphas(1,:) = wvec(1,:,idat)
      call dgemv("N", 2*npwsp, iter, one, diis%chain_phi(:,:,:,idat), 2*npwsp, alphas, 1, zero, phi_bk(:,:,idat), 1)
      call dgemv("N", 2*npwsp, iter, one, diis%chain_resv(:,:,:,idat), 2*npwsp, alphas, 1, zero, residv_bk(:,:,idat), 1)
-
-     !call dgemv(character 	TRANS, integer 	M, integer 	N, double precision 	ALPHA,
-     !           double precision, dimension(lda,*) 	A, integer 	LDA,
-     !           double precision, dimension(*) 	X, integer 	INCX,
-     !           double precision 	BETA, double precision, dimension(*) 	Y,integer 	INCY)
-
      ABI_FREE(alphas)
    end if
  end do

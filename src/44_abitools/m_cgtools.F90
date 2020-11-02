@@ -4667,7 +4667,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  ! Nothing to do if ortalgo=-1
  if(ortalgo==-1) return
 
- call wrtout(std_out, sjoin(" Begin wavefunction orthogonalization with ortalgo:", itoa(ortalgo)))
+ !call wrtout(std_out, sjoin(" Begin wavefunction orthogonalization with ortalgo:", itoa(ortalgo)))
  call cwtime(cpu, wall, gflops, "start")
 
  do ivec=1,nvec
@@ -4676,10 +4676,10 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  end do
 
  if (ortalgo==3) then
-   !  =========================
-   !  First (new new) algorithm
-   !  =========================
-   !  NEW VERSION: avoid copies, use ZHERK for NC
+   ! =========================
+   ! First (new new) algorithm
+   ! =========================
+   ! NEW VERSION: avoid copies, use ZHERK for NC
    cg_idx = cgindex(1)
    if (useoverlap == 1) then
      gsc_idx = gscindex(1)
@@ -4689,10 +4689,10 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
    end if
 
  else if(ortalgo==1) then
-    !  =======================
-    !  Second (new) algorithm
-    !  =======================
-    !  This first algorithm seems to be more efficient especially in the parallel band-FFT mode.
+    ! =======================
+    ! Second (new) algorithm
+    ! =======================
+    ! This first algorithm seems to be more efficient especially in the parallel band-FFT mode.
 
    if(istwf_k==1) then
      vectsize=nelem
@@ -5102,7 +5102,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
    MSG_ERROR(sjoin("Wrong value for ortalgo:", itoa(ortalgo)))
  end if
 
- call cwtime_report(" pw_orthon", cpu, wall, gflops)
+ call cwtime_report(sjoin(" pw_orthon with ortalgo: ", itoa(ortalgo)), cpu, wall, gflops)
 
 end subroutine pw_orthon
 !!***
