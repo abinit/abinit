@@ -195,7 +195,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 ! *************************************************************************
 
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
- prtvol = dtset%prtvol; prtvol = -level
+ prtvol = dtset%prtvol !; prtvol = -level
  me_g0 = mpi_enreg%me_g0 !; comm_fft = mpi_enreg%comm_fft; comm_spinorfft = mpi_enreg%comm_spinorfft;
  !comm = mpi_enreg%comm_spinorfft; if (mpi_enreg%paral_kgb == 1) comm = mpi_enreg%comm_bandspinorfft
  comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
