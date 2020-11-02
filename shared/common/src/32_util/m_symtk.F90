@@ -1674,7 +1674,11 @@ subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred,tnons_new,tolsym)
 ! *************************************************************************
 !
 !Check whether group contains more than identity;
-!if not then simply return
+!if not then simply return after possible copying
+ if(present(tnons_new))then
+   tnons_new(:,1:nsym)=tnons(:,1:nsym)
+ endif
+
  if (nsym>1) then
 
 !DEBUG
@@ -1730,7 +1734,7 @@ subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred,tnons_new,tolsym)
    if(present(tolsym) .and. present(tnons_new) )then
      fixed_mismatch=0
      mismatch_fft_tnons=0
-     tnons_new(:,:)=tnons(:,:)+nint(tnons(:,:)-tol8)
+     tnons_new(:,:)=tnons(:,:)-nint(tnons(:,:)-tolsym)
      do isym=1,nsym
        mismatch_fft_tnons_isym=0
        do ii=1,3
