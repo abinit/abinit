@@ -865,7 +865,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
            call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
          end do
          call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
-         call symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
+         call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
 
          write(msg,'(a,es12.3,11a)')&
           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
@@ -882,7 +882,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
          !Needs one more resymmetrization, for the tnons
          ABI_ALLOCATE(tnons_new,(3,nsym))
-         call symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred,tnons_new,tolsym)
+         call symmetrize_xred(natom,nsym,symrel,tnons,xred,tnons_new=tnons_new,tolsym=tolsym)
          tnons(:,1:nsym)=tnons_new(:,:)
          ABI_DEALLOCATE(indsym)
          ABI_DEALLOCATE(symrec)
