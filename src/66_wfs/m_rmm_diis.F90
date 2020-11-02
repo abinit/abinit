@@ -268,8 +268,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Perform max_niter DIIS steps (usually 3 as nline default is 4),
  ! we always end with trial step after DIIS (see below)
  max_niter = max(dtset%nline - 1, 1)
- !if (accuracy_ene == 1) max_niter = max(dtset%nline - 2, 1)
- !if (accuracy_ene >= 4) max_niter = dtset%nline
+ !if (accuracy_level == 1) max_niter = max(dtset%nline - 2, 1)
+ !if (accuracy_level >= 4) max_niter = dtset%nline
 
  ! Define accuracy_ene for SCF
  accuracy_ene = zero
@@ -305,7 +305,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
  end if
 
- ! Treat states in groups of bsize bands to be able to call zgemm.
+ ! Treat states in groups of bsize bands.
  bsize = 8  ! default value for paral_kgb = 0
  if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
@@ -323,7 +323,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ige = min(iblock * npwsp * bsize, npwsp * nband)
    ndat = (ige - igs + 1) / npwsp
    ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
-
    if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
 
    if (paral_kgb == 0) then
@@ -633,13 +632,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! but the full Vnl matrix should be computed.
 
  if (recompute_eigresid_after_ortho) then
+   !if (prtvol > 0)
    call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize
      ige = min(iblock * npwsp * bsize, npwsp * nband)
      ndat = (ige - igs + 1) / npwsp
      ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
-
      if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg(:,igs), ghc_bk, gsc_bk, mpi_enreg, prtvol, &
@@ -647,6 +646,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end do
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
  else
+   !if (prtvol)
    call wrtout(std_out, " Still far from convergence. Eigenvalues, residuals and NC enlx won't be recomputed.")
  end if
 
@@ -662,7 +662,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ABI_FREE(lambda_bk)
  ABI_FREE(dots_bk)
  ABI_FREE(ghc_bk)
- !ABI_FREE(gsc_bk)
  ABI_FREE(residv_bk)
  ABI_FREE(kres_bk)
  ABI_FREE(gvnlxc_bk)
@@ -1430,22 +1429,23 @@ subroutine cg_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, com
 
  integer,parameter :: option1 = 1
  integer :: idat, ierr
- real(dp) :: dotr(ndat), doti
+ real(dp) :: doti, dots_r(ndat)
 
+ ! <psi|H|psi> / <psi|S|psi>
 !$OMP PARALLEL DO
  do idat=1,ndat
    call dotprod_g(eig(idat), doti, istwf_k, npwsp, option1, ghc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
    if (usepaw == 1) then
-     call dotprod_g(dotr(idat), doti, istwf_k, npwsp, option1, gsc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
+     call dotprod_g(dots_r(idat), doti, istwf_k, npwsp, option1, gsc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
    end if
  end do
 
  if (xmpi_comm_size(comm) > 1) then
    call xmpi_sum(eig, comm, ierr)
-   if (usepaw == 1) call xmpi_sum(dotr, comm, ierr)
+   if (usepaw == 1) call xmpi_sum(dots_r, comm, ierr)
  end if
 
- if (usepaw == 1) eig(:) = eig(:) / dotr(:)
+ if (usepaw == 1) eig(:) = eig(:) / dots_r(:)
 
 end subroutine cg_eigens
 !!***
@@ -1473,7 +1473,9 @@ subroutine cg_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
  real(dp),intent(in) :: ghc(2*npwsp, ndat), cg(2*npwsp, ndat), gsc(2*npwsp, ndat*usepaw)
  real(dp),intent(out) :: residvecs(2*npwsp, ndat)
 
+!Local variables-------------------------------
  integer :: idat
+! *************************************************************************
 
  if (usepaw == 1) then
    ! (H - e) |psi>
@@ -1497,6 +1499,7 @@ end subroutine cg_residvecs
 !!  cg_norm2g
 !!
 !! FUNCTION
+!!  Compute <psi|psi> for ndat states distributed inside communicator comm.
 !!
 !! INPUTS
 !!
@@ -1514,13 +1517,14 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
  real(dp),intent(in) :: cg(2*npwsp, ndat)
  real(dp),intent(out) :: norms(ndat)
 
+!Local variables-------------------------------
  integer :: idat, ierr
+! *************************************************************************
 
 !$OMP PARALLEL DO
  do idat=1,ndat
    call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
  end do
-
  if (xmpi_comm_size(comm) > 1) call xmpi_sum(norms, comm, ierr)
 
 end subroutine cg_norm2g
@@ -1548,8 +1552,10 @@ subroutine cg_zdotg(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
  real(dp),intent(in) :: cg1(2*npwsp,ndat), cg2(2*npwsp,ndat)
  real(dp),intent(out) :: dots(2,ndat)
 
+!Local variables-------------------------------
  integer :: idat, ierr
  real(dp) :: dotr, doti, re_dots(ndat)
+! *************************************************************************
 
 !$OMP PARALLEL DO PRIVATE(dotr, doti)
  do idat=1,ndat
@@ -1601,8 +1607,10 @@ subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect,
  real(dp),intent(in) :: cg(2*npw*nspinor,ndat), kinpw(npw)
  real(dp),intent(inout) :: vect(2*npw*nspinor,ndat)
 
+!Local variables-------------------------------
  integer :: idat
  real(dp),allocatable :: pcon(:)
+! *************************************************************************
 
  ! TODO: Optimized version for MPI with ndat > 1
  !return
@@ -1654,7 +1662,6 @@ subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
 
 !Local variables-------------------------------
  integer :: idat
-
 ! *************************************************************************
 
 !$OMP PARALLEL DO
@@ -1695,7 +1702,6 @@ subroutine my_pack_matrix(n, mat_in, mat_out)
 
 !local variables
  integer :: isubh, i, j
-
  ! *************************************************************************
 
  isubh = 1
