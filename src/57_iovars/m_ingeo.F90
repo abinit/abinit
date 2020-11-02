@@ -174,8 +174,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
- integer :: ipsp,irreducible,isym,itypat,jsym,marr,multiplicity,natom_uc,natfix,natrd
+ integer :: bckbrvltt,brvltt,chkprim,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
+ integer :: ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
@@ -866,6 +866,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          end do
          call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
          call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
+         ABI_DEALLOCATE(indsym)
+         ABI_DEALLOCATE(symrec)
 
          write(msg,'(a,es12.3,11a)')&
           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
@@ -882,10 +884,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
          !Needs one more resymmetrization, for the tnons
          ABI_ALLOCATE(tnons_new,(3,nsym))
-         call symmetrize_xred(natom,nsym,symrel,tnons,xred,tnons_new=tnons_new,tolsym=tolsym)
+         call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
+&          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
          tnons(:,1:nsym)=tnons_new(:,:)
-         ABI_DEALLOCATE(indsym)
-         ABI_DEALLOCATE(symrec)
          ABI_DEALLOCATE(tnons_new)
 
        end if

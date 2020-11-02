@@ -1621,6 +1621,7 @@ end subroutine symmetrize_tnons
 !! B. If optional argument tolsym AND tnons_new are defined.
 !! Might also adjust xred in order for tnons to be aligned with the FFT grids. 
 !! This will deliver new tnons_new.
+!! NOTE : Actually, should make two separate routines !
 !!
 !! INPUTS
 !! indsym(4,nsym,natom)=(optional) indirect indexing array giving label of atom
@@ -1635,6 +1636,9 @@ end subroutine symmetrize_tnons
 !!   giving suggestions of xred modifications, to pbe proposed to users.
 !!
 !! OUTPUT
+!! fixed_mismatch=(optional) 1 if there is a mismatch and this mismatch has been fixed
+!! mismatch_fft_tnons=(optional) non-zero if there is a mismatch between the fft grid and the tnons, gives the number 
+!!   of the first symmetry operation for which there is such a mismatch.
 !! tnons_new(3,nsym)=(optional)nonsymmorphic translations for symmetries
 !!
 !! SIDE EFFECTS
@@ -1652,11 +1656,12 @@ end subroutine symmetrize_tnons
 !!
 !! SOURCE
 
-subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym,tnons_new,tolsym)
+subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mismatch_fft_tnons,tnons_new,tolsym)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsym
+ integer,intent(out),optional :: fixed_mismatch,mismatch_fft_tnons
 !arrays
  integer,intent(in),optional :: indsym(4,nsym,natom)
  integer,intent(in) :: symrel(3,3,nsym)
@@ -1667,8 +1672,8 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym,tnons_new,tolsym)
 
 !Local variables-------------------------------
 !scalars
- integer  :: fixed_mismatch,iatom,ib,ii,info,irank,isym,isym2
- integer  :: jj,mismatch_fft_tnons,mismatch_fft_tnons_isym
+ integer  :: iatom,ib,ii,info,irank,isym,isym2
+ integer  :: jj,mismatch_fft_tnons_isym
  real(dp) :: diff
  logical  :: dissimilar
 !arrays
@@ -1738,7 +1743,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym,tnons_new,tolsym)
 !ENDDEBUG
 
 !  Loop over symmetry operations to determine possibly new tnons, as well as symmetrized positions.
-   if(present(tolsym) .and. present(tnons_new) )then
+   if(present(tolsym) .and. present(tnons_new) .and. present(fixed_mismatch) .and. present(mismatch_fft_tnons))then
      fixed_mismatch=0
      mismatch_fft_tnons=0
      tnons_new(:,:)=tnons(:,:)-nint(tnons(:,:)-tolsym)
