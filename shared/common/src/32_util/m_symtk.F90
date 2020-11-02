@@ -1700,10 +1700,12 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym,tnons_new,tolsym)
 !  write(std_out,*) 
 !ENDDEBUG
 
+   ABI_ALLOCATE(xredsym,(3,natom))
+   xredsym(:,:)=xred(:,1:natom)
+
    if(present(indsym))then 
 
 !    Loop over atoms to determine new, symmetrized positions.
-     ABI_ALLOCATE(xredsym,(3,natom))
      do iatom=1,natom
        tsum(:)=0.0d0
 !
