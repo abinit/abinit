@@ -172,9 +172,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb !, comm
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
- integer :: me_g0, nb_pocc, jj, kk, it, ibk, iek, cplex, ortalgo, accuracy_level, raise_acc, prev_mixprec !ii, ld1, ld2,
+ integer :: me_g0, nb_pocc, jj, kk, it, ibk, cplex, ortalgo, accuracy_level, raise_acc, prev_mixprec !ii, ld1, ld2, iek,
  integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy !, comm_spinorfft, comm_fft
- logical :: end_with_trial_step, recompute_lambda, recompute_eigresid_after_ortho, first_call, do_rollback
+ logical :: end_with_trial_step, recompute_lambda, recompute_eigresid_after_ortho, first_call !, do_rollback
  logical :: use_fft_mixprec
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops, max_res_pocc, tol_occupied !, dotr, doti
@@ -205,6 +205,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Prepare DIIS loop
  ! =================
  ! accuracy_level
+ !
  !  1: Used at the beginning of the SCF cycle. Use loosy convergence criteria in order
  !     to reduce the number of H|psi> applications as much as possible so that we can mix densities/potentials.
  !     Move to the next level after Max 15 iterations.
@@ -486,6 +487,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
    end do
+   !call cg_zaxpby_areal_op(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
    if (timeit) call cwtime_report(" KR0 ", cpu, wall, gflops)
 
    ! DIIS iterations
@@ -661,7 +663,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 contains
 
- real(dp) function limit_lambda(lambda) result(new_lambda)
+ real(dp) elemental function limit_lambda(lambda) result(new_lambda)
 
   real(dp),intent(in) :: lambda
   real(dp) :: max_lambda, min_lambda
@@ -1120,7 +1122,7 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
  real(dp),intent(inout) :: phi_bk(2, npwsp, ndat), residv_bk(2, npwsp, ndat)
 
  integer,parameter :: master = 0
- integer :: cplex, ierr, nprocs, my_rank, idat, ii !, ibk, iek
+ integer :: cplex, ierr, nprocs, my_rank, idat !, ii !, ibk, iek
  real(dp) :: noise, cpu, wall, gflops
  !integer :: failed(ndat)
  real(dp),allocatable :: diis_eig(:), wmat1(:,:,:), wmat2(:,:,:), wvec(:,:,:), alphas(:,:)
@@ -1129,6 +1131,7 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  cplex = diis%cplex
  !failed = 0
+ ABI_UNUSED(lambda_bk)
 
  if (timeit) call cwtime(cpu, wall, gflops, "start")
 

@@ -45,7 +45,7 @@ module m_mover
 #endif
 
  use defs_abitypes,        only : MPI_type
- use m_fstrings,           only : strcat, sjoin, indent
+ use m_fstrings,           only : strcat, sjoin, indent, itoa
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
  use m_time,               only : abi_wtime, sec2str
@@ -79,6 +79,7 @@ module m_mover
  use scup_global, only : global_set_parent_iter,global_set_print_parameters
 #endif
  use m_scup_dataset
+
  implicit none
 
  private
@@ -514,7 +515,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 #endif
 
    ! If RMM-DIIS is used, perform 2 iterations with the CG/LOBPCG and then activate RMM-DIIS.
-   !if (scfcv_args%dtset%rmm_diis /= 0 .and. itime > 1) scfcv_args%dtset%rmm_diis = -2
+   !if (scfcv_args%dtset%rmm_diis /= 0 .and. itime > 1)
+   !  IADD(scfcv_args%dtset%rmm_diis, -2)
+   !  if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
+   !end if
 
 !  ###########################################################
 !  ### 09. Loop for icycle (From 1 to ncycle)
@@ -531,9 +535,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 &       ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
         call wrtout([std_out, ab_out], message)
      end if
-     if (useprtxfase) then
-       call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
-     end if
+     if (useprtxfase) call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
 
      xred_prev(:,:)=xred(:,:)
      rprimd_prev(:,:)=rprimd(:,:)
@@ -975,7 +977,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  call abihist_free(hist)
  call abihist_free(hist_prev)
-
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 
