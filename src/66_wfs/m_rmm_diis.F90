@@ -588,7 +588,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        call diis%push_hist(diis%last_iter + 1, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), tag)
        if (timeit) call cwtime_report(" last_trial_step ", cpu, wall, gflops)
      else
-       ! TODO: Need to recompute S only for pw_orthon
+       ! TODO: Need to recompute only S for pw_orthon
        if (usepaw == 1) then
        call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)

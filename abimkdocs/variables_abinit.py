@@ -18691,19 +18691,22 @@ Variable(
     commentdefault="because it is not usually worth using it unless bandpp is large and it requires additional memory",
     added_in_version="before_v9",
     text=r"""
-This keyword tells abinit to use a BLAS routine to speed up the computation of
+This keyword tells abinit to use a BLAS3 routine to speed up the computation of
 the non-local operator. This requires the pre-computation of a large matrix,
 and has a significant memory overhead. In exchange, it provides improved
 performance when used on several bands at once (Chebyshev or LOBPCG algorithm
-with [[bandpp]]
+with [[bandpp] > 1]
 
 The memory overhead is proportional to the number of atoms, the number of
 plane waves, and the number of projectors per atom. It can be mitigated by
 distributing the array with [[npfft]]
-
 The performance depends crucially on having a good BLAS installed. Provided
 the BLAS supports OpenMP, this option also yields very good scaling for the
 nonlocal operator.
+
+This option is available only if [[useylm]] is 1. ABINIT will automatically set [[useylm]] to 1
+if [[gemm_nonlop]] is set to 1 in the input file (actually, this is only needed when NC pseudos are used as
+PAW already uses 1 for [[useylm]]).
 """,
 ),
 
