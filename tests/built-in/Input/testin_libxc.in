@@ -30,6 +30,8 @@ nspden  2
 spinat  1.0 0.0 0.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -37,7 +39,6 @@ spinat  1.0 0.0 0.0
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_LIBXC
 #%% [files]
-#%% psp_files= 83bi.psphgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -21,7 +21,7 @@
  ecut 18  pawecutdg 35.0
  ionmov 2
  ntime 15
- tolrff 0.05 
+ tolrff 0.01 
  tolmxf 2.0d-4  # For testing. Should be more stringent.
 
  kptopt 1
@@ -38,13 +38,15 @@
  znucl  7
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pbe_standard/N.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t67.out, tolnlines = 5, tolabs = 0.0003, tolrel = 5.000e-05, fld_options = -easy
-#%% psp_files = N.xml
+#%%   t67.out, tolnlines = 5, tolabs = 1.100e-3, tolrel = 3.000e-01, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

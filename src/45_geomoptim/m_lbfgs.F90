@@ -83,7 +83,7 @@ contains
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pred_lbfgs
+!!      m_pred_bfgs
 !!
 !! CHILDREN
 !!
@@ -131,7 +131,7 @@ end subroutine lbfgs_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      pred_lbfgs
+!!      m_pred_bfgs
 !!
 !! CHILDREN
 !!
@@ -190,7 +190,8 @@ integer                :: lbfgs_execute
        lbfgs_plan%line_bracket, lbfgs_plan%line_stage1, lbfgs_plan%line_infoc)
 
 
- lbfgs_execute = lbfgs_plan%lbfgs_status
+!lbfgs_execute = lbfgs_plan%lbfgs_status
+ lbfgs_execute = lbfgs_plan%line_info
 
 end function lbfgs_execute
 !!***

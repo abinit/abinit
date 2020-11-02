@@ -109,7 +109,7 @@ end subroutine exit_init
 !!  its children from installing their handlers.
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!      inupper,timein,wrtout,xmpi_bcast
@@ -292,7 +292,7 @@ end function get_start_time
 !!      or -2 if the exit was ordered through the CPU time limit.
 !!
 !! PARENTS
-!!      dfpt_looppert,driver,gstate,respfn,scprqt
+!!      m_common,m_dfpt_looppert,m_driver,m_gstate,m_respfn_driver
 !!
 !! CHILDREN
 !!      inupper,timein,wrtout,xmpi_bcast
@@ -331,6 +331,7 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
      iexit=0
 
      ! Is it worth to test the cpu time ?
+     tsec = zero
      if (abs(cpus)>1.0d-5 .or. openexit==1) then
        call timein(tsec(1),tsec(2))
      end if

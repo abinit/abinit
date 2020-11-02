@@ -125,10 +125,10 @@ contains
 !! to strange bugs in the debugging procedure, if one tries to print wtk or istwfk, in this case!
 !!
 !! PARENTS
-!!      invars1,invars2
+!!      m_invars1,m_invars2
 !!
 !! CHILDREN
-!!      getkgrid,intagm,metric,mknormpath,testkgrid,timab,wrtout
+!!      getkgrid,intagm,metric,symfind,symlatt
 !!
 !! SOURCE
 
@@ -160,6 +160,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  integer,parameter :: master = 0
  integer :: dkpt,ii,ikpt,jkpt,marr,ndiv_small,nkpt_computed,my_rank,nprocs
  integer :: nsegment,prtkpt,tread,tread_kptrlatt,tread_ngkpt, ncid, fform, ierr
+ logical :: use_kerange
  real(dp) :: fraction,norm,ucvol,wtksum
  character(len=500) :: msg
  type(hdr_type) :: hdr
@@ -184,6 +185,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  shiftk_orig = zero
  kptrlatt_orig = 0; kptrlatt = 0
  nshiftk_orig = 1; nshiftk = 1
+ use_kerange = .False.
 
  !fockdownsampling(:)=1
  !kptnrm = one
@@ -225,7 +227,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 
      wtksum=sum(wtk(:))
      write(msg,'(a,i0,a,f12.6)')' inkpts: Sum of ',nkpt,' k point weights is',wtksum
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
 
      if (wtksum < tol6) then
        write(msg, '(3a)' )&
@@ -241,7 +243,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
          MSG_ERROR(msg)
        else
          write(msg,'(a,i0,a)')' With present occopt= ',occopt,', renormalize it to one'
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          norm=one/wtksum
          wtk(1:nkpt)=wtk(1:nkpt)*norm
        end if
@@ -249,7 +251,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    end if
 
  else if (kptopt == 0 .and. getkerange_filepath /= ABI_NOFILE) then
-   ! Initialize kpts from kerange_path file.
+   ! Initialize k-points from kerange_path file.
+   use_kerange = .True.
    ABI_MALLOC(krange2ibz, (nkpt))
    if (my_rank == master) then
 #ifdef HAVE_NETCDF
@@ -265,9 +268,10 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      MSG_ERROR("getkerange_filepath requires NETCDF support")
 #endif
    end if
+
    call xmpi_bcast(krange2ibz, master, comm, ierr)
    call hdr%bcast(master, my_rank, comm)
-   ! Hdr contains kpts in the IBZ. Extract data corresponding to pockets via krange2ibz.
+   ! Hdr contains the kpts in the IBZ. Extract k-points in the pockets via krange2ibz.
    nshiftk = hdr%nshiftk; nshiftk_orig = hdr%nshiftk_orig
    istwfk = hdr%istwfk(krange2ibz(:))
    kptrlatt = hdr%kptrlatt; kptrlatt_orig = hdr%kptrlatt_orig
@@ -467,6 +471,11 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      call testkgrid(bravais,iout,kptrlatt,kptrlen, msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
    end if
 
+   ! TODO: Avoid call to getkgrid if eph
+   !eph_task = -1
+   !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
+   !if(tread==1) eph_task=intarr(1)
+
    fockdownsampling(:)=1
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fockdownsampling',tread,'INT')
    if(tread==1)fockdownsampling=intarr(1:3)
@@ -501,8 +510,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    call intagm(dprarr,intarr,jdtset,marr,nkpt,string(1:lenstr),'istwfk',tread,'INT')
    if(tread==1) istwfk(1:nkpt)=intarr(1:nkpt)
 
-   ! Impose istwfk=1 for RF calculations
-   if(response==1)istwfk(1:nkpt)=1
+   ! Impose istwfk=1 for RF calculations or NSCF calculation with kpts from kerange.
+   if (response == 1 .or. use_kerange) istwfk(1:nkpt)=1
 
    ! Also impose istwfk=1 for spinor calculations
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nspinor',tread,'INT')
@@ -564,7 +573,7 @@ end subroutine inkpts
 !!  wtqc=weigth of the eventual current q point
 !!
 !! PARENTS
-!!      invars1
+!!      m_invars1
 !!
 !! CHILDREN
 !!      getkgrid,intagm,metric,symfind,symlatt

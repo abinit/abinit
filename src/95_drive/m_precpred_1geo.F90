@@ -102,7 +102,7 @@ contains
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! Rest of i/o is related to lda
+!! Rest of i/o is related to DFT
 !!  xred(3,natom)=reduced dimensionless atomic coordinates; updated on output
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file
 !!
@@ -254,9 +254,12 @@ real(dp), allocatable :: xred(:,:)
          call crystal%free()
        end if
        call xmpi_barrier(comm_cell)
-       write (dilatmx_errmsg, '(a,i0,3a)') &
+       write (dilatmx_errmsg, '(a,i0,9a)') &
         'Dilatmx has been exceeded too many times (', nerr_dilatmx, ')',ch10, &
-        'Restart your calculation from larger lattice vectors and/or a larger dilatmx'
+        'See the description of dilatmx and chkdilatmx input variables.',ch10, &
+        'Action : either first do a calculation with chkdilatmx=0, or ',ch10,&
+        'restart your calculation with a larger dilatmx, or larger lattice vectors.',ch10,&
+        'Warning : With chkdilatmx=0 the final computation of lattice parameters might be inaccurate.'
        MSG_ERROR_CLASS(dilatmx_errmsg, "DilatmxError")
      end if
    else

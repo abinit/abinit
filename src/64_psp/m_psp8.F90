@@ -97,11 +97,9 @@ contains
 !!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
-!!      nctab_eval_tvalespl,pawrad_free,pawrad_init,psp8cc,psp8lo,psp8nl,spline
-!!      wrtout
 !!
 !! SOURCE
 
@@ -519,7 +517,7 @@ end subroutine psp8in
 !!  xccc1d(n1xccc,6)= 1D core charge function and its four first derivatives
 !!
 !! PARENTS
-!!      psp8in
+!!      m_psp8
 !!
 !! CHILDREN
 !!

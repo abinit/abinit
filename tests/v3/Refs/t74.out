@@ -138,7 +138,7 @@ _ WF disk file :      0.054 Mbytes ; DEN or POT disk file :      0.134 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      6.5000000000E+00  6.5000000000E+00  9.0000000000E+00 Bohr
               amu      1.59994000E+01
-      chksymbreak           0
+      chksymtnons           0
            diemac      1.00000000E+00
            diemix      3.33333333E-01
              ecut      1.30000000E+01 Hartree
@@ -372,8 +372,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.05372
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
 -  8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1356,7 +1356,7 @@ band_energy         : -5.82790998342791E+00
  -outvars: echo values of variables after computation  --------
             acell      6.5000000000E+00  6.5000000000E+00  9.0000000000E+00 Bohr
               amu      1.59994000E+01
-      chksymbreak           0
+      chksymtnons           0
            diemac      1.00000000E+00
            diemix      3.33333333E-01
              ecut      1.30000000E+01 Hartree

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nctk
 !! NAME
 !! m_nctk
@@ -79,8 +78,10 @@ MODULE m_nctk
 #endif
 
 #ifdef HAVE_NETCDF
- ! netcdf4-hdf5
+ ! netcdf4-hdf5 is the default
  integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
+ ! netcdf4 classic
+ !integer,save,private :: def_cmode_for_seq_create = ior(nf90_clobber, nf90_write)
 #endif
 
  character(len=5),private,parameter :: NCTK_IMPLICIT_DIMS(10) = [ &
@@ -257,7 +258,7 @@ MODULE m_nctk
  ! If cache_preemption is provided when opening a netCDF-4/HDF5 file, it will be used
  ! instead of the default (0.75) as the preemption value for the HDF5 chunk cache.
 
- logical, save ABI_PROTECTED, public :: nctk_has_mpiio = .False.
+ logical, save ABI_PROTECTED, public :: nctk_has_mpiio = .false.
  ! This flag is set to true if the netcdf library supports parallel IO.
  ! Cannot use CPP flags because nf90_open_par and other similar functions are always
  ! exported by netcdf. As a consequence we have to check at run-time if we can
@@ -420,9 +421,10 @@ end function nctk_string_from_occopt
 !!    to handle possible errors in the caller.
 !!
 !! PARENTS
-!!      conducti_nc,optic
+!!      m_conducti,optic
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -528,6 +530,7 @@ end function nctk_try_fort_or_ncfile
 !!      abinit
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -555,10 +558,10 @@ subroutine nctk_test_mpiio()
 
    if (ncerr == nf90_noerr) then
      nctk_has_mpiio = .True.
-     call wrtout(std_out,"Netcdf library supports MPI-IO", "COLL")
+     call wrtout(std_out," Netcdf library supports MPI-IO", "COLL")
    else if (ncerr == nf90_enopar) then
      ! This is the value returned by the C function ifndef USE_PARALLEL
-     MSG_WARNING(sjoin("netcdf lib does not support MPI-IO and: ", nf90_strerror(ncerr)))
+     MSG_WARNING(sjoin("Netcdf lib does not support MPI-IO and: ", nf90_strerror(ncerr)))
      nctk_has_mpiio = .False.
    else
      ! Maybe something wrong in the low-level layer!
@@ -600,7 +603,7 @@ end subroutine nctk_test_mpiio
 !! FUNCTION
 !!  Return the netcdf type from a string. Possible values:
 !!    c or ch   for NF90_CHAR
-!!    i or int  for NF90_INT
+!!    i or int  for NF90_INTtrue
 !!   sp         for NF90_FLOAT
 !!   dp         for NF90_DOUBLE
 !!
@@ -798,7 +801,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    ! Write string with input.
    my_string = trim(INPUT_STRING)
    if (DTSET_IDX /= -1 .and. index(INPUT_STRING, "jdtset ") == 0) then
-     my_string = "jdtset " // itoa(DTSET_IDX) // ch10 // trim(INPUT_STRING)
+     my_string = "jdtset " // trim(itoa(DTSET_IDX)) // "  " // trim(INPUT_STRING)
    end if
 
    input_len = len_trim(my_string)
@@ -1059,7 +1062,7 @@ integer function nctk_set_collective(ncid, varid) result(ncerr)
 !Arguments ------------------------------------
  integer,intent(in) :: ncid,varid
 
-! *********************************************************************
+! *********************************************************************true
 
   ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
@@ -1318,9 +1321,10 @@ end function nctk_def_basedims
 !!  (only writing)
 !!
 !! PARENTS
-!!      m_abihist,m_bse_io,m_effective_potential,write_eig
+!!      m_abihist,m_bse_io,m_effective_potential,m_nctk,m_spin_ncfile
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2375,6 +2379,7 @@ end function nctk_read_datar
 !!      m_nctk
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2456,6 +2461,7 @@ end subroutine collect_datar
 !!      m_nctk
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2524,6 +2530,7 @@ end subroutine distrib_datar
 !!      m_nctk
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2583,6 +2590,7 @@ end subroutine var_from_id
 !! PARENTS
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2610,7 +2618,7 @@ end subroutine var_from_name
 !! nctk_defwrite_nonana_terms
 !!
 !! FUNCTION
-!!  Write phonon frequencies and displacements for q-->0 in the presence of non-analytical behaviour.
+!!  Write to ncfile the phonon frequencies and displacements for q --> 0 in the presence of non-analytical behaviour.
 !!
 !! INPUTS
 !!  ncid=netcdf file id.
@@ -2630,6 +2638,7 @@ end subroutine var_from_name
 !!      anaddb,m_ifc
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2703,6 +2712,7 @@ end subroutine nctk_defwrite_nonana_terms
 !!      anaddb
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2768,6 +2778,7 @@ end subroutine nctk_defwrite_nonana_raman_terms
 !!      anaddb
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2819,9 +2830,10 @@ end subroutine nctk_defwrite_raman_terms
 !!  Remove
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2878,9 +2890,10 @@ integer :: ncerr, cmode
 !!  (only writing)
 !!
 !! PARENTS
-!!      prttagm,prttagm_images
+!!      m_parser
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2961,7 +2974,7 @@ end subroutine write_var_netcdf
 !!  (only writing)
 !!
 !! PARENTS
-!!      clnup1
+!!      m_gstate
 !!
 !! CHILDREN
 !!      ab_define_var

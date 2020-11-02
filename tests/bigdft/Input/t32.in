@@ -54,13 +54,15 @@ prtden 0
 prtwf 0
 prteig 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "1h.atompaw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t32.out, tolnlines = 24, tolabs = 5.8e-2, tolrel = 9.0e-3
-#%% psp_files = 1h.atompaw
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

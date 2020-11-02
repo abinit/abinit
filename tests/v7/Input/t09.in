@@ -23,6 +23,7 @@
  kptopt 1 ngkpt 2 2 2     ! Monkhosrt pack 2x2x2
  occopt 7 tsmear 0.001    ! Processed as metallic
  chksymbreak 0 nsym 0     ! Allow all symetries; don't check them
+ chksymtnons 0
 
 !Self-consistent cycle for the electronic relaxation
  toldfe 1.0d-10           ! Stopping criterium
@@ -46,13 +47,15 @@
  nband 12                 ! Number of bands
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.lda"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%   t09.out, tolnlines = 10, tolabs = 6.0e-08, tolrel = 3.0e-02, fld_options = -medium
-#%% psp_files = si_ps.736.lda
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

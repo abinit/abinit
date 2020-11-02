@@ -43,13 +43,15 @@ toldfe 1.d-7
 
 diemac    2.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Li.LDA-PW-paw.abinit, H.LDA-PW-paw.abinit"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t26.out, tolnlines=    0,   tolabs=  0.0e+00,      tolrel= 0.0e+00, fld_options = -easy
-#%% psp_files = Li.LDA-PW-paw.abinit, H.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

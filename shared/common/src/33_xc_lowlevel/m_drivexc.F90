@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_drivexc
 !! NAME
 !!  m_drivexc
@@ -65,10 +64,12 @@ contains
 !!  ixc = internal code for xc functional
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      wrtout
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -237,9 +238,12 @@ end subroutine echo_xc_name
 !! OUTPUT
 !!
 !! PARENTS
-!!      respfn,scfcv
+!!      m_longwave,m_respfn_driver,m_scfcv_core
 !!
 !! CHILDREN
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -326,9 +330,12 @@ end subroutine check_kxc
 !!  [nd2vxc]= size of the array d2vxc(npts,nd2vxc) (third derivatives of Exc wrt density)
 !!
 !! PARENTS
-!!      m_pawxc,rhotoxc
+!!      m_drivexc,m_pawxc,m_rhotoxc,m_xcdata
 !!
 !! CHILDREN
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -416,8 +423,9 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(ndvxc)) then
    ndvxc=0
    if (abs(order)>=2) then
-     if (ixc==1.or.ixc==13.or.ixc==21.or.ixc==22.or.(ixc>=7.and.ixc<=10)) then
-       ndvxc=min(nspden,2)+1
+     if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
+&        ixc==21.or.ixc==22) then
+       ndvxc=min(nspden,2)+1  
      else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
@@ -426,7 +434,8 @@ subroutine size_dvxc(ixc,order,nspden,&
 &             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
        ndvxc=15
      else if (ixc<0) then
-       ndvxc=3 ; if (need_gradient) ndvxc=15
+       ndvxc=2*min(nspden,2)+1 ; if (order==-2) ndvxc=2
+       if (need_gradient) ndvxc=15
      end if
    end if
  end if
@@ -493,9 +502,12 @@ end subroutine size_dvxc
 !!    described above.
 !!
 !! PARENTS
-!!      m_pawxc,rhotoxc
+!!      m_pawxc,m_rhotoxc
 !!
 !! CHILDREN
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -583,10 +595,13 @@ end subroutine xcmult
 !!  charge at the new real space grid points (future work).
 !!
 !! PARENTS
-!!      bethe_salpeter,m_pawxc,mkcore_wvl,posdoppler,poslifetime,posratecore
-!!      psolver_rhohxc,rhohxcpositron,rhotoxc,wvl_initro
+!!      m_bethe_salpeter,m_electronpositron,m_pawxc,m_positron,m_psolver
+!!      m_rhotoxc,m_wvl_rho,mkcore_wvl
 !!
 !! CHILDREN
+!!      invcb,libxc_functionals_end,libxc_functionals_getvxc
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -802,12 +817,12 @@ end subroutine mkdenpos
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
 !!
 !! PARENTS
-!!    rhotoxc,m_pawxc
+!!      m_pawxc,m_rhotoxc
 !!
 !! CHILDREN
 !!      invcb,libxc_functionals_end,libxc_functionals_getvxc
-!!      libxc_functionals_init,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca,xcspol
-!!      xctetr,xcwign,xcxalp
+!!      libxc_functionals_init,size_dvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 
@@ -886,7 +901,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !Check value of order
  if( (order<1.and.order/=-2).or.order>4)then
    write(message, '(a,i0)' )&
-&   'The only allowed values for order are 1,2,-2 or 3, while it is found to be ',order
+&   'The only allowed values for order are 1, 2, -2 or 3, while it is found to be ',order
    MSG_BUG(message)
  end if
 

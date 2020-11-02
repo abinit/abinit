@@ -253,10 +253,10 @@ contains
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! NOTES
 !!  Be careful to the meaning of nfft (size of FFT grids):
@@ -360,7 +360,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
- real(dp) :: dmft_ldaocc
+ real(dp) :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
  character(len=500) :: message
@@ -381,7 +381,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
- type(oper_type) :: lda_occup
+ type(oper_type) :: dft_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
 
  type(crystal_t) :: cryst_struc
@@ -537,9 +537,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  end if
  if(dtset%wfoptalg==2)nnsclo_now=40  ! UNDER DEVELOPMENT
 
- write(message, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now=',nnsclo_now,&
-& ', note that nnsclo,dbl_nnsclo,istep=',dtset%nnsclo,dbl_nnsclo,istep
- call wrtout(std_out,message,'COLL')
+ write(message, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now = ',nnsclo_now,&
+   ', note that nnsclo, dbl_nnsclo, istep= ',dtset%nnsclo,dbl_nnsclo,istep
+ call wrtout(std_out,message)
 
 !==== Initialize most of the Hamiltonian ====
 !Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -688,21 +688,21 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if(with_vxctau) then
            do ii=1,4
              call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-&             vxctau(:,:,ii),vxctaulocal(:,:,:,:,ii),2)
+                         vxctau(:,:,ii),vxctaulocal(:,:,:,:,ii),2)
            end do
          end if
        else
          ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-&                       rhodum,rhodum,cgrvtrial,vtrial)
+                        rhodum,rhodum,cgrvtrial,vtrial)
          call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-&                    cgrvtrial,vlocal,2)
+                     cgrvtrial,vlocal,2)
          if(with_vxctau) then
            do ii=1,4
              call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-&                           rhodum,rhodum,cgrvtrial,vxctau(:,:,ii))
+                           rhodum,rhodum,cgrvtrial,vxctau(:,:,ii))
              call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-&                        cgrvtrial,vxctaulocal(:,:,:,:,ii),2)
+                         cgrvtrial,vxctaulocal(:,:,:,:,ii),2)
            end do
          end if
          ABI_DEALLOCATE(cgrvtrial)
@@ -788,8 +788,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            cycle
          end if
        else
-         if ((proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) &
-&         .and.(ikpt_loc <= dtset%mkmem)) then
+         if ((proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) .and.(ikpt_loc <= dtset%mkmem)) then
            eigen(1+bdtot_index : nband_k+bdtot_index) = zero
            resid(1+bdtot_index : nband_k+bdtot_index) = zero
            bdtot_index = bdtot_index + nband_k
@@ -964,9 +963,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(985,1,tsec)
 
 #if defined HAVE_GPU_CUDA
-       if(dtset%use_gpu_cuda==1) then
-         call gpu_finalize_ffnl_ph3d()
-       end if
+       if(dtset%use_gpu_cuda==1) call gpu_finalize_ffnl_ph3d()
 #endif
        ABI_DEALLOCATE(ffnl)
        ABI_DEALLOCATE(kinpw)
@@ -1222,7 +1219,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(990,2,tsec)
 
 !    !=========  DMFT call begin ============================================
-     dmft_ldaocc=0
+     dmft_dftocc=0
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
        call timab(991,1,tsec)
 
@@ -1231,7 +1228,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      ==  0 to a dmft calculation and do not use lda occupations
 !      ==  1 to a lda calculation with the dmft loop
-       if(dtset%dmftcheck==-1) dmft_ldaocc=1
+       if(dtset%dmftcheck==-1) dmft_dftocc=1
 
 !      ==  initialise occnd
        paw_dmft%occnd=zero
@@ -1247,7 +1244,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end do
 
 
-       if(dmft_ldaocc==0) then
+       if(dmft_dftocc==0) then
          if(dtset%occopt/=3) then
            MSG_ERROR('occopt should be equal to 3 in dmft')
          end if
@@ -1270,42 +1267,42 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if (paw_dmft%use_dmft>0 .and. residm>tol4 .and. dtset%dmftcheck>=0) then
            if(dtset%dmft_entropy>0)  then
              write(message,'(a,e12.3)')&
-&             ' WARNING: Wavefunctions not converged : DFT+DMFT calculation cannot be carried out safely ',residm
-             call wrtout(std_out,message,'COLL')
+               ' WARNING: Wavefunctions not converged: DFT+DMFT calculation cannot be carried out safely ',residm
+             call wrtout(std_out,message)
            else
              write(message,'(a,e12.3)')&
-&             ' ERROR: Wavefunctions not converged : DFT+DMFT calculation cannot be carried out safely ',residm
-             call wrtout(std_out,message,'COLL')
+              ' ERROR: Wavefunctions not converged: DFT+DMFT calculation cannot be carried out safely ',residm
+             call wrtout(std_out,message)
              write(message,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
              MSG_ERROR(message)
            end if
 
          else if (paw_dmft%use_dmft>0 .and. residm>tol10.and. dtset%dmftcheck>=0) then
            write(message,'(3a)')ch10,&
-&           '  Wavefunctions not converged : DFT+DMFT calculation might not be carried out safely ',ch10
+            '  Wavefunctions not converged: DFT+DMFT calculation might not be carried out safely ',ch10
            MSG_WARNING(message)
          end if
 
-!        ==  allocate paw_dmft%psichi and paw_dmft%eigen_lda
+!        ==  allocate paw_dmft%psichi and paw_dmft%eigen_dft
          call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,&
-&         dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
+           dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !        ==  gather crystal structure date into data "cryst_struc"
          remove_inv=.false.
          if(dtset%nspden==4) remove_inv=.true.
          call crystal_init(dtset%amu_orig(:,1),cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
-&         dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
-&         dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
-&         dtset%symrel,dtset%tnons,dtset%symafm)
+          dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+          dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
+          dtset%symrel,dtset%tnons,dtset%symafm)
 
 !        ==  compute psichi
          call xmpi_barrier(spaceComm_distrb)
-         call init_oper(paw_dmft,lda_occup)
+         call init_oper(paw_dmft,dft_occup)
          call flush_unit(std_out)
          call timab(620,1,tsec)
          call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,&
-&         lda_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
+&         dft_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
 &         dtset%nkpt,my_nspinor,dtset%nsppol,occ,&
 &         paw_dmft,paw_ij,pawang,pawtab,psps,usecprj_local,dtfil%unpaw)
          call timab(620,2,tsec)
@@ -1315,7 +1312,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)
 
-         call dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,dtset%pawprtvol)
+         call dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,dtset%pawprtvol)
          edmft=paw_dmft%edmft
          energies%e_paw=energies%e_paw+edmft
          energies%e_pawdc=energies%e_pawdc+edmft
@@ -1330,8 +1327,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !           write(message,'(5a)')ch10,&
 !&           ' Parallelization over bands is not yet compatible with self-consistency in DMFT ',ch10,&
 !&           ' Calculation of density does not taken into account non diagonal occupations',ch10
-!           call wrtout(std_out,message,'COLL')
-!           call wrtout(ab_out,message,'COLL')
+!           call wrtout(std_out,message)
+!           call wrtout(ab_out,message)
 !!          MSG_ERROR(message)
 !           if(dtset%nstep>1) then
 !             write(message,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
@@ -1358,19 +1355,19 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !        ==  destroy crystal_t cryst_struc
          call cryst_struc%free()
-         call destroy_oper(lda_occup)
-       end if ! dmft_ldaocc
+         call destroy_oper(dft_occup)
+       end if ! dmft_dftocc
        call timab(991,2,tsec)
 
      end if ! usedmft
 
      if(dtset%nbandkss/=0) then
        write(message,'(a,i3,2a,i3,4a)') &
-&       " dtset%nbandkss ==",dtset%nbandkss,ch10,&
-&       " and dtset%usedmft ==",dtset%usedmft,ch10,&
-&       " a DFT loop is carried out without DMFT.",ch10,&
-&       " Only psichi's will be written at convergence of the DFT loop."
-       call wrtout(std_out,message,'COLL')
+        " dtset%nbandkss = ",dtset%nbandkss,ch10,&
+        " and dtset%usedmft = ",dtset%usedmft,ch10,&
+        " a DFT loop is carried out without DMFT.",ch10,&
+        " Only psichi's will be written at convergence of the DFT loop."
+       call wrtout(std_out,message)
      end if
 !    !=========  DMFT call end   ============================================
 
@@ -1405,7 +1402,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !          dmft
            if(paw_dmft%use_dmft>=1.and.dtset%nbandkss==0) then
              if(paw_dmft%band_in(iband)) then
-               if( paw_dmft%use_dmft == 1 .and. dmft_ldaocc == 1 ) then ! test of the code
+               if( paw_dmft%use_dmft == 1 .and. dmft_dftocc == 1 ) then ! test of the code
                  paw_dmft%occnd(1,iband,iband,ikpt,isppol)=occ(bdtot_index)
                end if
                locc_test = abs(paw_dmft%occnd(1,iband,iband,ikpt,isppol))+&
@@ -1460,27 +1457,27 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        energies%e_kinetic = energies%e_kinetic -ekindmft+ekindmft2
        if(abs(dtset%pawprtvol)>=2) then
          write(message,'(4a,7(2x,a,2x,e14.7,a),a)') &
-&         "-----------------------------------------------",ch10,&
-&         "--- Energy for DMFT and tests (in Ha)  ",ch10,&
-&         "--- Ebandldatot    (Ha.) = ",ebandldatot,ch10,&
-&         "--- Ebandlda       (Ha.) = ",ebandlda,ch10,&
-&         "--- Ebanddmft      (Ha.) = ",ebanddmft,ch10,&
-&         "--- Ekinlda        (Ha.) = ",ekinlda,ch10, &
-&         "--- Ekindmftdiag   (Ha.) = ",ekindmft,ch10,&
-&         "--- Ekindmftnondiag(Ha.) = ",ekindmft2,ch10,&
-&         "--- Edmft=         (Ha.) = ",edmft,ch10,&
-&         "-----------------------------------------------"
-         call wrtout(std_out,message,'COLL')
+           "-----------------------------------------------",ch10,&
+           "--- Energy for DMFT and tests (in Ha)  ",ch10,&
+           "--- Ebandldatot    (Ha.) = ",ebandldatot,ch10,&
+           "--- Ebandlda       (Ha.) = ",ebandlda,ch10,&
+           "--- Ebanddmft      (Ha.) = ",ebanddmft,ch10,&
+           "--- Ekinlda        (Ha.) = ",ekinlda,ch10, &
+           "--- Ekindmftdiag   (Ha.) = ",ekindmft,ch10,&
+           "--- Ekindmftnondiag(Ha.) = ",ekindmft2,ch10,&
+           "--- Edmft=         (Ha.) = ",edmft,ch10,&
+           "-----------------------------------------------"
+         call wrtout(std_out,message)
        end if
 !       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
      end if
 
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+         rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+         rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
      end if
      call timab(992,2,tsec)
 
@@ -1492,14 +1489,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(989,1,tsec)
 
        nbuf=2*mbdkpsp+dtset%nfft*dtset%nspden+3+3*natom*optforces
-!      * If Hartree-Fock calculation, the exact exchange energy is k-dependent.
+       ! If Hartree-Fock calculation, the exact exchange energy is k-dependent.
        if(dtset%usefock==1) then
          nbuf=nbuf+1
          if (optforces>0) nbuf=nbuf+3*natom
        end if
        if(iscf==-1 .or. iscf==-2)nbuf=2*mbdkpsp
        ABI_ALLOCATE(buffer1,(nbuf))
-!      Pack eigen,resid,rho[wf]r,grnl,enl,ek
+       ! Pack eigen,resid,rho[wf]r,grnl,enl,ek
        buffer1(1:mbdkpsp)=eigen(:)
        buffer1(1+mbdkpsp:2*mbdkpsp)=resid(:)
        index1=2*mbdkpsp
@@ -1514,7 +1511,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          buffer1(index1+2) = energies%e_eigenvalues
          buffer1(index1+3) = energies%e_nlpsp_vfock
          index1=index1+3
-!        * If Hartree-Fock calculation, save e_fock in buffer1
+         ! If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            buffer1(index1+1) = energies%e_fock
            index1=index1+1
@@ -1526,12 +1523,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if (optforces>0) buffer1(index1+1:index1+3*natom)=grnl(1:3*natom)
        end if
 
-!      Build sum of everything
+       ! Build sum of everything
        call timab(48,1,tsec)
        call xmpi_sum(buffer1,nbuf,mpi_enreg%comm_kpt ,ierr)
        call timab(48,2,tsec)
 
-!      Unpack the final result
+       ! Unpack the final result
        eigen(:)=buffer1(1:mbdkpsp)
        resid(:)=buffer1(1+mbdkpsp:2*mbdkpsp)
        index1=2*mbdkpsp
@@ -1558,7 +1555,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          energies%e_eigenvalues = buffer1(index1+2)
          energies%e_nlpsp_vfock = buffer1(index1+3)
          index1=index1+3
-!        * If Hartree-Fock calculation, save e_fock in buffer1
+         ! If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            energies%e_fock = buffer1(index1+1)
            index1=index1+1
@@ -1683,16 +1680,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(min_occ>0.01_dp)then
          if(dtset%nsppol==1)then
            write(message, '(a,i0,3a,f7.3,5a)' )&
-&           'For k-point number ',ikpt,',',ch10,&
-&           'The minimal occupation factor is',min_occ,'.',ch10,&
-&           'An adequate monitoring of convergence requires it to be  at most 0.01_dp.',ch10,&
-&           'Action: increase slightly the number of bands.'
+             'For k-point number ',ikpt,',',ch10,&
+             'The minimal occupation factor is',min_occ,'.',ch10,&
+             'An adequate monitoring of convergence requires it to be  at most 0.01_dp.',ch10,&
+             'Action: increase slightly the number of bands.'
          else
            write(message, '(a,i0,3a,i0,a,f7.3,5a)' )&
-&           'For k-point number ',ikpt,', and',ch10,&
-&           'for spin polarization ',isppol, ' the minimal occupation factor is',min_occ,'.',ch10,&
-&           'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
-&           'Action: increase slightly the number of bands.'
+             'For k-point number ',ikpt,', and',ch10,&
+             'for spin polarization ',isppol, ' the minimal occupation factor is',min_occ,'.',ch10,&
+             'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
+             'Action: increase slightly the number of bands.'
          end if
          MSG_WARNING(message)
          exit ! It is enough if one lack of adequate occupation is identified, so exit.
@@ -1860,9 +1857,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_DEALLOCATE(EigMin)
    ABI_DEALLOCATE(doccde)
 #if defined HAVE_GPU_CUDA
-   if(dtset%use_gpu_cuda==1) then
-     call gpu_finalize_ham_data()
-   end if
+   if(dtset%use_gpu_cuda==1) call gpu_finalize_ham_data()
 #endif
  end if
 
@@ -1887,10 +1882,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !! OUTPUT
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -1989,10 +1984,10 @@ subroutine wvl_nscf_loop()
 !!  argout(sizeout)=description
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2080,10 +2075,10 @@ subroutine wvl_nscf_loop_bigdft()
 !!  e_eigenvalues= eigenvalues energy
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2138,10 +2133,10 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2190,10 +2185,10 @@ subroutine wvl_occ()
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2242,10 +2237,10 @@ subroutine wvl_occ_bigdft()
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2337,7 +2332,7 @@ end subroutine vtorho
 !! NOTES
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      timab,xmpi_recv,xmpi_send
@@ -2371,10 +2366,6 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
  real(dp),allocatable :: buffer(:,:)
 
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,'(a)')'cgq_builder enter'
-!DEBUG
 
  if (mcgq==0.or.mkgq==0) return
 
@@ -2506,10 +2497,6 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
 
  ABI_DEALLOCATE(flag_send)
  ABI_DEALLOCATE(flag_receive)
-
-!DEBUG
-!write(std_out,'(a)')'cgq_builder exit'
-!END_DEBUG
 
 end subroutine cgq_builder
 !!***

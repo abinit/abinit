@@ -79,6 +79,7 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -113,9 +114,10 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
-!!      respfn
+!!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -162,6 +164,7 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -194,9 +197,10 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
-!!      respfn
+!!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -233,9 +237,10 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
-!!      d2frnl
+!!      m_d2frnl
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -355,8 +360,10 @@ CONTAINS
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -516,8 +523,10 @@ end subroutine print_efmas
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_eph_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -572,8 +581,8 @@ end subroutine print_efmas
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
 
 !Prepare the efmas* datastructures
- ABI_DT_MALLOC(efmasdeg,(nkpt))
- ABI_DT_MALLOC(efmasval,(mband,nkpt))
+ ABI_MALLOC(efmasdeg,(nkpt))
+ ABI_MALLOC(efmasval,(mband,nkpt))
 
  ideg_tot=1
  ieig=1
@@ -643,6 +652,7 @@ end subroutine print_efmas
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -843,11 +853,10 @@ end subroutine print_efmas
 !!    efmasval(:,:)%eig2_diag OUTPUT : generalized 2nd order k-derivatives of eigenenergy
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_tr_efmas,zgemm,zgetrf
-!!      zgetri,zheev
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -1133,11 +1142,10 @@ end subroutine print_efmas
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dotprod_g,dsyev,print_tr_efmas,zgemm,zgetrf
-!!      zgetri,zheev
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 

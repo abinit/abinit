@@ -54,11 +54,13 @@ ntypat 1
 typat  1 1  
 natom 2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

@@ -52,13 +52,15 @@
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/7n.5.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t55.out, tolnlines = 10, tolabs = 1.000e-02, tolrel = 4.000e-01
-#%% psp_files = 7n.psphgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

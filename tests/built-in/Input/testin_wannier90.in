@@ -37,14 +37,16 @@ istwfk 8*1
  znucl  31 33
 
 
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
+ pseudos "31ga.pspnc, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% no_check = yes
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_WANNIER90
 #%% [files]
-#%% psp_files= 31ga.pspnc, 33as.pspnc
-#%% extra_inputs = testin_wannier90o_w90.win
+#%% extra_inputs = wannier90.win
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

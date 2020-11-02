@@ -16,6 +16,27 @@ inp_files = [
 "t03.in",
 # Structure variable
 "t04.in",
+# Optic
+"t05.in", # GGA-PBE nsppol=1
+"t06.in", # optic
+"t07.in", # GGA-PBE nsppol=2
+"t08.in", # optic
+"t09.in", # GGA-PBE PAW nsppol=1
+"t10.in", # optic
+"t11.in", # GGA-PBE PAW nsppol=2
+"t12.in", # optic
+"t13.in", # metallic iron GGA-PBE PAW nsppol=2
+"t14.in", # optic
+"t15.in", # check slight misalignment of rprim, with large tolsym
+"t16.in", # check slightly incorrect xred, with large tolsym
+"t17.in", # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
+# GW/BSE
+"t21.in", # HF exchange checking q->0 terms
+"t22.in", # AC GW
+# DFPT
+"t41.in",
+"t42.in",
+"t43.in",
 # Electron-phonon
 "t50.in",
 "t51.in",
@@ -38,4 +59,6 @@ inp_files = [
 "t85.in", # Velocity Verlet NVE
 "t86.in", # Spin lattice coupling, Only Oiju term activated.
 "t87.in", # Spin lattice coupling, Oiju and Tijuv. 
+# GS Coulomb cut-off
+"t90.in", # checkG Coulomb cut-off, large tolerance a.t.m.
 ]

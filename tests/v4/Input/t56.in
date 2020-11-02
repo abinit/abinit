@@ -7,6 +7,7 @@
 #First dataset : SC run with 2 kpoints
  prtden1 1     getden1 0   getwfk1 0
  nband1  4     nstep1 30
+ kptopt1 1
 
 
 #Second dataset : NSC run with 32 kpoints, lots of bands
@@ -21,7 +22,6 @@
  rfelfd3  2
  getwfk3  2
   nband3  50
- kptopt3  2
 
 # ddk response function
    iscf4 -3
@@ -31,7 +31,6 @@
  rfelfd4  2
  getwfk4  2
   nband4  50
- kptopt4  2
 
 
 # ddk response function
@@ -42,7 +41,6 @@
  rfelfd5  2
  getwfk5  2
   nband5  50
- kptopt5  2
 
 
 #Common data
@@ -52,7 +50,7 @@
          0.0 0.5 0.0
          0.0 0.0 0.5
  ngkpt 2 2 2
- kptopt 1     # Is this correct for preparation of optic ??
+ kptopt 2
 
  acell   3*10.60
  amu 69.72  74.9216
@@ -68,6 +66,9 @@
  typat  1 2  tolwfr  1.e-22
  znucl  31 33
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.SGS_mod, 33as.SGS_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -75,7 +76,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t56.out, tolnlines = 2, tolabs = 1.100e-05, tolrel = 6.000e-05
-#%% psp_files = 31ga.SGS_mod, 33as.SGS_mod
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

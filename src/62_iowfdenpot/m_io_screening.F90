@@ -163,7 +163,7 @@ MODULE m_io_screening
   ! Input variable (time-reversal symmetry in RPA expression)
 
   integer :: icutcoul
-  ! Input variable (Coulomb cutoff)
+  ! Input variable (Coulomb singularity treatment)
 
   integer :: gwcomp
   ! Input variable (GW compensation energy technique)
@@ -298,7 +298,7 @@ end function ncname_from_id
 !!  fform=Kind of the array in the file (0 signals an error)
 !!
 !! PARENTS
-!!      m_io_screening,m_screen,m_screening,mrgscr,setup_bse
+!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -401,7 +401,7 @@ end subroutine hscr_from_file
 !! no check is done, it is up to the developer.
 !!
 !! PARENTS
-!!      m_io_screening,m_screening,screening
+!!      m_io_screening,m_screening,m_screening_driver
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -517,7 +517,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
          NCF_CHECK(nf90_get_var(ncid, vid("test_type"), hscr%test_type))
          NCF_CHECK(nf90_get_var(ncid, vid("tordering"), hscr%tordering))
          NCF_CHECK(nf90_get_var(ncid, vid("awtr"), hscr%awtr))
-         NCF_CHECK(nf90_get_var(ncid, vid("icutcoul"), hscr%icutcoul))
+         NCF_CHECK(nf90_get_var(ncid, vid("gw_icutcoul"), hscr%icutcoul))
          NCF_CHECK(nf90_get_var(ncid, vid("gwcomp"), hscr%gwcomp))
          NCF_CHECK(nf90_get_var(ncid, vid("gwgamma"), hscr%gwgamma))
          NCF_CHECK(nf90_get_var(ncid, vid("mbpt_sciss"), hscr%mbpt_sciss))
@@ -643,7 +643,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 
      ncerr = nctk_defnwrite_ivars(ncid, [character(len=nctk_slen) :: &
        "id", "ikxc", "inclvkb", "headform", "fform", "gwcalctyp", &
-       "nbands_used", "npwwfn_used", "spmeth", "test_type", "tordering", "awtr", "icutcoul", &
+       "nbands_used", "npwwfn_used", "spmeth", "test_type", "tordering", "awtr", "gw_icutcoul", &
        "gwcomp", "gwgamma" &
       ],&
       [ hscr%id, hscr%ikxc, hscr%inclvkb, hscr%headform, hscr%fform, hscr%gwcalctyp, &
@@ -716,7 +716,7 @@ end subroutine hscr_io
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_io_screening,m_screen,m_screening,mrgscr,setup_bse
+!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -916,7 +916,7 @@ type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,torder
 
 ! HSCR_NEW
  hscr%awtr = dtset%awtr
- hscr%icutcoul = dtset%icutcoul
+ hscr%icutcoul = dtset%gw_icutcoul
  hscr%vcutgeo = dtset%vcutgeo
  hscr%gwcomp = dtset%gwcomp
  hscr%gwgamma = dtset%gwgamma
@@ -955,7 +955,7 @@ end function hscr_new
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      m_io_screening,setup_bse
+!!      m_bethe_salpeter,m_io_screening
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -1082,7 +1082,8 @@ end subroutine hscr_malloc
 !!  (only deallocate)
 !!
 !! PARENTS
-!!      m_io_screening,m_screen,m_screening,mrgscr,screening,setup_bse
+!!      m_bethe_salpeter,m_io_screening,m_screen,m_screening,m_screening_driver
+!!      mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -1366,7 +1367,7 @@ end subroutine hscr_merge
 !!  (only writing on file)
 !!
 !! PARENTS
-!!      m_io_screening,m_screening,screening
+!!      m_io_screening,m_screening,m_screening_driver
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout
@@ -1474,7 +1475,7 @@ end subroutine write_screening
 !!    will be truncated. If nomegaA > Hscr%nomega an error will occur
 !!
 !! PARENTS
-!!      calc_ucrpa,m_io_screening,m_screen,m_screening,mrgscr
+!!      m_calc_ucrpa,m_io_screening,m_screen,m_screening,mrgscr
 !!
 !! CHILDREN
 !!      hscr_copy,hscr_io,hscr_print,read_screening,write_screening,wrtout

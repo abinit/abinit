@@ -67,6 +67,9 @@
   prtprocar  2
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -74,10 +77,9 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t40.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -ridiculous;
-#%%   t40o_DOS_AT0001, tolnlines = 40, tolabs = 3.000e+01, tolrel = 9.500e-02, fld_options = -ridiculous
+#%%   t40o_DOS_AT0001, tolnlines = 48, tolabs = 3.000e+01, tolrel = 1.1e-01, fld_options = -ridiculous
 # for the moment do not test PROCAR file - this version depends on the wave function phase with arbitrary sign
 #   PROCAR_0000, tolnlines = 0, tolabs = 1.000e-03, tolrel = 1.000e-03, fld_options = -ridiculous
-#%% psp_files = 26fe.paw 
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
@@ -87,5 +89,7 @@
 ##%%  Test of irdden and prtdosm input keyword.
 #%%   Density from test 38 is read; then a non self-consistent calculation
 #%%   is done and the m-decomposed LDOS on the first atom is printed out.
+#%%   The BCC structure is slightly distorted, in order to decrease the symmetry and the degeneracies, and allow better portability.
+#%%   (perhaps PROCAR file could be tested again).
 #%% topics = DFT+U
 #%%<END TEST_INFO>

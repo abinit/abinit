@@ -266,19 +266,11 @@ contains
 !!    pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      ab7_mixing_deallocate,ab7_mixing_new,ab7_mixing_use_disk_cache,appdig
-!!      calcdenmagsph,destroy_efield,dfpt_etot,dfpt_newvtr,dfpt_nselt,dfpt_nstdy
-!!      dfpt_nstpaw,dfpt_rhofermi,dfpt_rhotov,dfpt_vtorho,dfptff_bec,dfptff_die
-!!      dfptff_ebp,dfptff_edie,dfptff_initberry,fftdatar_write_from_hdr,fourdp
-!!      getcut,hdr_update,metric,newfermie1,paw_an_free,paw_an_init
-!!      paw_an_nullify,paw_an_reset_flags,paw_ij_free,paw_ij_init
-!!      paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc,pawcprj_free
-!!      pawcprj_getdim,pawdenpot,pawdij,pawdijfr,pawmknhat,pawnhatfr
-!!      pawrhoij_alloc,pawrhoij_free,qmatrix,rf2_getidirs,scprqt,status,symdij
-!!      timab,wfk_close,wrtout,xmpi_barrier,xmpi_isum,xmpi_sum,xmpi_wait
+!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -1586,9 +1578,11 @@ end subroutine dfpt_scfcv
 !!      at each new call of dfpt_scfcv).
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
+!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -1727,10 +1721,11 @@ end subroutine dfpt_etot
 !!   at output : updated value
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      dotprod_vn,free_my_atmtab,get_my_atmtab,pawdfptenergy,wrtout
+!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -1923,11 +1918,11 @@ end subroutine newfermie1
 !!    and that the residual is not a combination of V_res and rhoij_res (pawoptmix=0).
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      ab7_mixing_copy_current_step,ab7_mixing_eval,ab7_mixing_eval_allocate
-!!      ab7_mixing_eval_deallocate,fourdp,metric,moddiel,timab
+!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -2330,11 +2325,11 @@ end subroutine dfpt_newvtr
 !!  d2nl(2,3,mpert,3,mpert)=non-local contributions to the 2DTEs
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      dfpt_mkcore,dfpt_mkvxcstr,dfpt_nsteltwf,dotprod_vn
-!!      hartrestr,init_hamiltonian,stresssym,vlocalstr,wrtout,xmpi_barrier
+!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -2734,10 +2729,11 @@ end subroutine dfpt_nselt
 !!   non-stationary 2DTE, for the present k point, and perturbation idir, ipert
 !!
 !! PARENTS
-!!      dfpt_nselt
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      dotprod_g,kpgstr,mkffnl,mkkin,nonlop
+!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -2989,13 +2985,11 @@ end subroutine dfpt_nsteltwf
 !! Note that the ddk perturbation should not be treated here.
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      appdig,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
-!!      dfpt_nstwf,dfpt_sygra,dfpt_vlocal,dotprod_vn,init_hamiltonian
-!!      mati3inv,timab,wfk_close,wfk_open_read,wrtout
-!!      xmpi_sum
+!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -3111,12 +3105,12 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
    end if
 
    if (t_exist) then
-!    Note the use of unit numbers 21, 22 and 23
+     !  Note the use of unit numbers 21, 22 and 23
+     ! Open files in sequential mode
      ddkfil(idir1)=20+idir1
      write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk)
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     call wfk_open_read(ddks(idir1),fiwfddk,formeig1,dtset%iomode,ddkfil(idir1),spaceworld)
+     call wrtout([std_out, ab_out], msg)
+     call wfk_open_read(ddks(idir1),fiwfddk,formeig1,dtset%iomode,ddkfil(idir1), xmpi_comm_self)
    end if
  end do
 
@@ -3190,7 +3184,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !    In case of electric field pert1, read ddk wfs file
 !    Note that the symmetries are not used for ddk, so read each k point
-!    Also take into account implicitely the parallelism over k points
+!    Also take into account implicitly the parallelism over k points
 
      do idir1=1,3
        if (ddkfil(idir1)/=0) then
@@ -3297,9 +3291,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !In case of electric field ipert1, close the ddk wf files
  do idir1=1,3
-   if (ddkfil(idir1)/=0)then
-     call ddks(idir1)%close()
-   end if
+   if (ddkfil(idir1)/=0) call ddks(idir1)%close()
  end do
 
 !Symmetrize the non-local contributions,
@@ -3563,15 +3555,11 @@ end subroutine dfpt_nstdy
 !!    at least the use of fftpac should be modified.
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      destroy_rf_hamiltonian,dfpt_wfkfermi,fftpac
-!!      init_hamiltonian,init_rf_hamiltonian,kpgstr
-!!      mkffnl,mkkin,mkkpg,occeig,paw_ij_free
-!!      paw_ij_init,paw_ij_nullify,pawdijfr,pawmkrho,pawrhoij_alloc
-!!      pawrhoij_free,pawrhoij_free_unpacked,pawrhoij_init_unpacked
-!!      pawrhoij_mpisum_unpacked,status,symrhg,timab,xmpi_sum
+!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -4241,11 +4229,11 @@ end subroutine dfpt_rhofermi
 !!       at Fermi level (cumulative, so input as well as output)
 !!
 !! PARENTS
-!!      dfpt_rhofermi
+!!      m_dfpt_scfcv
 !!
 !! CHILDREN
 !!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,status,timab,wrtout
+!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 

@@ -126,11 +126,11 @@ contains
 !!       kxc(:,19)=gradz(rho_dn)
 !!
 !! PARENTS
-!!      dfpt_dyxc1,dfpt_mkvxc_noncoll,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov
-!!      dfptnl_loop,m_kxc,nres2vres
+!!      m_dfpt_mkvxc,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv,m_forstr,m_kxc
+!!      m_pead_nl_loop,m_respfn_driver
 !!
 !! CHILDREN
-!!      dfpt_mkvxcgga,matr3inv,timab
+!!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab
 !!
 !! SOURCE
 
@@ -501,10 +501,10 @@ end subroutine dfpt_mkvxc
 !!       kxc(:,19)=gradz(rho_dn)
 !!
 !! PARENTS
-!!      dfpt_mkvxc
+!!      m_dfpt_mkvxc
 !!
 !! CHILDREN
-!!      xcden,xcpot
+!!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab
 !!
 !! SOURCE
 
@@ -779,7 +779,7 @@ end subroutine dfpt_mkvxcgga
 !!   core-correction, if applicable)
 !!
 !! PARENTS
-!!      dfpt_dyxc1,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov,nres2vres
+!!      m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv,m_forstr,m_respfn_driver
 !!
 !! CHILDREN
 !!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab

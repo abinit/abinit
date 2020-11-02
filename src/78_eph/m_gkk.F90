@@ -46,7 +46,7 @@ module m_gkk
  use m_io_tools,       only : iomode_from_fname
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
  use m_symtk,          only : littlegroup_q
- use m_fftcore,        only : ngfft_seq, get_kg
+ use m_fftcore,        only : get_kg
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : findqg0
@@ -95,7 +95,7 @@ contains  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph
+!!      m_eph_driver
 !!
 !! NOTES
 !!
@@ -132,7 +132,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer :: my_rank,nproc,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor
  integer :: ib1,ib2,band,ik,ikq,timerev_q
- integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq, comm_rpt, method
+ integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq, comm_rpt
  integer :: mpw,mpw_k,mpw_kq,ierr,my_kstart,my_kstop,ncid
  integer :: n1,n2,n3,n4,n5,n6,nspden,ncerr
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
@@ -255,10 +255,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  ! Read wavefunctions on the k-points grid and q-shifted k-points grid.
  call wfd_k%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
- if (.False.) call wfd_k%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  call wfd_kq%read_wfk(wfq_path, iomode_from_fname(wfq_path))
- if (.False.) call wfd_kq%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
@@ -280,7 +278,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  ! TODO FOR PAW
  usecprj = 0
- ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
+ ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
  ! Prepare call to getgh1c
  usevnl = 0
@@ -314,9 +312,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  if (dtset%eph_use_ftinterp /= 0) then
    MSG_WARNING(sjoin("Enforcing FT interpolation for q-point", ktoa(qpt)))
    comm_rpt = xmpi_comm_self
-   method = dtset%userid
-   !method = 0
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfftf, nspden, dvdb%my_npert))
    call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
@@ -602,7 +598,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  call wfd_k%free()
  call wfd_kq%free()
  call pawcprj_free(cwaveprj0)
- ABI_DT_FREE(cwaveprj0)
+ ABI_FREE(cwaveprj0)
 
 end subroutine eph_gkk
 !!***
@@ -619,88 +615,167 @@ end subroutine eph_gkk
 !!
 !! INPUT
 !!  dvdb<dbdb_type>=Database with the DFPT SCF potentials.
-!!  cryst(crystal_t)=Crystalline structure
+!!  dtset<dataset_type>= Input variables.
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
-!!  nqlist=Number of q-points
-!!  qlist(3,nqlist)=List of q-points where \delta V_{q,nu)(r) is wanted.
-!!    Potentials will be Fourier interpolated if qpt is not in DVDB.
-!!  prtvol=Verbosity level
-!!  path=Name of the netcdf file.
+!!  out_ncpath=Name of the netcdf file.
 !!
 !! OUTPUT
 !!  Only writing
 !!
 !! PARENTS
+!!      m_eph_driver
 !!
 !! CHILDREN
+!!      get_kg
 !!
 !! SOURCE
 
-subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
+subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
+
+ use m_bz_mesh, only : kpath_t, kpath_new
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nqlist,prtvol
+ type(dataset_type),target,intent(in) :: dtset
  type(dvdb_t),intent(inout) :: dvdb
- type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
- character(len=*),intent(in) :: path
-!arrays
- real(dp),intent(in) :: qlist(3,nqlist)
+ character(len=*),intent(in) :: out_ncpath
 
 !Local variables-------------------------------
 !scalars
- integer :: iq, db_iqpt, cplex, nfft, comm, ip, idir, ipert
+ integer,parameter :: master = 0
+ integer :: db_iqpt, cplex, nfft, comm, ip, idir, ipert, my_rank, interpolated, comm_rpt
  logical :: with_lr_model
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
 #endif
 !arrays
  integer :: ngfft(18)
- real(dp) :: phfreqs(3*cryst%natom),qpt(3)
- real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom), displ_red(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: phfreqs(dvdb%natom3),qpt(3)
+ real(dp) :: displ_cart(2,3, dvdb%cryst%natom, dvdb%natom3), displ_red(2,dvdb%natom3,dvdb%natom3)
  real(dp),allocatable :: v1scf(:,:,:,:), v1_qnu(:,:,:,:)
  real(dp),allocatable :: v1lr_atm(:,:,:,:), v1lr_qnu(:,:,:,:)
+#if 1
+ integer :: iq, nu, iatom, ii, jj, kk
+ real(dp) :: inv_qepsq, qtau, phre, phim, rtmp
+ type(kpath_t) :: qpath
+ real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3),  glr(3)
+ real(dp) :: values(dvdb%natom3)
 
 !************************************************************************
 
- call wrtout(std_out, sjoin("Writing Delta V_{q,nu)(r) potentials to file:", path), do_flush=.True.)
+ ! +0.50000  +0.50000  +0.50000  # L
+ ! +0.00000  +0.00000  +0.00000  # $\Gamma$
+ ! +0.50000  +0.00000  +0.50000  # X
+ ! +0.50000  +0.25000  +0.75000  # W
+ ! +0.37500  +0.37500  +0.75000  # K
+ ! +0.00000  +0.00000  +0.00000  # $\Gamma$
+ ! +0.37500  +0.37500  +0.75000  # K
 
- comm = xmpi_comm_self
- call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1)); nfft = product(ngfft(1:3))
+ ! +0.62500  +0.25000  +0.62500  # U
+ ! +0.50000  +0.50000  +0.50000  # L
+ ! +0.37500  +0.37500  +0.75000  # K
+ ! +0.62500  +0.25000  +0.62500  # U
+ ! +0.50000  +0.00000  +0.50000  # X
 
- call dvdb%open_read(ngfft, xmpi_comm_self)
- call dvdb%print()
- !call dvdb%list_perts([-1, -1, -1])
+ bounds(:, 1) = tol3 * [+0.50000,  +0.50000, +0.50000] !  # L
+ bounds(:, 2) = tol3 * [+0.00000,  +0.00000, +0.00000] !  # $\Gamma$
+ bounds(:, 3) = tol3 * [+0.50000,  +0.00000, +0.50000] !  # X
+ bounds(:, 4) = tol3 * [+0.37500,  +0.37500, +0.75000] !  # K
+ bounds(:, 5) = tol3 * [+0.00000,  +0.00000, +0.00000] !  # $\Gamma$
+ bounds(:, 6) = tol3 * [+0.50000,  +0.25000, +0.75000] !  # W
+
+ qpath = kpath_new(bounds, dvdb%cryst%gprimd, dtset%ndivsm)
+
+ do iq=1,qpath%npts
+   qpt_red = qpath%points(:, iq)
+   qpt_cart = two_pi * matmul(dvdb%cryst%gprimd, qpt_red)
+   inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
+   call ifc%fourq(dvdb%cryst, qpt_red, phfreqs, displ_cart)
+   do nu=1, dvdb%natom3
+     glr = zero
+     do iatom=1, dvdb%cryst%natom
+       ! Phase factor exp(-i (q+G) . tau)
+       qtau = - two_pi * dot_product(qpt_red, dvdb%cryst%xred(:,iatom))
+       phre = cos(qtau); phim = sin(qtau)
+       do jj=1,3
+         do ii=1,3
+           do kk=1,3
+             rtmp = dvdb%qstar(ii, jj, kk, iatom) * qpt_cart(ii) * qpt_cart(jj)
+             glr(1) = glr(1) + rtmp * (displ_cart(1, kk, iatom, nu) * phre - displ_cart(2, kk, iatom, nu) * phim)
+             glr(2) = glr(2) + rtmp * (displ_cart(2, kk, iatom, nu) * phre + displ_cart(1, kk, iatom, nu) * phre)
+           end do
+         end do
+       end do
+     end do
+     glr = half * (glr / inv_qepsq) * (four_pi / dvdb%cryst%ucvol)
+     values(nu) = (glr(1) ** 2 + glr(2) ** 2) / (two *  phfreqs(nu))
+   end do ! nu
+   write(std_out, "(i0, 4(f9.6), /, (es18.6, 1x))") iq, qpt_red, phfreqs(nu), (values(nu), nu=1, 3*dvdb%natom)
+ end do ! iqpt
+
+ call qpath%free()
+ return
+#endif
+
+ my_rank = xmpi_comm_rank(dvdb%comm)
+ comm = dvdb%comm
+ qpt = dtset%qptn
+
+ call wrtout(std_out, sjoin(" Writing Delta V_{q,nu)(r) potentials to file:", out_ncpath), do_flush=.True.)
+ call wrtout([std_out, ab_out], sjoin(ch10, "- Results stored in: ", out_ncpath))
+ call wrtout(std_out, sjoin(" Using qpt:", ktoa(qpt)))
+ !call wrtout([std_out, ab_out], " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
+ call dvdb%print(unit=std_out)
+
+ ! Define FFT mesh
+ ngfft = dvdb%ngfft
+ nfft = product(ngfft(1:3))
+
+ if (dtset%eph_task == -16) then
+   call wrtout([std_out, ab_out], " Assuming q-point already in the DVDB file. No interpolation.")
+   interpolated = 0
+
+ else if (dtset%eph_task == +16) then
+   call wrtout([std_out, ab_out], " Using Fourier interpolation.")
+    comm_rpt = xmpi_comm_self
+    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+    interpolated = 1
+ else
+   MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
+ end if
+
  with_lr_model = .True.
 
  ! Create netcdf file.
 #ifdef HAVE_NETCDF
- NCF_CHECK(nctk_open_create(ncid, path, comm))
- NCF_CHECK(cryst%ncwrite(ncid))
+ if (my_rank == master) then
+   NCF_CHECK(nctk_open_create(ncid, out_ncpath, comm))
+   NCF_CHECK(dvdb%cryst%ncwrite(ncid))
 
- ! Add other dimensions.
- ncerr = nctk_def_dims(ncid, [ &
-   nctkdim_t("nfft", nfft), nctkdim_t("nspden", dvdb%nspden), &
-   nctkdim_t("natom3", 3 * cryst%natom), nctkdim_t("nqlist", nqlist)], defmode=.True.)
- NCF_CHECK(ncerr)
+   ! Add other dimensions.
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("nfft", nfft), nctkdim_t("nspden", dvdb%nspden), &
+     nctkdim_t("natom3", 3 * dvdb%cryst%natom)], defmode=.True.)
+   NCF_CHECK(ncerr)
 
- ! Define arrays
- ncerr = nctk_def_arrays(ncid, [ &
-   nctkarr_t("ngfft", "int", "three"), &
-   nctkarr_t("qlist", "dp", "three, nqlist"), &
-   nctkarr_t("phfreqs", "dp", "natom3, nqlist"), &
-   nctkarr_t("displ_cart", "dp", "two, natom3, natom3, nqlist"), &
-   nctkarr_t("v1_qnu", "dp", "two, nfft, nspden, natom3, nqlist")])
- NCF_CHECK(ncerr)
+   ! Define arrays
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("ngfft", "int", "three"), &
+     nctkarr_t("qpt", "dp", "three"), &
+     nctkarr_t("phfreqs", "dp", "natom3"), &
+     nctkarr_t("displ_cart", "dp", "two, natom3, natom3"), &
+     nctkarr_t("v1_qnu", "dp", "two, nfft, nspden, natom3")])
+   NCF_CHECK(ncerr)
 
- if (with_lr_model) then
-   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t("v1lr_qnu", "dp", "two, nfft, nspden, natom3, nqlist")]))
+   if (with_lr_model) then
+     NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t("v1lr_qnu", "dp", "two, nfft, nspden, natom3")]))
+   end if
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpt"), qpt))
  end if
-
- NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qlist"), qlist))
 #endif
 
  ABI_MALLOC(v1_qnu, (2, nfft, dvdb%nspden, dvdb%natom3))
@@ -709,50 +784,55 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
    ABI_MALLOC(v1lr_qnu, (2, nfft, dvdb%nspden, dvdb%natom3))
  end if
 
- do iq=1,nqlist
-   qpt = qlist(:,iq)
-   call ifc%fourq(cryst, qpt, phfreqs, displ_cart, out_displ_red=displ_red)
+ ! Get phonon freqs and displacemented for this q-point.
+ call ifc%fourq(dvdb%cryst, qpt, phfreqs, displ_cart, out_displ_red=displ_red)
 
+ if (interpolated == 0) then
    ! Find the index of the q-point in the DVDB.
    db_iqpt = dvdb%findq(qpt)
    if (db_iqpt /= -1) then
-     if (prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
      ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
      ! This call allocates v1scf(cplex, nfft, nspden, 3*natom))
      call dvdb%readsym_allv1(db_iqpt, cplex, nfft, ngfft, v1scf, comm)
    else
-     MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB file"))
+     MSG_ERROR(sjoin("Cannot find q-point:", ktoa(qpt), "in DVDB file"))
    end if
+ else
 
-   ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
-   ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
-   ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)
-   call v1atm_to_vqnu(cplex, nfft, dvdb%nspden, dvdb%natom3, v1scf, displ_red, v1_qnu)
+   cplex = 2
+   ABI_MALLOC(v1scf, (cplex, nfft, dvdb%nspden, dvdb%my_npert))
+   call dvdb%ftinterp_qpt(qpt, nfft, ngfft, v1scf, dvdb%comm_rpt)
+ end if
 
-   if (with_lr_model) then
-     ! Compute LR model in the atomic representation then compute phonon representation in v1lr_qnu.
-     v1lr_atm = zero
-     do idir=1,3
-       do ipert=1,dvdb%natom
-         ip = (ipert - 1) * 3 + idir
-         call dvdb%get_v1r_long_range(qpt, idir, ipert, nfft, ngfft, v1lr_atm(:,:,1,ip))
-         if (dvdb%nspden == 2) v1lr_atm(:,:,2,ip) = v1lr_atm(:,:,1,ip)
-       end do
+ ! Compute scattering potential in phonon representations instead ot atomic one.
+ ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
+ ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
+ ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)
+ call v1atm_to_vqnu(cplex, nfft, dvdb%nspden, dvdb%natom3, v1scf, displ_red, v1_qnu)
+
+ if (with_lr_model) then
+   ! Compute LR model in the atomic representation then compute phonon representation in v1lr_qnu.
+   v1lr_atm = zero
+   do idir=1,3
+     do ipert=1,dvdb%natom
+       ip = (ipert - 1) * 3 + idir
+       call dvdb%get_v1r_long_range(qpt, idir, ipert, nfft, ngfft, v1lr_atm(:,:,1,ip))
+       if (dvdb%nspden == 2) v1lr_atm(:,:,2,ip) = v1lr_atm(:,:,1,ip)
      end do
-     call v1atm_to_vqnu(2, nfft, dvdb%nspden, dvdb%natom3, v1lr_atm, displ_red, v1lr_qnu)
-   end if
+   end do
+   call v1atm_to_vqnu(2, nfft, dvdb%nspden, dvdb%natom3, v1lr_atm, displ_red, v1lr_qnu)
+ end if
 
 #ifdef HAVE_NETCDF
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfreqs, start=[1, iq]))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "displ_cart"), displ_cart, start=[1, 1, 1, iq]))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1_qnu"), v1_qnu, start=[1, 1, 1, 1, iq]))
-   if (with_lr_model) then
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1lr_qnu"), v1lr_qnu, start=[1, 1, 1, 1, iq]))
-   end if
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfreqs))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "displ_cart"), displ_cart))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1_qnu"), v1_qnu))
+ if (with_lr_model) then
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1lr_qnu"), v1lr_qnu))
+ end if
 #endif
-   ABI_FREE(v1scf)
- end do
 
+ ABI_FREE(v1scf)
  ABI_FREE(v1_qnu)
  ABI_SFREE(v1lr_atm)
  ABI_SFREE(v1lr_qnu)
@@ -781,8 +861,10 @@ end subroutine ncwrite_v1qnu
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_gkk
 !!
 !! CHILDREN
+!!      get_kg
 !!
 !! SOURCE
 

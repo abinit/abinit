@@ -825,9 +825,9 @@ subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc
  ! * Free memory.
  ABI_FREE(kln2ln)
  call slatang_cshell_free(Slatang3l)
- ABI_DT_FREE(Slatang3l)
+ ABI_FREE(Slatang3l)
  call slatrad_cshell_free(Slatrad3l)
- ABI_DT_FREE(Slatrad3l)
+ ABI_FREE(Slatrad3l)
 
 end subroutine paw_sigxcore
 !!***
@@ -857,7 +857,7 @@ end subroutine paw_sigxcore
 !!    for each type of atom.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      klmn2ijlmn,pawio_print_ij,slatrad_free,slatrad_init,wrtout

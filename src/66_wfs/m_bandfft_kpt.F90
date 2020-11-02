@@ -62,7 +62,7 @@ MODULE m_bandfft_kpt
 !!
 !! FUNCTION
 !! The bandfft_kpt_type structured datatype gather different information
-!! about the triple band-fft-kpt parallelisation :
+!! about the triple band-fft-kpt parallelisation:
 !! tabs which are distributed over all the three dimensions and stored during
 !! the calculation, dimensions of messages exchange during the calculations...
 !! i.e.: all the information which were spread over the entire code before and
@@ -82,8 +82,8 @@ MODULE m_bandfft_kpt
                                             ! by the other processors band
   integer, allocatable :: kg_k_gather(:,:)  ! planewave coordinates
                                             ! (of the processor + sent by other processors band)
-  integer, allocatable :: recvcounts(:)     ! number of values received by the  processor from each processor band
-  integer, allocatable :: sendcounts(:)     ! number of values sent   by the  processor to   each processor band
+  integer, allocatable :: recvcounts(:)     ! number of values received by the processor from each processor band
+  integer, allocatable :: sendcounts(:)     ! number of values sent by the  processor to each processor band
   integer, allocatable :: rdispls   (:)     ! positions of values received by the processor from each processor band
   integer, allocatable :: sdispls   (:)     ! postions of values sent by the processor to each processor band
   integer, allocatable :: gbound(:,:)       ! sphere boundary info: gbound(2*mgfft+8,2)
@@ -99,7 +99,7 @@ MODULE m_bandfft_kpt
   integer :: istwf_k                        ! input option parameter that describes the storage of wfs
   integer :: idatarecv0                     ! position of the planewave coordinates (0,0,0)
   integer :: ndatarecv_tot                  ! total number of received values by the processor
-                                            ! (ndatarecv   + number of received opposited planewave coordinates)
+                                            ! (ndatarecv + number of received opposited planewave coordinates)
   integer :: ndatasend_sym                  ! number of sent values to the processors fft to create opposited
                                             ! planewave coordinates
   integer, allocatable :: kg_k_gather_sym(:,:)  ! planewave coordinates
@@ -108,13 +108,13 @@ MODULE m_bandfft_kpt
   integer, allocatable :: recvcounts_sym(:)     ! number of values received by the  processor from each processor fft
   integer, allocatable :: recvcounts_sym_tot(:) ! number of values received by each processor from the  other processors fft
   integer, allocatable :: sdispls_sym(:)        ! postions of values sent by the processor to each processor fft
-  integer, allocatable :: sendcounts_sym(:)     ! number of values sent   by the  processor to each processor fft
-  integer, allocatable :: sendcounts_sym_all(:) ! number of values sent   by each processor to the other processors fft
+  integer, allocatable :: sendcounts_sym(:)     ! number of values sent by the  processor to each processor fft
+  integer, allocatable :: sendcounts_sym_all(:) ! number of values sent by each processor to the other processors fft
   integer, allocatable :: tab_proc(:)           ! positions of opposited planewave coordinates in the list of the processors fft
 
   logical              :: have_to_reequilibrate ! indicates weather we will have to reequilibrate and allocate all these stuff
   integer              :: npw_fft               ! Number of plane waves during fft step
-  integer, allocatable :: indices_pw_fft(:)     !  Indices for sorting pw like pw
+  integer, allocatable :: indices_pw_fft(:)     ! Indices for sorting pw like pw
   integer, allocatable :: sendcount_fft (:)     ! Number of pw to send to others proc fft
   integer, allocatable :: senddisp_fft(:)       ! Positions for sending
   integer, allocatable :: recvcount_fft(:)      ! Number of pw to receive from others proc fft
@@ -194,9 +194,10 @@ CONTAINS
 !!  bandfft_kpt_in=<type(bandfft_kpt)>=bandfft_kpt datastructure
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -646,9 +647,10 @@ end subroutine bandfft_kpt_init1
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      prep_bandfft_tabs
+!!      m_bandfft_kpt
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -726,9 +728,10 @@ end subroutine bandfft_kpt_init2
 !!  bandfft_kpt_in=the datastructure to nullify
 !!
 !! PARENTS
-!!      posdoppler
+!!      m_positron
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -765,9 +768,10 @@ end subroutine bandfft_kpt_reset
 !!  bandfft_kpt_in=the datastructure to destroy
 !!
 !! PARENTS
-!!      m_bandfft_kpt,posdoppler
+!!      m_bandfft_kpt,m_positron
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -878,9 +882,10 @@ end subroutine bandfft_kpt_destroy
 !!
 !!
 !! PARENTS
-!!      gstate,gwls_hamiltonian
+!!      m_gstate,m_gwls_hamiltonian
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -948,6 +953,7 @@ end subroutine bandfft_kpt_destroy_array
 !! PARENTS
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1156,9 +1162,10 @@ end subroutine bandfft_kpt_copy
 !!  ierr=Error status
 !!
 !! PARENTS
-!!      posdoppler
+!!      m_positron
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1451,9 +1458,10 @@ end subroutine bandfft_kpt_mpi_send
 !!  output=# of on proc. sender
 !!
 !! PARENTS
-!!      posdoppler
+!!      m_positron
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1798,9 +1806,10 @@ end subroutine bandfft_kpt_mpi_recv
 !!  kinpw(:)=kinetic energy for each plane wave (Hartree)
 !!
 !! PARENTS
-!!      energy,fock2ACE,forstrnps
+!!      m_dft_energy,m_fock_getghc,m_forstr
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1886,9 +1895,10 @@ end subroutine bandfft_kpt_savetabs
 !!  bandfft_kpt_out=<type(bandfft_kpt)>=bandfft_kpt datastructure
 !!
 !! PARENTS
-!!      energy,fock2ACE,forstrnps
+!!      m_dft_energy,m_fock_getghc,m_forstr
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1977,9 +1987,10 @@ end subroutine bandfft_kpt_restoretabs
 !!  bandfft_kpt_current_ikpt value changed
 !!
 !! PARENTS
-!!      mkrho,prep_bandfft_tabs,vtorho
+!!      m_bandfft_kpt,m_mkrho,m_vtorho
 !!
 !! CHILDREN
+!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -2053,7 +2064,7 @@ end function bandfft_kpt_get_ikpt
 !!  bandfft_kpt tabs (defined in m_bandfft_kpt module)
 !!
 !! PARENTS
-!!      energy,fock2ACE,forstrnps,vtorho
+!!      m_dft_energy,m_fock_getghc,m_forstr,m_vtorho
 !!
 !! CHILDREN
 !!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv

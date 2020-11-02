@@ -60,6 +60,9 @@ nshiftk   1
           0.6666666666666667  0.3333333333333333  0.874132194455
    znucl  31 33
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/31ga.3.hgh, PseudosHGH_pwteter/33as.5.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -67,7 +70,6 @@ nshiftk   1
 #%% [files]
 #%% files_to_test = 
 #%%   t67.out, tolnlines = 17, tolabs = 21.0, tolrel = 3.000e-03, fld_options = -easy
-#%% psp_files = 31ga.hgh, 33as.hgh
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

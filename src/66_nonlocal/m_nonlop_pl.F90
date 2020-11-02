@@ -11,6 +11,7 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! PARENTS
+!!      m_nonlop
 !!
 !! CHILDREN
 !!
@@ -1303,7 +1304,7 @@ contains
 !! The initial 2 handles the Re and Im parts.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -1368,7 +1369,7 @@ end subroutine trace2
 !! \end{eqnarray} }}
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -1451,7 +1452,7 @@ end subroutine strsocv
 !!  G=0 component, that will be only one one proc...
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -1561,7 +1562,7 @@ end subroutine scalewf_nonlop
 !! For l=0, there is no contribution.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!

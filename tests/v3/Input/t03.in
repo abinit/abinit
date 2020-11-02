@@ -155,7 +155,7 @@ ndtset 8
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t03.out, tolnlines=0, tolabs=0.0, tolrel=0.0, fld_options=-medium
-#%% psp_files= 31ga.hgh, 33as.hgh 
+#%% psp_files= PseudosHGH_pwteter/31ga.3.hgh, PseudosHGH_pwteter/33as.5.hgh 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

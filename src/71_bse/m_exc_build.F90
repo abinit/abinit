@@ -37,6 +37,7 @@ module m_exc_build
  use mpi
 #endif
  use m_hdr
+ use m_wfd
 
  use defs_datatypes, only : pseudopotential_type
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
@@ -46,14 +47,13 @@ module m_exc_build
  use m_geometry,     only : normv
  use m_crystal,      only : crystal_t
  use m_gsphere,      only : gsphere_t, gsph_fft_tabs
- use m_vcoul,        only : vcoul_t 
+ use m_vcoul,        only : vcoul_t
  use m_bz_mesh,      only : kmesh_t, get_BZ_item, get_BZ_diff, has_BZ_item, isamek, findqg0
  use m_pawpwij,      only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_sym,      only : paw_symcprj_op
- use m_wfd,          only : wfd_t
  use m_oscillators,  only : rho_tw_g, sym_rhotwgq0
 
  implicit none
@@ -109,9 +109,9 @@ contains
 !!
 !! NOTES
 !!  *) Version for K_V = K_C (q=0), thus KP_V = KP_C
-!!  *) No exchange limit: use LDA energies in case.
+!!  *) No exchange limit: use DFT energies in case.
 !!  *) Symmetry of H(-k-k') = H*(k k') not used.
-!!  *) Coulomb term can be approssimateed as diagonal in G.
+!!  *) Coulomb term can be approximated as diagonal in G.
 !!  *) Valence bands treated from lomo on.
 !!  *) Symmetries of the sub-blocks are used to reduce the number of elements to calculate.
 !!
@@ -151,9 +151,12 @@ contains
 !!      -----------------------------------
 !!
 !! PARENTS
-!!      exc_build_ham
+!!      m_exc_build
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -208,6 +211,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  logical :: use_mpiio,do_coulomb_term,do_exchange_term,w_is_diagonal,isirred
  logical :: is_qeq0
  character(len=500) :: msg
+ type(wave_t),pointer :: wave_ck,  wave_ckp, wave_vk, wave_vkp
 !arrays
  integer :: bidx(2,4),g0(3),spin_ids(2,3)
  integer(i8b) :: nels_block(3)
@@ -314,22 +318,22 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ABI_MALLOC(ur_vk ,(nspinor*nfftot_osc))
 
  if (Wfd%usepaw==1) then
-   ABI_DT_MALLOC(Cp_vk,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_vk,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_vk,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_ck,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_ck,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_ck,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_ckp,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_ckp,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_ckp,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_vkp,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_vkp,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_vkp,0,Wfd%nlmn_atm)
 
-   ABI_DT_MALLOC(Cp_tmp1,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp1,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp1,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_tmp2,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp2,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp2,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_tmp3,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp3,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp3,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_tmp4,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp4,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp4,0,Wfd%nlmn_atm)
  end if
  !
@@ -687,7 +691,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ! === Evaluate oscillator matrix elements ===
          ! * $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form.
          if (Wfd%usepaw==1.and.ik_bz/=ikp_bz) then
-           ABI_DT_MALLOC(Pwij_q,(Cryst%ntypat))
+           ABI_MALLOC(Pwij_q,(Cryst%ntypat))
            call pawpwij_init(Pwij_q,npweps,Qmesh%bz(:,iq_bz),Gsph_c%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
          end if
 
@@ -696,8 +700,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ! =======================================
          do ic=bidx(1,2),bidx(2,2) !do ic=BSp%lumo,BSp%nbnds
 
-           if (wfd%ihave_ur(ic,ik_ibz,spin1,how="Stored")) then
-             ptur_ck => Wfd%Wave(ic,ik_ibz,spin1)%ur
+           ABI_CHECK(wfd%get_wave_ptr(ic, ik_ibz, spin1, wave_ck, msg) == 0, msg)
+           if (wave_ck%has_ur == WFD_STORED) then
+             ptur_ck => wave_ck%ur
            else
              call wfd%get_ur(ic,ik_ibz,spin1,ur_ck)
              ptur_ck => ur_ck
@@ -706,8 +711,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
            ! Get cprj for this (c,kbz,s1) in the BZ.
            ! phase due to the umklapp G0 in k-q is already included.
            if (Wfd%usepaw==1) then
-             if (wfd%ihave_cprj(ic,ik_ibz,spin1,how="Stored")) then
-               ptcp_ck => Wfd%Wave(ic,ik_ibz,spin1)%cprj
+             if (wave_ck%has_cprj == WFD_STORED) then
+               ptcp_ck => wave_ck%cprj
              else
                call wfd%get_cprj(ic,ik_ibz,spin1,Cryst,Cp_tmp1,sorted=.FALSE.)
                ptcp_ck => Cp_tmp1
@@ -725,8 +730,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                ! Calculate matrix element from wfr.
                ! TODO: change the order of the loops.
 
-               if (wfd%ihave_ur(icp,ikp_ibz,spin2,how="Stored")) then
-                 ptur_ckp => Wfd%Wave(icp,ikp_ibz,spin2)%ur
+               ABI_CHECK(wfd%get_wave_ptr(icp, ikp_ibz, spin2, wave_ckp, msg) == 0, msg)
+               if (wave_ckp%has_ur == WFD_STORED) then
+                 ptur_ckp => wave_ckp%ur
                else
                  call wfd%get_ur(icp,ikp_ibz,spin2,ur_ckp)
                  ptur_ckp => ur_ckp
@@ -735,8 +741,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                ! Load cprj for this (c,k,s2) in the BZ.
                ! Do not care about umklapp G0 in k-q as the phase is already included.
                if (Wfd%usepaw==1) then
-                 if (wfd%ihave_cprj(icp,ikp_ibz,spin2,how="Stored")) then
-                   ptcp_ckp =>  Wfd%Wave(icp,ikp_ibz,spin2)%cprj
+                 if (wave_ckp%has_cprj == WFD_STORED) then
+                   ptcp_ckp =>  wave_ckp%cprj
                  else
                    call wfd%get_cprj(icp,ikp_ibz,spin2,Cryst,Cp_tmp2,sorted=.FALSE.)
                    ptcp_ckp =>  Cp_tmp2
@@ -745,13 +751,13 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                end if
 
                call rho_tw_g(nspinor,npweps,nfftot_osc,ndat1,ngfft_osc,map2sphere,use_padfft,igfftg0,gbound,&
-&                ptur_ckp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
-&                ptur_ck ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
-&                dim_rtwg,rhxtwg_cpc)
+                 ptur_ckp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
+                 ptur_ck ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
+                 dim_rtwg,rhxtwg_cpc)
 
                if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
                  call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_c%gvec,&
-&                  Cp_ckp,Cp_ck,Pwij_q,rhxtwg_cpc)
+                  Cp_ckp,Cp_ck,Pwij_q,rhxtwg_cpc)
                end if
              end if
 
@@ -795,18 +801,20 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                ene_t = BSp%Trans(it,spin1)%en
 
                ! TODO: use this but change the order of the loops.
-               if (wfd%ihave_ur(iv,ik_ibz,spin1,how="Stored")) then
-                 ptur_vk => Wfd%Wave(iv,ik_ibz,spin1)%ur
+               ABI_CHECK(wfd%get_wave_ptr(iv, ik_ibz, spin1, wave_vk, msg) == 0, msg)
+
+               if (wave_vk%has_ur == WFD_STORED) then
+                 ptur_vk => wave_vk%ur
                else
                  call wfd%get_ur(iv,ik_ibz,spin1,ur_vk)
                  ptur_vk => ur_vk
                end if
                !
                ! Load cprj for this (v,k,s1) in the BZ.
-               ! * Do not care about umklapp G0 in k-q as the phase is already included.
+               ! Do not care about umklapp G0 in k-q as the phase is already included.
                if (Wfd%usepaw==1) then
-                 if (wfd%ihave_cprj(iv,ik_ibz,spin1,how="Stored")) then
-                   ptcp_vk => Wfd%Wave(iv,ik_ibz,spin1)%cprj
+                 if (wave_vk%has_cprj == WFD_STORED) then
+                   ptcp_vk => wave_vk%cprj
                  else
                    call wfd%get_cprj(iv,ik_ibz,spin1,Cryst,Cp_tmp3,sorted=.FALSE.)
                    ptcp_vk => Cp_tmp3
@@ -841,9 +849,12 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                    rhxtwg_vpv(:) = sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npweps,rhxtwg_q0(:,ivp,iv,ik_ibz,spin1),Gsph_c)
 
                  else
+
+                   ABI_CHECK(wfd%get_wave_ptr(ivp, ikp_ibz, spin2, wave_vkp, msg) == 0, msg)
+
                    ! Calculate matrix element from wfr.
-                   if (wfd%ihave_ur(ivp,ikp_ibz,spin2,how="Stored")) then
-                     ptur_vkp => Wfd%Wave(ivp,ikp_ibz,spin2)%ur
+                   if (wave_vkp%has_ur == WFD_STORED) then
+                     ptur_vkp => wave_vkp%ur
                    else
                      call wfd%get_ur(ivp,ikp_ibz,spin2,ur_vkp)
                      ptur_vkp => ur_vkp
@@ -852,8 +863,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                    ! Load cprj for this (vp,kp,s2) in the BZ.
                    ! Do not care about umklapp G0 in k-q as the phase is already included.
                    if (Wfd%usepaw==1) then
-                     if (wfd%ihave_cprj(ivp,ikp_ibz,spin2,how="Stored")) then
-                       ptcp_vkp =>  Wfd%Wave(ivp,ikp_ibz,spin2)%cprj
+                     if (wave_vkp%has_cprj == WFD_STORED) then
+                       ptcp_vkp =>  wave_vkp%cprj
                      else
                        call wfd%get_cprj(ivp,ikp_ibz,spin2,Cryst,Cp_tmp4,sorted=.FALSE.)
                        ptcp_vkp => Cp_tmp4
@@ -862,13 +873,13 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                    end if
 
                    call rho_tw_g(nspinor,npweps,nfftot_osc,ndat1,ngfft_osc,map2sphere,use_padfft,igfftg0,gbound,&
-&                     ptur_vkp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
-&                     ptur_vk ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
-&                     dim_rtwg,rhxtwg_vpv)
+                     ptur_vkp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
+                     ptur_vk ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
+                     dim_rtwg,rhxtwg_vpv)
 
                    if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
                      call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
-&                      Gsph_c%gvec,Cp_vkp,Cp_vk,Pwij_q,rhxtwg_vpv)
+                       Gsph_c%gvec,Cp_vkp,Cp_vk,Pwij_q,rhxtwg_vpv)
                    end if
                  end if
 
@@ -933,7 +944,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
          if (Wfd%usepaw==1.and.ik_bz/=ikp_bz) then ! Free the onsite contribution for this q.
            call pawpwij_free(Pwij_q)
-           ABI_DT_FREE(Pwij_q)
+           ABI_FREE(Pwij_q)
          end if
 
        end do ! ik_bz
@@ -1632,21 +1643,21 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ! Deallocation for PAW.
  if (Wfd%usepaw==1) then
    call pawcprj_free(Cp_vk)
-   ABI_DT_FREE(Cp_vk)
+   ABI_FREE(Cp_vk)
    call pawcprj_free(Cp_ck)
-   ABI_DT_FREE(Cp_ck)
+   ABI_FREE(Cp_ck)
    call pawcprj_free(Cp_ckp)
-   ABI_DT_FREE(Cp_ckp)
+   ABI_FREE(Cp_ckp)
    call pawcprj_free(Cp_vkp)
-   ABI_DT_FREE(Cp_vkp)
+   ABI_FREE(Cp_vkp)
    call pawcprj_free(Cp_tmp1)
-   ABI_DT_FREE(Cp_tmp1)
+   ABI_FREE(Cp_tmp1)
    call pawcprj_free(Cp_tmp2)
-   ABI_DT_FREE(Cp_tmp2)
+   ABI_FREE(Cp_tmp2)
    call pawcprj_free(Cp_tmp3)
-   ABI_DT_FREE(Cp_tmp3)
+   ABI_FREE(Cp_tmp3)
    call pawcprj_free(Cp_tmp4)
-   ABI_DT_FREE(Cp_tmp4)
+   ABI_FREE(Cp_tmp4)
  end if
 
  call xmpi_barrier(comm)
@@ -1682,9 +1693,9 @@ end subroutine exc_build_block
 !!
 !! NOTES
 !!  *) Version for K_V = K_C (q=0), thus KP_V = KP_C
-!!  *) No exchange limit: use LDA energies in case.
+!!  *) No exchange limit: use DFT energies in case.
 !!  *) Symmetry of H(-k-k') = H*(k k') not used.
-!!  *) Coulomb term can be approssimateed as diagonal in G.
+!!  *) Coulomb term can be approximated as diagonal in G.
 !!  *) Valence bands treated from lomo on.
 !!  *) Symmetries of the sub-blocks are used to reduce the number of elements to calculate.
 !!
@@ -1726,6 +1737,9 @@ end subroutine exc_build_block
 !! PARENTS
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2098,9 +2112,12 @@ end subroutine exc_build_v
 !!  The excitonic Hamiltonian is saved on an external binary file (see below).
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2224,9 +2241,12 @@ end subroutine exc_build_ham
 !!     Allocated here and filled with the matrix elements on each node.
 !!
 !! PARENTS
-!!      exc_build_ham
+!!      m_exc_build
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2258,6 +2278,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  real(dp) :: cpu,wall,gflops !q0vol,fcc_const
  complex(dpc) :: ph_mkt
  character(len=500) :: msg
+ type(wave_t),pointer :: wave_v, wave_c
 !arrays
  integer,allocatable :: igfftg0(:),task_distrib(:,:,:,:)
  integer,allocatable :: gbound(:,:),id_tab(:)
@@ -2277,9 +2298,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 
  lomo_min = MINVAL(lomo_spin); humo_max = MAXVAL(humo_spin)
 
- if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
- end if
+ if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
 
  mgfft_osc   = MAXVAL(ngfft_osc(1:3))
  fftalga_osc = ngfft_osc(7)/100 !; fftalgc_osc=MOD(ngfft_osc(7),10)
@@ -2306,9 +2325,9 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  ! &              * (Cryst%ucvol*Kmesh%nbz)/(2*pi)**3. * QL*QL
 
  if (Wfd%usepaw==1) then
-   ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
+   ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
    call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
+   ABI_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
    call pawcprj_alloc(Cp2,0,Wfd%nlmn_atm)
  end if
 
@@ -2326,7 +2345,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  call get_BZ_item(Qmesh,iqbz0,qbz,iq_ibz,isym_q,itim_q)
 
  if (Wfd%usepaw==1) then ! Prepare onsite contributions at q==0
-   ABI_DT_MALLOC(Pwij_q0,(Cryst%ntypat))
+   ABI_MALLOC(Pwij_q0,(Cryst%ntypat))
    call pawpwij_init(Pwij_q0,npweps,Qmesh%bz(:,iqbz0),Gsph_x%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
  end if
  !
@@ -2370,45 +2389,46 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
      do iv=lomo_spin(spin),humo_spin(spin) ! Loop over band V
        if ( ALL(task_distrib(:,iv,ik_ibz,1)/=Wfd%my_rank) ) CYCLE
 
-       if (wfd%ihave_ur(iv,ik_ibz,spin,how="Stored")) then
-         ptr_ur1 =>  Wfd%Wave(iv,ik_ibz,spin)%ur
+       ABI_CHECK(wfd%get_wave_ptr(iv, ik_ibz, spin, wave_v, msg) == 0, msg)
+
+       if (wave_v%has_ur == WFD_STORED) then
+         ptr_ur1 =>  wave_v%ur
        else
          call wfd%get_ur(iv,ik_ibz,spin,ur1)
          ptr_ur1 =>  ur1
        end if
 
-       if (Wfd%usepaw==1) then
-         call wfd%get_cprj(iv,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
-       end if
+       if (Wfd%usepaw==1) call wfd%get_cprj(iv,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
 
        ! Loop over band C
        do ic=lomo_spin(spin),humo_spin(spin)
          if ( task_distrib(ic,iv,ik_ibz,1)/=Wfd%my_rank ) CYCLE
 
-         if (wfd%ihave_ur(ic,ik_ibz,spin,how="Stored")) then
-           ptr_ur2 =>  Wfd%Wave(ic,ik_ibz,spin)%ur
+         ABI_CHECK(wfd%get_wave_ptr(ic, ik_ibz, spin, wave_c, msg) == 0, msg)
+
+         if (wave_c%has_ur == WFD_STORED) then
+           ptr_ur2 =>  wave_c%ur
          else
            call wfd%get_ur(ic,ik_ibz,spin,ur2)
            ptr_ur2 =>  ur2
          end if
 
-         if (Wfd%usepaw==1) then
-           call wfd%get_cprj(ic,ik_ibz,spin,Cryst,Cp2,sorted=.FALSE.)
-         end if
+         if (Wfd%usepaw==1) call wfd%get_cprj(ic,ik_ibz,spin,Cryst,Cp2,sorted=.FALSE.)
 
          call rho_tw_g(Wfd%nspinor,npweps,nfftot_osc,ndat1,ngfft_osc,map2sphere1,use_padfft,igfftg0,gbound,&
-&          ptr_ur1,1,id_tab,ph_mkt,spinrot_k,&
-&          ptr_ur2,1,id_tab,ph_mkt,spinrot_k,&
-&          dim_rtwg1,rhotwg1)
+           ptr_ur1,1,id_tab,ph_mkt,spinrot_k,&
+           ptr_ur2,1,id_tab,ph_mkt,spinrot_k,&
+           dim_rtwg1,rhotwg1)
 
-         if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
+         if (Wfd%usepaw==1) then
+           ! Add PAW onsite contribution.
            call paw_rho_tw_g(npweps,dim_rtwg1,Wfd%nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_x%gvec,&
-&            Cp1,Cp2,Pwij_q0,rhotwg1)
+             Cp1,Cp2,Pwij_q0,rhotwg1)
          end if
 
          ! If q=0 treat Exchange and Coulomb-term independently
          if (iv <= homo_spin(spin) .and. ic <= homo_spin(spin) .or. &
-&            iv >  homo_spin(spin) .and. ic >  homo_spin(spin)) then
+             iv >  homo_spin(spin) .and. ic >  homo_spin(spin)) then
 
            if (iv/=ic) then !COULOMB term: C/=V: ignore them
              rhotwg1(1) = czero_gw
@@ -2474,11 +2494,11 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  if (Wfd%usepaw==1) then
    ! Deallocation for PAW.
    call pawpwij_free(Pwij_q0)
-   ABI_DT_FREE(Pwij_q0)
+   ABI_FREE(Pwij_q0)
    call pawcprj_free(Cp1)
-   ABI_DT_FREE(Cp1)
+   ABI_FREE(Cp1)
    call pawcprj_free(Cp2)
-   ABI_DT_FREE(Cp2)
+   ABI_FREE(Cp2)
  end if
 
  call timab(671,2,tsec)

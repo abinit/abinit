@@ -678,10 +678,11 @@ end subroutine abihist_bcast_1D
 !!      |                    acell, stresses, and energies,
 !!
 !! PARENTS
-!!      gstateimg,m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
-!!      pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin,pred_lbfgs
-!!      pred_moldyn,pred_nose,pred_srkna14,pred_steepdesc,pred_velverlet
-!!      pred_verlet
+!!      m_fit_polynomial_coeff,m_generate_training_set,m_gstateimg,m_mover
+!!      m_pred_bfgs,m_pred_delocint,m_pred_diisrelax,m_pred_fire,m_pred_hmc
+!!      m_pred_isokinetic,m_pred_isothermal,m_pred_langevin,m_pred_lotf
+!!      m_pred_moldyn,m_pred_nose,m_pred_srkna14,m_pred_steepdesc
+!!      m_pred_velverlet,m_pred_verlet
 !!
 !! CHILDREN
 !!
@@ -813,9 +814,10 @@ end function abihist_findIndex
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax,pred_hmc
-!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_lbfgs,pred_moldyn
-!!      pred_nose,pred_srkna14,pred_steepdesc,pred_velverlet,pred_verlet
+!!      m_gstateimg,m_mover,m_precpred_1geo,m_pred_bfgs,m_pred_delocint
+!!      m_pred_diisrelax,m_pred_fire,m_pred_hmc,m_pred_isokinetic
+!!      m_pred_isothermal,m_pred_langevin,m_pred_lotf,m_pred_moldyn,m_pred_nose
+!!      m_pred_srkna14,m_pred_steepdesc,m_pred_velverlet,m_pred_verlet
 !!
 !! CHILDREN
 !!
@@ -884,7 +886,7 @@ end subroutine hist2var
 !!                               stresses, cell and energies,
 !!
 !! PARENTS
-!!      gstateimg,mover
+!!      m_gstateimg,m_mover
 !!
 !! CHILDREN
 !!
@@ -952,7 +954,7 @@ end subroutine vel2hist
 !!  hist_out <type(abihist)>
 !!
 !! PARENTS
-!!      gstateimg,m_effective_potential_file
+!!      m_effective_potential_file,m_gstateimg
 !!
 !! CHILDREN
 !!
@@ -1150,7 +1152,7 @@ end subroutine abihist_compare_and_copy
 !!  (only writing)
 !!
 !! PARENTS
-!!      mover
+!!      m_fit_polynomial_coeff,m_mover
 !!
 !! CHILDREN
 !!
@@ -1186,14 +1188,17 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 #if defined HAVE_NETCDF
 
  need_to_write = .FALSE.
- if(nctime==0 .or. ifirst==1 .or. (itime > nctime .and.mod(itime,nctime) == 0)) need_to_write = .TRUE.
+ if(nctime==0 .or. ifirst==1) need_to_write = .TRUE.
+ if (itime > nctime .and. nctime /= 0) then
+     if (mod(itime,nctime) == 0) need_to_write = .TRUE.
+ end if
 !Return if we don't need to write the HIST file at this step
  if (.not. need_to_write) return
 
  if (ifirst==1) then
 !##### First access: Create NetCDF file and write defs
 
-   write(std_out,*) 'Write iteration in HIST netCDF file'
+   write(std_out,*) 'Write iteration in HIST netCDF file (also create it)'
    npsp=size(znucl)
 
 !  Create netCDF file
@@ -1284,7 +1289,7 @@ end subroutine write_md_hist
 !!  (only writing)
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!
@@ -1421,7 +1426,7 @@ end subroutine write_md_hist_img
 !!                     cell dims and energies,
 !!
 !! PARENTS
-!!      m_effective_potential_file,m_tdep_readwrite,mover
+!!      m_effective_potential_file,m_mover,m_mover_effpot,m_tdep_readwrite
 !!
 !! CHILDREN
 !!
@@ -1520,7 +1525,7 @@ end subroutine read_md_hist
 !!    Size(hist) is equal to a number of images to be read
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
 !!

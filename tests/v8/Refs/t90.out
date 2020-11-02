@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h33 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 11h05 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t90/t90.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/v8_t90/t90.in
 - output file    -> t90.out
 - root for input  files -> t90i
 - root for output files -> t90o
@@ -78,16 +78,16 @@ _ WF disk file :      0.594 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       7
-     lnmax =       7     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       7     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       0
 -    mband =           8        mffmem =           1         mkmem =           8
-       mpw =         274          nfft =        5832          nkpt =           8
+       mpw =         303          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       2.768 Mbytes of memory.
+P This job should need less than                       3.407 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.270 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.298 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -95,16 +95,16 @@ _ WF disk file :      0.270 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       7
-     lnmax =       7     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       7     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       2
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       0
 -    mband =          16        mffmem =           1         mkmem =           8
-       mpw =         274          nfft =        5832          nkpt =           8
+       mpw =         303          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       3.616 Mbytes of memory.
+P This job should need less than                       4.343 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.537 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.594 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -112,16 +112,16 @@ _ WF disk file :      0.537 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =      14
-     lnmax =      14     mgfft =      18  mpssoang =       5    mqgrid =    3001
+     lnmax =      14     mgfft =      20  mpssoang =       5    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       4   nspinor =       2
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       0
 -    mband =          16        mffmem =           1         mkmem =           8
-       mpw =         274          nfft =        5832          nkpt =           8
+       mpw =         303          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       6.904 Mbytes of memory.
+P This job should need less than                       8.774 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.537 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.594 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -143,24 +143,14 @@ _ WF disk file :      0.537 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
              bdgw4          1       6       1       6
              bdgw5          1      12       1      12
              bdgw6          1      12       1      12
-             ecut1     8.00000000E+00 Hartree
-             ecut2     8.00000000E+00 Hartree
-             ecut3     8.00000000E+00 Hartree
-             ecut4     7.56385066E+00 Hartree
-             ecut5     7.56385066E+00 Hartree
-             ecut6     7.56385066E+00 Hartree
-         ecutsigx1     8.00000000E+00 Hartree
-         ecutsigx2     8.00000000E+00 Hartree
-         ecutsigx3     8.00000000E+00 Hartree
-         ecutsigx4     7.56385066E+00 Hartree
-         ecutsigx5     7.56385066E+00 Hartree
-         ecutsigx6     7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
+         ecutsigx      8.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     0.00000000E+00 Hartree
-          ecutwfn4     7.56385066E+00 Hartree
-          ecutwfn5     7.56385066E+00 Hartree
-          ecutwfn6     7.56385066E+00 Hartree
+          ecutwfn4     8.00000000E+00 Hartree
+          ecutwfn5     8.00000000E+00 Hartree
+          ecutwfn6     8.00000000E+00 Hartree
 -          fftalg         312
            getwfk1          0
            getwfk2          1
@@ -367,12 +357,7 @@ P           mkmem           8
           nbandhf5          8
           nbandhf6          8
            ndtset           6
-            ngfft1         20      20      20
-            ngfft2         20      20      20
-            ngfft3         20      20      20
-            ngfft4         18      18      18
-            ngfft5         18      18      18
-            ngfft6         18      18      18
+            ngfft          20      20      20
              nkpt           8
            nkptgw           2
            nkpthf          64
@@ -544,8 +529,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si_r.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -886,8 +871,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si_r.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1038,8 +1023,8 @@ band_energy         : -1.69180394797768E-01
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
-dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 274, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 303, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 5, }
 ...
@@ -1065,8 +1050,8 @@ meta: {optdriver: 4, gwcalctyp: 5, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si_r.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1127,10 +1112,10 @@ meta: {optdriver: 4, gwcalctyp: 5, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  === KS Band Gaps ===
@@ -1167,15 +1152,15 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.550
 QP_gap     :    8.628
-Delta_QP_KS:    6.077
+Delta_QP_KS:    6.078
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -7.548 -10.490 -17.500   0.000   1.000   0.000 -17.500  -7.009 -14.558
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1  -7.548 -10.494 -17.503   0.000   1.000   0.000 -17.503  -7.010 -14.558
         2   4.516 -11.366 -13.071   0.000   1.000   0.000 -13.071  -1.705   2.811
         3   4.516 -11.366 -13.071   0.000   1.000   0.000 -13.071  -1.705   2.811
         4   4.516 -11.366 -13.071   0.000   1.000   0.000 -13.071  -1.705   2.811
-        5   7.066 -10.061  -5.688   0.000   1.000   0.000  -5.688   4.372  11.439
-        6   7.066 -10.061  -5.688   0.000   1.000   0.000  -5.688   4.372  11.439
+        5   7.066 -10.063  -5.689   0.000   1.000   0.000  -5.689   4.373  11.440
+        6   7.066 -10.063  -5.689   0.000   1.000   0.000  -5.689   4.373  11.440
 ...
 
 
@@ -1184,15 +1169,15 @@ iteration_state: {dtset: 4, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.858
-QP_gap     :    9.311
-Delta_QP_KS:    6.453
+QP_gap     :    9.310
+Delta_QP_KS:    6.452
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -5.171 -10.883 -16.882   0.000   1.000   0.000 -16.882  -5.999 -11.170
-        2  -2.528 -10.215 -14.893   0.000   1.000   0.000 -14.893  -4.678  -7.206
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1  -5.171 -10.884 -16.884   0.000   1.000   0.000 -16.884  -6.000 -11.171
+        2  -2.528 -10.216 -14.894   0.000   1.000   0.000 -14.894  -4.679  -7.206
         3   3.291 -11.099 -13.280   0.000   1.000   0.000 -13.280  -2.181   1.110
         4   3.291 -11.099 -13.280   0.000   1.000   0.000 -13.280  -2.181   1.110
-        5   6.150 -10.113  -5.841   0.000   1.000   0.000  -5.841   4.272  10.421
+        5   6.150 -10.113  -5.842   0.000   1.000   0.000  -5.842   4.271  10.421
         6   7.853  -9.683  -5.024   0.000   1.000   0.000  -5.024   4.659  12.512
 ...
 
@@ -1204,8 +1189,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
-dimensions: {natom: 2, nkpt: 8, mband: 16, nsppol: 1, nspinor: 2, nspden: 1, mpw: 274, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 16, nsppol: 1, nspinor: 2, nspden: 1, mpw: 303, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 5, }
 ...
@@ -1268,10 +1253,10 @@ meta: {optdriver: 4, gwcalctyp: 5, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  === KS Band Gaps ===
@@ -1307,22 +1292,22 @@ iteration_state: {dtset: 5, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.550
-QP_gap     :    8.627
-Delta_QP_KS:    6.077
+QP_gap     :    8.628
+Delta_QP_KS:    6.078
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -7.548 -10.490 -17.499   0.000   1.000   0.000 -17.499  -7.008 -14.557
-        2  -7.548 -10.490 -17.499   0.000   1.000   0.000 -17.499  -7.008 -14.557
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1  -7.548 -10.494 -17.503   0.000   1.000   0.000 -17.503  -7.010 -14.558
+        2  -7.548 -10.494 -17.503   0.000   1.000   0.000 -17.503  -7.010 -14.558
         3   4.516 -11.366 -13.071   0.000   1.000   0.000 -13.071  -1.705   2.811
         4   4.516 -11.366 -13.071   0.000   1.000   0.000 -13.071  -1.705   2.811
         5   4.516 -11.366 -13.071   0.000   1.000   0.000 -13.071  -1.705   2.811
         6   4.516 -11.366 -13.071   0.000   1.000   0.000 -13.071  -1.705   2.811
         7   4.516 -11.366 -13.071   0.000   1.000   0.000 -13.071  -1.705   2.811
         8   4.516 -11.366 -13.071   0.000   1.000   0.000 -13.071  -1.705   2.811
-        9   7.066 -10.061  -5.688   0.000   1.000   0.000  -5.688   4.372  11.439
-       10   7.066 -10.061  -5.688   0.000   1.000   0.000  -5.688   4.372  11.439
-       11   7.066 -10.061  -5.688   0.000   1.000   0.000  -5.688   4.372  11.439
-       12   7.066 -10.061  -5.688   0.000   1.000   0.000  -5.688   4.372  11.439
+        9   7.066 -10.063  -5.689   0.000   1.000   0.000  -5.689   4.373  11.440
+       10   7.066 -10.063  -5.689   0.000   1.000   0.000  -5.689   4.373  11.440
+       11   7.066 -10.063  -5.689   0.000   1.000   0.000  -5.689   4.373  11.440
+       12   7.066 -10.063  -5.689   0.000   1.000   0.000  -5.689   4.373  11.440
 ...
 
 
@@ -1331,20 +1316,20 @@ iteration_state: {dtset: 5, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.858
-QP_gap     :    9.311
-Delta_QP_KS:    6.453
+QP_gap     :    9.310
+Delta_QP_KS:    6.452
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -5.171 -10.883 -16.882   0.000   1.000   0.000 -16.882  -5.999 -11.170
-        2  -5.171 -10.883 -16.882   0.000   1.000   0.000 -16.882  -5.999 -11.170
-        3  -2.528 -10.215 -14.893   0.000   1.000   0.000 -14.893  -4.678  -7.206
-        4  -2.528 -10.215 -14.893   0.000   1.000   0.000 -14.893  -4.678  -7.206
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1  -5.171 -10.884 -16.884   0.000   1.000   0.000 -16.884  -6.000 -11.171
+        2  -5.171 -10.884 -16.884   0.000   1.000   0.000 -16.884  -6.000 -11.171
+        3  -2.528 -10.216 -14.894   0.000   1.000   0.000 -14.894  -4.679  -7.206
+        4  -2.528 -10.216 -14.894   0.000   1.000   0.000 -14.894  -4.679  -7.206
         5   3.291 -11.099 -13.280   0.000   1.000   0.000 -13.280  -2.181   1.110
         6   3.291 -11.099 -13.280   0.000   1.000   0.000 -13.280  -2.181   1.110
         7   3.291 -11.099 -13.280   0.000   1.000   0.000 -13.280  -2.181   1.110
         8   3.291 -11.099 -13.280   0.000   1.000   0.000 -13.280  -2.181   1.110
-        9   6.150 -10.113  -5.841   0.000   1.000   0.000  -5.841   4.272  10.421
-       10   6.150 -10.113  -5.841   0.000   1.000   0.000  -5.841   4.272  10.421
+        9   6.150 -10.113  -5.842   0.000   1.000   0.000  -5.842   4.271  10.421
+       10   6.150 -10.113  -5.842   0.000   1.000   0.000  -5.842   4.271  10.421
        11   7.853  -9.683  -5.024   0.000   1.000   0.000  -5.024   4.659  12.512
        12   7.853  -9.683  -5.024   0.000   1.000   0.000  -5.024   4.659  12.512
 ...
@@ -1357,8 +1342,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 6, }
-dimensions: {natom: 2, nkpt: 8, mband: 16, nsppol: 1, nspinor: 2, nspden: 4, mpw: 274, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 16, nsppol: 1, nspinor: 2, nspden: 4, mpw: 303, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 5, }
 ...
@@ -1384,8 +1369,8 @@ meta: {optdriver: 4, gwcalctyp: 5, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si_r.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1441,10 +1426,10 @@ meta: {optdriver: 4, gwcalctyp: 5, }
  setmesh: FFT mesh size selected  =  20x 20x 20
           total number of points  =     8000
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  === KS Band Gaps ===
@@ -1481,21 +1466,21 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.511
 QP_gap     :    8.577
-Delta_QP_KS:    6.066
+Delta_QP_KS:    6.067
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -7.548 -10.490 -17.499   0.000   1.000   0.000 -17.499  -7.008 -14.557
-        2  -7.548 -10.490 -17.499   0.000   1.000   0.000 -17.499  -7.008 -14.557
-        3   4.484 -11.367 -13.083   0.000   1.000   0.000 -13.083  -1.715   2.769
-        4   4.484 -11.367 -13.083   0.000   1.000   0.000 -13.083  -1.715   2.769
-        5   4.532 -11.365 -13.064   0.000   1.000   0.000 -13.064  -1.699   2.833
-        6   4.532 -11.365 -13.064   0.000   1.000   0.000 -13.064  -1.699   2.833
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1  -7.548 -10.494 -17.503   0.000   1.000   0.000 -17.503  -7.010 -14.558
+        2  -7.548 -10.494 -17.503   0.000   1.000   0.000 -17.503  -7.010 -14.558
+        3   4.484 -11.368 -13.083   0.000   1.000   0.000 -13.083  -1.715   2.769
+        4   4.484 -11.368 -13.083   0.000   1.000   0.000 -13.083  -1.715   2.769
+        5   4.532 -11.365 -13.065   0.000   1.000   0.000 -13.065  -1.699   2.833
+        6   4.532 -11.365 -13.065   0.000   1.000   0.000 -13.065  -1.699   2.833
         7   4.532 -11.365 -13.065   0.000   1.000   0.000 -13.065  -1.700   2.832
         8   4.532 -11.365 -13.065   0.000   1.000   0.000 -13.065  -1.700   2.832
-        9   7.043 -10.064  -5.698   0.000   1.000   0.000  -5.698   4.366  11.409
-       10   7.043 -10.064  -5.698   0.000   1.000   0.000  -5.698   4.366  11.409
-       11   7.078 -10.059  -5.684   0.000   1.000   0.000  -5.684   4.376  11.453
-       12   7.078 -10.059  -5.684   0.000   1.000   0.000  -5.684   4.376  11.453
+        9   7.043 -10.066  -5.699   0.000   1.000   0.000  -5.699   4.367  11.410
+       10   7.043 -10.066  -5.699   0.000   1.000   0.000  -5.699   4.367  11.410
+       11   7.078 -10.061  -5.684   0.000   1.000   0.000  -5.684   4.376  11.454
+       12   7.078 -10.061  -5.684   0.000   1.000   0.000  -5.684   4.376  11.454
 ...
 
 
@@ -1504,20 +1489,20 @@ iteration_state: {dtset: 6, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.843
-QP_gap     :    9.291
-Delta_QP_KS:    6.448
+QP_gap     :    9.290
+Delta_QP_KS:    6.447
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -5.171 -10.883 -16.882   0.000   1.000   0.000 -16.882  -5.999 -11.170
-        2  -5.171 -10.883 -16.882   0.000   1.000   0.000 -16.882  -5.999 -11.170
-        3  -2.528 -10.215 -14.893   0.000   1.000   0.000 -14.893  -4.678  -7.206
-        4  -2.528 -10.215 -14.893   0.000   1.000   0.000 -14.893  -4.678  -7.206
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1  -5.171 -10.884 -16.884   0.000   1.000   0.000 -16.884  -6.000 -11.171
+        2  -5.171 -10.884 -16.884   0.000   1.000   0.000 -16.884  -6.000 -11.171
+        3  -2.528 -10.216 -14.894   0.000   1.000   0.000 -14.894  -4.679  -7.206
+        4  -2.528 -10.216 -14.894   0.000   1.000   0.000 -14.894  -4.679  -7.206
         5   3.275 -11.100 -13.286   0.000   1.000   0.000 -13.286  -2.186   1.090
         6   3.275 -11.100 -13.286   0.000   1.000   0.000 -13.286  -2.186   1.090
-        7   3.307 -11.098 -13.275   0.000   1.000   0.000 -13.275  -2.177   1.130
-        8   3.307 -11.098 -13.275   0.000   1.000   0.000 -13.275  -2.177   1.130
-        9   6.150 -10.113  -5.841   0.000   1.000   0.000  -5.841   4.272  10.421
-       10   6.150 -10.113  -5.841   0.000   1.000   0.000  -5.841   4.272  10.421
+        7   3.307 -11.098 -13.275   0.000   1.000   0.000 -13.275  -2.177   1.131
+        8   3.307 -11.098 -13.275   0.000   1.000   0.000 -13.275  -2.177   1.131
+        9   6.150 -10.113  -5.842   0.000   1.000   0.000  -5.842   4.271  10.421
+       10   6.150 -10.113  -5.842   0.000   1.000   0.000  -5.842   4.271  10.421
        11   7.846  -9.685  -5.027   0.000   1.000   0.000  -5.027   4.658  12.504
        12   7.846  -9.685  -5.027   0.000   1.000   0.000  -5.027   4.658  12.504
 ...
@@ -1535,24 +1520,14 @@ data: !SigmaeeData |
              bdgw4          1       6       1       6
              bdgw5          1      12       1      12
              bdgw6          1      12       1      12
-             ecut1     8.00000000E+00 Hartree
-             ecut2     8.00000000E+00 Hartree
-             ecut3     8.00000000E+00 Hartree
-             ecut4     7.56385066E+00 Hartree
-             ecut5     7.56385066E+00 Hartree
-             ecut6     7.56385066E+00 Hartree
-         ecutsigx1     8.00000000E+00 Hartree
-         ecutsigx2     8.00000000E+00 Hartree
-         ecutsigx3     8.00000000E+00 Hartree
-         ecutsigx4     7.56385066E+00 Hartree
-         ecutsigx5     7.56385066E+00 Hartree
-         ecutsigx6     7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
+         ecutsigx      8.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     0.00000000E+00 Hartree
-          ecutwfn4     7.56385066E+00 Hartree
-          ecutwfn5     7.56385066E+00 Hartree
-          ecutwfn6     7.56385066E+00 Hartree
+          ecutwfn4     8.00000000E+00 Hartree
+          ecutwfn5     8.00000000E+00 Hartree
+          ecutwfn6     8.00000000E+00 Hartree
            etotal1    -8.4505736443E+00
            etotal2    -8.4505736443E+00
            etotal3    -8.4505844285E+00
@@ -1777,12 +1752,7 @@ P           mkmem           8
           nbandhf5          8
           nbandhf6          8
            ndtset           6
-            ngfft1         20      20      20
-            ngfft2         20      20      20
-            ngfft3         20      20      20
-            ngfft4         18      18      18
-            ngfft5         18      18      18
-            ngfft6         18      18      18
+            ngfft          20      20      20
              nkpt           8
            nkptgw           2
            nkpthf          64
@@ -1925,10 +1895,63 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         19.5        0.32      0.005
+- Total wall clock time (s,m,h):         20.8        0.35      0.006
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           19.5, wall_time =           20.8
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 13.468  69.1     13.785  66.2              3      -1.00        0.98       0.98
+- pspini                         2.334  12.0      2.335  11.2              6      -1.00        1.00       1.00
+- fourwf%(pot)                   1.436   7.4      1.490   7.2          10051      -1.00        0.96       0.96
+- nonlop(apply)                  0.640   3.3      0.541   2.6           5132      -1.00        1.18       1.18
+- ewald                          0.495   2.5      0.494   2.4              6      -1.00        1.00       1.00
+- invars2                        0.411   2.1      0.412   2.0              6      -1.00        1.00       1.00
+- getghc-other                   0.239   1.2      0.266   1.3             -1      -1.00        0.90       0.90
+- fourwf%(den)                   0.219   1.1      0.218   1.0           2528      -1.00        1.01       1.01
+- vtowfk(ssdiag)                 0.153   0.8      0.158   0.8             -1      -1.00        0.97       0.97
+- nonlop(forstr)                 0.144   0.7      0.142   0.7            160      -1.00        1.02       1.02
+- stress                         0.138   0.7      0.137   0.7              3      -1.00        1.01       1.01
+- projbd                         0.137   0.7      0.142   0.7           5176      -1.00        0.96       0.96
+- ewald2 (+vdw_dftd)             0.130   0.7      0.130   0.6              3      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.122   0.6      0.115   0.6             38      -1.00        1.06       1.06
+- timing timab                   0.112   0.6      0.113   0.5              9      -1.00        0.99       0.99
+- others (112)                   0.328   1.7      0.338   1.6             -1      -1.00        0.97       0.97
+-<END_TIMER>
+-
+- subtotal                      20.506 105.2     20.816 100.0                                  0.99       0.99
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          19.5, wall_time =          20.8
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 13.468  69.1     13.785  66.2              3      -1.00        0.98       0.98
+- pspini                         2.334  12.0      2.335  11.2              6      -1.00        1.00       1.00
+- fourwf%(pot)                   1.436   7.4      1.490   7.2          10051      -1.00        0.96       0.96
+- nonlop(apply)                  0.640   3.3      0.541   2.6           5132      -1.00        1.18       1.18
+- ewald                          0.495   2.5      0.494   2.4              6      -1.00        1.00       1.00
+- invars2                        0.411   2.1      0.412   2.0              6      -1.00        1.00       1.00
+- getghc-other                   0.239   1.2      0.266   1.3             -1      -1.00        0.90       0.90
+- fourwf%(den)                   0.219   1.1      0.218   1.0           2528      -1.00        1.01       1.01
+- vtowfk(ssdiag)                 0.153   0.8      0.158   0.8             -1      -1.00        0.97       0.97
+- nonlop(forstr)                 0.144   0.7      0.142   0.7            160      -1.00        1.02       1.02
+- stress                         0.138   0.7      0.137   0.7              3      -1.00        1.01       1.01
+- projbd                         0.137   0.7      0.142   0.7           5176      -1.00        0.96       0.96
+- ewald2 (+vdw_dftd)             0.130   0.7      0.130   0.6              3      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.122   0.6      0.115   0.6             38      -1.00        1.06       1.06
+- timing timab                   0.112   0.6      0.113   0.5              9      -1.00        0.99       0.99
+- others (112)                   0.328   1.7      0.338   1.6             -1      -1.00        0.97       0.97
+-<END_TIMER>
 
+- subtotal                      20.506 105.2     20.816 100.0                                  0.99       0.99
 
 ================================================================================
 
@@ -2013,10 +2036,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.1  wall=         18.3
+- Proc.   0 individual time (sec): cpu=         19.5  wall=         20.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  23 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.1  wall=         18.3
+.Delivered  20 WARNINGs and  28 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.5  wall=         20.8

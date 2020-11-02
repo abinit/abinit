@@ -90,11 +90,16 @@ ntypat 1
 typat  1 1  
 natom 2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "C.psp8"
+
+# This test is disabled on abiref_gnu_9.2_openmpi, because a problem with SIGFPE is triggered inside the MPI layer (MPI_ALLREDUCE) when input arrays are not initialized with zeros.
+# MPI_SUM may overflow depending on the (random) memory chunks returned by C malloc. See several Gitlab comments from Matteo about this problem.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = abiref_gnu_9.2_openmpi
 #%% [files]
-#%% psp_files = C.psp8
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

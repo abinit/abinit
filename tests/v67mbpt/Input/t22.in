@@ -184,7 +184,7 @@ nfreqim4          8
 ppmfrq4          26. eV # This overrides the default
                         # plasma frequency and affects the grid
                         # distribution (See the documentation)
-icutcoul4         3 # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul4        3 # old deprecated value of icutcoul, only used for legacy
 
 #--------------------------------------------------
 
@@ -266,7 +266,7 @@ kptgw6                  # List of k-points for GW correction
            0.0 0.0 0.0  # Gamma point
 bdgw6      1  7         # start/stop bands
 gwmem6     11           # Set to 00 for memory-saving in sigma calc.
-icutcoul6         3 # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul6         3 # old deprecated value of icutcoul, only used for legacy
 #--------------------------------------------------
 
 #--------------------------------------------------
@@ -304,7 +304,7 @@ kptgw7                  # List of k-points for GW correction
 bdgw7      1  7         # start/stop bands
 gwmem7     11           # Set to 00 for memory-saving in sigma calc.
 ppmfrq7    26. eV
-icutcoul7         3 # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul7         3 # old deprecated value of icutcoul, only used for legacy
 #--------------------------------------------------
 
 #--------------------------------------------------
@@ -342,7 +342,7 @@ kptgw8                  # List of k-points for GW correction
 bdgw8      1  7         # start/stop bands
 gwmem8     11           # Set to 00 for memory-saving in sigma calc.
 ppmfrq8    26. eV
-icutcoul8         3 # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul8         3 # old deprecated value of icutcoul, only used for legacy
 #--------------------------------------------------
 
 #--------------------------------------------------
@@ -381,7 +381,7 @@ bdgw9      1  7         # start/stop bands
 gwmem9     11           # Set to 00 for memory-saving in sigma calc.
 ppmfrq9    26. eV
 
-icutcoul9         3 # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul9         3 # old deprecated value of icutcoul, only used for legacy
 
 #--------------------------------------------------
 
@@ -421,9 +421,12 @@ bdgw10      1  7         # start/stop bands
 gwmem10     11           # Set to 00 for memory-saving in sigma calc.
 ppmfrq10    26. eV
 
-icutcoul10         3 # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul10         3 # old deprecated value of icutcoul, only used for legacy
 
 #--------------------------------------------------
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -431,7 +434,6 @@ icutcoul10         3 # old deprecated value of icutcoul, only used for legacy
 #%% [files]
 #%% files_to_test = 
 #%%   t22.out, tolnlines = 600, tolabs = 1.1e-2, tolrel = 6.0e-2, fld_options =  -medium
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

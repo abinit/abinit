@@ -8,18 +8,18 @@ symsigma 0
 tolwfr1       1.0d-6
 
 # Dataset 2: Sigma calculation with "true" Coulomb interaction integrated with an auxiliary function
-optdriver2  4
-gwcalctyp2 25
-getwfk2     1
-icutcoul2   6
+optdriver2   4
+gwcalctyp2  25
+getwfk2      1
+gw_icutcoul2   6
 
 
 # Dataset 3: Sigma calculation with a cutoff in Vcoul (Beigi's method)
-optdriver3  4
-gwcalctyp3 25
-getwfk3     1
-icutcoul3   0            # Spherical cutoff
-rcut3      -1.0
+optdriver3   4
+gwcalctyp3  25
+getwfk3      1
+gw_icutcoul3   0            # Spherical cutoff
+rcut3       -1.0
 
 # The following GW variable are meaningful only during the sigma run.
 nkptgw 1
@@ -65,13 +65,15 @@ nband       *5
 nstep       50
 enunit       2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t09.out, tolnlines = 20, tolabs = 1.1e-3, tolrel = 1.1, fld_options =  -medium
-#%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

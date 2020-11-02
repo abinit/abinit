@@ -92,7 +92,7 @@ _ WF disk file :      3.088 Mbytes ; DEN or POT disk file :      0.124 Mbytes.
          berryopt1          0
          berryopt2          0
          berryopt3          1
-      chksymbreak           0
+      chksymtnons           0
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      5.00000000E+00 Hartree
@@ -314,8 +314,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/7n.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/7n.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/7n.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/7n.pspnc
 -  Troullier-Martins psp for element  N         Thu Oct 27 17:29:45 EDT 1994
 -  7.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -751,7 +751,7 @@ force_length_stats: {min: null, max: null, mean: null, }
          berryopt1          0
          berryopt2          0
          berryopt3          1
-      chksymbreak           0
+      chksymtnons           0
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      5.00000000E+00 Hartree

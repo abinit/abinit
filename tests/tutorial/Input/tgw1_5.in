@@ -57,6 +57,9 @@ shiftk  0.0 0.0 0.0
 istwfk  *1         # This is mandatory in all the GW steps.
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -64,7 +67,6 @@ istwfk  *1         # This is mandatory in all the GW steps.
 #%% [files]
 #%% files_to_test = 
 #%%   tgw1_5.out, tolnlines= 70, tolabs=  7.000e-02, tolrel=  7.000e-02
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

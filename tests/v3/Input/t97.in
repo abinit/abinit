@@ -29,13 +29,15 @@ nstep 20
 toldfe 1.0d-8
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/42mo.pspnc, PseudosTM_pwteter/14si.pspnc, PseudosTM_pwteter/8o.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t97.out, tolnlines = 1, tolabs = 1.010e-09, tolrel = 6.000e-04
-#%% psp_files = 42mo.pspnc, 14si.pspnc, 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

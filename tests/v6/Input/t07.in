@@ -37,7 +37,7 @@ diemix 0.5
 kptopt 1
 kptrlatt 2 0 0 0 2 0 0 0 2
 
-# === LDA+U/LDA+DMFT options
+# === DFT+U/LDA+DMFT options
 usedmft1 0
 usedmft2 1
 dmftcheck2 -1
@@ -57,13 +57,15 @@ dmftqmc_n 10
 # === Other options
 prtden 0  prteig 0  prtwf 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t07.out, tolnlines = 3, tolabs = 3.0e-6, tolrel = 3.0e-4, fld_options = -medium
-#%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

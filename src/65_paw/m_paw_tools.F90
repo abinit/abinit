@@ -75,10 +75,14 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      bethe_salpeter,respfn,scfcv,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_nonlinear,m_respfn_driver,m_scfcv_core
+!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
-!!      wrtout
+!!      free_my_atmtab,get_my_atmtab,mat_mlms2jmj,mat_slm2ylm,paw_ij_free
+!!      paw_ij_gather,paw_ij_nullify,pawdij_print_dij,pawrhoij_free
+!!      pawrhoij_gather,pawrhoij_nullify,pawrhoij_print_rhoij,setnoccmmp,wrtout
+!!      xmpi_comm_group,xmpi_group_free,xmpi_group_translate_ranks
 !!
 !! SOURCE
 
@@ -289,13 +293,13 @@ end subroutine chkpawovlp
 !!  (only printing)
 !!
 !! PARENTS
-!!      bethe_salpeter,outscfcv,screening,sigma
+!!      m_bethe_salpeter,m_outscfcv,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,mat_mlms2jmj,mat_slm2ylm,paw_ij_free
-!!      paw_ij_gather,paw_ij_nullify,pawio_print_ij,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,setnoccmmp,wrtout,xmpi_comm_group
-!!      xmpi_group_free,xmpi_group_translate_ranks
+!!      paw_ij_gather,paw_ij_nullify,pawdij_print_dij,pawrhoij_free
+!!      pawrhoij_gather,pawrhoij_nullify,pawrhoij_print_rhoij,setnoccmmp,wrtout
+!!      xmpi_comm_group,xmpi_group_free,xmpi_group_translate_ranks
 !!
 !! SOURCE
 
@@ -532,7 +536,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
    do i_unitfi=1,2
      unitfi=ab_out;if (i_unitfi==2) unitfi=std_out
      write(msg,'(3a)') &
-&     ' ---------- LDA+U DATA --------------------------------------------------- ',ch10
+&     ' ---------- DFT+U DATA --------------------------------------------------- ',ch10
      call wrtout(unitfi,msg,'COLL')
      do iatom=1,dtset%natom
        itypat=dtset%typat(iatom);ll=pawtab(itypat)%lpawu

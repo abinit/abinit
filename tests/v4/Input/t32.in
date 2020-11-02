@@ -22,6 +22,9 @@
  occopt 7
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/8o.pspnc, PseudosTM_pwteter/12mg.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -29,7 +32,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t32.out, tolnlines = 50, tolabs = 3.0e-06, tolrel = 7.000e-07
-#%% psp_files = 8o.pspnc, 12mg.pspnc
 #%% [shell]
 #%% post_commands = ww_cp t32o_DEN t33i_DEN; ww_mv t32o_DEN t34i_DEN
 #%% [paral_info]

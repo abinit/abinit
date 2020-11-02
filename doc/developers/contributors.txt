@@ -26,9 +26,46 @@ in the ABINIT project in the past or currently :
 - University of West Virginia (A. Romero),
 
 Coming now to individuals,
-recent direct contributors to ABINIT (versions 8.0 to 9.0.0) are listed below.
+recent direct contributors to ABINIT (versions 8.10.0 to 9.2.0) are listed below.
 For reasons of privacy, we do not provide the e-mail address anymore.
 If you need to contact somebody, try the forum or the github.
+B. Amadon
+G. Antonius
+L. Baguet
+J.-M. Beuken
+J. Bieder
+J. Bouchet
+E. Bousquet
+F. Bruneval
+G. Brunin
+Wei Chen
+J.-B. Charraud
+Ph. Ghosez
+M. Giantomassi
+O. Gingras
+X. Gonze
+F. Goudreault
+B. Guster
+G. Hautier
+Xu He
+N. Helbig
+F. Jollet,
+H. Miranda
+F. Naccarato
+R. Outerovitch
+G. Petretto
+N. Pike
+Y. Pouillon
+F. Ricci
+M. Royo
+M. Schmitt
+M. Stengel
+M. Torrent
+J. Van Bever
+M. Verstraete
+J. Zwanziger
+
+direct contributors to ABINIT (versions 8.0 to 9.0.0) are :
 name                      
 Flavio Abreu Araujo      
 Florian Altvater        

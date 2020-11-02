@@ -36,10 +36,12 @@ you can contact the ABINIT group for a possible arrangement, in which case co-au
 
 ## List of suggestions
 
-The 2020 general ABINIT article [Gen.1](#g1),
+The 2020 ABINIT article [Gen.1](#g1), that describe the impact, environment and recent developments,
 first in the list of suggestions below, should be cited in papers that have benefited from the
 ABINIT project, irrespective of their content.
-There are four other ABINIT articles, [Gen.2](#g2), [Gen.3](#g3), [Gen.4](#b4), and [Gen.5](#g5) that might as well be
+The other 2020 ABINIT article [Gen.2](#g2), an overview of the ABINIT project, with focus on specific developments,
+is also strongly suggested for citation. In particular, see the overview of ABINIT capabilities, in Tables I and II.
+There are four other ABINIT articles, [Gen.3](#g3), [Gen.4](#g4), [Gen.5](#g5), and [Gen.6](#g6) that might as well be
 considered, irrespective of ther content, because these publications are
 quite general as well, although they are older (2016, 2009, 2005 and 2002).  
 
@@ -51,31 +53,40 @@ in the [[topic:index|topics files]]. as well as in the references of the five ge
 
 <a id="g1"></a>
 - **Gen.1** At least, the most recent article [[cite:Gonze2020]] that describes the ABINIT project
+(impact, environment and recent developments)
 should be mentioned in the bibliography section of your paper.
 A version of this paper, that is not formatted for Computer Phys. Comm. is available
 [here](https://www.abinit.org/sites/default/files/ABINIT20.pdf).
 The licence allows the authors to put it on the Web.
 
 <a id="g2"></a>
-- **Gen.2** A version of the 2016 ABINIT article [[cite:Gonze2016]],
+- **Gen.2** The other 2020 ABINIT article [[cite:Romero2020]] that describes the ABINIT project
+(overview and specific developments) is also a strong suggestion for citation 
+in the bibliography section of your paper.
+A version of this paper, that is not formatted for J. Chem. Phys. is available
+[here](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
+The licence allows the authors to put it on the Web.
+
+<a id="g3"></a>
+- **Gen.3** A version of the 2016 ABINIT article [[cite:Gonze2016]],
 that is not formatted for Computer Phys. Comm. is available 
 [here](https://www.abinit.org/sites/default/files/ABINIT16.pdf).
 The licence allows the authors to put it on the Web. 
 
-<a id="g3"></a>
-- **Gen.3**. The 2009 ABINIT article [[cite:Gonze2009]] is especially detailed. A version of this paper, 
+<a id="g4"></a>
+- **Gen.4**. The 2009 ABINIT article [[cite:Gonze2009]] is especially detailed. A version of this paper, 
 that is not formatted for Computer Phys. Comm. is available 
 [here](https://www.abinit.org/sites/default/files/about/ABINIT_CPC_v10.pdf). 
 The licence allows the authors to put it on the Web. 
 
-<a id="g4"></a>
-- **Gen.4**. The 2005 ABINIT article [[cite:Gonze2005]] is quite short. 
+<a id="g5"></a>
+- **Gen.5**. The 2005 ABINIT article [[cite:Gonze2005]] is quite short. 
 The .pdf of the latter paper is available [here](https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf). 
 Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag, 
 the licence allows the authors to put it on the Web).
 
-<a id="g5"></a>
-- **Gen.5**. The very first paper on the ABINIT project [[cite:Gonze2002]] might also be considered for citation.
+<a id="g6"></a>
+- **Gen.6**. The very first paper on the ABINIT project [[cite:Gonze2002]] might also be considered for citation.
 
 <a id="s1"></a>
 - **Spe.1.** If the Projector-Augmented Wave method as implemented in ABINIT is used [[cite:Torrent2008]] should be mentioned.
@@ -109,7 +120,7 @@ of bands in a GW calculation (input variables [[gwcomp]] and [[gwencomp]]), cite
 cite [[cite:Bottin2008]] ([available on Arxiv.org](https://arxiv.org/abs/0707.3405)). 
 
 <a id="s9"></a>
-- **Spe.9.** If the LDA+U method as implemented in ABINIT is used, cite [[cite:Amadon2008]]. 
+- **Spe.9.** If the DFT+U method as implemented in ABINIT is used, cite [[cite:Amadon2008]]. 
 
 <a id="s10"></a>
 - **Spe.10.** If the ONCVPSP pseudopotentials are used, cite [[cite:Hamann2013]]. 
@@ -123,3 +134,11 @@ on the electronic structure are computed, cite [[cite:Ponce2014]] and [[cite:Pon
 
 <a id="s13"></a>
 - **Spe.13.** If the direct (DFPT) computation of effective masses is used, see [[topic:EffectiveMass]], cite [[cite:Laflamme2016]].
+
+<a id="s14"></a>
+- **Spe.14.** If flexoelectricity or dynamical quadrupoles are computed, cite [[cite:Royo2019]].
+
+<a id="s15"></a>
+- **Spe.15.** If the new procedure for electron-phonon calculations [[optdriver]]=7 is used, cite [[cite:Brunin2020]] and/or [[cite:Brunin2020b]].
+
+

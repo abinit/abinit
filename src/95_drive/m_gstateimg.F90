@@ -54,7 +54,6 @@ module m_gstateimg
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
  use m_pawtab,       only : pawtab_type
- use m_dtfil,        only : dtfil_init
  use m_gstate,       only : gstate
  use m_predtk,       only : prtxvf
  use m_precpred_1geo, only : precpred_1geo
@@ -174,17 +173,10 @@ contains
 !! Not yet possible to use restartxf in parallel when localrdwf==0
 !!
 !! PARENTS
-!!      driver,gwls_sternheimer
+!!      m_driver,m_gwls_sternheimer
 !!
 !! CHILDREN
-!!      abihist_bcast,abihist_copy,abihist_free,abihist_init,args_gs_free
-!!      args_gs_init,copy_results_img,destroy_results_img,dtfil_init,fcart2fred
-!!      ga_destroy,ga_init,gstate,init_results_img,libpaw_spmsg_mpisum
-!!      localfilnam,localrdfile,localredirect,localwrfile,mep_destroy,mep_init
-!!      mkradim,mkrdim,pimd_destroy,pimd_init,pimd_skip_qtb,predictimg,prtimg
-!!      read_md_hist_img,scf_history_free,scf_history_nullify,specialmsg_mpisum
-!!      status,timab,var2hist,vel2hist,write_md_hist_img,wrtout,xmpi_barrier
-!!      xmpi_sum
+!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -829,10 +821,10 @@ end subroutine gstateimg
 !!  (data written to unit iout)
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
-!!      destroy_results_img,gather_results_img,metric,prtxvf,wrtout,xred2xcart
+!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -1025,11 +1017,10 @@ end subroutine prtimg
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
-!!      predict_copy,predict_ga,predict_neb,predict_pimd,predict_steepest
-!!      predict_string,wrtout
+!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -1178,9 +1169,10 @@ end subroutine predictimg
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
-!!      predictimg
+!!      m_gstateimg
 !!
 !! CHILDREN
+!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -1259,9 +1251,10 @@ end subroutine predict_copy
 !!    at output, the predicted values of xred for all images
 !!
 !! PARENTS
-!!      predictimg
+!!      m_gstateimg
 !!
 !! CHILDREN
+!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
 !!
 !! SOURCE
 

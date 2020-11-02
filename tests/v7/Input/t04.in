@@ -51,6 +51,9 @@ istwfk *1
 tsmear 0.0001
 occopt 7
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -58,7 +61,6 @@ occopt 7
 #%% files_to_test = 
 #%%   t04.out, tolnlines = 13, tolabs = 1.0e-8, tolrel = 1.0e-3, fld_options = -easy;
 #%%   t04o_DOS_ATEXTRA0010, tolnlines = 11, tolabs = 1.0e-9, tolrel = 1.0e-6
-#%% psp_files = 13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

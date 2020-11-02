@@ -124,11 +124,10 @@ contains
 !! is constant throughout run.
 !!
 !! PARENTS
-!!      bethe_salpeter,eph,gstate,nonlinear,respfn,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_eph_driver,m_gstate,m_longwave,m_nonlinear
+!!      m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
-!!      nctab_free,nctab_init,nctab_mixalch,pawtab_set_flags,pspatm,pspcor
-!!      psps_ncwrite,psps_print,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -312,7 +311,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  if (gencond==1) then
 
    write(msg, '(a,a)' ) ch10,'--- Pseudopotential description ------------------------------------------------'
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(ab_out,msg)
 
    ABI_ALLOCATE(ekb,(psps%dimekb*(1-psps%usepaw)))
    ABI_ALLOCATE(xccc1d,(psps%n1xccc*(1-psps%usepaw),6))
@@ -349,7 +348,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        indlmn(:,:)=0
 
        write(msg, '(a,i4,a,t38,a)' )'- pspini: atom type',ipsp,'  psp file is',trim(psps%filpsp(ipsp))
-       call wrtout([std_out, ab_out], msg,'COLL')
+       call wrtout([std_out, ab_out], msg)
 
 !      Read atomic psp V(r) and wf(r) to get local and nonlocal psp:
 !      Cannot use the same call in case of bound checking, because of pawrad/pawtab
@@ -394,7 +393,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
      ! Allocate NC tables used for mixing.
      if (psps%usepaw == 0) then
-       ABI_DT_MALLOC(nctab_alch, (npspalch))
+       ABI_MALLOC(nctab_alch, (npspalch))
        do ipspalch=1,npspalch
          call nctab_init(nctab_alch(ipspalch), psps%mqgrid_vl, .False., .False.)
        end do
@@ -402,7 +401,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
      do ipsp=1,npsp
        write(msg, '(a,i4,a,t38,a)' ) '- pspini: atom type',ipsp,'  psp file is',trim(psps%filpsp(ipsp))
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(ab_out,msg)
 
        xcccrc=zero
        ekb(:)=zero;ffspl(:,:,:)=zero;vlspl(:,:)=zero
@@ -558,7 +557,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        do ipspalch=1,npspalch
          call nctab_free(nctab_alch(ipspalch))
        end do
-       ABI_DT_FREE(nctab_alch)
+       ABI_FREE(nctab_alch)
      end if
    end if ! mtypalch
 
@@ -584,13 +583,13 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  if(abs(ecore_old-ecore)>tol8*abs(ecore_old+ecore))then
    write(msg, '(2x,es15.8,t50,a)' ) ecore,'ecore*ucvol(ha*bohr**3)'
    !  ecore is useless if iscf<=0, but at least it has been initialized
-   if(dtset%iscf>=0) call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   if(dtset%iscf>=0) call wrtout(ab_out,msg)
+   call wrtout(std_out,msg)
  end if
 
 !End of pseudopotential output section
  write(msg, '(2a)' )'--------------------------------------------------------------------------------',ch10
- call wrtout(ab_out,msg,'COLL')
+ call wrtout(ab_out,msg)
 
 !-------------------------------------------------------------
 ! Keep track of this call to the routine
@@ -660,7 +659,7 @@ end subroutine pspini
 !!  ecore=resulting psion-psion energy in Hartrees
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!
@@ -794,14 +793,9 @@ end subroutine pspcor
 !!  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
-!!      nctab_eval_tcorespl,pawpsp_17in,pawpsp_7in,pawpsp_bcast
-!!      pawpsp_read_header_xml,pawpsp_read_pawheader,pawpsp_wvl,psp10in,psp1in
-!!      psp2in,psp3in,psp5in,psp6in,psp8in,psp9in,psp_dump_outputs
-!!      psxml2abheader,test_xml_xmlpaw_upf,timab,upf2abinit,wrtout
-!!      wvl_descr_psp_fill
 !!
 !! SOURCE
 
@@ -878,7 +872,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    end if
 
    write(msg, '(a,t38,a)' )'- pspatm: opening atomic psp file',trim(psps%filpsp(ipsp))
-   call wrtout([std_out, ab_out],  msg,'COLL')
+   call wrtout([std_out, ab_out],  msg)
 
    !  Check if the file pseudopotential file is written in (XML| XML-PAW | UPF)
    call test_xml_xmlpaw_upf(psps%filpsp(ipsp), usexml, xmlpaw, useupf)
@@ -901,12 +895,12 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      ! Read and write some description of file from first line (character data)
      read (tmp_unit,'(a)',err=10,iomsg=errmsg) title
      write(msg, '(a,a)' ) '- ',trim(title)
-     call wrtout([std_out, ab_out], msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
 
      ! Read and write more data describing psp parameters
      read (tmp_unit,*,err=10,iomsg=errmsg) znucl,zion,pspdat
      write(msg,'(a,f9.5,f10.5,2x,i8,t47,a)')'-',znucl,zion,pspdat,'znucl, zion, pspdat'
-     call wrtout([std_out, ab_out], msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
 
      read (tmp_unit,*,err=10,iomsg=errmsg) pspcod,pspxc,lmax,lloc,mmax,r2well
      if(pspxc<0) then
@@ -916,7 +910,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
        write(msg, '(4i5,i10,f10.5,t47,a)' ) &
          pspcod,pspxc,lmax,lloc,mmax,r2well,'pspcod,pspxc,lmax,lloc,mmax,r2well'
      end if
-     call wrtout([std_out, ab_out], msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
 
    else if (usexml == 1 .and. xmlpaw == 0) then
 
@@ -935,9 +929,9 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      r2well = 0
 
      write(msg,'(a,1x,a3,3x,a)') "-",atmsymb,trim(creator)
-     call wrtout([std_out, ab_out], msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
      write(msg,'(a,f9.5,f10.5,2x,i8,t47,a)')'-',znucl,zion,pspdat,'znucl, zion, pspdat'
-     call wrtout([std_out, ab_out], msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
      if(pspxc<0) then
        write(msg, '(i5,i8,2i5,i10,f10.5,t47,a)' ) &
          pspcod,pspxc,lmax,lloc,mmax,r2well,'pspcod,pspxc,lmax,lloc,mmax,r2well'
@@ -945,7 +939,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
        write(msg, '(4i5,i10,f10.5,t47,a)' ) &
          pspcod,pspxc,lmax,lloc,mmax,r2well,'pspcod,pspxc,lmax,lloc,mmax,r2well'
      end if
-     call wrtout([std_out, ab_out], msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
 #else
      write(msg,'(a,a)')  &
        'ABINIT is not compiled with XML support for reading this type of pseudopotential ', trim(psps%filpsp(ipsp))
@@ -955,7 +949,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    else if (usexml == 1 .and. xmlpaw == 1) then
      write(msg,'(a,a)')  &
        '- pspatm : Reading pseudopotential header in XML form from ', trim(psps%filpsp(ipsp))
-     call wrtout([std_out, ab_out], msg,'COLL')
+     call wrtout([std_out, ab_out], msg)
 
 !    Return header informations
      call pawpsxml2ab(psps%filpsp(ipsp),ecut_tmp, pspheads_tmp,0)
@@ -1231,7 +1225,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
            iln0=iln0+nproj(il+psps%mpsang)
            write(msg, '(2x,a,i1,4f12.6)' ) 'spin-orbit ',il,(ekb(iln+ii),ii=0,nproj(il+psps%mpsang)-1)
          end if
-         call wrtout([std_out, ab_out],msg,'COLL')
+         call wrtout([std_out, ab_out],msg)
        end if
      end do
    end if
@@ -1368,7 +1362,7 @@ end subroutine pspatm
 !! (to be filled)
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
 !!

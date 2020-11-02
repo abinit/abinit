@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_finegrid
 !! NAME
 !!  m_paw_finegrid
@@ -83,8 +82,7 @@ CONTAINS
 !!    gylmgr2(6,nfgd,lm_size)= second derivatives of g_l(r-R)*Y_lm(r-R) wrt cart. coordinates
 !!
 !! PARENTS
-!!      m_pawdij,nhatgrid,paw_mknewh0,pawgrnl,pawmknhat,pawmknhat_psipsi
-!!      pawnhatfr,wvl_nhatgrid
+!!      m_paw_denpot,m_paw_dfpt,m_paw_nhat,m_pawdij
 !!
 !! CHILDREN
 !!
@@ -958,9 +956,9 @@ end subroutine pawgylm
 !!  gylmg(npw,lmax**2,ntypat)=Fourier transform of each g_l(r).Y_lm(r) function
 !!
 !! PARENTS
+!!      m_suscep_stat
 !!
 !! CHILDREN
-!!      paw_uniform_splfit
 !!
 !! SOURCE
 
@@ -1072,7 +1070,7 @@ end subroutine pawgylmg
 !!  rfgd(3,nfgd)= cartesian coordinates of r-R.
 !!
 !! PARENTS
-!!      nhatgrid,pawgrnl
+!!      m_paw_dfpt,m_paw_nhat
 !!
 !! CHILDREN
 !!
@@ -1229,7 +1227,7 @@ end subroutine pawrfgd_fft
 !!  rfgd(3,nfgd)= cartesian coordinates of r-R.
 !!
 !! PARENTS
-!!      wvl_nhatgrid
+!!      m_paw_nhat
 !!
 !! CHILDREN
 !!
@@ -1395,7 +1393,7 @@ end subroutine pawrfgd_wvl
 !!                                 Not allocated if q=0 !
 !!
 !! PARENTS
-!!      m_pawdij,pawgrnl,pawmknhat,pawmknhat_psipsi,respfn
+!!      m_paw_dfpt,m_paw_nhat,m_pawdij,m_respfn_driver
 !!
 !! CHILDREN
 !!

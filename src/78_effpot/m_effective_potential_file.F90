@@ -34,6 +34,8 @@ module m_effective_potential_file
  use m_anharmonics_terms
  use m_effective_potential
  use m_ifc
+ use m_ddb
+ use m_ddb_hdr
 #if defined HAVE_NETCDF
  use netcdf
 #endif
@@ -229,7 +231,7 @@ CONTAINS  !=====================================================================
 !! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential
 !!
 !! PARENTS
-!!      compute_anharmonics,multibinit
+!!      m_compute_anharmonics,m_multibinit_driver
 !!
 !! CHILDREN
 !!
@@ -237,9 +239,7 @@ CONTAINS  !=====================================================================
 
 subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
-  use m_effective_potential
   use m_multibinit_dataset
-  use m_ddb, only : ddb_from_file
   use m_strain
   use m_crystal, only : crystal_t
   use m_dynmat, only : bigbx9
@@ -258,6 +258,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !scalars
   integer :: ii,filetype,natom,ntypat,nqpt,nrpt
   character(500) :: message
+  type(ddb_hdr_type) :: ddb_hdr
 !array
   integer,allocatable :: atifc(:)
 
@@ -291,7 +292,8 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       ABI_ALLOCATE(atifc,(inp%natom))
       atifc = inp%atifc
 
-      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc,Crystal,comm)
+      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc, ddb_hdr, Crystal,comm)
+      call ddb_hdr%free()
 
 !     And finaly, we can check if the value of atifc is not change...
       if (.not.all(atifc.EQ.inp%atifc)) then
@@ -446,7 +448,7 @@ end subroutine effective_potential_file_read
 !!             41 ASCII file with history of MD or snapshot
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,m_mover_effpot,m_multibinit_driver
 !!
 !! CHILDREN
 !!
@@ -570,16 +572,13 @@ end subroutine effective_potential_file_getType
 !! nrpt  = number of rpt points
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)
-
- use m_ddb
- use m_ddb_hdr
 
 !Arguments ------------------------------------
 !scalars
@@ -619,7 +618,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
    natom = ddb_hdr%natom
    ntypat = ddb_hdr%ntypat
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Must read some value to initialze  array (nprt for ifc)
 !   call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
@@ -1274,7 +1273,6 @@ end subroutine system_getDimFromXML
  subroutine system_xml2effpot(eff_pot,filename,comm,strcpling)
 
  use m_atomdata
- use m_effective_potential, only : effective_potential_type
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_ab7_symmetry
 
@@ -2214,18 +2212,11 @@ end subroutine system_xml2effpot
 
 subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
- use defs_basis
- use m_errors
- use m_abicore
  use m_dynmat
- use m_xmpi
 
- use m_ddb
- use m_ifc
  use m_copy,            only : alloc_copy
  use m_crystal,         only : crystal_t
  use m_multibinit_dataset, only : multibinit_dtset_type
- use m_effective_potential, only : effective_potential_type, effective_potential_free
 
 !Arguments ------------------------------------
 !scalars
@@ -2901,7 +2892,6 @@ end subroutine system_ddb2effpot
 subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  use m_atomdata
- use m_effective_potential, only : effective_potential_type
  use m_polynomial_coeff
  use m_polynomial_term
  use m_crystal, only : symbols_crystal
@@ -3324,7 +3314,7 @@ end subroutine coeffs_xml2effpot
 !! hist<type(abihist)> = datatype with the  history of the MD
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,m_multibinit_driver
 !!
 !! CHILDREN
 !!
@@ -3437,7 +3427,8 @@ end subroutine effective_potential_file_readMDfile
 !! hist<type(abihist)> = The history of the MD
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff,multibinit
+!!      m_fit_polynomial_coeff,m_mover,m_mover_effpot,m_multibinit_driver
+!!      m_opt_effpot
 !!
 !! CHILDREN
 !!
@@ -3456,7 +3447,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
 !Local variables-------------------------------
 !scalar
  integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncells,nstep_hist
- real(dp):: factor
+ real(dp):: factor,ratio
  logical :: revelant_factor,need_map,need_verbose,need_fixmap
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3)
@@ -3511,22 +3502,35 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
 
  ncells = product(ncell)
 
-!Check if the energy store in the hist is revelant, sometimes some MD files gives
+!Check if the energy stored in the hist is revelant, sometimes some MD files gives
 !the energy of the unit cell... This is not suppose to happen... But just in case...
  do ii=1,nstep_hist
-   factE_hist = int(anint(hist%etot(ii) / eff_pot%energy))
-   if(factE_hist == 1) then
-!    In this case we mutiply the energy of the hist by the number of cell
-     hist%etot(ii) = hist%etot(ii)  * ncells
-   end if
-   if(factE_hist /=1 .and. factE_hist /= ncells)then
-     write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
+   if(abs(eff_pot%energy)>tol12)then
+     ratio=hist%etot(ii) / eff_pot%energy
+     if(abs(ratio)<real(huge(factE_hist))*half)then
+       factE_hist = nint(ratio)
+       if(factE_hist == 1) then
+!      In this case we mutiply the energy of the hist by the number of cell
+         hist%etot(ii) = hist%etot(ii)  * ncells
+       end if
+       if(factE_hist /=1 .and. factE_hist /= ncells)then
+         write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
+&            ' --- !WARNING',ch10,&
+&            '     The energy of the history step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
+&            '     However, the multiplicity of the cell is ',ncells,'.',ch10,&
+&            '     Please check the energy of the step ',ii,ch10,&
+&            ' ---',ch10
+         if(need_verbose) call wrtout(std_out,msg,'COLL')
+       endif
+     else
+       write(msg, '(4a,i0,3a,es16.6,5a)' )ch10,&
 &          ' --- !WARNING',ch10,&
-&          '     The energy of the step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
-&          '     However, the multiplicity of the cell is ',ncells,'.',ch10,&
-&          '     Please check the energy of the step ',ii,ch10,&
+&          '     The energy of the history step ',ii,' is apparently not initialized.',ch10,&
+&          '     Its current value is',hist%etot(ii),ch10,&
+&          '     This does not allow to perform checking on the multiplicity of the cell ',ch10,&
 &          ' ---',ch10
-     if(need_verbose) call wrtout(std_out,msg,'COLL')
+       if(need_verbose) call wrtout(std_out,msg,'COLL')
+     end if
    end if
  end do
 

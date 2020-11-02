@@ -1,1 +1,1 @@
-Please point the configuration to a working NetCDF installation
+Please specify the installation directory for NetCDF

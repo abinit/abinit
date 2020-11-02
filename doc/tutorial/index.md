@@ -7,7 +7,7 @@ authors: XG
 ## Overview of the ABINIT tutorials.
 
 These tutorials are aimed at teaching the use of ABINIT, in the
-UNIX/Linux OS and its variants (MacOSX, AIX ...).
+UNIX/Linux OS and its variants (MacOS, AIX ...).
 They might be used for other operating systems, but the commands have to be adapted.
 
 At present, nearly forty tutorials are available. Each of them is at most
@@ -30,10 +30,10 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="70  ,285 ,180 ,310 " href="tddft/index.html" />
 <area shape="rect" coords="70  ,315 ,180 ,335 " href="positron/index.html" />
 <area shape="rect" coords="70  ,345 ,180 ,369 " href="ffield/index.html" />
-<area shape="rect" coords="70  ,370 ,180 ,390 " href="analysis_tools/index.html" />
+<area shape="rect" coords="70  ,370 ,180 ,390 " href="cut3d/index.html" />
 <area shape="rect" coords="70  ,395 ,180 ,420 " href="fold2bloch/index.html" />
 <area shape="rect" coords="70  ,425 ,180 ,445 " href="wannier90/index.html" />
-<area shape="rect" coords="70  ,450 ,180 ,475" href="source_code/index.html" />
+<area shape="rect" coords="70  ,450 ,180 ,475" href="../developers/developers_howto/index.html" />
 <area shape="rect" coords="210  ,135 ,330 ,199 " href="rf1/index.html" />
 <area shape="rect" coords="210  ,210 ,330 ,240 " href="optic/index.html" />
 <area shape="rect" coords="210  ,250 ,330 ,280 " href="rf2/index.html" />
@@ -41,11 +41,13 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="210  ,326 ,289 ,379 " href="lattice_model/index.html" />
 <area shape="rect" coords="290  ,326 ,330 ,379 " href="spin_model/index.html" />
 <area shape="rect" coords="210  ,390 ,330 ,420 " href="nlo/index.html" />
-<area shape="rect" coords="210  ,435 ,330 ,464 " href="eph/index.html" />
-<area shape="rect" coords="210  ,465 ,330 ,495 " href="tdepes/index.html" />
+<area shape="rect" coords="210  ,425 ,330 ,464 " href="eph_intro/index.html" />
+<area shape="rect" coords="210  ,465 ,264 ,494 " href="eph_intro/index.html" />
+<area shape="rect" coords="265  ,465 ,330 ,484 " href="eph4mob/index.html" />
+<area shape="rect" coords="210  ,485 ,330 ,524 " href="eph4zpr/index.html" />
 <area shape="rect" coords="355  ,400 ,440 ,440 " href="gw1/index.html" />
 <area shape="rect" coords="355  ,460 ,440 ,479 " href="gw2/index.html" />
-<area shape="rect" coords="355  ,480 ,440 ,500 " href="bse/index.html" />
+<area shape="rect" coords="355  ,480 ,440 ,520 " href="bse/index.html" />
 <area shape="rect" coords="485  ,15 ,590 , 90 " href="basepar/index.html" />
 <area shape="rect" coords="475  ,125 ,615 ,175 " href="paral_gspw/index.html" />
 <area shape="rect" coords="475  ,180 ,615 ,235 " href="paral_moldyn/index.html" />
@@ -54,7 +56,7 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="475  ,360 ,615 ,410 " href="paral_dfpt/index.html" />
 <area shape="rect" coords="415  ,420 ,615 ,470 " href="paral_mbt/index.html" />
 </map>
-<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v9.png" usemap="#map1"/>
+<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v10.png" usemap="#map1"/>
 </center>
 
 The "base" tutorials are presented at the top, in orange. The blocks in red represents additional tutorials related
@@ -134,7 +136,7 @@ prerequisite than the tutorials 1 to 4, and that you can do in any order (there 
     to obtain the positron lifetime in the perfect material, the lifetime of a positron
     localized in a vacancy, the electron-positron momentum distribution wavefunctions and densities.
 
-  * [The tutorial on Analysis Tools](analysis_tools) deals with the use of the CUT3D utility to analyse wavefunctions and densities.
+  * [The tutorial on cut3d](cut3d) deals with the use of the CUT3D utility to analyse wavefunctions and densities.
 
   * [The tutorial on the fold2bloch postprocessor](fold2bloch) deals with the use of the fold2Bloch utility
     to unfold band structures from supercell calculations.
@@ -155,8 +157,8 @@ prerequisite than the tutorials 1 to 4, and that you can do in any order (there 
   * [The tutorial on TDDFT](tddft) deals with the computation of the excitation spectrum of finite systems,
     thanks to the Time-Dependent Density Functional Theory approach, in the Casida formalism.
 
-  * [The tutorial "Source code"](source_code) introduces the user to the development
-    of new functionalities in ABINIT: in this tutorial, one learns how to add a new input variable ...
+  * [The "howto guide for developers"](../developers/developers_howto) introduces the new developer to the development
+    of new functionalities in ABINIT ...
 
 ### DFPT-related tutorials
 **There is an additional group of tutorials on density-functional
@@ -179,29 +181,47 @@ piezoelectricity ...), for which some common additional information are needed:*
     the frequency dependent linear optical dielectric function and the frequency
     dependent second order nonlinear optical susceptibility, in the simple "Sum-Over-State" approximation.
 
-**The additional information given by tutorials DFPT1 and DFPT2 (Optic not needed) opens the door to a group of tutorials
-that can be followed independently of each other:**
-
-  * [The tutorial on the electron-phonon interaction](eph) presents the use of the utility MRGKK and ANADDB
-    to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
-
-  * [The tutorial on temperature dependence of the electronic structure](tdepes) presents the computation
-    of the temperature dependence of the electronic structure,
-    the zero-point motion effect, the lifetime/broadening of eigenenergies.
+**The additional information given by tutorials DFPT1 and DFPT2 (Optic not needed) opens the door to several tutorials:
+the group of tutorials starting with the computation of elastic properties, followed by the two multibinit tutorials,
+the tutorial on non-linear optics, and the group of electron-phonon tutorials:**
 
   * [The tutorial on the elastic properties](elastic) presents the computation with respect to
     the strain perturbation and its responses: elastic constants, piezoelectricity.
 
-  * [The tutorial on static non-linear properties](nlo) presents the computation of responses beyond
-    the linear order, within Density-Functional Perturbation Theory (beyond the simple Sum-Over-State approximation):
-    Raman scattering efficiencies (non-resonant case), non-linear electronic susceptibility, electro-optic effect.
-    Comparison with the finite field technique (combining DFPT calculatons with finite difference calculations), is also provided.
-
-**After following tutorials DFPT1, DFPT2, Elastic and NLO, the tutorials on MULTIBINIT might be followed:**
-
   * [The first tutorial on MULTIBINIT](lattice_model) presents the basic use of the MULTIBINIT application,
     how to build a harmonic model by using a second-principles approach for lattice dynamics
     simulations based on atomic potentials fitted on first-principles calculations.
+
+  * [The second tutorial on MULTIBINIT](spin_model) presents how to build a spin model 
+    and run spin dynamics in MULTIBINIT.
+
+  * [The tutorial on static non-linear properties](nlo) presents the computation of responses beyond
+    the linear order, within Density-Functional Perturbation Theory (beyond the simple Sum-Over-State approximation):
+    Raman scattering efficiencies (non-resonant case), non-linear electronic susceptibility, electro-optic effect.
+    Comparison with the finite field technique (combining DFPT calculations with finite difference calculations), is also provided.
+
+  * [The introductive tutorial on the electron-phonon interaction](eph_intro) presents the electron-phonon driver 
+    integrated with the ABINIT executable, discuss important technical details related to the implementation and the associated input variables. 
+    The drawbacks/advantages with respect to the implementation available in ANADDB are also discussed.
+
+  * [The tutorial on mobility calculations](eph4mob) explains how to compute phonon-limited carrier mobilities 
+    in semiconductors within the relaxation time approximation (RTA)
+
+  * [The tutorial on zero-point renormalization and temperature-dependence of electronic structure](eph4zpr) 
+    explains how to obtain the electron self-energy due to phonons, compute the zero-point renormalization (ZPR) of the band gap 
+    as well as temperature-dependent band gaps (or the whole electronic structure).
+
+**Two obsolete tutorials on electron-phonon interaction are still present. 
+The implementations are still available at time of writing,
+but have been superceded by the new implementations, described in the above-mentioned tutorials.
+Their prerequisite is also tutorials DFPT1 and DFPT2 (Optic not needed):**
+
+  * [The obsolete tutorial on the electron-phonon interaction](eph) presents the use of the utility MRGKK and ANADDB
+    to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
+
+  * [The obsolete tutorial on temperature dependence of the electronic structure](tdepes) presents the computation
+    of the temperature dependence of the electronic structure,
+    the zero-point motion effect, the lifetime/broadening of eigenenergies.
 
 ### MBPT-related tutorials
 **There is another additional group of tutorials on many-body perturbation

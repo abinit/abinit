@@ -92,7 +92,7 @@ _ WF disk file :      0.733 Mbytes ; DEN or POT disk file :      0.068 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.5055909000E+00  7.5055909000E+00  7.5055909000E+00 Bohr
               amu      2.69815390E+01
-      chksymbreak           0
+      chksymtnons           0
              ecut      6.00000000E+00 Hartree
 -          fftalg         312
            getwfk1          0
@@ -610,7 +610,7 @@ force_length_stats: {min:   4.44089210E-17, max:   1.23465454E+00, mean:   7.757
  -outvars: echo values of variables after computation  --------
             acell      7.5055909000E+00  7.5055909000E+00  7.5055909000E+00 Bohr
               amu      2.69815390E+01
-      chksymbreak           0
+      chksymtnons           0
              ecut      6.00000000E+00 Hartree
            etotal1    -1.0459312997E+01
            etotal2    -5.9142591499E+00

@@ -34,6 +34,9 @@ xred     0.000000000000000   0.000000000000000   0.000000000000000
          0.807100000000000   0.192900000000000   0.500000000000000 
          0.192900000000000   0.807100000000000   0.500000000000000 
          0.692900000000000   0.692900000000000   0.000000000000000 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Sn-GGA-PBE-rpaw-2.70.abinit, O-GGA-PBE-rpaw-1.41.abinit"
       
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -41,7 +44,6 @@ xred     0.000000000000000   0.000000000000000   0.000000000000000
 #%% [files]
 #%% files_to_test = 
 #%%   tnuc_2.out, tolnlines=  12, tolabs=  4.1e-09, tolrel=  3.000e-03
-#%% psp_files = Sn-GGA-PBE-rpaw-2.70.abinit, O-GGA-PBE-rpaw-1.41.abinit
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

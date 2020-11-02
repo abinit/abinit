@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h45 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 10h39 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_3.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_3.in
 - output file    -> tgw2_3.out
 - root for input  files -> tgw2_3i
 - root for output files -> tgw2_3o
@@ -32,11 +32,11 @@
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
     occopt =       3   xclevel =       1
 -    mband =          30        mffmem =           1         mkmem =           8
-       mpw =          92          nfft =        3375          nkpt =           8
+       mpw =         100          nfft =        3375          nkpt =           8
 ================================================================================
-P This job should need less than                       2.519 Mbytes of memory.
+P This job should need less than                       2.551 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.339 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.368 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -54,9 +54,9 @@ _ WF disk file :      0.339 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
               amu      2.69815390E+01
              bdgw           1       1       2       2       1       2       1       1
                             1       3       1       3       1       5       1       4
-             ecut      6.40521068E+00 Hartree
-         ecutsigx      6.40521068E+00 Hartree
-          ecutwfn      6.40521068E+00 Hartree
+             ecut      6.50000000E+00 Hartree
+         ecutsigx      6.50000000E+00 Hartree
+          ecutwfn      6.50000000E+00 Hartree
            enunit           1
 -          fftalg         312
         gwcalctyp          12
@@ -181,8 +181,8 @@ P           mkmem           8
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 1, nkpt: 8, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 92, }
-cutoff_energies: {ecut:   6.4, pawecutdg:  -1.0, }
+dimensions: {natom: 1, nkpt: 8, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 100, }
+cutoff_energies: {ecut:   6.5, pawecutdg:  -1.0, }
 electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   5.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 12, }
 ...
@@ -206,8 +206,8 @@ meta: {optdriver: 4, gwcalctyp: 12, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -282,7 +282,7 @@ meta: {optdriver: 4, gwcalctyp: 12, }
   Number of electrons    =    2.9999
 
   QP Band energy    [Ha] =  3.72160123532742E-01
-  QP Hartree energy [Ha] =  3.57747793413947E-03
+  QP Hartree energy [Ha] =  3.57455035450578E-03
 
 --------------------------------------------------------------------------------
  SIGMA fundamental parameters:
@@ -326,8 +326,8 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -3.762    -9.451    -3.762     5.689   -15.617     5.940     0.761    -0.313    -9.623    -0.173    -3.934    -3.988
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -3.762    -9.451    -3.762     5.689   -15.617     5.941     0.761    -0.314    -9.622    -0.171    -3.933    -3.987
 ...
 
 
@@ -339,8 +339,8 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        2    10.716    -9.474    10.716    20.190    -5.126    -4.535     0.689    -0.452    -9.603    -0.128    10.587    10.529
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        2    10.716    -9.475    10.716    20.190    -5.126    -4.537     0.688    -0.452    -9.605    -0.130    10.586    10.527
 ...
 
 
@@ -352,9 +352,9 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1     2.778    -9.407     2.778    12.185   -11.900     2.268     0.690    -0.449    -9.563    -0.155     2.623     2.553
-        2     2.924    -9.503     2.924    12.427   -11.766     2.109     0.689    -0.451    -9.608    -0.106     2.818     2.771
+        2     2.924    -9.503     2.924    12.427   -11.766     2.107     0.689    -0.451    -9.610    -0.107     2.817     2.768
 ...
 
 
@@ -366,8 +366,8 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -1.525    -9.451    -1.525     7.926   -14.491     4.774     0.685    -0.459    -9.633    -0.182    -1.707    -1.790
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -1.525    -9.451    -1.525     7.926   -14.491     4.774     0.685    -0.460    -9.633    -0.182    -1.707    -1.791
 ...
 
 
@@ -376,13 +376,13 @@ iteration_state: {dtset: 1, }
 kpoint     : [   0.500,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    4.360
-QP_gap     :    4.385
-Delta_QP_KS:    0.025
+QP_gap     :    4.384
+Delta_QP_KS:    0.024
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1     2.300    -9.454     2.300    11.754   -12.217     2.582     0.676    -0.480    -9.577    -0.123     2.177     2.119
-        2     6.559    -9.465     6.559    16.023    -8.705    -0.954     0.689    -0.451    -9.599    -0.134     6.425     6.364
-        3    10.919    -9.434    10.919    20.353    -4.981    -4.608     0.700    -0.429    -9.543    -0.109    10.810    10.763
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1     2.300    -9.454     2.300    11.754   -12.217     2.581     0.676    -0.480    -9.577    -0.123     2.177     2.118
+        2     6.559    -9.465     6.559    16.024    -8.705    -0.956     0.689    -0.451    -9.600    -0.135     6.424     6.363
+        3    10.919    -9.434    10.919    20.353    -4.981    -4.611     0.700    -0.430    -9.545    -0.111    10.808    10.760
 ...
 
 
@@ -392,12 +392,12 @@ kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    7.879
 QP_gap     :    7.845
-Delta_QP_KS:   -0.034
+Delta_QP_KS:   -0.035
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1     0.678    -9.451     0.678    10.129   -13.228     3.624     0.663    -0.508    -9.553    -0.101     0.577     0.525
-        2     8.557    -9.517     8.557    18.074    -6.765    -2.946     0.695    -0.439    -9.652    -0.135     8.422     8.362
-        3     9.995    -9.387     9.995    19.382    -5.372    -4.179     0.699    -0.430    -9.501    -0.115     9.881     9.831
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1     0.678    -9.451     0.678    10.129   -13.228     3.623     0.663    -0.508    -9.553    -0.102     0.576     0.524
+        2     8.557    -9.517     8.557    18.074    -6.765    -2.948     0.695    -0.440    -9.653    -0.136     8.421     8.361
+        3     9.995    -9.387     9.995    19.382    -5.372    -4.183     0.699    -0.431    -9.504    -0.117     9.878     9.827
 ...
 
 
@@ -406,15 +406,15 @@ iteration_state: {dtset: 1, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :    6.920
-QP_gap     :    6.959
-Delta_QP_KS:    0.039
+QP_gap     :    6.961
+Delta_QP_KS:    0.041
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1     4.420    -9.515     4.420    13.935   -10.984     1.181     0.696    -0.438    -9.715    -0.200     4.220     4.132
-        2     5.700    -9.363     5.700    15.063    -9.191    -0.317     0.698    -0.433    -9.464    -0.101     5.600     5.556
-        3    12.621    -9.563    12.621    22.184    -4.576    -5.076     0.691    -0.448    -9.625    -0.062    12.559    12.528
-        4    12.803    -9.478    12.803    22.281    -4.316    -5.437     0.678    -0.474    -9.665    -0.187    12.616    12.528
-        5    12.803    -9.478    12.803    22.281    -4.316    -5.437     0.678    -0.474    -9.664    -0.187    12.617    12.531
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1     4.420    -9.515     4.420    13.935   -10.984     1.180     0.695    -0.438    -9.716    -0.201     4.219     4.131
+        2     5.700    -9.363     5.700    15.063    -9.191    -0.320     0.698    -0.434    -9.466    -0.103     5.598     5.553
+        3    12.621    -9.563    12.621    22.184    -4.576    -5.077     0.691    -0.448    -9.625    -0.062    12.559    12.524
+        4    12.803    -9.478    12.803    22.281    -4.316    -5.441     0.678    -0.474    -9.667    -0.190    12.614    12.524
+        5    12.803    -9.478    12.803    22.281    -4.316    -5.440     0.678    -0.474    -9.667    -0.189    12.614    12.531
 ...
 
 
@@ -426,28 +426,28 @@ KS_gap     :    1.050
 QP_gap     :    1.118
 Delta_QP_KS:    0.068
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1     6.487    -9.516     6.487    16.003    -8.978    -0.771     0.687    -0.456    -9.676    -0.160     6.327     6.254
-        2     6.487    -9.516     6.487    16.003    -8.978    -0.771     0.687    -0.456    -9.676    -0.160     6.327     6.254
-        3     7.537    -9.292     7.537    16.829    -7.339    -2.085     0.694    -0.441    -9.384    -0.092     7.445     7.405
-        4     8.261    -9.468     8.261    17.728    -6.722    -2.926     0.690    -0.449    -9.592    -0.124     8.136     8.080
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1     6.487    -9.516     6.487    16.003    -8.978    -0.773     0.687    -0.456    -9.677    -0.161     6.326     6.252
+        2     6.487    -9.516     6.487    16.003    -8.978    -0.772     0.687    -0.456    -9.677    -0.161     6.326     6.253
+        3     7.537    -9.291     7.537    16.828    -7.339    -2.085     0.694    -0.441    -9.384    -0.092     7.445     7.404
+        4     8.261    -9.468     8.261    17.729    -6.722    -2.932     0.690    -0.450    -9.596    -0.128     8.132     8.074
 ...
 
 
- New Fermi energy :        2.558310E-01 Ha ,    6.961515E+00 eV
+ New Fermi energy :        2.557535E-01 Ha ,    6.959406E+00 eV
 
  writing QP data on file : tgw2_3o_QPS
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (  -0.173   1.157) for band index:  1
+.  kptgw no:  1; Maximum DeltaE = (  -0.171   1.155) for band index:  1
 .  kptgw no:  2; Maximum DeltaE = (   0.000   0.000) for band index:  1
 .  kptgw no:  3; Maximum DeltaE = (  -0.155   0.086) for band index:  1
-.  kptgw no:  4; Maximum DeltaE = (  -0.182   0.443) for band index:  1
+.  kptgw no:  4; Maximum DeltaE = (  -0.182   0.442) for band index:  1
 .  kptgw no:  5; Maximum DeltaE = (  -0.123   0.122) for band index:  1
-.  kptgw no:  6; Maximum DeltaE = (  -0.101   0.242) for band index:  1
-.  kptgw no:  7; Maximum DeltaE = (  -0.187  -0.089) for band index:  4
-.  kptgw no:  8; Maximum DeltaE = (  -0.160   0.006) for band index:  1
+.  kptgw no:  6; Maximum DeltaE = (  -0.102   0.241) for band index:  1
+.  kptgw no:  7; Maximum DeltaE = (  -0.190  -0.089) for band index:  4
+.  kptgw no:  8; Maximum DeltaE = (  -0.161   0.006) for band index:  1
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -457,9 +457,9 @@ data: !SigmaeeData |
               amu      2.69815390E+01
              bdgw           1       1       2       2       1       2       1       1
                             1       3       1       3       1       5       1       4
-             ecut      6.40521068E+00 Hartree
-         ecutsigx      6.40521068E+00 Hartree
-          ecutwfn      6.40521068E+00 Hartree
+             ecut      6.50000000E+00 Hartree
+         ecutsigx      6.50000000E+00 Hartree
+          ecutwfn      6.50000000E+00 Hartree
            enunit           1
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -579,10 +579,41 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          8.1        0.14      0.002
+- Total wall clock time (s,m,h):          8.8        0.15      0.002
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            8.1, wall_time =            8.8
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  7.805  96.2      8.115  92.5              1      -1.00        0.96       0.96
+- pspini                         0.191   2.4      0.192   2.2              1      -1.00        1.00       1.00
+- timing timab                   0.110   1.4      0.111   1.3              9      -1.00        1.00       1.00
+- invars2                        0.047   0.6      0.048   0.5              1      -1.00        0.98       0.98
+- others (123)                   0.045   0.6      0.044   0.5             -1      -1.00        1.02       1.02
+-<END_TIMER>
+-
+- subtotal                       8.198 101.0      8.510  97.0                                  0.96       0.96
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           8.1, wall_time =           8.8
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  7.805  96.2      8.115  92.5              1      -1.00        0.96       0.96
+- pspini                         0.191   2.4      0.192   2.2              1      -1.00        1.00       1.00
+- timing timab                   0.110   1.4      0.111   1.3              9      -1.00        1.00       1.00
+- invars2                        0.047   0.6      0.048   0.5              1      -1.00        0.98       0.98
+- others (123)                   0.045   0.6      0.044   0.5             -1      -1.00        1.02       1.02
+-<END_TIMER>
 
+- subtotal                       8.198 101.0      8.510  97.0                                  0.96       0.96
 
 ================================================================================
 
@@ -658,10 +689,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.9  wall=          7.9
+- Proc.   0 individual time (sec): cpu=          8.1  wall=          8.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.9  wall=          7.9
+.Delivered   9 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.1  wall=          8.8

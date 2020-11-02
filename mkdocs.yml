@@ -31,12 +31,14 @@ pages:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
-    - Tdep: guide/tdep.md
+    - a-TDEP: guide/a-TDEP.md
     - Installation:
         - HowTo: installation.md
-        - MacOSX: README_MacOSX.md
-        - GPUs: README_gpu.md
-        - Xlf: README_xlf.md
+        - MacOS: INSTALL_MacOS.md
+        - Ubuntu: INSTALL_Ubuntu.md
+        - CentOS: INSTALL_CentOS.md
+        - EasyBuild: INSTALL_EasyBuild.md
+        - GPUs: INSTALL_gpu.md
 
 - Topics:
     - Features: topics/features.md
@@ -88,6 +90,7 @@ pages:
     - topics/LatticeModel.md
     - topics/LDAminushalf.md
     - topics/LOTF.md
+    - topics/longwave.md
     - topics/Macroave.md
     - topics/MagField.md
     - topics/MagMom.md
@@ -120,7 +123,7 @@ pages:
     - topics/STM.md
     - topics/Susceptibility.md
     - topics/TDDFT.md
-    - topics/Tdep.md
+    - topics/a-TDEP.md
     - topics/TDepES.md
     - topics/Temperature.md
     - topics/TransPath.md
@@ -156,12 +159,13 @@ pages:
     - Anaddb: variables/anaddb.md
     - Multibinit: variables/multibinit.md
     - Optic: variables/optic.md
-    - Tdep: variables/tdep.md
+    - a-TDEP: variables/atdep.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
     - Statistics: variables/varset_stats.md
 - Tutorial:
     - Overview: tutorial/index.md
+    - Building Abinit: tutorial/compilation.md
     - Base Tutorials:
         - Base1: tutorial/base1.md
         - Base2: tutorial/base2.md
@@ -184,6 +188,11 @@ pages:
         - tutorial/nlo.md
     - DMFT: tutorial/dmft.md
     - EPH:
+        - tutorial/eph_intro.md
+        - tutorial/eph4mob.md
+        - tutorial/eph4zpr.md
+        #- tutorial/eph4isotc.md
+    - EPH-legacy:
         - tutorial/eph.md
         - tutorial/tdepes.md
     - Many-Body:
@@ -202,12 +211,12 @@ pages:
         - Lattice Model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
         - Spin Model: tutorial/spin_model.md
-    - tutorial/analysis_tools.md
+    #- tutorial/abitk.md
+    - tutorial/cut3d.md
     - tutorial/fold2bloch.md
     - tutorial/nuc.md
     - tutorial/optic.md
     - tutorial/positron.md
-    - tutorial/source_code.md
     - tutorial/tddft.md
     - tutorial/wannier90.md
 - Theory:
@@ -262,6 +271,7 @@ markdown_extensions:
   - markdown.extensions.tables
   - markdown.extensions.def_list
   - markdown.extensions.sane_lists
+  - markdown.extensions.attr_list
   #- mdx_math:
   #      enable_dollar_delimiter: True
   - pymdownx.arithmatex:
@@ -312,13 +322,13 @@ extra_javascript:
     - extra_javascript/jquery.dialogextend.min.js
     - extra_javascript/abidocs.js
 
-copyright: Copyright &copy; 2019-2020 The Abinit Group
+copyright: Copyright &copy; 2020-2021 The Abinit Group
 
 # Google Analytics
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.1.2  
+    version: 9.3.1
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt
@@ -368,7 +378,6 @@ extra:
         materials_project: "[materials project](https://materialsproject.org/)"
         #conda: https://conda.io/docs/
         #Anaconda: https://continuum.io/downloads
-        #matsci: http://materials.sh/
         #spack: https://github.com/LLNL/spack
         #pip: https://pypi.python.org/pypi/pip
         ipython: "[ipython](https://ipython.org/index.html)"

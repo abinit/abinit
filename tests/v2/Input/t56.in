@@ -25,13 +25,15 @@
  xred 0.0 0.0 0.0
  znucl  24.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "24cr.000107.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%  t56.out, tolnlines = 9, tolabs = 4.0e-8, tolrel = 1.0e-2
-#%% psp_files = 24cr.000107.fhi
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

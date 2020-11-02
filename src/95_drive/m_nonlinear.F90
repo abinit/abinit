@@ -44,7 +44,7 @@ module m_nonlinear
  use m_symtk,    only : symmetrize_xred, littlegroup_q
  use m_dynmat,   only : d3sym, sytens
  use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
- use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init
  use m_ioarr,    only : read_rhor
  use m_kg,       only : getcut, kpgio, getph
  use m_fft,      only : fourdp
@@ -145,14 +145,10 @@ contains
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
-!!      d3sym,dfptnl_doutput,dfptnl_loop,ebands_free,fourdp,getcut
-!!      getkgrid,getshell,hdr_free,hdr_init,hdr_update,initmv,inwffil,kpgio
-!!      mkcore,nlopt,pspini,read_rhor,rhotoxc,setsym,setup1,status
-!!      ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
-!!      symmetrize_xred,sytens,timab,wffclose,wrtout
+!!      kpgio,xmpi_sum
 !!
 !! SOURCE
 
@@ -847,7 +843,7 @@ end if
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
-&   dtset%qprtrb,dum_rhog,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+&   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
  else
 !  Norm-cons.: compute Vloc in reciprocal space and core charge in real space
@@ -873,7 +869,8 @@ end if
 
 !Set up hartree and xc potential. Compute kxc here.
  ABI_ALLOCATE(vhartr,(nfftf))
- call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfftf,ngfftf,&
+             &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
 
  option=3
  nkxc=2*dtset%nspden-1 ! LDA
@@ -1071,9 +1068,9 @@ end if
 
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,1,xred=xred,occ=occ)
 
-   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+   call ddb_hdr%open_write(dtfil%fnameabo_ddb, dtfil%unddb)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Call main output routine
    call dfptnl_doutput(blkflg,d3etot,dtset%mband,mpert,dtset%nkpt,dtset%natom,dtset%ntypat,dtfil%unddb)
@@ -1365,9 +1362,10 @@ end if
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
+!!      kpgio,xmpi_sum
 !!
 !! SOURCE
 
@@ -1411,9 +1409,10 @@ end if
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
+!!      kpgio,xmpi_sum
 !!
 !! SOURCE
 
@@ -1485,7 +1484,7 @@ end subroutine nonlinear
 !!                           (see initberry.f for more explanations)
 !!
 !! PARENTS
-!!      nonlinear
+!!      m_nonlinear
 !!
 !! CHILDREN
 !!      kpgio,xmpi_sum

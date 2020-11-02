@@ -29,13 +29,15 @@
                .750000000000       .750000000000       .250000000000
  znucl 14
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t40.in, t41.in
 #%% [files]
 #%% files_to_test = t40.out, tolnlines=  1, tolabs=  1.000e-02, tolrel=  6.201e-05
-#%% psp_files=14si.pspnc
 #%% [shell]
 #%% post_commands = ww_mv t40o_DEN t41_DEN
 #%% [paral_info]

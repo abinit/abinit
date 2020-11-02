@@ -132,6 +132,9 @@
               8.3403087614E-01  8.3403087614E-01  6.6786431989E-01
               6.6697112171E-01  6.6697112171E-01  6.6697112171E-01
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/79au.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -139,7 +142,6 @@
 #%% [NCPU_32]
 #%% files_to_test = 
 #%%   tgspw_03_MPI32.out, tolnlines = 150, tolabs = 1.1e-3, tolrel = 1.0e-2 
-#%% psp_files = 79au.pspnc
 #%% [paral_info]
 #%% max_nprocs = 32
 #%% nprocs_to_test = 32

@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h22 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 17h30 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t31-t32-t33-t34-t35/t32.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t32.in
 - output file    -> t32.out
 - root for input  files -> t32i
 - root for output files -> t32o
@@ -32,11 +32,11 @@
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           8
-       mpw =         153          nfft =        4096          nkpt =           8
+       mpw =         190          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.885 Mbytes of memory.
+P This job should need less than                       1.932 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.151 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+_ WF disk file :      0.188 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -63,9 +63,9 @@ _ WF disk file :      0.151 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
         bs_loband           2
       chksymbreak           0
            diemac      1.20000000E+01
-             ecut      5.10559920E+00 Hartree
-          ecuteps      2.08005893E+00 Hartree
-          ecutwfn      5.10559920E+00 Hartree
+             ecut      6.00000000E+00 Hartree
+          ecuteps      2.10000000E+00 Hartree
+          ecutwfn      6.00000000E+00 Hartree
 -          fftalg         312
        getwfkfine          99
            irdwfk           1
@@ -171,8 +171,8 @@ P           mkmem           8
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 153, }
-cutoff_energies: {ecut:   5.1, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 190, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 ...
@@ -199,8 +199,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -249,13 +249,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  yields     8 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =  20x 20x 20
+          total number of points  =     8000
 
  ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
  Algorithm: Haydock technique.
  Dimension of the v, W matrices,  npweps  = 51
- Cutoff for the wavefunctions,    npwwfn  = 137
+ Cutoff for the wavefunctions,    npwwfn  = 169
  Number of k-points in the IBZ,   nkibz   = 8
  Highest empty band included,     nband   = 8
  === Spin UP ===
@@ -361,33 +361,33 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  yields    64 points in the full Brillouin Zone.
 
 
- Number of electrons calculated from density =    7.9986; Expected =    8.0000
- average of density, n =  0.029999
- r_s =    1.9965
- omega_plasma =   16.7073 [eV]
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
+ r_s =    1.9964
+ omega_plasma =   16.7088 [eV]
 
  Writing KS-RPA macroscopic dielectric function without local fields to file: t32o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t32o_DS1_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 173 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 172 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 178 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 173 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 172 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 174 iterations.
  Writing EXC Macroscopic dielectric function to file: t32o_DS1_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  20.3372  -0.0000  16.6813  -0.0000  17.7660   0.0000
-   0.1000  20.3545   0.0349  16.6902   0.0179  17.7768   0.0217
-   0.2000  20.4068   0.0702  16.7170   0.0358  17.8093   0.0436
-   0.3000  20.4946   0.1064  16.7618   0.0541  17.8638   0.0658
-   0.4000  20.6191   0.1439  16.8250   0.0728  17.9408   0.0887
-   0.5000  20.7818   0.1833  16.9072   0.0920  18.0409   0.1123
-   0.6000  20.9849   0.2252  17.0088   0.1120  18.1650   0.1369
-   0.7000  21.2311   0.2702  17.1308   0.1329  18.3143   0.1628
-   0.8000  21.5240   0.3193  17.2742   0.1548  18.4900   0.1902
-   0.9000  21.8680   0.3733  17.4400   0.1781  18.6940   0.2194
+   0.0000  20.3147  -0.0000  16.6621  -0.0000  17.7472   0.0000
+   0.1000  20.3320   0.0349  16.6710   0.0178  17.7580   0.0217
+   0.2000  20.3842   0.0701  16.6978   0.0358  17.7905   0.0436
+   0.3000  20.4720   0.1063  16.7426   0.0541  17.8450   0.0658
+   0.4000  20.5964   0.1438  16.8058   0.0727  17.9220   0.0886
+   0.5000  20.7590   0.1832  16.8878   0.0919  18.0220   0.1122
+   0.6000  20.9619   0.2251  16.9894   0.1119  18.1461   0.1368
+   0.7000  21.2080   0.2701  17.1113   0.1328  18.2952   0.1627
+   0.8000  21.5007   0.3191  17.2545   0.1547  18.4709   0.1901
+   0.9000  21.8445   0.3730  17.4203   0.1780  18.6747   0.2193
   
 
 == END DATASET(S) ==============================================================
@@ -407,9 +407,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
         bs_loband           2
       chksymbreak           0
            diemac      1.20000000E+01
-             ecut      5.10559920E+00 Hartree
-          ecuteps      2.08005893E+00 Hartree
-          ecutwfn      5.10559920E+00 Hartree
+             ecut      6.00000000E+00 Hartree
+          ecuteps      2.10000000E+00 Hartree
+          ecutwfn      6.00000000E+00 Hartree
            etotal1     0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -511,10 +511,51 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          5.5        0.09      0.002
+- Total wall clock time (s,m,h):          7.4        0.12      0.002
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            5.5, wall_time =            7.4
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- bse(mkexceps)                  3.556  64.8      4.634  62.6              1      -1.00        0.77       0.77
+- bse(exc_haydock_driver)        3.556  64.8      4.634  62.6              1      -1.00        0.77       0.77
+- bse(Init1)                     1.183  21.5      1.188  16.0              1      -1.00        1.00       1.00
+- pspini                         0.403   7.3      0.405   5.5              1      -1.00        0.99       0.99
+- bse(mkrho)                     0.234   4.3      0.234   3.2              1      -1.00        1.00       1.00
+- bse(rdmkeps^-1)                0.112   2.0      0.114   1.5              1      -1.00        0.99       0.99
+- timing timab                   0.110   2.0      0.111   1.5              9      -1.00        0.99       0.99
+- ewald                          0.083   1.5      0.083   1.1              1      -1.00        1.00       1.00
+- invars2                        0.062   1.1      0.064   0.9              1      -1.00        0.97       0.97
+- others (118)                   0.046   0.8      0.046   0.6             -1      -1.00        1.00       1.00
+-<END_TIMER>
+-
+- subtotal                       9.346 170.2     11.513 155.4                                  0.81       0.81
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           5.5, wall_time =           7.4
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- bse(mkexceps)                  3.556  64.8      4.634  62.6              1      -1.00        0.77       0.77
+- bse(exc_haydock_driver)        3.556  64.8      4.634  62.6              1      -1.00        0.77       0.77
+- bse(Init1)                     1.183  21.5      1.188  16.0              1      -1.00        1.00       1.00
+- pspini                         0.403   7.3      0.405   5.5              1      -1.00        0.99       0.99
+- bse(mkrho)                     0.234   4.3      0.234   3.2              1      -1.00        1.00       1.00
+- bse(rdmkeps^-1)                0.112   2.0      0.114   1.5              1      -1.00        0.99       0.99
+- timing timab                   0.110   2.0      0.111   1.5              9      -1.00        0.99       0.99
+- ewald                          0.083   1.5      0.083   1.1              1      -1.00        1.00       1.00
+- invars2                        0.062   1.1      0.064   0.9              1      -1.00        0.97       0.97
+- others (118)                   0.046   0.8      0.046   0.6             -1      -1.00        1.00       1.00
+-<END_TIMER>
 
+- subtotal                       9.346 170.2     11.513 155.4                                  0.81       0.81
 
 ================================================================================
 
@@ -600,10 +641,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.6
+- Proc.   0 individual time (sec): cpu=          5.5  wall=          7.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  12 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.6  wall=          4.6
+.Delivered  12 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.5  wall=          7.4

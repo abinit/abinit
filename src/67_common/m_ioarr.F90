@@ -128,7 +128,7 @@ CONTAINS  !=====================================================================
 !!  pawrhoij(my_natom*usepaw) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!
 !! PARENTS
-!!      gstate,outscfcv
+!!      m_gstate,m_outscfcv
 !!
 !! CHILDREN
 !!
@@ -193,13 +193,13 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  my_fildata = fildata
  nspden = dtset%nspden; usewvl = dtset%usewvl
 
-!Check validity of arguments--only rho(r) (51,52) and V(r) (101,102) are presently supported
+ ! Check validity of arguments--only rho(r) (51,52) and V(r) (101,102) are presently supported
  if ( (fform-1)/2 /=25 .and. (fform-1)/2 /=50 ) then
    write(message,'(a,i0,a)')' Input fform= ',fform,' not allowed.'
    MSG_BUG(message)
  end if
 
-!Print input fform
+ ! Print input fform
  if ( (fform-1)/2==25 .and. rdwr==1) then
    message = ' ioarr: reading density data '
  else if ( (fform-1)/2==25 .and. rdwr==2) then
@@ -209,14 +209,14 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  else if ( (fform-1)/2==50 .and. rdwr==2) then
    message = ' ioarr: writing potential data'
  end if
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,message)
 
- call wrtout(std_out, 'ioarr: file name is: '//TRIM(fildata),'COLL')
+ call wrtout(std_out, 'ioarr: file name is: '//TRIM(fildata))
 
 #ifdef HAVE_NETCDF
  if (accessfil == IO_MODE_ETSF) then ! Initialize filename in case of ETSF file.
    file_etsf = nctk_ncify(fildata)
-   call wrtout(std_out,sjoin('file name for ETSF access: ', file_etsf),'COLL')
+   call wrtout(std_out,sjoin('file name for ETSF access: ', file_etsf))
  end if
 #endif
 
@@ -292,8 +292,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
          if (need_fftinterp) then
            write(message, "(2a,2(a,3(i0,1x)))")&
-&           "Will perform Fourier interpolation since in and out ngfft differ",ch10,&
-&           "ngfft in file: ",hdr0%ngfft,", expected ngfft: ",hdr%ngfft
+            "Will perform Fourier interpolation since in and out ngfft differ",ch10,&
+            "ngfft in file: ",hdr0%ngfft,", expected ngfft: ",hdr%ngfft
            MSG_WARNING(message)
 
            ! Read rho(r) from file, interpolate it, write data and change fildata
@@ -428,7 +428,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      call hdr_check(fform, fform_dum, hdr, hdr0, 'COLL', restart, restartpaw)
 
      ! If nspden[file] /= nspden, need a temporary array
-     if (hdr0%nspden/=nspden) then
+     if (hdr0%nspden /= nspden) then
        ABI_MALLOC(arr_file,(cplex*nfft,hdr0%nspden))
      else
        arr_file => arr
@@ -462,7 +462,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      MSG_BUG(message)
    end if
 
-   call wrtout(std_out,sjoin("data read from disk file: ", fildata),'COLL')
+   call wrtout(std_out,sjoin("data read from disk file: ", fildata))
 
    etotal=hdr0%etot
 
@@ -472,7 +472,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      ABI_FREE(arr_file)
    end if
 
-!  Eventually copy (or distribute) PAW data
+   ! Eventually copy (or distribute) PAW data
    if (rdwrpaw==1.and.restartpaw/=0) then
      if (size(hdr0%pawrhoij) /= size(pawrhoij)) then
        call pawrhoij_copy(hdr0%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
@@ -622,7 +622,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      ABI_DEALLOCATE(my_density)
    end if
 
-   call wrtout(std_out,sjoin(' Data written to disk file:', fildata),'COLL')
+   call wrtout(std_out,sjoin(' Data written to disk file:', fildata))
 
  else
    write(message,'(a,i0,a)')'Called with rdwr = ',rdwr,' not allowed.'
@@ -685,7 +685,7 @@ end subroutine ioarr
 !!   fform i.e. the integer specification for data type is automatically initialized from varname.
 !!
 !! PARENTS
-!!      cut3d,m_ioarr,outscfcv,sigma
+!!      cut3d,m_ioarr,m_outscfcv,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -891,7 +891,7 @@ end subroutine fftdatar_write
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_scfcv,scfcv
+!!      m_dfpt_scfcv,m_scfcv_core
 !!
 !! CHILDREN
 !!
@@ -912,7 +912,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 
 !Local variables-------------------------------
 !!scalars
- integer :: timrev,mband
+ integer :: mband
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands
 !arrays
@@ -920,8 +920,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 
 ! *************************************************************************
 
- timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
- crystal = hdr%get_crystal(timrev)
+ crystal = hdr%get_crystal()
 
  if (present(eigen)) then
      mband = maxval(hdr%nband)
@@ -991,8 +990,9 @@ end subroutine fftdatar_write_from_hdr
 !!   All the processors inside comm and comm_atom should call this routine.
 !!
 !! PARENTS
-!!      dfpt_looppert,dfptnl_loop,gstate,mrgscr,nonlinear,respfn,setup_positron
-!!      sigma
+!!      m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_dvdb,m_gstate,m_longwave
+!!      m_nonlinear,m_pead_nl_loop,m_positron,m_respfn_driver,m_sigma_driver
+!!      m_sigmaph,mrgscr
 !!
 !! CHILDREN
 !!
@@ -1144,13 +1144,13 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
        ratio = ohdr%nelect / (sum(rhor_file(:,1))*ucvol/ product(ngfft(1:3)))
        rhor_file = rhor_file * ratio
        write(msg,'(a,f8.2,a,f8.4)')' Expected nelect: ',ohdr%nelect,' renormalization ratio: ',ratio
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      end if
    end if ! need_interp
 
    ! Read PAW Rhoij
    if (ohdr%usepaw == 1) then
-     ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
+     ABI_MALLOC(pawrhoij_file, (ohdr%natom))
      call pawrhoij_nullify(pawrhoij_file)
      call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
          ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
@@ -1182,7 +1182,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    ! Eventually copy (or distribute) PAW data
    if (ohdr%usepaw == 1 .and. pawread == 1) then
      if (my_rank /= master) then
-       ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
+       ABI_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
        call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
             ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
@@ -1243,7 +1243,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
  if (allocated(pawrhoij_file)) then
    call pawrhoij_free(pawrhoij_file)
-   ABI_DT_FREE(pawrhoij_file)
+   ABI_FREE(pawrhoij_file)
  end if
 
 ! Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities

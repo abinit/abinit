@@ -140,14 +140,11 @@ CONTAINS  !=====================================================================
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_scfcv,odamix,paw_qpscgw,respfn,scfcv,screening
-!!      sigma
+!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_odamix
+!!      m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawdensities,pawdijfock,pawdijhartree
-!!      pawdijnd,pawdijso,pawrad_deducer0,pawuenergy,pawxc,pawxc_dfpt,pawxcm
-!!      pawxcm_dfpt,pawxcmpositron,pawxcpositron,pawxenergy,pawxpot,poisson
-!!      setnoccmmp,timab,wrtout,xmpi_sum
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -190,7 +187,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  logical :: non_magnetic_xc,paral_atom,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
- real(dp) :: eldaumdc,eldaumdcdc,eldaufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
+ real(dp) :: edftumdc,edftumdcdc,edftufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
  real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum
  character(len=3) :: pertstrg
  character(len=500) :: msg
@@ -307,7 +304,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    e1xc=zero     ; e1xcdc=zero
    etild1xc=zero ; etild1xcdc=zero
    exccore=zero  ; eh2=zero ; e1t10=zero
-   eldaumdc=zero ; eldaumdcdc=zero ; eldaufll=zero
+   edftumdc=zero ; edftumdcdc=zero ; edftufll=zero
    eexex=zero    ; eexexdc=zero
    eextemp=zero  ; eexdctemp=zero
    espnorb=zero  ; enucdip=zero
@@ -838,7 +835,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      if (pawu_algo==PAWU_ALGO_1) then
 
 !      PAW+U Dij computation from nocc_m_mp
-       call pawuenergy(iatom_tot,eldaumdc,eldaumdcdc,paw_ij(iatom)%noccmmp, &
+       call pawuenergy(iatom_tot,edftumdc,edftumdcdc,paw_ij(iatom)%noccmmp, &
 &                      paw_ij(iatom)%nocctot,pawprtvol,pawtab(itypat))
      else
 
@@ -852,15 +849,15 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        if (option/=1) then
          etmp=zero
          call pawaccenergy(etmp,pawrhoij(iatom),paw_ij(iatom)%dijU,cplex_dij,qphase,ndij,pawtab(itypat))
-         eldaumdc=eldaumdc+half*etmp ; eldaumdcdc=eldaumdcdc-half*etmp
+         edftumdc=edftumdc+half*etmp ; edftumdcdc=edftumdcdc-half*etmp
          !Add FLL double-counting part
          if (pawu_dblec==PAWU_FLL.and.ipert==0) then
            ABI_CHECK(qphase==1,'BUG in pawdenpot: qphase should be 1 for Dble-C FLL term!')
-           call pawaccenergy_nospin(eldaufll,pawrhoij(iatom),pawtab(itypat)%euij_fll,1,1,pawtab(itypat))
+           call pawaccenergy_nospin(edftufll,pawrhoij(iatom),pawtab(itypat)%euij_fll,1,1,pawtab(itypat))
          end if
        end if
 
-     end if ! LDA+U algo
+     end if ! DFT+U algo
    end if ! Dij Hartree
 
 !  ========= Compute nuclear dipole moment energy contribution  ========
@@ -1031,10 +1028,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
  if (option/=1) then
    if (ipert==0) then
-     epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+eldaumdc+eldaufll+eexex+espnorb+efock+enucdip
-     epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+eldaumdcdc-eexex-efockdc
+     epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+edftumdc+edftufll+eexex+espnorb+efock+enucdip
+     epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+edftumdcdc-eexex-efockdc
    else
-     epaw=e1xc-etild1xc+eh2+two*eldaumdc
+     epaw=e1xc-etild1xc+eh2+two*edftumdc
      epawdc=zero
    end if
  end if
@@ -1132,10 +1129,10 @@ end subroutine pawdenpot
 !!               updated with the contribution of current atom
 !!
 !! PARENTS
-!!      make_efg_onsite,pawdenpot,pawdfptenergy,poslifetime,posratecore
+!!      m_paw_denpot,m_paw_dfpt,m_paw_dfptnl,m_paw_nmr,m_positron
 !!
 !! CHILDREN
-!!      pawrad_deducer0,simp_gen,wrtout
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -1525,10 +1522,10 @@ end subroutine pawdensities
 !!  ttau1(cplex*mesh_size,lm_size,nspden)]= pseudo on site kinetic energy density
 !!
 !! PARENTS
-!!      pawdenpot
+!!      m_paw_denpot
 !!
 !! CHILDREN
-!!      pawrad_deducer0,simp_gen
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -1823,7 +1820,7 @@ end subroutine pawkindensities
 !!             expression of 2nd-order energy)
 !!
 !! PARENTS
-!!      m_paw_denpot
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! NOTES
 !! * The general form for Dij is:
@@ -1845,6 +1842,9 @@ end subroutine pawkindensities
 !!   Note the order of s1/s2 indices, especially for Rho_ij.
 !!   The present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
 !!     rho^{s1,s2}^_ij = Sum[<Psi^s2|pi><pj|Psi^s1]  (s1 and s2 exponents inverted)
+!!
+!! CHILDREN
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -2015,10 +2015,10 @@ end subroutine pawaccenergy
 !!             expression of 2nd-order energy)
 !!
 !! PARENTS
-!!      m_paw_denpot
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! CHILDREN
-!!      pawaccenergy
+!!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout
 !!
 !! SOURCE
 
@@ -2100,7 +2100,7 @@ end subroutine pawaccenergy_nospin
 !!     At output: new value for Paw_ij()%dij
 !!
 !! PARENTS
-!!      calc_vhxc_me
+!!      m_vhxc_me
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,pawgylm,symdij,symdij_all,wrtout

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawxmlps
 !! NAME
 !! m_pawxmlps
@@ -257,6 +256,7 @@ type, public :: paw_setup_t
   real(dpxml)                  :: rpaw
   real(dpxml)                  :: ex_cc
   character(len=4)             :: idgrid
+  character(len=12)            :: optortho
   type(atom_t)                 :: atom
   type(xc_functional_t)        :: xc_functional
   type(generator_t)            :: generator
@@ -1049,7 +1049,7 @@ end subroutine paw_end_element1
 !! PARENTS
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 subroutine pawdata_chunk(chunk)
@@ -1129,10 +1129,10 @@ end subroutine pawdata_chunk
 !!  paw_setup<paw_setup_type>=Datatype gathering information on XML paw setup.
 !!
 !! PARENTS
-!!      abinit,inpspheads
+!!      m_pspheads,m_pspini
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1255,10 +1255,9 @@ end subroutine paw_setup_free
 !!  paw_setupout<paw_setup_type>=output paw_setup datastructure
 !!
 !! PARENTS
-!!      inpspheads
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1280,6 +1279,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
  paw_setupout%tread=paw_setupin%tread
  paw_setupout%ngrid=paw_setupin%ngrid
  paw_setupout%idgrid=paw_setupin%idgrid
+ paw_setupout%optortho=paw_setupin%optortho
  paw_setupout%rpaw=paw_setupin%rpaw
  paw_setupout%ex_cc=paw_setupin%ex_cc
  paw_setupout%atom%tread=paw_setupin%atom%tread
@@ -1494,7 +1494,7 @@ end subroutine paw_setup_copy
 !!      m_pawxmlps
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1542,10 +1542,10 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      pawpsxml2ab
+!!      m_pspheads
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1930,10 +1930,10 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      pawpsxml2ab
+!!      m_pspheads
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -2666,6 +2666,18 @@ end subroutine paw_setup_copy
      cycle
    end if
 
+!  --Read orthogonalisation scheme
+   if (line(1:18)=='<orthogonalisation') then
+     call paw_rdfromline(" scheme",line,strg,ierr)
+     if (len(trim(strg))<=30) then
+       strg1=trim(strg)
+       read(unit=strg1,fmt=*) paw_setup%optortho
+     else
+       read(unit=strg,fmt=*) paw_setup%optortho
+     end if
+     cycle
+   end if
+
 !  --Read the Atompaw input file
    ir=0
    if ((line(1:13)=='<!-- Program:').and.(ir==1)) then
@@ -2729,10 +2741,10 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      m_pawpsprdpawpsxml_core
+!!      m_pawpsp
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 

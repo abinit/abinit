@@ -135,16 +135,16 @@ module m_multibinit_dataset
   integer :: qrefine(3)
 
   ! parameters for spin
-  integer :: spin_calc_traj_obs
+ ! integer :: spin_calc_traj_obs
   integer :: spin_calc_thermo_obs
-  integer :: spin_calc_correlation_obs
+  !integer :: spin_calc_correlation_obs
   integer :: spin_dipdip
   integer :: spin_dynamics
   integer :: spin_init_state
   integer :: spin_nctime
   integer :: spin_ntime_pre
   integer :: spin_ntime
-  integer :: spin_nmatom !TODO hexu: is it needed?
+!  integer :: spin_nmatom !TODO hexu: is it needed?
 !  integer :: spin_n1l
 !  integer :: spin_n2l
   integer :: spin_sia_add
@@ -169,6 +169,7 @@ module m_multibinit_dataset
   real(dp) :: fit_tolMSDS
   real(dp) :: fit_tolMSDE
   real(dp) :: fit_tolMSDFS
+  real(dp) :: strfact
   real(dp) :: temperature
   real(dp) :: rifcsph
   real(dp) :: conf
@@ -182,9 +183,9 @@ module m_multibinit_dataset
   ! lattice (new) related 
   real(dp) :: latt_friction ! langevin dynamics friction
   real(dp) :: latt_taut     ! Berendsen taut
-  real(dp) :: latt_taup     ! 
-  real(dp) :: latt_compressibility
-  integer :: latt_mask(3)
+  !real(dp) :: latt_taup     ! 
+  !real(dp) :: latt_compressibility
+  !integer :: latt_mask(3)
 
   !  parameters for spin
   real(dp) :: spin_dt
@@ -291,6 +292,7 @@ contains
 !! PARENTS
 !!
 !! CHILDREN
+!!      outvars_scup
 !!
 !! SOURCE
 
@@ -368,8 +370,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%latt_friction=1d-4
  ! Berendsen taut
  multibinit_dtset%latt_taut=1000.0
- multibinit_dtset%latt_taup=1000.0
- multibinit_dtset%latt_compressibility=0.0
+ !multibinit_dtset%latt_taup=1000.0
+ !multibinit_dtset%latt_compressibility=0.0
 
  multibinit_dtset%ntime=200
  multibinit_dtset%nctime=1
@@ -391,15 +393,16 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%restartxf=0
  multibinit_dtset%rfmeth=1
  multibinit_dtset%rifcsph=zero
+ multibinit_dtset%strfact=100.0d0
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
  multibinit_dtset%test_effpot=0 
  multibinit_dtset%test_prt_ph=0 
  multibinit_dtset%tolmxf=2.0d-5
  
- multibinit_dtset%spin_calc_traj_obs=0
+ !multibinit_dtset%spin_calc_traj_obs=0
  multibinit_dtset%spin_calc_thermo_obs=1
- multibinit_dtset%spin_calc_correlation_obs=0
+ !multibinit_dtset%spin_calc_correlation_obs=0
  multibinit_dtset%spin_dipdip=0
  multibinit_dtset%spin_dynamics=0
  multibinit_dtset%spin_init_state=1
@@ -463,7 +466,7 @@ multibinit_dtset%slc_coupling=0
  multibinit_dtset%q1shft(:,:) = zero
  ABI_ALLOCATE(multibinit_dtset%iatfix,(3,natom))
 
- multibinit_dtset%latt_mask(:) = 0
+! multibinit_dtset%latt_mask(:) = 0
 
 end subroutine multibinit_dtset_init
 !!***
@@ -483,9 +486,10 @@ end subroutine multibinit_dtset_init
 !!  multibinit_dtset <type(multibinit_dtset_type)> = multibinit_dataset structure
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
+!!      outvars_scup
 !!
 !! SOURCE
 
@@ -584,9 +588,10 @@ end subroutine multibinit_dtset_free
 !! Should be executed by one processor only.
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
+!!      outvars_scup
 !!
 !! SOURCE
 
@@ -1019,9 +1024,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 !L
- multibinit_dtset%latt_compressibility=0.0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_compressibility',tread,'DPR')
- if(tread==1) multibinit_dtset%latt_compressibility=dprarr(1)
+! multibinit_dtset%latt_compressibility=0.0
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_compressibility',tread,'DPR')
+! if(tread==1) multibinit_dtset%latt_compressibility=dprarr(1)
 
  multibinit_dtset%latt_friction=1e-4
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_friction',tread,'DPR')
@@ -1031,9 +1036,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taut',tread,'DPR')
  if(tread==1) multibinit_dtset%latt_taut=dprarr(1)
 
- multibinit_dtset%latt_taup=1000
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taup',tread,'DPR')
- if(tread==1) multibinit_dtset%latt_taup=dprarr(1)
+! multibinit_dtset%latt_taup=1000
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taup',tread,'DPR')
+! if(tread==1) multibinit_dtset%latt_taup=dprarr(1)
 
 
 !N
@@ -1316,17 +1321,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_damping',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_damping=dprarr(1)
 
- multibinit_dtset%spin_calc_correlation_obs=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_calc_correlation_obs',tread,'INT')
- if(tread==1) multibinit_dtset%spin_calc_correlation_obs=intarr(1)
- if(multibinit_dtset%spin_calc_correlation_obs>1.or.multibinit_dtset%spin_calc_correlation_obs<0)then
-    write(message, '(a,i8,a,a,a,a,a)' )&
-         &   'spin_calc_correlation_obs is',multibinit_dtset%spin_calc_correlation_obs,', but the only allowed values',ch10,&
-         &   'is 0 or 1.',ch10,&
-         &   'Action: correct spin_calc_correlation_obs in your input file.'
-    MSG_ERROR(message)
- end if
-
+! multibinit_dtset%spin_calc_correlation_obs=0
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_calc_correlation_obs',tread,'INT')
+! if(tread==1) multibinit_dtset%spin_calc_correlation_obs=intarr(1)
+! if(multibinit_dtset%spin_calc_correlation_obs>1.or.multibinit_dtset%spin_calc_correlation_obs<0)then
+!    write(message, '(a,i8,a,a,a,a,a)' )&
+!         &   'spin_calc_correlation_obs is',multibinit_dtset%spin_calc_correlation_obs,', but the only allowed values',ch10,&
+!         &   'is 0 or 1.',ch10,&
+!         &   'Action: correct spin_calc_correlation_obs in your input file.'
+!    MSG_ERROR(message)
+! end if
+!
  multibinit_dtset%spin_calc_thermo_obs=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_calc_thermo_obs',tread,'INT')
  if(tread==1) multibinit_dtset%spin_calc_thermo_obs=intarr(1)
@@ -1339,16 +1344,16 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
- multibinit_dtset%spin_calc_traj_obs=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_calc_traj_obs',tread,'INT')
- if(tread==1) multibinit_dtset%spin_calc_traj_obs=intarr(1)
- if(multibinit_dtset%spin_calc_traj_obs>1.or.multibinit_dtset%spin_calc_traj_obs<0)then
-    write(message, '(a,i8,a,a,a,a,a)' )&
-         &   'spin_calc_traj_obs is',multibinit_dtset%spin_calc_traj_obs,', but the only allowed values',ch10,&
-         &   'is 0 or 1.',ch10,&
-         &   'Action: correct spin_calc_traj_obs in your input file.'
-    MSG_ERROR(message)
- end if
+! multibinit_dtset%spin_calc_traj_obs=0
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_calc_traj_obs',tread,'INT')
+! if(tread==1) multibinit_dtset%spin_calc_traj_obs=intarr(1)
+! if(multibinit_dtset%spin_calc_traj_obs>1.or.multibinit_dtset%spin_calc_traj_obs<0)then
+!    write(message, '(a,i8,a,a,a,a,a)' )&
+!         &   'spin_calc_traj_obs is',multibinit_dtset%spin_calc_traj_obs,', but the only allowed values',ch10,&
+!         &   'is 0 or 1.',ch10,&
+!         &   'Action: correct spin_calc_traj_obs in your input file.'
+!    MSG_ERROR(message)
+! end if
 
 
  multibinit_dtset%spin_dipdip=0
@@ -1672,10 +1677,20 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
+ multibinit_dtset%strfact=100.0d0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strfact',tread,'DPR')
+ if(tread==1) multibinit_dtset%strfact=dprarr(1)
+ if(multibinit_dtset%strfact<-tol12)then
+   write(message, '(a,f10.1,a,a,a,a,a)' )&
+&   'strfact is ',multibinit_dtset%strfact,'. The only allowed values',ch10,&
+&   'are positives values.',ch10,&
+&   'Action: correct strfact in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !T
 
- multibinit_dtset%temperature=325
+ multibinit_dtset%temperature=325.0d0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature',tread,'DPR')
  if(tread==1) multibinit_dtset%temperature=dprarr(1)
  if(multibinit_dtset%temperature<=0)then
@@ -2138,18 +2153,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !K
 
 !L
- multibinit_dtset%latt_mask(:)=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_mask',tread,'INT')
- if(tread==1) then
-    do ii=1, 3
-       multibinit_dtset%latt_mask(ii)=intarr(ii)
-       if(multibinit_dtset%latt_mask(ii) <0 .or. multibinit_dtset%latt_mask(ii) >1)then
-          write(message, '(a)' )&
-               &   ' latt_mask element should be 0 or 1.'
-          MSG_ERROR(message)
-       end if
-    end do
- end if
+! multibinit_dtset%latt_mask(:)=0
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_mask',tread,'INT')
+! if(tread==1) then
+!    do ii=1, 3
+!       multibinit_dtset%latt_mask(ii)=intarr(ii)
+!       if(multibinit_dtset%latt_mask(ii) <0 .or. multibinit_dtset%latt_mask(ii) >1)then
+!          write(message, '(a)' )&
+!               &   ' latt_mask element should be 0 or 1.'
+!          MSG_ERROR(message)
+!       end if
+!    end do
+! end if
 
 
 !M
@@ -2618,9 +2633,10 @@ end subroutine invars10
 !! Should be executed by one processor only.
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
+!!      outvars_scup
 !!
 !! SOURCE
 
@@ -2698,15 +2714,15 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
    if(multibinit_dtset%dynamics==104)then
       write(nunit,'(a15,ES15.5)')'     latt_taut',multibinit_dtset%latt_taut
-      write(nunit,'(a15,ES15.5)')'     latt_taup',multibinit_dtset%latt_taup
-      write(nunit,'(a15,ES15.5)')'compressibility',multibinit_dtset%latt_compressibility
+!      write(nunit,'(a15,ES15.5)')'     latt_taup',multibinit_dtset%latt_taup
+!      write(nunit,'(a15,ES15.5)')'compressibility',multibinit_dtset%latt_compressibility
    end if
    
    if(multibinit_dtset%dynamics==105)then
       write(nunit,'(a15,ES15.5)')'     latt_taut',multibinit_dtset%latt_taut
-      write(nunit,'(a15,ES15.5)')'     latt_taup',multibinit_dtset%latt_taup
-      write(nunit,'(a15,ES15.5)')'compressibility',multibinit_dtset%latt_compressibility
-      write(nunit,'(a15,ES15.5)')'     latt_mask',(multibinit_dtset%latt_mask(ii), ii=1, 3)
+!      write(nunit,'(a15,ES15.5)')'     latt_taup',multibinit_dtset%latt_taup
+!      write(nunit,'(a15,ES15.5)')'compressibility',multibinit_dtset%latt_compressibility
+!      write(nunit,'(a15,ES15.5)')'     latt_mask',(multibinit_dtset%latt_mask(ii), ii=1, 3)
    end if
 
  end if
@@ -2714,9 +2730,9 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
  if(multibinit_dtset%spin_dynamics/=0) then
     write(nunit,'(a)')' Spin Dynamics :'
 
-    write(nunit,'(3x,a25,I12.1)')'spin_calc_correlation_obs',multibinit_dtset%spin_calc_correlation_obs
+    !write(nunit,'(3x,a25,I12.1)')'spin_calc_correlation_obs',multibinit_dtset%spin_calc_correlation_obs
     write(nunit,'(3x,a25,I12.1)')'spin_calc_thermo_obs',multibinit_dtset%spin_calc_thermo_obs
-    write(nunit,'(3x,a25,I12.1)')'spin_calc_traj_obs',multibinit_dtset%spin_calc_traj_obs
+    !write(nunit,'(3x,a25,I12.1)')'spin_calc_traj_obs',multibinit_dtset%spin_calc_traj_obs
     write(nunit,'(12x,a16,I12.1)')'spin_dynamics',multibinit_dtset%spin_dynamics
     write(nunit,'(10x, a18, 5x, F10.5)')'spin_temperature',multibinit_dtset%spin_temperature
     write(nunit,'(10x, a18, 5x, F10.5)')'spin_damping',multibinit_dtset%spin_damping

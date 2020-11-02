@@ -114,6 +114,9 @@ shiftk 0.5 0.5 0.5
 nstep 100
 diemac 12.0
 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31-Ga.LDA.fhi, 15-P.LDA.fhi"
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -122,12 +125,12 @@ diemac 12.0
 #%% [files]
 #%% files_to_test = 
 #%%   tlw_4.out, tolnlines=  8, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
-#%% psp_files =  31-Ga.LDA.fhi, 15-P.LDA.fhi
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
 #%% description = Dynamic Quadrupoles Calculation for GaP
+#%% topics = longwave
 #%%<END TEST_INFO>
 

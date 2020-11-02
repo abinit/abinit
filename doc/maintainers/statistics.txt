@@ -3,8 +3,8 @@ Date released : date mentioned in the release notes
 Then, the other indicators should refer to the first production version
 
 Size of tar.gz      : ls -l *tar.gz    (on abiref)
-Number of F90 files : ls src/*/*.F90 | wc
-Number of F90 lines : cat src/*/*.F90 | wc
+Number of F90 files : ls src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | wc
+Number of F90 lines : cat src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | wc
 Number of tests     : ls tests/*/Input/t*in | wc
 
 
@@ -48,3 +48,5 @@ Version  Date       Size         Number        Number        Number
 8.6      2017 Nov   81.6         1253          863564       1151 
 8.8      2018 Apr   82.5         1150          879137       1187 
 8.10     2018 Oct   89.0          644          900113       1217
+9.0      2020 Mar   87.4          712          927158       1281
+9.2      2020 Sep   96.5          852         1156302       1318

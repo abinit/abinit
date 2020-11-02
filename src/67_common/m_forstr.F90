@@ -240,12 +240,11 @@ contains
 !!     (fine grid) for the computation of total density.
 !!
 !! PARENTS
-!!      afterscfloop,setup_positron
+!!      m_afterscfloop,m_positron
 !!
 !! CHILDREN
-!!      ctocprj,forces,forstrnps,initylmg,metric,nres2vres,pawcprj_alloc
-!!      pawcprj_free,pawcprj_getdim,pawgrnl,stress,timab,wvl_nl_gradient
-!!      xchybrid_ncpp_cc,xred2xcart
+!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
+!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 
@@ -285,12 +284,12 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom)
- real(dp),intent(in) :: rhog(2,nfftf),rprimd(3,3),strsxc(6),vhartr(nfftf)
+ real(dp),intent(in) :: rhog(2,nfftf),strsxc(6),vhartr(nfftf)
  real(dp),intent(in) :: vpsp(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: forold(3,dtset%natom)
- real(dp),intent(inout) :: nhat(nfftf,dtset%nspden*psps%usepaw),rhor(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: nhat(nfftf,dtset%nspden*psps%usepaw),rhor(nfftf,dtset%nspden),rprimd(3,3)
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout),target :: nvresid(nfftf,dtset%nspden)
  real(dp),intent(out) :: favg(3)
@@ -598,13 +597,11 @@ end subroutine forstr
 !!    (hartree/bohr^3)
 !!
 !! PARENTS
-!!      forstr
+!!      m_forstr
 !!
 !! CHILDREN
-!!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
-!!      fock_getghc,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
-!!      meanvalue_g,mkffnl,mkkpg,nonlop,pawcprj_alloc,pawcprj_free,pawcprj_get
-!!      pawcprj_reorder,prep_bandfft_tabs,prep_nonlop,stresssym,timab,xmpi_sum
+!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
+!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 
@@ -1150,8 +1147,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      call timab(65,1,tsec)
      call xmpi_sum(kinstr,spaceComm,ierr)
      call xmpi_sum(npsstr,spaceComm,ierr)
-     if ((usefock_loc).and.(fockcommon%optstr)) then
-       call xmpi_sum(fockcommon%stress,spaceComm,ierr)
+     if (usefock_loc) then
+       if (fockcommon%optstr) then
+         call xmpi_sum(fockcommon%stress,spaceComm,ierr)
+       end if
      end if
      call timab(65,2,tsec)
    end if
@@ -1166,8 +1165,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    if (nsym>1) then
      call stresssym(gs_hamk%gprimd,nsym,kinstr,symrec)
      call stresssym(gs_hamk%gprimd,nsym,npsstr,symrec)
-     if ((usefock_loc).and.(fockcommon%optstr)) then
-       call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
+     if (usefock_loc) then
+       if (fockcommon%optstr) then
+         call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
+       end if
      end if
    end if
  end if
@@ -1240,7 +1241,7 @@ end subroutine forstrnps
 !! vresid(nfft,nspden)= the output potential residual
 !!
 !! PARENTS
-!!      etotfor,forstr
+!!      m_forstr,m_scfcv_core
 !!
 !! CHILDREN
 !!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
@@ -1356,7 +1357,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  Compute VH(n^res)(r)
    if (dtset%icoulomb == 0) then
-     call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,nresg,rprimd,vhres)
+     call hartre(1,gsqcut,dtset%icutcoul,izero,mpi_enreg,nfft,ngfft,&
+                 &dtset%nkpt,dtset%rcut,nresg,rprimd,dtset%vcutgeo,vhres)
    else
      comm=mpi_enreg%comm_cell
      nproc=xmpi_comm_size(comm)
@@ -1404,7 +1406,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
    option=2;if (dtset%xclevel==2.and.optxc==0) option=12
 
-   call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,nresg,rprimd,vhres)
+   call hartre(1,gsqcut,dtset%icutcoul,izero,mpi_enreg,nfft,ngfft,&
+               &dtset%nkpt,dtset%rcut,nresg,rprimd,dtset%vcutgeo,vhres)
    call xcdata_init(xcdata,dtset=dtset)
 
 !  To be adjusted for the call to rhotoxc

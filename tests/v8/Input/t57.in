@@ -124,17 +124,17 @@ diemac 6
 #ecut 15
 nstep 100
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8, O.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-## Exclude ibm8 because no NetCDF
-#%% exclude_hosts = ibm@ibm8
 #%% [shell]
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
 #%%   t57.out, tolnlines = 4, tolabs = 1.1e-6, tolrel = 9.0e-5, fld_options=-medium;
-#%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

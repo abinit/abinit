@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_errors
 !! NAME
 !!  m_errors
@@ -299,7 +298,7 @@ end function assert_eqn
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -342,7 +341,7 @@ end subroutine assert1
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -385,7 +384,7 @@ end subroutine assert2
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -428,7 +427,7 @@ end subroutine assert3
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -467,7 +466,7 @@ end subroutine assert4
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -512,9 +511,10 @@ end subroutine assert_v
 !!  This routine is usually interfaced with the macros defined in abi_common.h
 !!
 !! PARENTS
+!!      m_slc_primitive_potential
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -584,7 +584,7 @@ end subroutine netcdf_check
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -668,7 +668,7 @@ end subroutine sentinel
 !!      m_errors,m_xc_vdw
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -737,11 +737,11 @@ end subroutine die
 !!      m_errors
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
-subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
+subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit)
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: line, unit
@@ -780,7 +780,7 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
 
  select case (toupper(level))
 
- case ('COMMENT','WARNING')
+ case ('COMMENT', 'WARNING')
 
    write(sbuf,'(8a,i0,7a)')ch10,&
      "--- !",TRIM(level),ch10,&
@@ -792,21 +792,15 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
 
  case ('STOP')
 
-   write(sbuf,'(8a)')ch10,&
+   write(sbuf,'(9a)')ch10,&
      "--- !",TRIM(level),ch10,&
-     "message: |",ch10,TRIM(indent(my_msg)),ch10
-   call wrtout(unit_, sbuf, mode_paral)
-   if (.not.present(NOSTOP)) then
-     call abi_abort(mode_paral,print_config=.FALSE.)
-   end if
+     "message: |",ch10,TRIM(indent(my_msg)),ch10,"..."
+   call wrtout(unit_, sbuf, mode_paral, do_flush=.True.)
+   if (.not.present(NOSTOP)) call abi_abort(mode_paral, print_config=.FALSE.)
 
- ! ERROR' or 'BUG'
  case default
-
+   ! ERROR' or 'BUG'
    if ((.not.present(NOSTOP)).and.(.not.present(NODUMP))) then
-     !call print_kinds()
-     !call xmpi_show_info()
-     !call dump_config(std_out)
      ! Dump the backtrace if the compiler supports it.
      if (m_errors_show_backtrace == 1) call show_backtrace()
    end if
@@ -827,7 +821,7 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP,unit)
         call lock_and_write(ABI_MPIABORTFILE, sbuf, ierr)
      end if
      ! And now we die!
-     call abi_abort(mode_paral,print_config=.FALSE.)
+     call abi_abort(mode_paral, print_config=.FALSE.)
    end if
 
  end select
@@ -847,7 +841,7 @@ end subroutine msg_hndl
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -878,12 +872,11 @@ end subroutine set_backtrace_onerr
 !!      m_errors
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
 subroutine show_backtrace()
-
 
 #if defined FC_GNU && defined HAVE_FC_BACKTRACE
   call backtrace()  ! Gfortran extension
@@ -915,11 +908,11 @@ end subroutine show_backtrace
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
-subroutine check_mpi_ierr(ierr,msg,file,line)
+subroutine check_mpi_ierr(ierr, msg, file, line)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ierr
@@ -1254,7 +1247,7 @@ end subroutine unused_ch
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -1309,7 +1302,7 @@ end subroutine abietsf_msg_hndl
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -1359,7 +1352,7 @@ end subroutine abietsf_warn
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -1417,7 +1410,7 @@ end subroutine bigdft_lib_error
 !! PARENTS
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -1448,12 +1441,12 @@ end subroutine xlf_set_sighandler
 !!    Default: 1, i.e. memory check is always activated.
 !!
 !! PARENTS
-!!      abinit,anaddb,conducti,cut3d,fftprof,fold2Bloch,ioprof,lapackprof
-!!      macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet
-!!      vdw_kernelgen
+!!      abinit,abitk,anaddb,atdep,conducti,cut3d,fftprof,fold2Bloch,ioprof
+!!      lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit,optic
+!!      testtransposer,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
-!!      abimem_get_info,abimem_shutdown,show_units,wrtout
+!!      abi_abort
 !!
 !! SOURCE
 
@@ -1607,10 +1600,10 @@ end subroutine abinit_doctor
 !!  By default, it uses "call exit(1)", that is not completely portable.
 !!
 !! PARENTS
-!!      m_errors,testkgrid,vtorho
+!!      m_errors,m_kpts
 !!
 !! CHILDREN
-!!      dump_config,print_kinds,wrtout,xmpi_abort,xmpi_show_info
+!!      abi_abort
 !!
 !! SOURCE
 

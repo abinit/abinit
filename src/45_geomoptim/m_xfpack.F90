@@ -82,10 +82,9 @@ contains
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet
+!!      m_pred_bfgs,m_pred_delocint,m_pred_fire,m_pred_verlet
 !!
 !! CHILDREN
-!!      metric,mkradim,strainsym
 !!
 !! SOURCE
 
@@ -280,11 +279,9 @@ end subroutine xfpack_vin2x
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet,xfh_recover_deloc
-!!      xfh_recover_new
+!!      m_pred_bfgs,m_pred_delocint,m_pred_fire,m_pred_verlet,m_xfpack
 !!
 !! CHILDREN
-!!      matr3inv,metric,mkrdim,strainsym
 !!
 !! SOURCE
 
@@ -457,8 +454,7 @@ end subroutine xfpack_x2vin
 !!   strten, depending on the value of optcell, and taking care ot strtarget
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet,xfh_recover_deloc
-!!      xfh_recover_new
+!!      m_pred_bfgs,m_pred_delocint,m_pred_fire,m_pred_verlet,m_xfpack
 !!
 !! CHILDREN
 !!
@@ -579,10 +575,9 @@ end subroutine xfpack_f2vout
 !! OUTPUT
 !!
 !! PARENTS
-!!      pred_bfgs,pred_lbfgs
+!!      m_pred_bfgs
 !!
 !! CHILDREN
-!!      hessupdt,xfpack_f2vout,xfpack_x2vin
 !!
 !! SOURCE
 
@@ -733,7 +728,7 @@ end subroutine xfh_recover_new
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_mover
 !!
 !! CHILDREN
 !!

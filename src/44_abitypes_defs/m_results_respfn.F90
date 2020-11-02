@@ -86,7 +86,7 @@ CONTAINS
 !!  results_respfn(:)=<type(results_respfn_type)>=results_respfn datastructure
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!
@@ -153,7 +153,7 @@ end subroutine init_results_respfn
 !!  results_respfn(:)=<type(results_respfn_type)>=results_respfn datastructure
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!

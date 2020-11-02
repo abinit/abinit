@@ -61,7 +61,7 @@ typat 1 1 1 1 1    # All possible atoms are type 1.
              0.0000000000E+00  0.0000000000E+00  7.5055909000E+00
              0.0000000000E+00  3.7527954500E+00  1.1370551260E+01
              0.0000000000E+00  0.0000000000E+00  1.5202965441E+01
- chksymbreak 0
+ chksymtnons 0
 
 #Exchange-correlation functional
 ixc 1             # LDA Teter Pade parametrization
@@ -75,13 +75,15 @@ nstep 15          # Maximal number of SCF cycles
 #Various entries
 prtden 0          # Do not print density
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t46.out, tolnlines = 14, tolabs = 2.000e-09, tolrel = 1.000e-06, fld_options = -medium
-#%% psp_files = 13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

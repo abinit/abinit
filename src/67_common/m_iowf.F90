@@ -107,7 +107,7 @@ CONTAINS  !=====================================================================
 !! * The name of the file wff2 might be the same as that of the file wff1.
 !!
 !! PARENTS
-!!      berryphase_new,dfpt_looppert,gstate
+!!      m_berryphase_new,m_dfpt_looppert,m_gstate
 !!
 !! CHILDREN
 !!      xmpi_sum_master
@@ -156,7 +156,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: cg_disk(:,:),eig_k(:),occ_k(:)
 #ifdef HAVE_NETCDF
- integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk, timrev
+ integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
  type(crystal_t) :: crystal
 #endif
@@ -346,8 +346,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        ABI_MALLOC(vkbd, (mpw_disk, psps%lnmax, psps%ntypat))
        ABI_MALLOC(kg_disk, (3, mpw_disk))
 
-       timrev = 2 ! FIXME: Use abinit convention for timrev
-       crystal = hdr%get_crystal(timrev)
+       crystal = hdr%get_crystal()
 
        ! For each k-point: read full G-vector list from file, compute KB data and write to file.
        do ikpt=1,nkpt
@@ -405,11 +404,9 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
 #ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !crystal = hdr%get_crystal(2)
-     !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
+     !crystal = hdr%get_crystal()
+     !NCF_CHECK(ebands_ncwrite_path(gs_ebands, cryst, filname)
      !call crystal%free()
-     !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
-     !NCF_CHECK(ncerr)
 #else
      MSG_ERROR("ETSF_IO is not activated")
      ABI_UNUSED(psps%ntypat)
@@ -741,7 +738,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k
  integer :: comm_cell,comm_fft,comm_bandfft,formeig
  integer :: cnt,min_cnt,max_cnt,ierr,action,source,ncid,ncerr,cg_varid,kg_varid !,eig_varid,
- integer :: timrev,paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
+ integer :: paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
  integer :: ipw,ispinor_index,npwso,npwsotot,npwtot,nspinortot,ikpt_this_proc,ispinor
  integer :: bandpp,nproc_band,nproc_fft,nproc_spinor,me_fft,nproc_cell,nwrites
  integer :: comm_mpiio,nranks,bstart,bcount !nbdblock,nblocks,
@@ -797,9 +794,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    ABI_CHECK(all(npwarr == hdr%npwarr), "npwarr != hdr%npwarr")
  end if
 
- ! FIXME: Use abinit convention for timrev
- timrev = 2
- crystal = hdr%get_crystal(timrev)
+ crystal = hdr%get_crystal()
 
  ! TODO
  ! Be careful with response == 1.
@@ -819,7 +814,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    formeig = 1
  end if
 
- ! same_layout is set to True if the interal representation of the cgs
+ ! same_layout is set to True if the internal representation of the cgs
  ! is compatible with the representation on file.
  iomode = IO_MODE_ETSF
  if (response == 0) then
@@ -872,8 +867,11 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        NCF_CHECK(crystal%ncwrite(ncid))
 
        if (response == 0) then
+         ! Write Gs bands
          NCF_CHECK(ebands_ncwrite(gs_ebands, ncid))
        else
+         ! Write H1 matrix elements and occupancies.
+         ! Note that GS eigens are not written here.
          call ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
        end if
 
@@ -1351,9 +1349,9 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 !Local variables-------------------------------
 !scalars
  integer :: idx,spin,ikpt,nband_k,ib2,ib1
- integer :: ncerr,occ_varid,h1mat_varid
+ integer :: ncerr,occ_varid,h1mat_varid,eigens_varid
 !arrays
- real(dp),allocatable :: h1mat(:,:,:,:,:)
+ real(dp),allocatable :: h1mat(:,:,:,:,:), fake_eigens(:,:,:)
 
 ! *************************************************************************
 
@@ -1384,6 +1382,7 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 
  NCF_CHECK(nf90_inq_varid(ncid, "occupations", occ_varid))
  NCF_CHECK(nf90_inq_varid(ncid, "h1_matrix_elements", h1mat_varid))
+ NCF_CHECK(nf90_inq_varid(ncid, "eigenvalues", eigens_varid))
 
  ! Write data
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -1391,6 +1390,11 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
  NCF_CHECK_MSG(nf90_put_var(ncid, h1mat_varid, h1mat), "putting h1mat")
 
  ABI_FREE(h1mat)
+
+ ! GS eigenvalues are set to zero.
+ ABI_CALLOC(fake_eigens, (mband,nkpt,nsppol))
+ NCF_CHECK_MSG(nf90_put_var(ncid, eigens_varid, fake_eigens), "putting fake eigens")
+ ABI_FREE(fake_eigens)
 
 end subroutine ncwrite_eigen1_occ
 !!***

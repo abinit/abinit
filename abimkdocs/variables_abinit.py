@@ -712,11 +712,14 @@ The box cutoff ratio is the ratio between the wavefunction plane wave sphere
 radius, and the radius of the sphere that can be inserted in the FFT box, in reciprocal space.
 
 In order for the density to be exact (in the case of the plane wave part, not the PAW on-site terms),
-this ratio should be at least two. If one uses a smaller ratio, one will gain speed, at the expense of accuracy.
+this ratio should be at least two. If one uses a smaller ratio (e.g 1.5), one will gain speed, at the expense of accuracy.
 In the case of pure ground state calculation (e.g. for the determination of geometries), this is sensible.
+It should also be noticed that using a value of [[boxcutmin]] too close to one can lead to runtime errors in the FFT routines.
+A value larger than to 1.1 is therefore recommended.
 
 Prior to v8.9, the use of boxcutmin for DFPT calculations was forbidden. However, after testing, it was seen that
-the deterioration in phonon band structures could be alleviated to a large extent by the imposition of the Acoustic Sum Rule [[asr]].
+the deterioration in phonon band structures could be alleviated to a large extent by the imposition
+of the Acoustic Sum Rule [[asr]].
 """,
 ),
 
@@ -1499,6 +1502,14 @@ it will simply issue a warning. There will be no rescaling. If 1, after tentativ
 rescaling as described in [[dilatmx]], the code will stop execution.
 Also, the use of [[chkdilatmx]] = 0 allows one to set [[dilatmx]] to a larger value than 1.15,
 otherwise forbidden as being a waste of CPU and memory.
+
+So, when using [[chkdilatmx]]=0, the relaxed lattice parameters might not be accurate, but will simply better
+than the starting ones.
+
+[[chkdilatmx]]=0 is useful when the starting geometry is likely very inaccurate. However, if the user is in search
+of an accurate geometry estimation, then a first determination of the (better but inaccurate) geometry with [[chkdilatmx]]=0
+should be followed by a more accurate second run from the better geometry with [[chkdilatmx]]=1 and [[dilatmx]] slightly larger than 1,
+(possibly 1.05).
 """,
 ),
 
@@ -1555,49 +1566,80 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable governs the behaviour of the code when there are potential
-source of symmetry breaking, related e.g. to the k point grid or the presence
-of non-symmorphic translations which might not be coherent with the exchange-correlation grid.
+This variable governs the behaviour of the code when there is a potential
+source of symmetry breaking related to the k point grid.
 
-When **chksymbreak** = 1, the code stops (or issue a warning) if:
-
-  * (1) The k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
-  * (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
-    or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
+When **chksymbreak** = 1, the code stops if 
+the k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
 
 Note that the check is disabled when the number of k-points in the BZ is greater than 40 ** 3.
 
 When **chksymbreak** = 0, there is no such check.
 
-When **chksymbreak** = -1, the code stops if the condition (1) is met,
-but in case the condition (2) is met, there will be a trial to shift the
-atomic coordinates such as to obtain symmetry operations with the adequate non-symmorphic part.
-
 Explanation:
 In the ground-state calculation, such breaking of the symmetry is usually
 harmless. However, if the user is doing a calculation of phonons using DFPT
 ([[rfphon]] = 1), the convergence with respect to the number of k points will be
-much worse with a non-symmetric grid than with a symmetric one. Also, if the
-user is doing a GW calculation, the presence of non-symmorphic translations
-that are not coherent with the FFT grid might cause problems. In the GW part,
-indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
+worse with a non-symmetric grid than with a symmetric one. 
+
+So, it was decided to warn the user about such problem already at
+the level of the ground state calculations, although such warning might be irrelevant.
+
+If you encounter a problem outlined above, you have two choices: change your
+k point grid, to make it more symmetric, or ignore the problem, and set **chksymbreak** = 0.
+""",
+),
+
+Variable(
+    abivarname="chksymtnons",
+    varset="gstate",
+    vartype="integer",
+    topics=['crystal_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="CHecK SYMmetry of TNONS",
+    characteristics=['[[INPUT_ONLY]]'],
+    added_in_version="v9.2",
+    text=r"""
+This variable governs the behaviour of the code when there is a potential
+symmetry breaking, related to the presence
+of non-symmorphic translations not leaving the FFT exchange-correlation grid invariant.
+
+When **chksymtnons** = 1, the code stops if 
+the non-symmorphic translation part of the symmetry operations has components that are not zero,
+or simple fractions with 2, 3, 4, 5, 6, 8, 9, 10 or 12 as denominators. Also, suggestions
+to bypass the problem are made in the output file.
+
+When **chksymtnons** = 2, the code makes similar check, but does not stop after providing
+in the output file suggestions to bypass the problem.
+
+When **chksymtnons** = 0, the code skips the check.
+
+Explanation:
+In ground-state or DFPT calculations, such breaking of the symmetry is harmless. 
+However, for a GW or BSE calculation, the presence of non-symmorphic translations
+that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault). 
+In the GW or BSE parts, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
 for calculating both the polarizability and the self-energy. The wavefunctions
 in the full Brillouin zone are obtained from the irreducible wedge by applying
 the symmetry operations of the space group of the crystal. In the present
 implementation, the symmetrisation of the wavefunctions is done in real space
 on the FFT mesh that, therefore, has to be coherent both with the rotational
 part as well as with the fractional translation of each symmetry operation. If
-the condition (2) is met, the GW code will not be able to find a symmetry
-preserving FFT mesh.
+the condition above (2, 3, 4, 5, 6, 7, 8, 9, 10, or 12 as denominator) is not met, 
+the GW/BSE code will not be able to find a symmetry preserving FFT mesh.
 
-So, it was decided to warn the user about these possible problems already at
-the level of the ground state calculations, although such warning might be irrelevant.
+So, it was decided to warn the user about such problem already at
+the level of the ground-state calculations, although such warning might be irrelevant.
 
-If you encounter a problem outlined above, you have two choices: change your
+If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
-symmetric point; or ignore the problem, and set **chksymbreak** = 0.
+symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0.
+If **chksymtnons** = 2, ABINIT makes a suggestion of a possible global translation, 
+and corresponding translated atomic positions.
 """,
 ),
+
 
 Variable(
     abivarname="chneut",
@@ -1767,7 +1809,8 @@ Variable(
     vartype="real",
     topics=['ElPhonInt_useful'],
     dimensions="scalar",
-    defaultval=1024,
+    #defaultval=1024,
+    defaultval=0.0,
     mnemonics="DVDB Q-CACHE size in Megabytes",
     added_in_version="before_v9",
     text=r"""
@@ -1781,6 +1824,11 @@ The speedup is important especially if the QP corrections are computed for sever
 
 A negative value signals to the code that all the q-points in the DVDB should be stored in memory.
 Use zero value disables the cache.
+
+!!! note
+
+    This variable is still under development as many things changed in the treatment of the interpolation
+    of the DFPT potential. For the time being, avoid using this option unless you know what you are doing.
 """,
 ),
 
@@ -2448,15 +2496,22 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
-on-the-flight variations the plane wave basis set, due to cell optimization by ABINIT.
-Useful only when [[ionmov]] == 2 or 22 and [[optcell]]/=0, that is, cell optimization.
+on-the-flight enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
+Useful only when doing cell optimization, e.g. [[optcell]]/=0, usually with [[ionmov]] == 2 or 22.
+Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large),
+then the recommended value of [[dilatmx]] is 1.05.
+When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
+you need an accurate estimation of the geometry, then make a first
+run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using
+the newly estimated geometry, with [[chkdilatmx]]=0 and [[dilatmx]] set to 1.05.
+If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]]=0 only once.
 
 In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
 ABINIT will rescale uniformly the
 tentative new primitive vectors to a value that leads at most to 90% of the
 maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
 prevent the geometry optimization algorithms to have taken a too large trial
-step), but afterwards will exit. Setting [[chkdilatmx]] == 0 allows one to
+step), but afterwards will stop and exit. Setting [[chkdilatmx]] == 0 allows one to
 book a larger planewave basis, but will not rescale the tentative new primitive vectors
 nor lead to an exit when the [[dilatmx]] threshold is exceeded.
 The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
@@ -2465,18 +2520,18 @@ this might be sufficiently accurate. In such case, [[dilatmx]] might even be let
 
 Detailed explanation: The memory space for the planewave basis set is defined
 by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called
-internally "ecut_eff". Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
-Still, operations (like scalar products) are taking into account these fake non-used planewaves,
-thus slowing down the ABINIT execution.
+internally "ecut_eff"). Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
+Still, operations (like scalar products) are done by taking into account these fake (non-used) planewaves,
+even if their coefficients are set to zero, thus slowing down the ABINIT execution.
 Using [[dilatmx]]<1.0 is equivalent to changing [[ecut]] in all its uses. This
 is allowed, although its meaning is no longer related to a maximal expected scaling.
 
 Setting [[dilatmx]] to a large value leads to waste of CPU time and memory.
 By default, ABINIT will not accept that you define [[dilatmx]] bigger than 1.15.
 This behaviour will be overcome by using [[chkdilatmx]] == 0.
-Supposing you think that the optimized [[acell]] values might be 10% larger
-than your input values, use simply [[dilatmx]] 1.1. This will already lead to
-an increase of the number of planewaves by a factor (1.1)  3  =1.331, and a
+Supposing you think that the optimized [[acell]] values might be 5% larger
+than your input values, use simply [[dilatmx]] 1.05. This will lead to
+an increase of the number of planewaves by a factor $(1.05)^3$, which is about $1.158$, and a
 corresponding increase in CPU time and memory.
 It is possible to use [[dilatmx]] when [[optcell]] =0, but a value larger than
 1.0 will be a waste.
@@ -2513,7 +2568,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 For Ground state calculations only.
-Gives the value of an initial density matrix used in LDA+U and kept fixed
+Gives the value of an initial density matrix used in DFT+U and kept fixed
 during the first abs([[usedmatpu]]) SCF iterations.
 Only components corresponding to [[lpawu]] angular momentum are requested.
 Restriction: In order to use dmatpawu, [[lpawu]] must be identical for all atom types (or -1).
@@ -2842,7 +2897,7 @@ Variable(
 Choice of solver for the Impurity model.
 
   * 0 --> No solver and U=0, J=0 (see [[upawu]] and [[jpawu]]).
-  * 1 --> LDA+U self-energy is used (for testing purpose)
+  * 1 --> DFT+U self-energy is used (for testing purpose)
   * 2 --> Hubbard one solver in the density density approximation of the Coulomb interaction. The Hubbard one solver is an approximation which gives a rough description of correlated Mott insulators. It should not be used for metals.
   * 5 --> Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT in the density density approximation of the Coulomb interaction. The calculation is fully parallelised over MPI processes.
   * 6 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS in the density density representation.
@@ -2896,8 +2951,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 
-The LDA occupation matrix for correlated electrons can be computed directly.
-It can be compared to the calculation of the same quantity using LDA Green's
+The DFT occupation matrix for correlated electrons can be computed directly.
+It can be compared to the calculation of the same quantity using DFT Green's
 function, a sum over Matsubara frequencies and a projection over correlated
 orbitals. Because the Matsubara grid is finite, the two quantities differ. If
 this difference is larger than dmft_tolfreq, then the code stops and an error
@@ -2918,7 +2973,7 @@ Variable(
     text=r"""
 Tolerance for the variation of Local Charge for convergence of the DMFT Loop.
 Most of the time however, DFT+DMFT calculations can converge fastly using [[dmft_iter]]=1, so
-that this variable is not required. 
+that this variable is not required.
 """,
 ),
 
@@ -2951,7 +3006,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[dmftbandi]] is the first band taken into account in the Projected Local
-Orbitals scheme of LDA+DMFT. With [[dmftbandf]], they define the energy window
+Orbitals scheme of DFT+DMFT. With [[dmftbandf]], they define the energy window
 used to define Wannier Functions (see [[cite:Amadon2008]]).
 """,
 ),
@@ -3732,7 +3787,7 @@ In the case of star-function interpolation:
   * einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [[cite:Uehara2000]].
     In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of
     the lattice vectors included in the star expansion
-  * einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9
+  * einterp(4): Used if einterp(3) /= 0. It defines rsigma in Eq 9
 
 """,
 ),
@@ -3793,8 +3848,11 @@ Variable(
     mnemonics="Electron-PHonon: EXTRA ELectrons",
     added_in_version="before_v9",
     text=r"""
-Number of electrons per unit cell to be added to the initial value computed
-from the pseudopotentials and unit cell.
+Number of electrons per unit cell to be added/subtracted to the initial value computed
+from the pseudopotentials and the unit cell.
+Can be used to simulate doping within the rigid band approximation.
+Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
+See also [[eph_doping]] to specify the same quantity in terms of charge/cm^3
 """,
 ),
 
@@ -3809,9 +3867,11 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable can be used to change the value of the Fermi level when
-performing electron-phonon calculations with [[optdriver]] == 7. This variable
-has effect only if set to a non-zero value. See also [[eph_extrael]].
+This variable can be used to change artificially the value of the Fermi level when
+performing e-ph calculations.
+The variable has effect only if set to a non-zero value.
+This option is mutually exclusive with [[eph_extrael]] and [[eph_doping]].
+When [[eph_fermie]] is used the number of temperatures specified by [[tmesh]] cannot be greater than one.
 """,
 ),
 
@@ -3866,8 +3926,10 @@ Variable(
     requires="[[eph_intmeth]] == 1",
     added_in_version="before_v9",
     text=r"""
-This variable defines the gaussian broadening used for the integration over
-the Fermi surface when [[eph_intmeth]] == 1.
+This variable defines the gaussian broadening used for the integration over the double delta
+over the Fermi surface when [[eph_intmeth]] == 1.
+A negative value, activates the adaptive gaussian broadening proposed in [[cite:Li2015]]
+in which the broadening is automatically computed from the group velocities.
 """,
 ),
 
@@ -3877,7 +3939,7 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval="2 (tetra) except when [[eph_task]] = +4 where 1 is used as default.",
+    defaultval="2 (tetra) except when [[eph_task]] = 4 and when ([[eph_task]] = -4 and symsigma == 0), where 1 is used as default.",
     mnemonics="Electron-Phonon: INTegration METHod",
     added_in_version="before_v9",
     text=r"""
@@ -3893,11 +3955,16 @@ Phonon linewidths in metals (**eph_task** = 1):
 
 :   The default approach for the integration of the double-delta over the Fermi surface is 2 (tetrahedron).
     When the gaussian method is used, the broadening is given by [[eph_fsmear]].
+    A negative value activates the adaptive Gaussian broadening.
     See also [[eph_fsewin]].
 
-Electron-phonon self-energy
+Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
-:   The default is gaussian method with broadening specified by [[zcut]].
+:   The default is [[eph_intmeth]]==1, Lorentzian method with broadening specified by [[zcut]]. Note that [[eph_intmeth]]==2 is still in development for this case (ABINITv9.2).
+
+Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
+
+:   The default is [[eph_intmeth]]==2, Tetrahedron method except when symsigma == 0, where it is [[eph_intmeth]]==1..
 """,
 ),
 
@@ -3965,7 +4032,7 @@ The choice is among:
 * 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
 * -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
 * 3 --> Compute phonon self-energy.
-* 4 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections. Generate SIGEPH.nc file.
+* 4 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function. Generate SIGEPH.nc file.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy). Generate SIGEPH.nc file.
 * 5 --> Interpolate DFPT potentials to produce a new DVDB file on the [[eph_ngqpt_fine]] q-mesh that can be read with [[getdvdb]]
 * -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]]. Note that, in this case,
@@ -3977,6 +4044,12 @@ The choice is among:
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
+
+
+!!! important
+
+    At the time of writing ( |today| ), PAW or norm-conserving pseudos with SOC are not supported by the EPH code.
+    Also [[useylm]] must be set to 0 (default for NC pseudos).
 """,
 ),
 
@@ -4187,21 +4260,15 @@ Variable(
     vartype="integer",
     topics=['TuningSpeed_useful'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[FFTW3]] and [[usedmft]] == 0': 312,
- '[[paral_kgb]] == 1': 401,
- 'defaultval': 112}),
+    defaultval=ValueWithConditions({'[[FFTW3]] and [[usedmft]] == 0': 312, '[[paral_kgb]] == 1': 401, 'defaultval': 112}),
     mnemonics="Fast Fourier Transform ALGorithm",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-This keyword is **irrelevant** when Fast Fourier Transforms are done using
-**Graphics Processing Units** (GPU), i.e. when [[use_gpu_cuda]] = 1
-(in that case, it is ignored).
-
-Allows to choose the algorithm for Fast Fourier Transforms. These have to be
-used when applied to wavefunctions (routine `fourwf`), as well as when
-applied to densities and potentials (routine `fourdp.F90`). Presently, it is the
-concatenation of three digits, labelled (A), (B) and (C).
+Allows to choose the implementation for performing Fast Fourier Transforms.
+These have to be used when applied to wavefunctions (routine `fourwf`), as well as when
+applied to densities and potentials (routine `fourdp.F90`).
+Presently, it is the concatenation of three digits, labelled (A), (B) and (C).
 
 The first digit (A) is to be chosen among 1, 2, 3, 4 or 5:
 
@@ -4226,6 +4293,15 @@ The third digit (C) is related to `fourwf`:
     This is very efficient for cache architectures. (coded for A==1 and A==4, but A==4 is not yet sufficiently tested)
 
 Internal representation as [[ngfft]](7).
+
+FFTW and DFTI are usually faster than the internal implementation and are therefore recommended.
+These libraries, however, must be activated at configure time with e.g. the *with_fft_flavor* option.
+In this case, the default value of [[fftalg]] is changed accordingly.
+
+!!! important
+
+    This keyword is **ignored** when Fast Fourier Transforms are done using
+    **Graphics Processing Units** (GPU), i.e. when [[use_gpu_cuda]] = 1
 """,
 ),
 
@@ -4336,6 +4412,48 @@ of 8); is only one is negative, then the two other axes are sampled using a
 face-centered sampling. Finally, some of the values might be taken as 0, in
 which case the corresponding direction is sampled by only one layer of points
 (if two are zero, a line of points is obtained).
+""",
+),
+
+Variable(
+    abivarname="fock_icutcoul",
+    varset="gstate",
+    vartype="integer",
+    topics=['Hybrids_useful','Coulomb_useful'],
+    dimensions="scalar",
+    defaultval=3,
+    mnemonics="Integer that governs the CUT-off for COULomb interaction",
+    added_in_version="before_v9",
+    text=r"""
+!!!Under development!!!
+Electronic structure calculations for isolated systems, 1D and 2D systems
+present a slow convergence with respect to the size of the supercell due to the
+long ranged Coulomb interaction and the high degree of non-locality of the
+operators involved. Thus, restricting the range of the Coulomb interaction,
+in order to prevent supercell images to interact can significantly speed-up
+convergence, or even can make convergence happen. Also, even in the ground-state
+case, a cut-off Coulomb interaction might prove useful.
+
+[[fock_icutcoul]] defines the particular expression to be used for the Fock
+operator in reciprocal space. The choice of [[fock_icutcoul]] depends on the
+dimensionality and the character of the XC functional used (or otherwise the
+presence of the exclusive treatment of the short-range exchange interaction).
+Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are available
+options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals.
+The corresponding influential variables are [[vcutgeo]] and [[rcut]].
+
+  * 0 --> sphere (molecules, but also 3D-crystals, see below).
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes).
+  * 2 --> (W.I.P.) surface.
+  * 3 --> 3D crystal (Coulomb interaction without cut-off).
+  * 4 --> (W.I.P.)ERF, long-range only Coulomb interaction.
+  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
+
+Note that Spencer and Alavi showed that the
+spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
+In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]<0),
+which is automatically calculated so that the volume enclosed in the sphere is
+equal to the volume of the solid.
 """,
 ),
 
@@ -5214,7 +5332,7 @@ Variable(
 Used when [[ndtset]] > 0 (multi-dataset mode) and [[optdriver]] = 3, or 4
 (screening or sigma step of a GW calculation), to indicate that the
 eigenvalues and possibly the wavefunctions have to be taken from a previous
-quasi-particle calculation (instead of the usual LDA starting point). This is
+quasi-particle calculation (instead of the usual DFT starting point). This is
 to achieve quasi-particle self-consistency. See also [[irdqps]]
 NOTE: a negative value of a "get" variable indicates the number of datasets
 to go backwards; it is not the number to be subtracted from the current
@@ -5734,6 +5852,41 @@ function which decays as $1/x^2$. To be used in conjunction with [[nfreqre]],
 ),
 
 Variable(
+    abivarname="gw_icutcoul",
+    varset="gw",
+    vartype="integer",
+    topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
+    dimensions="scalar",
+    defaultval=6,
+    mnemonics="Integer that governs the CUT-off for COULomb interaction",
+    requires="[[optdriver]] in [3,4]",
+    added_in_version="v9.1",
+    text=r"""
+Many-body calculations for fully periodic systems are problematic due to the
+presence of the integrable Coulomb singularity at $\mathbf{G}=0$ that hinders
+the convergence with respect to the number of q-points used to sample the
+Brillouin zone. The convergence can be accelerated by integrating accurately
+the zone in the neighborhood of $\mathbf{G}=0$.
+
+[[gw_icutcoul]] defines the particular expression to be used for such integration.
+It can be used in conjunction with its equivalent for the ground state electronic
+structure cut-off [[icutcoul]].
+
+  * 0 --> sphere (molecules, but also 3D-crystals, see below).
+  * 1 --> cylinder (nanowires, nanotubes).
+  * 2 --> surface.
+  * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
+  * 4 --> ERF, long-range only Coulomb interaction.
+  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
+  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
+  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
+  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
+  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
+  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+""",
+),
+
+Variable(
     abivarname="gw_invalid_freq",
     varset="gw",
     vartype="integer",
@@ -5954,6 +6107,24 @@ Sets a tolerance for absolute differences of QP energies that will cause one
 self-consistent GW cycle to stop.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since **toldfe** has
 the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
+""",
+),
+
+Variable(
+    abivarname="gwaclowrank",
+    varset="gw",
+    vartype="integer",
+    topics=['GW_basic', 'SelfEnergy_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GW Analytic Continuation LOW RANK approximation",
+    requires="[[optdriver]] == 4",
+    added_in_version="9.2.0",
+    text=r"""
+**gwaclowrank** governs the number of eigenvectors of epsm1(iw') that will be retained in the calculation.
+The default value **gwaclowrank** = 0 means all eigenvectors are retained and therefore no approximation is made.
+**gwaclowrank** is by definition lower than the number of planewaves used for epsm1, which is set by [[npweps]] or indirectly by [[ecuteps]].
+The lower **gwaclowrank**, the faster the calculation.
 """,
 ),
 
@@ -6790,40 +6961,33 @@ pseudo-potential and ion-ion interaction:
 
 Variable(
     abivarname="icutcoul",
-    varset="gw",
+    varset="gstate",
     vartype="integer",
-    topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
+    topics=['Coulomb_useful'],
     dimensions="scalar",
-    defaultval=6,
+    defaultval=3,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
-    requires="[[optdriver]] in [3,4]",
     added_in_version="before_v9",
     text=r"""
-Many-body calculations for isolated systems present a slow convergence with
-respect to the size of the supercell due to the long ranged Coulomb
-interaction and the high degree of non-locality of the operators involved. A
-similar issue also occurs in fully periodic systems due to the presence of the
-integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
-respect to the number of q-points used to sample the Brillouin zone. The
-convergence can be accelerated by replacing the true bare Coulomb interaction
-with other expressions.
+Electronic structure calculations for isolated systems, 1D and 2D systems
+present a slow convergence with respect to the size of the supercell due to the
+long ranged Coulomb interaction and the high degree of non-locality of the
+operators involved. Thus, restricting the range of the Coulomb interaction,
+in order to prevent supercell images to interact can significantly speed-up
+convergence, or even can make convergence happen. Also, even in the ground-state
+case, a cut-off Coulomb interaction might prove useful.
 
-[[icutcoul]] defines the particular expression to be used for the Coulomb term
+[[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
 in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
-of the system. Possible values of [[icutcoul]] are from 0 to 6. The
+of the system. Possible values of [[icutcoul]] are from 0 to 5. The
 corresponding influential variables are [[vcutgeo]] and [[rcut]].
 
-  * 0 --> sphere (molecules but also 3D-crystals).
-  * 1 --> cylinder (nanowires, nanotubes).
+  * 0 --> sphere (molecules, but also 3D-crystals, see below).
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes).
   * 2 --> surface.
-  * 3 --> 3D crystal (no cut-off, integration in a spherical mini-Brillouin Zone, legacy value).
+  * 3 --> 3D crystal (Coulomb interaction without cut-off).
   * 4 --> ERF, long-range only Coulomb interaction.
-  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
-  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
-  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
-  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
-  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
-  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional). (W.I.P.)
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
@@ -9215,12 +9379,86 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give for each species the value of the angular momentum (only values 2 or 3
-are allowed)  on which to apply the LDA+U correction.
+are allowed)  on which to apply the DFT+U correction.
 
   * If equal to 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
-  * If equal to -1: do not apply LDA+U correction on the species.
+  * If equal to -1: do not apply DFT+U correction on the species.
 """,
 ),
+
+Variable(
+    abivarname="lw_flexo",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of FLEXOelectricity related spatial dispersion tensors",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Used to run the calculation of spatial dispersion tensorial quantities needed to
+build the bulk flexoelectric tensor (the clamped-ion contribution is alread calculated by
+abinit whereas the mixed and lattice-mediated ones are obtained through a postprocessing anaddb calculation,
+see [[flexoflag@anaddb]]).
+
+At present ( |today| ), all the elements of the spatial dispersion tensors are necessarily
+calculated. This **requires** the precalculation of the ground-state wave-functions and
+density as well as response functions and densities to a set of perturbations as specified below.
+All perturbations and directions need to be explicitly computed, and the linear response calculations
+have to be performed with [[prepalw]] = 1.
+
+  * 0 --> No flexoelectric spatial dispersion tensors are calculated.
+  * 1 --> Four tensors required to build all the contributions to the bulk flexoelectric tensor
+          are calculated. Requires precomputed linear response functions
+          and densities: ddk, d2_dkdk, electric field, atomic displacement and strain.
+  * 2 --> Clamped-ion flexoelectric tensor is calculated. Requires precomputed linear response functions
+          and densities: ddk, d2_dkdk, electric field and strain.
+  * 3 --> Two tensors required to build the mixed flexoelectric tensor are calculated:
+          the first moment of polarization response to an atomic displacement and the first
+          moment of the IFCs. Related quantities that can be derived from these two tensors
+          are also printed: dynamical quadrupoles, clamped-ion piezoelectric tensor and
+          piezoelectric force response tensor. Requires precomputed linear response functions and densities:
+          ddk, d2_dkdk, electric field and atomic displacement.
+  * 4 --> Two tensors required to build the lattice-mediated flexoelectric tensor are calculated:
+          the first moment of the IFCs and the first moment of the piezoelectric force response
+          tensor. Related quantities that can be derived from these two tensors
+          are also printed: piezoelectric force response tensor and clamped-ion elastic tensor.
+          Requires precomputed linear response functions and densities:
+          ddk, atomic displacement and strain.
+""",
+),
+
+Variable(
+    abivarname="lw_qdrpl",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of dynamical QuaDRuPoLes tensor",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Used to run dynamical quadrupoles tensor calculation (e.g., needed to include dipole-quadrupole
+and/or quadrupole-quadrupole electrostatic interactions in the anaddb calculation of
+phonons. See [[dipquad@anaddb]] and [[quadquad@anaddb]]).
+
+  * 0 --> No dynamical quadrupoles are calculated
+  * 1 --> Dynamical quadrupoles are calculated. Related quantities that can be derived from
+          the dynamical quadrupoles are also printed: the first moment of the polarization
+          response to an atomic displacement and the clamped-ion piezoelectric tensor.
+
+At present ( |today| ), all the elements of the dynamical quadrupoles tensor are necessarily
+calculated. This **requires** the precalculation of the ground-state wave functions and
+density as well as response functions and densities to the following perturbations:
+ddk, d2_dkdk, atomic displacements and electric fields. All perturbations and directions need
+to be explicitly computed, and the linear response calculations have to be performed with [[prepalw]] = 1.
+""",
+),
+
 
 Variable(
     abivarname="macro_uj",
@@ -9367,12 +9605,12 @@ Variable(
     abivarname="mbpt_sciss",
     varset="gw",
     vartype="real",
-    topics=['GW_useful', 'Susceptibility_useful', 'SelfEnergy_useful'],
+    topics=['GW_useful', 'Susceptibility_useful', 'SelfEnergy_useful', 'ElPhonInt_expert'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Many Body Perturbation Theory SCISSor operator",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]] in [3,4,99]",
+    requires="[[optdriver]] in [3,4,7,99]",
     added_in_version="before_v9",
     text=r"""
 The scissor operator energy added to the conductions states. In some cases,
@@ -9828,7 +10066,7 @@ Variable(
     requires="[[usepawu]] == 1",
     added_in_version="before_v9",
     text=r"""
-This internal variable gives the number of atoms on which the LDA/GGA+U method
+This internal variable gives the number of atoms on which the DFT+U method
 is applied. This value is determined from [[lpawu]].
 """,
 ),
@@ -10020,8 +10258,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
-[[nband]] bands, are to be considered as part of a buffer. This concept is
-useful in three situations: in non-self-consistent calculations, for the
+[[nband]] bands, are to be considered as part of a buffer.
+A negative value is interpreted as percentage of [[nband]] (added in v9).
+
+This concept is useful in three situations: in non-self-consistent calculations, for the
 determination of the convergence tolerance; for response functions of metals,
 to avoid instabilities, and also when finite electric fields or non-linear
 responses (with electric field perturbations) are considered. For the two
@@ -10032,9 +10272,10 @@ following. The third case is only for implementation convenience.
 In non-self-consistent GS calculations ([[iscf]]<0), the highest levels might
 be difficult to converge, if they are degenerate with another level, that does
 not belong to the set of bands treated. Then, it might take extremely long to
-reach [[tolwfr]], although the other bands are already extremely well-
-converged, and the energy of the highest bands (whose residual are not yet
+reach [[tolwfr]], although the other bands are already extremely well-converged,
+and the energy of the highest bands (whose residual are not yet
 good enough), is also rather well converged.
+
 In response to this problem, for non-zero [[nbdbuf]], the largest residual
 (residm), to be later compared with [[tolwfr]], will be computed only in the
 set of non-buffer bands (this modification applies for non-self-consistent as
@@ -10043,13 +10284,13 @@ For a GS calculation, with [[iscf]]<0, supposing [[nbdbuf]] is not initialized
 in the input file, then ABINIT will overcome the default [[nbdbuf]] value, and
 automatically set [[nbdbuf]] to 2.
 
-In metallic RF calculations, in the conjugate gradient optimisation of first-
-order wavefunctions, there is an instability situation when the q wavevector
+In metallic RF calculations, in the conjugate gradient optimisation of first-order wavefunctions,
+there is an instability situation when the q wavevector
 of the perturbation brings the eigenenergy of the highest treated band at some
-k point higher than the lowest untreated eigenenergy at some k+q point. If one
+k-point higher than the lowest untreated eigenenergy at some k+q point. If one
 accepts a buffer of frozen states, this instability can be made to disappear.
 Frozen states receive automatically a residual value of -0.1
-For a RF calculation, with 3<=[[occopt]]<=7, supposing [[nbdbuf]] is not
+For a RF calculation, with 3 <= [[occopt]] <= 7, supposing [[nbdbuf]] is not
 initialized in the input file, then ABINIT will overcome the default
 [[nbdbuf]] value, and automatically set [[nbdbuf]] to 2. This value might be
 too low in some cases.
@@ -10594,7 +10835,7 @@ Variable(
     requires="[[nqpt]] == 1 and [[kptopt]] >= 0",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done,
 and the default value of [[ngqpt]] is kept.
 
 Similar to [[ngkpt]], but for the q-wavevector. At variance with [[ngkpt]], note that only one q point is selected per dataset
@@ -10878,18 +11119,18 @@ Gives the maximum number of non-self-consistent loops of [[nline]] line
 minimisations, in the SCF case (when [[iscf]] >0). In the case [[iscf]] <=0,
 the number of non-self-consistent loops is determined by [[nstep]].
 
-    * The Default value of 0 -- for standard plane-wave calculations -- corresponds
-    to make the two first fixed potential determinations of wavefunctions have 2
-    non-self consistent loops, and the next ones to have only 1 non-self
-    consistent loop.
+* The Default value of 0 -- for standard plane-wave calculations -- corresponds
+to make the two first fixed potential determinations of wavefunctions have 2
+non-self consistent loops, and the next ones to have only 1 non-self
+consistent loop.
 
-    * The Default value of 0 -- for wavelets calculations ([[usewvl]] = 1) --
-    corresponds to make 2 steps with 3 non-self consistent loops, 2 steps with 2
-    non-self consistent loops, then the next ones with 1 non-self consistent loop.
+* The Default value of 0 -- for wavelets calculations ([[usewvl]] = 1) --
+corresponds to make 2 steps with 3 non-self consistent loops, 2 steps with 2
+non-self consistent loops, then the next ones with 1 non-self consistent loop.
 
-    * A negative value corresponds to make the abs([[nnsclo]]) first fixed potential determinations
-    of wavefunctions have 5 non-self consistent loops, and the next ones to have only 1 non-self
-    consistent loop.
+* A negative value corresponds to make the abs([[nnsclo]]) first fixed potential determinations
+of wavefunctions have 5 non-self consistent loops, and the next ones to have only 1 non-self
+consistent loop.
 
 """,
 ),
@@ -11093,10 +11334,10 @@ Variable(
     requires="[[optdriver]] == 1 and [[paral_kgb]] == 1 (Ground-state calculations with LOBPCG algorithm)",
     added_in_version="before_v9",
     text=r"""
-When using Scalapack (or any similar Matrix Algebra library), the efficiency
-of the eigenproblem resolution saturates as the number of CPU cores increases.
-It is better to use a smaller number of CPU cores for the LINALG calls.
-This maximum number of cores can be set with [[np_slk]].
+When using Scalapack (or any similar Matrix Algebra library such as ELPA), the efficiency
+of the eigenproblem solver saturates as the number of CPU cores increases.
+In this case, it is more efficient to use a smaller number of CPUs for the LINALG calls.
+The maximum number of cores can be set with [[np_slk]].
 A large number for [[np_slk]] (i.e. 1000000) means that all cores are used for
 the Linear Algebra calls.
 np_slk must divide the number of processors involved in diagonalizations
@@ -11531,7 +11772,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done,
 and the default value of [[nshiftq]] is kept.
 
 This parameter gives the number of shifted grids to be used concurrently to
@@ -12375,7 +12616,7 @@ A few details require attention when performing unit cell optimisation:
 
 It is STRONGLY suggested first to optimize the ionic positions without cell
 shape and size optimization (**optcell** = 0), then start the cell shape and
-size optimization from the cell with relaxed ionic positions. Presently
+size optimization from the cell with relaxed ionic positions, possibly from the previous dataset, using [[getxred]] or [[getxcart]]. Presently
 (v3.1), one cannot restart ([[restartxf]]) a calculation with a non-zero
 **optcell** value from the (x,f) history of another run with a different non-
 zero **optcell** value. There are still a few problems at that level.
@@ -12411,6 +12652,7 @@ The choice is among:
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
   * 7 --> electron-phonon coupling (EPH)
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 10 --> longwave response functions (LONGWAVE), routine *longwave*.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
@@ -14127,6 +14369,62 @@ energy vs q vector) is reported in the output file for the lowest 10 bands.
 """,
 ),
 
+
+Variable(
+    abivarname="prepalw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PREPAre LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+The computation of spatial dispersion quantities from the longwave DFPT
+approach requires the first-order wavefunctions and densities obtained from
+a linear response calculation. The standard approach in a linear response calculation is:
+
+  * compute only the irreducible perturbations;
+  * use symmetries to reduce the number of k-points for the k-point integration.
+
+This approach cannot be applied, presently (v9.0), if the first-order
+wavefunctions are to be used to compute spatial dispersion properties.
+During the linear response calculation, in order to prepare a longwave
+calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
+compute all the perturbations explicitly, and to keep the full number of k-points
+in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+""",
+),
+
+
+Variable(
+    abivarname="prepalw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PREPAre LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+The computation of spatial dispersion quantities from the longwave DFPT
+approach requires the first-order wavefunctions and densities obtained from
+a linear response calculation. The standard approach in a linear response calculation is:
+
+  * compute only the irreducible perturbations;
+  * use symmetries to reduce the number of k-points for the k-point integration.
+
+This approach cannot be applied, presently (v9.0), if the first-order
+wavefunctions are to be used to compute spatial dispersion properties.
+During the linear response calculation, in order to prepare a longwave
+calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
+compute all the perturbations explicitly, and to keep the full number of k-points
+in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+""",
+),
+
 Variable(
     abivarname="prepanl",
     varset="dfpt",
@@ -14506,11 +14804,11 @@ Relevant only when [[prtdos]] = 3.
 If set to 1, the m-decomposed LDOS is delivered in DOS file.
 Note that [[prtdosm]] computes the M-resolved partial dos for complex
 spherical harmonics,giving e.g. DOS(L,M) == DOS(L,-M) (without spin-orbit). In
-the contrary, the LDA+U occupation matrix, see [[dmatpawu]] is in the real
+the contrary, the DFT+U occupation matrix, see [[dmatpawu]] is in the real
 spherical harmonics basis.
 If set to 2, the m-decomposed LDOS is delivered in DOS file.
 In this case, [[prtdosm]] computes the M-resolved partial dos for real
-spherical harmonics in the same basis as the LDA+U occupation matrix.
+spherical harmonics in the same basis as the DFT+U occupation matrix.
 """,
 ),
 
@@ -14555,7 +14853,7 @@ If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed usin
 This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
 Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
 The option prtefg is compatible with spin polarized calculations (see
-[[nspden]]) and also LDA+U (see [[usepawu]]).
+[[nspden]]) and also DFT+U (see [[usepawu]]).
 """,
 ),
 
@@ -15364,7 +15662,7 @@ http://www.wannier.org ](http://www.wannier.org) ).
 
 !!! Notes
 
-    * An input file of LDA wave functions is required which is completely consistent with the _KSS file used in the self-consistent GW calculation. This means that [[kssform]] 3 must be used to create the _KSS file and the output _WFK file from the same run must be used as input here.
+    * An input file of DFT wave functions is required which is completely consistent with the _KSS file used in the self-consistent GW calculation. This means that [[kssform]] 3 must be used to create the _KSS file and the output _WFK file from the same run must be used as input here.
     * Wannier90 requires [[nshiftk]] = 1, and [[shiftk]] =  0 0 0 is recommended. The k-point set used for the GW calculation, typically the irreducible BZ set created using [[kptopt]] = 1, and that for the Abinit- Wannier90 interface must be consistent.
     * Full-BZ wavefunctions should be generated in the run calling the interface by setting [[kptopt]] = 3, [[iscf]] = -2, and [[nstep]] = 3. This will simply use symmetry to transform the input IBZ wavefunctions to the full BZ set, still consistent with the GW _KSS input.
     * The final _QPS file created by the self-consistent GW run is required as input.
@@ -15637,7 +15935,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done,
 and the default value of [[qpt]], namely the null vector, is kept.
 
 Combined with [[qptnrm]], define the q vector [[qptn]](1:3) in the case
@@ -15728,7 +16026,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done,
 and the default value of [[qptopt]] is kept.
 
 Controls the set up to generate the Q point [[qptn]](1:3) to be used for the
@@ -15780,7 +16078,7 @@ Variable(
     excludes="[[ngqpt]]",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done,
 and the default value of [[qptrlatt]] is kept.
 
 This input variable is used only when [[qptopt]] is positive. It partially
@@ -16311,6 +16609,9 @@ eigenfrequencies output).
 The treatment of the acoustic sum rule and charge neutrality sum rule is finer
 at the level of the ANADDB utility, with the two independent input variables
 [[anaddb:asr]] and [[anaddb:chneut]].
+Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
+Running different DFPT calculations from scrarch just to change [[rfasr]] is indeed a waste of time as
+you can compute the DDB only once and then use anaddb.
 """,
 ),
 
@@ -16328,8 +16629,7 @@ Control the range of atoms for which displacements will be considered in
 phonon calculations (atomic polarizations).
 These values are only relevant to phonon response function calculations.
 May take values from 1 to [[natom]], with [[rfatpol]](1)<=[[rfatpol]](2).
-The atoms to be moved will be defined by the
-do-loop variable iatpol:
+The atoms to be moved will be defined by the do-loop variable iatpol:
 
   - do iatpol=[[rfatpol]](1),[[rfatpol]](2)
 
@@ -16596,12 +16896,12 @@ translations.
 Alternatively to [[rprim]], directions of dimensionless primitive vectors can
 be specified by using the input variable [[angdeg]]. This is especially useful
 for hexagonal lattices (with 120 or 60 degrees angles). Indeed, in order for
-symmetries to be recognized, rprim must be symmetric up to [[tolsym]] (10
-digits by default), inducing a specification such as
+symmetries to be recognized, rprim must be symmetric up to [[tolsym]] (1.0e-5 by default),
+inducing a specification such as
 
-      rprim  0.86602540378  0.5  0.0
-            -0.86602540378  0.5  0.0
-             0.0            0.0  1.0
+      rprim  0.86602  0.5  0.0
+            -0.86602  0.5  0.0
+             0.0      0.0  1.0
 
 that can be avoided thanks to [[angdeg]]:
 
@@ -16834,7 +17134,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done,
 and the default value of [[shiftq]] is kept.
 
 It is used only when [[qptopt]] >= 0, and must be defined if [[nshiftq]] is larger than 1.
@@ -17438,9 +17738,12 @@ Variable(
     mnemonics="STRess TARGET",
     added_in_version="before_v9",
     text=r"""
+Define the target stress to be obtained by optimization of the cell.
 The components of the stress tensor must be stored according to: (1,1) -->1;
 (2,2) --> 2; (3,3) --> 3; (2,3) --> 4; (3,1) --> 5; (1,2) -->6. The conversion factor
-between Ha/Bohr**3 and GPa is: 1 Ha/Bohr**3 = 29421.033 GPa.
+between Ha/Bohr**3 (the atomic unit for stress) and GPa is: 1 Ha/Bohr**3 = 29421.033 GPa.
+If a hydrostatic stress (so, a pressure P) is wanted, define [[strtarget]] as
+-P -P -P 0 0 0 .
 Not used if [[optcell]] == 0.
 """,
 ),
@@ -17590,8 +17893,14 @@ their action on the direct (or real) space primitive translations.
 It turns out that these can always be expressed as integers.
 Always give the identity matrix even if no other symmetries hold, e.g.
 [[symrel]] 1 0 0 0 1 0 0 0 1.
+
 Also note that for this array, as for all others, the array elements are filled
-in a columnwise order as is usual for Fortran.
+in a columnwise order as is usual for Fortran.  Explicitly,
+[[symrel]] 1 0 0 -1 -1 0 0 0 1 for symmetry operation isym is stored internally as 
+symrel(1,1,isym)=1, symrel(1,2)=-1, ...
+The atom located at xred(1:3) is send to location 
+xred_sym(jj)=symrel(jj,1,isym)*xred(1)+symrel(jj,2,isym)*xred(2)+symrel(jj,3,isym)*xred(3)+tnons(jj).
+
 The relation between the above symmetry matrices [[symrel]], expressed in the
 basis of primitive translations, and the same symmetry matrices expressed in
 cartesian coordinates, is as follows. Denote the matrix whose columns are the
@@ -17859,6 +18168,13 @@ leave 0 0 0 invariant, then these are all 0.
 When the symmetry finder is used (see [[nsym]]), [[tnons]] is computed
 automatically.
 
+For the ground-state and DFPT drivers of ABINIT, the value of tnons is unrestricted.
+However, for GW and BSE, the symmetry operations must leave the FFT grid invariant.
+Preparatory (Ground-state) runs must also use the same atomic geometry, hence the same tnons.
+As ABINIT cannot guess whether the user has in mind to do a GW or BSE run after the GS run,
+a conservative approach is implemented, requiring such match of symmetry operations
+and FFT grid also in the GS case. See more details in the section describing the input variable [[chksymtnons]].
+
 See also [[symafm]] for the complete description of the symmetry operation.
 """,
 ),
@@ -18057,7 +18373,7 @@ Variable(
     vartype="real",
     topics=['crystal_useful'],
     dimensions="scalar",
-    defaultval=1e-08,
+    defaultval=1e-05,
     mnemonics="TOLERANCE for SYMmetries",
     added_in_version="before_v9",
     text=r"""
@@ -18069,11 +18385,11 @@ reduced set of atoms, the full set of atoms. Note that a value larger than
 0.01 is considered to be unacceptable, whatever the value of [[tolsym]]
 (so, it is not worth to set [[tolsym]] bigger than 0.01).
 
-Note: ABINIT needs the atomic positions to be symmetric to each others
+Note: internally ABINIT relies on the atomic positions to be symmetric to each others
 within 1.e-8, irrespective of [[tolsym]].
-So, if [[tolsym]] is set to a larger value than 1.e-8, then the
-input atomic coordinates will be nevertheless automatically symmetrized by the symmetry
-operations that will have been found.
+If [[tolsym]] is set to a larger value than 1.e-8 (and the default is larger than 1.e-8), then the
+input atomic coordinates and lattice parameters are automatically re-symmetrized by the symmetry
+operations that have been found.
 """
 ),
 
@@ -18519,7 +18835,7 @@ Variable(
 When [[usedmatpu]]/=0, an initial density matrix (given by [[dmatpawu]]
 keyword) is used and kept fixed during the first ABS([[usedmatpu]]) SCF steps.
 This starting value of the density matrix can be useful to find the correct
-ground state. Within LDA+U formalism, finding the minimal energy of the system
+ground state. Within DFT+U formalism, finding the minimal energy of the system
 is tricky; thus it is advised to test several values of the initial density
 matrix.
 Note also that the density matrix has to respect some symmetry rules
@@ -18683,9 +18999,9 @@ Variable(
 Must be non-zero if a DFT+U calculation is done, or if a GW calculation
 following a DFT+U calculation is done (important!).
 
-  * If set to 0, the LDA+U method is not used.
+  * If set to 0, the DFT+U method is not used.
 
-  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used.
+  * If set to 1, 2 or 4, the DFT+U method (cf [[cite:Anisimov1991a]]) is used.
 The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy.
 Three choices are allowed concerning the double counting term:
 
@@ -18696,7 +19012,7 @@ Three choices are allowed concerning the double counting term:
     * If [[usepawu]] = 4, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
     polarization in the exchange correlation functional (cf [[cite:Park2015]] and [[cite:Chen2016a]]). In this case, one must use [[iscf]]<10.
 
-If LDA+U is activated ([[usepawu]] = 1 or 2), the [[lpawu]], [[upawu]] and
+If DFT+U is activated ([[usepawu]] = 1 or 2), the [[lpawu]], [[upawu]] and
 [[jpawu]] input variables are read.
 The implementation is done inside PAW augmentation regions only (cf [[cite:Bengone2000]]).
 The initial density matrix can be given in the input file (see [[usedmatpu]]).
@@ -19106,16 +19422,19 @@ Variable(
     text=r"""
 [[vcutgeo]] is used in conjunction with [[icutcoul]] to specify the geometry
 used to truncate the Coulomb interaction, as well as the particular approach
-to be used. It has a meaning only for the cylindrical symmetry
-([[icutcoul]] = 1) or in the case of surfaces ([[icutcoul]] = 2). For each
+to be used. It has a meaning only for a periodic one-dimensional system, typically
+a nanowire, nanotube or polymer surrounded by vacuum separating the system
+from images in neighbouring cells
+([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
+typically a slab with vacuum separating it from images in neighbouring cells (([[icutcoul]] = 2). For each
 geometry, two different definitions of the cutoff region are available (see
-Phys. Rev. B 73, 233103 and Phys. Rev. B 73, 205119 for a complete description
+[[cite:Ismail-Beigi2006]] and [[cite:Rozzi2006]] for a complete description
 of the methods)
 
-In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]], the cutoff region is given by the
+In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
 Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
 thus automatically defined by the unit cell and there is no need to specify
-When [[rcut]].
+the value of [[rcut]].
 
 To define a cylinder along the z-axis use the following lines:
 ```
@@ -19123,14 +19442,18 @@ icutcoul 1
 vcutgeo  0 0 1
 ```
 
-Please note that the method of Ismail-Beigi is implemented only in the case if an
+Please note that the method of Ismail-Beigi is implemented only in the case of an
 orthorhombic Bravais lattice. For hexagonal lattices, one has to use the method
 of Rozzi [[cite:Rozzi2006]]. In this case, the interaction is truncated
-in a finite cylinder. Contrarily to the first approach, here one has to
+in a finite cylinder. Contrarily to the first approach, the user has to
 specify both the radius of the cylinder with [[rcut]] as well as the length of
-the cylinder along the periodic dimension that should always be smaller than
+the cylinder along the periodic dimension, that should always be smaller than
 the extension of the Born von Karman box. The length of the cylinder is given
-in terms of the fraction of the primitive vector along the periodic direction.
+in terms of a multiple of the primitive vector along the periodic direction.
+Another option provided by Rozzi [[cite:Rozzi2006]] is the infinite length cylinder.
+In order to activate it in ABINIT,
+one needs to use a very large negative [[vcutgeo]] value on the third direction
+(i.e. vcutgeo(3) <= -999).
 
 For example, in order to define a finite cylinder along z of radius 2.5 Bohr
 and length 3*R3,
@@ -19140,8 +19463,8 @@ vcutgeo  0 0 -3.0 # note the minus sign
 rcut     2.5
 ```
 
-For surface calculations ([[icutcoul]] = 2), [[vcutgeo]] is used to define the
-two periodic directions defining the surface. Also in this case two different
+For two-dimensional systems ([[icutcoul]] = 2), [[vcutgeo]] is used to define the
+two periodic directions. Also in this case two different
 techniques are available. In the method of Ismail-Beigi, the (positive) non-zero
 components of vcutgeo define the periodic directions of the infinite surface.
 The interaction is truncated within a slab of width L where L is the length of
@@ -19151,14 +19474,20 @@ example:
 icutcoul 2
 vcutgeo  1 1 0
 ```
+At present, the implementation of the Beigi technique for two-dimensional systems is restricted
+to the periodic directions being in the x-y plane.
 
-It is also possible to define a finite
-surface by employing negative values. For example:
+In Rozzi's method, it is also possible to define a finite range
+for the Coulomb interaction in the periodic directions by employing negative values. For example:
 ```
 icutcoul 2
 vcutgeo -3 -2 0
 ```
 **Definition to be added**
+
+Note that not all k-point grids are allowed in these 1D and 2D cases:
+the k point vector component(s) along non-periodic direction(s) must vanish.
+So, if the 2D Ismail-Beigi technique is used, the z-component of the k points must vanish.
 """,
 ),
 
@@ -20177,7 +20506,7 @@ redundant with that supplied by array [[xred]]. By default,
 although Angstrom can be specified, if preferred, since [[xcart]] has the [[LENGTH]] characteristics.
 If [[xred]] are ABSENT from the input file and [[xcart]] is
 provided, then the values of [[xred]] will be computed from the provided
-[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]] 
+[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]]
 to provide starting coordinates).
 One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
@@ -20231,7 +20560,7 @@ must be absent from the input file.
 One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
 
-The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom, 
+The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom,
 named `xangst`.
 """,
 ),
@@ -20305,7 +20634,7 @@ for increasing number of k points.
 
 When [[optdriver]] = 7, **zcut** defines the small complex shift used to avoid
 divergences in the expression for the Fan-Migdal e-ph self-energy.
-Note that the default value is to large for e-ph calculations, smaller values of the order
+Note that the default value is too large for e-ph calculations, smaller values of the order
 of 0.001 or 0.001 eV should be used (and carefully tested).
 """,
 ),
@@ -20365,7 +20694,7 @@ For a "dummy" atom, with [[znucl]] = 0, as used in the case of calculations
 with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
 """,
 ),
-#{"abinit_version": "8.7.3"}
+
 Variable(
     abivarname="tmesh",
     varset="eph",
@@ -20377,8 +20706,10 @@ Variable(
     added_in_version="8.7.3",
     text=r"""
 This variable defines the linear mesh of temperatures used in the EPH code ([[optdriver]] = 7).
-The first entry gives the initial temperature in Kelvin, the second entry the linear step in Kelvin,
-the third entry is the number of points in the mesh. The default value corresponds to 6 points between 5 K and 300 K.
+The first entry gives the **initial** temperature in Kelvin,
+the second entry the **linear step** in Kelvin,
+the third entry is the **number of points** in the mesh.
+The default value corresponds to 6 points between 5 K and 300 K.
 """,
 ),
 
@@ -20409,7 +20740,6 @@ The option is ignored if PAW.
 """,
 ),
 
-#{"abinit_version": "9.0.0"}
 Variable(
     abivarname="sigma_ngkpt",
     varset="gw",
@@ -20422,16 +20752,17 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable allows the user to specify the list of k-points in the self-energy $\Sigma_{n\kk}$
-in terms of a homogeneous mesh in the IBZ instead of the traditional approach based
-on [[nkptgw]], [[kptgw]], [[bdgw]].
+in terms of a homogeneous mesh in the IBZ instead of the traditional approach based on [[nkptgw]], [[kptgw]], [[bdgw]].
 
 The specification in terms of sigma_ngkpt is easier to use in particular when
-the self-energy is needed on a sub-mesh.
-The use of this variables requires a range of bands specified via [[gw_qprange]].
+the self-energy is needed on a sub-mesh used to generate the input WFK file.
+
+The set of bands can be specified either with [[sigma_erange]] or [[gw_qprange]].
+[[sigma_erange]] is the recommended approach when computing transport properties.
 
 !!! important
 
-    sigma_ngkpt and [[nkptgw]] and [[sigma_erange]] are mutually exclusive.
+    sigma_ngkpt and [[nkptgw]] and are mutually exclusive.
 """,
 ),
 
@@ -20525,21 +20856,6 @@ that takes into account the maximum phonon frequency.
 """,
 ),
 
-# TODO: Remove
-#Variable(
-#    abivarname="frohl_params",
-#    varset="gw",
-#    topics=['SelfEnergy_expert'],
-#    vartype="real",
-#    defaultval=[0, 0, 0, 0],
-#    dimensions=[4],
-#    requires="[[optdriver]] in [7]",
-#    mnemonics="FROHLich PARAMeterS",
-#    text=r"""
-#This variable is still under development. User interface will change
-#""",
-#),
-
 Variable(
     abivarname="prteliash",
     varset="eph",
@@ -20561,25 +20877,33 @@ Variable(
     varset="eph",
     topics=['SelfEnergy_expert'],
     vartype="real",
-    defaultval=[-1.0, -1.0],
+    defaultval=[0.0, 0.0],
     dimensions=[2],
     mnemonics="SIGMA Energy-range.",
     characteristics=['[[ENERGY]]'],
     added_in_version="9.0.0",
     text=r"""
-This variable selects the k-points and the bands in the self-energy matrix elements on the basis
-of their position with respect to the band edges (energy differences are **always positive**, even for holes).
+This variable consists of two entries that allow one to select the k-points and the bands
+in the e-ph self-energy $\Sigma_\nk$ on the basis of their KS energy $\ee_\nk$.
+This variable is used in [eph_task]] = -4 to compute phonon-limited mobilities in the energy region relevant for transport.
 
-Only the k-points and the bands whose energy difference if less than this value will be included in the calculation.
-The first entry refers to holes, the second one to electrons.
-A negative entry can be used to exclude either holes or electrons from the calculation.
-This variable is not compatible with [[nkptgw]] and [[sigma_ngkpt]].
+If both entries in [[sigma_erange]] are negative, the code assumes a metal and only states within the energy
+window [efermi - abs(sigma_erange(1)), efermi + abs(sigma_erange(2)] are included in the calculation.
+
+Positive (or zero) values are used in semiconductors
+to define an energy range with respect to the band edges
+In this case, the first entry given the position of the holes with respect to the CBM while the second entry
+gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
+A zero entry can be used to exclude either holes or electrons from the calculation.
+
+If both entries are zero, the variable is ignored.
+Note that [[sigma_erange]] is not compatible with [[nkptgw]] and [[sigma_ngkpt]].
 
 !!! important
 
-    By default, this variable is given in Hartree. Use
+    By default, this variable is given in Hartree. Use e.g.
 
-        sigma_erange 1 1 eV
+        sigma_erange 0.0 0.5 eV
 
     to specify the energy intervals in eV units.
 """,
@@ -20625,11 +20949,13 @@ Variable(
     vartype="integer",
     defaultval=[0, 0, 0],
     dimensions=[3],
-    mnemonics="TRANSPORT, Number of Grid points for K PoinTs generation",
+    requires="[[optdriver]] == 7 and [[eph_task]] in [-4,7]",
+    mnemonics="TRANSPORT: Number of Grid points for K PoinTs integration in transport computations",
     added_in_version="9.0.0",
     text=r"""
-This in an advanced option that is mainly used to donwsample the k-points used
-to compute the carrier mobility obtained in [[eph_task]] = -4.
+This in an advanced option that is mainly used to downsample the k-points used
+to compute the carrier mobility obtained with ([[eph_task]] = -4 or [[eph_task]] = 7).
+
 If this variable is not specified, the code uses the k-mesh specified by [[ngkpt]]
 (i.e. the k-mesh corresponding to the WFK file) for computing the mobility integral in the BZ.
 In some cases, however, one may want to employ a submesh of k-points to analyze the convergence behaviour.
@@ -20675,9 +21001,10 @@ with the NSCF computation of the first order derivative of the KS wavefunctions 
 the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1
-during the GS run and the specification of [[tolwfr]] in the EPH input file.
-The path to the POT file used in the EPH calculation is specified via [[getpot_filepath]].
+during the GS run.
+The path to the external POT file used in the EPH calculation is specified via [[getpot_filepath]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
+The solver stops when the solution is converged within [[tolwfr]].
 
 !!! important
 
@@ -20701,9 +21028,14 @@ Variable(
     mnemonics="KERANGE PATH",
     added_in_version="9.0.0",
     text=r"""
-This variable defines the path of the external KERANGE.nc file with the list of k-points in the electron/hole pockets.
-The tables stored in the file are used for the calculation of the imaginary part of the e-ph self-energy ([[eph_task]] == -4).
-This file is generated by running a preliminary step with [[wfk_task]] = "wfk_einterp".
+This variable defines the path of the external KERANGE.nc file with the list of k-points in the
+electron/hole pockets for semiconductors or the k-points withing an energy window around the Fermi level
+as specified by [[sigma_erange]].
+
+The tables stored in the netcdf file are used for the calculation of the imaginary part of
+the e-ph self-energy ([[eph_task]] == -4).
+This file is generated by running a preliminary step with [[wfk_task]] = "wfk_kpts_erange".
+For an example, see [[test:v9_57]]
 """,
 ),
 
@@ -20821,13 +21153,18 @@ allocated for the wavefunctions, especially when we have to sum over empty state
     parallelize along this dimension. The parallelization over q-points seem to be more efficient than
     the one over perturbations although it introduces some load imbalance because, due to memory reasons,
     the code distributes the q-points in the IBZ (nqibz) instead of the q-points in the full BZ (nqbz).
-    Moreover non all the q-points in the IBZ contribute to the imaginary part of $$\Sigma_nk$$.
+    Moreover non all the q-points in the IBZ contribute to the imaginary part of $\Sigma_nk$.
     The MPI parallelism over k-points and spins is supported with similar behaviour as in **eph_task** +4.
 
 
 !!! important
 
     The total number of MPI processes must be equal to the product of the different entries.
+
+    Note also that the EPH code implements its own MPI-algorithm and this [[eph_np_pqbks]] is
+    the **only variable** that should be used to change the default behaviour.
+    Other variables such as [[nppert]], [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    are **not used** in the EPH subdriver.
 """,
 ),
 
@@ -20850,21 +21187,6 @@ at the input [[qpt]].
 """,
 ),
 
-#Variable(
-#    abivarname="eph_alpha_gmin",
-#    varset="eph",
-#    vartype="real",
-#    topics=['ElPhonInt_expert'],
-#    dimensions="scalar",
-#    defaultval=0,
-#    mnemonics="EPH ALPHA times norm of GMIN.",
-#    added_in_version="9.0.0",
-#    text=r"""
-#This is an *advanced option* used to compute the long-range part of the DFTP potential.
-#TO BE DESCRIBED WHEN WE ENTER PRODUCTION
-#""",
-#),
-
 Variable(
     abivarname="getpot_filepath",
     varset="files",
@@ -20872,7 +21194,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the KS POTential from PATH",
+    mnemonics="GET the KS POTential from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 This variable defines the path of the POT file containing the KS ground-state potential
@@ -20908,7 +21230,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the fine wavefunctions from PATH",
+    mnemonics="GET the fine wavefunctions from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the fine WFK file using a string instead of the dataset index.
@@ -20943,7 +21265,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval="None",
-    mnemonics="GET the DDB from PATH",
+    mnemonics="GET the DDB from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the DDB file using a string instead of the dataset index.
@@ -20960,7 +21282,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the DVDB file from PATH",
+    mnemonics="GET the DVDB file from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the DVDB file using a string instead of the dataset index.
@@ -20977,7 +21299,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the DEN file from PATH",
+    mnemonics="GET the DEN file from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the DEN file using a string instead of the dataset index.
@@ -20994,7 +21316,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the SCR file from PATH",
+    mnemonics="GET the SCR file from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the SCR file using a string instead of the dataset index.
@@ -21164,10 +21486,10 @@ Variable(
     added_in_version="before v9",
     text=r"""
 Factor that multiplies the three primitive vectors to generate a supercell.
-The starting nuclei types [[typat]] and coordinates [[xred]] and [[xcart]] 
+The starting nuclei types [[typat]] and coordinates [[xred]] and [[xcart]]
 are simply replicated in the different images of the original primitive cell.
 If present, [[spinat]] and [[chrgat]] are also replicated without change.
-Note that [[supercell_latt]] is not echoed. It is immediately used to change 
+Note that [[supercell_latt]] is not echoed. It is immediately used to change
 [[natom]], [[typat]], and all input variables that depend on [[natom]] and [[typat]].
 
 This input variable cannot be used jointly with non-default values of [[natrd]] and [[nobj]].
@@ -21194,14 +21516,39 @@ String defining the list of pseudopotential files when Abinit is executed with t
 
 The string must be quoted in double quotation marks and multiple files should be separated by a comma, e.g.
 
-    pseudos = "al.psp8, as.psp8"
+    pseudos "al.psp8, as.psp8"
 
-The **mandatory** list must contain [[ntypat]] pseudos ordered according to the [[znucl]] array.
-The directory where all pseudos are located can be specified with [[pp_dirpath]].
+This variable is **mandatory** and the list must contain [[ntypat]] pseudos ordered according to the [[znucl]] array.
+
+Relative and absolute paths are allowed as in:
+
+    pseudos "../pseudos/al.psp8, ..//pseudos/as.psp8"
+
+
+or
+
+    pseudos "/home/user/pseudos/al.psp8, /home/user/pseudos/as.psp8"
+
+
+If all the pseudos are located in the same directory, it is much easier to use a common prefix with [[pp_dirpath]].
+For instance, the previous example is equivalent to:
+
+    pp_dirpath "/home/user/pseudos"
+    pseudos "al.psp8, as.psp8"
 
 !!! important
 
-    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported.
+    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported in pseudopotential names.
+    The only exception is the shell variable `$ABI_PSPDIR` that can be used in conjunction with [[pp_dirpath]]
+
+        pp_dirpath = "$ABI_PSPDIR"
+        pseudos "al.psp8, as.psp8"
+
+    Before running the calculation, one should set the value of $ABI_PSPDIR inside the terminal using:
+
+        ```sh
+        export ABI_PSPDIR="/home/user/pseudos"
+        ```
 """
 ),
 
@@ -21234,6 +21581,7 @@ the external file and need not to be specified in the ABINIT input.
 At present ( |today| ), the allowed values for **filetype** are:
 
 * abifile --> An output file produced by Abinit (only netcdf files are supported for the time being)
+* abivars --> A txt input file with Abinit variables
 * poscar  --> POSCAR files in VASP-5 format (element symbol after the atomic position is required).
 
 Some examples will help clarify.
@@ -21251,6 +21599,34 @@ are supported as well e.g.
 In the case of structural relaxations, these files contain the final geometry (not necessarily relaxed
 within the given tolerance) hence [[structure]] can be used to perform an in-place restart by reading
 the output of a previous run.
+
+To read the structure from an external file with the structure in Abinit format, use:
+
+    structure "abivars:my_text_file"
+
+where *my_text_file* specifies the lattice in terms [[acell], ([[rprimd]] or [[angdeg]])
+while the atomic positions are specified with [[natom]] and the special variable **xred_symbols** that
+can only be used inside this external file.
+
+```
+# MgB2 lattice structure
+
+acell   2*3.086  3.523 Angstrom
+
+rprim   0.866025403784439  0.5  0.0
+       -0.866025403784439  0.5  0.0
+        0.0                0.0  1.0
+
+natom   3
+
+# Reduced positions followed by element symbol.
+
+xred_symbols
+ 0.0  0.0  0.0  Mg
+ 1/3  2/3  0.5  B
+ 2/3  1/3  0.5  B
+```
+
 
 To read the structure from an external POSCAR file, use:
 
@@ -21302,7 +21678,7 @@ such as `Selective dynamics` or velocities.
 !!! important
 
     Several POSCAR files available on the internet give atomic positions and lattice vectors with ~6 digits.
-    The ABINIT routines use tight tolerances to detect the space group thus it may happen that ABINIT does not
+    The ABINIT routines use tighter tolerances to detect the space group thus it may happen that ABINIT does not
     detect all the symmetry operations with a consequent **INCREASE** of the number of k-points in the IBZ
     and the associated computational cost. This is especially true for hexagonal or rhombohedral lattices.
     A possible solution is to increase the value of [[tolsym]] in the input file to e.g. 1e-4
@@ -21338,6 +21714,143 @@ Limitations:
 In all these cases in which the [[structure]] variable is not supported,
 one has to resort to the **standard approach** to define the list of atoms and their type.
 """
+),
+
+Variable(
+    abivarname="dvdb_rspace_cell",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="DVDB R-SPACE CELL",
+    added_in_version="9.1.0",
+    text=r"""
+This **advanced** variable sets the list of supercell $\RR$-points used to construct the scattering potential
+in the real-space representation with the associated weights for the Fourier transform
+to go from $W(\rr,\RR)$ to $v1scf(\rr,\qq)$.
+
+Possible values are:
+
+    0 --> Use unit super cell for $\RR$ space. All weights set to 1.
+    1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algorithm as for the dynamical matrix).
+          Note that this option leads to more $\RR$-points with a non-neglibigle increase of the memory allocated.
+
+!!! tip
+
+    Reducing the value of [[boxcutmin]] to e.g. 1.1 allows one to reduce the number, [[nfft]], of $\rr$-points
+    with a considerable memory saving for $W(\rr,\RR)$.
+""",
+),
+
+Variable(
+    abivarname="dvdb_qdamp",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0.1,
+    mnemonics="DVDB Q-DAMPing",
+    added_in_version="9.1.0",
+    text=r"""
+This **advanced** variable defines the $\alpha$ parameter in the Gaussian filter $e^{-\frac{|\qG|^2}{4\alpha}}$
+that multiplies the Fourier components of the model potential in the long wavelength limit (Eq 24 of Brunin2020 PRB
+see also [[cite:Sjakste2015]] and [[cite:Giustino2017]]).
+
+The $\alpha$ parameter determines the separation between the long-range and the short-range parts
+of the interaction and is used to express Ewald sums [[cite:Gonze1997]].
+in terms of a sum in $\GG$-space (long-range part) and a sum in real space that, being short ranged,
+is not relevant for the definition of the LR model.
+""",
+),
+
+Variable(
+    abivarname="getsigeph_filepath",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval="Output filename of the present dataset",
+    mnemonics="GET the SIGEPH from FILEPATH",
+    added_in_version="9.1.0",
+    text=r"""
+This variable defines the path of the SIGEPH file with the e-ph self-energy results
+that should be used as input for further analysis.
+At present, it is used by the transport driver ([[eph_task]]  = 7) to read the lifetimes needed
+to compute carrier mobilities within the RTA.
+""",
+),
+
+Variable(
+    abivarname="brav",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="BRAVais",
+    added_in_version="9.1.4",
+    text=r"""
+    See [[brav@anaddb]]
+""",
+),
+
+Variable(
+    abivarname="eph_doping",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="EPH doping",
+    added_in_version="9.2.0",
+    text=r"""
+Gives the doping charge in units of |e_charge| / cm^3.
+Negative for n-doping, positive for p-doping.
+Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
+Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
+""",
+),
+
+Variable(
+    abivarname="eph_phwinfact",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=1.1,
+    mnemonics="EPH PHonon FACTor for energy WINdow",
+    added_in_version="9.2.0",
+    text=r"""
+This variable defines the effective energy window for the $\kq$ KS states
+in the computation of electron lifetimes ([[eph_task]] -4) and is used to predict
+the list of $\qq$-points in the BZ that will be needeed during the calculation.
+
+The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk$ but then this
+initial energy window must be increased a bit to accomodate for phonon absorption/emission (from $\kk$ to $\kq$).
+This is importat for $\nk$ states that are close to edge of the initial energy window as this states may be needed
+for the linear interpolation used in tetrahedron method.
+
+In a nuthshell, the code increases the initial window using the max phonon frequency multiplied by [[eph_phwinfact]].
+The default value is a compromise between numerical stability and efficiency.
+Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substancial decrease in the number of
+$\kq$ KS states that must be read from file with a subsequent decrease in the memory requirements for the wavefunctions.
+We recommended to perform initial tests to decide whether a value smaller than four can be used.
+""",
+),
+
+Variable(
+    abivarname="rifcsph",
+    varset="eph",
+    vartype="real",
+    topics=['Phonons_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Radius of the Interatomic Force Constant SPHere",
+    added_in_version="9.2.0",
+    text=r"""
+Same meaning as [[rifcsph@anaddb]]
+""",
 ),
 
 ]

@@ -486,7 +486,7 @@ Variable(
     topics=['FitProcess_useful'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="FIT Training Set OPTION",
+    mnemonics="fit Training Set OPTION",
     added_in_version="before_v9",
     text=r"""
 * 0 --> the Training is hist from ABINIT
@@ -502,7 +502,7 @@ Variable(
     topics=['BoundingProcess_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="BOUND COEFFicient",
+    mnemonics="BOUND MODEL",
     added_in_version="before_v9",
     text=r"""
 Flag to activate the bound process:
@@ -797,7 +797,7 @@ Variable(
     mnemonics="LATTice dynamics FRICTION parameter",
     added_in_version="before_v9",
     text=r"""
-    Parameter of the friction coefficient used in Langevin dynamcis [[multibinit:dynamics]] =102. Typical value is 1e-4 to 1e-2. 
+    Parameter of the friction coefficient used in Langevin dynamics [[multibinit:dynamics]] =102. Typical value is 1e-4 to 1e-2. 
 """,
 ),
 
@@ -812,7 +812,7 @@ Variable(
     mnemonics="LATTice dynamics relaxation time TAUT",
     added_in_version="before_v9",
     text=r"""
-    Parameter used in Berendsen lattice dynamcis [[multibinit:dynamics]] =102 and 103, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of latt_taut.
+    Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =102 and 103, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of latt_taut.
     The unit is atomic unit, same as [[dtion]].
 """,
 ),
@@ -827,7 +827,7 @@ Variable(
     mnemonics="LATTice dynamics relaxation time TAUP",
     added_in_version="before_v9",
     text=r"""
-    Parameter used in Berendsen lattice dynamcis [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup.
+    Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup.
     The unit is atomic unit, same as [[dtion]].
 """,
 ),
@@ -915,6 +915,20 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give the size of the supercell for the dynamics
+""",
+),
+
+Variable(
+    abivarname="strfact@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=100.0,
+    mnemonics="STRess FACTor",
+    added_in_version="v9.1",
+    text=r"""
+See [[abinit:strfact]]
 """,
 ),
 
@@ -1454,6 +1468,21 @@ Variable(
 * 1 --> Evaluate the effective potential with respect to given test-set and calculate mean square differences between ab-initio energy/forces and model energy/forces
 """,
 ),
+
+Variable(
+    abivarname="tolmxf@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=2e-5,
+    mnemonics="TOLerance on the MaXimal Force",
+    added_in_version="v9",
+    text=r"""
+Sets a maximal absolute force tolerance (in hartree/Bohr) below which BFGS structural relaxation iterations will stop. Corresponds to [[tolmxf]] of Abinit.
+""",
+),
+
 
 Variable(
 abivarname="analyze_anh_pot@multibinit",

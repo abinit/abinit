@@ -23,10 +23,10 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,dvdb_free,dvdb_init
-!!      dvdb_list_perts,dvdb_merge_files,dvdb_print,dvdb_test_ftinterp
-!!      dvdb_test_v1complete,dvdb_test_v1rsym,get_command_argument,herald
-!!      prompt,wrtout,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,dvdb%free,dvdb%list_perts
+!!      dvdb%open_read,dvdb%print,dvdb%qdownsample,dvdb_merge_files
+!!      dvdb_test_ftinterp,dvdb_test_v1complete,dvdb_test_v1rsym
+!!      get_command_argument,herald,ngfft_seq,prompt,wrtout,xmpi_init
 !!
 !! SOURCE
 
@@ -56,9 +56,10 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
- integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, method, dvdb_qdamp, symv1scf
+ integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, symv1scf, npert_miss, abimem_level
+ real(dp) :: dvdb_qdamp, abimem_limit_mb
  character(len=24) :: codename
- character(len=500) :: command,arg, msg
+ character(len=500) :: command, arg, msg
  character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
  type(dvdb_t) :: dvdb
 !arrays
@@ -78,13 +79,15 @@ program mrgdv
  ! Initialize memory profiling if it is activated
  ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
  ! write greating,read the file names, etc.
  codename='MRGDV'//repeat(' ',18)
- call herald(codename,abinit_version,std_out)
+ call herald(codename, abinit_version, std_out)
 
  ABI_CHECK(xmpi_comm_size(comm) == 1, "Not programmed for parallel execution")
  ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
@@ -93,6 +96,7 @@ program mrgdv
 
  if (nargs == 0) then
    ! We are reading from stdin
+   ! Prepend prompt with `-` to bypass bug in intel18-19
    call prompt("Enter name of output file:", dvdb_filepath)
    call prompt("Enter total number of DFPT POT files:", nfiles)
    ABI_MALLOC(v1files, (nfiles))
@@ -127,7 +131,6 @@ program mrgdv
        write(std_out,*)"                           Test Fourier interpolation of DFPT potentials."
        write(std_out,*)"downsample in_DVDB out_DVDB [n1, n2, n3] Produce new DVDB with q-subsmesh"
        !write(std_out,*)"convert in_old_DVDB out_DVDB.nc  Convert old DVDB format to new DVDB in netcdf format"
-       !write(std_out,*)"add_gspot in_POT in_DVDB.nc  Add GS potential to DVDB file (required for Sternheimer)."
        goto 100
      end if
    end do
@@ -159,8 +162,8 @@ program mrgdv
      call get_command_argument(2, dvdb_filepath)
 
      dvdb = dvdb_new(dvdb_filepath, comm)
-     call dvdb%print(prtvol=prtvol)
-     call dvdb%list_perts([-1, -1, -1])
+     if (prtvol > 0) call dvdb%print(prtvol=prtvol)
+     call dvdb%list_perts([-1, -1, -1], npert_miss)
      call dvdb%free()
 
    case ("test_v1comp", "test_v1complete")
@@ -180,26 +183,26 @@ program mrgdv
      call get_command_argument(2, dvdb_filepath)
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default=2, want_len=3) == 0, msg)
      ABI_CHECK(get_arg("ddb-path", ddb_filepath, msg, default="") == 0, msg)
-     ABI_CHECK(get_arg("method", method, msg, default=0) == 0, msg)
+     ABI_CHECK(get_arg("rspace_cell", rspace_cell, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
-     ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=-1) == 0, msg)
+     ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=0.1_dp) == 0, msg)
      ABI_CHECK(get_arg_list("coarse-ngqpt", coarse_ngqpt, lenr, msg, default=0, want_len=3) == 0, msg)
-     call dvdb_test_ftinterp(dvdb_filepath, method, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
+     call dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
                              ddb_filepath, prtvol, coarse_ngqpt, comm)
 
    case ("downsample")
      call get_command_argument(2, dvdb_filepath)
      call get_command_argument(3, dump_file)
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, want_len=3) == 0, msg)
-     write(std_out,"(a)")sjoin(" Downsampling Q-mesh with ngqpt:", ltoa(ngqpt))
+     write(std_out,"(a)")sjoin(" Downsampling q-mesh with ngqpt:", ltoa(ngqpt))
      write(std_out,"(a)")trim(dvdb_filepath), " --> ", trim(dump_file)
 
      dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
      call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:, 1))
      call dvdb%open_read(ngfftf, xmpi_comm_self)
-     call dvdb%print()
-     call dvdb%list_perts([-1,-1,-1], unit=std_out)
+     if (prtvol > 0) call dvdb%print(prtvol=prtvol)
+     call dvdb%list_perts([-1,-1,-1], npert_miss, unit=std_out)
      call dvdb%qdownsample(dump_file, ngqpt, comm)
      call dvdb%free()
 

@@ -49,13 +49,15 @@ diemac 12.0
 vdw_xc 7 # Activate DFT-D3(BJ)
 vdw_tol 1d-8 # Tolerance on the pair-wise term (1d-12 is safer for convergence purposes)
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "B-q3, PseudosHGH_pwteter/7n.5.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t99.out, tolnlines = 8, tolabs = 1.001e-04, tolrel = 5.0e-04, fld_options = -easy
-#%% psp_files = B-q3, 7n.psphgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

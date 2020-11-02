@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h46 )
+.Starting date : Thu 15 Oct 2020.
+- ( at 12h06 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tbs_1-tbs_2-tbs_3-tbs_4/tbs_4.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/TestBot_MPI1/tutorial_tbs_1-tbs_2-tbs_3-tbs_4/tbs_4.in
 - output file    -> tbs_4.out
 - root for input  files -> tbs_4i
 - root for output files -> tbs_4o
@@ -27,16 +27,16 @@
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =           7        mffmem =           1         mkmem =          64
-       mpw =         278          nfft =        5832          nkpt =          64
+       mpw =         298          nfft =        8000          nkpt =          64
 ================================================================================
-P This job should need less than                       4.389 Mbytes of memory.
+P This job should need less than                       5.144 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      1.902 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      2.039 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -44,16 +44,16 @@ _ WF disk file :      1.902 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =           7        mffmem =           1         mkmem =          64
-       mpw =         278          nfft =        5832          nkpt =          64
+       mpw =         298          nfft =        8000          nkpt =          64
 ================================================================================
-P This job should need less than                       4.389 Mbytes of memory.
+P This job should need less than                       5.144 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      1.902 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      2.039 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -74,12 +74,12 @@ _ WF disk file :      1.902 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
         bs_loband           2
       chksymbreak           0
            diemac      1.20000000E+01
-             ecut      7.56385066E+00 Hartree
-          ecuteps1     1.51277013E+00 Hartree
-          ecuteps2     2.26915520E+00 Hartree
-          ecutwfn      7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
+          ecuteps1     2.00000000E+00 Hartree
+          ecuteps2     3.00000000E+00 Hartree
+          ecutwfn      8.00000000E+00 Hartree
 -          fftalg         312
-         icutcoul           3
+      gw_icutcoul           3
            irdscr           1
            irdwfk           1
            jdtset        1    2
@@ -141,7 +141,7 @@ P           mkmem          64
             natom           2
             nband           7
            ndtset           2
-            ngfft          18      18      18
+            ngfft          20      20      20
              nkpt          64
            npweps1         27
            npweps2         59
@@ -238,8 +238,8 @@ P           mkmem          64
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 64, mband: 7, nsppol: 1, nspinor: 1, nspden: 1, mpw: 278, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 64, mband: 7, nsppol: 1, nspinor: 1, nspden: 1, mpw: 298, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 ...
@@ -264,8 +264,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -381,7 +381,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
  Algorithm: Haydock technique.
  Dimension of the v, W matrices,  npweps  = 27
- Cutoff for the wavefunctions,    npwwfn  = 259
+ Cutoff for the wavefunctions,    npwwfn  = 283
  Number of k-points in the IBZ,   nkibz   = 64
  Highest empty band included,     nband   = 7
  === Spin UP ===
@@ -410,34 +410,34 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  q = (  0.000000  0.813043  0.813043) [r.l.u.]
  q = (  0.813043  0.000000  0.813043) [r.l.u.]
  q = (  0.813043  0.813043  0.000000) [r.l.u.]
- Number of electrons calculated from density =    7.9999; Expected =    8.0000
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7087 [eV]
+ omega_plasma =   16.7088 [eV]
 
 . Writing resonant excitonic Hamiltonian on file tbs_4o_DS1_BSR; file size=   0.00 [Gb].
  Writing KS-RPA macroscopic dielectric function without local fields to file: tbs_4o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: tbs_4o_DS1_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 43 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 43 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 43 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 31 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: tbs_4o_DS1_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  17.2242   0.0000  14.2601   0.0000  15.9576   0.0000
-   0.0200  17.2247   0.0080  14.2604   0.0042  15.9580   0.0061
-   0.0400  17.2263   0.0160  14.2612   0.0085  15.9593   0.0122
-   0.0600  17.2289   0.0241  14.2626   0.0127  15.9613   0.0184
-   0.0800  17.2326   0.0321  14.2646   0.0169  15.9641   0.0245
-   0.1000  17.2374   0.0401  14.2671   0.0212  15.9678   0.0306
-   0.1200  17.2433   0.0482  14.2702   0.0254  15.9722   0.0368
-   0.1400  17.2502   0.0563  14.2738   0.0297  15.9775   0.0429
-   0.1600  17.2581   0.0644  14.2781   0.0339  15.9836   0.0491
-   0.1800  17.2672   0.0726  14.2828   0.0382  15.9905   0.0553
+   0.0000  17.2075   0.0000  14.2464   0.0000  15.9429   0.0000
+   0.0200  17.2080   0.0080  14.2466   0.0042  15.9433   0.0061
+   0.0400  17.2096   0.0160  14.2475   0.0084  15.9445   0.0122
+   0.0600  17.2123   0.0240  14.2489   0.0127  15.9465   0.0183
+   0.0800  17.2160   0.0321  14.2508   0.0169  15.9493   0.0245
+   0.1000  17.2208   0.0401  14.2534   0.0211  15.9530   0.0306
+   0.1200  17.2266   0.0482  14.2564   0.0254  15.9574   0.0367
+   0.1400  17.2335   0.0562  14.2601   0.0296  15.9627   0.0429
+   0.1600  17.2415   0.0643  14.2643   0.0339  15.9688   0.0491
+   0.1800  17.2505   0.0725  14.2691   0.0382  15.9757   0.0553
   
 
 ================================================================================
@@ -447,8 +447,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 64, mband: 7, nsppol: 1, nspinor: 1, nspden: 1, mpw: 278, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 64, mband: 7, nsppol: 1, nspinor: 1, nspden: 1, mpw: 298, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 ...
@@ -569,7 +569,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
  Algorithm: Haydock technique.
  Dimension of the v, W matrices,  npweps  = 59
- Cutoff for the wavefunctions,    npwwfn  = 259
+ Cutoff for the wavefunctions,    npwwfn  = 283
  Number of k-points in the IBZ,   nkibz   = 64
  Highest empty band included,     nband   = 7
  === Spin UP ===
@@ -598,34 +598,34 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  q = (  0.000000  0.813043  0.813043) [r.l.u.]
  q = (  0.813043  0.000000  0.813043) [r.l.u.]
  q = (  0.813043  0.813043  0.000000) [r.l.u.]
- Number of electrons calculated from density =    7.9999; Expected =    8.0000
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7087 [eV]
+ omega_plasma =   16.7088 [eV]
 
 . Writing resonant excitonic Hamiltonian on file tbs_4o_DS2_BSR; file size=   0.00 [Gb].
  Writing KS-RPA macroscopic dielectric function without local fields to file: tbs_4o_DS2_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: tbs_4o_DS2_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 43 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 43 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 30 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: tbs_4o_DS2_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  17.2242   0.0000  14.2601   0.0000  15.5472   0.0000
-   0.0200  17.2247   0.0080  14.2604   0.0042  15.5476   0.0056
-   0.0400  17.2263   0.0160  14.2612   0.0085  15.5487   0.0113
-   0.0600  17.2289   0.0241  14.2626   0.0127  15.5506   0.0169
-   0.0800  17.2326   0.0321  14.2646   0.0169  15.5532   0.0226
-   0.1000  17.2374   0.0401  14.2671   0.0212  15.5566   0.0283
-   0.1200  17.2433   0.0482  14.2702   0.0254  15.5607   0.0339
-   0.1400  17.2502   0.0563  14.2738   0.0297  15.5655   0.0396
-   0.1600  17.2581   0.0644  14.2781   0.0339  15.5712   0.0453
-   0.1800  17.2672   0.0726  14.2828   0.0382  15.5775   0.0510
+   0.0000  17.2075   0.0000  14.2464   0.0000  15.5329   0.0000
+   0.0200  17.2080   0.0080  14.2466   0.0042  15.5333   0.0056
+   0.0400  17.2096   0.0160  14.2475   0.0084  15.5344   0.0113
+   0.0600  17.2123   0.0240  14.2489   0.0127  15.5363   0.0169
+   0.0800  17.2160   0.0321  14.2508   0.0169  15.5389   0.0226
+   0.1000  17.2208   0.0401  14.2534   0.0211  15.5422   0.0282
+   0.1200  17.2266   0.0482  14.2564   0.0254  15.5464   0.0339
+   0.1400  17.2335   0.0562  14.2601   0.0296  15.5512   0.0396
+   0.1600  17.2415   0.0643  14.2643   0.0339  15.5568   0.0453
+   0.1800  17.2505   0.0725  14.2691   0.0382  15.5632   0.0510
   
 
 == END DATASET(S) ==============================================================
@@ -639,10 +639,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
         bs_loband           2
       chksymbreak           0
            diemac      1.20000000E+01
-             ecut      7.56385066E+00 Hartree
-          ecuteps1     1.51277013E+00 Hartree
-          ecuteps2     2.26915520E+00 Hartree
-          ecutwfn      7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
+          ecuteps1     2.00000000E+00 Hartree
+          ecuteps2     3.00000000E+00 Hartree
+          ecutwfn      8.00000000E+00 Hartree
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -650,7 +650,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-         icutcoul           3
+      gw_icutcoul           3
            irdscr           1
            irdwfk           1
            jdtset        1    2
@@ -712,7 +712,7 @@ P           mkmem          64
             natom           2
             nband           7
            ndtset           2
-            ngfft          18      18      18
+            ngfft          20      20      20
              nkpt          64
            npweps1         27
            npweps2         59
@@ -839,7 +839,24 @@ P           mkmem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -857,7 +874,9 @@ P           mkmem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -870,25 +889,10 @@ P           mkmem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=         41.0  wall=         41.9
+- Proc.   0 individual time (sec): cpu=         39.6  wall=         41.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  16 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         41.0  wall=         41.9
+.Delivered  12 WARNINGs and  24 COMMENTs to log file.
++Overall time at end (sec) : cpu=         39.6  wall=         41.2

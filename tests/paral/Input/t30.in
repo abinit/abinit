@@ -23,6 +23,7 @@
        0.5 0.5 0.0
  xred 0.0  0.0  0.0
       0.22 0.22 0.22
+ chksymtnons 0
  znucl 6
  nband 12 occ 4*2 8*0
  ntypat 1 typat 1 1  natom 2
@@ -32,12 +33,14 @@
  use_gemm_nonlop 1 # test nonlop with BLAS
  fftalg 402
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = ubu_intel_16.0_mpich, ubu_intel_15.0_mpich, abiref_nag_6.2_openmpi
+#%% exclude_builders = ubu_intel_16.0_mpich, ubu_intel_15.0_mpich
 #%% [files]
-#%% psp_files = 6c_lda.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

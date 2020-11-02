@@ -115,7 +115,7 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  self <type(self_type)>= variables related to self-energy
-!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent LDA+DMFT calculations.
+!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent DFT+DMFT calculations.
 !!  opt_oper = 1  Allocate only quantities in the KS basis.
 !!             2  Allocate only quantities in the local basis.
 !!             3  Allocate quantities in both the KS and local basis.
@@ -129,7 +129,6 @@ CONTAINS  !=====================================================================
 !!      m_self
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -194,7 +193,7 @@ end subroutine alloc_self
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=variables related to crystal structure
 !!  self <type(self_type)>= variables related to self-energy
-!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent LDA+DMFT calculations.
+!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent DFT+DMFT calculations.
 !!  opt_read =  not used for the moment
 !!  wtype = "real" Self energy will be computed for real frequencies
 !!        = "imag" Self energy will be computed for imaginary frequencies
@@ -204,10 +203,9 @@ end subroutine alloc_self
 !!
 !!
 !! PARENTS
-!!      m_dmft,spectral_function
+!!      m_dmft,m_outscfcv
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -261,10 +259,9 @@ end subroutine initialize_self
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,spectral_function
+!!      m_dmft,m_outscfcv
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -308,7 +305,7 @@ end subroutine destroy_self
 !!  self <type(self_type)>= variables related to self-energy
 !!  option = 1 Do not print double counting.
 !!           2 Print double counting
-!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent LDA+DMFT calculations.
+!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent DFT+DMFT calculations.
 !!  prtopt = integer which precises the amount of printing in the subroutine called
 !!
 !! OUTPUT
@@ -318,7 +315,6 @@ end subroutine destroy_self
 !!      m_dmft
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -375,10 +371,9 @@ end subroutine print_self
 !!  hu <type(hu_type)>= variables related to the interaction between electrons
 !!
 !! PARENTS
-!!      m_dmft,spectral_function
+!!      m_dmft
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -488,10 +483,9 @@ end subroutine dc_self
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,spectral_function
+!!      m_dmft,m_outscfcv
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -1334,7 +1328,6 @@ end subroutine rw_self
 !!      m_dmft
 !!
 !! CHILDREN
-!!      shift_matlu,wrtout
 !!
 !! SOURCE
 
@@ -1522,9 +1515,9 @@ end subroutine make_qmcshift_self
 !!  self%qmc_shift in self <type(self_type)> = Self-energy
 !!
 !! PARENTS
+!!      m_self
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1675,9 +1668,9 @@ end subroutine kramerskronig_self
 !!  self%qmc_shift in self <type(self_type)> = Self-energy
 !!
 !! PARENTS
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

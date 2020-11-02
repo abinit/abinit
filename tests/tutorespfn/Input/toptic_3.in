@@ -1,4 +1,4 @@
-# Prepare the computation of linear optic properties (for the imaginary spectrum only)
+# Prepare the computation of linear optic properties (for the imaginary spectrum only : the number of bands can be taken much lower than for the real part)
 # of GaAs crystal : ground-state with few bands,
 # then non-SCF with a larger number of bands, then ddk for different directions
 # Note that the k point sampling shoud be finer for significant results. The cut-off energy is also too low.
@@ -14,51 +14,49 @@
 
 #Second dataset : NSC run with large number of bands, and points in the IBZ
     iscf2 -2  
-   nband2  9  # Minimal number of bands for linear optics (imaginary part of the spectrum)
    nstep2 25
   kptopt2  1
   getwfk2  1   getden2 1   # Usual file handling data
 
 #Third dataset : NSC run with large number of bands, and points in the the full BZ
     iscf3 -2  
-   nband3  9  # Minimal number of bands for linear optics (imaginary part of the spectrum)
    nstep3 25
-  kptopt3  2  # Time-reversal symmetry can be used in the present implementation for linear optics
   getwfk3  2   getden3 1   # Usual file handling data
 
 
 #Fourth dataset : ddk response function along axis 1
    iscf4 -3
-  nband4  9   # Minimal number of bands for linear optics (imaginary part of the spectrum)
-  nstep4  1  nline4  0     prtwf4   3
- kptopt4  2   # Time-reversal symmetry can be used in the present implementation for linear optics
+  nstep4  1  nline4  0     prtwf4   3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements
 
-   nqpt4  1  qpt4  0.0d0 0.0d0 0.0d0 
+   nqpt4  1  
   rfdir4  1 0 0
  rfelfd4  2
- getwfk4  3
 
 #Fifth dataset : ddk response function along axis 2
    iscf5 -3
-  nband5  9   # Minimal number of bands for linear optics (imaginary part of the spectrum)
-  nstep5  1  nline5  0    prtwf5  3
- kptopt5  2   # Time-reversal symmetry can be used in the present implementation for linear optics
+  nstep5  1  nline5  0    prtwf5  3     # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
 
-   nqpt5  1  qpt5  0.0d0 0.0d0 0.0d0
+   nqpt5  1  
   rfdir5  0 1 0
  rfelfd5  2
- getwfk5  3
 
 #Sixth dataset : ddk response function along axis 3
    iscf6 -3
-  nband6  9   # Minimal number of bands for linear optics (imaginary part of the spectrum)
-  nstep6  1  nline6  0    prtwf6  3
- kptopt6  2   # Time-reversal symmetry can be used in the present implementation for linear optics
+  nstep6  1  nline6  0    prtwf6  3     # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements.
 
    nqpt6  1  qpt6  0.0d0 0.0d0 0.0d0
   rfdir6  0 0 1
  rfelfd6  2
- getwfk6  3
+
+# Data common to datasets 2-6
+  nband   9       # Minimal number of bands for linear optics (imaginary part of the spectrum)
+
+# Data common to datasets 3-6
+ kptopt   2      # Need points in the half BZ (use time-reversal symmetry)
+
+# Data common to datasets 4-6
+  getwfk  3
+
 
 
 #Data common to all datasets
@@ -82,6 +80,9 @@
  typat  1 2  tolwfr  1.e-20
  znucl  31 33
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/31ga.pspnc, PseudosTM_pwteter/33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -90,7 +91,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   toptic_3.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
-#%% psp_files =  31ga.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

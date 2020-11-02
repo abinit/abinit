@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h43 )
+.Starting date : Tue 28 Apr 2020.
+- ( at 14h16 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_tnlo_7-tnlo_8-tnlo_9-tnlo_10-tnlo_11/tnlo_9.in
+- input  file    -> /home/baguetl/PROGRAM/abinit/finitediff_exc/build/ubuntu/Test_suite/tutorespfn_tnlo_7-tnlo_8-tnlo_9-tnlo_10-tnlo_11/tnlo_9.in
 - output file    -> tnlo_9.out
 - root for input  files -> tnlo_9i
 - root for output files -> tnlo_9o
@@ -48,7 +48,7 @@ _ WF disk file :      2.111 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    0
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0530000000E+01  1.0530000000E+01  1.0530000000E+01 Bohr
@@ -170,7 +170,7 @@ P          mk1mem         432
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -195,8 +195,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.03767
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -213,8 +213,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
+- pspini: atom type   2  psp file is /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -266,21 +266,21 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.419562004637     -1.042E+01 1.040E+01 0.000E+00
- ETOT  2  -10.423366793466     -3.805E-03 1.934E-03 0.000E+00
+-ETOT  1  -10.419562003242     -1.042E+01 1.040E+01 0.000E+00
+ ETOT  2  -10.423366793464     -3.805E-03 1.934E-03 0.000E+00
  ETOT  3  -10.423368081196     -1.288E-06 1.204E-07 0.000E+00
  ETOT  4  -10.423368081681     -4.851E-10 5.044E-11 0.000E+00
  ETOT  5  -10.423368081681     -4.281E-13 2.149E-14 0.000E+00
- ETOT  6  -10.423368081681     -1.776E-14 1.991E-17 0.000E+00
- ETOT  7  -10.423368081681      9.592E-14 2.283E-20 0.000E+00
- ETOT  8  -10.423368081681     -2.487E-14 9.998E-23 0.000E+00
+ ETOT  6  -10.423368081681     -1.776E-15 1.990E-17 0.000E+00
+ ETOT  7  -10.423368081681      9.059E-14 2.283E-20 0.000E+00
+ ETOT  8  -10.423368081681     -8.882E-15 1.000E-22 0.000E+00
 
  At SCF step    8   max residual=  1.00E-22 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   35.823E-24; max=  99.983E-24
+ Mean square residual over all n,k,spin=   35.823E-24; max=  99.999E-24
  dfpt_looppert : ek2=    1.7090085353E+01
           f-sum rule ratio=    1.2328367987E+00 (note : ecutsm/=0)
  prteigrs : about to open file tnlo_9t_1WF1_EIG
@@ -325,21 +325,21 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.419562394212     -1.042E+01 1.040E+01 0.000E+00
- ETOT  2  -10.423366793092     -3.804E-03 1.934E-03 0.000E+00
+-ETOT  1  -10.419562393010     -1.042E+01 1.040E+01 0.000E+00
+ ETOT  2  -10.423366793091     -3.804E-03 1.934E-03 0.000E+00
  ETOT  3  -10.423368081005     -1.288E-06 1.204E-07 0.000E+00
  ETOT  4  -10.423368081495     -4.894E-10 5.044E-11 0.000E+00
- ETOT  5  -10.423368081495     -3.908E-13 2.149E-14 0.000E+00
- ETOT  6  -10.423368081495     -3.375E-14 2.230E-17 0.000E+00
- ETOT  7  -10.423368081495      3.908E-14 3.942E-20 0.000E+00
- ETOT  8  -10.423368081495      8.882E-15 9.999E-23 0.000E+00
+ ETOT  5  -10.423368081495     -3.979E-13 2.149E-14 0.000E+00
+ ETOT  6  -10.423368081495     -5.507E-14 2.230E-17 0.000E+00
+ ETOT  7  -10.423368081495      5.151E-14 3.942E-20 0.000E+00
+ ETOT  8  -10.423368081495      8.882E-15 1.000E-22 0.000E+00
 
  At SCF step    8   max residual=  1.00E-22 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   36.012E-24; max=  99.991E-24
+ Mean square residual over all n,k,spin=   35.959E-24; max=  99.999E-24
  dfpt_looppert : ek2=    1.7090085353E+01
           f-sum rule ratio=    1.2328367987E+00 (note : ecutsm/=0)
  prteigrs : about to open file tnlo_9t_1WF1_EIG
@@ -384,21 +384,21 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.419561950459     -1.042E+01 1.040E+01 0.000E+00
- ETOT  2  -10.423366793025     -3.805E-03 1.934E-03 0.000E+00
+-ETOT  1  -10.419561952480     -1.042E+01 1.040E+01 0.000E+00
+ ETOT  2  -10.423366793028     -3.805E-03 1.934E-03 0.000E+00
  ETOT  3  -10.423368080824     -1.288E-06 1.204E-07 0.000E+00
  ETOT  4  -10.423368081309     -4.852E-10 5.044E-11 0.000E+00
- ETOT  5  -10.423368081310     -3.180E-13 2.149E-14 0.000E+00
- ETOT  6  -10.423368081310     -3.730E-14 1.989E-17 0.000E+00
- ETOT  7  -10.423368081310      7.105E-15 2.283E-20 0.000E+00
- ETOT  8  -10.423368081310     -2.487E-14 1.000E-22 0.000E+00
+ ETOT  5  -10.423368081310     -3.411E-13 2.149E-14 0.000E+00
+ ETOT  6  -10.423368081310     -7.105E-15 1.989E-17 0.000E+00
+ ETOT  7  -10.423368081310     -1.243E-14 2.283E-20 0.000E+00
+ ETOT  8  -10.423368081310     -1.776E-15 1.000E-22 0.000E+00
 
  At SCF step    8   max residual=  1.00E-22 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   35.771E-24; max=  99.996E-24
+ Mean square residual over all n,k,spin=   35.824E-24; max=  99.999E-24
  dfpt_looppert : ek2=    1.7090085353E+01
           f-sum rule ratio=    1.2328367987E+00 (note : ecutsm/=0)
  prteigrs : about to open file tnlo_9t_1WF1_EIG
@@ -645,10 +645,10 @@ P          mk1mem         432
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         16.7  wall=         18.3
+- Proc.   0 individual time (sec): cpu=         17.2  wall=         79.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.7  wall=         18.3
+.Delivered   5 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.2  wall=         79.7

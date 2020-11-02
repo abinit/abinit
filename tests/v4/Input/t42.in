@@ -47,13 +47,15 @@ nstep 40          # Maximal number of SCF cycles
 toldff 5.0d-5
 diemac 20
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc, 32ge_lda.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t42.in, t43.in, t44.in, t45.in
 #%% [files]
 #%% files_to_test = t42.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
-#%% psp_files=14si.pspnc, 32ge_lda.fhi
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp t42o_VHXC t43_VHXC;
