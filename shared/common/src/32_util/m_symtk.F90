@@ -1662,7 +1662,7 @@ subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred,tnons_new,tolsym)
 !scalars
  integer  :: fixed_mismatch,iatom,ib,ii,info,irank,isym,isym2
  integer  :: jj,mismatch_fft_tnons,mismatch_fft_tnons_isym
- real(dp) :: delta8,delta9,delta10,delta12,fc1,fc2,fc3
+ real(dp) :: fc1,fc2,fc3
  real(dp) :: diff
  logical  :: dissimilar
 !arrays
@@ -1730,7 +1730,7 @@ subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred,tnons_new,tolsym)
    if(present(tolsym) .and. present(tnons_new) )then
      fixed_mismatch=0
      mismatch_fft_tnons=0
-     tnons_new(:,:)=tnons(:,:)
+     tnons_new(:,:)=tnons(:,:)+nint(tnons(:,:)-tol8)
      do isym=1,nsym
        mismatch_fft_tnons_isym=0
        do ii=1,3
