@@ -883,7 +883,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          !Needs one more resymmetrization, for the tnons
          ABI_ALLOCATE(tnons_new,(3,nsym))
          call symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred,tnons_new,tolsym)
-         tnons(:,:)=tnons_new(:,:)
+         tnons(:,1:nsym)=tnons_new(:,:)
          ABI_DEALLOCATE(indsym)
          ABI_DEALLOCATE(symrec)
          ABI_DEALLOCATE(tnons_new)
