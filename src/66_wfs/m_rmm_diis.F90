@@ -170,34 +170,32 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, use_subovl0 = 0
- integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb !, comm
+ integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nb_pocc, jj, kk, it, ibk, cplex, ortalgo, accuracy_level, raise_acc, prev_mixprec !ii, ld1, ld2, iek,
  integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy !, comm_spinorfft, comm_fft
- logical :: end_with_trial_step, recompute_lambda, recompute_eigresid_after_ortho, first_call !, do_rollback
+ logical :: end_with_trial_step, recompute_lambda, recompute_eigresid_after_ortho, first_call
  logical :: use_fft_mixprec
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene, cpu, wall, gflops, max_res_pocc, tol_occupied !, dotr, doti
+ real(dp) :: accuracy_ene, cpu, wall, gflops, max_res_pocc, tol_occupied
  !character(len=500) :: msg
  character(len=6) :: tag
+ type(rmm_diis_t) :: diis
+ type(yamldoc_t) :: ydoc
 !arrays
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: evec(:,:), subham(:), h_ij(:,:,:)
- real(dp),allocatable :: ghc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), dots_bk(:,:)
- real(dp),allocatable :: residv_bk(:,:), kres_bk(:,:)
+ real(dp),allocatable :: ghc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), residv_bk(:,:), kres_bk(:,:), dots_bk(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), phi_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
- type(rmm_diis_t) :: diis
- type(yamldoc_t) :: ydoc
 
 ! *************************************************************************
 
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
  prtvol = dtset%prtvol !; prtvol = -level
- me_g0 = mpi_enreg%me_g0 !; comm_fft = mpi_enreg%comm_fft; comm_spinorfft = mpi_enreg%comm_spinorfft;
- !comm = mpi_enreg%comm_spinorfft; if (mpi_enreg%paral_kgb == 1) comm = mpi_enreg%comm_bandspinorfft
+ me_g0 = mpi_enreg%me_g0
  comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  npwsp = npw * nspinor
 
@@ -286,13 +284,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !recompute_eigresid_after_ortho = .False.
 
  use_fft_mixprec = dtset%mixprec == 1 .and. accuracy_level < 2
- !use_fft_mixprec = .True.
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(1)
 
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1 ! optekin = 0
 
- !call subspace_rotation(cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc_all, mpi_enreg, nband, npw, nspinor)
+ !call subspace_rotation(gs_hamk, nband, npw, nspinor, dtset, mpi_enreg, kinpw, cg, gsc_all, eig, enlx)
 
  ! =======================================
  ! Apply H to input cg to compute <i|H|j>
@@ -439,7 +436,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input cg are already S-normalized.
    call diis%push_iter(0, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), phi_bk, residv_bk, gsc_bk, "SDIAG")
-
    if (timeit) call cwtime_report(" first getghc_eigresid ", cpu, wall, gflops)
 
    ! Line minimization with preconditioned steepest descent:
@@ -465,9 +461,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end if
 
    ! Compute (H - e_0 S) |K R_0>
-   call cg_residvecs(usepaw, npwsp, ndat, eig(ib_start), kres_bk, ghc_bk, gsc_bk, residv_bk)
-   if (timeit) call cwtime_report(" cg_residvecs ", cpu, wall, gflops)
-
+   call cg_get_residvecs(usepaw, npwsp, ndat, eig(ib_start), kres_bk, ghc_bk, gsc_bk, residv_bk)
    call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_bandspinorfft)
    if (timeit) call cwtime_report(" cg_norm2g ", cpu, wall, gflops)
 
@@ -482,15 +476,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    ! Build |Psi_1> = |Phi_0> + lambda |K R_0>
    do idat=1,ndat
-     !write(std_out,*)"Computing lambda with:", -dots_bk(1,idat), lambda_bk(idat)
      lambda_bk(idat) = limit_lambda(-dots_bk(1,idat) / lambda_bk(idat))
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
    end do
-   !call cg_zaxpby_areal_op(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
    if (timeit) call cwtime_report(" KR0 ", cpu, wall, gflops)
 
+   ! ===============
    ! DIIS iterations
+   ! ===============
    iter_loop: do iter=1,max_niter_block
 
      if (iter > 1) then
@@ -540,6 +534,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      recompute_lambda = diis%accuracy_level >= 4 .and. ncalls_with_prev_accuracy > 10
      !recompute_lambda = all(diis%accuracy_level, prev_accuracy) >= 4 .and. ncalls_with_prev_accuracy > 10
      !recompute_lambda = .True.
+     !recompute_lambda = .False.
 
      if (recompute_lambda) then
        tag = "NEWLAM"
@@ -556,7 +551,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        end if
 
        ! Compute (H - e_0 S) |K R_0>
-       call cg_residvecs(usepaw, npwsp, ndat, eig(ib_start), kres_bk, ghc_bk, gsc_bk, residv_bk)
+       call cg_get_residvecs(usepaw, npwsp, ndat, eig(ib_start), kres_bk, ghc_bk, gsc_bk, residv_bk)
        call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_bandspinorfft)
 
        ! Compute lambda
@@ -568,7 +563,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        end do
        call xmpi_sum(dots_bk, comm_bandspinorfft, ierr)
 
-       ! Build |Psi_n> = |Phi_n-1> + lambda |K R_n>
+       ! Build |Psi_n> = |Phi_{n-1}> + lambda |K R_{n-1}>
        do idat=1,ndat
          lambda_bk(idat) = limit_lambda(-dots_bk(1,idat) / lambda_bk(idat))
          jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
@@ -582,7 +577,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      endif
 
      if (.not. recompute_eigresid_after_ortho) then
-       ! Compute eig, resid, enlx (and gsc_bk if PAW) before orthogonalize.
+       ! Compute eig, resid, enlx (and gsc_bk if PAW) before orthogonalization.
+       ! This is an approximation but we save a call to getghc.
        call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
 
@@ -592,8 +588,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      else
        ! TODO: Need to recompute only S for pw_orthon
        if (usepaw == 1) then
-       call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
-                            eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
+         call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+                              eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
        end if
      end if
 
@@ -617,14 +613,14 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
- ! Recompute eigenvalues, residuals, and NC enlx after orthogonalization.
- ! This step is important to improve the convergence of the total energy
- ! and it guarantees that eigenvalues and residuals are consistent with the output wavefunctions.
- ! but we try to avoid it at the beginning of the SCF cycle.
- ! In principle, one can rotate Vnl(b,b') using the U^-1 from the Cholesky decomposition
- ! but the full Vnl matrix should be computed.
-
  if (recompute_eigresid_after_ortho) then
+   ! Here we Recompute eigenvalues, residuals, and NC enlx after orthogonalization.
+   ! This step is important to improve the convergence of the total energy
+   ! and it guarantees that eigenvalues and residuals are consistent with the output wavefunctions.
+   ! but we try to avoid it at the beginning of the SCF cycle.
+   ! In principle, one can rotate Vnl(b,b') using the U^-1 from the Cholesky decomposition
+   ! but the full Vnl matrix should be computed before the ortho step.
+
    !if (prtvol > 0)
    call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
    do iblock=1,nblocks
@@ -632,12 +628,24 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ige = min(iblock * npwsp * bsize, npwsp * nband)
      ndat = (ige - igs + 1) / npwsp
      ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
+
+     !phi_bk => cg(:,igs:ige)
      if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
 
      call getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg(:,igs), ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
                           normalize=.False.)
                           !normalize=.True.)
+
+     ! TODO: Recompute only Vnl if NC
+     !if (paral_kgb == 0) then
+     !  call getghc(cpopt, kres_bk, cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
+     !              rdummy, mpi_enreg, ndat, prtvol, sij_opt, tim_getghc, type_calc0)
+     !else
+     !  call prep_getghc(kres_bk, gs_hamk, gvnlxc_bk, ghc_bk, gsc_bk, rdummy, ndat, &
+     !                   mpi_enreg, prtvol, sij_opt, cpopt, cprj_dum, already_transposed=.False.)
+     !end if
+
    end do
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
  else
@@ -998,13 +1006,13 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
  if (usepaw == 1 .and. normalize_) call cgpaw_normalize(npwsp, ndat, cg, gsc, istwf_k, me_g0, comm)
 
  ! Compute new approximated eigenvalues, residue vectors and residuals.
- call cg_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, comm)
- call cg_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
+ call cg_get_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, comm)
+ call cg_get_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
  call cg_norm2g(istwf_k, npwsp, ndat, residvecs, resid, me_g0, comm)
 
  if (usepaw == 0) then
    ! Evaluate new enlx for NC.
-   call cg_zdotg(istwf_k, npwsp, ndat, option1, cg, gvnlxc, dots, me_g0, comm)
+   call cg_zdotg_zip(istwf_k, npwsp, ndat, option1, cg, gvnlxc, dots, me_g0, comm)
    enlx = dots(1,:)
  end if
 
@@ -1393,274 +1401,6 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx
 
 end subroutine rmm_diis_rollback
 !!***
-
-!!****f* m_cgtools/cg_eigens
-!! NAME
-!!  cg_eigens
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cg_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, comm)
-
- integer,intent(in) :: usepaw, istwf_k, npwsp, ndat, me_g0, comm
- real(dp),intent(in) :: ghc(2*npwsp, ndat), cg(2*npwsp, ndat), gsc(2*npwsp, ndat*usepaw)
- real(dp),intent(out) :: eig(ndat)
-
- integer,parameter :: option1 = 1
- integer :: idat, ierr
- real(dp) :: doti, dots_r(ndat)
-
- ! <psi|H|psi> / <psi|S|psi>
-!$OMP PARALLEL DO
- do idat=1,ndat
-   call dotprod_g(eig(idat), doti, istwf_k, npwsp, option1, ghc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
-   if (usepaw == 1) then
-     call dotprod_g(dots_r(idat), doti, istwf_k, npwsp, option1, gsc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
-   end if
- end do
-
- if (xmpi_comm_size(comm) > 1) then
-   call xmpi_sum(eig, comm, ierr)
-   if (usepaw == 1) call xmpi_sum(dots_r, comm, ierr)
- end if
-
- if (usepaw == 1) eig(:) = eig(:) / dots_r(:)
-
-end subroutine cg_eigens
-!!***
-
-!!****f* m_cgtools/cg_residvecs
-!! NAME
-!!  cg_residvecs
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cg_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
-
- integer,intent(in) :: usepaw, npwsp, ndat
- real(dp),intent(in) :: eig(ndat)
- real(dp),intent(in) :: ghc(2*npwsp, ndat), cg(2*npwsp, ndat), gsc(2*npwsp, ndat*usepaw)
- real(dp),intent(out) :: residvecs(2*npwsp, ndat)
-
-!Local variables-------------------------------
- integer :: idat
-! *************************************************************************
-
- if (usepaw == 1) then
-   ! (H - e) |psi>
-!$OMP PARALLEL DO
-   do idat=1,ndat
-     residvecs(:,idat) = ghc(:,idat) - eig(idat) * gsc(:,idat)
-   end do
- else
-   ! (H - eS) |psi>
-!$OMP PARALLEL DO
-   do idat=1,ndat
-     residvecs(:,idat) = ghc(:,idat) - eig(idat) * cg(:,idat)
-   end do
- end if
-
-end subroutine cg_residvecs
-!!***
-
-!!****f* m_cgtools/cg_norm2g
-!! NAME
-!!  cg_norm2g
-!!
-!! FUNCTION
-!!  Compute <psi|psi> for ndat states distributed inside communicator comm.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
-
- integer,intent(in) :: istwf_k, npwsp, ndat, me_g0, comm
- real(dp),intent(in) :: cg(2*npwsp, ndat)
- real(dp),intent(out) :: norms(ndat)
-
-!Local variables-------------------------------
- integer :: idat, ierr
-! *************************************************************************
-
-!$OMP PARALLEL DO
- do idat=1,ndat
-   call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
- end do
- if (xmpi_comm_size(comm) > 1) call xmpi_sum(norms, comm, ierr)
-
-end subroutine cg_norm2g
-!!***
-
-!!****f* m_cgtools/cg_zdotg
-!! NAME
-!!  cg_zdotg
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cg_zdotg(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
-
- integer,intent(in) :: istwf_k, npwsp, ndat, option, me_g0, comm
- real(dp),intent(in) :: cg1(2*npwsp,ndat), cg2(2*npwsp,ndat)
- real(dp),intent(out) :: dots(2,ndat)
-
-!Local variables-------------------------------
- integer :: idat, ierr
- real(dp) :: dotr, doti, re_dots(ndat)
-! *************************************************************************
-
-!$OMP PARALLEL DO PRIVATE(dotr, doti)
- do idat=1,ndat
-   call dotprod_g(dotr, doti, istwf_k, npwsp, option, cg1(:,idat), cg2(:,idat), me_g0, xmpi_comm_self)
-   if (istwf_k == 2) then
-     re_dots(idat) = dotr
-   else
-     dots(:, idat) = [dotr, doti]
-   end if
- end do
-
- if (xmpi_comm_size(comm) > 1) then
-   if (istwf_k == 2) then
-     call xmpi_sum(re_dots, comm, ierr)
-   else
-     call xmpi_sum(dots, comm, ierr)
-   end if
- end if
-
- if (istwf_k == 2) then
-   do idat=1,ndat
-     dots(1,idat) = re_dots(idat)
-     dots(2,idat) = zero
-   end do
- end if
-
-end subroutine cg_zdotg
-!!***
-
-!!****f* m_cgtools/cg_precon_many
-!! NAME
-!!  cg_precon_many
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect, me_g0, comm)
-
- integer,intent(in) :: istwf_k, npw, nspinor, optekin, ndat, me_g0, comm
- real(dp),intent(in) :: cg(2*npw*nspinor,ndat), kinpw(npw)
- real(dp),intent(inout) :: vect(2*npw*nspinor,ndat)
-
-!Local variables-------------------------------
- integer :: idat
- real(dp),allocatable :: pcon(:)
-! *************************************************************************
-
- ! TODO: Optimized version for MPI with ndat > 1
- !return
- ABI_MALLOC(pcon, (npw))
- do idat=1,ndat
-   call cg_precon(cg(:,idat), zero, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pcon, vect(:,idat), comm)
- end do
- ABI_FREE(pcon)
-
- !call cg_kinene(istwf_k, npw, nspinor, ndat, cg, me_g0, comm)
- !call cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw, npw,nspinor,optekin,optpcon,pcon,ghc,vect,vectsize,comm)
-
-end subroutine cg_precon_many
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_cgtools/cg_zaxpy_many_areal
-!! NAME
-!!  cg_zaxpy_many_areal
-!!
-!! FUNCTION
-!!  Computes y = alpha*x + y
-!!
-!! INPUTS
-!!  n = Specifies the number of elements in vectors x and y.
-!!  ndat
-!!  alpha(ndat) = Specifies the scalar alpha.
-!!  x = Array
-!!
-!! SIDE EFFECTS
-!!  y = Array. In output, y contains the updated vector.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: npwsp, ndat
- real(dp),intent(in) :: alphas(ndat)
-!arrays
- real(dp),intent(in) :: x(2*npwsp, ndat)
- real(dp),intent(inout) :: y(2*npwsp, ndat)
-
-!Local variables-------------------------------
- integer :: idat
-! *************************************************************************
-
-!$OMP PARALLEL DO
- do idat=1,ndat
-   call daxpy(2*npwsp, alphas(idat), x(1,idat), 1, y(1,idat), 1)
- end do
-
-end subroutine cg_zaxpy_many_areal
-!!***
-
 
 !!****f* m_numeric_tools/pack_matrix
 !! NAME

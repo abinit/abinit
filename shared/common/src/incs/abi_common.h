@@ -74,7 +74,7 @@
 /* var = var + increment
  * Because Fortran does not provide inplace add.
 */ 
-#define IADD(var, increment) var = var + increment
+#define _IADD(var, increment) var = var + increment
 
 /*
  * ABI_  abinit macros.

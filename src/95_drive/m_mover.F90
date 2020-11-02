@@ -514,11 +514,13 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    if(ab_mover%ionmov==23 .and. .not. lotf_extrapolation(itime)) skipcycle=.True.
 #endif
 
-   ! If RMM-DIIS is used, perform 2 iterations with the CG/LOBPCG and then activate RMM-DIIS.
-   !if (scfcv_args%dtset%rmm_diis /= 0 .and. itime > 1)
-   !  IADD(scfcv_args%dtset%rmm_diis, -2)
-   !  if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
-   !end if
+   ! If RMM-DIIS is used, decrease the number of NSCF steps done with wfoptalg before activating RMM-DIIS.
+   ! Usuall 4 for itime 1 and then 2.
+   if (scfcv_args%dtset%rmm_diis /= 0 .and. itime == 2) then
+     _IADD(scfcv_args%dtset%rmm_diis, -2)
+     if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
+     call wrtout(std_out, sjoin(" itime == 0 with RMM-DIIS --> setting rmm_diis to:", itoa(scfcv_args%dtset%rmm_diis)))
+   end if
 
 !  ###########################################################
 !  ### 09. Loop for icycle (From 1 to ncycle)

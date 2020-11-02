@@ -120,6 +120,12 @@ MODULE m_cgtools
                                     ! orthogonalize by modified Gram-Schmidt.
  public :: cg_hprotate_and_get_diag
  public :: cg_hrotate_and_get_diag
+ public :: cg_get_eigens            ! Compute <i|H|i> / <i|S|i> for ndat states.
+ public :: cg_get_residvecs         ! Compute (H - eS) |psi> for ndat states.
+ public :: cg_norm2g                ! Compute <psi|psi> for ndat states distributed inside communicator comm.
+ public :: cg_zdotg_zip             ! Compute <cg1|cg2> for ndat states
+ public :: cg_precon_many
+ public :: cg_zaxpy_many_areal
 !***
 
 CONTAINS  !========================================================================================
@@ -5238,6 +5244,281 @@ subroutine cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
  ABI_FREE(mat1)
 
 end subroutine cg_hrotate_and_get_diag
+!!***
+
+
+
+
+!!****f* m_cgtools/cg_get_eigens
+!! NAME
+!!  cg_get_eigens
+!!
+!! FUNCTION
+!!  Helper functions to compute <i|H|i> / <i|S|i> for ndat states.
+!!  Assume normalized input wavefunctions.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cg_get_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, comm)
+
+ integer,intent(in) :: usepaw, istwf_k, npwsp, ndat, me_g0, comm
+ real(dp),intent(in) :: ghc(2*npwsp, ndat), cg(2*npwsp, ndat), gsc(2*npwsp, ndat*usepaw)
+ real(dp),intent(out) :: eig(ndat)
+
+!Local variables-------------------------------
+ integer,parameter :: option1 = 1
+ integer :: idat, ierr
+ real(dp) :: doti, dots_r(ndat)
+! *************************************************************************
+
+ ! <psi|H|psi> / <psi|S|psi>
+!$OMP PARALLEL DO
+ do idat=1,ndat
+   call dotprod_g(eig(idat), doti, istwf_k, npwsp, option1, ghc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
+   if (usepaw == 1) then
+     call dotprod_g(dots_r(idat), doti, istwf_k, npwsp, option1, gsc(:,idat), cg(:,idat), me_g0, xmpi_comm_self)
+   end if
+ end do
+
+ if (xmpi_comm_size(comm) > 1) then
+   call xmpi_sum(eig, comm, ierr)
+   if (usepaw == 1) call xmpi_sum(dots_r, comm, ierr)
+ end if
+
+ if (usepaw == 1) eig(:) = eig(:) / dots_r(:)
+
+end subroutine cg_get_eigens
+!!***
+
+!!****f* m_cgtools/cg_get_residvecs
+!! NAME
+!!  cg_get_residvecs
+!!
+!! FUNCTION
+!!  Compute (H - eS) |psi> for ndat states.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cg_get_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
+
+ integer,intent(in) :: usepaw, npwsp, ndat
+ real(dp),intent(in) :: eig(ndat)
+ real(dp),intent(in) :: ghc(2*npwsp, ndat), cg(2*npwsp, ndat), gsc(2*npwsp, ndat*usepaw)
+ real(dp),intent(out) :: residvecs(2*npwsp, ndat)
+
+!Local variables-------------------------------
+ integer :: idat
+! *************************************************************************
+
+ if (usepaw == 1) then
+   ! (H - e) |psi>
+!$OMP PARALLEL DO
+   do idat=1,ndat
+     residvecs(:,idat) = ghc(:,idat) - eig(idat) * gsc(:,idat)
+   end do
+ else
+   ! (H - eS) |psi>
+!$OMP PARALLEL DO
+   do idat=1,ndat
+     residvecs(:,idat) = ghc(:,idat) - eig(idat) * cg(:,idat)
+   end do
+ end if
+
+end subroutine cg_get_residvecs
+!!***
+
+!!****f* m_cgtools/cg_norm2g
+!! NAME
+!!  cg_norm2g
+!!
+!! FUNCTION
+!!  Compute <psi|psi> for ndat states distributed inside communicator comm.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
+
+ integer,intent(in) :: istwf_k, npwsp, ndat, me_g0, comm
+ real(dp),intent(in) :: cg(2*npwsp, ndat)
+ real(dp),intent(out) :: norms(ndat)
+
+!Local variables-------------------------------
+ integer :: idat, ierr
+! *************************************************************************
+
+!$OMP PARALLEL DO
+ do idat=1,ndat
+   call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
+ end do
+ if (xmpi_comm_size(comm) > 1) call xmpi_sum(norms, comm, ierr)
+
+end subroutine cg_norm2g
+!!***
+
+!!****f* m_cgtools/cg_zdotg_zip
+!! NAME
+!!  cg_zdotg_zip
+!!
+!! FUNCTION
+!!  Compute <cg1|cg2> for ndat states
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cg_zdotg_zip(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
+
+ integer,intent(in) :: istwf_k, npwsp, ndat, option, me_g0, comm
+ real(dp),intent(in) :: cg1(2*npwsp,ndat), cg2(2*npwsp,ndat)
+ real(dp),intent(out) :: dots(2,ndat)
+
+!Local variables-------------------------------
+ integer :: idat, ierr
+ real(dp) :: dotr, doti, re_dots(ndat)
+! *************************************************************************
+
+!$OMP PARALLEL DO PRIVATE(dotr, doti)
+ do idat=1,ndat
+   call dotprod_g(dotr, doti, istwf_k, npwsp, option, cg1(:,idat), cg2(:,idat), me_g0, xmpi_comm_self)
+   if (istwf_k == 2) then
+     re_dots(idat) = dotr
+   else
+     dots(:, idat) = [dotr, doti]
+   end if
+ end do
+
+ if (xmpi_comm_size(comm) > 1) then
+   if (istwf_k == 2) then
+     call xmpi_sum(re_dots, comm, ierr)
+   else
+     call xmpi_sum(dots, comm, ierr)
+   end if
+ end if
+
+ if (istwf_k == 2) then
+   do idat=1,ndat
+     dots(1,idat) = re_dots(idat)
+     dots(2,idat) = zero
+   end do
+ end if
+
+end subroutine cg_zdotg_zip
+!!***
+
+!!****f* m_cgtools/cg_precon_many
+!! NAME
+!!  cg_precon_many
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect, me_g0, comm)
+
+ integer,intent(in) :: istwf_k, npw, nspinor, optekin, ndat, me_g0, comm
+ real(dp),intent(in) :: cg(2*npw*nspinor,ndat), kinpw(npw)
+ real(dp),intent(inout) :: vect(2*npw*nspinor,ndat)
+
+!Local variables-------------------------------
+ integer :: idat
+ real(dp),allocatable :: pcon(:)
+! *************************************************************************
+
+ ! TODO: Optimized version for MPI with ndat > 1
+ ABI_MALLOC(pcon, (npw))
+ do idat=1,ndat
+   call cg_precon(cg(:,idat), zero, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pcon, vect(:,idat), comm)
+ end do
+ ABI_FREE(pcon)
+
+ !call cg_kinene(istwf_k, npw, nspinor, ndat, cg, me_g0, comm)
+ !call cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw, npw,nspinor,optekin,optpcon,pcon,ghc,vect,vectsize,comm)
+
+end subroutine cg_precon_many
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_zaxpy_many_areal
+!! NAME
+!!  cg_zaxpy_many_areal
+!!
+!! FUNCTION
+!!  Computes y = alpha*x + y
+!!
+!! INPUTS
+!!  n = Specifies the number of elements in vectors x and y.
+!!  ndat
+!!  alpha(ndat) = Specifies the scalar alpha.
+!!  x = Array
+!!
+!! SIDE EFFECTS
+!!  y = Array. In output, y contains the updated vector.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npwsp, ndat
+ real(dp),intent(in) :: alphas(ndat)
+!arrays
+ real(dp),intent(in) :: x(2*npwsp, ndat)
+ real(dp),intent(inout) :: y(2*npwsp, ndat)
+
+!Local variables-------------------------------
+ integer :: idat
+! *************************************************************************
+
+!$OMP PARALLEL DO
+ do idat=1,ndat
+   call daxpy(2*npwsp, alphas(idat), x(1,idat), 1, y(1,idat), 1)
+ end do
+
+end subroutine cg_zaxpy_many_areal
 !!***
 
 end module m_cgtools
