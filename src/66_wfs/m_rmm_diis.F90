@@ -83,7 +83,7 @@ module m_rmm_diis
    real(dp),allocatable :: hist_enlx(:,:)
    character(len=7),allocatable :: step_type(:,:)
    ! (0:max_niter+2, bsize)
-   ! 0 is the initial step, then DIIS iterations (whose number may depend on the block)
+   ! 0 is the initial step, then DIIS iterations whose number may depend on the block
    ! followed by an optional trial step and the computation of eigens after ortho.
 
    real(dp),allocatable :: resmat(:,:,:,:)
@@ -248,10 +248,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (max_res_pocc < tol6) accuracy_level = 2
  if (max_res_pocc < tol10) accuracy_level = 3
  if (max_res_pocc < tol15) accuracy_level = 4
+ !if (max_res_pocc < tol8) accuracy_level = 2
+ !if (max_res_pocc < tol12) accuracy_level = 3
+ !if (max_res_pocc < tol16) accuracy_level = 4
  accuracy_level = max(prev_accuracy_level, accuracy_level, raise_acc)
  if (istep == 1) accuracy_level = 2  ! FIXME: Differenciate between restart or rmm_diis - 3.
  if (first_call .and. max_res_pocc == zero) accuracy_level = 1
-
  !print *, "rmm_diis_status:", rmm_diis_status
  !print *, "rmm_prev_acc:", prev_accuracy_level, "rmm_raise_acc:", raise_acc
  !print *, "accuracy_level:", accuracy_level, "rmm_raise_acc:", raise_acc
@@ -476,7 +478,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    ! Build |Psi_1> = |Phi_0> + lambda |K R_0>
    do idat=1,ndat
-     lambda_bk(idat) = limit_lambda(-dots_bk(1,idat) / lambda_bk(idat))
+     lambda_bk(idat) = -dots_bk(1,idat) / lambda_bk(idat)
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
    end do
@@ -523,6 +525,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! This means that one can observe a (hopefully) slightly different convergence behaviour depending on bsize.
    !
    end_with_trial_step = .True.
+   !end_with_trial_step = diis%accuracy_level >= 2
+   !end_with_trial_step = .False.
    if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
 
    if (end_with_trial_step) then
@@ -565,7 +569,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
        ! Build |Psi_n> = |Phi_{n-1}> + lambda |K R_{n-1}>
        do idat=1,ndat
-         lambda_bk(idat) = limit_lambda(-dots_bk(1,idat) / lambda_bk(idat))
+         lambda_bk(idat) = -dots_bk(1,idat) / lambda_bk(idat)
          jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
          phi_bk(:,jj:kk) = diis%chain_phi(:,:,it,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
        end do
@@ -590,6 +594,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        if (usepaw == 1) then
          call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                               eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
+       else
+          ! In principle this is not needed but as it will be done in pw_orthon
+          !cgnc_normalize(npwsp, ndat, phi_bk, istwf_k, me_g0, comm_bandspinorfft)
        end if
      end if
 
@@ -629,10 +636,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ndat = (ige - igs + 1) / npwsp
      ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
 
-     !phi_bk => cg(:,igs:ige)
+     phi_bk => cg(:,igs:ige)
      if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
 
-     call getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg(:,igs), ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+     call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
                           normalize=.False.)
                           !normalize=.True.)
@@ -668,35 +675,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ABI_FREE(residv_bk)
  ABI_FREE(kres_bk)
  ABI_FREE(gvnlxc_bk)
-
-contains
-
- real(dp) elemental function limit_lambda(lambda) result(new_lambda)
-
-  real(dp),intent(in) :: lambda
-  real(dp) :: max_lambda, min_lambda
-
-  !write(std_out, *)"input lambda:", lambda
-  new_lambda = lambda
-  return
-  if (accuracy_level == 1) return
-  !if (accuracy_level == 3) return
-
-  ! restrict the value of abs(lambda) in [0.1, 1.0]
-  max_lambda = one
-  min_lambda = tol1
-  if (abs(lambda) > max_lambda) then
-    new_lambda = sign(max_lambda, lambda)
-  else if (abs(lambda) < min_lambda) then
-    !if (abs(lambda) > tol12)  then
-      new_lambda = sign(min_lambda, lambda)
-    !else
-    !  new_lambda = tol12
-    !end if
-  end if
-  !write(std_out, *)"new lambda:", new_lambda
-
-end function limit_lambda
 
 end subroutine rmm_diis
 !!***
@@ -811,7 +789,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
  type(dataset_type),intent(in) :: dtset
 
  integer,parameter :: master = 0
- integer :: idat, ierr, nok, checks(ndat)
+ integer :: idat, ierr, nok, checks(ndat) !nbocc,
  real(dp) :: resid, deltae, deold , fact
  character(len=50) :: msg_list(ndat)
 
@@ -827,12 +805,12 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
    deltae = diis%hist_ene(iter, idat) - diis%hist_ene(iter-1, idat)
 
    ! Relative criterion on eigenvalue differerence.
-   ! Abinit default in the CG part is 0.005 that is really to low (0.3 in V).
+   ! Abinit default in the CG part is 0.005 that is really low (0.3 in V).
    ! Here we increase it depending whether the state is occupied or empty
-   fact = one !; if (abs(occ_bk(idat)) < diis%tol_occupied) fact = five
+   fact = one !; if (abs(occ_bk(idat)) < diis%tol_occupied) fact = three
    if (diis%accuracy_level == 1) fact = fact * 18
    if (diis%accuracy_level == 2) fact = fact * 12
-   if (diis%accuracy_level == 3) fact = fact * six
+   if (diis%accuracy_level == 3) fact = fact * 6
    if (abs(deltae) < fact * dtset%tolrde * abs(deold)) then
      checks(idat) = 1; msg_list(idat) = "deltae < fact * tolrde * deold"; cycle
    end if
@@ -858,8 +836,12 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
  end do ! idat
 
  ! Depending on the accuracy_level either full block or a fraction of it must pass the test in order to exit.
+ !nbocc = count(abs(occ_bk) < diis%tol_occupied)
+ !nbocc_ok = count(checks /= 0 .and. abs(occ_bk) < diis%tol_occupied)
+ !nbempty = ndat - nbocc
+ !ans = nbocc_ok == nbocc
+
  nok = count(checks /= 0)
- !nok = count(checks /= 0, mask=abs(occ_bk) < diis%tol_occupied)
  if (diis%accuracy_level == 1) ans = nok >= 0.70_dp * ndat
  if (diis%accuracy_level == 2) ans = nok >= 0.80_dp * ndat
  if (diis%accuracy_level == 3) ans = nok >= 0.90_dp * ndat
@@ -1015,12 +997,6 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
    call cg_zdotg_zip(istwf_k, npwsp, ndat, option1, cg, gvnlxc, dots, me_g0, comm)
    enlx = dots(1,:)
  end if
-
- !write(std_out, *)" In getghc_eigresid:"
- !do idat=1,ndat
- !  write(std_out, *)" idat:", idat, " eig:", eig(idat), " resid:", resid(idat), " enlx:", enlx(idat)
- !end do
- !write(std_out, *)""
 
  if (timeit) call cwtime_report(" getghc_eigresid", cpu, wall, gflops)
 
@@ -1447,3 +1423,30 @@ end subroutine my_pack_matrix
 
 end module m_rmm_diis
 !!***
+
+
+!-contains
+!-
+!- real(dp) elemental function limit_lambda(lambda) result(new_lambda)
+!-
+!-  real(dp),intent(in) :: lambda
+!-  real(dp) :: max_lambda, min_lambda
+!-
+!-  !write(std_out, *)"input lambda:", lambda
+!-  new_lambda = lambda
+!-  return
+!-  if (accuracy_level == 1) return
+!-  !if (accuracy_level == 3) return
+!-
+!-  ! restrict the value of abs(lambda) in [0.1, 1.0]
+!-  max_lambda = one
+!-  min_lambda = tol1
+!-  if (abs(lambda) > max_lambda) then
+!-    new_lambda = sign(max_lambda, lambda)
+!-  else if (abs(lambda) < min_lambda) then
+!-    !if (abs(lambda) > tol12)  then
+!-      new_lambda = sign(min_lambda, lambda)
+!-    !else
+!-    !  new_lambda = tol12
+!-    !end if
+!-  end if
