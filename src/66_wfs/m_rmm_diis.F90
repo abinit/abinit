@@ -186,7 +186,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
- real(dp),allocatable :: evec(:,:), subham(:), h_ij(:,:,:)
+ real(dp),allocatable :: evec(:,:,:), subham(:), h_ij(:,:,:)
  real(dp),allocatable :: ghc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), residv_bk(:,:), kres_bk(:,:), dots_bk(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), phi_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
@@ -198,6 +198,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  me_g0 = mpi_enreg%me_g0
  comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  npwsp = npw * nspinor
+ mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
 
  ! =================
  ! Prepare DIIS loop
@@ -291,107 +292,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1 ! optekin = 0
 
- !call subspace_rotation(gs_hamk, nband, npw, nspinor, dtset, mpi_enreg, kinpw, cg, gsc_all, eig, enlx)
-
- ! =======================================
- ! Apply H to input cg to compute <i|H|j>
- ! =======================================
- gsc_bk => fake_gsc_bk
- cpopt = -1; sij_opt = 0
- if (usepaw == 1) then
-   sij_opt = 1 ! matrix elements <G|S|C> have to be computed in gsc in addition to ghc
-   cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
- end if
-
  ! Treat states in groups of bsize bands.
  bsize = 8  ! default value for paral_kgb = 0
  if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
-
- cplex = 2; if (istwf_k == 2) cplex = 1
- ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
- ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
- ABI_CALLOC(h_ij, (cplex, nband, nband))
-
- call timab(1633, 1, tsec) !"rmm_diis:build_hij
- if (timeit) call cwtime(cpu, wall, gflops, "start")
-
- do iblock=1,nblocks
-   igs = 1 + (iblock - 1) * npwsp * bsize
-   ige = min(iblock * npwsp * bsize, npwsp * nband)
-   ndat = (ige - igs + 1) / npwsp
-   ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
-   if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
-
-   if (paral_kgb == 0) then
-     call getghc(cpopt, cg(:,igs:ige), cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
-                 rdummy, mpi_enreg, ndat, prtvol, sij_opt, tim_getghc, type_calc0)
-   else
-     call prep_getghc(cg(:,igs:ige), gs_hamk, gvnlxc_bk, ghc_bk, gsc_bk, rdummy, ndat, &
-                      mpi_enreg, prtvol, sij_opt, cpopt, cprj_dum, already_transposed=.False.)
-   end if
-
-   ! Compute <i|H|j> for i=1,nband and all j in block
-   if (cplex == 2) then
-     call cg_zgemm("C", "N", npwsp, nband, ndat, cg, ghc_bk, h_ij(:,:,ib_start))
-   else
-     call dgemm("T", "N", nband, ndat, 2*npwsp, one, cg, 2*npwsp, ghc_bk, 2*npwsp, zero, h_ij(:,:,ib_start), nband)
-   end if
-
-   if (istwf_k /= 1) then
-     do iband=ib_start, ib_stop
-       h_ij(:,:,iband) = two * h_ij(:,:,iband)
-
-       if (istwf_k == 2 .and. me_g0 == 1) then
-         ! Gamma k-point and I have G=0. Remove double counting term.
-         ig = 1 + (iband - ib_start) * npwsp
-         do ib=1,nband
-           ig0 = 1 + npwsp * (ib - 1)
-           h_ij(1,ib,iband) = h_ij(1,ib,iband) - cg(1,ig0) * ghc_bk(1,ig)
-         end do
-       end if
-
-       ! Force real matrix.
-       if (cplex == 2) h_ij(2,:,iband) = zero
-     end do
-   end if
-
- end do ! iblock
-
- if (timeit) call cwtime_report(" build_hij", cpu, wall, gflops)
-
- ! Pack <i|H|j> to prepare call to subdiago.
- ABI_MALLOC(subham, (nband*(nband+1)))
- if (cplex == 2) then
-   do iband=1,nband
-     h_ij(2,iband,iband) = zero ! Force diagonal elements to be real
-   end do
- end if
- if (cplex == 2) then
-   call pack_matrix(h_ij, subham, nband, 2)
- else
-   call my_pack_matrix(nband, h_ij, subham)
- end if
-
- ABI_FREE(h_ij)
- call xmpi_sum(subham, comm_bandspinorfft, ierr)
- call timab(1633, 2, tsec) !"rmm_diis:build_hij
- !do it=1,nband*(nband+1); write(std_out,*)"subham:", it, subham(it); end do
-
- ! ========================
- ! Subspace diagonalization
- ! ========================
- call timab(585, 1, tsec) !"vtowfk(subdiago)"
- ABI_MALLOC(evec, (2*nband, nband))
- mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
- call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, paral_kgb, &
-               subham, subovl, use_subovl0, usepaw, me_g0)
-
- call timab(585, 2, tsec)
- if (timeit) call cwtime_report(" subdiago", cpu, wall, gflops)
-
- ABI_FREE(subham)
- ABI_FREE(evec)
 
  ! Build DIIS object.
  diis = rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
@@ -404,10 +308,22 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ", accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
+ call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig, cg, gsc_all, evec)
+ ABI_FREE(evec)
+
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
  ABI_MALLOC(residv_bk, (2, npwsp*bsize))
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
+ ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
+ ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
+
+ gsc_bk => fake_gsc_bk
+ cpopt = -1; sij_opt = 0
+ if (usepaw == 1) then
+   sij_opt = 1 ! matrix elements <G|S|C> have to be computed in gsc in addition to ghc
+   cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
+ end if
 
  ! We loop over nblocks, each block has ndat states.
  ! - Convergence behaviour may depend on bsize as branches are taken according to
@@ -646,12 +562,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
      ! TODO: Recompute only Vnl if NC
      !if (paral_kgb == 0) then
-     !  call getghc(cpopt, kres_bk, cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
-     !              rdummy, mpi_enreg, ndat, prtvol, sij_opt, tim_getghc, type_calc0)
+     !  call getghc(cpopt, phi_bk, cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
+     !              rdummy, mpi_enreg, ndat, prtvol, sij_opt, tim_getghc, type_calc2)
      !else
-     !  call prep_getghc(kres_bk, gs_hamk, gvnlxc_bk, ghc_bk, gsc_bk, rdummy, ndat, &
+     !  call prep_getghc(phi_bk, gs_hamk, gvnlxc_bk, ghc_bk, gsc_bk, rdummy, ndat, &
      !                   mpi_enreg, prtvol, sij_opt, cpopt, cprj_dum, already_transposed=.False.)
      !end if
+     ! Evaluate new enlx for NC.
+     !call cg_zdotg_zip(istwf_k, npwsp, ndat, option1, phi_bk, gvnlxc_bk, dots, me_g0, comm_bandspinorfft)
+     !enlx = dots(1,:)
 
    end do
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
@@ -1421,9 +1340,169 @@ subroutine my_pack_matrix(n, mat_in, mat_out)
 end subroutine my_pack_matrix
 !!***
 
-end module m_rmm_diis
-!!***
 
+
+
+!!****f* ABINIT/rmm_diis
+!! NAME
+!! rmm_diis
+!!
+!! FUNCTION
+!! This routine updates the wave functions at a given k-point, using the RMM-DIIS method.
+!!
+!! INPUTS
+!!  istep,ikpt,isppol
+!!  dtset <type(dataset_type)>=all input variales for this dataset
+!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
+!!  mpi_enreg=information about MPI parallelization
+!!  nband=number of bands at this k point for that spin polarization
+!!  npw=number of plane waves at this k point
+!!  nspinor=number of plane waves at this k point
+!!
+!! OUTPUT
+!!  If usepaw==1:
+!!    gsc_all(2,*)=<g|s|c> matrix elements (s=overlap)
+!!
+!! SIDE EFFECTS
+!!  cg(2,*)=updated wavefunctions
+!!
+!! PARENTS
+!!      m_vtowfk
+!!
+!! CHILDREN
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig, cg, gsc_all, evec)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nband, npw, nspinor
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ type(dataset_type),intent(in) :: dtset
+ type(mpi_type),intent(inout) :: mpi_enreg
+ real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
+ real(dp),target,intent(inout) :: gsc_all(2,npw*nspinor*nband*dtset%usepaw)
+ real(dp),intent(out) :: eig(nband)
+ real(dp),allocatable,intent(out) :: evec(:,:,:)
+
+!Local variables-------------------------------
+ integer,parameter :: type_calc0 = 0, tim_getghc = 0, use_subovl0 = 0
+ integer :: ig, ig0, ib, ierr, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb
+ integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw
+ integer :: me_g0, cplex, ortalgo, comm_bandspinorfft
+ real(dp),parameter :: rdummy = zero
+ !character(len=500) :: msg
+!arrays
+ real(dp),target :: fake_gsc_bk(0,0)
+ real(dp) :: subovl(use_subovl0)
+ real(dp),allocatable :: subham(:), h_ij(:,:,:), ghc_bk(:,:), gvnlxc_bk(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:)
+ type(pawcprj_type) :: cprj_dum(1,1)
+
+! *************************************************************************
+
+ usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
+ me_g0 = mpi_enreg%me_g0
+ comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
+ npwsp = npw * nspinor
+
+ ! =======================================
+ ! Apply H to input cg to compute <i|H|j>
+ ! =======================================
+ gsc_bk => fake_gsc_bk
+ cpopt = -1; sij_opt = 0
+ if (usepaw == 1) then
+   sij_opt = 1 ! matrix elements <G|S|C> have to be computed in gsc in addition to ghc
+   cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
+ end if
+
+ ! Treat states in groups of bsize bands.
+ bsize = 8  ! default value for paral_kgb = 0
+ if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
+ nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
+
+ cplex = 2; if (istwf_k == 2) cplex = 1
+ ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
+ ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
+ ABI_CALLOC(h_ij, (cplex, nband, nband))
+
+ do iblock=1,nblocks
+   igs = 1 + (iblock - 1) * npwsp * bsize
+   ige = min(iblock * npwsp * bsize, npwsp * nband)
+   ndat = (ige - igs + 1) / npwsp
+   ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
+   if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
+
+   if (paral_kgb == 0) then
+     call getghc(cpopt, cg(:,igs:ige), cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
+                 rdummy, mpi_enreg, ndat, dtset%prtvol, sij_opt, tim_getghc, type_calc0)
+   else
+     call prep_getghc(cg(:,igs:ige), gs_hamk, gvnlxc_bk, ghc_bk, gsc_bk, rdummy, ndat, &
+                      mpi_enreg, dtset%prtvol, sij_opt, cpopt, cprj_dum, already_transposed=.False.)
+   end if
+
+   ! Compute <i|H|j> for i=1,nband and all j in block
+   if (cplex == 2) then
+     call cg_zgemm("C", "N", npwsp, nband, ndat, cg, ghc_bk, h_ij(:,:,ib_start))
+   else
+     call dgemm("T", "N", nband, ndat, 2*npwsp, one, cg, 2*npwsp, ghc_bk, 2*npwsp, zero, h_ij(:,:,ib_start), nband)
+   end if
+
+   if (istwf_k /= 1) then
+     do iband=ib_start, ib_stop
+       h_ij(:,:,iband) = two * h_ij(:,:,iband)
+
+       if (istwf_k == 2 .and. me_g0 == 1) then
+         ! Gamma k-point and I have G=0. Remove double counting term.
+         ig = 1 + (iband - ib_start) * npwsp
+         do ib=1,nband
+           ig0 = 1 + npwsp * (ib - 1)
+           h_ij(1,ib,iband) = h_ij(1,ib,iband) - cg(1,ig0) * ghc_bk(1,ig)
+         end do
+       end if
+
+       ! Force real matrix.
+       if (cplex == 2) h_ij(2,:,iband) = zero
+     end do
+   end if
+
+ end do ! iblock
+
+ ! Pack <i|H|j> to prepare call to subdiago.
+ ABI_MALLOC(subham, (nband*(nband+1)))
+ if (cplex == 2) then
+   do iband=1,nband
+     h_ij(2,iband,iband) = zero ! Force diagonal elements to be real
+   end do
+ end if
+ if (cplex == 2) then
+   call pack_matrix(h_ij, subham, nband, 2)
+ else
+   call my_pack_matrix(nband, h_ij, subham)
+ end if
+
+ ABI_FREE(h_ij)
+ call xmpi_sum(subham, comm_bandspinorfft, ierr)
+ !do it=1,nband*(nband+1); write(std_out,*)"subham:", it, subham(it); end do
+
+ ! ========================
+ ! Subspace diagonalization
+ ! ========================
+ ABI_MALLOC(evec, (2, nband, nband))
+ mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
+ call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, paral_kgb, &
+               subham, subovl, use_subovl0, usepaw, me_g0)
+
+ ABI_FREE(subham)
+ !ABI_FREE(evec)
+ ! Final cleanup.
+ ABI_FREE(ghc_bk)
+ ABI_FREE(gvnlxc_bk)
+
+end subroutine subspace_rotation
+!!***
 
 !-contains
 !-
@@ -1450,3 +1529,6 @@ end module m_rmm_diis
 !-    !  new_lambda = tol12
 !-    !end if
 !-  end if
+
+end module m_rmm_diis
+!!***
