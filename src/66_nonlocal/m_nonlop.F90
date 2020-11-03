@@ -169,7 +169,7 @@ contains
 !!                          direction in the case (choice=25,signs=2)
 !!  lambda=factor to be used when computing (Vln-lambda.S) - only for paw_opt=2
 !!         Typically lambda is the eigenvalue (or its guess)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  ndat=number of wavefunctions on which to apply nonlop
 !!  nnlout=dimension of enlout (when signs=1 and choice>0):
 !!         ==== if paw_opt=0, 1 or 2 ====

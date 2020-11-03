@@ -1483,7 +1483,7 @@ end subroutine getgsc
 !!                      if -1, matrix elements <G|H-lambda.S|C> have to be computed in ghc (gsc not used)
 !! tim_getghc=timing code of the calling subroutine(can be set to 0 if not attributed)
 !! type_calc= option governing which part of Hamitonian is to be applied:
-!             0: whole Hamiltonian
+!!            0: whole Hamiltonian
 !!            1: local part only
 !!            2: non-local+kinetic only (added to the existing Hamiltonian)
 !!            3: local + kinetic only (added to the existing Hamiltonian)

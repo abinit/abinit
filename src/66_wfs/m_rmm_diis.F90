@@ -42,9 +42,10 @@ module m_rmm_diis
  use m_hide_lapack,   only : xhegv_cplex, xhesv_cplex
  use m_pair_list,     only : pair_list
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_fftcore,       only : fftcore_set_mixprec
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_getghc,        only : getghc
- use m_fftcore,       only : fftcore_set_mixprec
+ use m_nonlop,        only : nonlop
  !use m_fock,         only : fock_set_ieigen, fock_set_getghc_call
 
  implicit none
@@ -170,6 +171,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
+ integer,parameter :: choice1 = 1, signs1 = 1, tim_nonlop = 0, paw_opt0 = 0
  integer :: ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb, ortalgo
  integer :: cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nb_pocc, jj, kk, it, accuracy_level, raise_acc, prev_mixprec !ii, ld1, ld2, iek,
@@ -345,8 +347,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    if (all(occ(ib_start:ib_stop) < diis%tol_occupied)) max_niter_block = max(1 + max_niter / 2, 2)
 
    ! Compute H |phi_0> with cg block after subdiago.
-   phi_bk => cg(:,igs:ige)
-   if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
+   phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
 
    call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                         eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
@@ -551,25 +552,26 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ndat = (ige - igs + 1) / npwsp
      ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
 
-     phi_bk => cg(:,igs:ige)
-     if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
+     phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
 
-     call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
-                          eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
-                          normalize=.False.)
-                          !normalize=.True.)
+     !if (.False.) then
+     if (usepaw == 0) then
+       ! Recompute only Vnl if NC
+       if (paral_kgb == 0) then
+         call nonlop(choice1, cpopt, cprj_dum, enlx(ib_start:), gs_hamk, 0, eig(ib_start), mpi_enreg, ndat, 1, paw_opt0,&
+                     signs1, gsc_bk, tim_nonlop, phi_bk, gvnlxc_bk)
+       else
+         call prep_nonlop(choice1, cpopt, cprj_dum, enlx(ib_start), gs_hamk, 0, eig(ib_start), &
+            ndat, mpi_enreg, 1, paw_opt0, signs1, gsc_bk, tim_nonlop, &
+            phi_bk, gvnlxc_bk, already_transposed=.False.)
+       end if
 
-     ! TODO: Recompute only Vnl if NC
-     !if (paral_kgb == 0) then
-     !  call getghc(cpopt, phi_bk, cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
-     !              rdummy, mpi_enreg, ndat, prtvol, sij_opt, tim_getghc, type_calc2)
-     !else
-     !  call prep_getghc(phi_bk, gs_hamk, gvnlxc_bk, ghc_bk, gsc_bk, rdummy, ndat, &
-     !                   mpi_enreg, prtvol, sij_opt, cpopt, cprj_dum, already_transposed=.False.)
-     !end if
-     ! Evaluate new enlx for NC.
-     !call cg_zdotg_zip(istwf_k, npwsp, ndat, option1, phi_bk, gvnlxc_bk, dots, me_g0, comm_bandspinorfft)
-     !enlx = dots(1,:)
+     else
+        ! FIXME This call seems to be needed for PAW. Strange as  <G|S|psi> is already recomputed in pw_orthon!
+        call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
+                             normalize=.False.)
+     end if
 
    end do
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)

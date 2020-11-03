@@ -599,8 +599,8 @@ end subroutine prep_getghc
 !! SOURCE
 
 subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,&
-&                      blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc,&
-&                      tim_nonlop,cwavef,gvnlc,already_transposed)
+                       blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc, tim_nonlop,cwavef,gvnlc, &
+                       already_transposed) ! optional
 
 !Arguments ------------------------------------
  integer,intent(in) :: blocksize,choice,cpopt,idir,signs,nnlout,paw_opt
