@@ -51,8 +51,9 @@ module m_symtk
  public :: matpointsym          ! Symmetrizes a 3x3 input matrix using the point symmetry of the input atom
  public :: holocell             ! Examine whether the trial conventional cell described by cell_base
                                 ! is coherent with the required holohedral group.
- public :: symmetrize_xred      ! Symmetrize atomic coordinates using input symmetry matrices symrel
  public :: symmetrize_rprimd    ! Generate new rprimd on the basis of the expected characteristics of the conventional cell
+ public :: symmetrize_tnons     ! Enforce accurate tnons for glide and screw symmetries
+ public :: symmetrize_xred      ! Symmetrize atomic coordinates using input symmetry matrices symrel
  public :: symchk               ! Symmetry checker for atomic coordinates.
  public :: symatm               ! Build indsym table describing the action of the symmetry operations on the atomic positions.
  public :: symcharac            ! Get the type of axis for the symmetry.
@@ -439,7 +440,7 @@ end subroutine chkgrp
 !!  [multable(4,nsym,nsym)]= Optional output.
 !!    multable(1,sym1,sym2) gives the index of the symmetry product S1 * S2 in the symrel array. 0 if not found.
 !!    multable(2:4,sym1,sym2)= the lattice vector that has to added to the fractional translation
-!!      of the operation of index multable(1,sym1,sym2) to obtain the fractional traslation of the product S1 * S2.
+!!      of the operation of index multable(1,sym1,sym2) to obtain the fractional translation of the product S1 * S2.
 !!  [toinv(4,nsym)]= Optional output.
 !!    toinv(1,sym1)=Gives the index of the inverse of the symmetry operation.
 !!     S1 * S1^{-1} = {E, L} with E the identity and L a real-space lattice vector.
@@ -471,7 +472,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
 
 !Local variables-------------------------------
 !scalars
- integer :: sym1,sym2,sym3,prd_symafm
+ integer :: echo,sym1,sym2,sym3,prd_symafm
  logical :: found_inv,iseq
  character(len=500) :: msg
 !arrays
@@ -489,6 +490,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
  end if
 
  ! 2) The inverse of each element must belong to the group.
+ echo=1
  do sym1=1,nsym
    found_inv = .FALSE.
    do sym2=1,nsym
@@ -506,15 +508,20 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
    end do
 
    if (.not. found_inv) then
-     write(msg,'(a,i0,2a)')&
-      "Cannot find the inverse of symmetry operation ",sym1,ch10,&
-      "Input symmetries do not form a group "
-     MSG_WARNING(msg)
+     if(echo==1)then
+       write(msg,'(a,i0,2a)')&
+        "Cannot find the inverse of symmetry operation ",sym1,ch10,&
+        "Input symmetries do not form a group "
+       MSG_WARNING(msg)
+       echo=0
+     endif
      ierr = ierr + 1
+     exit
    end if
  end do
 
  ! Check closure relation under composition and construct multiplication table.
+ echo=1
  do sym1=1,nsym
    do sym2=1,nsym
 
@@ -528,7 +535,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
      do sym3=1,nsym
        iseq = (all(prd_symrel == symrel(:,:,sym3) ) .and. &
                isinteger(prd_tnons - tnons(:,sym3), tnons_tol) .and. &
-               prd_symafm == symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail.
+               prd_symafm == symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail. XG 2020_10_24 Not anymore
 
        ! The rotational part is in the group but with different magnetic part!
        if (iseq) then
@@ -541,22 +548,27 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
        end if
      end do
 
-     if (.not. iseq) then
-       ! The test is negative
-       write(msg, '(a,2(i0,1x),a,7a)' )&
-         'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
-         'This indicates that the input symmetry elements',ch10,&
-         'do not possess closure under group composition.',ch10,&
-         'Action: check symrel, symafm and fix them.'
-       MSG_WARNING(msg)
+     if (.not. iseq .and. echo==1) then
+       if(echo==1)then
+         ! The test is negative
+         write(msg, '(a,2(i0,1x),a,7a)' )&
+           'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
+           'This indicates that the input symmetry elements',ch10,&
+           'do not possess closure under group composition.',ch10,&
+           'Action: check symrel, symafm and fix them.'
+         MSG_WARNING(msg)
+         echo=0
+       endif
        ierr = ierr + 1
        if (present(multable)) then
          multable(1, sym1, sym2) = 0
          multable(2:4, sym1, sym2) = huge(0)
        end if
+       exit
      end if
-
+    
    end do ! sym2
+   if(echo==0)exit
  end do ! sym1
 
 end subroutine sg_multable
@@ -1193,7 +1205,8 @@ end subroutine matpointsym
 !!
 !! INPUTS
 !!  enforce= if 0, only check; if =1, enforce exactly the holohedry
-!!  iholohedry=required holohegral group
+!!  iholohedry=required holohegral group (uses its absolute value, since when the multiplicity of the cell is 
+!!   more than one, the sign of iholohedry is changed).
 !!  iholohedry=1   triclinic      1bar
 !!  iholohedry=2   monoclinic     2/m
 !!  iholohedry=3   orthorhombic   mmm
@@ -1231,13 +1244,19 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 !scalars
  integer :: allequal,ii,orth
  real(dp):: aa,scprod1
-!character(len=500) :: msg
+ character(len=500) :: msg
 !arrays
  integer :: ang90(3),equal(3)
  real(dp) :: length(3),metric(3,3),norm(3),rbasis(3,3),rconv(3,3),rconv_new(3,3)
  real(dp) :: rnormalized(3,3),symmetrized_length(3)
 
 !**************************************************************************
+
+ if(abs(iholohedry)<1 .or. abs(iholohedry)>7)then
+   write(msg, '(a,i0)' )&
+&    'Abs(iholohedry) should be between 1 and 7, while iholohedry=',iholohedry 
+   MSG_BUG(msg)
+ end if
 
  do ii=1,3
    metric(:,ii)=cell_base(1,:)*cell_base(1,ii)+&
@@ -1266,18 +1285,18 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 !ENDDEBUG
 
  foundc=0
- if(iholohedry==1)                                      foundc=1
- if(iholohedry==2 .and. ang90(1)+ang90(3)==2 )          foundc=1
- if(iholohedry==3 .and. orth==1)                        foundc=1
- if(iholohedry==4 .and. orth==1 .and.          &
-& (equal(3)==1 .or. equal(2)==1 .or. equal(1)==1) ) foundc=1
- if(iholohedry==5 .and. allequal==1 .and. &
-& (abs(metric(1,2)-metric(2,3))<tolsym*metric(2,2)) .and. &
-& (abs(metric(1,2)-metric(1,3))<tolsym*metric(1,1))         )      foundc=1
- if(iholohedry==6 .and. equal(3)==1 .and. &
-& ang90(1)==1 .and. ang90(2)==1 .and. &
-& (2*metric(1,2)-metric(1,1))<tolsym*metric(1,1) )      foundc=1
- if(iholohedry==7 .and. orth==1 .and. allequal==1)      foundc=1
+ if(abs(iholohedry)==1)                                      foundc=1
+ if(abs(iholohedry)==2 .and. ang90(1)+ang90(3)==2 )          foundc=1
+ if(abs(iholohedry)==3 .and. orth==1)                        foundc=1
+ if(abs(iholohedry)==4 .and. orth==1 .and.          &
+&  (equal(3)==1 .or. equal(2)==1 .or. equal(1)==1) ) foundc=1
+ if(abs(iholohedry)==5 .and. allequal==1 .and. &
+&  (abs(metric(1,2)-metric(2,3))<tolsym*metric(2,2)) .and. &
+&  (abs(metric(1,2)-metric(1,3))<tolsym*metric(1,1))         )      foundc=1
+ if(abs(iholohedry)==6 .and. equal(3)==1 .and. &
+&   ang90(1)==1 .and. ang90(2)==1 .and. &
+&   (2*metric(1,2)-metric(1,1))<tolsym*metric(1,1) )      foundc=1
+ if(abs(iholohedry)==7 .and. orth==1 .and. allequal==1)      foundc=1
 
 !DEBUG
 !write(std_out, '(a,i4)' )' holocell : foundc=',foundc
@@ -1286,12 +1305,14 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 !-------------------------------------------------------------------------------------
 !Possibly enforce the holohedry (if it is to be enforced !)
 
- if(foundc==0.and.enforce==1.and.iholohedry/=1)then
+ if(foundc==0.and.enforce==1.and.abs(iholohedry)/=1)then
 
 !  Copy the cell_base vectors, and possibly fix the tetragonal axis to be the c-axis
-   if(iholohedry==4.and.equal(1)==1)then
+!  XG20201016 WARNING : in principle, one should NOT use the 'equal' information, since precisely this enforcement
+!  has the aim to reinstall the symmetries while they are broken !!
+   if(abs(iholohedry)==4.and.equal(1)==1)then
      rconv(:,3)=cell_base(:,1) ; rconv(:,1)=cell_base(:,2) ; rconv(:,2)=cell_base(:,3)
-   else if (iholohedry==4.and.equal(2)==1)then
+   else if (abs(iholohedry)==4.and.equal(2)==1)then
      rconv(:,3)=cell_base(:,2) ; rconv(:,2)=cell_base(:,1) ; rconv(:,1)=cell_base(:,3)
    else
      rconv(:,:)=cell_base(:,:)
@@ -1304,7 +1325,7 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 
 !  Take care of the first conventional vector aligned with rbasis(:,3) (or aligned with the trigonal axis if rhombohedral)
 !  and choice of the first normalized direction
-   if(iholohedry==5)then
+   if(abs(iholohedry)==5)then
      rbasis(:,3)=third*(rconv(:,1)+rconv(:,2)+rconv(:,3))
    else
      rbasis(:,3)=rconv(:,3)
@@ -1314,7 +1335,7 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 
 !  Projection of the first conventional vector perpendicular to rbasis(:,3)
 !  and choice of the first normalized direction
-   scprod1=sum(rnormalized(:,3)*cell_base(:,1))
+   scprod1=sum(rnormalized(:,3)*rconv(:,1))
    rbasis(:,1)=rconv(:,1)-rnormalized(:,3)*scprod1
    norm(1)=sqrt(sum(rbasis(:,1)**2))
    rnormalized(:,1)=rbasis(:,1)/norm(1)
@@ -1325,30 +1346,30 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
    rnormalized(3,2)=rnormalized(1,3)*rnormalized(2,1)-rnormalized(2,3)*rnormalized(1,1)
 
 !  Compute the vectors of the conventional cell, on the basis of iholohedry
-   if(iholohedry==2)then
+   if(abs(iholohedry)==2)then
      rconv_new(:,3)=rconv(:,3)
      rconv_new(:,1)=rconv(:,1)
      rconv_new(:,2)=rnormalized(:,2)*length(2) ! Now, the y axis is perpendicular to the two others, that have not been changed
-   else if(iholohedry==3.or.iholohedry==4.or.iholohedry==7)then
-     if(iholohedry==7)then
+   else if(abs(iholohedry)==3.or.abs(iholohedry)==4.or.abs(iholohedry)==7)then
+     if(abs(iholohedry)==7)then
        symmetrized_length(1:3)=sum(length(:))*third
-     else if(iholohedry==4)then
+     else if(abs(iholohedry)==4)then
        symmetrized_length(3)=length(3)
        symmetrized_length(1:2)=half*(length(1)+length(2))
-     else if(iholohedry==3)then
+     else if(abs(iholohedry)==3)then
        symmetrized_length(:)=length(:)
      end if
      do ii=1,3
        rconv_new(:,ii)=rnormalized(:,ii)*symmetrized_length(ii)
      end do
-   else if(iholohedry==5)then
+   else if(abs(iholohedry)==5)then
 !    In the normalized basis, they have coordinates (a,0,c), and (-a/2,+-sqrt(3)/2*a,c)
 !    c is known, but a is computed from the knowledge of the average length of the initial vectors
      aa=sqrt(sum(length(:)**2)*third-norm(3)**2)
      rconv_new(:,1)=aa*rnormalized(:,1)+rbasis(:,3)
      rconv_new(:,2)=aa*half*(-rnormalized(:,1)+sqrt(three)*rnormalized(:,2))+rbasis(:,3)
      rconv_new(:,3)=aa*half*(-rnormalized(:,1)-sqrt(three)*rnormalized(:,2))+rbasis(:,3)
-   else if(iholohedry==6)then
+   else if(abs(iholohedry)==6)then
 
 !    In the normalized basis, they have coordinates (a,0,0), (-a/2,+-sqrt(3)/2*a,0), and (0,0,c)
 !    c is known, but a is computed from the knowledge of the average length of the initial vectors
@@ -1358,32 +1379,10 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
      rconv_new(:,3)=rconv(:,3)
    end if
 
-!! WRONG TEST
-!  Check whether the modification make sense
-!   do ii=1,3
-!     do jj=1,3
-!       reldiff=(rconv_new(ii,jj)-rconv(ii,jj))/length(jj)
-!!      Allow for twice tolsym
-!       if(abs(reldiff)>two*tolsym)then
-!         write(msg,'(a,6(2a,3es14.6))')&
-!!         This is CRAZY : one detects symmetry problems above tolsym, and then requires the lattice vectors
-!!         not to be modify by more than 2 tolsym !!!
-!&         'Failed rectification of lattice vectors to comply with Bravais lattice identification, modifs are too large',ch10,&
-!&         '  rconv    =',rconv(:,1),ch10,&
-!&         '            ',rconv(:,2),ch10,&
-!&         '            ',rconv(:,3),ch10,&
-!&         '  rconv_new=',rconv_new(:,1),ch10,&
-!&         '            ',rconv_new(:,2),ch10,&
-!&         '            ',rconv_new(:,3)
-!         MSG_ERROR_CLASS(msg, "TolSymError")
-!       end if
-!     end do
-!   end do
-
 !  Copy back the cell_base vectors
-   if(iholohedry==4.and.equal(1)==1)then
+   if(abs(iholohedry)==4.and.equal(1)==1)then
      cell_base(:,3)=rconv_new(:,2) ; cell_base(:,2)=rconv_new(:,1) ; cell_base(:,1)=rconv_new(:,3)
-   else if (iholohedry==4.and.equal(2)==1)then
+   else if (abs(iholohedry)==4.and.equal(2)==1)then
      cell_base(:,3)=rconv_new(:,1) ; cell_base(:,1)=rconv_new(:,2) ; cell_base(:,2)=rconv_new(:,3)
    else
      cell_base(:,:)=rconv_new(:,:)
@@ -1489,28 +1488,6 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
    enddo
  enddo
 
-!! WRONG TEST
-!Check whether the modification make sense
-! do ii=1,3
-!   do jj=1,3
-!     reldiff=(rprimd_new(ii,jj)-rprimd(ii,jj))/sqrt(sum(rprimd(:,jj)**2))
-!!    Allow for twice tolsym
-!     if(abs(reldiff)>two*tolsym)then
-!       write(msg,'(a,6(2a,3es14.6))')&
-!!!         This is CRAZY : one detects symmetry problems above tolsym, and then requires the lattice vectors
-!!!         not to be modify by more than 2 tolsym !!!
-!&       'Failed rectification of lattice vectors to comply with Bravais lattice identification, modifs are too large',ch10,&
-!&       '  rprimd    =',rprimd(:,1),ch10,&
-!&       '             ',rprimd(:,2),ch10,&
-!&       '             ',rprimd(:,3),ch10,&
-!&       '  rprimd_new=',rprimd_new(:,1),ch10,&
-!&       '             ',rprimd_new(:,2),ch10,&
-!&       '             ',rprimd_new(:,3)
-!       MSG_ERROR_CLASS(msg, "TolSymError")
-!     end if
-!   end do
-! end do
-
  rprimd(:,:)=rprimd_new(:,:)
 
 !Check whether the symmetry operations are consistent with the lattice vectors
@@ -1526,6 +1503,99 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 !ENDDEBUG
 
 end subroutine symmetrize_rprimd
+!!***
+
+!!****f* m_symtk/symmetrize_tnons
+!! NAME
+!! symmetrize_tnons
+!!
+!! FUNCTION
+!! Given the order of a symmetry operation, make sure that tnons is
+!! such that applying "order" times the symmetry operation
+!! generate the unity operation, accurately. 
+!!
+!! INPUTS
+!! nsym=actual number of symmetries
+!! symrel(3,3,1:nsym)=symmetry operations in real space in terms of primitive translations
+!! tolsym=tolerance that was used to determine the symmetry operations
+!!
+!! SIDE EFFECTS
+!! tnons(3,1:nsym)= non-symmorphic translation vectors
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine symmetrize_tnons(nsym,symrel,tnons,tolsym)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nsym
+ real(dp),intent(in) :: tolsym
+!arrays
+ integer,intent(in) :: symrel(3,3,nsym)
+ real(dp),intent(inout) :: tnons(3,nsym)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iorder,isym,order
+!character(len=500) :: msg
+!arrays
+ integer :: symrel_mult(3,3)
+ integer :: unitmat(3,3)
+ real(dp):: tnons_mult(3)
+
+! *************************************************************************
+
+!DEBUG
+!write(std_out,'(a)') ' symmetrize_tnons : enter '
+!ENDDEBUG
+
+ unitmat=0
+ unitmat(1,1)=1 ; unitmat(2,2)=1 ; unitmat(3,3)=1 
+
+ do isym=1,nsym
+
+!DEBUG
+!write(std_out,'(a,i4,9i3,3es16.6)') ' isym,symrel,tnons=',isym,symrel(:,:,isym),tnons(:,isym)
+!ENDDEBUG
+
+   symrel_mult(:,:)=symrel(:,:,isym) ; tnons_mult(:)=tnons(:,isym)
+   order=0
+   !Determine the order of the operation
+   do iorder=1,48
+     symrel_mult(:,:)=matmul(symrel(:,:,isym),symrel_mult(:,:))
+     tnons_mult(:)=matmul(symrel(:,:,isym),tnons_mult(:))+tnons(:,isym)
+     if(sum(abs(symrel_mult-unitmat))==0)then
+       if(abs(tnons_mult(1)-nint(tnons_mult(1)))<tolsym*iorder .and. &
+&         abs(tnons_mult(2)-nint(tnons_mult(2)))<tolsym*iorder .and. &
+&         abs(tnons_mult(3)-nint(tnons_mult(3)))<tolsym*iorder)then
+         !The order has been found
+         order=iorder+1
+         !Now, adjust the tnons vector, in order to obtain the exact identity
+         !operation at order "order"
+         tnons_mult(:)=(tnons_mult(:)-nint(tnons_mult(:)))/(dble(order))
+         if(abs(tnons_mult(1))>1.00001e-8) tnons(1,isym)=tnons(1,isym)-tnons_mult(1)
+         if(abs(tnons_mult(2))>1.00001e-8) tnons(2,isym)=tnons(2,isym)-tnons_mult(2)
+         if(abs(tnons_mult(3))>1.00001e-8) tnons(3,isym)=tnons(3,isym)-tnons_mult(3)
+         exit
+       endif
+     endif
+     
+   enddo ! iorder
+
+   if(order==0)then
+     MSG_BUG("Was unable to find order of operation")
+   endif
+ enddo
+
+!DEBUG
+!write(std_out,'(a)') ' symmetrize_tnons : exit '
+!ENDDEBUG
+
+end subroutine symmetrize_tnons
 !!***
 
 !!****f* m_symtk/symmetrize_xred
@@ -1597,6 +1667,16 @@ subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
 !if not then simply return
  if (nsym>1) then
 
+!DEBUG
+!  write(std_out,'(a,i4)') 'symmetrize_xred: enter, nsym=',nsym
+!  do iatom=1,natom
+!    write(std_out,'(a,i4,3es16.6)') 'iatom,xred=',iatom,xred(:,iatom)
+!  enddo
+!  do isym=1,nsym
+!    write(std_out,'(a,i4,9i3,3es16.6)') 'isym,symrel,tnons',isym,symrel(:,:,isym),tnons(:,isym)
+!  enddo
+!ENDDEBUG
+
 !  loop over atoms
    ABI_ALLOCATE(xredsym,(3,natom))
    do iatom=1,natom
@@ -1627,6 +1707,12 @@ subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
 
 !    End loop over iatom
    end do
+
+!DEBUG
+!  do iatom=1,natom
+!    write(std_out,'(a,i4,3es16.6)') 'iatom,xredsym=',iatom,xredsym(:,iatom)
+!  enddo
+!ENDDEBUG
 
    transl(:)=xredsym(:,1)-nint(xredsym(:,1))
 
@@ -1665,6 +1751,10 @@ subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
 
 !  End condition of nsym/=1
  end if
+
+!DEBUG
+! write(std_out,'(a)') 'symmetrize_xred : exit'
+!ENDDEBUG
 
 end subroutine symmetrize_xred
 !!***
@@ -1886,7 +1976,7 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 ! *************************************************************************
 
 !DEBUG
-!write(std_out,'(a,es12.4)')' symatm : enter, tolsym=',tolsym
+!write(std_out,'(a,i4,es12.4)')' symatm : enter, nsym,tolsym=',nsym,tolsym
 !write(std_out,'(a,es12.4)')' symatm : xred='
 !do ii=1,natom
 !  write(std_out,'(i4,3es18.10)')ii,xred(1:3,ii)
@@ -3112,7 +3202,7 @@ subroutine print_symmetries(nsym, symrel, tnons, symafm, unit, mode_paral)
    isymend=isymin+3
    if (isymend>nsym) isymend=nsym
    do ii=1,3
-     write(msg,'(4(3i3,f8.3,i3,3x))')((symrel(ii,jj,isym),jj=1,3),tnons(ii,isym),symafm(isym),isym=isymin,isymend)
+     write(msg,'(4(3i3,f11.6,i3,3x))')((symrel(ii,jj,isym),jj=1,3),tnons(ii,isym),symafm(isym),isym=isymin,isymend)
      call wrtout(my_unt,msg,my_mode)
    end do
    write(msg,'(a)')ch10

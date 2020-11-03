@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h45 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 10h39 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_2.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_2.in
 - output file    -> tgw1_2.out
 - root for input  files -> tgw1_2i
 - root for output files -> tgw1_2o
@@ -61,16 +61,16 @@ _ WF disk file :      1.125 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =          25        mffmem =           1         mkmem =           1
-       mpw =         259          nfft =        5832          nkpt =           1
+       mpw =         283          nfft =        8000          nkpt =           1
 ================================================================================
-P This job should need less than                       2.334 Mbytes of memory.
+P This job should need less than                       2.949 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.101 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.110 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -87,15 +87,13 @@ _ WF disk file :      0.101 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
            diemac      1.20000000E+01
-             ecut1     8.00000000E+00 Hartree
-             ecut2     8.00000000E+00 Hartree
-             ecut3     7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
-          ecuteps3     5.10559920E+00 Hartree
+          ecuteps3     6.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
-          ecutwfn3     7.56385066E+00 Hartree
+          ecutwfn3     8.00000000E+00 Hartree
 -          fftalg         312
            getden1          0
            getden2         -1
@@ -138,9 +136,7 @@ P           mkmem3          1
            nbdbuf2         40
            nbdbuf3          0
            ndtset           3
-            ngfft1         20      20      20
-            ngfft2         20      20      20
-            ngfft3         18      18      18
+            ngfft          20      20      20
              nkpt1         10
              nkpt2          1
              nkpt3          1
@@ -276,8 +272,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -618,8 +614,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 1, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 1, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -643,26 +639,6 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
  Unit cell volume ucvol=  2.6663072E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
--  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
-- 14.00000   4.00000    940714                znucl, zion, pspdat
-    1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    0   5.907  14.692    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    1   2.617   4.181    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
-  pspatm : epsatm=    1.43386982
-         --- l  ekb(1:nproj) -->
-             0    3.287949
-             1    1.849886
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -694,10 +670,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Remaining bands to be divided among processors   nbcw = 21
 - Number of bands treated by each node ~21
 
- Number of electrons calculated from density =    7.9998; Expected =    8.0000
- average of density, n =  0.030003
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7086 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -713,22 +689,22 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
        -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -23.210  -0.000  -0.558  -0.000  -0.669   0.000  -0.701   0.000
-       -0.000   0.000 -16.635   0.000  -0.363  -0.000  -0.475  -0.000  -0.507
+    2   0.000 -23.211  -0.000  -0.558  -0.000  -0.670   0.000  -0.701   0.000
+       -0.000   0.000 -16.636   0.000  -0.362  -0.000  -0.474  -0.000  -0.506
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -5.689  -0.000  -0.102  -0.000  -0.186   0.000  -0.211   0.000
+    2   0.000  -5.689  -0.000  -0.103  -0.000  -0.187   0.000  -0.211   0.000
        -0.000   0.000  -1.949   0.000  -0.065  -0.000  -0.149  -0.000  -0.173
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  96.4963
-  dielectric constant without local fields = 140.5247
+  dielectric constant =  96.4489
+  dielectric constant without local fields = 140.4403
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     43.66  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     43.67  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
@@ -757,15 +733,13 @@ meta: {optdriver: 3, gwcalctyp: 0, }
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
            diemac      1.20000000E+01
-             ecut1     8.00000000E+00 Hartree
-             ecut2     8.00000000E+00 Hartree
-             ecut3     7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
-          ecuteps3     5.10559920E+00 Hartree
+          ecuteps3     6.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
-          ecutwfn3     7.56385066E+00 Hartree
+          ecutwfn3     8.00000000E+00 Hartree
            etotal1    -8.8725570746E+00
            etotal3     0.0000000000E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -814,9 +788,7 @@ P           mkmem3          1
            nbdbuf2         40
            nbdbuf3          0
            ndtset           3
-            ngfft1         20      20      20
-            ngfft2         20      20      20
-            ngfft3         18      18      18
+            ngfft          20      20      20
              nkpt1         10
              nkpt2          1
              nkpt3          1
@@ -921,10 +893,53 @@ P           mkmem3          1
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          8.8        0.15      0.002
+- Total wall clock time (s,m,h):         10.6        0.18      0.003
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            8.8, wall_time =           10.6
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- projbd                         3.013  34.2      3.047  28.7           8912      -1.00        0.99       0.99
+- vtowfk(ssdiag)                 1.953  22.1      1.970  18.5             -1      -1.00        0.99       0.99
+- fourwf%(pot)                   0.956  10.8      0.974   9.2           6366      -1.00        0.98       0.98
+- pspini                         0.414   4.7      0.418   3.9              3      -1.00        0.99       0.99
+- ewald                          0.257   2.9      0.257   2.4              3      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )          0.212   2.4      0.214   2.0             -1      -1.00        0.99       0.99
+- invars2                        0.176   2.0      0.178   1.7              3      -1.00        0.99       0.99
+- nonlop(apply)                  0.148   1.7      0.134   1.3           6366      -1.00        1.10       1.10
+- timing timab                   0.111   1.3      0.113   1.1              9      -1.00        0.99       0.99
+- getghc-other                   0.086   1.0      0.078   0.7             -1      -1.00        1.11       1.11
+- others (117)                   0.199   2.3      0.198   1.9             -1      -1.00        1.01       1.01
+-<END_TIMER>
+-
+- subtotal                       7.525  85.3      7.581  71.3                                  0.99       0.99
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           8.8, wall_time =          10.6
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- projbd                         3.013  34.2      3.047  28.7           8912      -1.00        0.99       0.99
+- vtowfk(ssdiag)                 1.953  22.1      1.970  18.5             -1      -1.00        0.99       0.99
+- fourwf%(pot)                   0.956  10.8      0.974   9.2           6366      -1.00        0.98       0.98
+- pspini                         0.414   4.7      0.418   3.9              3      -1.00        0.99       0.99
+- ewald                          0.257   2.9      0.257   2.4              3      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )          0.212   2.4      0.214   2.0             -1      -1.00        0.99       0.99
+- invars2                        0.176   2.0      0.178   1.7              3      -1.00        0.99       0.99
+- nonlop(apply)                  0.148   1.7      0.134   1.3           6366      -1.00        1.10       1.10
+- timing timab                   0.111   1.3      0.113   1.1              9      -1.00        0.99       0.99
+- getghc-other                   0.086   1.0      0.078   0.7             -1      -1.00        1.11       1.11
+- others (117)                   0.199   2.3      0.198   1.9             -1      -1.00        1.01       1.01
+-<END_TIMER>
 
+- subtotal                       7.525  85.3      7.581  71.3                                  0.99       0.99
 
 ================================================================================
 
@@ -1004,10 +1019,10 @@ P           mkmem3          1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.5  wall=         16.3
+- Proc.   0 individual time (sec): cpu=          8.8  wall=         10.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.5  wall=         16.3
+.Delivered   4 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.8  wall=         10.6

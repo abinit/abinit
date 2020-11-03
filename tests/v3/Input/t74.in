@@ -26,7 +26,7 @@
  xred3  0.0 0.0  0.11555    0.0 0.0 -0.1155
  getwfk3 2
 
- chksymbreak 0
+ chksymtnons 0
 
 #Specific for RF
  xred4  0.0 0.0  0.1155     0.0 0.0 -0.1155
