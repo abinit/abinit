@@ -405,6 +405,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !Structured debugging if prtvol==-level
  prtvol=dtset%prtvol
 
+! Electric fields: set flag to turn on various behaviors
+ berryflag = any(dtset%berryopt == [4, 14, 6, 16, 7, 17])
+
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
  wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
@@ -455,10 +458,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      energies%e_fockdc=zero
    end if
    grnl(:)=zero
-   !resid(:) = zero ! JWZ 13 May 2010. resid and eigen need to be fully zeroed each time before use
-                   ! MG: Each proc will set the (kpt,spin) slice of resid that is not treated to zero
-                   ! inside the loop so that can call xmpi_sum at the end
-                   ! Don't set resid to zero here because the previous values should be passed to the eigensolver.
+   if (berryflag) then
+     resid(:) = zero ! JWZ 13 May 2010. resid and eigen need to be fully zeroed each time before use
+   end if
+   ! MG: The previous line is not compatible with the RMM-DIIS since rmm_diis recevies the previous resid_k
+   ! to select the accuracy level.
+   ! For the time being, we set resid to zero if berryflag to avoid breaking the CG solver with E-field
+   ! but it's clear that the treatment of resid should be rationalized and that the previous values should be passed to vtowfk
    eigen(:) = zero
    bdtot_index=0
    ibg=0;icg=0
@@ -651,11 +657,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !===================================================================
 ! PLANE WAVES - Standard VTORHO procedure
 !===================================================================
-
-!  Electric fields: set flag to turn on various behaviors
-   berryflag = (dtset%berryopt == 4 .or. dtset%berryopt == 14 .or. &
-&   dtset%berryopt == 6 .or. dtset%berryopt == 16 .or. &
-&   dtset%berryopt == 7 .or. dtset%berryopt == 17)
 
 !  Electric field: allocate dphasek
    nkpt1 = dtset%nkpt

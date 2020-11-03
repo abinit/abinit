@@ -97,7 +97,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !Local variables-------------------------------
 !scalars
- logical :: twvl,allow
+ logical :: twvl,allow, berryflag
  logical :: wvlbigdft=.false.
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
@@ -3037,6 +3037,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ABI_CHECK(dt%npspinor == 1, "RMM-DIIS with spinor parallelism is not implemented")
      ABI_CHECK(dt%usefock == 0, "RMM-DIIS with Hartree-Fock or Hybrid Functionals is not implemented")
      ABI_CHECK(dt%wfoptalg /= 1, "RMM-DIIS with Chebyshev is not supported.")
+     berryflag = any(dt%berryopt == [4, 14, 6, 16, 7, 17])
+     ABI_CHECK(.not. berryflag, "RMM-DIIS with Electric field is not supported.")
    end if
 
 !  so_psp

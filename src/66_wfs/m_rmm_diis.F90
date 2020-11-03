@@ -169,10 +169,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer,intent(inout) :: rmm_diis_status(2)
 
 !Local variables-------------------------------
- integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0, use_subovl0 = 0
- integer :: ig, ig0, ib, ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb
- integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
- integer :: me_g0, nb_pocc, jj, kk, it, ibk, cplex, ortalgo, accuracy_level, raise_acc, prev_mixprec !ii, ld1, ld2, iek,
+ integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
+ integer :: ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb, ortalgo
+ integer :: cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
+ integer :: me_g0, nb_pocc, jj, kk, it, accuracy_level, raise_acc, prev_mixprec !ii, ld1, ld2, iek,
  integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy !, comm_spinorfft, comm_fft
  logical :: end_with_trial_step, recompute_lambda, recompute_eigresid_after_ortho, first_call
  logical :: use_fft_mixprec
@@ -185,8 +185,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 !arrays
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
- real(dp) :: subovl(use_subovl0)
- real(dp),allocatable :: evec(:,:,:), subham(:), h_ij(:,:,:)
+ real(dp),allocatable :: evec(:,:,:)
  real(dp),allocatable :: ghc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), residv_bk(:,:), kres_bk(:,:), dots_bk(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), phi_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
@@ -1297,9 +1296,9 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx
 end subroutine rmm_diis_rollback
 !!***
 
-!!****f* m_numeric_tools/pack_matrix
+!!****f* m_numeric_tools/my_pack_matrix
 !! NAME
-!! pack_matrix
+!! my_pack_matrix
 !!
 !! FUNCTION
 !! Packs a matrix into hermitian format
@@ -1389,9 +1388,9 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, tim_getghc = 0, use_subovl0 = 0
- integer :: ig, ig0, ib, ierr, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb
+ integer :: ig, ig0, ib, ierr, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, paral_kgb
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw
- integer :: me_g0, cplex, ortalgo, comm_bandspinorfft
+ integer :: me_g0, cplex, comm_bandspinorfft
  real(dp),parameter :: rdummy = zero
  !character(len=500) :: msg
 !arrays

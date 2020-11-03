@@ -18705,7 +18705,7 @@ the BLAS supports OpenMP, this option also yields very good scaling for the
 nonlocal operator.
 
 This option is available only if [[useylm]] is 1. ABINIT will automatically set [[useylm]] to 1
-if [[gemm_nonlop]] is set to 1 in the input file (actually, this is only needed when NC pseudos are used as
+if [[use_gemm_nonlop]] is set to 1 in the input file (actually, this is only needed when NC pseudos are used as
 PAW already uses 1 for [[useylm]]).
 """,
 ),

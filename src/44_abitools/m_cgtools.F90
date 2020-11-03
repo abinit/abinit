@@ -2660,7 +2660,7 @@ subroutine cgnc_normalize(npwsp, nband, cg, istwfk, me_g0, comm_pw)
 !Local variables ------------------------------
 !scalars
  integer :: ptr,ierr,band
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: norm(nband),alpha(2)
 
