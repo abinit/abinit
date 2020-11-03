@@ -1636,9 +1636,9 @@ end subroutine symmetrize_tnons
 !!   giving suggestions of xred modifications, to pbe proposed to users.
 !!
 !! OUTPUT
-!! fixed_mismatch=(optional) 1 if there is a mismatch and this mismatch has been fixed
+!! fixed_mismatch=(optional) 1 if there is a mismatch and this mismatch has been fixed, 0 otherwise
 !! mismatch_fft_tnons=(optional) non-zero if there is a mismatch between the fft grid and the tnons, gives the number 
-!!   of the first symmetry operation for which there is such a mismatch.
+!!   of the first symmetry operation for which there is such a mismatch. Zero otherwise.
 !! tnons_new(3,nsym)=(optional)nonsymmorphic translations for symmetries
 !!
 !! SIDE EFFECTS
@@ -1689,6 +1689,8 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
  if(present(tnons_new))then
    tnons_new(:,1:nsym)=tnons(:,1:nsym)
  endif
+ if(present(fixed_mismatch))fixed_mismatch=0
+ if(present(mismatch_fft_tnons))mismatch_fft_tnons=0
 
  if (nsym>1) then
 
