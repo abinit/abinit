@@ -177,12 +177,12 @@ For figures with a caption use the [markdown-figures extension](https://github.c
 
 ```md
 ![](../tutorial/bse_assets/tbs5.png)
-:   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
+:   Convergence of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 ```
 
 ![](../tutorial/bse_assets/tbs5.png)
-:   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
+:   Convergence of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 
 The caption can contain Latex equations as well as [Abinit wikilinks](#wikilinks).
