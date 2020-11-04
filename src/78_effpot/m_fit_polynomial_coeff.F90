@@ -151,7 +151,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix
- integer :: rank_to_send,unit_anh,fit_iatom_in
+ integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
@@ -174,7 +174,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  type(polynomial_coeff_type),target,allocatable :: coeffs_tmp(:)
  type(polynomial_coeff_type),pointer :: coeffs_in(:)
  type(fit_data_type) :: fit_data
- character(len=1000) :: message
+ character(len=1000) :: message,message2
  character(len=fnlen) :: filename
  character(len=3)  :: i_char
  character(len=7)  :: j_char
@@ -612,11 +612,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                    fit_data%training_set%sqomega)
 
 !Print the standard deviation before the fit
- write(message,'(3a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) &
-&                   ' Mean Standard Deviation values at the begining of the fit process (meV**2/atm):',&
-&               ch10,'   Energy          : ',&
-&               gf_values(4,1)*factor*(Ha_EV*1000)**2  ,ch10,&
+ write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
+!&                   ' Mean Standard Deviation values at the begining of the fit process (meV**2/atm):',&
+!&               ch10,'   Energy          : ',&
+!&               gf_values(4,1)*factor*(Ha_EV*1000)**2  ,ch10,&
 &                    ' Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
+&                    '   Energy          : ',& 
+&               gf_values(4,1)*(HaBohr_meVAng)**2,ch10,&
 &                    '   Forces+Stresses : ',&
 &               gf_values(1,1)*(HaBohr_meVAng)**2,ch10,&
 &                    '   Forces          : ',&
@@ -635,7 +637,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    if(need_verbose.and.ncycle > 0)then
      write(message,'(a,3x,a,10x,a,14x,a,14x,a,14x,a)') " N","Selecting","MSDE","MSDFS","MSDF","MSDS"
      call wrtout(ab_out,message,'COLL')
-     write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(meV^2/atm)","(eV^2/A^2)","(eV^2/A^2)",&
+     write(message,'(4x,a,6x,a,8x,a,8x,a,8x,a)') "Coefficient","(eV^2/A^2)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                            "(eV^2/A^2)"
      call wrtout(ab_out,message,'COLL')
    end if
@@ -672,11 +674,20 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
        write(message,'(2x,a,12x,a,14x,a,13x,a,14x,a)') " Testing","MSDE","MSDFS","MSDF","MSDS"
        call wrtout(std_out,message,'COLL')
-       write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(meV^2/atm)","(eV^2/A^2)","(eV^2/A^2)",&
+       write(message,'(a,7x,a,8x,a,8x,a,8x,a)') " Coefficient","(eV^2/A^2)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                            "(eV^2/A^2)"
        call wrtout(std_out,message,'COLL')
      end if!End if verbose
 
+     !Open *csv file for storing GF values of all cores for this iteration
+     write(filename,'(a,I1,aI3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom,"_proc",my_rank,"_iter",icycle,".csv"
+     unit_GF_val = get_unit()
+     if(iam_master)then
+        if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
+&          status="unknown",action="write") /= 0) then
+           MSG_ERROR(message)
+        end if
+     endif
 !    Reset gf_values
      gf_values(:,:) = zero
      do icoeff=1,my_ncoeff
@@ -713,6 +724,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                      list_coeffs_tmp(1:icycle),natom_sc,icycle,ncycle_max,ntime,&
 &                                      strten_coeffs_tmp,fit_data%strten_diff,&
 &                                      fit_data%training_set%sqomega,fit_on)
+     
        if(info==0)then
          if (need_positive.and.any(coeff_values(ncoeff_fix+1:icycle) < zero)) then
            write(message, '(a)') ' Negative value detected...'
@@ -728,18 +740,32 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
            write (j_char, '(i7)') my_coeffindexes(icoeff)
            write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char),&
-&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2 ,&
+!&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2 ,&
+&                                   gf_values(4,icoeff)*HaBohr_meVAng**2,&
 &                                   gf_values(1,icoeff)*HaBohr_meVAng**2,&
 &                                   gf_values(2,icoeff)*HaBohr_meVAng**2,&
+&                                   gf_values(3,icoeff)*HaBohr_meVAng**2
+           write(message2, '(I7.7,3a,ES18.10,a,ES18.10,a,ES18.10,a,ES18.10)') my_coeffindexes(icoeff),",",&
+!&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
+&                                   trim(my_coeffs(icoeff)%name),",",&
+&                                   gf_values(4,icoeff)*HaBohr_meVAng**2,",",&
+&                                   gf_values(1,icoeff)*HaBohr_meVAng**2,",",&
+&                                   gf_values(2,icoeff)*HaBohr_meVAng**2,",",&
 &                                   gf_values(3,icoeff)*HaBohr_meVAng**2
          end if
        else!In this case the matrix is singular
          gf_values(:,icoeff) = zero
          singular_coeffs(icoeff) = 1
-         write(message, '(a)') ' The matrix is singular...'
+!         write(message, '(a)') ' The matrix is singular...'
        end if
-       if(need_verbose) call wrtout(std_out,message,'COLL')
+       if(need_verbose)then
+           call wrtout(std_out,message,'COLL')
+           call wrtout(unit_GF_val,message2,'PERS',do_flush=.TRUE.)
+       endif
      end do
+
+     !Close *csv file for GF values of this iteration 
+     close(unit_GF_val) 
 
 !    find the best coeff on each CPU
      mingf(:)  = 9D99
@@ -827,15 +853,16 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   ' ===> ',trim(coeffs_tmp(icycle)%name)
        call wrtout(std_out,message,'COLL')
 
-       write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
-&                                        ' the iteration ',icycle_tmp,' (meV^2/atm): ',&
-&                         mingf(4)* factor * (Ha_eV *1000)**2
-       call wrtout(std_out,message,'COLL')
+!       write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
+!&                                        ' the iteration ',icycle_tmp,' (meV^2/atm): ',&
+!&                         mingf(4)* factor * (Ha_eV *1000)**2
+!       call wrtout(std_out,message,'COLL')
 
        write (i_char, '(i3)') icycle
        write (j_char, '(i7)') list_coeffs(icycle)
        write(message, '(a,a,3x,a,3x,4ES18.10)') " ",adjustl(i_char),adjustl(j_char),&
-&                                    mingf(4)* factor * (Ha_eV *1000)**2,&
+!&                                    mingf(4)* factor * (Ha_eV *1000)**2,&
+&                                    mingf(4)*HaBohr_meVAng**2,&
 &                                    mingf(1)*HaBohr_meVAng**2,&
 &                                    mingf(2)*HaBohr_meVAng**2,&
 &                                    mingf(3)*HaBohr_meVAng**2
@@ -914,7 +941,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,2x,a,9x,a,14x,a,13x,a,14x,a)') ch10," Iteration ","MSDE","MSDFS","MSDF","MSdS"
      call wrtout(std_out,message,'COLL')
-     write(message,'(a,5x,a,8x,a,8x,a,8x,a)') "              ","(meV^2/atm)","(eV^2/A^2)","(eV^2/A^2)",&
+     write(message,'(a,5x,a,8x,a,8x,a,8x,a)') "              ","(eV^2/A^2)","(eV^2/A^2)","(eV^2/A^2)",&
 &                                            "(eV^2/A^2)"
      call wrtout(std_out,message,'COLL')
 
@@ -1066,11 +1093,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
    if(need_verbose) then
 !  Print the standard deviation after the fit
-     write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
-&                    ' Mean Standard Deviation values at the end of the fit process (meV^2/atm): ',ch10,& 
-&                    '   Energy          : ',&
-&               gf_values(4,1)*(Ha_EV*1000)**2 *factor ,ch10,&
+     write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+!&                    ' Mean Standard Deviation values at the end of the fit process (meV^2/atm): ',ch10,& 
+!&                    '   Energy          : ',&
+!&               gf_values(4,1)*(Ha_EV*1000)**2 *factor ,ch10,&
 &                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
+&                    '   Energy          : ',& 
+&               gf_values(4,1)*(HaBohr_meVAng)**2,ch10,&
 &                    '   Forces+Stresses : ',&
 &               gf_values(1,1)*(HaBohr_meVAng)**2,ch10,&
 &                    '   Forces          : ',&
@@ -1759,12 +1788,12 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
        jcoeff_tmp = list_coeffs(jcoeff)
        enu = energy_coeffs(jcoeff_tmp,itime)
        if(fit_on(3))then
-         etmpA =  emu*enu
+         etmpA =  emu*enu/(sqomega(itime)**(1.0/2.0))
          A(icoeff,jcoeff) = A(icoeff,jcoeff) + efact*etmpA
        endif
      end do
      if(fit_on(3))then 
-        etmpB = etmpB + energy_diff(itime)*emu !/ (sqomega(itime)**3)
+        etmpB = etmpB + energy_diff(itime)*emu/(sqomega(itime)**(1.0/2.0)) !/ (sqomega(itime)**3)
      else 
         etmpB = zero ! REMOVE THIS LINE TO TAKE INTO ACOUNT THE ENERGY     
      endif
@@ -1937,7 +1966,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
      emu = emu + coefficients(icoeff)*energy_coeffs(icoeff_tmp,itime)
    end do
 !   uncomment the next line to be consistent with the definition of the goal function   
-   etmp = etmp + (energy_diff(itime)-emu)**2
+   etmp = etmp + (energy_diff(itime)-emu)**2/(sqomega(itime)**(1.0/2.0))
 !   uncomment the next get a measure in Ha instead of Ha^2   
 !   etmp = etmp + abs(energy_diff(itime)-emu)
 !  Fill forces
@@ -2444,7 +2473,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
 &                    real(100,dp),(/real(100,dp),real(100,dp)/))
    endif!(need_prt_ph)
 
-   mse  = mse  + ((hist%etot(ii) - energy))**2 !+abs(hist$etot(ii) - energy)
+   mse  = mse  + ((hist%etot(ii) - energy))**2/(sqomega(ii)**(1.0/2.0)) !+abs(hist$etot(ii) - energy)
    do ia=1,natom ! Loop over atoms
      do mu=1,3   ! Loop over cartesian directions
        msef = msef + (hist%fcart(mu,ia,ii)  - fcart(mu,ia))**2
