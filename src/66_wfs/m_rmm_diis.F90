@@ -171,7 +171,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
- integer,parameter :: choice1 = 1, signs1 = 1, tim_nonlop = 0, paw_opt0 = 0
+ integer,parameter :: choice1 = 1, signs1 = 1, signs2 = 2, tim_nonlop = 0, paw_opt0 = 0, paw_opt3 = 3
  integer :: ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb, ortalgo
  integer :: cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nb_pocc, jj, kk, it, accuracy_level, raise_acc, prev_mixprec, after_ortho
@@ -247,6 +247,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (max_res_pocc < tol8)  accuracy_level = 2
  if (max_res_pocc < tol12) accuracy_level = 3
  if (max_res_pocc < tol16) accuracy_level = 4
+ !if (max_res_pocc < tol18) accuracy_level = 4
  accuracy_level = max(prev_accuracy_level, accuracy_level, raise_acc)
  if (istep == 1) accuracy_level = 2  ! FIXME: Differenciate between restart or rmm_diis - 3.
  if (first_call .and. max_res_pocc == zero) accuracy_level = 1
@@ -285,6 +286,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  after_ortho = 0
  if (accuracy_level >= 2) after_ortho = 1
  if (accuracy_level >= 4) after_ortho = 2
+ !after_ortho = 2
 
  use_fft_mixprec = dtset%mixprec == 1 .and. accuracy_level < 2
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(1)
@@ -342,7 +344,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    !if dtset%
    !if dtset%occopt == 2
    max_niter_block = max_niter
-   if (all(occ(ib_start:ib_stop) < diis%tol_occupied)) max_niter_block = max(1 + max_niter / 2, 2)
+   !if (all(occ(ib_start:ib_stop) < diis%tol_occupied)) max_niter_block = max(1 + max_niter / 2, 2)
 
    ! Compute H |phi_0> with cg block after subdiago.
    phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
@@ -436,10 +438,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! High energy states may have larger residuals at the end of the iter_loop especially if we reduce the
    ! number of iterations. Here we select the trial states in the chain with smaller resid.
    ! We are allowed to do so because we are still othogonalization-free.
-   call diis%rollback(npwsp, ndat, phi_bk, gsc_bk, eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
+   call diis%rollback(npwsp, ndat, phi_bk, gsc_bk, residv_bk,  &
+                      eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
 
    if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
 
+   !end_with_trial_step = .False.
+   !end_with_trial_step = .True.
    if (end_with_trial_step) then
      ! The final trial step is cheap and effective provided the previous lambda is still accurate.
      ! Computing new residuals at this level is expensive, moreover we still need to orthogonalizalize
@@ -453,9 +458,25 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
 
      if (usepaw == 1) then
-       ! TODO: Need to recompute only S for pw_orthon
+       ! Need to recompute <G|S|Psi> before calling pw_orthon
+#if 1
        call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
+#else
+       !dimenl1=gs_ham%dimekb1;dimenl2=natom;tim_nonlop=0
+       !choice=1;signs=2;cpopt=-1+3*gs_ham%usecprj;paw_opt=3;useylm=1
+
+       if (paral_kgb == 0) then
+         call nonlop(choice1, cpopt, cprj_dum, enlx(ib_start:), gs_hamk, 0, eig(ib_start), &
+                     mpi_enreg, ndat, 1, paw_opt3, signs2, gsc_bk, tim_nonlop, phi_bk, gvnlxc_bk)
+       else
+         call prep_nonlop(choice1, cpopt, cprj_dum, enlx(ib_start), gs_hamk, 0, eig(ib_start), &
+            ndat, mpi_enreg, 1, paw_opt3, signs2, gsc_bk, tim_nonlop, &
+            phi_bk, gvnlxc_bk, already_transposed=.False.)
+       end if
+
+       !call cgpaw_normalize(npwsp, ndat, phi_bk, gsc_bk, istwf_k, me_g0, comm_bandspinorfft)
+#endif
      else
         ! In principle this is not needed but as it will be done in pw_orthon
         !cgnc_normalize(npwsp, ndat, phi_bk, istwf_k, me_g0, comm_bandspinorfft)
@@ -497,10 +518,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
      select case (after_ortho)
      case (1)
-       ! 1: recompute enlx_bx after ortho. eigens and residuals are inconsistent.
-       !if (.False.) then
+       ! recompute NC enlx_bx after ortho. eigens and residuals are inconsistent.
        if (usepaw == 0) then
-         ! Recompute only Vnl if NC
          if (paral_kgb == 0) then
            call nonlop(choice1, cpopt, cprj_dum, enlx(ib_start:), gs_hamk, 0, eig(ib_start), &
                        mpi_enreg, ndat, 1, paw_opt0, signs1, gsc_bk, tim_nonlop, phi_bk, gvnlxc_bk)
@@ -518,7 +537,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        end if
 
      case (2)
-       ! 2: fully consistent mode: update enlx_bx, eigens, residuals after orthogonalizalization.
+       ! fully consistent mode: update enlx_bx, eigens, residuals after orthogonalizalization.
        call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
                             normalize=.False.)
@@ -611,9 +630,8 @@ subroutine rmm_diis_push_iter(diis, iter, ndat, eig_bk, resid_bk, enlx_bk, phi_b
  character(len=*),intent(in) :: tag
 
 !Local variables-------------------------------
-! *************************************************************************
-
  integer :: idat, ibk
+! *************************************************************************
 
  diis%last_iter = iter
  diis%hist_ene(iter, 1:ndat) = eig_bk
@@ -674,6 +692,8 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
 ! *************************************************************************
 
  diis%last_iter = iter
+ ! FIXME: Temporarily disabled
+ !ans = .False.; return
  if (xmpi_comm_rank(comm) /= master) goto 10
 
  ! Tolerances depend on accuracy_level and occupation of the state.
@@ -1214,17 +1234,19 @@ end subroutine rmm_diis_eval_mats
 !!
 !! SOURCE
 
-subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx, comm)
+subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, resid, enlx, comm)
 
  class(rmm_diis_t),intent(inout) :: diis
  integer,intent(in) :: npwsp, comm, ndat
- real(dp),intent(inout) :: phi_bk(2, npwsp, ndat), gsc_bk(2, npwsp, ndat*diis%usepaw)
+ real(dp),intent(inout) :: phi_bk(2, npwsp, ndat), gsc_bk(2, npwsp, ndat*diis%usepaw), residv_bk(2, npwsp, ndat)
  real(dp),intent(inout) :: eig(ndat), resid(ndat), enlx(ndat)
 
  integer,parameter :: master = 0
  integer :: nprocs, my_rank, idat, iter, ierr, ilast, take_iter(ndat)
  real(dp) :: cpu, wall, gflops
 
+ ! FIXME: Temporarily disabled
+ !return
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  take_iter = -1
  ilast = diis%last_iter
@@ -1249,6 +1271,7 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, eig, resid, enlx
      resid(idat) = diis%hist_resid(iter, idat)
      enlx(idat) = diis%hist_enlx(iter, idat)
      call cg_zcopy(npwsp, diis%chain_phi(:,:,iter,idat), phi_bk(:,:,idat))
+     call cg_zcopy(npwsp, diis%chain_resv(:,:,iter,idat), residv_bk(:,:,idat))
      if (diis%usepaw == 1) call cg_zcopy(npwsp, diis%chain_sphi(:,:,iter,idat), gsc_bk(:,:,idat))
      call diis%stats%increment("rollback", 1)
    end do
