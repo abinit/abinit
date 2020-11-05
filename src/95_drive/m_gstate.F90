@@ -1261,14 +1261,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  ###########################################################
 !  ### 14. Move atoms and acell according to ionmov value
 
-
-!  Eventually symmetrize atomic coordinates over space group elements:
-!  call symmetrize_xred(indsym,dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
-
-!  If atoms are not being moved and U should not be determined,
-!  use scfcv directly; else
-!  call move, pawuj_drive or brdmin which in turn calls scfcv.
-
    call timab(35,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&

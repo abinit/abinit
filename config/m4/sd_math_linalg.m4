@@ -203,7 +203,7 @@ AC_DEFUN([SD_LINALG_INIT], [
 
 AC_DEFUN([SD_LINALG_INIT_FLAVOR], [
   # Init internal parameters
-  sd_linalg_valid_flavors="auto acml asl atlas easybuild elpa essl magma mkl netlib none openblas plasma"
+  sd_linalg_valid_flavors="auto acml aocl asl atlas easybuild elpa essl magma mkl netlib none openblas plasma"
   sd_linalg_flavor=""
   sd_linalg_flavor_init="unknown"
   sd_linalg_flavor_gpu=""

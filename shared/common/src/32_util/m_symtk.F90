@@ -535,7 +535,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
      do sym3=1,nsym
        iseq = (all(prd_symrel == symrel(:,:,sym3) ) .and. &
                isinteger(prd_tnons - tnons(:,sym3), tnons_tol) .and. &
-               prd_symafm == symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail.
+               prd_symafm == symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail. XG 2020_10_24 Not anymore
 
        ! The rotational part is in the group but with different magnetic part!
        if (iseq) then
@@ -625,7 +625,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
 ! *************************************************************************
 
 !DEBUG
-!write(std_out,'(a)') ' chkorthsy : enter '
+!write(std_out,'(a,i3)') ' chkorthsy : enter, iexit= ',iexit
 !write(std_out,'(a,i3)') ' nsym=',nsym
 !do isym=1,nsym
 !  write(std_out,'(9i4)')symrel(:,:,isym)
@@ -643,7 +643,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
  rmet2=zero
  do ii=1,3
    do jj=1,3
-     rmet2=rmet2+rmet(ii,jj)*2
+     rmet2=rmet2+rmet(ii,jj)**2
    end do
  end do
 
@@ -1279,9 +1279,12 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
  if(equal(1)==1 .and. equal(2)==1 .and. equal(3)==1) allequal=1
 
 !DEBUG
-!write(std_out, '(a,i4)' )' holocell : iholohedry=',iholohedry
-!write(std_out, '(a,3i4)' )' holocell : ang90=',ang90
-!write(std_out, '(a,3i4)' )' holocell : equal=',equal
+!write(std_out,*)' holocell : enforce, iholohedry=',enforce, iholohedry
+!write(std_out,*)' holocell : ang90=',ang90
+!write(std_out,*)' holocell : equal=',equal
+!!write(std_out,*)' holocell : tolsym=',tolsym
+!!write(std_out,*)' holocell : metric(1,1)=',metric(1,1)
+!!write(std_out,*)' holocell : metric(1,2)=',metric(1,2)
 !ENDDEBUG
 
  foundc=0
@@ -1295,11 +1298,11 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 &  (abs(metric(1,2)-metric(1,3))<tolsym*metric(1,1))         )      foundc=1
  if(abs(iholohedry)==6 .and. equal(3)==1 .and. &
 &   ang90(1)==1 .and. ang90(2)==1 .and. &
-&   (2*metric(1,2)-metric(1,1))<tolsym*metric(1,1) )      foundc=1
+&   abs(2*metric(1,2)+metric(1,1))<tolsym*metric(1,1) )      foundc=1
  if(abs(iholohedry)==7 .and. orth==1 .and. allequal==1)      foundc=1
 
 !DEBUG
-!write(std_out, '(a,i4)' )' holocell : foundc=',foundc
+!write(std_out, '(a,2i4)' )' holocell : foundc, enforce=',foundc,enforce
 !ENDDEBUG
 
 !-------------------------------------------------------------------------------------
@@ -1603,26 +1606,40 @@ end subroutine symmetrize_tnons
 !! symmetrize_xred
 !!
 !! FUNCTION
-!! Symmetrize atomic coordinates using input symmetry matrices symrel
+!! Symmetrize atomic coordinates. 
+!! Two tasks can be executed :
+!! A. If optional argument indsym is present.
+!! Using input symmetry matrices symrel
 !! which are expressed in terms of the basis of real space primitive
-!! translations (array elements are integers).
+!! translations (array elements are integers), use indsym to make all corresponding atoms coordinate
+!! fullfil exactly symmetry operations.
 !! Input array indsym(4,isym,iatom) gives label of atom into which iatom
 !! is rotated by INVERSE of symmetry element isym and also gives primitive
 !! translation to get back to unit cell.
 !! This version uses improvement in algorithm suggested by Andrew
 !! Horsfield (see symatm.f).
+!! B. If optional argument tolsym AND tnons_new are defined.
+!! Might also adjust xred in order for tnons to be aligned with the FFT grids. 
+!! This will deliver new tnons_new.
+!! NOTE : Actually, should make two separate routines !
 !!
 !! INPUTS
-!! indsym(4,nsym,natom)=indirect indexing array giving label of atom
+!! indsym(4,nsym,natom)=(optional) indirect indexing array giving label of atom
 !!   into which iatom is rotated by symmetry element isym
 !! natom=number of atoms
 !! nsym=number of symmetries in group
 !! symrel(3,3,nsym)=symmetry matrices in terms of real space
 !!   primitive translations
 !! tnons(3,nsym)=nonsymmorphic translations for symmetries
+!! tolsym=(optional) tolerance on symmetries. When defined, one will try to align the symmetry operations with the FFT grid,
+!!   if the modification is less than tolsym. Take tolsym equal to 1 to deliver possibly large changes of xred,
+!!   giving suggestions of xred modifications, to pbe proposed to users.
 !!
 !! OUTPUT
-!!  (see side effects)
+!! fixed_mismatch=(optional) 1 if there is a mismatch and this mismatch has been fixed, 0 otherwise
+!! mismatch_fft_tnons=(optional) non-zero if there is a mismatch between the fft grid and the tnons, gives the number 
+!!   of the first symmetry operation for which there is such a mismatch. Zero otherwise.
+!! tnons_new(3,nsym)=(optional)nonsymmorphic translations for symmetries
 !!
 !! SIDE EFFECTS
 !! Input/Output
@@ -1639,35 +1656,46 @@ end subroutine symmetrize_tnons
 !!
 !! SOURCE
 
-subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
+subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mismatch_fft_tnons,tnons_new,tolsym)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsym
+ integer,intent(out),optional :: fixed_mismatch,mismatch_fft_tnons
 !arrays
- integer,intent(in) :: indsym(4,nsym,natom),symrel(3,3,nsym)
+ integer,intent(in),optional :: indsym(4,nsym,natom)
+ integer,intent(in) :: symrel(3,3,nsym)
  real(dp),intent(in) :: tnons(3,nsym)
+ real(dp),intent(in),optional :: tolsym
+ real(dp),intent(out),optional :: tnons_new(3,nsym)
  real(dp),intent(inout) :: xred(3,natom)
 
 !Local variables-------------------------------
 !scalars
- integer  :: iatom,ib,isym
- integer  :: ii,jj
- real(dp) :: fc1,fc2,fc3
+ integer  :: iatom,ib,ii,info,irank,isym,isym2
+ integer  :: jj,mismatch_fft_tnons_isym
  real(dp) :: diff
  logical  :: dissimilar
 !arrays
- real(dp) :: tsum(3),tt(3)
+ real(dp) :: delta(4),fc(3),mat(3,3),mult(4)=(/eight,nine,ten,three*four/)
+ real(dp) :: sgval(3),tsum(3),tt(3),work(15),xredshift(3,1)
  real(dp),allocatable :: xredsym(:,:)
  real(dp) :: transl(3) ! translation vector
 
 ! *************************************************************************
 !
 !Check whether group contains more than identity;
-!if not then simply return
+!if not then simply return after possible copying
+ if(present(tnons_new))then
+   tnons_new(:,1:nsym)=tnons(:,1:nsym)
+ endif
+ if(present(fixed_mismatch))fixed_mismatch=0
+ if(present(mismatch_fft_tnons))mismatch_fft_tnons=0
+
  if (nsym>1) then
 
 !DEBUG
+!  write(std_out,*) 
 !  write(std_out,'(a,i4)') 'symmetrize_xred: enter, nsym=',nsym
 !  do iatom=1,natom
 !    write(std_out,'(a,i4,3es16.6)') 'iatom,xred=',iatom,xred(:,iatom)
@@ -1675,44 +1703,120 @@ subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
 !  do isym=1,nsym
 !    write(std_out,'(a,i4,9i3,3es16.6)') 'isym,symrel,tnons',isym,symrel(:,:,isym),tnons(:,isym)
 !  enddo
+!  write(std_out,*)' present(tnons_new),present(tolsym)=',present(tnons_new),present(tolsym)
+!  write(std_out,*) 
 !ENDDEBUG
 
-!  loop over atoms
    ABI_ALLOCATE(xredsym,(3,natom))
-   do iatom=1,natom
-     tsum(1)=0.0d0
-     tsum(2)=0.0d0
-     tsum(3)=0.0d0
-!
-!    loop over symmetries
-     do isym=1,nsym
-!      atom ib is atom into which iatom is rotated by inverse of
-!      symmetry isym (inverse of symrel(mu,nu,isym))
-       ib=indsym(4,isym,iatom)
-!      Find the reduced coordinates after translation=t(indsym)+transl
-       fc1=xred(1,ib)+dble(indsym(1,isym,iatom))
-       fc2=xred(2,ib)+dble(indsym(2,isym,iatom))
-       fc3=xred(3,ib)+dble(indsym(3,isym,iatom))
-!      Compute [S * (x(indsym)+transl) ] + tnonsymmorphic
-       tt(:)=dble(symrel(:,1,isym))*fc1+&
-&       dble(symrel(:,2,isym))*fc2+&
-&       dble(symrel(:,3,isym))*fc3+ tnons(:,isym)
+   xredsym(:,:)=xred(:,1:natom)
 
-!      Average over nominally equivalent atomic positions
-       tsum(:)=tsum(:)+tt(:)
-     end do
-!
-!    Set symmetrized result to sum over number of terms
-     xredsym(:,iatom)=tsum(:)/dble(nsym)
+   if(present(indsym))then 
 
-!    End loop over iatom
-   end do
+!    Loop over atoms to determine new, symmetrized positions.
+     do iatom=1,natom
+       tsum(:)=0.0d0
+!
+!      Loop over symmetries
+       do isym=1,nsym
+!        atom ib is atom into which iatom is rotated by inverse of
+!        symmetry isym (inverse of symrel(mu,nu,isym))
+         ib=indsym(4,isym,iatom)
+!        Find the reduced coordinates after translation=t(indsym)+transl
+         fc(:)=xred(:,ib)+dble(indsym(1:3,isym,iatom))
+!        Compute [S * (x(indsym)+transl) ] + tnonsymmorphic
+         tt(:)=dble(symrel(:,1,isym))*fc(1)+&
+&         dble(symrel(:,2,isym))*fc(2)+&
+&         dble(symrel(:,3,isym))*fc(3)+ tnons(:,isym)
+
+!        Average over nominally equivalent atomic positions
+         tsum(:)=tsum(:)+tt(:)
+       end do ! isym
+!
+!      Set symmetrized result to sum over number of terms
+       xredsym(:,iatom)=tsum(:)/dble(nsym)
+
+     end do ! iatom
+   endif ! present(indsym)
 
 !DEBUG
-!  do iatom=1,natom
-!    write(std_out,'(a,i4,3es16.6)') 'iatom,xredsym=',iatom,xredsym(:,iatom)
-!  enddo
+! do iatom=1,natom
+!   write(std_out,'(a,i4,3es20.10)') 'iatom,xredsym=',iatom,xredsym(:,iatom)
+! enddo
 !ENDDEBUG
+
+!  Loop over symmetry operations to determine possibly new tnons, as well as symmetrized positions.
+   if(present(tolsym) .and. present(tnons_new) .and. present(fixed_mismatch) .and. present(mismatch_fft_tnons))then
+     fixed_mismatch=0
+     mismatch_fft_tnons=0
+     tnons_new(:,:)=tnons(:,:)-nint(tnons(:,:)-tolsym)
+     do isym=1,nsym
+       mismatch_fft_tnons_isym=0
+       do ii=1,3
+         delta(:)=tnons(ii,isym)*mult(:)
+         delta(:)=delta(:)-nint(delta(:))
+         ! Is there is a mismatch between FFT and isym for all multipliers ?
+         if( all(abs(delta(:))>tol8) ) mismatch_fft_tnons_isym=1
+       enddo
+       !Declare the first symmetry operation that induces a problem
+       if(mismatch_fft_tnons_isym>0 .and. (mismatch_fft_tnons==0)) mismatch_fft_tnons=isym
+
+       ! However, also try to propose a solution.
+       if(mismatch_fft_tnons_isym==1)then
+         ! Compute the pseudo-inverse of symrel-1, then multiply tnons
+         mat(:,:)=zero; mat(1,1)=one; mat(2,2)=one; mat(3,3)=one
+         ! This is symrel-1
+         mat(:,:)=symrel(:,:,isym)-mat(:,:)
+         do ii=1,3
+           !Select the smallest modification tnons
+           delta(:)=tnons(ii,isym)*mult(:)
+           delta(:)=(delta(:)-nint(delta(:)))/mult(:)
+           xredshift(ii,1)=delta(1) 
+           do jj=2,4
+             if(abs(delta(jj))<abs(xredshift(ii,1)))xredshift(ii,1)=delta(jj)
+           enddo
+         enddo
+         call dgelss(3,3,1,mat,3,xredshift(:,1),3,sgval,tol5,irank,work,15,info)
+         ! xredshift(:,1) is now the tentative shift, to be tested for all symmetries
+         if( all(abs(xredshift(:,1))<tolsym) )then
+           fixed_mismatch=1
+           do isym2=1, nsym
+             tnons_new(:,isym2)=tnons(:,isym2)+xredshift(:,1)-matmul(symrel(:,:,isym2),xredshift(:,1))
+             do ii=1,3
+               !tnons might now be slighly non-zero. Set to zero such values
+               if(abs(tnons_new(ii,isym))<tol6**2)tnons_new(ii,isym)=zero
+               delta(:)=tnons_new(ii,isym)*mult(:)
+               delta(:)=delta(:)-nint(delta(:))
+               ! Is the mismatch between FFT and symmetries still present for all the multipliers ??
+               if( all(abs(delta(:))>tol8) ) fixed_mismatch=0
+             enddo
+           enddo
+         endif
+!DEBUG
+!        write(std_out,*) 'fixed_mismatch',fixed_mismatch
+!        write(std_out,'(a,3es20.10)') 'xredshift=',xredshift(:,1)
+!ENDDEBUG
+         if(fixed_mismatch==1)exit
+       endif ! mismatch_fft_tnons_isym==1
+     end do ! isym
+     if(mismatch_fft_tnons/=0)then
+       if(fixed_mismatch==1)then
+         do iatom=1,natom
+           xredsym(:,iatom)=xredsym(:,iatom)+xredshift(:,1)
+         enddo
+       endif
+     endif
+
+!DEBUG
+!    write(std_out,*) ' mismatch_fft_tnons, fixed_mismatch=',mismatch_fft_tnons, fixed_mismatch
+!    do iatom=1,natom
+!      write(std_out,'(a,i4,3es20.10)') 'iatom,xredsym=',iatom,xredsym(:,iatom)
+!    enddo
+!ENDDEBUG
+
+   endif ! present(tolsym) .and. present(tnons_new)
+
+! --------------------------------------------------------------
+!  Will update the atomic positions only if it is worth to do so.
 
    transl(:)=xredsym(:,1)-nint(xredsym(:,1))
 
@@ -1753,7 +1857,17 @@ subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
  end if
 
 !DEBUG
+! write(std_out,*) 
 ! write(std_out,'(a)') 'symmetrize_xred : exit'
+! do iatom=1,natom
+!   write(std_out,'(a,i4,3es20.10)') 'iatom,xred=',iatom,xred(:,iatom)
+! enddo
+! if(present(tnons_new))then
+!   do isym=1,nsym
+!     write(std_out,'(a,i4,9i3,3es20.10)') 'isym,symrel,tnons_new',isym,symrel(:,:,isym),tnons_new(:,isym)
+!   enddo
+! endif
+! write(std_out,*) 
 !ENDDEBUG
 
 end subroutine symmetrize_xred
