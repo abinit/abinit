@@ -680,7 +680,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      end if!End if verbose
 
      !Open *csv file for storing GF values of all cores for this iteration
-     write(filename,'(a,I1,aI3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom,"_proc",my_rank,"_iter",icycle,".csv"
+     write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom,"_proc",my_rank,"_iter",icycle,".csv"
      unit_GF_val = get_unit()
      if(iam_master)then
         if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
@@ -2598,13 +2598,15 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 
 
 !  Print the standard deviation after the fit
-     write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
-&                    ' Mean Standard Deviation values of the effective-potential',ch10,&
-&                    ' with respect to the test-set (meV^2/atm):',&
-&               ch10,'   Energy          : ',&
-&               mse* (Ha_EV*1000)**2 *factor ,ch10,&
+     write(message,'(6a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+!&                    ' Mean Standard Deviation values of the effective-potential',ch10,&
+!&                    ' with respect to the test-set (meV^2/atm):',&
+!&               ch10,'   Energy          : ',&
+!&               mse* (Ha_EV*1000)**2 *factor ,ch10,&
 &                    ' Goal function values of the effective.potential',ch10,& 
 &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
+&                    '   Energy          : ',&
+&               (mse)*(HaBohr_meVAng)**2,ch10,&
 &                    '   Forces+Stresses : ',&
 &               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
 &                    '   Forces          : ',&
