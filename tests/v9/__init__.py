@@ -29,8 +29,8 @@ inp_files = [
 "t14.in", # optic
 "t15.in", # check slight misalignment of rprim, with large tolsym
 "t16.in", # check slightly incorrect xred, with large tolsym
-"t17.in", # RMM-DIIS eigsolver for NC.
-"t18.in", # RMM-DIIS eigsolver for PAW.
+"t19.in", # RMM-DIIS eigsolver for NC.
+"t20.in", # RMM-DIIS eigsolver for PAW.
 # GW/BSE
 "t21.in", # HF exchange checking q->0 terms
 "t22.in", # AC GW
