@@ -128,13 +128,13 @@ contains
 
 subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,cwavef_left_r,&
 &                 gs_ham,lambda,mpi_enreg,ndat,&
-&                 prtvol,sij_opt,tim_getchc,type_calc,&
+&                 sij_opt,type_calc,&
 &                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cpopt,ndat, prtvol
- integer,intent(in) :: sij_opt,tim_getchc,type_calc
+ integer,intent(in) :: cpopt,ndat
+ integer,intent(in) :: sij_opt,type_calc
  integer,intent(in),optional :: select_k
  real(dp),intent(in) :: lambda
  real(dp),intent(inout) :: chc(2*ndat)
@@ -147,30 +147,19 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: level=114,re=1,im=2,tim_fourwf=33
- integer :: choice,cplex,cpopt_here,i1,i2,i3,idat,idir,ierr
- integer :: ig,igspinor,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
- integer :: nnlout,nffttot,npw,npw_fft,npw_k1,npw_k2,nspinortot
+ integer,parameter :: re=1,im=2
+ integer :: choice,cpopt_here,i1,i2,i3,idat,idir
+ integer :: ig,igspinor,ispinor,my_nspinor
+ integer :: nnlout,nffttot,npw,npw_k1,npw_k2,nspinortot
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
- logical :: k1_eq_k2,have_to_reequilibrate,has_fock
+ logical :: k1_eq_k2,has_fock
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: dotr,doti,ghcim,ghcre,weight
  character(len=500) :: msg
 !arrays
  integer, pointer :: gbound_k1(:,:),gbound_k2(:,:),kg_k1(:,:),kg_k2(:,:)
- integer, ABI_CONTIGUOUS pointer :: indices_pw_fft(:),kg_k_fft(:,:)
- integer, ABI_CONTIGUOUS pointer :: recvcount_fft(:),recvdisp_fft(:)
- integer, ABI_CONTIGUOUS pointer ::  sendcount_fft(:),senddisp_fft(:)
- integer, allocatable:: dimcprj(:)
  real(dp) :: enlout(ndat),enlout_im(ndat),lambda_ndat(ndat),tsec(2),z_tmp(2)
- real(dp),target :: nonlop_dum(1,1)
- real(dp),allocatable :: buff_wf(:,:),cwavef1(:,:),cwavef2(:,:),cwavef_fft(:,:),cwavef_fft_tr(:,:)
- real(dp),allocatable :: ghc1(:,:),ghc2(:,:),ghc3(:,:),ghc4(:,:),ghc_mGGA(:,:),ghc_vectornd(:,:)
- real(dp),allocatable :: gvnlc(:,:),vlocal_tmp(:,:,:),work(:,:,:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:)
+ real(dp),allocatable :: gsc(:,:),gvnlxc(:,:)
  real(dp), pointer :: kinpw_k1(:),kinpw_k2(:),kpt_k1(:),kpt_k2(:)
- real(dp), pointer :: gsc_ptr(:,:)
- type(fock_common_type),pointer :: fock
- type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
 
 ! *********************************************************************
 
@@ -297,7 +286,7 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
      do i3=1,gs_ham%n6
        do i2=1,gs_ham%n5
          do i1=1,gs_ham%n4
-           z_tmp(1) = cwavef_r(1,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3+(ndat-1)*gs_ham%n4)+cwavef_r(2,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
+           z_tmp(1) = cwavef_r(1,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)+cwavef_r(2,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
            z_tmp(2) = cwavef_r(2,i1,i2,i3)*cwavef_left_r(1,i1,i2,i3)-cwavef_r(1,i1,i2,i3)*cwavef_left_r(2,i1,i2,i3)
            chc(1) = chc(1) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(1)
            chc(2) = chc(2) + gs_ham%vlocal(i1,i2,i3,1)*z_tmp(2)
@@ -461,12 +450,12 @@ end subroutine getchc
 !! SOURCE
 
 subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,ndat,&
-&                 prtvol,tim_getcsc,&
+&                 tim_getcsc,&
 &                 select_k) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cpopt,ndat,prtvol,tim_getcsc
+ integer,intent(in) :: cpopt,ndat,tim_getcsc
  integer,intent(in),optional :: select_k
  real(dp),intent(out) :: csc(2*ndat)
  type(MPI_type),intent(in) :: mpi_enreg
@@ -479,8 +468,8 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
 
 !Local variables-------------------------------
 !scalars
- integer :: band_shift,choice,dimenl1,dimenl2,iband,idat,idir,ierr,index_cg,index_cprj
- integer :: index_gsc,me,my_nspinor,npw,nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm,nnlout
+ integer :: choice,idat,idir
+ integer :: npw,nspinor,paw_opt,select_k_,signs,tim_nonlop,nnlout
  !character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)

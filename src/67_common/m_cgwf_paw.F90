@@ -50,6 +50,7 @@ module m_cgwf_paw
 !!***
 
  public :: cgwf_paw
+ public :: mksubovl
 
 !!***
 
@@ -118,16 +119,16 @@ contains
 !!
 !! SOURCE
 
-subroutine cgwf_paw(cg,chkexit,cpus,eig,&
-&                filnam_ds1,gs_hamk,icg,ikpt,inonsc,&
-&                isppol,mcg,mpi_enreg,&
-&                nband,nbdblock,nkpt,nline,npw,&
-&                nspinor,nsppol,ortalg,prtvol,quit,resid,subham,&
+subroutine cgwf_paw(cg,chkexit,cprj_cwavef_bands,cpus,eig,&
+&                filnam_ds1,gs_hamk,icg,inonsc,&
+&                mcg,mpi_enreg,&
+&                nband,nbdblock,nline,npw,&
+&                nspinor,ortalg,prtvol,quit,resid,subham,&
 &                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
- integer,intent(in) :: chkexit,icg,ikpt,inonsc,isppol
- integer,intent(in) :: mcg,nband,nbdblock,nkpt,nline
- integer,intent(in) :: npw,nspinor,nsppol,ortalg,prtvol
+ integer,intent(in) :: chkexit,icg,inonsc
+ integer,intent(in) :: mcg,nband,nbdblock,nline
+ integer,intent(in) :: npw,nspinor,ortalg,prtvol
  integer,intent(in) :: wfoptalg
  integer,intent(in) :: quit
  real(dp),intent(in) :: cpus,tolrde,tolwfr
@@ -138,10 +139,11 @@ subroutine cgwf_paw(cg,chkexit,cpus,eig,&
  real(dp),intent(inout),target :: cg(2,mcg)
  real(dp), intent(inout) :: eig(nband)
  real(dp),intent(out) :: resid(nband),subham(nband*(nband+1))
+ type(pawcprj_type),intent(inout),target :: cprj_cwavef_bands(:,:)
 
 !Local variables-------------------------------
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
-integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
+integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  integer,save :: nskip=0
  integer :: counter,cpopt,itypat
  integer :: i1,i2,i3,ia,iband,ibandmin,ibandmax,isubh,isubh0,jband,me_g0
@@ -151,11 +153,11 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  integer :: optekin,sij_opt
  integer :: useoverlap,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr,eval,gamma
- real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,weight_fft,xnorm
+ real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,weight_fft,xnorm
  real(dp) :: dot(2)
  character(len=500) :: message
- integer,allocatable :: dimlmn(:)
- real(dp) :: tsec(2),dotrr(1),dotii(1)
+! integer,allocatable :: dimlmn(:)
+ real(dp) :: tsec(2)
  real(dp),allocatable :: conjgr(:,:),gvnlxc(:,:),denpot_dum(:,:,:),fofgout_dum(:,:)
  real(dp), pointer :: cwavef(:,:),cwavef_left(:,:),cwavef_bands(:,:)
  real(dp), allocatable :: cwavef_r(:,:,:,:)
@@ -163,7 +165,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  real(dp),allocatable :: direc(:,:),direc_tmp(:,:),pcon(:),scprod(:,:),scwavef_dum(:,:),direc_r(:,:,:,:)
  real(dp),pointer :: scprod_csc(:),kinpw(:)
  real(dp) :: z_tmp(2),z_tmp2(2)
- type(pawcprj_type),allocatable,target :: cprj_cwavef_bands(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:),cprj_cwavef_left(:,:)
  type(pawcprj_type),allocatable :: cprj_direc(:,:),cprj_conjgr(:,:)
 
@@ -223,7 +224,6 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
  ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
 
- ABI_DATATYPE_ALLOCATE(cprj_cwavef_bands,(natom,nband))
  ABI_DATATYPE_ALLOCATE(cprj_direc ,(natom,nbdblock))
  ABI_DATATYPE_ALLOCATE(cprj_conjgr ,(natom,nbdblock))
 
@@ -236,16 +236,15 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 
  ncpgr = 0 ! no need of gradients here
 !Dimensioning and allocation of <p_i|Cnk>
- ABI_ALLOCATE(dimlmn,(natom))
- dimlmn=0  ! Type-sorted cprj
- ia=0
- do itypat=1,gs_hamk%ntypat
-   dimlmn(ia+1:ia+gs_hamk%nattyp(itypat))=count(gs_hamk%indlmn(3,:,itypat)>0)
-   ia=ia+gs_hamk%nattyp(itypat)
- end do
- call pawcprj_alloc(cprj_cwavef_bands,ncpgr,dimlmn)
- call pawcprj_alloc(cprj_direc,ncpgr,dimlmn)
- call pawcprj_alloc(cprj_conjgr,ncpgr,dimlmn)
+! ABI_ALLOCATE(dimlmn,(natom))
+! dimlmn=0  ! Type-sorted cprj
+! ia=0
+! do itypat=1,gs_hamk%ntypat
+!   dimlmn(ia+1:ia+gs_hamk%nattyp(itypat))=count(gs_hamk%indlmn(3,:,itypat)>0)
+!   ia=ia+gs_hamk%nattyp(itypat)
+! end do
+ call pawcprj_alloc(cprj_direc,ncpgr,gs_hamk%dimcprj)
+ call pawcprj_alloc(cprj_conjgr,ncpgr,gs_hamk%dimcprj)
 
  cwavef_bands => cg(:,1+icg:nblock*npw*nspinor+icg)
 
@@ -273,7 +272,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
    end do
  end do
 
- isubh = 1
+ isubh=1
  isubh0=1
 
  ! Loop over blocks of bands. In the standard band-sequential algorithm, nblock=nband.
@@ -340,7 +339,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          ! Compute lambda = <C|H|C>
          sij_opt = 0
          call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
-           &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
+           &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
          chc=z_tmp(1)
          lam0=chc
          eval=chc
@@ -610,13 +609,13 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 &          gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
 &          n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
          call getchc(z_tmp,cpopt,cwavef,direc,cprj_cwavef,cprj_direc,cwavef_r,direc_r,&
-           &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
+           &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
          dhc=z_tmp(1)
          dhc=dhc*xnorm
 
          ! Compute <D|H|D> or <D|(H-zshift)^2|D>
          call getchc(z_tmp,cpopt,direc,direc,cprj_direc,cprj_direc,direc_r,direc_r,&
-&          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
+&          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
          dhd=z_tmp(1)
          dhd=dhd*xnorm**2
 
@@ -708,7 +707,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            end if
            ! Update chc before exit
            call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
-             &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
+             &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
            eig(iband)=z_tmp(1)
            nskip=nskip+2*(nline-iline)  ! Number of one-way 3D ffts skipped
            exit                         ! Exit from the loop on iline
@@ -717,7 +716,7 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          ! Update chc only if last iteration, otherwise it will be done at the beginning of the next one
          if (iline==nline) then
            call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
-             &          gs_hamk,zero,mpi_enreg,1,prtvol,sij_opt,tim_getchc,type_calc)
+             &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
            eig(iband)=z_tmp(1)
          end if
 
@@ -761,7 +760,12 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
      ! Add the nonlocal part
      call getchc(subham(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef,&
        &          cprj_cwavef,cprj_cwavef_left,cwavef_r,cwavef_r,&
-       &          gs_hamk,zero,mpi_enreg,iband,prtvol,sij_opt,tim_getchc,4)
+       &          gs_hamk,zero,mpi_enreg,iband,sij_opt,4)
+     ! Compute csc matrix
+!     cwavef_left => cwavef_bands(:,1:iband*npw*nspinor)
+!     call getcsc(subovl(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef_left,&
+!       &          cprj_cwavef,cprj_cwavef_left,&
+!       &          gs_hamk,mpi_enreg,iband,tim_getcsc_band)
      isubh0=isubh
    end do
 
@@ -786,12 +790,10 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  ! ===================
 
  nullify(cprj_cwavef)
- call pawcprj_free(cprj_cwavef_bands)
  call pawcprj_free(cprj_direc)
  call pawcprj_free(cprj_conjgr)
- ABI_DATATYPE_DEALLOCATE(cprj_cwavef_bands)
  ABI_DATATYPE_DEALLOCATE(cprj_conjgr)
- ABI_DEALLOCATE(dimlmn)
+! ABI_DEALLOCATE(dimlmn)
  ABI_DEALLOCATE(conjgr)
  ABI_DEALLOCATE(scwavef_dum)
  ABI_DEALLOCATE(gvnlxc)
@@ -813,6 +815,56 @@ integer,parameter :: tim_getchc=0,tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  DBG_EXIT("COLL")
 
 end subroutine cgwf_paw
+!!***
+
+subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
+!Arguments ------------------------------------
+ integer,intent(in) :: icg,nband
+!arrays
+ real(dp),intent(out) :: subovl(nband*(nband+1))
+ type(pawcprj_type),intent(in),target :: cprj_cwavef_bands(:,:)
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ type(MPI_type),intent(in) :: mpi_enreg
+ real(dp),intent(inout),target :: cg(:,:)
+
+!Local variables-------------------------------
+ integer,parameter :: tim_getcsc_band=4
+ integer :: cpopt,iband,isubh,wfsize
+ real(dp), pointer :: cwavef(:,:),cwavef_left(:,:)
+ real(dp),pointer :: cwavef_bands(:,:)
+ type(pawcprj_type),pointer :: cprj_cwavef(:,:),cprj_cwavef_left(:,:)
+
+! *********************************************************************
+
+ wfsize=gs_hamk%npw_k*gs_hamk%nspinor
+ cpopt=2
+
+ cwavef_bands => cg(:,1+icg:nband*wfsize+icg)
+ do iband=1,nband
+   cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
+   cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+
+   call getcprj(1,0,cwavef,cprj_cwavef,&
+&    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+&    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&    gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+ end do
+
+ isubh=1
+ do iband=1,nband
+   cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
+   cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+   cwavef_left => cwavef_bands(:,1:iband*wfsize)
+   cprj_cwavef_left => cprj_cwavef_bands(:,1:iband)
+   ! Compute csc matrix
+   call getcsc(subovl(isubh:isubh+2*iband-1),cpopt,cwavef,cwavef_left,&
+     &          cprj_cwavef,cprj_cwavef_left,&
+     &          gs_hamk,mpi_enreg,iband,tim_getcsc_band)
+   isubh=isubh+2*iband
+ end do
+
+end subroutine mksubovl
 !!***
 
 end module m_cgwf_paw

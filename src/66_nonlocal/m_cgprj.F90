@@ -377,128 +377,6 @@ contains
  end subroutine getcprj
 !!***
 
-!!****f* ABINIT/cprj_axpby
-!! NAME
-!! cprj_axpby
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
- subroutine cprj_axpby(cprj_res,cprj_x,cprj_y,alpha,beta,&
-&                   indlmn,istwf_k,lmnmax,mpi_enreg,&
-&                   natom,nattyp,nby,nspinor,ntypat)
-
-!Arguments -------------------------------
-!scalars
- integer,intent(in) :: istwf_k,lmnmax
- integer,intent(in) :: natom,nby,nspinor,ntypat
- real(dp),intent(in) :: alpha(2),beta(2*nby)
- type(MPI_type),intent(in) :: mpi_enreg
-!arrays
- integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
- type(pawcprj_type),intent(inout) :: cprj_res(natom,nspinor)
- type(pawcprj_type),intent(inout) :: cprj_x(natom,nspinor)
- type(pawcprj_type),intent(inout) :: cprj_y(natom,nspinor*nby)
-
-!Local variables-------------------------------
-!scalars
- logical :: alpha_zero,alpha_im_zero,beta_zero,beta_im_zero
- integer :: cplex,ia,ia1,ia2,ia3,ia4,iatm,iby,ispinor,itypat
- integer :: mincat,nby_,nincat,nlmn
-!arrays
- real(dp) :: tsec(2)
- real(dp), allocatable :: ax(:,:),by(:,:)
-
-! *********************************************************************
-
- DBG_ENTER('COLL')
-
- call timab(1211,1,tsec)
-
-!Some other dims
- mincat=min(NLO_MINCAT,maxval(nattyp))
- cplex=2;if (istwf_k>1) cplex=1
- alpha_zero = (alpha(1)**2 + alpha(2)**2) < tol12*tol12
- beta_zero  = ( beta(1)**2 +  beta(2)**2) < tol12*tol12
- alpha_im_zero = (abs(alpha(2)) < tol12) .or. cplex==1
- beta_im_zero  = (abs(beta(2))  < tol12) .or. cplex==1
-
- nby_ = nby
- ! If beta==0 : no loop on by
- if (beta_zero) nby_ = 1
-
- do iby=1,nby_
-!  Loop over atom types
-   ia1=1;iatm=0
-   do itypat=1,ntypat
-     ia2=ia1+nattyp(itypat)-1;if (ia2<ia1) cycle
-     nlmn=count(indlmn(3,:,itypat)>0)
-
-     ABI_ALLOCATE(ax,(cplex,nlmn))
-     ABI_ALLOCATE(by,(cplex,nlmn))
-     if (alpha_zero) ax = zero
-
-!    Loop on blocks of atoms inside type
-!     iatm_block=iatm
-     do ia3=ia1,ia2,mincat
-       ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
-
-       do ispinor=1,nspinor
-         do ia=1,nincat
-           ! If alpha/=0 and first iteration on 'by' : compute 'ax'
-           if (.not.alpha_zero.and.iby==1) then
-             ax(1:cplex,1:nlmn) = alpha(1)*cprj_x(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
-             if (.not.alpha_im_zero) then
-               ax(1,1:nlmn) = ax(1,1:nlmn) - alpha(2)*cprj_x(iatm+ia,ispinor)%cp(2,1:nlmn)
-               ax(2,1:nlmn) = ax(2,1:nlmn) + alpha(2)*cprj_x(iatm+ia,ispinor)%cp(1,1:nlmn)
-             end if
-           end if
-           ! If beta/=0 : compute 'by' (for data 'iby')
-           if (.not.beta_zero) then
-             by(1:cplex,1:nlmn) =  beta(2*iby-1)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1:cplex,1:nlmn)
-             if (.not.beta_im_zero) then
-               by(1,1:nlmn) = by(1,1:nlmn) - beta(2*iby)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(2,1:nlmn)
-               by(2,1:nlmn) = by(2,1:nlmn) + beta(2*iby)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1,1:nlmn)
-             end if
-           end if
-           ! if first iteration on nby, initialize res with ax (can be zero)
-           if (iby==1) cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) = ax(1:cplex,1:nlmn)
-           ! if beta/=0, accumulate res from data 'iby'
-           if (.not.beta_zero) then
-             cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) = &
-&               cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) + by(1:cplex,1:nlmn)
-           end if
-         end do
-       end do
-
-!      End loop inside block of atoms
-       iatm=iatm+nincat
-     end do
-
-     ABI_DEALLOCATE(ax)
-     ABI_DEALLOCATE(by)
-
-!    End loop over atom types
-     ia1=ia2+1
-   end do
- end do
-
- call timab(1211,2,tsec)
-
- DBG_EXIT('COLL')
-
- end subroutine cprj_axpby
-!!***
-
 !!****f* ABINIT/ctocprj
 !! NAME
 !! ctocprj
@@ -1084,6 +962,240 @@ contains
 
  end subroutine ctocprj
 !!***
+
+!!****f* ABINIT/cprj_axpby
+!! NAME
+!! cprj_axpby
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine cprj_axpby(cprj_res,cprj_x,cprj_y,alpha,beta,&
+&                   indlmn,istwf_k,lmnmax,mpi_enreg,&
+&                   natom,nattyp,nby,nspinor,ntypat)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: istwf_k,lmnmax
+ integer,intent(in) :: natom,nby,nspinor,ntypat
+ real(dp),intent(in) :: alpha(2),beta(2*nby)
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
+ type(pawcprj_type),intent(inout) :: cprj_res(natom,nspinor)
+ type(pawcprj_type),intent(inout) :: cprj_x(natom,nspinor)
+ type(pawcprj_type),intent(inout) :: cprj_y(natom,nspinor*nby)
+
+!Local variables-------------------------------
+!scalars
+ logical :: alpha_zero,alpha_im_zero,beta_zero,beta_im_zero
+ integer :: cplex,ia,ia1,ia2,ia3,ia4,iatm,iby,ispinor,itypat
+ integer :: mincat,nby_,nincat,nlmn
+!arrays
+ real(dp) :: tsec(2)
+ real(dp), allocatable :: ax(:,:),by(:,:)
+
+! *********************************************************************
+
+ DBG_ENTER('COLL')
+
+ call timab(1211,1,tsec)
+
+!Some other dims
+ mincat=min(NLO_MINCAT,maxval(nattyp))
+ cplex=2;if (istwf_k>1) cplex=1
+ alpha_zero = (alpha(1)**2 + alpha(2)**2) < tol12*tol12
+ beta_zero  = ( beta(1)**2 +  beta(2)**2) < tol12*tol12
+ alpha_im_zero = (abs(alpha(2)) < tol12) .or. cplex==1
+ beta_im_zero  = (abs(beta(2))  < tol12) .or. cplex==1
+
+ nby_ = nby
+ ! If beta==0 : no loop on by
+ if (beta_zero) nby_ = 1
+
+ do iby=1,nby_
+!  Loop over atom types
+   ia1=1;iatm=0
+   do itypat=1,ntypat
+     ia2=ia1+nattyp(itypat)-1;if (ia2<ia1) cycle
+     nlmn=count(indlmn(3,:,itypat)>0)
+
+     ABI_ALLOCATE(ax,(cplex,nlmn))
+     ABI_ALLOCATE(by,(cplex,nlmn))
+     if (alpha_zero) ax = zero
+
+!    Loop on blocks of atoms inside type
+!     iatm_block=iatm
+     do ia3=ia1,ia2,mincat
+       ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
+
+       do ispinor=1,nspinor
+         do ia=1,nincat
+           ! If alpha/=0 and first iteration on 'by' : compute 'ax'
+           if (.not.alpha_zero.and.iby==1) then
+             ax(1:cplex,1:nlmn) = alpha(1)*cprj_x(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
+             if (.not.alpha_im_zero) then
+               ax(1,1:nlmn) = ax(1,1:nlmn) - alpha(2)*cprj_x(iatm+ia,ispinor)%cp(2,1:nlmn)
+               ax(2,1:nlmn) = ax(2,1:nlmn) + alpha(2)*cprj_x(iatm+ia,ispinor)%cp(1,1:nlmn)
+             end if
+           end if
+           ! If beta/=0 : compute 'by' (for data 'iby')
+           if (.not.beta_zero) then
+             by(1:cplex,1:nlmn) =  beta(2*iby-1)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1:cplex,1:nlmn)
+             if (.not.beta_im_zero) then
+               by(1,1:nlmn) = by(1,1:nlmn) - beta(2*iby)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(2,1:nlmn)
+               by(2,1:nlmn) = by(2,1:nlmn) + beta(2*iby)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1,1:nlmn)
+             end if
+           end if
+           ! if first iteration on nby, initialize res with ax (can be zero)
+           if (iby==1) cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) = ax(1:cplex,1:nlmn)
+           ! if beta/=0, accumulate res from data 'iby'
+           if (.not.beta_zero) then
+             cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) = &
+&               cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) + by(1:cplex,1:nlmn)
+           end if
+         end do
+       end do
+
+!      End loop inside block of atoms
+       iatm=iatm+nincat
+     end do
+
+     ABI_DEALLOCATE(ax)
+     ABI_DEALLOCATE(by)
+
+!    End loop over atom types
+     ia1=ia2+1
+   end do
+ end do
+
+ call timab(1211,2,tsec)
+
+ DBG_EXIT('COLL')
+
+ end subroutine cprj_axpby
+!!***
+
+!!!****f* ABINIT/cprj_rotate
+!!! NAME
+!!! cprj_rotate
+!!!
+!!! FUNCTION
+!!!
+!!! INPUTS
+!!!
+!!! SIDE EFFECTS
+!!!
+!!! PARENTS
+!!!
+!!! CHILDREN
+!!!
+!!! SOURCE
+!
+! subroutine cprj_rotate(cprj,evec,&
+!&                   indlmn,istwf_k,lmnmax,mpi_enreg,&
+!&                   natom,nattyp,nband,nspinor,ntypat)
+!
+!!Arguments -------------------------------
+!!scalars
+! integer,intent(in) :: istwf_k,lmnmax
+! integer,intent(in) :: natom,nband,nspinor,ntypat
+! type(MPI_type),intent(in) :: mpi_enreg
+!!arrays
+! integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
+! real(dp) :: evec(:,:)
+! type(pawcprj_type),intent(inout) :: cprj(natom,nspinor*nband)
+!
+!!Local variables-------------------------------
+!!scalars
+! logical :: alpha_zero,alpha_im_zero,beta_zero,beta_im_zero
+! integer :: iband,jband,cplex,ia,ia1,ia2,ia3,ia4,iatm,iby,ispinor,itypat
+! integer :: mincat,nby_,nincat,nlmn
+!!arrays
+! real(dp) :: tsec(2)
+! real(dp), allocatable :: ax(:,:),by(:,:)
+!
+!! *********************************************************************
+!
+! DBG_ENTER('COLL')
+!
+! call timab(1211,1,tsec)
+!
+!!Some other dims
+! mincat=min(NLO_MINCAT,maxval(nattyp))
+! cplex=2;if (istwf_k>1) cplex=1
+!
+!!Loop over atom types
+! do iband=1,nband
+!   do jband=1,nband
+!   ia1=1;iatm=0
+!   do itypat=1,ntypat
+!     ia2=ia1+nattyp(itypat)-1;if (ia2<ia1) cycle
+!     nlmn=count(indlmn(3,:,itypat)>0)
+!
+!     ABI_ALLOCATE(ax,(cplex,nlmn))
+!     ABI_ALLOCATE(by,(cplex,nlmn))
+!     if (alpha_zero) ax = zero
+!
+!!    Loop on blocks of atoms inside type
+!!     iatm_block=iatm
+!     do ia3=ia1,ia2,mincat
+!       ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
+!
+!       do ispinor=1,nspinor
+!         do ia=1,nincat
+!           ! If alpha/=0 and first iteration on 'by' : compute 'ax'
+!           if (.not.alpha_zero.and.iby==1) then
+!             ax(1:cplex,1:nlmn) = alpha(1)*cprj_x(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
+!             if (.not.alpha_im_zero) then
+!               ax(1,1:nlmn) = ax(1,1:nlmn) - alpha(2)*cprj_x(iatm+ia,ispinor)%cp(2,1:nlmn)
+!               ax(2,1:nlmn) = ax(2,1:nlmn) + alpha(2)*cprj_x(iatm+ia,ispinor)%cp(1,1:nlmn)
+!             end if
+!           end if
+!           ! If beta/=0 : compute 'by' (for data 'iby')
+!           if (.not.beta_zero) then
+!             by(1:cplex,1:nlmn) =  beta(2*iby-1)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1:cplex,1:nlmn)
+!             if (.not.beta_im_zero) then
+!               by(1,1:nlmn) = by(1,1:nlmn) - beta(2*iby)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(2,1:nlmn)
+!               by(2,1:nlmn) = by(2,1:nlmn) + beta(2*iby)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1,1:nlmn)
+!             end if
+!           end if
+!           ! if first iteration on nby, initialize res with ax (can be zero)
+!           if (iby==1) cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) = ax(1:cplex,1:nlmn)
+!           ! if beta/=0, accumulate res from data 'iby'
+!           if (.not.beta_zero) then
+!             cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) = &
+!&               cprj_res(iatm+ia,ispinor)%cp(1:cplex,1:nlmn) + by(1:cplex,1:nlmn)
+!           end if
+!         end do
+!       end do
+!
+!!      End loop inside block of atoms
+!       iatm=iatm+nincat
+!     end do
+!
+!     ABI_DEALLOCATE(ax)
+!     ABI_DEALLOCATE(by)
+!
+!!    End loop over atom types
+!     ia1=ia2+1
+!   end do
+!
+! call timab(1211,2,tsec)
+!
+! DBG_EXIT('COLL')
+!
+! end subroutine cprj_rotate
+!!!***
 
 end module m_cgprj
 !!***

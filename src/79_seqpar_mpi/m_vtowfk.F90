@@ -45,7 +45,7 @@ module m_vtowfk
  use m_gwls_hamiltonian, only : build_H
  use m_fftcore,     only : fftcore_set_mixprec, fftcore_mixprec
  use m_cgwf,        only : cgwf
- use m_cgwf_paw,    only : cgwf_paw
+ use m_cgwf_paw,    only : cgwf_paw,mksubovl
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
  use m_spacepar,    only : meanvalue_g
@@ -211,6 +211,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+ type(pawcprj_type),allocatable :: cprj_cwavef_bands(:,:)
 
 ! **********************************************************************
 
@@ -268,8 +269,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  enable_cgwf_paw = (gs_hamk%usepaw==1).and.(wfopta10==0)
  mgsc=0
+ igsc=0
  if ( .not. newlobpcg .and. .not. enable_cgwf_paw) then
-   igsc=0
    mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
 
    ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
@@ -304,7 +305,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end if
 
-   if (use_subovl==1) then
+   if (use_subovl==1.or.enable_cgwf_paw) then
      ABI_ALLOCATE(subovl,(nband_k*(nband_k+1)))
    else
      ABI_ALLOCATE(subovl,(0))
@@ -315,6 +316,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if (prtvol>2 .or. ikpt<=nkpt_max) then
    write(message,'(a,i5,2x,a,3f9.5,2x,a)')' non-scf iterations; kpt # ',ikpt,', k= (',gs_hamk%kpt_k,'), band residuals:'
    call wrtout(std_out,message,'PERS')
+ end if
+
+ if (enable_cgwf_paw) then
+   ncpgr = 0 ! no need of gradients here
+   ABI_DATATYPE_ALLOCATE(cprj_cwavef_bands,(natom,nband_k))
+   call pawcprj_alloc(cprj_cwavef_bands,ncpgr,gs_hamk%dimcprj)
  end if
 
 !Electric field: initialize dphase_k
@@ -412,10 +419,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
 !      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
        if (enable_cgwf_paw) then
-         call cgwf_paw(cg,dtset%chkexit,cpus,eig_k,dtfil%filnam_ds(1),&
-&         gs_hamk,icg,ikpt,inonsc,isppol,mcg,&
-&         mpi_enreg,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,my_nspinor,&
-&         dtset%nsppol,dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
+         call cgwf_paw(cg,dtset%chkexit,cprj_cwavef_bands,cpus,eig_k,dtfil%filnam_ds(1),&
+&         gs_hamk,icg,inonsc,mcg,mpi_enreg,nband_k,dtset%nbdblock,dtset%nline,npw_k,my_nspinor,&
+&         dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
        else
          call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
 &         gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
@@ -457,6 +463,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
 &       subham,subovl,use_subovl,0,mpi_enreg%me_g0)
+       call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
      end if
      call timab(585,2,tsec)
    end if
@@ -493,13 +500,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
    if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
-     if (.not.enable_cgwf_paw) then
-       call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
-&       mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
-     else
-       call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,0,cg,&
-&       mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
-     end if
+     call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,subovl,gs_hamk%usepaw,cg,&
+&     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+     !LTEST
+     return
+     !LTEST
    end if
    call timab(583,2,tsec)
 
@@ -973,6 +978,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call wrtout(std_out,message,'PERS')
      end do
    end if
+ end if
+
+ if (enable_cgwf_paw) then
+   call pawcprj_free(cprj_cwavef_bands)
+   ABI_DATATYPE_DEALLOCATE(cprj_cwavef_bands)
  end if
 
  !Hamiltonian constructor for gwls_sternheimer

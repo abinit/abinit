@@ -4586,6 +4586,18 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
    end if
 
    ABI_DEALLOCATE(work)
+
+   if (use_subovl==1) then
+     ABI_MALLOC_OR_DIE(work,(2,nband_k*(nband_k+1)), ierr)
+
+     do iband=1,nband_k
+       do ii=1,iband
+        
+       end do
+     end do
+     ABI_DEALLOCATE(work)
+   end if
+
  end if
 
  contains
@@ -4657,7 +4669,7 @@ end subroutine subdiago
 !!
 !! SOURCE
 
-subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useoverlap,vecnm,me_g0,comm)
+subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useoverlap,vecnm,me_g0,comm)
 
  use m_abi_linalg
 
@@ -4665,13 +4677,13 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 !scalars
  integer,intent(in) :: icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,useoverlap,me_g0,comm
 !arrays
- real(dp),intent(inout) :: ovl_vecnm(2,mgsc*useoverlap),vecnm(2,mcg)
+ real(dp),intent(inout) :: ovl_mat(nvec*(nvec+1)*useoverlap),vecnm(2,mcg)
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr,ii,ii0,ii1,ii2,ivec,ivec2
+ integer :: ierr,ii,ii0,ii1,ii2,ivec,ivec2,ivec3,iv1,iv2,iv3,iv1l,iv2l,iv3l
  integer :: rvectsiz,vectsize,cg_idx,gsc_idx
- real(dp) :: doti,dotr,sum,xnorm
+ real(dp) :: doti,dotr,summ,xnorm
  character(len=500) :: msg
 !arrays
  integer :: cgindex(nvec),gscindex(nvec)
@@ -4679,6 +4691,9 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  real(dp),allocatable :: rblockvectorbx(:,:),rblockvectorx(:,:),rgramxbx(:,:)
  complex(dpc),allocatable :: cblockvectorbx(:,:),cblockvectorx(:,:)
  complex(dpc),allocatable :: cgramxbx(:,:)
+ !LTEST
+ real(dp) :: re,im
+ !LTES
 
 ! *************************************************************************
 
@@ -4697,13 +4712,16 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
    end do
  end if
 #endif
+ if (useoverlap==1.and.(ortalgo/=0)) then
+   MSG_ERROR('useoverlap is implemented only for ortalgo==0')
+ end if
 
 !Nothing to do if ortalgo=-1
  if(ortalgo==-1) return
 
  do ivec=1,nvec
    cgindex(ivec)=nelem*(ivec-1)+icg+1
-   gscindex(ivec)=nelem*(ivec-1)+igsc+1
+!   gscindex(ivec)=nelem*(ivec-1)+igsc+1
  end do
 
  if (ortalgo==3) then
@@ -4713,8 +4731,9 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 !  NEW VERSION: avoid copies, use ZHERK for NC
    cg_idx = cgindex(1)
    if (useoverlap==1) then
-     gsc_idx = gscindex(1)
-     call cgpaw_cholesky(nelem,nvec,vecnm(1,cg_idx),ovl_vecnm(1,gsc_idx),istwf_k,me_g0,comm)
+!    TO DO
+!     gsc_idx = gscindex(1)
+!     call cgpaw_cholesky(nelem,nvec,vecnm(1,cg_idx),ovl_vecnm(1,gsc_idx),istwf_k,me_g0,comm)
    else
      call cgnc_cholesky(nelem,nvec,vecnm(1,cg_idx),istwf_k,me_g0,comm,use_gemm=.FALSE.)
    end if
@@ -4732,7 +4751,8 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
      ABI_ALLOCATE(cblockvectorbx,(vectsize,nvec))
      call abi_xcopy(nvec*vectsize,vecnm(:,cgindex(1):cgindex(nvec)-1),1,cblockvectorx,1,x_cplx=2)
      if (useoverlap == 1) then
-       call abi_xcopy(nvec*vectsize,ovl_vecnm(:,gscindex(1):gscindex(nvec)-1),1,cblockvectorbx,1,x_cplx=2)
+       !TO DO
+       !call abi_xcopy(nvec*vectsize,ovl_vecnm(:,gscindex(1):gscindex(nvec)-1),1,cblockvectorbx,1,x_cplx=2)
      else
        call abi_xcopy(nvec*vectsize,vecnm(:,cgindex(1):cgindex(nvec)-1),1,cblockvectorbx,1,x_cplx=2)
      end if
@@ -4740,7 +4760,8 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
      call abi_xcopy(nvec*vectsize,cblockvectorx,1,vecnm(:,cgindex(1):cgindex(nvec)-1),1,x_cplx=2)
      if (useoverlap == 1) then
        call abi_xtrsm('r','u','n','n',vectsize,nvec,cone,cgramxbx,nvec,cblockvectorbx,vectsize)
-       call abi_xcopy(nvec*vectsize,cblockvectorbx,1,ovl_vecnm(:,gscindex(1):gscindex(nvec)-1),1,x_cplx=2)
+       !TO DO
+       !call abi_xcopy(nvec*vectsize,cblockvectorbx,1,ovl_vecnm(:,gscindex(1):gscindex(nvec)-1),1,x_cplx=2)
      end if
      ABI_DEALLOCATE(cgramxbx)
      ABI_DEALLOCATE(cblockvectorx)
@@ -4759,9 +4780,10 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
          call abi_xcopy(rvectsiz-1,vecnm(1,cgindex(ivec)+1),2,rblockvectorx(2,ivec),1)
          call abi_xcopy(rvectsiz-1,vecnm(2,cgindex(ivec)+1),2,rblockvectorx(rvectsiz+1,ivec),1)
          if (useoverlap == 1) then
-           call abi_xcopy(1,ovl_vecnm(1,gscindex(ivec)),1,rblockvectorbx(1,ivec),1)
-           call abi_xcopy(rvectsiz-1,ovl_vecnm(1,gscindex(ivec)+1),2,rblockvectorbx(2,ivec),1)
-           call abi_xcopy(rvectsiz-1,ovl_vecnm(2,gscindex(ivec)+1),2,rblockvectorbx(rvectsiz+1,ivec),1)
+           !TO DO
+           !call abi_xcopy(1,ovl_vecnm(1,gscindex(ivec)),1,rblockvectorbx(1,ivec),1)
+           !call abi_xcopy(rvectsiz-1,ovl_vecnm(1,gscindex(ivec)+1),2,rblockvectorbx(2,ivec),1)
+           !call abi_xcopy(rvectsiz-1,ovl_vecnm(2,gscindex(ivec)+1),2,rblockvectorbx(rvectsiz+1,ivec),1)
          else
            call abi_xcopy(1,vecnm(1,cgindex(ivec)),1,rblockvectorbx(1,ivec),1)
            call abi_xcopy(rvectsiz-1,vecnm(1,cgindex(ivec)+1),2,rblockvectorbx(2,ivec),1)
@@ -4773,8 +4795,9 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
          call abi_xcopy(rvectsiz,vecnm(1,cgindex(ivec)),2,rblockvectorx(1,ivec),1)
          call abi_xcopy(rvectsiz,vecnm(2,cgindex(ivec)),2,rblockvectorx(rvectsiz+1,ivec),1)
          if (useoverlap == 1) then
-           call abi_xcopy(rvectsiz,ovl_vecnm(1,gscindex(ivec)),2,rblockvectorbx(1,ivec),1)
-           call abi_xcopy(rvectsiz,ovl_vecnm(2,gscindex(ivec)),2,rblockvectorbx(rvectsiz+1,ivec),1)
+           !TO DO
+           !call abi_xcopy(rvectsiz,ovl_vecnm(1,gscindex(ivec)),2,rblockvectorbx(1,ivec),1)
+           !call abi_xcopy(rvectsiz,ovl_vecnm(2,gscindex(ivec)),2,rblockvectorbx(rvectsiz+1,ivec),1)
          else
            call abi_xcopy(rvectsiz,vecnm(1,cgindex(ivec)),2,rblockvectorbx(1,ivec),1)
            call abi_xcopy(rvectsiz,vecnm(2,cgindex(ivec)),2,rblockvectorbx(rvectsiz+1,ivec),1)
@@ -4802,17 +4825,18 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 
        if(useoverlap == 1) then
          call abi_xtrsm('r','u','n','n',vectsize,nvec,one,rgramxbx,nvec,rblockvectorbx,vectsize)
-         if (me_g0 == 1) then
-           call abi_xcopy(1,rblockvectorbx(1,ivec),1,ovl_vecnm(1,gscindex(ivec)),1)
-           ovl_vecnm(2,gscindex(ivec))=zero
-           rblockvectorbx(2:vectsize,ivec)=rblockvectorbx(2:vectsize,ivec)/sqrt2
-           call abi_xcopy(rvectsiz-1,rblockvectorbx(2,ivec),1,ovl_vecnm(1,gscindex(ivec)+1),2)
-           call abi_xcopy(rvectsiz-1,rblockvectorbx(rvectsiz+1,ivec),1,ovl_vecnm(2,gscindex(ivec)+1),2)
-         else
-           rblockvectorbx(1:vectsize,ivec)=rblockvectorbx(1:vectsize,ivec)/sqrt2
-           call abi_xcopy(rvectsiz,rblockvectorbx(1,ivec),1,ovl_vecnm(1,gscindex(ivec)),2)
-           call abi_xcopy(rvectsiz,rblockvectorbx(rvectsiz+1,ivec),1,ovl_vecnm(2,gscindex(ivec)),2)
-         end if
+         !TO DO
+         !if (me_g0 == 1) then
+         !  call abi_xcopy(1,rblockvectorbx(1,ivec),1,ovl_vecnm(1,gscindex(ivec)),1)
+         !  ovl_vecnm(2,gscindex(ivec))=zero
+         !  rblockvectorbx(2:vectsize,ivec)=rblockvectorbx(2:vectsize,ivec)/sqrt2
+         !  call abi_xcopy(rvectsiz-1,rblockvectorbx(2,ivec),1,ovl_vecnm(1,gscindex(ivec)+1),2)
+         !  call abi_xcopy(rvectsiz-1,rblockvectorbx(rvectsiz+1,ivec),1,ovl_vecnm(2,gscindex(ivec)+1),2)
+         !else
+         !  rblockvectorbx(1:vectsize,ivec)=rblockvectorbx(1:vectsize,ivec)/sqrt2
+         !  call abi_xcopy(rvectsiz,rblockvectorbx(1,ivec),1,ovl_vecnm(1,gscindex(ivec)),2)
+         !  call abi_xcopy(rvectsiz,rblockvectorbx(rvectsiz+1,ivec),1,ovl_vecnm(2,gscindex(ivec)),2)
+         !end if
        end if
      end do
      ABI_DEALLOCATE(rgramxbx)
@@ -4827,8 +4851,8 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
    if (useoverlap==0) then
      call cgnc_gramschmidt(nelem,nvec,vecnm(1,cg_idx),istwf_k,me_g0,comm)
    else
-     gsc_idx = gscindex(1)
-     call cgpaw_gramschmidt(nelem,nvec,vecnm(1,cg_idx),ovl_vecnm(1,gsc_idx),istwf_k,me_g0,comm)
+!     gsc_idx = gscindex(1)
+!     call cgpaw_gramschmidt(nelem,nvec,vecnm(1,cg_idx),ovl_vecnm(1,gsc_idx),istwf_k,me_g0,comm)
    end if
 
  else if (ANY(ortalgo==(/0,2/))) then
@@ -4839,57 +4863,81 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
    do ivec=1,nvec
 !    Normalize each vecnm(n,m) in turn:
 
+     iv1l = ivec*(ivec-1)
+     iv1  = 2*ivec-1
      if (useoverlap==1) then ! Using overlap S...
-       if(istwf_k/=2)then
-         sum=zero;ii0=1
-       else
-         if (me_g0 ==1) then
-           sum=half*ovl_vecnm(1,1+nelem*(ivec-1)+igsc)*vecnm(1,1+nelem*(ivec-1)+icg)
-           ii0=2
-         else
-           sum=zero;ii0=1
-         end if
-       end if
-!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:sum) SHARED(icg,ivec,nelem,vecnm)
-       do ii=ii0+nelem*(ivec-1),nelem*ivec
-         sum=sum+vecnm(1,ii+icg)*ovl_vecnm(1,ii+igsc)+vecnm(2,ii+icg)*ovl_vecnm(2,ii+igsc)
-       end do
+!       if(istwf_k/=2)then
+!         sum=zero;ii0=1
+!       else
+!         if (me_g0 ==1) then
+!!           sum=half*ovl_vecnm(1,1+nelem*(ivec-1)+igsc)*vecnm(1,1+nelem*(ivec-1)+icg)
+!           ii0=2
+!         else
+!           sum=zero;ii0=1
+!         end if
+!       end if
+       summ=ovl_mat(iv1l+iv1)
 
      else ! Without overlap...
        if(istwf_k/=2)then
-         sum=zero;ii0=1
+         summ=zero;ii0=1
        else
          if (me_g0 ==1) then
-           sum=half*vecnm(1,1+nelem*(ivec-1)+icg)**2
+           summ=half*vecnm(1,1+nelem*(ivec-1)+icg)**2
            ii0=2
          else
-           sum=zero;ii0=1
+           summ=zero;ii0=1
          end if
        end if
-!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:sum) SHARED(icg,ivec,nelem,vecnm)
+!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:summ) SHARED(icg,ivec,nelem,vecnm)
        do ii=ii0+nelem*(ivec-1)+icg,nelem*ivec+icg
-         sum=sum+vecnm(1,ii)**2+vecnm(2,ii)**2
+         summ=summ+vecnm(1,ii)**2+vecnm(2,ii)**2
        end do
      end if
 
      call timab(48,1,tsec)
-     call xmpi_sum(sum,comm,ierr)
+     call xmpi_sum(summ,comm,ierr)
      call timab(48,2,tsec)
+     !LTEST
+     write(std_out,'(a,i5)') '(pw_ortho) iband',ivec
+     write(std_out,'(a,es21.10e3)') '(pw_ortho) sum',summ
+     !LTEST
 
-     if(istwf_k>=2)sum=two*sum
-     xnorm = sqrt(abs(sum)) ;  sum=1.0_dp/xnorm
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,sum,vecnm)
+     if(istwf_k>=2)summ=two*summ
+     xnorm = sqrt(abs(summ)) ;  summ=1.0_dp/xnorm
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
      do ii=1+nelem*(ivec-1)+icg,nelem*ivec+icg
-       vecnm(1,ii)=vecnm(1,ii)*sum
-       vecnm(2,ii)=vecnm(2,ii)*sum
+       vecnm(1,ii)=vecnm(1,ii)*summ
+       vecnm(2,ii)=vecnm(2,ii)*summ
      end do
-     if (useoverlap==1) then
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,sum,ovl_vecnm)
-       do ii=1+nelem*(ivec-1)+igsc,nelem*ivec+igsc
-         ovl_vecnm(1,ii)=ovl_vecnm(1,ii)*sum
-         ovl_vecnm(2,ii)=ovl_vecnm(2,ii)*sum
-       end do
-     end if
+!     if (useoverlap==1) then
+!!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,ovl_vecnm)
+!       do ii=1+nelem*(ivec-1)+igsc,nelem*ivec+igsc
+!         ovl_vecnm(1,ii)=ovl_vecnm(1,ii)*summ
+!         ovl_vecnm(2,ii)=ovl_vecnm(2,ii)*summ
+!       end do
+!     end if
+!     ovl_mat(iv1l+iv1  ) = one
+!     ovl_mat(iv1l+iv1+1) = zero
+     do ivec2=ivec,nvec
+       iv2l=ivec2*(ivec2-1)
+       if (ivec<ivec2) then
+         ovl_mat(iv2l+iv1  ) = ovl_mat(iv2l+iv1  )*summ
+         ovl_mat(iv2l+iv1+1) = ovl_mat(iv2l+iv1+1)*summ
+       else if (ivec==ivec2) then
+         ovl_mat(iv2l+iv1  ) = ovl_mat(iv2l+iv1  )*summ*summ
+         ovl_mat(iv2l+iv1+1) = ovl_mat(iv2l+iv1+1)*summ*summ
+         re = ovl_mat(iv2l+iv1  )
+         im = ovl_mat(iv2l+iv1+1)
+         if (abs(re-1)>tol12.or.abs(im)>tol12) then
+           write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
+           write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
+           MSG_ERROR('Should be one!')
+         end if
+         !ovl_mat(iv2+iv1  ) = one
+         !ovl_mat(iv2+iv1+1) = zero 
+       end if
+     end do
 
 !    Remove projection in all higher states.
      if (ivec<nvec) then
@@ -4902,11 +4950,24 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 !            First compute scalar product
              dotr=zero ; doti=zero
              ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+igsc
-!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:doti,dotr) SHARED(ii1,ii2,nelem,vecnm)
-             do ii=1,nelem
-               dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
-               doti=doti+vecnm(1,ii1+ii)*ovl_vecnm(2,ii2+ii)-vecnm(2,ii1+ii)*ovl_vecnm(1,ii2+ii)
-             end do
+!!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:doti,dotr) SHARED(ii1,ii2,nelem,vecnm)
+!             do ii=1,nelem
+!               dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
+!               doti=doti+vecnm(1,ii1+ii)*ovl_vecnm(2,ii2+ii)-vecnm(2,ii1+ii)*ovl_vecnm(1,ii2+ii)
+!             end do
+             iv2l=ivec2*(ivec2-1)
+             iv2 =2*ivec2-1
+!             ovl_mat(iv2l+iv1  ) = ovl_mat(iv2l+iv1  )*summ
+!             ovl_mat(iv2l+iv1+1) = ovl_mat(iv2l+iv1+1)*summ
+             dotr = ovl_mat(iv2l+iv1  )
+             doti = ovl_mat(iv2l+iv1+1)
+             !LTEST
+             if (ivec<=2) then
+               write(std_out,'(a,i5)') '(pw_ortho) jband',ivec2
+               write(std_out,'(a,es21.10e3)') '(pw_ortho) dotr',dotr
+               write(std_out,'(a,es21.10e3)') '(pw_ortho) doti',doti
+             end if
+             !LTEST
 
              call timab(48,1,tsec)
              buffer2(1)=doti;buffer2(2)=dotr
@@ -4920,21 +4981,66 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 #ifdef FC_INTEL
 !            DIR$ ivdep
 #endif
+             !LTEST
+             if (ivec<=2) then
+               write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
+               write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
+             end if
+             !LTEST
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
              do ii=1,nelem
                vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
                vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
              end do
-
-             ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
-             do ii=1,nelem
-               ovl_vecnm(1,ii2+ii)=ovl_vecnm(1,ii2+ii)&
-&               -dotr*ovl_vecnm(1,ii1+ii)&
-&               +doti*ovl_vecnm(2,ii1+ii)
-               ovl_vecnm(2,ii2+ii)=ovl_vecnm(2,ii2+ii)&
-               -doti*ovl_vecnm(1,ii1+ii)&
-&               -dotr*ovl_vecnm(2,ii1+ii)
+             !LTEST
+             if (ivec<=2) then
+               write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
+               write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
+             end if
+             !LTEST
+             do ivec3=1,ivec
+               iv3=2*ivec3-1
+               ovl_mat(iv2l+iv3  ) = ovl_mat(iv2l+iv3  ) - dotr*ovl_mat(iv1l+iv3) + doti*ovl_mat(iv1l+iv3+1)
+               ovl_mat(iv2l+iv3+1) = ovl_mat(iv2l+iv3+1) - doti*ovl_mat(iv1l+iv3) - dotr*ovl_mat(iv1l+iv3+1) 
+               !LTEST
+               if (ivec3==ivec) then
+                 re = ovl_mat(iv1l+iv3  )
+                 im = ovl_mat(iv1l+iv3+1)
+                 if (abs(re-1)>tol12.or.abs(im)>tol12) then
+                   write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
+                   write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
+                   MSG_ERROR('Should be one!')
+                 end if
+                 re = ovl_mat(iv2l+iv3  )
+                 im = ovl_mat(iv2l+iv3+1)
+                 if (abs(re)>tol12.or.abs(im)>tol12) then
+                   write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
+                   write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
+                   MSG_ERROR('Should be zero!')
+                 end if
+               end if
+               !LTEST
              end do
+             do ivec3=ivec+1,ivec2
+               iv3l=ivec3*(ivec3-1)
+               iv3=2*ivec3-1
+               ovl_mat(iv2l+iv3  ) = ovl_mat(iv2l+iv3  ) - dotr*ovl_mat(iv3l+iv1) - doti*ovl_mat(iv3l+iv1+1)
+               ovl_mat(iv2l+iv3+1) = ovl_mat(iv2l+iv3+1) - doti*ovl_mat(iv3l+iv1) + dotr*ovl_mat(iv3l+iv1+1) 
+             end do
+             do ivec3=ivec2,nvec
+               iv3l=ivec3*(ivec3-1)
+               ovl_mat(iv3l+iv2  ) = ovl_mat(iv3l+iv2  ) - dotr*ovl_mat(iv3l+iv1) + doti*ovl_mat(iv3l+iv1+1)
+               ovl_mat(iv3l+iv2+1) = ovl_mat(iv3l+iv2+1) - doti*ovl_mat(iv3l+iv1) - dotr*ovl_mat(iv3l+iv1+1) 
+             end do
+             !ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
+             !do ii=1,nelem
+             !  ovl_vecnm(1,ii2+ii)=ovl_vecnm(1,ii2+ii)&
+&            !   -dotr*ovl_vecnm(1,ii1+ii)&
+&            !   +doti*ovl_vecnm(2,ii1+ii)
+             !  ovl_vecnm(2,ii2+ii)=ovl_vecnm(2,ii2+ii)&
+             !  -doti*ovl_vecnm(1,ii1+ii)&
+&            !   -dotr*ovl_vecnm(2,ii1+ii)
+             !end do
            end do
          else
 !          ----- No overlap -----
@@ -4980,49 +5086,50 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 
          if (useoverlap==1) then
 !          ----- Using overlap -----
-           do ivec2=ivec+1,nvec
-!            First compute scalar product
-             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+igsc
-             if (me_g0 ==1) then
-               dotr=half*vecnm(1,ii1+1)*ovl_vecnm(1,ii2+1)
-!              Avoid double counting G=0 contribution
-!              Imaginary part of vecnm at G=0 should be zero,so only take real part
-!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
-               do ii=2,nelem
-                 dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+&
-&                 vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
-               end do
-             else
-               dotr=0._dp
-!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
-               do ii=1,nelem
-                 dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+&
-&                 vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
-               end do
-             end if
+           !do ivec2=ivec+1,nvec
+!          !  First compute scalar product
+           !  ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+igsc
+           !  if (me_g0 ==1) then
+           !    !TO DO
+           !    !dotr=half*vecnm(1,ii1+1)*ovl_vecnm(1,ii2+1)
+!          !    Avoid double counting G=0 contribution
+!          !    Imaginary part of vecnm at G=0 should be zero,so only take real part
+!!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+           !    do ii=2,nelem
+           !      dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+&
+&          !       vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
+           !    end do
+           !  else
+           !    dotr=0._dp
+!!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+           !    do ii=1,nelem
+           !      dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+&
+&          !       vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
+           !    end do
+           !  end if
 
-             dotr=two*dotr
+           !  dotr=two*dotr
 
-             call timab(48,1,tsec)
-             call xmpi_sum(dotr,comm,ierr)
-             call timab(48,2,tsec)
+           !  call timab(48,1,tsec)
+           !  call xmpi_sum(dotr,comm,ierr)
+           !  call timab(48,2,tsec)
 
-!            Then subtract the appropriate amount of the lower state
-             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
-#ifdef FC_INTEL
-!            DIR$ ivdep
-#endif
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
-             do ii=1,nelem
-               vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
-               vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
-             end do
-             ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
-             do ii=1,nelem
-               ovl_vecnm(1,ii2+ii)=ovl_vecnm(1,ii2+ii)-dotr*ovl_vecnm(1,ii1+ii)
-               ovl_vecnm(2,ii2+ii)=ovl_vecnm(2,ii2+ii)-dotr*ovl_vecnm(2,ii1+ii)
-             end do
-           end do
+!          !  Then subtract the appropriate amount of the lower state
+           !  ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+!#ifdef FC_INTEL
+!          !  DIR$ ivdep
+!#endif
+!!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
+           !  do ii=1,nelem
+           !    vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
+           !    vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
+           !  end do
+           !  ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
+           !  do ii=1,nelem
+           !    ovl_vecnm(1,ii2+ii)=ovl_vecnm(1,ii2+ii)-dotr*ovl_vecnm(1,ii1+ii)
+           !    ovl_vecnm(2,ii2+ii)=ovl_vecnm(2,ii2+ii)-dotr*ovl_vecnm(2,ii1+ii)
+           !  end do
+           !end do
          else
 !          ----- No overlap -----
            do ivec2=ivec+1,nvec
@@ -5065,39 +5172,40 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
 !        At other special points,use of time-reversal symmetry saves cpu time.
 
          if (useoverlap==1) then
+           !TO DO
 !          ----- Using overlap -----
-           do ivec2=ivec+1,nvec
-!            First compute scalar product
-             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+igsc
-!            Avoid double counting G=0 contribution
-!            Imaginary part of vecnm at G=0 should be zero,so only take real part
-             dotr=zero
-!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
-             do ii=1,nelem
-               dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
-             end do
-             dotr=two*dotr
-
-             call timab(48,1,tsec)
-             call xmpi_sum(dotr,comm,ierr)
-             call timab(48,2,tsec)
-
-!            Then subtract the appropriate amount of the lower state
-             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
-#ifdef FC_INTEL
-!            DIR$ ivdep
-#endif
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
-             do ii=1,nelem
-               vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
-               vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
-             end do
-             ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
-             do ii=1,nelem
-               ovl_vecnm(1,ii2+ii)=ovl_vecnm(1,ii2+ii)-dotr*ovl_vecnm(1,ii1+ii)
-               ovl_vecnm(2,ii2+ii)=ovl_vecnm(2,ii2+ii)-dotr*ovl_vecnm(2,ii1+ii)
-             end do
-           end do
+!           do ivec2=ivec+1,nvec
+!!            First compute scalar product
+!             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+igsc
+!!            Avoid double counting G=0 contribution
+!!            Imaginary part of vecnm at G=0 should be zero,so only take real part
+!             dotr=zero
+!!$OMP PARALLEL DO PRIVATE(ii) REDUCTION(+:dotr) SHARED(ii1,ii2,nelem,vecnm)
+!             do ii=1,nelem
+!               dotr=dotr+vecnm(1,ii1+ii)*ovl_vecnm(1,ii2+ii)+vecnm(2,ii1+ii)*ovl_vecnm(2,ii2+ii)
+!             end do
+!             dotr=two*dotr
+!
+!             call timab(48,1,tsec)
+!             call xmpi_sum(dotr,comm,ierr)
+!             call timab(48,2,tsec)
+!
+!!            Then subtract the appropriate amount of the lower state
+!             ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+!#ifdef FC_INTEL
+!!            DIR$ ivdep
+!#endif
+!!$OMP PARALLEL DO PRIVATE(ii) SHARED(dotr,ii1,ii2,nelem,vecnm)
+!             do ii=1,nelem
+!               vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)
+!               vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-dotr*vecnm(2,ii1+ii)
+!             end do
+!             ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
+!             do ii=1,nelem
+!               ovl_vecnm(1,ii2+ii)=ovl_vecnm(1,ii2+ii)-dotr*ovl_vecnm(1,ii1+ii)
+!               ovl_vecnm(2,ii2+ii)=ovl_vecnm(2,ii2+ii)-dotr*ovl_vecnm(2,ii1+ii)
+!             end do
+!           end do
          else
 !          ----- No overlap -----
            do ivec2=ivec+1,nvec
