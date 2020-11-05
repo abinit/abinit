@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h21 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 10h55 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t06/t06.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/v67mbpt_t06/t06.in
 - output file    -> t06.out
 - root for input  files -> t06i
 - root for output files -> t06o
@@ -210,42 +210,34 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
              bdgw23        24      25
              bdgw33        24      25
            diemac      4.00000000E+00
-             ecut11    6.00000000E+00 Hartree
-             ecut12    5.99051324E+00 Hartree
-             ecut13    5.99051324E+00 Hartree
-             ecut21    6.00000000E+00 Hartree
-             ecut22    5.99051324E+00 Hartree
-             ecut23    5.99051324E+00 Hartree
-             ecut31    6.00000000E+00 Hartree
-             ecut32    5.99051324E+00 Hartree
-             ecut33    5.99051324E+00 Hartree
+             ecut      6.00000000E+00 Hartree
           ecuteps11    0.00000000E+00 Hartree
-          ecuteps12    1.06226803E+00 Hartree
+          ecuteps12    1.10000000E+00 Hartree
           ecuteps13    0.00000000E+00 Hartree
           ecuteps21    0.00000000E+00 Hartree
-          ecuteps22    1.06226803E+00 Hartree
+          ecuteps22    1.10000000E+00 Hartree
           ecuteps23    0.00000000E+00 Hartree
           ecuteps31    0.00000000E+00 Hartree
-          ecuteps32    1.06226803E+00 Hartree
+          ecuteps32    1.10000000E+00 Hartree
           ecuteps33    0.00000000E+00 Hartree
          ecutsigx11    0.00000000E+00 Hartree
          ecutsigx12    0.00000000E+00 Hartree
-         ecutsigx13    5.99051324E+00 Hartree
+         ecutsigx13    6.00000000E+00 Hartree
          ecutsigx21    0.00000000E+00 Hartree
          ecutsigx22    0.00000000E+00 Hartree
-         ecutsigx23    5.99051324E+00 Hartree
+         ecutsigx23    6.00000000E+00 Hartree
          ecutsigx31    0.00000000E+00 Hartree
          ecutsigx32    0.00000000E+00 Hartree
-         ecutsigx33    5.99051324E+00 Hartree
+         ecutsigx33    6.00000000E+00 Hartree
           ecutwfn11    0.00000000E+00 Hartree
-          ecutwfn12    5.99051324E+00 Hartree
-          ecutwfn13    5.99051324E+00 Hartree
+          ecutwfn12    6.00000000E+00 Hartree
+          ecutwfn13    6.00000000E+00 Hartree
           ecutwfn21    0.00000000E+00 Hartree
-          ecutwfn22    5.99051324E+00 Hartree
-          ecutwfn23    5.99051324E+00 Hartree
+          ecutwfn22    6.00000000E+00 Hartree
+          ecutwfn23    6.00000000E+00 Hartree
           ecutwfn31    0.00000000E+00 Hartree
-          ecutwfn32    5.99051324E+00 Hartree
-          ecutwfn33    5.99051324E+00 Hartree
+          ecutwfn32    6.00000000E+00 Hartree
+          ecutwfn33    6.00000000E+00 Hartree
 -          fftalg         312
             fftgw11        21
             fftgw12        11
@@ -274,15 +266,15 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
            getwfk31         0
            getwfk32        -1
            getwfk33        -2
-        gw_icutcoul11         6
-        gw_icutcoul12         6
-        gw_icutcoul13         3
-        gw_icutcoul21         6
-        gw_icutcoul22         6
-        gw_icutcoul23         3
-        gw_icutcoul31         6
-        gw_icutcoul32         6
-        gw_icutcoul33         3
+      gw_icutcoul11         6
+      gw_icutcoul12         6
+      gw_icutcoul13         3
+      gw_icutcoul21         6
+      gw_icutcoul22         6
+      gw_icutcoul23         3
+      gw_icutcoul31         6
+      gw_icutcoul32         6
+      gw_icutcoul33         3
           inclvkb11         2
           inclvkb12         0
           inclvkb13         2
@@ -717,8 +709,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si-LDA.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/Si-LDA.paw
 - Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
 - 14.00000   4.00000  20070412                znucl, zion, pspdat
     7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -739,8 +731,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1044,50 +1036,6 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  R(3)=  0.0000000  0.0000000 10.2132705  G(3)=  0.0000000  0.0000000  0.0979118
  Unit cell volume ucvol=  7.6241917E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
-- 14.00000   4.00000  20070412                znucl, zion, pspdat
-    7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw3
- basis_size (lnmax)=  5 (lmn_size= 13), orbitals=   0   0   1   1   2
- Spheres core radius: rc_sph= 2.00437498
- 4 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1398 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1393 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1508 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=1658 , AA= 0.43309E-03 BB= 0.60633E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 3
- Radial grid used for Vloc is grid 4
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
--  8.00000   6.00000  20040423                znucl, zion, pspdat
-    7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw2
- basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
- Spheres core radius: rc_sph= 1.41000000
- 2 radial meshes are used:
-  - mesh 1: r(i)=AA*exp(BB*(i-2)), size= 350 , AA= 0.72362E-05 BB= 0.35000E-01
-  - mesh 2: r(i)=step*(i-1), size= 566 , step= 0.25000E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 1
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -1296,7 +1244,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
-       -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
+        0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
 
     2  -0.000  -7.580   0.001   0.549   0.385  -1.100  -0.774   0.551   0.388
         0.000   0.000  -0.000  -0.950   0.669  -0.002  -0.001   0.954  -0.670
@@ -1319,10 +1267,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.400  -0.013   0.013   0.003   0.003  -0.014   0.014  -0.003  -0.003
-     -0.000  -0.005  -0.005   0.002  -0.003   0.001   0.001  -0.003   0.002
+      0.000  -0.005  -0.005   0.002  -0.003   0.001   0.001  -0.003   0.002
        1       2       3       4       5       6       7       8       9
       0.400  -0.013   0.013   0.003   0.003  -0.014   0.014  -0.003  -0.003
-     -0.000   0.005   0.005  -0.002   0.003  -0.001  -0.001   0.003  -0.002
+      0.000   0.005   0.005  -0.002   0.003  -0.001  -0.001   0.003  -0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  24.2036 [eV]
@@ -1345,12 +1293,12 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000   0.002  -0.000  -0.000  -0.000   0.001  -0.001  -0.000   0.001
 
     2   0.001  -6.266   0.001   0.747   0.537  -1.496  -1.078   0.749   0.541
-       -0.002  -0.000   0.001  -1.293   0.932  -0.001   0.000   1.298  -0.934
+       -0.002   0.000   0.001  -1.293   0.932  -0.001   0.000   1.298  -0.934
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.591   0.000  -0.000   0.046   0.098   0.046   0.098   0.046   0.098
-       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
+        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000  -1.310   0.000   0.175   0.166  -0.351  -0.333   0.176   0.167
        -0.000   0.000   0.000  -0.303   0.288  -0.000  -0.000   0.304  -0.288
@@ -1676,50 +1624,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
-- 14.00000   4.00000  20070412                znucl, zion, pspdat
-    7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw3
- basis_size (lnmax)=  5 (lmn_size= 13), orbitals=   0   0   1   1   2
- Spheres core radius: rc_sph= 2.00437498
- 4 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1398 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1393 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1508 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=1658 , AA= 0.43309E-03 BB= 0.60633E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 3
- Radial grid used for Vloc is grid 4
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
--  8.00000   6.00000  20040423                znucl, zion, pspdat
-    7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw2
- basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
- Spheres core radius: rc_sph= 1.41000000
- 2 radial meshes are used:
-  - mesh 1: r(i)=AA*exp(BB*(i-2)), size= 350 , AA= 0.72362E-05 BB= 0.35000E-01
-  - mesh 2: r(i)=step*(i-1), size= 566 , step= 0.25000E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 1
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
 _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
@@ -1994,50 +1898,6 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  R(3)=  0.0000000  0.0000000 10.2132705  G(3)=  0.0000000  0.0000000  0.0979118
  Unit cell volume ucvol=  7.6241917E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
-- 14.00000   4.00000  20070412                znucl, zion, pspdat
-    7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw3
- basis_size (lnmax)=  5 (lmn_size= 13), orbitals=   0   0   1   1   2
- Spheres core radius: rc_sph= 2.00437498
- 4 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1398 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1393 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1508 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=1658 , AA= 0.43309E-03 BB= 0.60633E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 3
- Radial grid used for Vloc is grid 4
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
--  8.00000   6.00000  20040423                znucl, zion, pspdat
-    7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw2
- basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
- Spheres core radius: rc_sph= 1.41000000
- 2 radial meshes are used:
-  - mesh 1: r(i)=AA*exp(BB*(i-2)), size= 350 , AA= 0.72362E-05 BB= 0.35000E-01
-  - mesh 2: r(i)=step*(i-1), size= 566 , step= 0.25000E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 1
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -2239,7 +2099,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
        -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
 
     2  -0.000  -7.580   0.001   0.549   0.385  -1.100  -0.774   0.551   0.388
-        0.000   0.000   0.000  -0.950   0.669  -0.002  -0.001   0.954  -0.670
+        0.000   0.000  -0.000  -0.950   0.669  -0.002  -0.001   0.954  -0.670
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2285,7 +2145,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000   0.002  -0.000  -0.000  -0.000   0.001  -0.001  -0.000   0.001
 
     2   0.001  -6.266   0.001   0.747   0.537  -1.496  -1.078   0.749   0.541
-       -0.002  -0.000   0.001  -1.293   0.932  -0.001   0.000   1.298  -0.934
+       -0.002   0.000   0.001  -1.293   0.932  -0.001   0.000   1.298  -0.934
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2293,7 +2153,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000  -1.310   0.000   0.175   0.166  -0.351  -0.333   0.176   0.167
-       -0.000  -0.000   0.000  -0.303   0.288  -0.000  -0.000   0.304  -0.288
+       -0.000   0.000   0.000  -0.303   0.288  -0.000  -0.000   0.304  -0.288
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     10.39  [%]
 
@@ -2606,50 +2466,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
-- 14.00000   4.00000  20070412                znucl, zion, pspdat
-    7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw3
- basis_size (lnmax)=  5 (lmn_size= 13), orbitals=   0   0   1   1   2
- Spheres core radius: rc_sph= 2.00437498
- 4 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1398 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1393 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1508 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=1658 , AA= 0.43309E-03 BB= 0.60633E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 3
- Radial grid used for Vloc is grid 4
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
--  8.00000   6.00000  20040423                znucl, zion, pspdat
-    7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw2
- basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
- Spheres core radius: rc_sph= 1.41000000
- 2 radial meshes are used:
-  - mesh 1: r(i)=AA*exp(BB*(i-2)), size= 350 , AA= 0.72362E-05 BB= 0.35000E-01
-  - mesh 2: r(i)=step*(i-1), size= 566 , step= 0.25000E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 1
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
 _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
@@ -2924,50 +2740,6 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  R(3)=  0.0000000  0.0000000 10.2132705  G(3)=  0.0000000  0.0000000  0.0979118
  Unit cell volume ucvol=  7.6241917E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
-- Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
-- 14.00000   4.00000  20070412                znucl, zion, pspdat
-    7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw3
- basis_size (lnmax)=  5 (lmn_size= 13), orbitals=   0   0   1   1   2
- Spheres core radius: rc_sph= 2.00437498
- 4 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1398 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1393 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1508 , AA= 0.43309E-03 BB= 0.60633E-02
-  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=1658 , AA= 0.43309E-03 BB= 0.60633E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 3
- Radial grid used for Vloc is grid 4
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
--  8.00000   6.00000  20040423                znucl, zion, pspdat
-    7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw2
- basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
- Spheres core radius: rc_sph= 1.41000000
- 2 radial meshes are used:
-  - mesh 1: r(i)=AA*exp(BB*(i-2)), size= 350 , AA= 0.72362E-05 BB= 0.35000E-01
-  - mesh 2: r(i)=step*(i-1), size= 566 , step= 0.25000E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 1
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -3166,18 +2938,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
+       -0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
     2   0.000  -7.579  -0.003   0.549   0.671   0.003   0.000  -0.958   0.388
-       -0.000   0.000  -0.000  -0.952  -0.384  -1.097   0.774   0.551  -0.671
+       -0.000   0.000   0.000  -0.952  -0.384  -1.097   0.774   0.551  -0.671
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
+        0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
     2   0.000  -1.297  -0.001   0.122   0.175   0.001  -0.000  -0.213   0.101
-       -0.000   0.000  -0.000  -0.212  -0.100  -0.244   0.202   0.123  -0.175
+       -0.000   0.000   0.000  -0.212  -0.100  -0.244   0.202   0.123  -0.175
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   2.5010
@@ -3189,19 +2961,19 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.400   0.013  -0.013  -0.003   0.003   0.001  -0.001  -0.003   0.003
-      0.000   0.005   0.005  -0.002   0.003   0.014   0.014   0.003  -0.002
+     -0.000   0.005   0.005  -0.002   0.003   0.014   0.014   0.003  -0.002
        1       2       3       4       5       6       7       8       9
       0.400   0.013  -0.013  -0.003   0.003   0.001  -0.001  -0.003   0.003
-      0.000  -0.005  -0.005   0.002  -0.003  -0.014  -0.014  -0.003   0.002
+     -0.000  -0.005  -0.005   0.002  -0.003  -0.014  -0.014  -0.003   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
       0.868   0.003  -0.003  -0.000   0.002   0.001  -0.001  -0.002   0.000
-     -0.000   0.001   0.001  -0.002   0.001   0.004   0.004   0.001  -0.002
+      0.000   0.001   0.001  -0.002   0.001   0.004   0.004   0.001  -0.002
        1       2       3       4       5       6       7       8       9
       0.868   0.003  -0.003  -0.000   0.002   0.001  -0.001  -0.002   0.000
-     -0.000  -0.001  -0.001   0.002  -0.001  -0.004  -0.004  -0.001   0.002
+      0.000  -0.001  -0.001   0.002  -0.001  -0.004  -0.004  -0.001   0.002
 
 
 
@@ -3212,10 +2984,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -4.876   0.001  -0.001  -0.397   0.001   0.002   0.001  -0.000  -0.473
-       -0.000  -0.003  -0.000   0.000   0.472  -0.398   0.475  -0.399  -0.000
+        0.000  -0.003  -0.000   0.000   0.472  -0.398   0.475  -0.399  -0.000
 
     2   0.001  -6.266  -0.002   0.746   0.935   0.002   0.001  -1.300   0.540
-        0.003  -0.000   0.002  -1.294  -0.535  -1.493   1.078   0.750  -0.935
+        0.003   0.000   0.002  -1.294  -0.535  -1.493   1.078   0.750  -0.935
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
@@ -3223,7 +2995,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000  -0.001  -0.000   0.000   0.097  -0.046   0.098  -0.046   0.000
 
     2   0.000  -1.310  -0.000   0.175   0.288   0.001   0.000  -0.305   0.166
-        0.001  -0.000   0.000  -0.304  -0.166  -0.350   0.333   0.176  -0.289
+        0.001   0.000   0.000  -0.304  -0.166  -0.350   0.333   0.176  -0.289
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     10.38  [%]
 
@@ -3512,42 +3284,34 @@ data: !SigmaeeData |
              bdgw23        24      25
              bdgw33        24      25
            diemac      4.00000000E+00
-             ecut11    6.00000000E+00 Hartree
-             ecut12    5.99051324E+00 Hartree
-             ecut13    5.99051324E+00 Hartree
-             ecut21    6.00000000E+00 Hartree
-             ecut22    5.99051324E+00 Hartree
-             ecut23    5.99051324E+00 Hartree
-             ecut31    6.00000000E+00 Hartree
-             ecut32    5.99051324E+00 Hartree
-             ecut33    5.99051324E+00 Hartree
+             ecut      6.00000000E+00 Hartree
           ecuteps11    0.00000000E+00 Hartree
-          ecuteps12    1.06226803E+00 Hartree
+          ecuteps12    1.10000000E+00 Hartree
           ecuteps13    0.00000000E+00 Hartree
           ecuteps21    0.00000000E+00 Hartree
-          ecuteps22    1.06226803E+00 Hartree
+          ecuteps22    1.10000000E+00 Hartree
           ecuteps23    0.00000000E+00 Hartree
           ecuteps31    0.00000000E+00 Hartree
-          ecuteps32    1.06226803E+00 Hartree
+          ecuteps32    1.10000000E+00 Hartree
           ecuteps33    0.00000000E+00 Hartree
          ecutsigx11    0.00000000E+00 Hartree
          ecutsigx12    0.00000000E+00 Hartree
-         ecutsigx13    5.99051324E+00 Hartree
+         ecutsigx13    6.00000000E+00 Hartree
          ecutsigx21    0.00000000E+00 Hartree
          ecutsigx22    0.00000000E+00 Hartree
-         ecutsigx23    5.99051324E+00 Hartree
+         ecutsigx23    6.00000000E+00 Hartree
          ecutsigx31    0.00000000E+00 Hartree
          ecutsigx32    0.00000000E+00 Hartree
-         ecutsigx33    5.99051324E+00 Hartree
+         ecutsigx33    6.00000000E+00 Hartree
           ecutwfn11    0.00000000E+00 Hartree
-          ecutwfn12    5.99051324E+00 Hartree
-          ecutwfn13    5.99051324E+00 Hartree
+          ecutwfn12    6.00000000E+00 Hartree
+          ecutwfn13    6.00000000E+00 Hartree
           ecutwfn21    0.00000000E+00 Hartree
-          ecutwfn22    5.99051324E+00 Hartree
-          ecutwfn23    5.99051324E+00 Hartree
+          ecutwfn22    6.00000000E+00 Hartree
+          ecutwfn23    6.00000000E+00 Hartree
           ecutwfn31    0.00000000E+00 Hartree
-          ecutwfn32    5.99051324E+00 Hartree
-          ecutwfn33    5.99051324E+00 Hartree
+          ecutwfn32    6.00000000E+00 Hartree
+          ecutwfn33    6.00000000E+00 Hartree
            etotal11   -1.0309925718E+02
            etotal12    0.0000000000E+00
            etotal13    0.0000000000E+00
@@ -3666,15 +3430,15 @@ data: !SigmaeeData |
            getwfk31         0
            getwfk32        -1
            getwfk33        -2
-        gw_icutcoul11         6
-        gw_icutcoul12         6
-        gw_icutcoul13         3
-        gw_icutcoul21         6
-        gw_icutcoul22         6
-        gw_icutcoul23         3
-        gw_icutcoul31         6
-        gw_icutcoul32         6
-        gw_icutcoul33         3
+      gw_icutcoul11         6
+      gw_icutcoul12         6
+      gw_icutcoul13         3
+      gw_icutcoul21         6
+      gw_icutcoul22         6
+      gw_icutcoul23         3
+      gw_icutcoul31         6
+      gw_icutcoul32         6
+      gw_icutcoul33         3
           inclvkb11         2
           inclvkb12         0
           inclvkb13         2
@@ -4073,10 +3837,49 @@ P           mkmem           1
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         87.8        1.46      0.024
+- Total wall clock time (s,m,h):         93.8        1.56      0.026
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           87.8, wall_time =           93.8
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 66.741  76.0     67.543  72.0              3      -1.00        0.99       0.99
+- ewald                          9.276  10.6      9.279   9.9              9      -1.00        1.00       1.00
+- pspini                         1.880   2.1      1.880   2.0              9      -1.00        1.00       1.00
+- stress                         1.568   1.8      1.567   1.7              3      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             1.562   1.8      1.562   1.7              3      -1.00        1.00       1.00
+- fourwf%(pot)                   1.259   1.4      1.275   1.4           3206      -1.00        0.99       0.99
+- invars2                        0.984   1.1      0.985   1.0              9      -1.00        1.00       1.00
+- nonlop(apply)                  0.905   1.0      0.920   1.0           3206      -1.00        0.98       0.98
+- others (119)                   1.881   2.1      1.873   2.0             -1      -1.00        1.00       1.00
+-<END_TIMER>
+-
+- subtotal                      86.054  98.0     86.884  92.6                                  0.99       0.99
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          87.8, wall_time =          93.8
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 66.741  76.0     67.543  72.0              3      -1.00        0.99       0.99
+- ewald                          9.276  10.6      9.279   9.9              9      -1.00        1.00       1.00
+- pspini                         1.880   2.1      1.880   2.0              9      -1.00        1.00       1.00
+- stress                         1.568   1.8      1.567   1.7              3      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             1.562   1.8      1.562   1.7              3      -1.00        1.00       1.00
+- fourwf%(pot)                   1.259   1.4      1.275   1.4           3206      -1.00        0.99       0.99
+- invars2                        0.984   1.1      0.985   1.0              9      -1.00        1.00       1.00
+- nonlop(apply)                  0.905   1.0      0.920   1.0           3206      -1.00        0.98       0.98
+- others (119)                   1.881   2.1      1.873   2.0             -1      -1.00        1.00       1.00
+-<END_TIMER>
 
+- subtotal                      86.054  98.0     86.884  92.6                                  0.99       0.99
 
 ================================================================================
 
@@ -4161,10 +3964,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         96.3  wall=         96.6
+- Proc.   0 individual time (sec): cpu=         87.8  wall=         93.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         96.3  wall=         96.6
+.Delivered  18 WARNINGs and  30 COMMENTs to log file.
++Overall time at end (sec) : cpu=         87.8  wall=         93.8

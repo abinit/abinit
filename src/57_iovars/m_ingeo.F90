@@ -32,7 +32,8 @@ module m_ingeo
  use m_sort
  use m_dtset
 
- use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, symmetrize_rprimd, symmetrize_xred, symatm
+ use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, &
+&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred, symatm
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
@@ -173,13 +174,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
- integer :: ipsp,irreducible,isym,itypat,jsym,marr,multiplicity,natom_uc,natfix,natrd
+ integer :: bckbrvltt,brvltt,chkprim,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
+ integer :: ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
- character(len=600) :: msg
+ character(len=1000) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
  type(geo_t) :: geo
@@ -189,7 +190,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
- real(dp),allocatable :: tnons_cart(:,:)
+ real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
@@ -844,8 +845,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
          chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
 
-       !If the group closure is not obtained which should be exceptional, try with a larger tolsym (three times larger)
+       !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
        if(ierr/=0)then
+         MSG_WARNING('Will try to obtain group closure by using a tripled tolsym.')
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
            nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,two*tolsym,typat,use_inversion,xred,&
            chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
@@ -853,20 +855,21 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          MSG_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
        endif
 
-       ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
-       ! and recompute the symmetry operations (tnons might not be accurate enough)
+       ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize tnons for gliding or screw operations, 
+       ! symmetrize the atomic positions and recompute the symmetry operations 
        if(tolsym>1.00001e-8)then
+         call symmetrize_tnons(nsym,symrel,tnons,tolsym)
          ABI_ALLOCATE(indsym,(4,natom,nsym))
          ABI_ALLOCATE(symrec,(3,3,nsym))
          do isym=1,nsym
            call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
          end do
          call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
-         call symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
+         call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
          ABI_DEALLOCATE(indsym)
          ABI_DEALLOCATE(symrec)
 
-         write(msg,'(a,es14.6,11a)')&
+         write(msg,'(a,es12.3,11a)')&
           'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
           'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
           'symmetrized before storing them in the dataset internal variable.',ch10,&
@@ -878,6 +881,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
            nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
            chrgat=chrgat,nucdipmom=nucdipmom)
+
+         !Needs one more resymmetrization, for the tnons
+         ABI_ALLOCATE(tnons_new,(3,nsym))
+         call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
+&          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
+         tnons(:,1:nsym)=tnons_new(:,:)
+         ABI_DEALLOCATE(tnons_new)
 
        end if
      end if
@@ -942,14 +952,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tol8)
 
    if(iexit==-1)then
-     write(msg,'(a,es14.6,11a)')&
-       'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
-       'In order to avoid spurious effects, the primitive vectors have been',ch10,&
-       'symmetrized before storing them in the dataset internal variable.',ch10,&
-       'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
-       'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-       'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
+      write(msg,'(5a,es11.3,13a)')&
+        'It is observed that the input primitive vectors are not accurate:',ch10,&
+        'the lattice is not left invariant within 1.0e-8 when applying symmetry operations.',ch10,&
+        'However, they are only slightly inaccurate, as inaccuracies are within the input tolsym=', tolsym,ch10,&
+        'In order to avoid spurious effects, the primitive vectors have been',ch10,&
+        'symmetrized before storing them in the dataset internal variable.',ch10,&
+        'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
+        'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+        'In order to avoid this symmetrization (e.g. for specific debugging/development),',&
+        ' decrease tolsym to 1.0e-8 or lower,',ch10,&
+        'or use input primitive vectors that are accurate to better than 1.0e-8.'
      MSG_WARNING(msg)
+
      call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tol8)
      call mkradim(acell,rprim,rprimd)
    end if
@@ -1124,6 +1139,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ABI_DEALLOCATE(intarr)
  ABI_DEALLOCATE(dprarr)
+
+!DEBUG
+!write(std_out,'(a)')' m_ingeo : end ingeo '
+!ENDDEBUG
 
 end subroutine ingeo
 !!***

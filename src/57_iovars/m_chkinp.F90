@@ -37,7 +37,7 @@ module m_chkinp
  use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : iseven, isdiagmat
- use m_symtk,          only : chkgrp, chkorthsy
+ use m_symtk,          only : chkgrp, chkorthsy, symmetrize_xred
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
  use m_exit,           only : get_timelimit
@@ -99,13 +99,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !scalars
  logical :: twvl,allow, berryflag
  logical :: wvlbigdft=.false.
- integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
+ integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr,all_nprocs
- integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response
+ integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
+ integer :: nproc,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
  integer :: fftalg,need_kden,usepaw,usewvl
- real(dp) :: delta,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
+ integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: msg
  type(dataset_type) :: dt
 !arrays
@@ -113,7 +114,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: gpu_devices(5)=(/-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
- real(dp),allocatable :: frac(:,:)
+ real(dp),allocatable :: frac(:,:),tnons_new(:,:),xred(:,:)
  character(len=32) :: cond_string(4)
  character(len=32) :: input_name
 
@@ -403,29 +404,67 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
 
 !  chksymbreak
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymbreak',dt%chksymbreak,3,(/0,1,-1/),iout)
-   if(dt%chksymbreak==1)then
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymbreak',dt%chksymbreak,2,(/0,1/),iout)
+
+!  chksymtnons
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymtnons',dt%chksymtnons,3,(/0,1,2/),iout)
+
+   if(dt%chksymtnons>0)then
 !    Check the values of tnons
-     do isym=1,dt%nsym
-       do ii=1,3
-         delta=dt%tnons(ii,isym)*eight
-         if(abs(delta-nint(delta))>tol6)then
-           delta=dt%tnons(ii,isym)*three*four
-           if(abs(delta-nint(delta))>tol6)then
-             write(msg, '(5a,i4,2a,9i3,2a,3es16.6,4a)' )&
-              ' Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
-              ' which is neither a rational fraction in 1/8th nor in 1/12th:', ch10,&
-              ' for the symmetry number: ',isym,ch10,&
-              ' symrel is: ',dt%symrel(1:3,1:3,isym),ch10,&
-              ' tnons is: ',dt%tnons(1:3,isym),ch10,&
-              ' Please, read the description of the input variable chksymbreak,',ch10,&
-              ' then, if you feel confident, you might switch it to zero, or consult with the forum.'
-             MSG_WARNING(msg)
-             ! moved this to a warning: for slab geometries arbitrary tnons can appear along the vacuum direction
-           end if
-         end if
-       end do
-     end do
+     ABI_ALLOCATE(tnons_new,(3,dt%nsym))
+     ABI_ALLOCATE(xred,(3,dt%natom))
+     xred(:,:)=dt%xred_orig(:,1:dt%natom,1)
+!    Use the largest significant value of tolsym, namely, one.
+     call symmetrize_xred(dt%natom,dt%nsym,dt%symrel,dt%tnons,xred,&
+&      fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=one)
+     ABI_DEALLOCATE(tnons_new)
+
+     if(mismatch_fft_tnons/=0)then
+       if(fixed_mismatch==1)then
+         write(msg, '(2a)' ) ch10,' chkinp: COMMENT -'
+         call wrtout(std_out,msg,'COLL')
+         write(msg, '(4a,3es20.10)' )  &
+&          '   Found potentially symmetry-breaking value of tnons. ', ch10,&
+&          '   The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:',ch10,&
+&          xred(:,1)-dt%xred_orig(:,1,1)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(iout,msg,'COLL')
+         write(msg, '(4a)' ) ch10,&
+&          '   For your convenience, you might cut+paste the shifted new atomic positions (for image 1 only):',ch10,&
+&          '   xred'
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(iout,msg,'COLL')
+         do iatom=1,dt%natom
+           write(msg,'(a,3es20.10)') '        ',xred(:,iatom)
+           call wrtout(std_out,msg,'COLL')
+           call wrtout(iout,msg,'COLL')
+         enddo
+         call wrtout(std_out,' ','COLL')
+       endif
+
+       if(dt%chksymtnons==1)then
+         write(msg, '(8a,i4,2a,9i3,2a,3es20.10,10a)' ) ch10,&
+&          ' chkinp: ERROR -',ch10,&
+&          '   Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
+&          '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
+&          '   for the symmetry number ',mismatch_fft_tnons,ch10,&
+&          '   symrel is ',dt%symrel(1:3,1:3,mismatch_fft_tnons),ch10,&
+&          '   tnons is ',dt%tnons(1:3,mismatch_fft_tnons),ch10,&
+&          '   So, your atomic positions are not aligned with the FFT grid.',ch10,&
+&          '   Please, read the description of the input variable chksymtnons.',ch10,&
+&          '   If you are planning GW or BSE calculations, such tnons value is very problematic.',ch10,&
+&          '   Otherwise, you might set chksymtnons=0. But do not be surprised if ABINIT crashes for GW or BSE.',ch10,&
+&          '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
+         call wrtout(std_out,msg,'COLL')
+         if(fixed_mismatch==1)then
+           write(msg, '(a)' ) '   ABINIT has detected such a possible shift. See the suggestion given in the COMMENT above.'
+           call wrtout(std_out,msg,'COLL')
+         endif
+         ierr=ierr+1 ! Previously a warning: for slab geometries arbitrary tnons can appear along the vacuum direction.
+                     ! But then simply set chksymtnons=0 ...
+       endif
+     endif
+     ABI_DEALLOCATE(xred)
    end if
 
 !  constraint_kind
@@ -3863,6 +3902,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  ierr=sum(ierr_dtset(1:ndtset_alloc)/mpi_enregs(1:ndtset_alloc)%nproc)
 
  if (ierr==1) then
+   write(msg,'(4a)')ch10,&
+   ' Checking consistency of input data against itself revealed some problem(s).',ch10,&
+   ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).'
+   call wrtout(iout,msg,'COLL')   
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above.'

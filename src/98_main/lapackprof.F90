@@ -60,7 +60,6 @@ program lapackprof
  integer :: istwfk, mcg, mgsc, band, g0, idx, ortalgo, abimem_level, prtvol, usepaw, debug
  real(dp) ::  ctime, wtime, gflops, abimem_limit_mb
  !logical :: do_check
- !character(len=24) :: skinds
  character(len=500) :: method, command, arg, msg !header,
  type(MPI_type) :: MPI_enreg
 !arrays

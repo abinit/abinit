@@ -85,6 +85,8 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
       # ScaLAPACK?
       if test "${sd_linalg_has_blacs}" = "yes"; then
         _SD_LINALG_CHECK_SCALAPACK
+      else
+         sd_linalg_has_scalapack="no"
       fi
 
     fi
@@ -92,7 +94,10 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
     # ELPA
     _SD_LINALG_CHECK_ELPA
 
+  else
+    sd_linalg_has_scalapack="no"
   fi
+  AC_SUBST(sd_linalg_has_scalapack)
 
   # Validate the MPI linear algebra support
   if test "${sd_mpi_enable}" = "yes"; then
@@ -582,6 +587,11 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
     acml)
       sd_linalg_vendor_provided="blas lapack blacs scalapack"
       sd_linalg_vendor_blas_libs="-lacml -lacml_mv"
+      ;;
+
+    aocl)
+      sd_linalg_vendor_provided="blas lapack blacs scalapack"
+      sd_linalg_vendor_blas_libs="-lblis -lflame"
       ;;
 
     asl)

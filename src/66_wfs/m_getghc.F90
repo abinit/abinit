@@ -391,7 +391,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          ABI_DEALLOCATE(ghc2)
        end if ! spin 2 treated by this proc
 
-     end if ! npsinortot
+     end if ! nspinortot
 
    else if (gs_ham%nvloc==4) then
 !    Treat non-collinear local potentials
@@ -1284,7 +1284,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
    ABI_DEALLOCATE(cwavef1)
    ABI_DEALLOCATE(cwavef2)
 
- end if ! npsinortot
+ end if ! nspinortot
 
  ABI_DEALLOCATE(work)
 

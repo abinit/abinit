@@ -1041,7 +1041,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    --------------------------------------------------------------
 
 !    Eventually symmetrize atomic coordinates over space group elements:
-     call symmetrize_xred(indsym,dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
+     call symmetrize_xred(dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
      if (dtset%usewvl == 0) then
 !      Get cut-off for g-vectors

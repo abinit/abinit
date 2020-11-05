@@ -545,8 +545,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
 
-     call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
-&     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
+     call symmetrize_xred(ab_mover%natom,&
+&     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred,indsym=scfcv_args%indsym)
 
      change=any(xred(:,:)/=xred_prev(:,:))
      if (change)then

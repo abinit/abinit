@@ -29,6 +29,8 @@ inp_files = [
 "t14.in", # optic
 "t15.in", # check slight misalignment of rprim, with large tolsym
 "t16.in", # check slightly incorrect xred, with large tolsym
+"t17.in", # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
+"t18.in", # check slightly incorrect rprim and xred, yielding correction to tnons, tolerated.
 "t19.in", # RMM-DIIS eigsolver for NC.
 "t20.in", # RMM-DIIS eigsolver for PAW.
 # GW/BSE
@@ -37,6 +39,7 @@ inp_files = [
 # DFPT
 "t41.in",
 "t42.in",
+"t43.in",
 # Electron-phonon
 "t50.in",
 "t51.in",
