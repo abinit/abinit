@@ -4627,7 +4627,7 @@ end subroutine subdiago
 !!
 !! SOURCE
 
-subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useoverlap,vecnm,me_g0,comm)
+subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_vecnm, useoverlap, vecnm, me_g0, comm)
 
  use m_abi_linalg
 
@@ -4642,7 +4642,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  integer :: ierr,ii,ii0,ii1,ii2,ivec,ivec2
  integer :: rvectsiz,vectsize,cg_idx,gsc_idx
  real(dp) :: doti,dotr,sum,xnorm
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
 #ifdef DEBUG_MODE
  character(len=500) :: msg
 #endif
@@ -4674,7 +4674,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
  if(ortalgo==-1) return
 
  !call wrtout(std_out, sjoin(" Begin wavefunction orthogonalization with ortalgo:", itoa(ortalgo)))
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
 
  do ivec=1,nvec
    cgindex(ivec)=nelem*(ivec-1)+icg+1
@@ -5108,7 +5108,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
    MSG_ERROR(sjoin("Wrong value for ortalgo:", itoa(ortalgo)))
  end if
 
- call cwtime_report(sjoin(" pw_orthon with ortalgo: ", itoa(ortalgo)), cpu, wall, gflops)
+ !call cwtime_report(sjoin(" pw_orthon with ortalgo: ", itoa(ortalgo)), cpu, wall, gflops)
 
 end subroutine pw_orthon
 !!***

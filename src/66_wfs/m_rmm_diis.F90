@@ -254,6 +254,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !print *, "rmm_diis_status:", rmm_diis_status
  !print *, "rmm_prev_acc:", prev_accuracy_level, "rmm_raise_acc:", raise_acc
  !print *, "accuracy_level:", accuracy_level, "rmm_raise_acc:", raise_acc
+ !if (usepaw == 1) accuracy_level = 4
 
  ! Update rmm_diis_status. Reset number of calls if we moved to a new accuracy_level.
  rmm_diis_status(1) = accuracy_level
@@ -266,6 +267,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Prefer more DIIS iterations with rollback over the final trial step.
    max_niter = dtset%nline; end_with_trial_step = .False.
  end if
+ ! FIXME: There's no real evidence that trial step is needed.
+ end_with_trial_step = .False.
 
  ! Define accuracy_ene for SCF
  accuracy_ene = zero
@@ -287,6 +290,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (accuracy_level >= 2) after_ortho = 1
  if (accuracy_level >= 4) after_ortho = 2
  !after_ortho = 2
+ if (usepaw == 1) after_ortho = 2 ! FIXME
 
  use_fft_mixprec = dtset%mixprec == 1 .and. accuracy_level < 2
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(1)
@@ -310,7 +314,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ", accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
+ ! =========================
  ! === Subspace rotation ===
+ ! =========================
  call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig, cg, gsc_all, evec)
  ABI_FREE(evec)
 
@@ -453,13 +459,14 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
      call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
 
+     ! Build |Psi_1> = |Phi_0> + lambda |K R_0>
      ! Reuse previous lambda.
      tag = "FIXLAM"
      call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
 
      if (usepaw == 1) then
        ! Need to recompute <G|S|Psi> before calling pw_orthon
-#if 1
+#if 0
        call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
 #else
@@ -474,7 +481,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
             ndat, mpi_enreg, 1, paw_opt3, signs2, gsc_bk, tim_nonlop, &
             phi_bk, gvnlxc_bk, already_transposed=.False.)
        end if
-
        !call cgpaw_normalize(npwsp, ndat, phi_bk, gsc_bk, istwf_k, me_g0, comm_bandspinorfft)
 #endif
      else
@@ -495,8 +501,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! ===============================
  call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
  ortalgo = mpi_enreg%paral_kgb !; ortalgo = 3
- if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
  call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc_all, usepaw, cg, me_g0, comm_bandspinorfft)
+ !call fxphas(cg, gsc_all, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
@@ -531,9 +537,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
        else
           ! FIXME This call seems to be needed for PAW. Strange as <G|S|psi> is already recomputed in pw_orthon!
-          call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
-                               eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
-                               normalize=.False.)
+          !call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+          !                     eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
+          !                     normalize=.False.)
+          !                     !normalize=.True.)
        end if
 
      case (2)
@@ -541,6 +548,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
                             normalize=.False.)
+                            !normalize=.True.)
      case default
        MSG_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
      end select
@@ -1270,6 +1278,7 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, 
      eig(idat) = diis%hist_ene(iter, idat)
      resid(idat) = diis%hist_resid(iter, idat)
      enlx(idat) = diis%hist_enlx(iter, idat)
+     ! Copy |psi>, S|psi> and associated residual.
      call cg_zcopy(npwsp, diis%chain_phi(:,:,iter,idat), phi_bk(:,:,idat))
      call cg_zcopy(npwsp, diis%chain_resv(:,:,iter,idat), residv_bk(:,:,idat))
      if (diis%usepaw == 1) call cg_zcopy(npwsp, diis%chain_sphi(:,:,iter,idat), gsc_bk(:,:,idat))
