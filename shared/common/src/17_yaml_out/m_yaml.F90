@@ -154,6 +154,9 @@ module m_yaml
  public :: yaml_single_dict
   ! Create a full document from a single dictionary
 
+ public :: yaml_write_dict
+  ! Write a dictionary in a Yaml document.
+
  public :: yaml_iterstart
   ! Set the value of the iteration indices used to build the iteration_state dict in the Yaml documents
 
@@ -1475,6 +1478,48 @@ subroutine yaml_single_dict(unit, tag, comment, pl, key_size, string_size, &
  call doc%write_and_free(unit, newline=nl)
 
 end subroutine yaml_single_dict
+!!***
+
+!!****f* m_yaml/yaml_write_dict
+!! NAME
+!! yaml_write_dict
+!!
+!! FUNCTION
+!!  Write a dictionary in a Yaml document.
+!!
+!! INPUTS
+!!  tag: Yaml tag
+!!  dict_name: Dictionary name
+!!  dict: Dictionary
+!!  unit: Unit numver
+!!  [with_iter_state]: True if dict with iteration state should be added. Default: False
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine yaml_write_dict(tag, dict_name, dict, unit, with_iter_state)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: tag, dict_name
+ type(pair_list),intent(inout) :: dict
+ integer,intent(in) :: unit
+ logical,optional,intent(in) :: with_iter_state
+
+!Local variables-------------------------------
+ type(yamldoc_t) :: ydoc
+ logical :: with_iter_state_
+! *************************************************************************
+
+ with_iter_state_ = .False.; if (present(with_iter_state)) with_iter_state_ = with_iter_state
+
+ ydoc = yamldoc_open(tag, with_iter_state=with_iter_state_)
+ call ydoc%add_dict(dict_name, dict)
+ call ydoc%write_and_free(unit)
+
+end subroutine yaml_write_dict
 !!***
 
 !!****f* m_yaml/yamldoc_write_unit_and_free

@@ -176,14 +176,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nb_pocc, jj, kk, it, accuracy_level, raise_acc, prev_mixprec, after_ortho
  integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy !, comm_spinorfft, comm_fft
- logical :: end_with_trial_step, first_call
- logical :: use_fft_mixprec
+ logical :: end_with_trial_step, first_call, use_fft_mixprec
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops, max_res_pocc, tol_occupied
  !character(len=500) :: msg
- character(len=6) :: tag
+ !character(len=6) :: tag
  type(rmm_diis_t) :: diis
- type(yamldoc_t) :: ydoc
 !arrays
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
@@ -194,14 +192,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 ! *************************************************************************
 
- usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb; prtvol = dtset%prtvol !; prtvol = -level
+ usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
  me_g0 = mpi_enreg%me_g0; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  npwsp = npw * nspinor; mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
+ prtvol = dtset%prtvol !; prtvol = -level
 
  ! =================
  ! Prepare DIIS loop
  ! =================
- ! accuracy_level
+ ! accuracy_level:
  !
  !  1: Used at the beginning of the SCF cycle. Use loosy convergence criteria in order
  !     to reduce the number of H|psi> applications as much as possible so that we can mix densities/potentials.
@@ -407,7 +406,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
    end do
-   if (timeit) call cwtime_report(" KR0 ", cpu, wall, gflops)
+   if (timeit) call cwtime_report(" trial_step ", cpu, wall, gflops)
 
    ! ===============
    ! DIIS iterations
@@ -440,14 +439,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ! Compute <R_i|R_j> and <i|S|j> for j=iter
      if (iter /= max_niter_block) call diis%eval_mats(iter, ndat, me_g0, comm_bandspinorfft)
    end do iter_loop
+   if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
 
-   ! High energy states may have larger residuals at the end of the iter_loop especially if we reduce the
-   ! number of iterations. Here we select the trial states in the chain with smaller resid.
-   ! We are allowed to do so because we are still othogonalization-free.
    call diis%rollback(npwsp, ndat, phi_bk, gsc_bk, residv_bk,  &
                       eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
 
-   if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
+   if (timeit) call cwtime_report(" rollback ", cpu, wall, gflops)
 
    !end_with_trial_step = .False.
    !end_with_trial_step = .True.
@@ -461,7 +458,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
      ! Build |Psi_1> = |Phi_0> + lambda |K R_0>
      ! Reuse previous lambda.
-     tag = "FIXLAM"
+     !tag = "FIXLAM"
+     !lambda_bk = limit_lambda(lambda_bk)
      call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
 
      if (usepaw == 1) then
@@ -488,6 +486,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
         !cgnc_normalize(npwsp, ndat, phi_bk, istwf_k, me_g0, comm_bandspinorfft)
      end if
 
+     if (timeit) call cwtime_report(" last_trial_step", cpu, wall, gflops)
    end if ! end_with_trial_step
 
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
@@ -562,10 +561,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
 
- !call yaml_write_dict('RMM-DIIS', "stats", dict%stats, std_out, with_iter_state=.False.)
- ydoc = yamldoc_open("RMM-DIIS", with_iter_state=.False.)
- call ydoc%add_dict("diis_stats", diis%stats)
- call ydoc%write_and_free(std_out)
+ call yaml_write_dict('RMM-DIIS', "stats", diis%stats, std_out, with_iter_state=.False.)
  call diis%free()
 
  ! Final cleanup.
@@ -618,6 +614,7 @@ end subroutine rmm_diis_push_hist
 !!  rmm_diis_push_iter
 !!
 !! FUNCTION
+!!  Save one iteration of the DIIS.
 !!
 !! INPUTS
 !!
@@ -673,6 +670,7 @@ end subroutine rmm_diis_push_iter
 !!  rmm_diis_exit_iter
 !!
 !! FUNCTION
+!!  Return true if we can exit the DIIS iteration
 !!
 !! INPUTS
 !!
@@ -775,6 +773,7 @@ end function rmm_diis_exit_iter
 !!  rmm_diis_print_block
 !!
 !! FUNCTION
+!!  Print energies, residuals for a block of states.
 !!
 !! INPUTS
 !!
@@ -831,6 +830,7 @@ end subroutine rmm_diis_print_block
 !!  getghc_eigresid
 !!
 !! FUNCTION
+!!  Compute new eigenvalues, residuals, H|psi> and enlx from cg and gsc.
 !!
 !! INPUTS
 !!
@@ -894,10 +894,10 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
                     mpi_enreg, prtvol, sij_opt, cpopt, cprj_dum, already_transposed=.False.)
  end if
 
- ! PAW normalization must be done here.
+ ! PAW normalization must be done here once gsc is known.
  if (usepaw == 1 .and. normalize_) call cgpaw_normalize(npwsp, ndat, cg, gsc, istwf_k, me_g0, comm)
 
- ! Compute new approximated eigenvalues, residue vectors and residuals.
+ ! Compute new approximated eigenvalues, residual vectors and norms
  call cg_get_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, comm)
  call cg_get_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
  call cg_norm2g(istwf_k, npwsp, ndat, residvecs, resid, me_g0, comm)
@@ -962,6 +962,7 @@ end function rmm_diis_new
 !!  rmm_diis_free
 !!
 !! FUNCTION
+!!  Free dynamic memory.
 !!
 !! INPUTS
 !!
@@ -997,6 +998,7 @@ end subroutine rmm_diis_free
 !!  rmm_diis_update_block
 !!
 !! FUNCTION
+!!  Compute new trial wavefunctions and residuals from the DIIS chain.
 !!
 !! INPUTS
 !!
@@ -1015,12 +1017,14 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
  real(dp),intent(in) :: lambda_bk(ndat)
  real(dp),intent(inout) :: phi_bk(2, npwsp, ndat), residv_bk(2, npwsp, ndat)
 
+!local variables
  integer,parameter :: master = 0
  integer :: cplex, ierr, nprocs, my_rank, idat !, ii !, ibk, iek
  real(dp) :: noise, cpu, wall, gflops
  !integer :: failed(ndat)
  real(dp),allocatable :: diis_eig(:), wmat1(:,:,:), wmat2(:,:,:), wvec(:,:,:), alphas(:,:)
  character(len=500) :: msg
+ ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  cplex = diis%cplex
@@ -1030,7 +1034,7 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
  if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  if (diis%use_smat == 1) then
-    ! try_to_solve_eigproblem = .False. Numerically unstable.
+   ! try_to_solve_eigproblem = .False. Numerically unstable.
 
    !do idat=1,ndat ! TODO
    ABI_MALLOC(diis_eig, (0:iter-1))
@@ -1064,48 +1068,48 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
    ABI_FREE(wmat2)
    ABI_FREE(diis_eig)
    !cycle
+
  else
+   ! Solve system of linear equations.
+   ! Only master works so that we are sure we have the same solution.
+   ABI_CALLOC(wvec, (cplex, 0:iter, ndat))
 
- ! Solve system of linear equations.
- ! Only master works so that we are sure we have the same solution.
- ABI_CALLOC(wvec, (cplex, 0:iter, ndat))
+   if (my_rank == master) then
+     ABI_MALLOC(wmat1, (cplex, 0:iter, 0:iter))
 
- if (my_rank == master) then
-   ABI_MALLOC(wmat1, (cplex, 0:iter, 0:iter))
+     do idat=1,ndat
+       wvec(1, iter, idat) = -one
+       wmat1 = zero
+       wmat1(1,:,iter) = -one
+       wmat1(1,iter,:) = -one
+       wmat1(1,iter,iter) = zero
+       wmat1(:,0:iter-1, 0:iter-1) = diis%resmat(:, 0:iter-1, 0:iter-1, idat)
 
-   do idat=1,ndat
-     wvec(1, iter, idat) = -one
-     wmat1 = zero
-     wmat1(1,:,iter) = -one
-     wmat1(1,iter,:) = -one
-     wmat1(1,iter,iter) = zero
-     wmat1(:,0:iter-1, 0:iter-1) = diis%resmat(:, 0:iter-1, 0:iter-1, idat)
+       !if (ierr /= 0) then
+       !  write(std_out, *)"iter:", iter, "cplex:", cplex
+       !  do ii=0,iter
+       !    !write(std_out, sjoin("(", itoa(2*iter), ", (es14.6)")) "wmat1:", wmat1(:, ii, :)
+       !    write(std_out, "(a, *(es14.6))") " wmat1:", wmat1(:, ii, :)
+       !  end do
+       !end if
 
-     !if (ierr /= 0) then
-     !  write(std_out, *)"iter:", iter, "cplex:", cplex
-     !  do ii=0,iter
-     !    !write(std_out, sjoin("(", itoa(2*iter), ", (es14.6)")) "wmat1:", wmat1(:, ii, :)
-     !    write(std_out, "(a, *(es14.6))") " wmat1:", wmat1(:, ii, :)
-     !  end do
-     !end if
+       call xhesv_cplex("U", cplex, iter+1, 1, wmat1, wvec(:,:,idat), msg, ierr)
+       ABI_CHECK(ierr == 0, msg)
+       !failed(idat) = ierr
 
-     call xhesv_cplex("U", cplex, iter+1, 1, wmat1, wvec(:,:,idat), msg, ierr)
-     ABI_CHECK(ierr == 0, msg)
-     !failed(idat) = ierr
+       !if (diis%prtvol == -level) then
+       !  write(std_out,*)"wvec:", wvec(:,:,idat)
+       !  write(std_out,*)"sum(wvec):", sum(wvec(:, 0:iter-1, idat), dim=2)
+       !end if
+       if (cplex == 2) then
+         ! coefficients should sum up to 1 but sometimes we get a small imaginary part. here we remove it
+         noise = sum(wvec(2, 0:iter-1, idat))
+         wvec(2, 0:iter-1, idat) = wvec(2, 0:iter-1, idat) - noise * iter
+       end if
 
-     !if (diis%prtvol == -level) then
-     !  write(std_out,*)"wvec:", wvec(:,:,idat)
-     !  write(std_out,*)"sum(wvec):", sum(wvec(:, 0:iter-1, idat), dim=2)
-     !end if
-     if (cplex == 2) then
-       ! coefficients should sum up to 1 but sometimes we get a small imaginary part. here we remove it
-       noise = sum(wvec(2, 0:iter-1, idat))
-       wvec(2, 0:iter-1, idat) = wvec(2, 0:iter-1, idat) - noise * iter
-     end if
-
-   end do
-   ABI_FREE(wmat1)
- end if
+     end do
+     ABI_FREE(wmat1)
+   end if
  end if ! use_smat
 
  ! Master broadcasts data.
@@ -1137,7 +1141,7 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
 
  ABI_FREE(wvec)
 
- if (timeit) call cwtime_report(" build_hij", cpu, wall, gflops)
+ if (timeit) call cwtime_report(" update_block", cpu, wall, gflops)
 
 end subroutine rmm_diis_update_block
 !!***
@@ -1147,6 +1151,7 @@ end subroutine rmm_diis_update_block
 !!  rmm_diis_eval_mats
 !!
 !! FUNCTION
+!!  Compute matrix elements required by DIIS.
 !!
 !! INPUTS
 !!
@@ -1160,11 +1165,14 @@ end subroutine rmm_diis_update_block
 
 subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
 
+!Arguments ------------------------------------
  class(rmm_diis_t),intent(inout) :: diis
  integer,intent(in) :: iter, ndat, me_g0, comm
 
+!local variables
  integer :: ii, ierr, idat, nprocs, option
  real(dp) :: dotr, doti, cpu, wall, gflops
+! *************************************************************************
 
  nprocs = xmpi_comm_size(comm)
  option = 2; if (diis%cplex == 1) option = 1
@@ -1231,6 +1239,9 @@ end subroutine rmm_diis_eval_mats
 !!  rmm_diis_rollback
 !!
 !! FUNCTION
+!!  High energy states may have larger residuals at the end of the iter_loop especially if we reduce the
+!!  number of iterations. Here we select the trial states in the chain with smaller resid.
+!!  We are allowed to do so because we are still othogonalization-free.
 !!
 !! INPUTS
 !!
@@ -1244,14 +1255,17 @@ end subroutine rmm_diis_eval_mats
 
 subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, resid, enlx, comm)
 
+!Arguments ------------------------------------
  class(rmm_diis_t),intent(inout) :: diis
  integer,intent(in) :: npwsp, comm, ndat
  real(dp),intent(inout) :: phi_bk(2, npwsp, ndat), gsc_bk(2, npwsp, ndat*diis%usepaw), residv_bk(2, npwsp, ndat)
  real(dp),intent(inout) :: eig(ndat), resid(ndat), enlx(ndat)
 
+!local variables
  integer,parameter :: master = 0
  integer :: nprocs, my_rank, idat, iter, ierr, ilast, take_iter(ndat)
  real(dp) :: cpu, wall, gflops
+! *************************************************************************
 
  ! FIXME: Temporarily disabled
  !return
@@ -1278,7 +1292,7 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, 
      eig(idat) = diis%hist_ene(iter, idat)
      resid(idat) = diis%hist_resid(iter, idat)
      enlx(idat) = diis%hist_enlx(iter, idat)
-     ! Copy |psi>, S|psi> and associated residual.
+     ! Copy |psi>, S|psi> and residual.
      call cg_zcopy(npwsp, diis%chain_phi(:,:,iter,idat), phi_bk(:,:,idat))
      call cg_zcopy(npwsp, diis%chain_resv(:,:,iter,idat), residv_bk(:,:,idat))
      if (diis%usepaw == 1) call cg_zcopy(npwsp, diis%chain_sphi(:,:,iter,idat), gsc_bk(:,:,idat))
@@ -1314,13 +1328,14 @@ end subroutine rmm_diis_rollback
 
 subroutine my_pack_matrix(n, mat_in, mat_out)
 
+!Arguments ------------------------------------
  integer, intent(in) :: N
  real(dp), intent(in) :: mat_in(N, N)
  real(dp), intent(out) :: mat_out(2, N*(N+1)/2)
 
 !local variables
  integer :: isubh, i, j
- ! *************************************************************************
+! *************************************************************************
 
  isubh = 1
  do j=1,N
@@ -1383,6 +1398,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig
  integer :: ig, ig0, ib, ierr, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, paral_kgb
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw
  integer :: me_g0, cplex, comm_bandspinorfft
+ real(dp) :: cpu, wall, gflops
  real(dp),parameter :: rdummy = zero
  !character(len=500) :: msg
 !arrays
@@ -1393,6 +1409,8 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig
  type(pawcprj_type) :: cprj_dum(1,1)
 
 ! *************************************************************************
+
+ if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
  me_g0 = mpi_enreg%me_g0
@@ -1489,34 +1507,10 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig
  ABI_FREE(ghc_bk)
  ABI_FREE(gvnlxc_bk)
 
+ if (timeit) call cwtime_report(" subspace rotation", cpu, wall, gflops)
+
 end subroutine subspace_rotation
 !!***
-
-!-contains
-!-
-!- real(dp) elemental function limit_lambda(lambda) result(new_lambda)
-!-
-!-  real(dp),intent(in) :: lambda
-!-  real(dp) :: max_lambda, min_lambda
-!-
-!-  !write(std_out, *)"input lambda:", lambda
-!-  new_lambda = lambda
-!-  return
-!-  if (accuracy_level == 1) return
-!-  !if (accuracy_level == 3) return
-!-
-!-  ! restrict the value of abs(lambda) in [0.1, 1.0]
-!-  max_lambda = one
-!-  min_lambda = tol1
-!-  if (abs(lambda) > max_lambda) then
-!-    new_lambda = sign(max_lambda, lambda)
-!-  else if (abs(lambda) < min_lambda) then
-!-    !if (abs(lambda) > tol12)  then
-!-      new_lambda = sign(min_lambda, lambda)
-!-    !else
-!-    !  new_lambda = tol12
-!-    !end if
-!-  end if
 
 end module m_rmm_diis
 !!***
