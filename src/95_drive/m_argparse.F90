@@ -611,7 +611,7 @@ integer function get_arg_bool(argname, argval, msg, default, exclude) result(ier
  character(len=*),optional,intent(in) :: exclude
 
 !Local variables-------------------------------
- integer :: ii, istat
+ integer :: ii
  logical :: found_argname, found_excl
  character(len=500) :: arg
 
