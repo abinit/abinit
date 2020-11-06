@@ -1569,7 +1569,7 @@ Variable(
 This variable governs the behaviour of the code when there is a potential
 source of symmetry breaking related to the k point grid.
 
-When **chksymbreak** = 1, the code stops if 
+When **chksymbreak** = 1, the code stops if
 the k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
 
 Note that the check is disabled when the number of k-points in the BZ is greater than 40 ** 3.
@@ -1580,7 +1580,7 @@ Explanation:
 In the ground-state calculation, such breaking of the symmetry is usually
 harmless. However, if the user is doing a calculation of phonons using DFPT
 ([[rfphon]] = 1), the convergence with respect to the number of k points will be
-worse with a non-symmetric grid than with a symmetric one. 
+worse with a non-symmetric grid than with a symmetric one.
 
 So, it was decided to warn the user about such problem already at
 the level of the ground state calculations, although such warning might be irrelevant.
@@ -1605,7 +1605,7 @@ This variable governs the behaviour of the code when there is a potential
 symmetry breaking, related to the presence
 of non-symmorphic translations not leaving the FFT exchange-correlation grid invariant.
 
-When **chksymtnons** = 1, the code stops if 
+When **chksymtnons** = 1, the code stops if
 the non-symmorphic translation part of the symmetry operations has components that are not zero,
 or simple fractions with 2, 3, 4, 5, 6, 8, 9, 10 or 12 as denominators. Also, suggestions
 to bypass the problem are made in the output file.
@@ -1616,9 +1616,9 @@ in the output file suggestions to bypass the problem.
 When **chksymtnons** = 0, the code skips the check.
 
 Explanation:
-In ground-state or DFPT calculations, such breaking of the symmetry is harmless. 
+In ground-state or DFPT calculations, such breaking of the symmetry is harmless.
 However, for a GW or BSE calculation, the presence of non-symmorphic translations
-that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault). 
+that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault).
 In the GW or BSE parts, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
 for calculating both the polarizability and the self-energy. The wavefunctions
 in the full Brillouin zone are obtained from the irreducible wedge by applying
@@ -1626,7 +1626,7 @@ the symmetry operations of the space group of the crystal. In the present
 implementation, the symmetrisation of the wavefunctions is done in real space
 on the FFT mesh that, therefore, has to be coherent both with the rotational
 part as well as with the fractional translation of each symmetry operation. If
-the condition above (2, 3, 4, 5, 6, 7, 8, 9, 10, or 12 as denominator) is not met, 
+the condition above (2, 3, 4, 5, 6, 7, 8, 9, 10, or 12 as denominator) is not met,
 the GW/BSE code will not be able to find a symmetry preserving FFT mesh.
 
 So, it was decided to warn the user about such problem already at
@@ -1635,7 +1635,7 @@ the level of the ground-state calculations, although such warning might be irrel
 If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
 symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0.
-If **chksymtnons** = 2, ABINIT makes a suggestion of a possible global translation, 
+If **chksymtnons** = 2, ABINIT makes a suggestion of a possible global translation,
 and corresponding translated atomic positions.
 """,
 ),
@@ -17896,9 +17896,9 @@ Always give the identity matrix even if no other symmetries hold, e.g.
 
 Also note that for this array, as for all others, the array elements are filled
 in a columnwise order as is usual for Fortran.  Explicitly,
-[[symrel]] 1 0 0 -1 -1 0 0 0 1 for symmetry operation isym is stored internally as 
+[[symrel]] 1 0 0 -1 -1 0 0 0 1 for symmetry operation isym is stored internally as
 symrel(1,1,isym)=1, symrel(1,2)=-1, ...
-The atom located at xred(1:3) is send to location 
+The atom located at xred(1:3) is send to location
 xred_sym(jj)=symrel(jj,1,isym)*xred(1)+symrel(jj,2,isym)*xred(2)+symrel(jj,3,isym)*xred(3)+tnons(jj).
 
 The relation between the above symmetry matrices [[symrel]], expressed in the
@@ -21863,10 +21863,62 @@ Variable(
     topics=['TuningSpeed_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Activate RMM-DIIS eigensolver in the GS part.",
+    mnemonics="Activate the RMM-DIIS eigensolver in the GS part.",
     added_in_version="9.3.0",
     text=r"""
-This variable is still under active development
+Note that this variable is under active development so use it at your own risk.
+
+This variable enables the RMM-DIIS eigensolver to **accelerate**
+GS computations, structural relaxations and molecular-dynamics simulations.
+Note that the accuracy of the RMM-DIIS solver strongly depends on the quality of the input trial states
+as the RMM-DIIS algorithm is designed to find the closest eigenvector/eigevalue pair.
+This means that RMM-DIIS is usually used in conjunction with another eigenvalue solver
+that provides an initial guess for the KS eigenstates that are supposed to be reasonably close
+to the exact solution.
+The algorithm is inspired to XXX although the ABINIT implementation is not
+completely equivalent to the original formulation.
+
+RMM-DIIS can be used both with the conjugate-gradient and the LOBPCG solver although it is strongly suggested
+to use [[paral_kgb]] = 1 to take advantage of LOBPCG, its better efficiency and improved parallel MPI scalability.
+In a nutshell, to activate RMM-DIIS with LOBPCG it is sufficient to use:
+
+```
+paral_kgb 1
+rmm_diis  1
+```
+
+and then select the value of [[npband]], [[npkpt]], [[npfft]], [[npspinor]] according to your system.
+Note also [[bandpp]]
+
+If we are running a standard GS calculation. Abinit activates the RMM-DIIS solver after 3 + [[rmm_diis]] SCF iterations
+In the case of structural relaxations, the first SCF cycle is done with 3 + [[rmm_diis]] as usual whereas
+the subsequent relaxation steps activate RMM-DIIS after 1 + [[rmm_diis]] SCF iterations.
+This means that using [[rmm_diis]] 1 in a structural relaxation leads to:
+
+    - 4 SCF iterations with the "standard" eigensolver followed by RMM-DIIS for the intial crystalline structure
+    - 2 SCF iterations with the "Standard" eigesolver followed by the RMM-DIIS when we start the relaxation process.
+
+
+The RMM-DIIS solver usually requires less wall-time per iteration when compared to other approches since the
+explicit orthogonalization of the trial states is avoided during the iterative diagonalization and
+a single full-band orthogonalization is performed per cycle.
+On the other hand, RMM-DIIS usually leads to a significant speedup especially for systems
+with relatively large [[mpw]], [[nband]]
+In some cases, RMM-DIIS can be twice as fast **per iteration** as other conventional methods.
+On the other hand, please keep in mind that RMM-DIIS is not guaranteed to find the correct ground-state.
+Moreover the algorith may have problems to converge and more iterations may be needed to reach a given precision.
+Also, the present implementation is optimized for converging occupied states so we do not recommend
+[[rmm_diis]] for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
+Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
+then restart from the WFK file with more accurate eigenvalue solvers to crosscheck the results.
+
+
+This variable has not effect for DFPT or other optdriver cases.
+This option is compatible with NC and PAW as well as CG and LOBPC
+
+If [[ntime]]
+
+
 """,
 ),
 
