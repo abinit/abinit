@@ -4875,6 +4875,10 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
      call timab(48,1,tsec)
      call xmpi_sum(sum,comm,ierr)
      call timab(48,2,tsec)
+     !LTEST
+     !write(std_out,'(a,i5)') '(pw_ortho) iband',ivec
+     !write(std_out,'(a,es21.10e3)') '(pw_ortho) sum',sum
+     !LTEST
 
      if(istwf_k>=2)sum=two*sum
      xnorm = sqrt(abs(sum)) ;  sum=1.0_dp/xnorm
@@ -4914,17 +4918,36 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useo
              call timab(48,2,tsec)
              doti=buffer2(1)
              dotr=buffer2(2)
+             !LTEST
+             !if (ivec<=2) then
+             !  write(std_out,'(a,i5)') '(pw_ortho) jband',ivec2
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) dotr',dotr
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) doti',doti
+             !end if
+             !LTEST
 
 !            Then subtract the appropriate amount of the lower state
              ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
 #ifdef FC_INTEL
 !            DIR$ ivdep
 #endif
+             !LTEST
+             !if (ivec<=2) then
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
+             !end if
+             !LTEST
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
              do ii=1,nelem
                vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
                vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
              end do
+             !LTEST
+             !if (ivec<=2) then
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
+             !end if
+             !LTEST
 
              ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
              do ii=1,nelem

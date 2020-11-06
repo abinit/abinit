@@ -767,7 +767,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          call projbd(cg,direc,-1,icg,igsc,istwf_k,mcg,mgsc,nband,npw,nspinor,&
 &         gsc,scprod,0,tim_projbd,useoverlap,me_g0,mpi_enreg%comm_fft)
          !LTEST
-         write(std_out,'(a,es21.10e3)') 'direc',sum(abs(direc))
+         !write(std_out,'(a,es21.10e3)') 'direc',sum(abs(direc))
          !LTEST
 
          ! ======================================================================
@@ -839,8 +839,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            call dotprod_g(dotr,doti,istwf_k,npw*nspinor,3,cwavef,conjgr,me_g0,mpi_enreg%comm_spinorfft)
          end if
          !LTEST
-         write(std_out,'(a,es21.10e3)') 'dotr',dotr
-         write(std_out,'(a,es21.10e3)') 'doti',doti
+         !write(std_out,'(a,es21.10e3)') 'dotr',dotr
+         !write(std_out,'(a,es21.10e3)') 'doti',doti
          !LTEST
 
          ! Project the conjugated gradient onto the current band
@@ -861,9 +861,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            end do
          end if
          !LTEST
-         write(std_out,'(a,es21.10e3)') 'cwavef',sum(abs(cwavef))
-         write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
-         write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
+         !write(std_out,'(a,es21.10e3)') 'cwavef',sum(abs(cwavef))
+         !write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
+         !write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
          !LTEST
          ! In case of generalized eigenproblem, normalization of direction vector
          ! cannot be done here (because S|D> is not known here).
@@ -911,7 +911,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            xnorm=one/sqrt(abs(dotr))
          end if
          !LTEST
-         write(std_out,'(a,es21.10e3)') 'xnorm (D)',xnorm
+         !write(std_out,'(a,es21.10e3)') 'xnorm (D)',xnorm
          !LTEST
 
          ! Compute dhc = Re{<D|H|C>}

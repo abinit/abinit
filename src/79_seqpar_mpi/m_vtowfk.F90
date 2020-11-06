@@ -477,6 +477,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
      call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
 &     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+      !LTEST
+      !return
+      !LTEST
    end if
    call timab(583,2,tsec)
 
