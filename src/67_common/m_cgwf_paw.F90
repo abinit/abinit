@@ -475,7 +475,7 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            end do
          end if
          !LTEST
-         write(std_out,'(a,es21.10e3)') 'direc',sum(abs(direc))
+         !write(std_out,'(a,es21.10e3)') 'direc',sum(abs(direc))
          !LTEST
          ! Apply projbd to cprj_direc
          z_tmp = (/one,zero/)
@@ -558,8 +558,8 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          dotr=dot(1)
          doti=dot(2)
          !LTEST
-         write(std_out,'(a,es21.10e3)') 'dotr',dotr
-         write(std_out,'(a,es21.10e3)') 'doti',doti
+         !write(std_out,'(a,es21.10e3)') 'dotr',dotr
+         !write(std_out,'(a,es21.10e3)') 'doti',doti
          !LTEST
 
          ! Project the conjugated gradient onto the current band
@@ -580,9 +580,9 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            end do
          end if
          !LTEST
-         write(std_out,'(a,es21.10e3)') 'cwavef',sum(abs(cwavef))
-         write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
-         write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
+         !write(std_out,'(a,es21.10e3)') 'cwavef',sum(abs(cwavef))
+         !write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
+         !write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
          !LTEST
          z_tmp   = (/one,zero/)
          z_tmp2  = (/-dotr,-doti/)
@@ -599,7 +599,7 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 &         gs_hamk,mpi_enreg,1,prtvol,tim_getcsc)
          xnorm=one/sqrt(abs(dot(1)))
          !LTEST
-         write(std_out,'(a,es21.10e3)') 'xnorm (D)',xnorm
+         !write(std_out,'(a,es21.10e3)') 'xnorm (D)',xnorm
          !LTEST
 
          sij_opt=0

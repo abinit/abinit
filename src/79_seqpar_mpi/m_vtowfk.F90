@@ -503,7 +503,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,subovl,gs_hamk%usepaw,cg,&
 &     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
      !LTEST
-     return
+     !return
      !LTEST
    end if
    call timab(583,2,tsec)
@@ -794,9 +794,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
 &             use_gpu_cuda=dtset%use_gpu_cuda)
            end if
-           ABI_DEALLOCATE(cwavef_x) 
-           ABI_DEALLOCATE(cwavef_y) 
-         end if                     
+           ABI_DEALLOCATE(cwavef_x)
+           ABI_DEALLOCATE(cwavef_y)
+         end if
          call timab(537,2,tsec)
          ABI_DEALLOCATE(cwavefb)
        end if

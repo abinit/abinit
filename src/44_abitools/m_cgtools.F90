@@ -4592,7 +4592,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 
      do iband=1,nband_k
        do ii=1,iband
-        
+
        end do
      end do
      ABI_DEALLOCATE(work)
@@ -4687,7 +4687,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useove
  character(len=500) :: msg
 !arrays
  integer :: cgindex(nvec),gscindex(nvec)
- real(dp) :: buffer2(2),tsec(2)
+ real(dp) :: buffer2(2),tsec(2),ovl_row_tmp(2*nvec),ovl_col_tmp(2*nvec)
  real(dp),allocatable :: rblockvectorbx(:,:),rblockvectorx(:,:),rgramxbx(:,:)
  complex(dpc),allocatable :: cblockvectorbx(:,:),cblockvectorx(:,:)
  complex(dpc),allocatable :: cgramxbx(:,:)
@@ -4899,8 +4899,8 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useove
      call xmpi_sum(summ,comm,ierr)
      call timab(48,2,tsec)
      !LTEST
-     write(std_out,'(a,i5)') '(pw_ortho) iband',ivec
-     write(std_out,'(a,es21.10e3)') '(pw_ortho) sum',summ
+     !write(std_out,'(a,i5)') '(pw_ortho) iband',ivec
+     !write(std_out,'(a,es21.10e3)') '(pw_ortho) sum',summ
      !LTEST
 
      if(istwf_k>=2)summ=two*summ
@@ -4935,7 +4935,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useove
            MSG_ERROR('Should be one!')
          end if
          !ovl_mat(iv2+iv1  ) = one
-         !ovl_mat(iv2+iv1+1) = zero 
+         !ovl_mat(iv2+iv1+1) = zero
        end if
      end do
 
@@ -4962,11 +4962,11 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useove
              dotr = ovl_mat(iv2l+iv1  )
              doti = ovl_mat(iv2l+iv1+1)
              !LTEST
-             if (ivec<=2) then
-               write(std_out,'(a,i5)') '(pw_ortho) jband',ivec2
-               write(std_out,'(a,es21.10e3)') '(pw_ortho) dotr',dotr
-               write(std_out,'(a,es21.10e3)') '(pw_ortho) doti',doti
-             end if
+             !if (ivec<=2) then
+             !  write(std_out,'(a,i5)') '(pw_ortho) jband',ivec2
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) dotr',dotr
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) doti',doti
+             !end if
              !LTEST
 
              call timab(48,1,tsec)
@@ -4982,10 +4982,10 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useove
 !            DIR$ ivdep
 #endif
              !LTEST
-             if (ivec<=2) then
-               write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
-               write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
-             end if
+             !if (ivec<=2) then
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
+             !end if
              !LTEST
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
              do ii=1,nelem
@@ -4993,15 +4993,15 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useove
                vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
              end do
              !LTEST
-             if (ivec<=2) then
-               write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
-               write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
-             end if
+             !if (ivec<=2) then
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))
+             !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (im)',sum(abs(vecnm(2,ii2+1:ii2+nelem)))
+             !end if
              !LTEST
              do ivec3=1,ivec
                iv3=2*ivec3-1
-               ovl_mat(iv2l+iv3  ) = ovl_mat(iv2l+iv3  ) - dotr*ovl_mat(iv1l+iv3) + doti*ovl_mat(iv1l+iv3+1)
-               ovl_mat(iv2l+iv3+1) = ovl_mat(iv2l+iv3+1) - doti*ovl_mat(iv1l+iv3) - dotr*ovl_mat(iv1l+iv3+1) 
+               ovl_col_tmp(iv3  ) = ovl_mat(iv2l+iv3  ) - dotr*ovl_mat(iv1l+iv3) + doti*ovl_mat(iv1l+iv3+1)
+               ovl_col_tmp(iv3+1) = ovl_mat(iv2l+iv3+1) - doti*ovl_mat(iv1l+iv3) - dotr*ovl_mat(iv1l+iv3+1)
                !LTEST
                if (ivec3==ivec) then
                  re = ovl_mat(iv1l+iv3  )
@@ -5011,8 +5011,8 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useove
                    write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
                    MSG_ERROR('Should be one!')
                  end if
-                 re = ovl_mat(iv2l+iv3  )
-                 im = ovl_mat(iv2l+iv3+1)
+                 re = ovl_col_tmp(iv3  )
+                 im = ovl_col_tmp(iv3+1)
                  if (abs(re)>tol12.or.abs(im)>tol12) then
                    write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
                    write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
@@ -5024,13 +5024,36 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useove
              do ivec3=ivec+1,ivec2
                iv3l=ivec3*(ivec3-1)
                iv3=2*ivec3-1
-               ovl_mat(iv2l+iv3  ) = ovl_mat(iv2l+iv3  ) - dotr*ovl_mat(iv3l+iv1) - doti*ovl_mat(iv3l+iv1+1)
-               ovl_mat(iv2l+iv3+1) = ovl_mat(iv2l+iv3+1) - doti*ovl_mat(iv3l+iv1) + dotr*ovl_mat(iv3l+iv1+1) 
+               ovl_col_tmp(iv3  ) = ovl_mat(iv2l+iv3  ) - dotr*ovl_mat(iv3l+iv1) - doti*ovl_mat(iv3l+iv1+1)
+               ovl_col_tmp(iv3+1) = ovl_mat(iv2l+iv3+1) - doti*ovl_mat(iv3l+iv1) + dotr*ovl_mat(iv3l+iv1+1)
              end do
-             do ivec3=ivec2,nvec
+             do ivec3=ivec2+1,nvec
                iv3l=ivec3*(ivec3-1)
-               ovl_mat(iv3l+iv2  ) = ovl_mat(iv3l+iv2  ) - dotr*ovl_mat(iv3l+iv1) + doti*ovl_mat(iv3l+iv1+1)
-               ovl_mat(iv3l+iv2+1) = ovl_mat(iv3l+iv2+1) - doti*ovl_mat(iv3l+iv1) - dotr*ovl_mat(iv3l+iv1+1) 
+               iv3=2*ivec3-1
+               ovl_row_tmp(iv3  ) = ovl_mat(iv3l+iv2  ) - dotr*ovl_mat(iv3l+iv1) - doti*ovl_mat(iv3l+iv1+1)
+               ovl_row_tmp(iv3+1) = ovl_mat(iv3l+iv2+1) + doti*ovl_mat(iv3l+iv1) - dotr*ovl_mat(iv3l+iv1+1)
+             end do
+             do ivec3=1,ivec2
+               iv3=2*ivec3-1
+               ovl_mat(iv2l+iv3  ) = ovl_col_tmp(iv3  )
+               ovl_mat(iv2l+iv3+1) = ovl_col_tmp(iv3+1)
+             end do
+!             ovl_mat(iv2l+iv2  ) = ovl_mat(iv2l+iv2  ) + ovl_row_tmp(iv2  )
+!             ovl_mat(iv2l+iv2+1) = ovl_mat(iv2l+iv2+1) + ovl_row_tmp(iv2+1)
+             !LTEST
+             re = ovl_mat(iv2l+iv2  )
+             im = ovl_mat(iv2l+iv2+1)
+             if (abs(im)>tol12) then
+               write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
+               write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
+               MSG_ERROR('Should be real!')
+             end if
+             !LTEST
+             do ivec3=ivec2+1,nvec
+               iv3l=ivec3*(ivec3-1)
+               iv3=2*ivec3-1
+               ovl_mat(iv3l+iv2  ) = ovl_row_tmp(iv3  )
+               ovl_mat(iv3l+iv2+1) = ovl_row_tmp(iv3+1)
              end do
              !ii1=nelem*(ivec-1)+igsc;ii2=nelem*(ivec2-1)+igsc
              !do ii=1,nelem
