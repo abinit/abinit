@@ -209,7 +209,7 @@ program lapackprof
 
        call cwtime(ctime,wtime,gflops,"start")
 
-       call pw_orthon(0,0,istwfk,mcg,mgsc,npw,nband,ortalgo,gsc,useoverlap,cg,&
+       call pw_orthon(0,0,istwfk,mcg,npw,nband,ortalgo,gsc,useoverlap,cg,&
 &       mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
 
        call cwtime(ctime,wtime,gflops,"stop")

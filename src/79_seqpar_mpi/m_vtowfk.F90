@@ -500,7 +500,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
    if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
-     call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,subovl,gs_hamk%usepaw,cg,&
+     call pw_orthon(icg,igsc,istwf_k,mcg,npw_k*my_nspinor,nband_k,ortalgo,subovl,gs_hamk%usepaw,cg,&
 &     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
      !LTEST
      !return

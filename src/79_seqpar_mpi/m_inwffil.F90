@@ -3247,7 +3247,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  if (optorth==1.and.formeig==0.and.(mpi_enreg2%paral_kgb/=1.or.mpi_enreg2%nproc_cell==1)) then
    ABI_ALLOCATE(dum,(2,0))
    ortalgo=0 !;ortalgo=3
-   call pw_orthon(icg2,0,istwf2_k,mcg2,0,npw2*nspinor2_this_proc,nbd2,ortalgo,dum,0,cg2,&
+   call pw_orthon(icg2,0,istwf2_k,mcg2,npw2*nspinor2_this_proc,nbd2,ortalgo,dum,0,cg2,&
 &   mpi_enreg2%me_g0,mpi_enreg2%comm_bandspinorfft)
    ABI_DEALLOCATE(dum)
  end if

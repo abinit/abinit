@@ -4669,24 +4669,24 @@ end subroutine subdiago
 !!
 !! SOURCE
 
-subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_mat,useoverlap,vecnm,me_g0,comm)
+subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,vecnm,me_g0,comm)
 
  use m_abi_linalg
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,useoverlap,me_g0,comm
+ integer,intent(in) :: icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,useoverlap,me_g0,comm
 !arrays
  real(dp),intent(inout) :: ovl_mat(nvec*(nvec+1)*useoverlap),vecnm(2,mcg)
 
 !Local variables-------------------------------
 !scalars
  integer :: ierr,ii,ii0,ii1,ii2,ivec,ivec2,ivec3,iv1,iv2,iv3,iv1l,iv2l,iv3l
- integer :: rvectsiz,vectsize,cg_idx,gsc_idx
+ integer :: rvectsiz,vectsize,cg_idx!,gsc_idx
  real(dp) :: doti,dotr,summ,xnorm
  character(len=500) :: msg
 !arrays
- integer :: cgindex(nvec),gscindex(nvec)
+ integer :: cgindex(nvec)!,gscindex(nvec)
  real(dp) :: buffer2(2),tsec(2),ovl_row_tmp(2*nvec),ovl_col_tmp(2*nvec)
  real(dp),allocatable :: rblockvectorbx(:,:),rblockvectorx(:,:),rgramxbx(:,:)
  complex(dpc),allocatable :: cblockvectorbx(:,:),cblockvectorx(:,:)
