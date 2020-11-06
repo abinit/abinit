@@ -62,6 +62,7 @@ sources = [
     "m_multibinit_unittest.F90",
     "m_observables.F90",
     "m_opt_effpot.F90",
+    "m_polynomial.F90",
     "m_polynomial_coeff.F90",
     "m_polynomial_conf.F90",
     "m_polynomial_potential.F90",
