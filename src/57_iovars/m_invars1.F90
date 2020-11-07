@@ -2220,6 +2220,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%exchn2n3d=0
    dtsets(idtset)%extrapwf=0
    dtsets(idtset)%exchmix=quarter
+   dtsets(idtset)%expert_user=0
 !  F
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
