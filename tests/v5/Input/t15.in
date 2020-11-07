@@ -45,13 +45,15 @@ lpawu 2
 xcart   2*0  -2.1    2*0   2.1
 znucl 28
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t15.out, tolnlines = 2, tolabs = 5.000e-01, tolrel = 4.000e-01, fld_options = -ridiculous
-#%% psp_files = 28ni.paw
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

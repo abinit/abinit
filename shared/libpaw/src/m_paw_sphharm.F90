@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_sphharm
 !! NAME
 !!  m_paw_sphharm
@@ -1437,11 +1436,16 @@ end subroutine pl_deriv
 !!  cosgam=  cos(gamma) with gamma=Euler angle 3
 !!  isn= error code (0 if the routine exit normally)
 !!  sinalp= sin(alpha) with alpha=Euler angle 1
+!!  sinbeta= sin(beta)  with beta=Euler angle 2
 !!  singam= sin(gamma) with gamma=Euler angle 3
 !!
 !! NOTES
 !!  This file comes from the file crystal_symmetry.f
 !!  by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!  XG20200718 However, this routine was not accurate in the determination
+!!  of beta when cosbeta was close to one (indeed this is a special case). 
+!!  This has been corrected. Moreover, sinbeta has been made an output in order
+!!  to allow accurate calculations in dbeta. Also, tolerances have been made consistent.
 !!
 !! PARENTS
 !!      m_paw_sphharm
@@ -1450,41 +1454,61 @@ end subroutine pl_deriv
 !!
 !! SOURCE
 
-subroutine mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
+subroutine mkeuler(rot,cosbeta,sinbeta,cosalp,sinalp,cosgam,singam,isn)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(out) :: isn
- real(dp),intent(out) :: cosalp,cosbeta,cosgam,sinalp,singam
+ real(dp),intent(out) :: cosalp,cosbeta,cosgam,sinalp,sinbeta,singam
 !arrays
  real(dp),intent(in) :: rot(3,3)
 
 !Local variables ---------------------------------------
 !scalars
  integer :: ier
- real(dp) :: check,sinbeta
+ real(dp) :: check,sinbeta2
  character(len=500) :: msg
 
 ! *********************************************************************
 
  do isn= -1,1,2
+
+!Old coding, inaccurate
+!  cosbeta=real(isn)*rot(3,3)
+!  if(abs(1._dp-cosbeta*cosbeta)<tol10) then
+!    sinbeta=zero
+!  else
+!    sinbeta=sqrt(1._dp-cosbeta*cosbeta)
+!  end if
+!  if (abs(sinbeta).gt.tol10)  then
+!    cosalp=isn*rot(3,1)/sinbeta
+!    sinalp=isn*rot(3,2)/sinbeta
+!    cosgam=-isn*rot(1,3)/sinbeta
+!    singam=isn*rot(2,3)/sinbeta
+!  else
+!    cosalp=isn*rot(1,1)/cosbeta
+!    sinalp=isn*rot(1,2)/cosbeta
+!    cosgam=one
+!    singam=zero
+!  end if
+
+!New coding, more accurate
    cosbeta=real(isn)*rot(3,3)
-   if(abs(1._dp-cosbeta*cosbeta)<tol10) then
+   sinbeta2=rot(1,3)**2+rot(2,3)**2
+   if(sinbeta2<tol8**2)then
      sinbeta=zero
-   else
-     sinbeta=sqrt(1._dp-cosbeta*cosbeta)
-   end if
-   if (abs(sinbeta).gt.tol10)  then
-     cosalp=isn*rot(3,1)/sinbeta
-     sinalp=isn*rot(3,2)/sinbeta
-     cosgam=-isn*rot(1,3)/sinbeta
-     singam=isn*rot(2,3)/sinbeta
-   else
      cosalp=isn*rot(1,1)/cosbeta
      sinalp=isn*rot(1,2)/cosbeta
      cosgam=one
      singam=zero
+   else
+     sinbeta=sqrt(sinbeta2)
+     cosalp=isn*rot(3,1)/sinbeta
+     sinalp=isn*rot(3,2)/sinbeta
+     cosgam=-isn*rot(1,3)/sinbeta
+     singam=isn*rot(2,3)/sinbeta
    end if
+!
 
 !  Check matrix:
    ier=0
@@ -1574,6 +1598,7 @@ end function dble_factorial
 !!
 !! INPUTS
 !!  cosbeta= cosinus of beta (=Euler angle)
+!!  sinbeta= sinus of beta (=Euler angle)
 !!  ll= index l
 !!  mm= index m
 !!  mp= index m_prime
@@ -1586,6 +1611,9 @@ end function dble_factorial
 !!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
 !!  - Assume l relatively small so that factorials do not cause
 !!    roundoff error
+!!  - XG20200718 This routine was inaccurate when cosbeta was close to one or minus one. 
+!!    This has been fixed by adding sinbeta argument obtained from mkeuler. 
+!!    Tolerances have been adjusted as well.
 !!
 !! PARENTS
 !!     m_paw_sphharm
@@ -1594,13 +1622,13 @@ end function dble_factorial
 !!
 !! SOURCE
 
-function dbeta(cosbeta,ll,mp,mm)
+function dbeta(cosbeta,sinbeta,ll,mp,mm)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ll,mm,mp
  real(dp) :: dbeta
- real(dp),intent(in) :: cosbeta
+ real(dp),intent(in) :: cosbeta,sinbeta
 
 !Local variables ------------------------------
 !scalars
@@ -1617,10 +1645,25 @@ function dbeta(cosbeta,ll,mp,mm)
  else if (abs(cosbeta+1._dp).lt.tol10) then
    if (mp.eq.-mm) dbeta=(-1)**(ll+mm)
  else
-
 !  General case
-   cosbetab2=sqrt((1+cosbeta)*0.5_dp)
-   sinbetab2=sqrt((1-cosbeta)*0.5_dp)
+
+!!!!! Old coding
+!!  This is inaccurate when cosbeta is close to -1
+!   cosbetab2=sqrt((1+cosbeta)*0.5_dp)
+!!  This is inaccurate when cosbeta is close to +1
+!   sinbetab2=sqrt((1-cosbeta)*0.5_dp)
+!!!!! End old coding, begin new coding
+  if(cosbeta>-tol8)then
+    !If cosbeta is positive, cosbeta2 is positive with value >0.7, so one can divide by cosbetab2
+    cosbetab2=sqrt((1+cosbeta)*half)
+    sinbetab2=sinbeta*half/cosbetab2
+  else
+    !If cosbeta is negative, sinbeta2 is positive with value >0.7, so one can divide by sinbetab2
+    sinbetab2=sqrt((1-cosbeta)*half)
+    cosbetab2=sinbeta*half/sinbetab2
+  endif
+!!!!! End of new coding
+
    ml=max(mp,mm)
    ms=min(mp,mm)
    if (ml.ne.mp) sinbetab2=-sinbetab2
@@ -2350,7 +2393,7 @@ subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
 !Local variables ------------------------------
 !scalars
  integer :: i1,ii,il,irot,isn,j1,jj,k1,ll,mm,mp
- real(dp) :: cosalp,cosbeta,cosgam,sinalp,singam
+ real(dp) :: cosalp,cosbeta,cosgam,sinalp,sinbeta,singam
  character(len=1000) :: msg
 !arrays
  real(dp) :: prod(3,3),rot(3,3)
@@ -2396,7 +2439,7 @@ subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
          if(abs(rot(i1,j1))<tol10) rot(i1,j1)=zero
        end do
      end do
-     call mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
+     call mkeuler(rot,cosbeta,sinbeta,cosalp,sinalp,cosgam,singam,isn)
      do ll=1,lmax
        il=(isn)**ll
        do mp=-ll,ll
@@ -2407,11 +2450,11 @@ subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
 !          Formula (47) from the paper of Blanco et al
            zarot(ii,jj,ll+1,irot)=il&
 &           *(phim(cosalp,sinalp,mm)*phim(cosgam,singam,mp)*sign(1,mp)&
-           *(dbeta(cosbeta,ll,abs(mp),abs(mm))&
-&           +(-1._dp)**mm*dbeta(cosbeta,ll,abs(mm),-abs(mp)))*half&
+           *(dbeta(cosbeta,sinbeta,ll,abs(mp),abs(mm))&
+&           +(-1._dp)**mm*dbeta(cosbeta,sinbeta,ll,abs(mm),-abs(mp)))*half&
 &           -phim(cosalp,sinalp,-mm)*phim(cosgam,singam,-mp)*sign(1,mm)&
-           *(dbeta(cosbeta,ll,abs(mp),abs(mm))&
-&           -(-1._dp)**mm*dbeta(cosbeta,ll,abs(mm),-abs(mp)))*half)
+           *(dbeta(cosbeta,sinbeta,ll,abs(mp),abs(mm))&
+&           -(-1._dp)**mm*dbeta(cosbeta,sinbeta,ll,abs(mm),-abs(mp)))*half)
          end do
        end do
      end do
@@ -3260,8 +3303,7 @@ end subroutine realgaunt
 !!  NOTES
 !!  
 !! PARENTS
-!! 
-!! m_pawang
+!!      m_pawang
 !!
 !! CHILDREN
 !!

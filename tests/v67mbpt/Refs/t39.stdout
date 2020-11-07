@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of MRGSCR 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of MRGSCR 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  MRGSCR comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h22 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 10h56 )
   
 ->>  Enter the number of files to merge: 
 ->>  Enter the name of the file to be analyzed: 
@@ -80,17 +80,11 @@
  22   0.00   5.00
  23   0.00  12.93
  24   0.00  25.52
- 25   0.00  45.50
- 26   0.00  77.22
+ 25   0.00  45.51
+ 26   0.00  77.24
 
  Checking if the list of q-points is complete. 
 
- symatm: atom number 1 is reached starting at atom
-   1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
-   1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
- symatm: atom number 2 is reached starting at atom
-   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
-   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
  Reduced coordinates and weights : 
@@ -200,8 +194,8 @@
  12   0.00   5.00
  13   0.00  12.93
  14   0.00  25.52
- 15   0.00  45.50
- 16   0.00  77.22
+ 15   0.00  45.51
+ 16   0.00  77.24
 
  ==== Frequencies have been removed successfully === 
 

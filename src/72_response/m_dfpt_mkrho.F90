@@ -110,10 +110,10 @@ contains
 !!    spin-up density in second half)
 !!
 !! PARENTS
-!!      dfpt_looppert
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      cg_zcopy,fftpac,fourwf,sphereboundary,symrhg,timab,wrtout,xmpi_sum
+!!      fourwf,get_my_atmtab,getcprj,pawaccrhoij,pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
@@ -590,7 +590,7 @@ end subroutine dfpt_mkrho
 !!  Was part of dfpt_vtowfk before.
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_vtowfk,dfpt_wfkfermi
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
 !!
 !! CHILDREN
 !!      fourwf,get_my_atmtab,getcprj,pawaccrhoij,pawcprj_alloc,pawcprj_free

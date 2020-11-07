@@ -80,7 +80,7 @@ contains
 !!  cg(2,mcg)=updated wavefunctions
 !!
 !! PARENTS
-!!      vtowfk
+!!      m_vtowfk
 !!
 !! CHILDREN
 !!      abi_xcopy,abi_xgemm,abi_xheev,abi_xhegv,abi_xorthonormalize,abi_xtrsm

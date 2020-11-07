@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_libpaw_libxc_funcs
 !! NAME
 !!  m_libpaw_libxc_funcs
@@ -811,6 +810,10 @@ end function libpaw_libxc_fullname
 !!
 !! OUTPUT
 !!  xcrefs(:)= references(s) of the functional
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!
 !! SOURCE
 

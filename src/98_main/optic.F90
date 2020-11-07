@@ -60,13 +60,13 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,crystal_free,crystal_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,cryst%free,crystal_init
 !!      ebands_copy,ebands_free,ebands_init,ebands_update_occ,eprenorms_bcast
-!!      eprenorms_free,eprenorms_from_epnc,flush_unit,hdr_bcast,hdr_copy
-!!      hdr_free,herald,int2char4,linelop,linopt,mati3inv,matr3inv,metric
-!!      nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart,pmat_renorm,renorm_bst
-!!      sym2cart,timein,wfk_close,wfk_open_read,wfk_read_eigk,wrtout,xmpi_bcast
-!!      xmpi_end,xmpi_init,xmpi_sum
+!!      eprenorms_free,eprenorms_from_epnc,flush_unit,hdr%bcast,hdr%free
+!!      hdr_copy,hdr_ddk,hdr_ncread,herald,int2char4,linelop,linopt,mati3inv
+!!      matr3inv,metric,nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart
+!!      pmat_renorm,renorm_bst,sym2cart,timein,wfk0%close,wfk0%read_eigk
+!!      wfk_open_read,wfks,wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -300,9 +300,13 @@ program optic
      write(msg, "(12a)")ch10,&
 &      ' Check the consistency of the wavefunction files (esp. k point and number of bands). ',ch10,&
 &      ' Will compare, pairwise ( 1/2, 2/3, 3/4 ), the four following files :',ch10,&
-&      trim(wfkfile),ch10,trim(infiles(1)),ch10,trim(infiles(2)),ch10,trim(infiles(3))
+&      trim(wfkfile)
+     ! split the write since long filenames can bust the 500 char limit of 'msg'
      call wrtout(std_out,msg,'COLL')
-
+     do ii=1,3
+       write(msg, "(12a)")trim(infiles(ii))
+       call wrtout(std_out,msg,'COLL')
+     enddo
 !DEBUG
 !  stop
 !ENDDEBUG

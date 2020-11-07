@@ -21,6 +21,7 @@ ngfft 8 8 8
        0.5 0.5 0.0
  xred 0.0  0.0  0.0
       0.22 0.22 0.22
+ chksymtnons 0
  znucl 14
  nband 8
  ntypat 1 typat 1 1  natom 2
@@ -37,11 +38,13 @@ ngfft 8 8 8
 #nsym 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.phoney_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 14si.phoney_mod
 #%% [paral_info]
 #%% nprocs_to_test =  4
 #%% max_nprocs = 4

@@ -103,9 +103,11 @@ contains
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
 !! PARENTS
-!!      afterscfloop,newvtr,rhotov,setvtr,wvl_psitohpsi
+!!      m_afterscfloop,m_newvtr,m_rhotov,m_setvtr,m_wvl_psi
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -190,9 +192,11 @@ end subroutine wvl_vtrial_abi2big
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
 !! PARENTS
-!!      afterscfloop,mklocl,newrho,vtorho,wvl_mkrho
+!!      m_afterscfloop,m_mklocl,m_newrho,m_vtorho,m_wvl_rho
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -274,6 +278,8 @@ end subroutine wvl_rho_abi2big
 !! PARENTS
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -356,9 +362,11 @@ end subroutine wvl_vhartr_abi2big
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
 !! PARENTS
-!!      wvl_psitohpsi
+!!      m_wvl_psi
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -417,9 +425,11 @@ end subroutine wvl_vxc_abi2big
 !! occ is copied to wfs%ks%orbs%occup, or viceversa, depending on "opt" (see above).
 !!
 !! PARENTS
-!!      afterscfloop,gstate,vtorho,wvl_wfsinp_disk,wvl_wfsinp_scratch
+!!      m_afterscfloop,m_gstate,m_vtorho,m_wvl_wfsinp
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -502,9 +512,11 @@ end subroutine wvl_occ_abi2big
 !! occ is copied to wfs%ks%orbs%occup, or viceversa, depending on "opt" (see above).
 !!
 !! PARENTS
-!!      afterscfloop,vtorho
+!!      m_afterscfloop,m_vtorho
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -587,9 +599,11 @@ end subroutine wvl_eigen_abi2big
 !! as the SMEARING_DIST_ERF in BigDFT.
 !!
 !! PARENTS
-!!      vtorho,wvl_wfsinp_scratch
+!!      m_vtorho,m_wvl_wfsinp
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -685,6 +699,8 @@ end subroutine wvl_occopt_abi2big
 !! PARENTS
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -744,6 +760,8 @@ end subroutine wvl_rhov_abi2big_2D_4D
 !! PARENTS
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -802,6 +820,8 @@ end subroutine wvl_rhov_abi2big_1D_4D
 !! PARENTS
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -861,6 +881,8 @@ end subroutine wvl_rhov_abi2big_2D_2D
 !! PARENTS
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -919,6 +941,8 @@ end subroutine wvl_rhov_abi2big_1D_2D
 !! PARENTS
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -973,6 +997,8 @@ end subroutine wvl_rhov_abi2big_2D_1D
 !! PARENTS
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1039,6 +1065,8 @@ end subroutine wvl_rhov_abi2big_1D_1D
 !!      m_abi2big
 !!
 !! CHILDREN
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1185,10 +1213,11 @@ end subroutine wvl_rhov_abi2big_gen
 !!  dtset <type(dataset_type)>=the FFT grid is changed.
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
-!!      wrtout
+!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1287,7 +1316,7 @@ end subroutine wvl_setngfft
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! PARENTS
-!!      gstate,wvl_memory,wvl_wfsinp_reformat
+!!      m_gstate,m_memeval,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred

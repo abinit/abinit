@@ -406,6 +406,66 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
                     ########################################
 
 
+# _ABI_MPI_CHECK_IALLGATHER()
+# --------------------------
+#
+# Checks whether the MPI library supports MPI_IALLGATHER (MPI3)
+#
+AC_DEFUN([_ABI_MPI_CHECK_IALLGATHER], [
+  # Set default values
+  abi_mpi_iallgather_ok="no"
+
+  # Back-up build environment
+  ABI_ENV_BACKUP
+
+  # Prepare build environment
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
+  LDFLAGS="${FC_LDFLAGS}"
+  LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+  # Try to compile a Fortran program
+  # Note: we assume a MPI implementation that provides the mpi module
+  AC_MSG_CHECKING([whether the MPI library supports MPI_IALLGATHER (MPI3)])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[  
+      use mpi
+
+      integer, parameter :: siz=5
+      integer :: SENDBUF(siz), RECVBUF(siz)
+      integer :: SENDCOUNT, SENDTYPE, RECVCOUNT, RECVTYPE
+      integer :: COMM, REQUEST, IERROR
+
+      ! Prototype
+      ! MPI_IALLGATHER(SENDBUF, SENDCOUNT, SENDTYPE, RECVBUF, RECVCOUNT,
+      !  RECVTYPE, COMM, REQUEST, IERROR)
+      !  <type>    SENDBUF(*), RECVBUF (*)
+      !  INTEGER    SENDCOUNT, SENDTYPE, RECVCOUNT, RECVTYPE, COMM
+      !  INTEGER    REQUEST, IERROR
+
+      call MPI_IALLGATHER(SENDBUF, SENDCOUNT, SENDTYPE, RECVBUF, RECVCOUNT, &
+                          RECVTYPE, COMM, REQUEST, IERROR)
+
+    ]])], [abi_mpi_iallgather_ok="yes"], [abi_mpi_iallgather_ok="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${abi_mpi_iallgather_ok}])
+
+  # Restore build environment
+  ABI_ENV_RESTORE
+
+  # Forward information to the compiler
+  if test "${abi_mpi_iallgather_ok}" = "yes"; then
+    AC_DEFINE([HAVE_MPI_IALLGATHER], 1,
+      [Define to 1 if your MPI library supports MPI_IALLGATHER.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
+  fi
+]) # _ABI_MPI_CHECK_IALLGATHER     
+
+
+                    # ------------------------------------ #
+
+
 # _ABI_MPI_CHECK_IALLTOALL()
 # --------------------------
 #
@@ -685,7 +745,7 @@ EOF
 #
 AC_DEFUN([ABI_MPI_INIT], [
   # Delegate most of the init stage to Steredeg
-  SD_MPI_INIT([optional fail], [-lmpi])
+  SD_MPI_INIT([auto optional fail], [-lmpi])
 
   # Allow MPI flavors
   AC_ARG_WITH([mpi-flavor],
@@ -864,6 +924,7 @@ AC_DEFUN([ABI_MPI_DETECT], [
 
       # Check MPI3 extensions (very) important for HPC.
       _ABI_MPI_CHECK_IBCAST()
+      _ABI_MPI_CHECK_IALLGATHER()
       _ABI_MPI_CHECK_IALLTOALL()
       _ABI_MPI_CHECK_IALLTOALLV()
       _ABI_MPI_CHECK_IGATHERV()

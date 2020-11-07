@@ -109,10 +109,11 @@ CONTAINS  !=====================================================================
 !!     %vex(2*lpawu+1,:,:,:)=matrix of the screened interaction for correlated orbitals
 !!
 !! PARENTS
-!!      bethe_salpeter,gstate,m_entropyDMFT,respfn,screening,sigma
+!!      m_bethe_salpeter,m_entropyDMFT,m_gstate,m_nonlinear,m_respfn_driver
+!!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      calc_ubare,poisson,simp_gen,wrtout
+!!      poisson,simp_gen,wrtout
 !!
 !! SOURCE
 
@@ -873,10 +874,10 @@ CONTAINS  !=====================================================================
 !!  edftumdcdc= PAW+U contribution to double-counting total energy
 !!
 !! PARENTS
-!!      m_energy,pawdenpot
+!!      m_energy,m_paw_denpot
 !!
 !! CHILDREN
-!!      wrtout
+!!      poisson,simp_gen,wrtout
 !!
 !! SOURCE
 
@@ -1224,10 +1225,10 @@ CONTAINS  !=====================================================================
 !!  eexex=energy is updated with the contribution of the cuyrrent atom
 !!
 !! PARENTS
-!!      pawdenpot
+!!      m_paw_denpot
 !!
 !! CHILDREN
-!!      wrtout
+!!      poisson,simp_gen,wrtout
 !!
 !! SOURCE
 
@@ -1380,11 +1381,10 @@ CONTAINS  !=====================================================================
 !!  Note that n_{m,mp}=<mp|hat(n)|m> because rhoij=<p_j|...|p_i>
 !!
 !! PARENTS
-!!      afterscfloop,pawdenpot,pawprt,scfcv,vtorho
+!!      m_afterscfloop,m_paw_denpot,m_paw_tools,m_scfcv_core,m_vtorho
 !!
 !! CHILDREN
-!!      dgemm,dsyev,free_my_atmtab,get_my_atmtab,mat_mlms2jmj,mat_slm2ylm
-!!      wrtout,zgemm,zheev
+!!      poisson,simp_gen,wrtout
 !!
 !! SOURCE
 
@@ -2266,10 +2266,10 @@ end subroutine setnoccmmp
 !!  Only valid for f electrons !!!
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawio_print_ij,wrtout,xmpi_sum
+!!      poisson,simp_gen,wrtout
 !!
 !! SOURCE
 
@@ -2613,7 +2613,7 @@ end subroutine setrhoijpbe0
 !! NOTES
 !!
 !! PARENTS
-!!      pawpuxinit
+!!      m_paw_correlations
 !!
 !! CHILDREN
 !!      poisson,simp_gen,wrtout

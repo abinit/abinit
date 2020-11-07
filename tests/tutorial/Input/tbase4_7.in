@@ -49,7 +49,7 @@ xcart
    2*0.0  7.5055909  # Triplet giving the CARTESIAN coordinates of atom 3.
    0.0  3.75279545  11.25838635 # Triplet giving the CARTESIAN coordinates of atom 4.
    2*0.0 15.0111818  # Triplet giving the CARTESIAN coordinates of atom 5.
-chksymbreak 0        # Some of the non-symmorphic vectors are unconvential, but this is harmless in a ground-state calculation.
+chksymtnons 0        # Some of the non-symmorphic vectors are unconvential, but this is harmless in a ground-state calculation.
  
 #The relaxation
 ionmov 2
@@ -67,13 +67,15 @@ nstep 10          # Maximal number of SCF cycles
 toldff 5.0d-5     
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tbase4_7.out, tolnlines= 41, tolabs=1.001e-02, tolrel=0.03, fld_options=-easy
-#%% psp_files =  13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

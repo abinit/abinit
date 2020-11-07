@@ -58,13 +58,15 @@
    0.5 0.5 0.5
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t90.out, tolnlines = 2, tolabs = 1.100e-09, tolrel = 9.000e-10
-#%% psp_files = 01h.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

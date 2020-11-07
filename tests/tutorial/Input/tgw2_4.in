@@ -19,7 +19,7 @@ kptgw
              0.000000    0.000000    0.000000
 bdgw
              1 1
-icutcoul     3            # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul    3          # old deprecated value of icutcoul, only used for legacy
 
 #Definition of occupation numbers
 occopt 3
@@ -55,6 +55,9 @@ prtvol     5
 enunit     1
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -62,7 +65,6 @@ enunit     1
 #%% [files]
 #%% files_to_test = 
 #%%   tgw2_4.out, tolnlines=  2, tolabs=  1.010e-06, tolrel=  3.000e-02 
-#%% psp_files = 13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

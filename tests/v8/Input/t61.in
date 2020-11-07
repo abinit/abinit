@@ -62,6 +62,9 @@
  ntypat  1
  znucl 6
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -69,7 +72,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t61.out, tolnlines = 20, tolabs = 1.1e-3, tolrel = 0.04
-#%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

@@ -22,7 +22,7 @@
 - root for input  files -> t51i
 - root for output files -> t51o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
@@ -670,9 +670,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.GGA_PBE-JTH.xml
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307

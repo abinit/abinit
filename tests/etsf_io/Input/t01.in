@@ -37,6 +37,7 @@ xcart
     -0.75695   2.11523  -0.12023
      0.75695   5.66557   3.54768
     -0.75695   5.66557   3.54768    Angstrom
+tolsym 1.0e-8
 
 # Definition of the planewave basis set
 ecut   20           # This cut-off is too low for real calculations
@@ -53,6 +54,9 @@ toldfe 1.0d-4       # Tolerance on difference of energy
 # Output density to an ETSF file
 iomode  3
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/08o.pspgth, PseudosGTH_pwteter/01h.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -60,7 +64,6 @@ iomode  3
 #%% [files]
 #%% files_to_test = 
 #%%   t01.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 08o.pspgth, 01h.pspgth
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

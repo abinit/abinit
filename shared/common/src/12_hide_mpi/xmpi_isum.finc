@@ -52,7 +52,7 @@ subroutine xmpi_isum_int0d(xval, xsum, comm, request, ierr)
 
 #ifdef HAVE_MPI_IALLREDUCE
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_IALLREDUCE(xval, xsum, 1, MPI_INTEGER, MPI_SUM, comm, request,ierr)
+   call MPI_IALLREDUCE(xval, xsum, 1, MPI_INTEGER, MPI_SUM, comm, request, ierr)
    xmpi_count_requests = xmpi_count_requests + 1
    return
  end if
@@ -67,4 +67,44 @@ subroutine xmpi_isum_int0d(xval, xsum, comm, request, ierr)
  xsum = itmp; request = xmpi_request_null
 
 end subroutine xmpi_isum_int0d
+!!***
+
+!!****f* ABINIT/xmpi_isum_ip_dp4d
+!! NAME
+!!  xmpi_isum_ip_dp4d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: scalar integers. Non-blocking INPLACE version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_ip_dp4d(xval, comm, request, ierr)
+
+!Arguments-------------------------
+ real(dp) ABI_ASYNC, intent(inout) :: xval(:,:,:,:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_IALLREDUCE(MPI_IN_PLACE, xval, product(shape(xval)), MPI_DOUBLE_PRECISION, MPI_SUM, comm, request, ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ call xmpi_sum(xval, comm, ierr)
+ request = xmpi_request_null
+
+end subroutine xmpi_isum_ip_dp4d
 !!***

@@ -85,7 +85,7 @@ contains
 !!  cg(2,*)=updated wavefunctions
 !!
 !! PARENTS
-!!      vtowfk
+!!      m_vtowfk
 !!
 !! CHILDREN
 !!      apply_invovl,dotprod_g,getghc,pawcprj_alloc,pawcprj_axpby,pawcprj_copy

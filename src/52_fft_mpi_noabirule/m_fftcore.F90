@@ -472,8 +472,8 @@ end subroutine ngfft_seq
 !!  Only writing
 !!
 !! PARENTS
-!!      bethe_salpeter,eph,getng,m_fft,m_fft_prof,m_wfd,screening,setup_bse
-!!      sigma,wfk_analyze
+!!      m_bethe_salpeter,m_eph_driver,m_fft,m_fft_prof,m_fftcore
+!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master
@@ -553,9 +553,10 @@ end subroutine print_ngfft
 !! into first zone.  Given arbitrary kpt, this will cause trouble.
 !!
 !! PARENTS
-!!      getcut,getng
+!!      m_fftcore,m_kg
 !!
 !! CHILDREN
+!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -739,10 +740,10 @@ end subroutine bound
 !! [unit] = Output Unit number (DEFAULT std_out)
 !!
 !! PARENTS
-!!      fftprof,m_fft,m_fft_prof,memory_eval,mpi_setup,mrgscr,scfcv
+!!      fftprof,m_fft,m_fft_prof,m_memeval,m_mpi_setup,m_scfcv_core,mrgscr
 !!
 !! CHILDREN
-!!      bound,print_ngfft,sort_int,wrtout
+!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1080,16 +1081,16 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  if (paral_fft_==1) then
    ! For the time being, one need ngfft(2) and ngfft(3) to be multiple of nproc_fft
    if(modulo(ngfft(2),nproc_fft)/=0)then
-     write(msg,'(3a,i5,a,i5)')&
-      'The second dimension of the FFT grid, ngfft(2), should be',&
-      'a multiple of the number of processors for the FFT, nproc_fft.',&
+     write(msg,'(4a,i5,a,i5)')&
+      'The second dimension of the FFT grid, ngfft(2), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
       'However, ngfft(2)=',ngfft(2),' and nproc_fft=',nproc_fft
      MSG_BUG(msg)
    end if
    if(modulo(ngfft(3),nproc_fft)/=0)then
-     write(msg,'(3a,i5,a,i5)')&
-      'The third dimension of the FFT grid, ngfft(3), should be',&
-      'a multiple of the number of processors for the FFT, nproc_fft.',&
+     write(msg,'(4a,i5,a,i5)')&
+      'The third dimension of the FFT grid, ngfft(3), should be ',&
+      'a multiple of the number of processors for the FFT, nproc_fft.',ch10,&
       'However, ngfft(3)=',ngfft(3),' and nproc_fft=',nproc_fft
      MSG_BUG(msg)
    end if
@@ -1182,11 +1183,13 @@ end subroutine getng
 !!  gbound(2*mgfft+8,2)=defined above
 !!
 !! PARENTS
-!!      dfpt_eltfrkin,dfpt_mkrho,fock_getghc,m_bandfft_kpt,m_cut3d,m_epjdos
-!!      m_fft,m_fft_prof,m_fock,m_gsphere,m_hamiltonian,m_wfd,mkrho,mlwfovlp
-!!      pawmkaewf,posdoppler,scfcv,spin_current,suscep_stat,susk,tddft,wfconv
+!!      m_bandfft_kpt,m_cut3d,m_dfpt_elt,m_dfpt_mkrho,m_epjdos,m_fft,m_fft_prof
+!!      m_fock,m_fock_getghc,m_gsphere,m_hamiltonian,m_inwffil,m_mkrho
+!!      m_mlwfovlp,m_orbmag,m_paw_mkaewf,m_positron,m_scfcv_core,m_sigmaph
+!!      m_spin_current,m_suscep_stat,m_tddft,m_wfd
 !!
 !! CHILDREN
+!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1470,7 +1473,7 @@ end subroutine sphereboundary
 !!    is not large enough to accomodate the rotated G, in this case one should return ierr /= 0
 !!
 !! PARENTS
-!!      cg_rotate,fourwf,m_fft,m_fftcore,m_fftw3,m_io_kss,wfconv
+!!      m_cgtk,m_fft,m_fftcore,m_fftw3,m_inwffil,m_io_kss
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master
@@ -1865,7 +1868,7 @@ end subroutine sphere
 !! Order arguments
 !!
 !! PARENTS
-!!      fourwf
+!!      m_fft
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master
@@ -3992,8 +3995,8 @@ end subroutine indfftrisc
 !!  Must take into account the time-reversal symmetry when istwf_k is not 1.
 !!
 !! PARENTS
-!!      getmpw,initberry,initorbmag,kpgio,ks_ddiago,m_fft,m_fftcore,m_gsphere
-!!      m_hamiltonian,m_wfd,mkpwind_k,wfconv
+!!      m_berryphase_new,m_fft,m_fftcore,m_gsphere,m_inwffil,m_kg,m_ksdiago
+!!      m_orbmag,m_wfd
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master
@@ -4384,7 +4387,7 @@ end subroutine kpgsph
 !!  This routine has been extracted from kpgsph...
 !!
 !! PARENTS
-!!      finddistrproc
+!!      m_mpi_setup
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master
@@ -4490,7 +4493,7 @@ end subroutine kpgcount
 !!
 !! PARENTS
 !!      fftprof,m_ebands,m_fft,m_fft_prof,m_gkk,m_io_kss,m_phgamma,m_phpi
-!!      m_shirley,m_sigmaph,m_wfd,m_wfk,outkss
+!!      m_sigmaph,m_wfd,m_wfk
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master
@@ -4554,9 +4557,10 @@ end subroutine get_kg
 !!   mpi_enreg is not necessary in this case (the info is also in ngfft), but much more easy to read...
 !!
 !! PARENTS
-!!      m_fft_prof,m_gsphere,m_screening,m_shirley,m_wfd,prcref,prcref_PMA
+!!      m_fft_prof,m_gsphere,m_prcref,m_screening,m_sigmaph
 !!
 !! CHILDREN
+!!      xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 

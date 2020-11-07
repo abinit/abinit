@@ -136,6 +136,9 @@ znucl 22 41
 prtnest 1
 fermie_nest 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/22ti.pspnc, 41nb.pspfhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -143,7 +146,6 @@ fermie_nest 0
 #%% [files]
 #%% files_to_test = 
 #%%   t72.out, tolnlines = 11, tolabs = 4.0e-3, tolrel = 1.1, fld_options =  -easy
-#%% psp_files = 22ti.pspnc, 41nb.pspfhi
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

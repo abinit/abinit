@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fstrings
 !! NAME
 !!  m_fstrings
@@ -353,7 +352,6 @@ end function tolower
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 
@@ -699,7 +697,6 @@ end function rmquotes
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 
@@ -733,7 +730,6 @@ end subroutine write_rdp_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 
@@ -773,7 +769,6 @@ end subroutine write_int_0D
 !!      m_fstrings
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 ! NOT sure it will work
@@ -827,7 +822,6 @@ end subroutine trimzero
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 subroutine writeq_rdp_0D(unit,namestr,value,fmt)
@@ -864,7 +858,6 @@ end subroutine writeq_rdp_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 
@@ -1368,9 +1361,9 @@ pure function ltoa_int(list) result(str)
      write(temp, "(i0,a)")list(ii),", "
    end if
 
-   if (base + len_trim(temp) - 1 <= MAX_SLEN) then
-     str(base:) = trim(temp)
-     base = len_trim(str) + 1
+   if (base + len_trim(temp) <= MAX_SLEN) then
+     str(base:) = trim(temp)//" "
+     base = len_trim(str) + 2
    else
      return
    end if
@@ -1427,9 +1420,9 @@ pure function ltoa_dp(list, fmt) result(str)
      write(temp, fa) list(ii),","
    end if
 
-   if (base + len_trim(temp) - 1 <= MAX_SLEN) then
-     str(base:) = trim(temp)
-     base = len_trim(str) + 1
+   if (base + len_trim(temp) <= MAX_SLEN) then
+     str(base:) = trim(temp)// " "
+     base = len_trim(str) + 2
    else
      return
    end if
@@ -1993,8 +1986,8 @@ end function next_token
 !!          (output) same character string mapped to upper case
 !!
 !! PARENTS
-!!      anaddb,band2eps,chkvars,intagm,invars1,m_ab7_invars_f90
-!!      m_anaddb_dataset,m_exit,multibinit,parsefile
+!!      anaddb,band2eps,m_anaddb_dataset,m_dtset,m_exit,m_invars1
+!!      m_multibinit_driver,m_multibinit_manager,m_parser
 !!
 !! CHILDREN
 !!

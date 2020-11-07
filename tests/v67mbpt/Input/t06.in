@@ -27,7 +27,7 @@ kptgw?3   0.0  0.0  1/4
 bdgw?3    24  25
 zcut?3     0.1 eV
 
- icutcoul?3  3  # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul?3  3  # old deprecated value of icutcoul, only used for legacy
 
 # Chose the order of atoms
 typat1? 3*1 6*2
@@ -106,13 +106,15 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si-LDA.paw, 8o.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t06.out, tolnlines = 17, tolabs = 2.0e-4, tolrel = 2.0e-5, fld_options =  -medium
-#%% psp_files = Si-LDA.paw, 8o.paw
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -36,7 +36,7 @@
   typat 2*1  znucl 14.
   xred 0.00 0.00 0.00
        0.22 0.25 0.26
-  chksymbreak 0
+ chksymtnons 0
 
 # 6-Definition of special K-points:
 # ---------------------------------
@@ -50,13 +50,15 @@
   nsym 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t01.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

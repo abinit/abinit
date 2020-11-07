@@ -149,6 +149,9 @@
 #  d3e_pert3_elfd7   1
 #   d3e_pert3_dir7   1 1 1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pw_standard/Al.xml, As.LDA_PW-JTH_sp.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -173,7 +176,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%    t85.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -easy;
-#%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

@@ -13,6 +13,7 @@
  acell      14 14 14
  xcart      5.7193832970E+00  8 8
             8.2806553486E+00  8 8
+ chksymtnons 0
 
  # Parameters for the SCF calculation
  ecut      8
@@ -54,13 +55,15 @@
  #mkmem4    0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc, PseudosTM_pwteter/4be.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t62.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
-#%% psp_files = 1h.pspnc, 4be.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

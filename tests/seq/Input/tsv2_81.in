@@ -34,7 +34,7 @@ getden3   1
 tolwfr3   1.0d-9
 
  xred   0.00 0.0 0.02
- chksymbreak 0
+ chksymtnons 0
  shiftk 0.5 0.5 0.5
  acell  3*9
  ecut 5
@@ -55,12 +55,14 @@ tolwfr3   1.0d-9
  typat  1 
  
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/7n.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = tsv2_81.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files= 7n.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

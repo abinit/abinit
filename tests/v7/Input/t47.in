@@ -73,6 +73,9 @@
  typat  1 2  tolwfr  1.e-16 # too small !
  znucl  31 33
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.SGS_mod, 33as.SGS_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -80,7 +83,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t47.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 31ga.SGS_mod, 33as.SGS_mod
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

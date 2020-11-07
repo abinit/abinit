@@ -59,7 +59,7 @@ module m_bethe_salpeter
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
  use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
-                               ebands_update_occ, get_valence_idx, apply_scissor, ebands_report_gap
+                               ebands_update_occ, ebands_get_valence_idx, ebands_apply_scissors, ebands_report_gap
  use m_kg,              only : getph
  use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
  use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
@@ -150,7 +150,7 @@ contains
 !!              Bethe-Salpeter problem at different level of sophistication.
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! NOTES
 !!
@@ -170,21 +170,10 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
-!!      bs_parameters_free,chkpawovlp,crystal_free,denfgr,destroy_mpi_enreg
-!!      double_grid_free,ebands_free,ebands_update_occ,energies_init
-!!      eprenorms_free,exc_build_ham,exc_den,exc_diago_driver
-!!      exc_haydock_driver,fourdp,get_gftt,getph,gsph_free,hdr_free
-!!      init_distribfft_seq,initmpi_seq,kmesh_free,metric,mkdenpos,mkrdim
-!!      nhatgrid,paw_an_free,paw_an_init,paw_an_nullify,paw_gencond,paw_ij_free
-!!      paw_ij_init,paw_ij_nullify,pawdenpot,pawdij,pawfgr_destroy,pawfgr_init
-!!      pawfgrtab_free,pawfgrtab_init,pawhur_free,pawhur_init,pawinit,pawmknhat
-!!      pawnabla_init,pawprt,pawpuxinit,pawpwff_free,pawpwff_init
-!!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,pawtab_get_lsize
-!!      pawtab_print,print_ngfft,prtrhomxmn,pspini,rdqps,rotate_fft_mesh
-!!      screen_free,screen_init,screen_nullify,setsym_ylm,setup_bse
-!!      setup_bse_interp,setvtr,symdij,test_charge,timab,vcoul_free,wfd_free
-!!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
-!!      wfd_test_ortho,wfd_wave_free,wrtout,xmpi_bcast
+!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
+!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
+!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
+!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 
@@ -834,7 +823,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=0)
    ABI_MALLOC(qp_vbik,(QP_BSt%nkpt,QP_BSt%nsppol))
-   qp_vbik(:,:) = get_valence_idx(QP_BSt)
+   qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
    ABI_FREE(qp_vbik)
 
    call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_rhor)
@@ -1077,18 +1066,13 @@ end subroutine bethe_salpeter
 !! w_file=File name used to construct W. Set to ABI_NOFILE if no external file is used.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      apply_scissor,bsp_calctype2str,crystal_from_hdr,crystal_print
-!!      ebands_copy,ebands_init,ebands_print,ebands_report_gap
-!!      ebands_update_occ,eprenorms_bcast,eprenorms_from_epnc,find_qmesh
-!!      get_bz_item,get_ng0sh,gsph_extend,gsph_init,hdr_init,hdr_update
-!!      hdr_vs_dtset,hscr_bcast,hscr_free,hscr_from_file,hscr_print
-!!      init_transitions,kmesh_init,kmesh_print,make_mesh,matrginv,metric
-!!      mkrdim,pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,print_bs_files
-!!      print_bs_parameters,print_gsphere,print_ngfft,rdgw,setmesh,vcoul_init
-!!      wfk_read_eigenvalues,wrtout,xmpi_bcast,xmpi_max,xmpi_split_work
+!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
+!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
+!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
+!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 
@@ -1530,10 +1514,10 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
+   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
      nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
+   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
      nqlwl,qlwl,ngfftf,comm)
  end if
 
@@ -1595,7 +1579,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  call ebands_report_gap(KS_BSt,header=" KS band structure",unit=std_out,mode_paral="COLL")
 
  ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
- val_indeces = get_valence_idx(KS_BSt)
+ val_indeces = ebands_get_valence_idx(KS_BSt)
 
  do spin=1,KS_BSt%nsppol
    val_idx(spin) = val_indeces(1,spin)
@@ -1704,7 +1688,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    if (ABS(BSp%mbpt_sciss)>tol6) then
      write(msg,'(a,f8.2,a)')' Applying a scissors operator energy= ',BSp%mbpt_sciss*Ha_eV," [eV] on top of the KS energies."
      call wrtout(std_out,msg)
-     call apply_scissor(QP_BSt,BSp%mbpt_sciss)
+     call ebands_apply_scissors(QP_BSt,BSp%mbpt_sciss)
    else
      write(msg,'(a,f8.2,a)')' Using KS energies since mbpt_sciss= ',BSp%mbpt_sciss*Ha_eV," [eV]."
      call wrtout(std_out,msg)
@@ -1735,7 +1719,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    if (ABS(BSp%mbpt_sciss)>tol6) then
      write(msg,'(a,f8.2,a)')' Applying a scissors operator ',BSp%mbpt_sciss*Ha_eV," [eV] on top of the QP energies!"
      MSG_COMMENT(msg)
-     call apply_scissor(QP_BSt,BSp%mbpt_sciss)
+     call ebands_apply_scissors(QP_BSt,BSp%mbpt_sciss)
    end if
 
  CASE (BSE_HTYPE_RPA_QP)
@@ -2018,13 +2002,13 @@ end subroutine setup_bse
 !! w_file=File name used to construct W. Set to ABI_NOFILE if no external file is used.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      apply_scissor,double_grid_init,ebands_copy,ebands_init,ebands_print
-!!      ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend,gsph_init
-!!      init_transitions,kmesh_init,kmesh_print,make_mesh,print_gsphere
-!!      vcoul_init,wfk_read_eigenvalues,wrtout
+!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
+!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
+!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
+!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 
@@ -2165,10 +2149,10 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call vcoul_init(Vcp_dense,Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%icutcoul,&
+   call vcoul_init(Vcp_dense,Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
 &    Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp_dense,Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%icutcoul,&
+   call vcoul_init(Vcp_dense,Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
 &    Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
  end if
 
@@ -2230,7 +2214,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
    if (ABS(BSp%mbpt_sciss)>tol6) then
      write(msg,'(a,f8.2,a)')' Applying a scissors operator energy= ',BSp%mbpt_sciss*Ha_eV," [eV] on top of the KS energies."
      call wrtout(std_out,msg)
-     call apply_scissor(QP_BSt_dense,BSp%mbpt_sciss)
+     call ebands_apply_scissors(QP_BSt_dense,BSp%mbpt_sciss)
    else
      write(msg,'(a,f8.2,a)')' Using KS energies since mbpt_sciss= ',BSp%mbpt_sciss*Ha_eV," [eV]."
      call wrtout(std_out,msg)

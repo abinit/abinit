@@ -63,7 +63,7 @@
  2) Traditional CPP
 **/
 
-#if defined (FC_INTEL)
+#if defined (FC_INTEL) || defined (FC_AOCC)
 #define CONCAT(x,y) x ## y
 #else
 #define CONCAT(x,y) x/**/y
@@ -77,12 +77,37 @@
  * MSG_  macros for logging.
 */
 
-#define ABI_CHECK(expr, str) if (.not.(expr)) call assert(.FALSE., str _FILE_LINE_ARGS_)
+/* Stop execution with message `msg` if not expr */
+#define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
+
+/* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
+#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; MSG_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
+
+/* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
+#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+
+/* Stop execution with message `msg` if int1 > int2 */
+#define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+
+/* Stop execution with message `msg` if int1 < int2 */
+#define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+
+/* Stop execution with message `msg` if double1 < double2 */
+#define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+
+/* Stop execution with message `msg` if int not in [start, stop] */
+#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) MSG_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
+
+#define ABI_CHECK_NOSTOP(expr, msg, ierr) \
+   if (.not. (expr)) then NEWLINE ierr=ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
+
+/* Stop execution with message if MPI call returned error exit code */
 #define ABI_CHECK_MPI(ierr, msg) call check_mpi_ierr(ierr, msg _FILE_LINE_ARGS_)
 
 /* This macro is used in low-level MPI wrappers to return mpierr to the caller
  * so that one can locate the problematic call. Use it wisely since it may cause memory leaks.
- * #define ABI_HANDLE_MPIERR(mpierr) ABI_CHECK_MPI(mpierr,"ABI_HANDLE: Fatal error")
+ * #define ABI_HANDLE_MPIERR(mpierr) ABI_CHECK_MPI(mpierr, "ABI_HANDLE: Fatal error")
  */
 #define ABI_HANDLE_MPIERR(mpierr) if (mpierr /= MPI_SUCCESS) RETURN
 
@@ -165,8 +190,7 @@
    call abimem_record(0, QUOTE(to), _LOC(to), "A", ABI_MEM_BITS(to),  __FILE__, __LINE__)
 
 
-/* Allocate a polymophic scalar 
- * allocate(datatype:: scalar) */
+/* Allocate a polymophic scalar that is: allocate(datatype:: scalar) */
 #  define ABI_DATATYPE_ALLOCATE_SCALAR(type, scalar)                    \
   allocate(type::scalar) NEWLINE                                        \
     call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
@@ -174,8 +198,6 @@
 #  define ABI_DATATYPE_DEALLOCATE_SCALAR(scalar)                        \
   call abimem_record(0, QUOTE(scalar), _LOC(scalar), "D", -storage_size(scalar, kind=8), __FILE__, __LINE__) NEWLINE \
     deallocate(scalar) 
-
-
 
 #else
 /* macros used in production */
@@ -255,14 +277,14 @@
 #endif
 
 /* Macro for basic messages */
-#define MSG_COMMENT(msg) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_)
-#define MSG_WARNING(msg) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_)
-#define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg,"COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
-#define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg,"WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
-#define MSG_ERROR(msg) call msg_hndl(msg,"ERROR", "PERS" _FILE_LINE_ARGS_)
+#define MSG_COMMENT(msg) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_)
+#define MSG_WARNING(msg) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_)
+#define MSG_COMMENT_UNIT(msg, unt) call msg_hndl(msg, "COMMENT", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define MSG_WARNING_UNIT(msg, unt) call msg_hndl(msg, "WARNING", "PERS" _FILE_LINE_ARGS_, unit=unt)
+#define MSG_ERROR(msg) call msg_hndl(msg, "ERROR", "PERS" _FILE_LINE_ARGS_)
 #define MSG_ERROR_CLASS(msg, cls) call msg_hndl(msg, cls , "PERS" _FILE_LINE_ARGS_)
-#define MSG_BUG(msg) call msg_hndl(msg,"BUG", "PERS" _FILE_LINE_ARGS_)
-#define MSG_STOP(msg) call msg_hndl(msg,"STOP", "PERS")
+#define MSG_BUG(msg) call msg_hndl(msg, "BUG", "PERS" _FILE_LINE_ARGS_)
+#define MSG_STOP(msg) call msg_hndl(msg, "STOP", "PERS")
 
 #define MSG_ERROR_NODUMP(msg) call msg_hndl(msg, "ERROR", "PERS", NODUMP=.TRUE. _FILE_LINE_ARGS_)
 #define MSG_ERROR_NOSTOP(msg, ierr) \
@@ -373,7 +395,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #endif
 
 /* DFTI macros (should be declared in m_dfti but build-sys tests complain */
-#define DFTI_CHECK(status) if (status/=0) call dfti_check_status(status _FILE_LINE_ARGS_)
+#define DFTI_CHECK(status) if (status /= 0) call dfti_check_status(status _FILE_LINE_ARGS_)
 
 
 /* Macros used in the GW code */

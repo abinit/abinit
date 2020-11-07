@@ -46,7 +46,7 @@ istwfk *1
 
 #For all the dataset
 nsym 1
-icutcoul 6
+gw_icutcoul 6
 nband 27
 
 #==================================================================================
@@ -124,16 +124,17 @@ jpawu      0.0000000000000000  0.0  0.0  eV
  freqspmax5 1 eV
  freqspmin5 0 eV
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% test_chain = t23.in, t24.in, t25.in
-#%% exclude_hosts = ibm@ibm8
 #%% [files]
 #%% files_to_test = 
 #%%   t23.out, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 0.92565, fld_options = -medium
-#%% psp_files= 23v.paw, 38sr.paw, 8o.paw 
 #%% [shell] 
 #%% post_commands = 
 #%%    ww_cp t23o_DS3_WFK t24i_DS4_WFK;

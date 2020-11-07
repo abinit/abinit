@@ -34,6 +34,7 @@
 
 #include "abi_common.h"
 
+
 module m_spin_mover
 
   use defs_basis
@@ -222,7 +223,7 @@ contains
     else
       call self%set_initial_state(mode=params%spin_init_state)
     endif
-      
+
     ! observable
     if(iam_master) then
        call self%spin_ob%initialize(self%supercell, params)
@@ -469,9 +470,11 @@ contains
   !! etot: energy (scalar)
   !!
   !! PARENTS
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, &
        & etot, displacement, strain, lwf, energy_table)
@@ -542,9 +545,11 @@ contains
   !! etot: energy (scalar)
   !!
   !! PARENTS
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine spin_mover_t_run_one_step_dummy(self, effpot, S_in, etot, &
        & displacement, strain, lwf, energy_table)
@@ -721,9 +726,11 @@ contains
   !!
   !!
   !! PARENTS
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine spin_mover_t_run_time(self, calculator, displacement, strain, spin, lwf, energy_table)
 
@@ -808,11 +815,11 @@ contains
        call self%spin_ob%reset()
     endif
 
-    !if (iam_master) then
-    !   msg="Measurement run:"
-    !   call wrtout(std_out,msg,'COLL')
-    !   call wrtout(ab_out, msg, 'COLL')
-    !end if
+    if (iam_master) then
+       msg="Measurement run:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+    end if
 
     do while(t<self%total_time)
        counter=counter+1
@@ -898,11 +905,11 @@ contains
   !! OUTPUT
   !!
   !! PARENTS
-  !!
-  !!
+!!
   !! CHILDREN
-  !!
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine  run_MvT(self, pot, ncfile_prefix, displacement, strain, spin, lwf, energy_table)
     class(spin_mover_t), intent(inout) :: self

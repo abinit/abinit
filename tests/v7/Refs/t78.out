@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h23 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 11h00 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t78/t78.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/v7_t78/t78.in
 - output file    -> t78.out
 - root for input  files -> t78i
 - root for output files -> t78o
@@ -84,16 +84,16 @@ _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =      17    lmnmax =      22
-     lnmax =       8     mgfft =      12  mpssoang =       3    mqgrid =    3001
+     lnmax =       8     mgfft =      15  mpssoang =       3    mqgrid =    3001
      natom =       5  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       3
     occopt =       3   xclevel =       1
 -    mband =          25        mffmem =           1         mkmem =           4
-       mpw =         136          nfft =        1728          nkpt =           4
+       mpw =         136          nfft =        3375          nkpt =           4
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       6.770 Mbytes of memory.
+P This job should need less than                       7.074 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -103,16 +103,16 @@ _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
      intxc =       0    ionmov =       0      iscf =      17    lmnmax =      22
-     lnmax =       8     mgfft =      12  mpssoang =       3    mqgrid =     300
+     lnmax =       8     mgfft =      15  mpssoang =       3    mqgrid =     300
      natom =       5  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       1    ntypat =       3
     occopt =       3   xclevel =       1
 -    mband =          25        mffmem =           1         mkmem =           4
-       mpw =         136          nfft =        1728          nkpt =           4
+       mpw =         136          nfft =        3375          nkpt =           4
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       5.492 Mbytes of memory.
+P This job should need less than                       5.797 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -156,26 +156,18 @@ _ WF disk file :      0.210 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
         dmft_solv3          2
         dmft_solv4          5
         dmft_solv5          5
-             ecut1     4.00000000E+00 Hartree
-             ecut2     4.00000000E+00 Hartree
-             ecut3     4.00000000E+00 Hartree
-             ecut4     3.88700068E+00 Hartree
-             ecut5     3.88700068E+00 Hartree
-          ecuteps1     3.00000000E+00 Hartree
-          ecuteps2     3.00000000E+00 Hartree
-          ecuteps3     3.00000000E+00 Hartree
-          ecuteps4     2.59133378E+00 Hartree
-          ecuteps5     2.59133378E+00 Hartree
+             ecut      4.00000000E+00 Hartree
+          ecuteps      3.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     0.00000000E+00 Hartree
          ecutsigx4     0.00000000E+00 Hartree
-         ecutsigx5     2.59133378E+00 Hartree
+         ecutsigx5     3.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     0.00000000E+00 Hartree
-          ecutwfn4     3.88700068E+00 Hartree
-          ecutwfn5     3.88700068E+00 Hartree
+          ecutwfn4     4.00000000E+00 Hartree
+          ecutwfn5     4.00000000E+00 Hartree
 -          fftalg         312
         freqremax1     0.00000000E+00 Hartree
         freqremax2     0.00000000E+00 Hartree
@@ -259,11 +251,7 @@ P           mkmem           4
           nfreqsp3          0
           nfreqsp4          0
           nfreqsp5          4
-            ngfft1         15      15      15
-            ngfft2         15      15      15
-            ngfft3         15      15      15
-            ngfft4         12      12      12
-            ngfft5         12      12      12
+            ngfft          15      15      15
           ngfftdg          15      15      15
              nkpt           4
             nline           5
@@ -507,8 +495,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/23v.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/23v.paw
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/23v.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/23v.paw
 - Paw atomic data for element V - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 23.00000  13.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1505   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -528,8 +516,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/38sr.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/38sr.paw
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/38sr.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/38sr.paw
 - Paw atomic data for element Sr - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 38.00000  10.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1068   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -550,8 +538,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
+- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -621,18 +609,18 @@ tolerances: {tolvrs: 1.00E-15, }
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -143.14217305292    -1.431E+02 2.891E+00 2.579E+01
  ETOT  2  -143.22751339836    -8.534E-02 1.601E-02 2.135E+00
- ETOT  3  -143.11905014044     1.085E-01 2.544E-04 2.011E-01
+ ETOT  3  -143.11905014043     1.085E-01 2.544E-04 2.011E-01
  ETOT  4  -143.10758484012     1.147E-02 1.139E-05 1.572E-03
  ETOT  5  -143.10751225399     7.259E-05 6.732E-07 1.281E-05
  ETOT  6  -143.10751045931     1.795E-06 6.581E-08 1.130E-06
  ETOT  7  -143.10751037361     8.569E-08 7.400E-09 1.159E-08
- ETOT  8  -143.10751037321     4.001E-10 2.624E-09 1.893E-10
- ETOT  9  -143.10751037319     2.260E-11 1.553E-09 1.149E-11
- ETOT 10  -143.10751037319     0.000E+00 9.592E-10 4.487E-14
- ETOT 11  -143.10751037319    -1.137E-13 6.026E-10 2.414E-15
- ETOT 12  -143.10751037319    -2.842E-14 3.803E-10 9.550E-17
+ ETOT  8  -143.10751037321     4.003E-10 2.624E-09 1.893E-10
+ ETOT  9  -143.10751037319     2.262E-11 1.553E-09 1.149E-11
+ ETOT 10  -143.10751037319    -6.253E-13 9.592E-10 4.481E-14
+ ETOT 11  -143.10751037319    -1.705E-13 6.026E-10 2.413E-15
+ ETOT 12  -143.10751037319     5.684E-14 3.803E-10 9.522E-17
 
- At SCF step   12       nres2   =  9.55E-17 < tolvrs=  1.00E-15 =>converged.
+ At SCF step   12       nres2   =  9.52E-17 < tolvrs=  1.00E-15 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.22496961E-02  sigma(3 2)=  0.00000000E+00
@@ -650,7 +638,7 @@ lattice_vectors:
 lattice_lengths: [   6.76050,    6.76050,    6.76050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0898433E+02
-convergence: {deltae: -2.842E-14, res2:  9.550E-17, residm:  3.803E-10, diffor: null, }
+convergence: {deltae:  5.684E-14, res2:  9.522E-17, residm:  3.803E-10, diffor: null, }
 etotal    :  -1.43107510E+02
 entropy   :   0.00000000E+00
 fermie    :   5.75649606E-01
@@ -686,8 +674,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      4.079518913397578
- Compensation charge over fft grid         =      4.079147770761112
+ Compensation charge over spherical meshes =      4.079518913329367
+ Compensation charge over fft grid         =      4.079147770737911
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -832,32 +820,32 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.00142951430777E+01
-hartree             :  1.97494698901607E+01
-xc                  : -2.12207015723416E+01
+kinetic             :  4.00142951430905E+01
+hartree             :  1.97494698901177E+01
+xc                  : -2.12207015723488E+01
 Ewald energy        : -1.22667940452101E+02
 psp_core            :  8.09723334916530E+00
-local_psp           : -7.04463119696913E+01
-spherical_terms     :  3.36789747257206E+00
-internal            : -1.43106058139158E+02
-'-kT*entropy'       : -1.45220580418492E-03
-total_energy        : -1.43107510344963E+02
-total_energy_eV     : -3.89415339724570E+03
+local_psp           : -7.04463119696944E+01
+spherical_terms     :  3.36789747280839E+00
+internal            : -1.43106058138962E+02
+'-kT*entropy'       : -1.45220580397736E-03
+total_energy        : -1.43107510344766E+02
+total_energy_eV     : -3.89415339724036E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.17118377340772E+01
+band_energy         : -1.17118377341708E+01
 Ewald energy        : -1.22667940452101E+02
 psp_core            :  8.09723334916530E+00
-xc_dc               : -1.32218545211929E+01
-spherical_terms     : -3.60165880918171E+00
+xc_dc               : -1.32218545211478E+01
+spherical_terms     : -3.60165880913381E+00
 internal            : -1.43106058167388E+02
-'-kT*entropy'       : -1.45220580418492E-03
+'-kT*entropy'       : -1.45220580397736E-03
 total_energy_dc     : -1.43107510373192E+02
-total_energy_dc_eV  : -3.89415339801386E+03
+total_energy_dc_eV  : -3.89415339801387E+03
 ...
 
 
@@ -972,23 +960,23 @@ tolerances: {tolwfr: 1.00E-12, }
  ETOT  1  -143.10747732026    -1.431E+02 5.203E-03 1.059E-06
  ETOT  2  -143.10751038338    -3.306E-05 6.842E-06 5.212E-07
  ETOT  3  -143.10751037653     6.848E-09 1.680E-06 1.797E-07
- ETOT  4  -143.10751037447     2.067E-09 1.113E-06 7.041E-08
- ETOT  5  -143.10751037380     6.671E-10 2.548E-07 3.418E-08
- ETOT  6  -143.10751037375     4.772E-11 1.725E-07 3.156E-08
- ETOT  7  -143.10751037378    -3.169E-11 3.944E-08 3.316E-08
- ETOT  8  -143.10751037381    -2.385E-11 2.775E-08 3.439E-08
- ETOT  9  -143.10751037382    -1.501E-11 6.367E-09 3.529E-08
- ETOT 10  -143.10751037327     5.499E-10 4.542E-09 3.840E-10
- ETOT 11  -143.10751037325     2.404E-11 1.044E-09 3.088E-10
- ETOT 12  -143.10751037329    -4.601E-11 7.441E-10 4.480E-10
- ETOT 13  -143.10751037319     1.013E-10 1.702E-10 1.591E-11
- ETOT 14  -143.10751037320    -8.384E-12 1.220E-10 4.016E-11
- ETOT 15  -143.10751037320    -1.563E-12 2.788E-11 4.669E-11
+ ETOT  4  -143.10751037447     2.066E-09 1.113E-06 7.041E-08
+ ETOT  5  -143.10751037380     6.677E-10 2.548E-07 3.418E-08
+ ETOT  6  -143.10751037375     4.800E-11 1.725E-07 3.156E-08
+ ETOT  7  -143.10751037378    -3.200E-11 3.944E-08 3.316E-08
+ ETOT  8  -143.10751037381    -2.481E-11 2.775E-08 3.439E-08
+ ETOT  9  -143.10751037382    -1.259E-11 6.367E-09 3.520E-08
+ ETOT 10  -143.10751037327     5.481E-10 4.542E-09 3.827E-10
+ ETOT 11  -143.10751037325     2.447E-11 1.044E-09 3.078E-10
+ ETOT 12  -143.10751037330    -4.914E-11 7.441E-10 4.566E-10
+ ETOT 13  -143.10751037319     1.038E-10 1.702E-10 1.670E-11
+ ETOT 14  -143.10751037320    -8.356E-12 1.220E-10 4.093E-11
+ ETOT 15  -143.10751037320    -1.336E-12 2.788E-11 4.747E-11
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.22496364E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.22496364E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.22496364E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.22496350E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.22496350E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.22496350E-02  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -1006,14 +994,14 @@ lattice_vectors:
 lattice_lengths: [   6.76050,    6.76050,    6.76050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0898433E+02
-convergence: {deltae: -1.563E-12, res2:  4.669E-11, residm:  2.788E-11, diffor: null, }
+convergence: {deltae: -1.336E-12, res2:  4.747E-11, residm:  2.788E-11, diffor: null, }
 etotal    :  -1.43107510E+02
 entropy   :   0.00000000E+00
-fermie    :   5.75650406E-01
+fermie    :   5.75650413E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.22496364E-02,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.22496364E-02,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.22496364E-02, ]
+- [  3.22496350E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.22496350E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.22496350E-02, ]
 pressure_GPa:  -9.4882E+02
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  V]
@@ -1033,17 +1021,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.35000         13.74357957
-    2        1.92520          6.24939573
-    3        1.41000          3.46540578
-    4        1.41000          3.46540578
-    5        1.41000          3.46540578
+    1        2.35000         13.74357952
+    2        1.92520          6.24939577
+    3        1.41000          3.46540576
+    4        1.41000          3.46540576
+    5        1.41000          3.46540576
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      4.079520338684692
- Compensation charge over fft grid         =      4.079147273969990
+ Compensation charge over spherical meshes =      4.079520317622915
+ Compensation charge over fft grid         =      4.079147267281059
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1131,7 +1119,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   57.207E-14; max=  27.884E-12
+ Mean square residual over all n,k,spin=   57.076E-14; max=  27.878E-12
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1188,44 +1176,44 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.00142921219125E+01
-hartree             :  1.97494849720005E+01
-xc                  : -2.12207038416542E+01
+kinetic             :  4.00142919353741E+01
+hartree             :  1.97494850861897E+01
+xc                  : -2.12207038478782E+01
 Ewald energy        : -1.22667940452101E+02
 psp_core            :  8.09723334916530E+00
-local_psp           : -7.04463291924144E+01
-spherical_terms     :  3.36789312992892E+00
-internal            : -1.43106069913163E+02
-'-kT*entropy'       : -1.45221502620922E-03
-total_energy        : -1.43107522128189E+02
-total_energy_eV     : -3.89415371788359E+03
+local_psp           : -7.04463292442143E+01
+spherical_terms     :  3.36789301202966E+00
+internal            : -1.43106070161435E+02
+'-kT*entropy'       : -1.45221519019455E-03
+total_energy        : -1.43107522376625E+02
+total_energy_eV     : -3.89415372464389E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.17118227454227E+01
+band_energy         : -1.17118226763706E+01
 Ewald energy        : -1.22667940452101E+02
 psp_core            :  8.09723334916530E+00
-xc_dc               : -1.32218688684687E+01
-spherical_terms     : -3.60165944134820E+00
-internal            : -1.43106058158176E+02
-'-kT*entropy'       : -1.45221502620922E-03
+xc_dc               : -1.32218689806258E+01
+spherical_terms     : -3.60165939807946E+00
+internal            : -1.43106058158012E+02
+'-kT*entropy'       : -1.45221519019455E-03
 total_energy_dc     : -1.43107510373202E+02
-total_energy_dc_eV  : -3.89415339801412E+03
+total_energy_dc_eV  : -3.89415339801413E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.22496364E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.22496364E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.22496364E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.22496350E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.22496350E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.22496350E-02  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -9.4882E+02 GPa]
-- sigma(1 1)=  9.48816902E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.48816902E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.48816902E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  9.48816860E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.48816860E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.48816860E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -1326,16 +1314,16 @@ tolerances: {tolvrs: 1.00E-13, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -143.10751037319    -1.431E+02 2.017E-11 6.982E-12
- ETOT  2  -143.10751037319     1.194E-12 1.401E-11 5.719E-13
- ETOT  3  -143.10751037319     8.527E-14 9.819E-12 3.951E-14
+ ETOT  1  -143.10751037319    -1.431E+02 2.020E-11 7.544E-12
+ ETOT  2  -143.10751037319     2.046E-12 1.403E-11 6.219E-13
+ ETOT  3  -143.10751037319    -1.990E-13 9.831E-12 4.354E-14
 
- At SCF step    3       nres2   =  3.95E-14 < tolvrs=  1.00E-13 =>converged.
+ At SCF step    3       nres2   =  4.35E-14 < tolvrs=  1.00E-13 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.22496984E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.22496984E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.22496984E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.22496985E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.22496985E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.22496985E-02  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -1348,14 +1336,14 @@ lattice_vectors:
 lattice_lengths: [   6.76050,    6.76050,    6.76050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0898433E+02
-convergence: {deltae:  8.527E-14, res2:  3.951E-14, residm:  9.819E-12, diffor:  0.000E+00, }
+convergence: {deltae: -1.990E-13, res2:  4.354E-14, residm:  9.831E-12, diffor:  0.000E+00, }
 etotal    :  -1.43107510E+02
 entropy   :   0.00000000E+00
-fermie    :   5.75649579E-01
+fermie    :   5.75649577E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.22496984E-02,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.22496984E-02,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.22496984E-02, ]
+- [  3.22496985E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.22496985E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.22496985E-02, ]
 pressure_GPa:  -9.4882E+02
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  V]
@@ -1370,7 +1358,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.35000         13.74358044
+    1        2.35000         13.74358045
     2        1.92520          6.24939511
     3        1.41000          3.46540631
     4        1.41000          3.46540631
@@ -1379,8 +1367,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      4.079519029884127
- Compensation charge over fft grid         =      4.079147784880274
+ Compensation charge over spherical meshes =      4.079519035449783
+ Compensation charge over fft grid         =      4.079147785947230
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1520,7 +1508,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   98.196E-15; max=  98.193E-13
+ Mean square residual over all n,k,spin=   98.311E-15; max=  98.307E-13
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1561,44 +1549,44 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.00142951876646E+01
-hartree             :  1.97494695114371E+01
-xc                  : -2.12207015501675E+01
+kinetic             :  4.00142951895773E+01
+hartree             :  1.97494694896065E+01
+xc                  : -2.12207015482972E+01
 Ewald energy        : -1.22667940452101E+02
 psp_core            :  8.09723334916530E+00
-local_psp           : -7.04463114704765E+01
-spherical_terms     :  3.36789724638723E+00
-internal            : -1.43106058178091E+02
-'-kT*entropy'       : -1.45220555335919E-03
-total_energy        : -1.43107510383644E+02
-total_energy_eV     : -3.89415339829828E+03
+local_psp           : -7.04463114418265E+01
+spherical_terms     :  3.36789723596182E+00
+internal            : -1.43106058177914E+02
+'-kT*entropy'       : -1.45220554017524E-03
+total_energy        : -1.43107510383454E+02
+total_energy_eV     : -3.89415339829311E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 3, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.17118380336329E+01
+band_energy         : -1.17118380510392E+01
 Ewald energy        : -1.22667940452101E+02
 psp_core            :  8.09723334916530E+00
-xc_dc               : -1.32218541495425E+01
-spherical_terms     : -3.60165888152755E+00
-internal            : -1.43106058167639E+02
-'-kT*entropy'       : -1.45220555335919E-03
+xc_dc               : -1.32218541283109E+01
+spherical_terms     : -3.60165888536614E+00
+internal            : -1.43106058167652E+02
+'-kT*entropy'       : -1.45220554017524E-03
 total_energy_dc     : -1.43107510373192E+02
 total_energy_dc_eV  : -3.89415339801386E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.22496984E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.22496984E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.22496984E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.22496985E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.22496985E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.22496985E-02  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -9.4882E+02 GPa]
-- sigma(1 1)=  9.48818724E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.48818724E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.48818724E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  9.48818728E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.48818728E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.48818728E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1608,7 +1596,7 @@ total_energy_dc_eV  : -3.89415339801386E+03
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
 dimensions: {natom: 5, nkpt: 4, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 136, }
-cutoff_energies: {ecut:   3.9, pawecutdg:   4.1, }
+cutoff_energies: {ecut:   4.0, pawecutdg:   4.1, }
 electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.67493254E-03, }
 meta: {optdriver: 3, gwcalctyp: 2, }
 ...
@@ -1635,71 +1623,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  R(3)=  0.0000000  0.0000000  6.7605000  G(3)=  0.0000000  0.0000000  0.1479181
  Unit cell volume ucvol=  3.0898433E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/23v.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/23v.paw
-- Paw atomic data for element V - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
-- 23.00000  13.00000  20070917                znucl, zion, pspdat
-    7    7    2    0      1505   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw3
- basis_size (lnmax)=  8 (lmn_size= 22), orbitals=   0   0   0   1   1   1   2   2
- Spheres core radius: rc_sph= 2.35000000
- 3 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1505 , AA= 0.26380E-03 BB= 0.60673E-02
-  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1500 , AA= 0.26380E-03 BB= 0.60673E-02
-  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1738 , AA= 0.26380E-03 BB= 0.60673E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions =  2.00701120
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 3
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/38sr.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/38sr.paw
-- Paw atomic data for element Sr - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
-- 38.00000  10.00000  20070917                znucl, zion, pspdat
-    7    7    2    0      1068   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw3
- basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
- Spheres core radius: rc_sph= 1.92519986
- 4 radial meshes are used:
-  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1068 , AA= 0.22443E-03 BB= 0.85283E-02
-  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1063 , AA= 0.22443E-03 BB= 0.85283E-02
-  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1134 , AA= 0.22443E-03 BB= 0.85283E-02
-  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=1256 , AA= 0.22443E-03 BB= 0.85283E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions =  1.81361893
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 3
- Radial grid used for Vloc is grid 4
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   3  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
--  8.00000   6.00000  20040423                znucl, zion, pspdat
-    7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
- Pseudopotential format is: paw2
- basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
- Spheres core radius: rc_sph= 1.41000000
- 2 radial meshes are used:
-  - mesh 1: r(i)=AA*exp(BB*(i-2)), size= 350 , AA= 0.72362E-05 BB= 0.35000E-01
-  - mesh 2: r(i)=step*(i-1), size= 566 , step= 0.25000E-02
- Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
- Radius for shape functions = sphere core radius
- Radial grid used for partial waves is grid 1
- Radial grid used for projectors is grid  2
- Radial grid used for (t)core density is grid 1
- Radial grid used for Vloc is grid 1
- Compensation charge density is taken into account in XC energy/potential
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -1919,42 +1842,42 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      4.079518929321911
- Compensation charge over fine fft grid    =      4.079147784880274
+ Compensation charge over spherical meshes =      4.079518930391132
+ Compensation charge over fft grid         =      4.079147785947230
 
 
- Total number of electrons per unit cell =   40.8872 (Spherical mesh),   40.8868 (FFT mesh)
- average of density, n =  0.132328
- r_s =    1.2174
- omega_plasma =   35.0898 [eV]
+ Total number of electrons per unit cell =   41.0000 (Spherical mesh),   40.9996 (FFT mesh)
+ average of density, n =  0.132693
+ r_s =    1.2162
+ omega_plasma =   35.1382 [eV]
 
 
  ==== Results concerning PAW augmentation regions ====
 
  Total pseudopotential strength Dij (hartree):
  Atom #  1
-  -1.73016   0.40480  -2.34704   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.40480   0.15617  -1.43877   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -2.34704  -1.43877  15.34247   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -1.36105   0.00000   0.00000   0.13239   0.00000   0.00000  -0.10012   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -1.36105   0.00000   0.00000   0.13239   0.00000   0.00000  -0.10012   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -1.36105   0.00000   0.00000   0.13239   0.00000   0.00000  -0.10012 ...
-   0.00000   0.00000   0.00000   0.13239   0.00000   0.00000   0.03047   0.00000   0.00000  -0.13737   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.13239   0.00000   0.00000   0.03047   0.00000   0.00000  -0.13737   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.13239   0.00000   0.00000   0.03047   0.00000   0.00000  -0.13737 ...
-   0.00000   0.00000   0.00000  -0.10012   0.00000   0.00000  -0.13737   0.00000   0.00000   2.14763   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.10012   0.00000   0.00000  -0.13737   0.00000   0.00000   2.14763   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.10012   0.00000   0.00000  -0.13737   0.00000   0.00000   2.14763 ...
+  -1.71467   0.39935  -2.31208   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.39935   0.15598  -1.43580   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -2.31208  -1.43580  15.31555   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.34297   0.00000   0.00000   0.12899   0.00000   0.00000  -0.09436   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.34297   0.00000   0.00000   0.12899   0.00000   0.00000  -0.09436   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -1.34297   0.00000   0.00000   0.12899   0.00000   0.00000  -0.09436 ...
+   0.00000   0.00000   0.00000   0.12899   0.00000   0.00000   0.03076   0.00000   0.00000  -0.13793   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.12899   0.00000   0.00000   0.03076   0.00000   0.00000  -0.13793   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.12899   0.00000   0.00000   0.03076   0.00000   0.00000  -0.13793 ...
+   0.00000   0.00000   0.00000  -0.09436   0.00000   0.00000  -0.13793   0.00000   0.00000   2.15441   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.09436   0.00000   0.00000  -0.13793   0.00000   0.00000   2.15441   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09436   0.00000   0.00000  -0.13793   0.00000   0.00000   2.15441 ...
    ...  only 12  components have been written...
  Atom #  5
-   0.10234   0.04273   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.04273   0.04555   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000  -0.80640   0.00000   0.00000   0.07741   0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.80793   0.00000   0.00000   0.07631   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.80640   0.00000   0.00000   0.07741
-   0.00000   0.00000   0.07741   0.00000   0.00000  -1.26117   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.07631   0.00000   0.00000  -1.26261   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.07741   0.00000   0.00000  -1.26117
+   0.10044   0.04346   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.04346   0.04397   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000  -0.80472   0.00000   0.00000   0.07756   0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.80618   0.00000   0.00000   0.07650   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.80472   0.00000   0.00000   0.07756
+   0.00000   0.00000   0.07756   0.00000   0.00000  -1.26060   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.07650   0.00000   0.00000  -1.26198   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.07756   0.00000   0.00000  -1.26060
 
 
  Augmentation waves occupancies Rhoij:
@@ -2050,7 +1973,7 @@ Reading of the Wannier weights from data.plowann
     1  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
-    2   0.000  -4.062   0.959   0.046   0.046   0.046   0.046  -1.422   0.166
+    2   0.000  -4.144   0.903   0.002   0.002   0.002   0.002  -1.486   0.135
        -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
   chi0(G,G') at the    2 th omega   2.0000   0.0000 [eV]
@@ -2058,65 +1981,65 @@ Reading of the Wannier weights from data.plowann
     1  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
-    2   0.000  -4.241   0.925   0.061   0.061   0.061   0.061  -1.503   0.140
-        0.000  -0.047  -0.006   0.004   0.004   0.004   0.004  -0.020  -0.006
+    2   0.000  -4.338   0.853   0.021   0.021   0.021   0.021  -1.575   0.100
+        0.000  -0.052  -0.011   0.006   0.006   0.006   0.006  -0.022  -0.008
 
   chi0(G,G') at the    3 th omega   4.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
-    2   0.000  -5.321   0.465   0.277   0.277   0.277   0.277  -1.994  -0.091
-        0.000  -0.334  -0.231   0.122   0.122   0.122   0.122  -0.151  -0.104
+    2   0.000  -5.397   0.394   0.220   0.220   0.220   0.220  -2.059  -0.137
+        0.000  -0.323  -0.243   0.121   0.121   0.121   0.121  -0.144  -0.111
 
   chi0(G,G') at the    4 th omega   6.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
        -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
-    2  -0.000  -5.808   0.298  -0.277  -0.277  -0.277  -0.277  -2.864  -0.912
-        0.000  -0.859  -0.177  -0.307  -0.307  -0.307  -0.307  -0.490  -0.291
+    2  -0.000  -5.923   0.175  -0.343  -0.343  -0.343  -0.343  -3.000  -1.040
+        0.000  -0.871  -0.194  -0.305  -0.305  -0.305  -0.305  -0.520  -0.327
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =   3.5095
-  dielectric constant without local fields =   3.6414
+  dielectric constant =   3.5415
+  dielectric constant without local fields =   3.6728
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :      6.70  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :      6.98  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.285   0.003  -0.003   0.006  -0.006   0.008  -0.008   0.013  -0.013
+      0.282   0.003  -0.003   0.005  -0.005   0.008  -0.008   0.013  -0.013
      -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
        1       2       3       4       5       6       7       8       9
-      0.285   0.003  -0.003   0.006  -0.006   0.008  -0.008   0.013  -0.013
+      0.282   0.003  -0.003   0.005  -0.005   0.008  -0.008   0.013  -0.013
      -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
 
 
    Upper and lower wings at the    2 th omega   2.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.269   0.003  -0.003   0.006  -0.006   0.008  -0.008   0.013  -0.013
+      0.266   0.003  -0.003   0.005  -0.005   0.008  -0.008   0.013  -0.013
      -0.003  -0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
        1       2       3       4       5       6       7       8       9
-      0.269   0.003  -0.003   0.006  -0.006   0.008  -0.008   0.013  -0.013
+      0.266   0.003  -0.003   0.005  -0.005   0.008  -0.008   0.013  -0.013
      -0.003  -0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
 
    Upper and lower wings at the    3 th omega   4.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.209   0.003  -0.003   0.006  -0.006   0.009  -0.009   0.016  -0.016
-     -0.006  -0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
+      0.203   0.003  -0.003   0.006  -0.006   0.009  -0.009   0.015  -0.015
+     -0.010   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
-      0.209   0.003  -0.003   0.006  -0.006   0.009  -0.009   0.016  -0.016
-     -0.006  -0.000   0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
+      0.203   0.003  -0.003   0.006  -0.006   0.009  -0.009   0.015  -0.015
+     -0.010   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
 
 
    Upper and lower wings at the    4 th omega   6.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.185  -0.002   0.002  -0.005   0.005  -0.007   0.007   0.014  -0.014
+      0.182  -0.002   0.002  -0.005   0.005  -0.007   0.007   0.014  -0.014
      -0.046   0.000  -0.000   0.001  -0.001   0.001  -0.001   0.001  -0.001
        1       2       3       4       5       6       7       8       9
-      0.185  -0.002   0.002  -0.005   0.005  -0.007   0.007   0.014  -0.014
+      0.182  -0.002   0.002  -0.005   0.005  -0.007   0.007   0.014  -0.014
      -0.046   0.000  -0.000   0.001  -0.001   0.001  -0.001   0.001  -0.001
 
 
@@ -2127,37 +2050,37 @@ Reading of the Wannier weights from data.plowann
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -5.374  -2.194  -1.360  -2.204  -1.375  -2.206  -1.381  -1.644  -0.410
-       -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
+    1  -5.779  -2.522  -1.626  -2.532  -1.641  -2.535  -1.647  -1.913  -0.581
+        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000
 
-    2  -2.194  -5.306  -0.415  -1.416  -0.543  -1.410  -0.539  -2.251   0.159
+    2  -2.522  -5.655  -0.646  -1.677  -0.744  -1.671  -0.740  -2.543   0.021
        -0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   2.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -5.358  -1.984  -1.246  -1.995  -1.265  -1.999  -1.272  -1.460  -0.352
-       -0.264  -0.196  -0.112  -0.196  -0.112  -0.196  -0.113  -0.171  -0.037
+    1  -5.654  -2.224  -1.424  -2.236  -1.443  -2.239  -1.451  -1.670  -0.466
+       -0.320  -0.242  -0.149  -0.243  -0.150  -0.243  -0.151  -0.209  -0.062
 
-    2  -1.984  -5.275  -0.303  -1.143  -0.371  -1.136  -0.367  -2.115   0.223
-       -0.196  -0.220  -0.100  -0.162  -0.087  -0.162  -0.087  -0.163  -0.031
+    2  -2.224  -5.557  -0.460  -1.335  -0.501  -1.328  -0.497  -2.363   0.135
+       -0.242  -0.259  -0.132  -0.200  -0.118  -0.200  -0.118  -0.196  -0.053
 
   chi0(G,G') at the    3 th omega   4.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -8.845  -4.465  -2.614  -4.475  -2.633  -4.480  -2.639  -3.651  -0.830
-       -1.218  -0.898  -0.509  -0.899  -0.511  -0.900  -0.512  -0.780  -0.206
+    1 -10.129  -5.549  -3.438  -5.559  -3.455  -5.563  -3.461  -4.617  -1.369
+       -1.618  -1.239  -0.754  -1.241  -0.757  -1.241  -0.757  -1.092  -0.366
 
-    2  -4.465  -7.448  -1.352  -3.092  -1.452  -3.081  -1.443  -3.828  -0.232
-       -0.898  -1.502  -0.854  -0.349  -0.178  -0.348  -0.178  -0.993  -0.453
+    2  -5.549  -8.452  -2.053  -3.982  -2.097  -3.970  -2.087  -4.718  -0.658
+       -1.239  -1.801  -1.070  -0.637  -0.381  -0.636  -0.381  -1.262  -0.590
 
   chi0(G,G') at the    4 th omega   6.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -5.567  -1.832  -0.014  -1.846  -0.027  -1.858  -0.043  -0.791   1.742
-       -3.865  -1.703  -1.226  -1.707  -1.230  -1.708  -1.232  -0.705  -0.193
+    1  -5.822  -2.043  -0.180  -2.058  -0.192  -2.071  -0.208  -0.818   1.770
+       -4.122  -1.821  -1.345  -1.825  -1.349  -1.826  -1.351  -0.704  -0.202
 
-    2  -1.832  -6.819   0.534  -1.336   0.387  -1.323   0.400  -2.537   1.409
-       -1.703  -2.022  -1.153  -1.004  -0.856  -1.001  -0.854  -1.297  -0.787
+    2  -2.043  -7.230   0.288  -1.578   0.256  -1.566   0.268  -2.782   1.355
+       -1.821  -2.169  -1.255  -1.107  -0.922  -1.105  -0.920  -1.413  -0.841
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     10.72  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     11.15  [%]
 
 
 --------------------------------------------------------------------------------
@@ -2165,37 +2088,37 @@ Reading of the Wannier weights from data.plowann
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -5.914  -2.531  -1.608  -2.454  -2.454  -2.522  -1.604  -1.650  -0.821
-       -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+    1  -6.455  -2.975  -1.959  -2.849  -2.849  -2.966  -1.955  -1.967  -1.068
+        0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000
 
-    2  -2.531  -6.198  -0.663  -1.469  -1.469  -2.064  -0.815  -2.330  -0.498
-        0.000   0.000   0.000   0.000   0.000   0.000   0.000  -0.000   0.000
+    2  -2.975  -6.629  -0.971  -1.778  -1.778  -2.419  -1.086  -2.647  -0.709
+       -0.000   0.000   0.000   0.000   0.000   0.000   0.000  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   2.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -7.682  -3.929  -2.509  -3.539  -3.539  -3.914  -2.500  -2.516  -1.409
-       -0.553  -0.444  -0.301  -0.343  -0.343  -0.442  -0.299  -0.272  -0.196
+    1  -8.564  -4.647  -3.104  -4.189  -4.189  -4.631  -3.095  -3.036  -1.831
+       -0.666  -0.538  -0.381  -0.427  -0.427  -0.536  -0.380  -0.340  -0.252
 
-    2  -3.929  -7.592  -1.469  -2.360  -2.360  -3.225  -1.541  -3.134  -1.042
-       -0.444  -0.437  -0.266  -0.284  -0.284  -0.367  -0.238  -0.254  -0.180
+    2  -4.647  -8.249  -1.981  -2.875  -2.875  -3.794  -2.008  -3.620  -1.401
+       -0.538  -0.516  -0.337  -0.355  -0.355  -0.444  -0.304  -0.312  -0.231
 
   chi0(G,G') at the    3 th omega   4.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -7.627  -2.849  -1.899  -3.035  -3.035  -2.843  -1.892  -2.006  -0.878
-       -2.354  -1.730  -1.039  -1.722  -1.722  -1.729  -1.038  -1.407  -0.778
+    1  -8.608  -3.639  -2.491  -3.680  -3.680  -3.633  -2.485  -2.542  -1.289
+       -2.695  -2.039  -1.205  -1.993  -1.993  -2.038  -1.204  -1.682  -0.912
 
-    2  -2.849  -6.737  -0.726  -1.453  -1.453  -2.235  -0.937  -2.350  -0.507
-       -1.729  -1.661  -0.914  -1.294  -1.294  -1.253  -0.695  -1.306  -0.663
+    2  -3.639  -7.448  -1.207  -1.936  -1.936  -2.854  -1.369  -2.845  -0.834
+       -2.039  -1.931  -1.074  -1.543  -1.543  -1.531  -0.848  -1.543  -0.793
 
   chi0(G,G') at the    4 th omega   6.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -5.136  -1.416   0.050  -1.202  -1.202  -1.393   0.054  -0.782   0.673
-       -1.269  -0.699  -0.419  -0.605  -0.605  -0.697  -0.419  -0.329  -0.034
+    1  -5.205  -1.422   0.061  -1.280  -1.280  -1.398   0.065  -0.788   0.658
+       -1.435  -0.838  -0.520  -0.723  -0.723  -0.837  -0.519  -0.427  -0.106
 
-    2  -1.416  -7.080   0.770  -0.521  -0.521  -1.479   0.452  -1.857   0.700
-       -0.699  -1.533  -0.554  -0.348  -0.348  -0.255  -0.094  -0.782  -0.261
+    2  -1.422  -7.187   0.771  -0.550  -0.550  -1.416   0.527  -1.954   0.659
+       -0.838  -1.708  -0.658  -0.447  -0.447  -0.330  -0.160  -0.922  -0.341
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     13.44  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     14.02  [%]
 
 
 --------------------------------------------------------------------------------
@@ -2203,37 +2126,37 @@ Reading of the Wannier weights from data.plowann
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -4.796  -1.975  -1.975  -1.890  -1.085  -1.957  -1.957  -1.454  -0.568
+    1  -5.763  -2.655  -2.655  -2.705  -1.772  -2.631  -2.631  -2.033  -1.051
        -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2  -1.975  -5.390  -0.401  -1.286  -0.568  -0.942  -0.942  -2.345   0.087
-        0.000  -0.000   0.000   0.000   0.000   0.000   0.000   0.000  -0.000
+    2  -2.655  -5.901  -0.923  -1.844  -1.018  -1.381  -1.381  -2.793  -0.258
+        0.000  -0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
 
   chi0(G,G') at the    2 th omega   2.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -3.379  -1.240  -1.240  -0.523   0.083  -1.216  -1.216  -0.734   0.138
-       -0.360  -0.180  -0.180  -0.292  -0.224  -0.179  -0.179  -0.169  -0.130
+    1  -3.356  -1.298  -1.298  -0.531   0.232  -1.267  -1.267  -0.756   0.205
+       -0.515  -0.277  -0.277  -0.425  -0.351  -0.276  -0.276  -0.261  -0.213
 
-    2  -1.240  -5.131  -0.089  -0.618   0.018  -0.522  -0.522  -2.091   0.390
-       -0.180  -0.146  -0.097  -0.154  -0.113  -0.084  -0.084  -0.108  -0.062
+    2  -1.298  -5.282  -0.218  -0.672   0.085  -0.568  -0.568  -2.215   0.381
+       -0.277  -0.209  -0.159  -0.238  -0.190  -0.142  -0.142  -0.165  -0.113
 
   chi0(G,G') at the    3 th omega   4.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -4.302  -1.756  -1.756  -0.921  -0.272  -1.861  -1.861  -1.263   0.014
-       -5.124  -3.231  -3.231  -4.064  -2.308  -3.108  -3.108  -2.754  -1.540
+    1  -4.763  -2.149  -2.149  -1.373  -0.441  -2.274  -2.274  -1.559  -0.153
+       -6.213  -4.071  -4.071  -5.133  -2.930  -3.922  -3.922  -3.568  -2.005
 
-    2  -1.756  -5.803  -0.152  -0.994  -0.234  -1.221  -1.221  -2.490   0.545
-       -3.231  -2.407  -2.167  -2.581  -1.477  -1.771  -1.771  -1.995  -1.007
+    2  -2.149  -6.149  -0.461  -1.367  -0.382  -1.577  -1.577  -2.768   0.432
+       -4.071  -3.071  -2.846  -3.383  -1.929  -2.338  -2.338  -2.634  -1.383
 
   chi0(G,G') at the    4 th omega   6.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -2.846   0.048   0.048   2.050   1.231   0.061   0.061   1.234   0.936
-       -2.029  -1.302  -1.302  -0.854   0.018  -1.306  -1.306  -0.738   0.233
+    1  -2.844   0.067   0.067   2.216   1.413   0.055   0.055   1.392   1.062
+       -2.284  -1.523  -1.523  -0.994  -0.058  -1.517  -1.517  -0.836   0.189
 
-    2   0.048  -5.451   0.753   1.444   0.751   0.649   0.649  -1.132   0.538
-       -1.302  -1.673  -0.919  -0.740   0.131  -0.954  -0.954  -0.855   0.068
+    2   0.067  -5.474   0.722   1.667   0.951   0.649   0.649  -1.042   0.642
+       -1.523  -1.878  -1.130  -0.845   0.094  -1.141  -1.141  -0.943   0.051
 
-  Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     19.18  [%]
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     19.93  [%]
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -2243,7 +2166,7 @@ Reading of the Wannier weights from data.plowann
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
 dimensions: {natom: 5, nkpt: 4, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 136, }
-cutoff_energies: {ecut:   3.9, pawecutdg:   4.1, }
+cutoff_energies: {ecut:   4.0, pawecutdg:   4.1, }
 electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.67493254E-03, }
 meta: {optdriver: 4, gwcalctyp: 2, }
 ...
@@ -2274,8 +2197,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/23v.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/23v.paw
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/23v.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/23v.paw
 - Paw atomic data for element V - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 23.00000  13.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1505   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2295,8 +2218,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/38sr.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/38sr.paw
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/38sr.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/38sr.paw
 - Paw atomic data for element Sr - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 38.00000  10.00000  20070917                znucl, zion, pspdat
     7    7    2    0      1068   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2317,8 +2240,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
+- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2550,42 +2473,42 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      4.079518929321911
- Compensation charge over fine fft grid    =      4.079147784880274
+ Compensation charge over spherical meshes =      4.079518930391132
+ Compensation charge over fft grid         =      4.079147785947230
 
 
- Total number of electrons per unit cell =   40.8872 (Spherical mesh),   40.8868 (FFT mesh)
- average of density, n =  0.132328
- r_s =    1.2174
- omega_plasma =   35.0898 [eV]
+ Total number of electrons per unit cell =   41.0000 (Spherical mesh),   40.9996 (FFT mesh)
+ average of density, n =  0.132693
+ r_s =    1.2162
+ omega_plasma =   35.1382 [eV]
 
 
  ==== Results concerning PAW augmentation regions ====
 
  Total pseudopotential strength Dij (hartree):
  Atom #  1
-  -1.73016   0.40480  -2.34704   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.40480   0.15617  -1.43877   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -2.34704  -1.43877  15.34247   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -1.36105   0.00000   0.00000   0.13239   0.00000   0.00000  -0.10012   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -1.36105   0.00000   0.00000   0.13239   0.00000   0.00000  -0.10012   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -1.36105   0.00000   0.00000   0.13239   0.00000   0.00000  -0.10012 ...
-   0.00000   0.00000   0.00000   0.13239   0.00000   0.00000   0.03047   0.00000   0.00000  -0.13737   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.13239   0.00000   0.00000   0.03047   0.00000   0.00000  -0.13737   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.13239   0.00000   0.00000   0.03047   0.00000   0.00000  -0.13737 ...
-   0.00000   0.00000   0.00000  -0.10012   0.00000   0.00000  -0.13737   0.00000   0.00000   2.14763   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.10012   0.00000   0.00000  -0.13737   0.00000   0.00000   2.14763   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.10012   0.00000   0.00000  -0.13737   0.00000   0.00000   2.14763 ...
+  -1.71467   0.39935  -2.31208   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.39935   0.15598  -1.43580   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -2.31208  -1.43580  15.31555   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.34297   0.00000   0.00000   0.12899   0.00000   0.00000  -0.09436   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.34297   0.00000   0.00000   0.12899   0.00000   0.00000  -0.09436   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -1.34297   0.00000   0.00000   0.12899   0.00000   0.00000  -0.09436 ...
+   0.00000   0.00000   0.00000   0.12899   0.00000   0.00000   0.03076   0.00000   0.00000  -0.13793   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.12899   0.00000   0.00000   0.03076   0.00000   0.00000  -0.13793   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.12899   0.00000   0.00000   0.03076   0.00000   0.00000  -0.13793 ...
+   0.00000   0.00000   0.00000  -0.09436   0.00000   0.00000  -0.13793   0.00000   0.00000   2.15441   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.09436   0.00000   0.00000  -0.13793   0.00000   0.00000   2.15441   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09436   0.00000   0.00000  -0.13793   0.00000   0.00000   2.15441 ...
    ...  only 12  components have been written...
  Atom #  5
-   0.10234   0.04273   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.04273   0.04555   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000  -0.80640   0.00000   0.00000   0.07741   0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.80793   0.00000   0.00000   0.07631   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.80640   0.00000   0.00000   0.07741
-   0.00000   0.00000   0.07741   0.00000   0.00000  -1.26117   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.07631   0.00000   0.00000  -1.26261   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.07741   0.00000   0.00000  -1.26117
+   0.10044   0.04346   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.04346   0.04397   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000  -0.80472   0.00000   0.00000   0.07756   0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.80618   0.00000   0.00000   0.07650   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.80472   0.00000   0.00000   0.07756
+   0.00000   0.00000   0.07756   0.00000   0.00000  -1.26060   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.07650   0.00000   0.00000  -1.26198   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.07756   0.00000   0.00000  -1.26060
 
 
  Augmentation waves occupancies Rhoij:
@@ -2680,42 +2603,42 @@ Reading of the Wannier weights from data.plowann
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
 
   Diagonal bare interaction
-   1  9.505
-   2  9.504
-   3  9.024
-   4  9.978
-   5  9.089
+   1 10.500
+   2 10.499
+   3  9.514
+   4 11.011
+   5  9.576
 
   U'=U(m1,m2,m1,m2) for the bare interaction
  -      1      2      3      4      5
-   1  9.505  9.096  8.786  9.308  9.208
-   2  9.096  9.504  9.070  9.308  8.923
-   3  8.786  9.070  9.024  9.298  8.676
-   4  9.308  9.308  9.298  9.978  9.137
-   5  9.208  8.923  8.676  9.137  9.089
+   1 10.500 10.040  9.474 10.268  9.940
+   2 10.040 10.499  9.790 10.267  9.623
+   3  9.474  9.790  9.514 10.029  9.138
+   4 10.268 10.267 10.029 11.011  9.846
+   5  9.940  9.623  9.138  9.846  9.576
 
-  Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    9.1487   -0.0000
+  Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    9.9172    0.0000
 
- (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=    9.4200    0.0000)
+ (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=   10.2201   -0.0000)
 
   Hund coupling J=U(m1,m1,m2,m2) for the bare interaction
  -      1      2      3      4      5
-   1  9.505  0.255  0.255  0.241  0.041
-   2  0.255  9.504  0.095  0.241  0.202
-   3  0.255  0.095  9.024  0.097  0.194
-   4  0.241  0.241  0.097  9.978  0.209
-   5  0.041  0.202  0.194  0.209  9.089
+   1 10.500  0.264  0.274  0.250  0.043
+   2  0.264 10.499  0.101  0.250  0.216
+   3  0.274  0.101  9.514  0.103  0.207
+   4  0.250  0.250  0.103 11.011  0.224
+   5  0.043  0.216  0.207  0.224  9.576
 
-   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2510    0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2690   -0.0000
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
-   1  9.505  0.255  0.255  0.241  0.041
-   2  0.255  9.504  0.095  0.241  0.202
-   3  0.255  0.095  9.024  0.097  0.194
-   4  0.241  0.241  0.097  9.978  0.209
-   5  0.041  0.202  0.194  0.209  9.089
+   1 10.500  0.264  0.274  0.250  0.043
+   2  0.264 10.499  0.101  0.250  0.216
+   3  0.274  0.101  9.514  0.103  0.207
+   4  0.250  0.250  0.103 11.011  0.224
+   5  0.043  0.216  0.207  0.224  9.576
 
 
 
@@ -2727,165 +2650,165 @@ Reading of the Wannier weights from data.plowann
 
 
   Diagonal cRPA interaction
-   1  3.293
-   2  3.293
-   3  3.082
-   4  3.429
-   5  3.107
+   1  3.419
+   2  3.418
+   3  3.026
+   4  3.531
+   5  3.056
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  3.293  2.926  2.764  2.977  3.118
-   2  2.926  3.293  3.014  2.977  2.868
-   3  2.764  3.014  3.082  3.081  2.758
-   4  2.977  2.977  3.081  3.429  2.922
-   5  3.118  2.868  2.758  2.922  3.107
+   1  3.419  3.008  2.761  3.046  3.153
+   2  3.008  3.418  3.037  3.046  2.876
+   3  2.761  3.037  3.026  3.091  2.684
+   4  3.046  3.046  3.091  3.531  2.917
+   5  3.153  2.876  2.684  2.917  3.056
 
-  Hubbard cRPA interaction for w =  1, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    3.0005   -0.0000
+  Hubbard cRPA interaction for w =  1, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    3.0275    0.0000
 
-  (Hubbard cRPA interaction for w =   1, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.2408    0.0000)
+  (Hubbard cRPA interaction for w =   1, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.2901   -0.0000)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  3.293  0.222  0.227  0.216  0.040
-   2  0.222  3.293  0.087  0.216  0.180
-   3  0.227  0.087  3.082  0.088  0.172
-   4  0.216  0.216  0.088  3.429  0.184
-   5  0.040  0.180  0.172  0.184  3.107
+   1  3.419  0.230  0.243  0.223  0.042
+   2  0.230  3.418  0.092  0.223  0.192
+   3  0.243  0.092  3.026  0.093  0.182
+   4  0.223  0.223  0.093  3.531  0.196
+   5  0.042  0.192  0.182  0.196  3.056
 
-   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2232    0.0000
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2373   -0.0000
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
-   1  3.293  0.222  0.227  0.216  0.040
-   2  0.222  3.293  0.087  0.216  0.180
-   3  0.227  0.087  3.082  0.088  0.172
-   4  0.216  0.216  0.088  3.429  0.184
-   5  0.040  0.180  0.172  0.184  3.107
+   1  3.419  0.230  0.243  0.223  0.042
+   2  0.230  3.418  0.092  0.223  0.192
+   3  0.243  0.092  3.026  0.093  0.182
+   4  0.223  0.223  0.093  3.531  0.196
+   5  0.042  0.192  0.182  0.196  3.056
 
  --- For frequency w =   2  -------------
 
 
   Diagonal cRPA interaction
-   1  3.267
-   2  3.266
-   3  3.143
-   4  3.553
-   5  3.098
+   1  3.504
+   2  3.502
+   3  3.225
+   4  3.854
+   5  3.158
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  3.267  2.902  2.784  3.019  3.100
-   2  2.902  3.266  3.030  3.019  2.853
-   3  2.784  3.030  3.143  3.173  2.787
-   4  3.019  3.019  3.173  3.553  2.975
-   5  3.100  2.853  2.787  2.975  3.098
+   1  3.504  3.096  2.906  3.240  3.247
+   2  3.096  3.502  3.178  3.238  2.973
+   3  2.906  3.178  3.225  3.348  2.836
+   4  3.240  3.238  3.348  3.854  3.119
+   5  3.247  2.973  2.836  3.119  3.158
 
-  Hubbard cRPA interaction for w =  2, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    3.0244   -0.1604
+  Hubbard cRPA interaction for w =  2, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    3.1842   -0.2312
 
-  (Hubbard cRPA interaction for w =   2, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.2655   -0.1619)
+  (Hubbard cRPA interaction for w =   2, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.4488   -0.2337)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  3.267  0.223  0.226  0.215  0.040
-   2  0.223  3.266  0.086  0.215  0.180
-   3  0.226  0.086  3.143  0.088  0.172
-   4  0.215  0.215  0.088  3.553  0.185
-   5  0.040  0.180  0.172  0.185  3.098
+   1  3.504  0.230  0.242  0.222  0.042
+   2  0.230  3.502  0.092  0.222  0.192
+   3  0.242  0.092  3.225  0.094  0.183
+   4  0.222  0.222  0.094  3.854  0.197
+   5  0.042  0.192  0.183  0.197  3.158
 
-   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2233   -0.0009
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2378   -0.0012
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
-   1  3.267  0.223  0.226  0.215  0.040
-   2  0.223  3.266  0.086  0.215  0.180
-   3  0.226  0.086  3.143  0.088  0.172
-   4  0.215  0.215  0.088  3.553  0.185
-   5  0.040  0.180  0.172  0.185  3.098
+   1  3.504  0.230  0.242  0.222  0.042
+   2  0.230  3.502  0.092  0.222  0.192
+   3  0.242  0.092  3.225  0.094  0.183
+   4  0.222  0.222  0.094  3.854  0.197
+   5  0.042  0.192  0.183  0.197  3.158
 
  --- For frequency w =   3  -------------
 
 
   Diagonal cRPA interaction
-   1  2.396
-   2  2.394
-   3  2.225
-   4  2.471
-   5  2.262
+   1  2.392
+   2  2.388
+   3  2.102
+   4  2.456
+   5  2.135
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  2.396  2.040  1.901  2.060  2.248
-   2  2.040  2.394  2.140  2.059  2.006
-   3  1.901  2.140  2.225  2.179  1.918
-   4  2.060  2.059  2.179  2.471  2.031
-   5  2.248  2.006  1.918  2.031  2.262
+   1  2.392  1.992  1.801  2.007  2.182
+   2  1.992  2.388  2.066  2.005  1.914
+   3  1.801  2.066  2.102  2.099  1.772
+   4  2.007  2.005  2.099  2.456  1.933
+   5  2.182  1.914  1.772  1.933  2.135
 
-  Hubbard cRPA interaction for w =  3, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    2.1166   -0.6069
+  Hubbard cRPA interaction for w =  3, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    2.0406   -0.6276
 
-  (Hubbard cRPA interaction for w =   3, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    2.3499   -0.6151)
+  (Hubbard cRPA interaction for w =   3, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    2.2947   -0.6382)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  2.396  0.220  0.225  0.213  0.040
-   2  0.220  2.394  0.086  0.213  0.179
-   3  0.225  0.086  2.225  0.088  0.167
-   4  0.213  0.213  0.088  2.471  0.184
-   5  0.040  0.179  0.167  0.184  2.262
+   1  2.392  0.226  0.241  0.220  0.042
+   2  0.226  2.388  0.091  0.220  0.191
+   3  0.241  0.091  2.102  0.093  0.177
+   4  0.220  0.220  0.093  2.456  0.196
+   5  0.042  0.191  0.177  0.196  2.135
 
-   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2197   -0.0050
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2332   -0.0063
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
-   1  2.396  0.220  0.225  0.213  0.040
-   2  0.220  2.394  0.086  0.213  0.179
-   3  0.225  0.086  2.225  0.088  0.167
-   4  0.213  0.213  0.088  2.471  0.184
-   5  0.040  0.179  0.167  0.184  2.262
+   1  2.392  0.226  0.241  0.220  0.042
+   2  0.226  2.388  0.091  0.220  0.191
+   3  0.241  0.091  2.102  0.093  0.177
+   4  0.220  0.220  0.093  2.456  0.196
+   5  0.042  0.191  0.177  0.196  2.135
 
  --- For frequency w =   4  -------------
 
 
   Diagonal cRPA interaction
-   1  3.350
-   2  3.350
-   3  3.147
-   4  3.496
-   5  3.201
+   1  3.587
+   2  3.587
+   3  3.134
+   4  3.676
+   5  3.202
 
   U'=U(m1,m2,m1,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  3.350  2.987  2.829  3.038  3.194
-   2  2.987  3.350  3.075  3.038  2.948
-   3  2.829  3.075  3.147  3.149  2.840
-   4  3.038  3.038  3.149  3.496  3.004
-   5  3.194  2.948  2.840  3.004  3.201
+   1  3.587  3.178  2.897  3.199  3.311
+   2  3.178  3.587  3.172  3.199  3.036
+   3  2.897  3.172  3.134  3.219  2.810
+   4  3.199  3.199  3.219  3.676  3.062
+   5  3.311  3.036  2.810  3.062  3.202
 
-  Hubbard cRPA interaction for w =  4, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    3.0699   -1.5916
+  Hubbard cRPA interaction for w =  4, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    3.1741   -1.8793
 
-  (Hubbard cRPA interaction for w =   4, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.3087   -1.5983)
+  (Hubbard cRPA interaction for w =   4, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.4371   -1.8880)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
-   1  3.350  0.218  0.225  0.213  0.040
-   2  0.218  3.350  0.086  0.213  0.179
-   3  0.225  0.086  3.147  0.087  0.172
-   4  0.213  0.213  0.087  3.496  0.181
-   5  0.040  0.179  0.172  0.181  3.201
+   1  3.587  0.226  0.241  0.221  0.042
+   2  0.226  3.587  0.091  0.221  0.192
+   3  0.241  0.091  3.134  0.092  0.184
+   4  0.221  0.221  0.092  3.676  0.193
+   5  0.042  0.192  0.184  0.193  3.202
 
-   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2210   -0.0073
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2360   -0.0083
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
-   1  3.350  0.218  0.225  0.213  0.040
-   2  0.218  3.350  0.086  0.213  0.179
-   3  0.225  0.086  3.147  0.087  0.172
-   4  0.213  0.213  0.087  3.496  0.181
-   5  0.040  0.179  0.172  0.181  3.201
+   1  3.587  0.226  0.241  0.221  0.042
+   2  0.226  3.587  0.091  0.221  0.192
+   3  0.241  0.091  3.134  0.092  0.184
+   4  0.221  0.221  0.092  3.676  0.193
+   5  0.042  0.192  0.184  0.193  3.202
  
 ==Reminder of the orbitals==
   Only one orbital
@@ -2895,10 +2818,10 @@ Reading of the Wannier weights from data.plowann
             Average U and J as a function of frequency
    -------------------------------------------------------------
          omega           U(omega)            J(omega)
-        0.000      3.0005   -0.0000      0.2232    0.0000
-        2.000      3.0244   -0.1604      0.2233   -0.0009
-        4.000      2.1166   -0.6069      0.2197   -0.0050
-        6.000      3.0699   -1.5916      0.2210   -0.0073
+        0.000      3.0275    0.0000      0.2373   -0.0000
+        2.000      3.1842   -0.2312      0.2378   -0.0012
+        4.000      2.0406   -0.6276      0.2332   -0.0063
+        6.000      3.1741   -1.8793      0.2360   -0.0083
    -------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -2933,26 +2856,18 @@ Reading of the Wannier weights from data.plowann
         dmft_solv3          2
         dmft_solv4          5
         dmft_solv5          5
-             ecut1     4.00000000E+00 Hartree
-             ecut2     4.00000000E+00 Hartree
-             ecut3     4.00000000E+00 Hartree
-             ecut4     3.88700068E+00 Hartree
-             ecut5     3.88700068E+00 Hartree
-          ecuteps1     3.00000000E+00 Hartree
-          ecuteps2     3.00000000E+00 Hartree
-          ecuteps3     3.00000000E+00 Hartree
-          ecuteps4     2.59133378E+00 Hartree
-          ecuteps5     2.59133378E+00 Hartree
+             ecut      4.00000000E+00 Hartree
+          ecuteps      3.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
          ecutsigx3     0.00000000E+00 Hartree
          ecutsigx4     0.00000000E+00 Hartree
-         ecutsigx5     2.59133378E+00 Hartree
+         ecutsigx5     3.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     0.00000000E+00 Hartree
-          ecutwfn4     3.88700068E+00 Hartree
-          ecutwfn5     3.88700068E+00 Hartree
+          ecutwfn4     4.00000000E+00 Hartree
+          ecutwfn5     4.00000000E+00 Hartree
            etotal1    -1.4310751037E+02
            etotal2    -1.4310751037E+02
            etotal3    -1.4310751037E+02
@@ -3066,11 +2981,7 @@ P           mkmem           4
           nfreqsp3          0
           nfreqsp4          0
           nfreqsp5          4
-            ngfft1         15      15      15
-            ngfft2         15      15      15
-            ngfft3         15      15      15
-            ngfft4         12      12      12
-            ngfft5         12      12      12
+            ngfft          15      15      15
           ngfftdg          15      15      15
              nkpt           4
             nline           5
@@ -3268,11 +3179,11 @@ P           mkmem           4
            prtvol           1
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         221
-           strten1     3.2249696128E-02  3.2249696128E-02  3.2249696128E-02
+           strten1     3.2249696129E-02  3.2249696129E-02  3.2249696129E-02
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     3.2249636433E-02  3.2249636433E-02  3.2249636433E-02
+           strten2     3.2249634999E-02  3.2249634999E-02  3.2249634999E-02
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     3.2249698375E-02  3.2249698375E-02  3.2249698375E-02
+           strten3     3.2249698498E-02  3.2249698498E-02  3.2249698498E-02
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3344,10 +3255,57 @@ P           mkmem           4
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         54.0        0.90      0.015
+- Total wall clock time (s,m,h):         56.9        0.95      0.016
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           54.0, wall_time =           56.9
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 23.243  43.1     23.302  41.0              1      -1.00        1.00       1.00
+- ewald                          5.807  10.8      5.814  10.2              5      -1.00        1.00       1.00
+- pspini                         3.960   7.3      3.972   7.0              5      -1.00        1.00       1.00
+- pawinit                        2.944   5.5      2.954   5.2              4      -1.00        1.00       1.00
+- fourwf%(pot)                   1.896   3.5      1.895   3.3          21842      -1.00        1.00       1.00
+- stress                         1.723   3.2      1.724   3.0              3      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             1.721   3.2      1.722   3.0              3      -1.00        1.00       1.00
+- nonlop(apply)                  1.380   2.6      1.372   2.4          21842      -1.00        1.01       1.01
+- vtowfk(ssdiag)                 0.657   1.2      0.650   1.1             -1      -1.00        1.01       1.01
+- invars2                        0.482   0.9      0.486   0.9              5      -1.00        0.99       0.99
+- pawdij/symdij                  0.345   0.6      0.344   0.6             32      -1.00        1.00       1.00
+- projbd                         0.331   0.6      0.358   0.6          14542      -1.00        0.92       0.92
+- others (115)                   1.456   2.7      1.444   2.5             -1      -1.00        1.01       1.01
+-<END_TIMER>
+-
+- subtotal                      45.945  85.1     46.037  80.9                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          54.0, wall_time =          56.9
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                 23.243  43.1     23.302  41.0              1      -1.00        1.00       1.00
+- ewald                          5.807  10.8      5.814  10.2              5      -1.00        1.00       1.00
+- pspini                         3.960   7.3      3.972   7.0              5      -1.00        1.00       1.00
+- pawinit                        2.944   5.5      2.954   5.2              4      -1.00        1.00       1.00
+- fourwf%(pot)                   1.896   3.5      1.895   3.3          21842      -1.00        1.00       1.00
+- stress                         1.723   3.2      1.724   3.0              3      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             1.721   3.2      1.722   3.0              3      -1.00        1.00       1.00
+- nonlop(apply)                  1.380   2.6      1.372   2.4          21842      -1.00        1.01       1.01
+- vtowfk(ssdiag)                 0.657   1.2      0.650   1.1             -1      -1.00        1.01       1.01
+- invars2                        0.482   0.9      0.486   0.9              5      -1.00        0.99       0.99
+- pawdij/symdij                  0.345   0.6      0.344   0.6             32      -1.00        1.00       1.00
+- projbd                         0.331   0.6      0.358   0.6          14542      -1.00        0.92       0.92
+- others (115)                   1.456   2.7      1.444   2.5             -1      -1.00        1.01       1.01
+-<END_TIMER>
 
+- subtotal                      45.945  85.1     46.037  80.9                                  1.00       1.00
 
 ================================================================================
 
@@ -3370,25 +3328,17 @@ P           mkmem           4
 - Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2014
 -
-- [2] Plane-wave based electronic structure calculations for correlated materials.
-- using dynamical mean-field theory and projected local orbitals,
-- B. Amadon, F. Lechermann, A. Georges, F. Jollet, T.O. Wehling, A.I. Lichenstein,
-- Phys. Rev. B 77, 205112 (2008).
-- Comment: to be cited in case the computation of overlap operator for Wannier90 interface within PAW is used,
-- i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008
--
-- [3] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
+- [2] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
 - Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
-- [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
+- [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
 - Comment: PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [5] The Abinit project: Impact, environment and recent developments.
+- [4] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -3405,7 +3355,7 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [6] Recent developments in the ABINIT software package.
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -3423,7 +3373,7 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [7] ABINIT: First-principles approach of materials and nanosystem properties.
+- [6] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -3436,10 +3386,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         55.0  wall=         56.3
+- Proc.   0 individual time (sec): cpu=         54.0  wall=         56.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  43 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         55.0  wall=         56.3
+.Delivered  43 WARNINGs and  31 COMMENTs to log file.
++Overall time at end (sec) : cpu=         54.0  wall=         56.9

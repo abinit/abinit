@@ -54,6 +54,7 @@
        0.5 0.5 0.0
  xred 0.0  0.0  0.0
       0.22 0.22 0.22
+ chksymtnons 0
  znucl 6
  kptopt 0
  nband 12 occ 4*2 8*0
@@ -64,11 +65,16 @@
  npfft 2
  paral_kgb 1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
+# This test is disabled on abiref, because a problem with SIGFPE is triggered inside the MPI layer (MPI_ALLREDUCE) when input arrays are not initialized with zeros.
+# MPI_SUM may overflow depending on the (random) memory chunks returned by C malloc. See several Gitlab comments from Matteo about this problem.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = abiref_gnu_9.2_openmpi
 #%% [files]
-#%% psp_files = 6c_lda.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

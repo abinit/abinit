@@ -58,7 +58,6 @@ MODULE m_cgtools
  real(dp),public,parameter :: cg_czero(2) = (/0._dp,0._dp/)
  real(dp),public,parameter :: cg_cone(2)  = (/1._dp,0._dp/)
 
-
  ! Helper functions.
  public :: cg_setval
  public :: cg_tocplx
@@ -89,7 +88,8 @@ MODULE m_cgtools
  public :: set_istwfk               ! Returns the value of istwfk associated to the input k-point.
  public :: sqnorm_g                 ! Square of the norm in reciprocal space.
  public :: dotprod_g                ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
- public :: matrixelmt_g             ! matrix element <wf1|O|wf2> of two wavefunctions, in reciprocal space, for an operator diagonal in G-space.
+ public :: matrixelmt_g             ! matrix element <wf1|O|wf2> of two wavefunctions, in reciprocal space,
+                                    ! for an operator diagonal in G-space.
  public :: dotprod_v                ! Dot product of two potentials (integral over FFT grid).
  public :: dotprod_vn
  public :: sqnorm_v                 ! Compute square of the norm of a potential (integral over FFT grid).
@@ -105,11 +105,13 @@ MODULE m_cgtools
  public :: cgnc_gramschmidt         ! Gram-Schmidt orthogonalization for NC wavefunctions.
  public :: cgpaw_normalize          ! Normalize PAW wavefunctions.
  public :: cgpaw_gramschmidt        ! Gram-Schmidt orthogonalization for PAW wavefuncion
- public :: projbd                   ! Project out vector "direc" onto the bands i.e. direc=direc-$sum_{j/=i} { <cg_{j}|direc>.|cg_{j}> }$
+ public :: projbd                   ! Project out vector "direc" onto the bands i.e.
+                                    ! direc=direc-$sum_{j/=i} { <cg_{j}|direc>.|cg_{j}> }$
  public :: cg_envlop                ! Multiply random number values in cg by envelope function to lower initial kinetic energy.
  public :: cg_normev                ! Normalize a set of num eigenvectors of complex length ndim
  public :: cg_precon                ! precondition $<G|(H-e_{n,k})|C_{n,k}>$
- public :: cg_precon_block          ! precondition $<G|(H-e_{n,k})|C_{n,k}>$ for a block of band in the case of real WFs (istwfk/=1)
+ public :: cg_precon_block          ! precondition $<G|(H-e_{n,k})|C_{n,k}>$ for a block of band
+                                    ! in the case of real WFs (istwfk/=1)
  public :: cg_zprecon_block         ! precondition $<G|(H-e_{n,k})|C_{n,k}>$ for a block of band
  public :: fxphas_seq               ! Fix phase of all bands. Keep normalization but maximize real part
  public :: overlap_g                ! Compute the scalar product between WF at two different k-points
@@ -117,12 +119,6 @@ MODULE m_cgtools
  public :: pw_orthon                ! Normalize nvec complex vectors each of length nelem and then
                                     ! orthogonalize by modified Gram-Schmidt.
 !***
-
- !integer,parameter,private :: MIN_SIZE = 5000
- !complex(spc),private,parameter :: czero_spc =(0._sp,0._sp)
- !complex(spc),private,parameter :: cone_spc  =(1._sp,0._sp)
- !complex(dpc),private,parameter :: czero_dpc =(0._dp,0._dp)
- !complex(dpc),private,parameter :: cone_dpc  =(1._dp,0._dp)
 
 CONTAINS  !========================================================================================
 !!***
@@ -243,7 +239,7 @@ end subroutine cg_tocplx
 !!
 !! SOURCE
 
-subroutine cg_fromcplx(n,icplx,ocg)
+subroutine cg_fromcplx(n, icplx, ocg)
 
 !Arguments ------------------------------------
 !scalars
@@ -461,7 +457,7 @@ end subroutine cg_from_reim
 !!  y = In output, y contains a copy of the values of x.
 !!
 !! PARENTS
-!!      cgwf,corrmetalwf1,dfpt_cgwf,dfpt_mkrho,dfpt_vtowfk,lapackprof,m_iowf
+!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_mkrho,m_dfpt_vtowfk,m_iowf
 !!
 !! CHILDREN
 !!
@@ -500,7 +496,7 @@ end subroutine cg_zcopy
 !!  x = Updated vector.
 !!
 !! PARENTS
-!!      cgwf,m_cgtools
+!!      m_cgtools,m_cgwf
 !!
 !! CHILDREN
 !!
@@ -736,7 +732,7 @@ end function cg_zdotu
 !!  y = Array. In output, y contains the updated vector.
 !!
 !! PARENTS
-!!      cgwf,dfpt_cgwf,lapackprof,rf2_init
+!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_rf2_init
 !!
 !! CHILDREN
 !!
@@ -840,7 +836,7 @@ end subroutine cg_zaxpby
 !!
 !! SOURCE
 
-subroutine cg_zgemv(trans,nrows,ncols,cgmat,vec,matvec,alpha,beta)
+subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
 
 !Arguments ------------------------------------
 !scalars
@@ -907,7 +903,7 @@ end subroutine cg_zgemv
 !! OUTPUT
 !!
 !! PARENTS
-!!      lapackprof,m_cgtools
+!!      lapackprof,m_cgtools,m_sigmaph
 !!
 !! CHILDREN
 !!
@@ -950,7 +946,7 @@ subroutine cg_zgemm(transa, transb, npws, ncola, ncolb, cg_a, cg_b, cg_c, alpha,
  my_alpha = cg_cone;  if (PRESENT(alpha)) my_alpha = alpha
  my_beta  = cg_czero; if (PRESENT(beta))  my_beta  = beta
 
- call ZGEMM(transa,transb,mm,nn,kk,my_alpha,cg_a,lda,cg_b,ldb,my_beta,cg_c,ldc)
+ call ZGEMM(transa, transb, mm, nn, kk, my_alpha, cg_a, lda, cg_b, ldb, my_beta, cg_c, ldc)
 
 end subroutine cg_zgemm
 !!***
@@ -1044,7 +1040,7 @@ end function set_istwfk
 !!  dotr= <vect|vect>
 !!
 !! PARENTS
-!!      cgwf,dfpt_cgwf,dfpt_vtowfk,m_epjdos,mkresi,rf2_init
+!!      m_cgwf,m_dfpt_cgwf,m_dfpt_vtowfk,m_dft_energy,m_epjdos,m_rf2_init
 !!
 !! CHILDREN
 !!
@@ -1122,11 +1118,10 @@ end subroutine sqnorm_g
 !!  $dotr=\Re ( <vect1|vect2> )$
 !!
 !! PARENTS
-!!      cgwf,chebfi,corrmetalwf1,d2frnl,dfpt_cgwf,dfpt_nsteltwf,dfpt_nstpaw
-!!      dfpt_nstwf,dfpt_vtowfk,dfpt_wfkfermi,dfptnl_resp,dotprod_set_cgcprj
-!!      dotprodm_sumdiag_cgcprj,eig2stern,extrapwf,fock2ACE,fock_ACE_getghc
-!!      fock_getghc,m_efmas,m_gkk,m_phgamma,m_phpi,m_rf2,m_sigmaph,mkresi
-!!      nonlop_gpu,nonlop_test,rf2_init
+!!      m_cgcprj,m_cgwf,m_chebfi,m_d2frnl,m_dfpt_cgwf,m_dfpt_lwwf,m_dfpt_nstwf
+!!      m_dfpt_scfcv,m_dfpt_vtowfk,m_dfptnl_pert,m_dft_energy,m_efmas,m_eig2d
+!!      m_extraprho,m_fock_getghc,m_gkk,m_nonlop,m_nonlop_test,m_pead_nl_loop
+!!      m_phpi,m_rf2,m_rf2_init
 !!
 !! CHILDREN
 !!
@@ -1214,7 +1209,7 @@ end subroutine dotprod_g
 !!  ar=real part of the matrix element
 !!
 !! PARENTS
-!!      dfpt_vtowfk
+!!      m_dfpt_vtowfk
 !!
 !! CHILDREN
 !!
@@ -1232,7 +1227,7 @@ subroutine matrixelmt_g(ai,ar,diag,istwf_k,needimag,npw,nspinor,vect1,vect2,me_g
 !Local variables-------------------------------
 !scalars
  integer :: i1,ierr,ipw
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: buffer2(2)
  !real(dp),allocatable :: re_prod(:), im_prod(:)
@@ -1240,10 +1235,10 @@ subroutine matrixelmt_g(ai,ar,diag,istwf_k,needimag,npw,nspinor,vect1,vect2,me_g
 ! *************************************************************************
 
  if (nspinor==2 .and. istwf_k/=1) then
-   write(message,'(a,a,a,i6,a,i6)')&
-&   'When istwf_k/=1, nspinor must be 1,',ch10,&
-&   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
-   MSG_BUG(message)
+   write(msg,'(a,a,a,i6,a,i6)')&
+   'When istwf_k/=1, nspinor must be 1,',ch10,&
+   'however, nspinor=',nspinor,', and istwf_k=',istwf_k
+   MSG_BUG(msg)
  end if
 
 #if 0
@@ -1376,7 +1371,6 @@ end subroutine matrixelmt_g
 !!
 !! SOURCE
 
-
 subroutine dotprod_v(cplex,dotr,nfft,nspden,opt_storage,pot1,pot2,comm)
 
 !Arguments ------------------------------------
@@ -1473,11 +1467,11 @@ end subroutine dotprod_v
 !!     N is stored as : n, m_x, m_y, mz          (complex)
 !!
 !! PARENTS
-!!      dfpt_dyxc1,dfpt_eltfrxc,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov
-!!      dfptnl_loop,energy,newfermie1,odamix,prcrskerker2,rhotov,rhotoxc,setvtr
+!!      m_dfpt_elt,m_dfpt_lw,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv
+!!      m_dfptnl_pert,m_dft_energy,m_odamix,m_prcref,m_respfn_driver,m_rhotov
+!!      m_rhotoxc,m_setvtr
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1718,7 +1712,7 @@ end subroutine dotprod_vn
 !!  norm2= value of the square of the norm
 !!
 !! PARENTS
-!!      dfpt_rhotov,dfpt_vtorho,rhotov,vtorho
+!!      m_dfpt_rhotov,m_dfpt_vtorho,m_rhotov,m_vtorho
 !!
 !! CHILDREN
 !!
@@ -1804,8 +1798,8 @@ end subroutine sqnorm_v
 !!  meansp(nspden)=mean value for each nspden component
 !!
 !! PARENTS
-!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA,psolver_rhohxc,rhohxcpositron
-!!      rhotov,rhotoxc
+!!      m_electronpositron,m_forces,m_newvtr,m_paw_nhat,m_prcref,m_psolver
+!!      m_rhotov,m_rhotoxc
 !!
 !! CHILDREN
 !!
@@ -1867,7 +1861,7 @@ end subroutine mean_fftr
 !!  cgcmat = outer spin product of spinorial wf with itself
 !!
 !! PARENTS
-!!      m_cut3d,partial_dos_fractions
+!!      m_cut3d,m_epjdos
 !!
 !! CHILDREN
 !!
@@ -2098,7 +2092,7 @@ end subroutine cg_gsph2box
 !!  oarrsph(2,npw_k*ndat)=Data defined on the G-sphere.
 !!
 !! PARENTS
-!!      fourwf,m_dfti,m_fftw3
+!!      m_dfti,m_fft,m_fftw3
 !!
 !! CHILDREN
 !!
@@ -2203,7 +2197,7 @@ end subroutine cg_box2gsph
 !!                  modified in input with the contribution gived by ur.
 !!
 !! PARENTS
-!!      fourwf,m_dfti,m_fftw3
+!!      m_dfti,m_fft,m_fftw3
 !!
 !! CHILDREN
 !!
@@ -2394,7 +2388,7 @@ end subroutine cg_vlocpsi
 !!    output: Orthonormalized set.
 !!
 !! PARENTS
-!!      pw_orthon
+!!      m_cgtools
 !!
 !! CHILDREN
 !!
@@ -2545,7 +2539,7 @@ end subroutine cgnc_cholesky
 !!   destroyed in output.
 !!
 !! PARENTS
-!!      pw_orthon
+!!      m_cgtools
 !!
 !! CHILDREN
 !!
@@ -3174,14 +3168,14 @@ end subroutine cgpaw_gramschmidt
 !!  4) cg_zgemv wraps ZGEMM whose implementation is more efficient, especially in the threaded case.
 !!
 !! PARENTS
-!!      cgwf,dfpt_cgwf,dfpt_nstpaw,getdc1,lapackprof
+!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_nstwf,m_getgh1c
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
-&                 npw,nspinor,scg,scprod,scprod_io,tim_projbd,useoverlap,me_g0,comm)
+                  npw,nspinor,scg,scprod,scprod_io,tim_projbd,useoverlap,me_g0,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3312,7 +3306,7 @@ end subroutine projbd
 !!  cg(2,mcg)=revised values (not orthonormalized)
 !!
 !! PARENTS
-!!      wfconv
+!!      m_inwffil
 !!
 !! CHILDREN
 !!
@@ -3403,7 +3397,7 @@ end subroutine cg_envlop
 !!  cg(2*npw,nband)=nband normalized eigenvectors
 !!
 !! PARENTS
-!!      subdiago
+!!      m_cgtools
 !!
 !! CHILDREN
 !!
@@ -3421,7 +3415,7 @@ subroutine cg_normev(cg,npw,nband)
 !scalars
  integer :: ii,jj
  real(dp) :: den,evim,evre,phim,phre,xnorm
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -3434,12 +3428,12 @@ subroutine cg_normev(cg,npw,nband)
    end do
 
    if((xnorm-one)**2>tol6)then
-     write(message,'(6a,i6,a,es16.6,3a)' )ch10,&
-&     'normev: ',ch10,&
-&     'Starting xnorm should be close to one (tol is tol6).',ch10,&
-&     'However, for state number',ii,', xnorm=',xnorm,ch10,&
-&     'It might be that your LAPACK library has not been correctly installed.'
-     MSG_BUG(message)
+     write(msg,'(6a,i6,a,es16.6,3a)' )ch10,&
+     'normev: ',ch10,&
+     'Starting xnorm should be close to one (tol is tol6).',ch10,&
+     'However, for state number',ii,', xnorm=',xnorm,ch10,&
+     'It might be that your LAPACK library has not been correctly installed.'
+     MSG_BUG(msg)
    end if
 
    xnorm=1.0d0/sqrt(xnorm)
@@ -3496,7 +3490,7 @@ end subroutine cg_normev
 !!  vect(2,npw*nspinor)=<G|(H-eval)|C_{n,k}>*(polynomial ratio)
 !!
 !! PARENTS
-!!      cgwf,dfpt_cgwf
+!!      m_cgwf,m_dfpt_cgwf
 !!
 !! CHILDREN
 !!
@@ -3516,7 +3510,7 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
 !scalars
  integer :: ierr,ig,igs,ipw1,ispinor
  real(dp) :: ek0,ek0_inv,fac,poly,xx
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
 
@@ -3559,10 +3553,10 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
  call timab(48,2,tsec)
 
  if(ek0<1.0d-10)then
-   write(message,'(3a)')&
-&   'The mean kinetic energy of a wavefunction vanishes.',ch10,&
-&   'It is reset to 0.1 Ha.'
-   MSG_WARNING(message)
+   write(msg,'(3a)')&
+   'The mean kinetic energy of a wavefunction vanishes.',ch10,&
+   'It is reset to 0.1 Ha.'
+   MSG_WARNING(msg)
    ek0=0.1_dp
  end if
 
@@ -3656,7 +3650,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !scalars
  integer :: iblocksize,ierr,ig,igs,ipw1,ispinor
  real(dp) :: fac,poly,xx
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: ek0(:),ek0_inv(:)
@@ -3787,10 +3781,10 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 
      do iblocksize=1,blocksize
        if(ek0(iblocksize)<1.0d-10)then
-         write(message, '(4a)' )ch10,&
-&         'cg_precon_block: the mean kinetic energy of a wavefunction vanishes.',ch10,&
-&         'it is reset to 0.1ha.'
-         MSG_WARNING(message)
+         write(msg, '(4a)' )ch10,&
+         'cg_precon_block: the mean kinetic energy of a wavefunction vanishes.',ch10,&
+         'it is reset to 0.1ha.'
+         MSG_WARNING(msg)
          ek0(iblocksize)=0.1_dp
        end if
      end do
@@ -3949,7 +3943,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 !scalars
  integer :: iblocksize,ierr,ig,igs,ispinor
  real(dp) :: fac,poly,xx
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: ek0(:),ek0_inv(:)
@@ -4087,13 +4081,8 @@ end subroutine cg_zprecon_block
 !!  cg(2,mcg)=same array with altered phase.
 !!  gsc(2,mgsc)= same array with altered phase.
 !!
-!! NOTES
-!! When the sign of the real part was fixed (modif v3.1.3g.6), the
-!! test Tv3#5 , dataset 5, behaved differently than previously.
-!! This should be cleared up.
-!!
 !! PARENTS
-!!      m_dynmat,rayleigh_ritz
+!!      m_dynmat,m_rayleigh_ritz
 !!
 !! CHILDREN
 !!
@@ -4112,7 +4101,7 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
  integer :: iband,ii,indx
  real(dp) :: cim,cre,gscim,gscre,quotient,root1,root2,saa,sab,sbb,theta
  real(dp) :: thppi,xx,yy
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: cimb(:),creb(:),saab(:),sabb(:),sbbb(:) !,sarr(:,:)
 
@@ -4187,11 +4176,11 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
          end do
        end if
      else
-       write(message,'(a,i0,5a)')&
-&       'The eigenvector with band ',iband,' has zero norm.',ch10,&
-&       'This usually happens when the number of bands (nband) is comparable to the number of planewaves (mpw)',ch10,&
-&       'Action: Check the parameters of the calculation. If nband ~ mpw, then decrease nband or, alternatively, increase ecut'
-       MSG_ERROR(message)
+       write(msg,'(a,i0,5a)')&
+       'The eigenvector with band ',iband,' has zero norm.',ch10,&
+       'This usually happens when the number of bands (nband) is comparable to the number of planewaves (mpw)',ch10,&
+       'Action: Check the parameters of the calculation. If nband ~ mpw, then decrease nband or, alternatively, increase ecut'
+       MSG_ERROR(msg)
      end if
 
      xx=cos(theta)
@@ -4323,8 +4312,7 @@ end subroutine fxphas_seq
 !! The current implementation if not compatible with TR-symmetry (i.e. istwfk/=1) !
 !!
 !! PARENTS
-!!      dfptff_bec,dfptff_die,dfptff_ebp,dfptff_edie,dfptff_gbefd
-!!      dfptff_gradberry,qmatrix,smatrix
+!!      m_berrytk,m_dfpt_fef
 !!
 !! CHILDREN
 !!
@@ -4399,16 +4387,16 @@ end subroutine overlap_g
 !!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
 !!
 !! PARENTS
-!!      rayleigh_ritz,vtowfk
+!!      m_rayleigh_ritz,m_vtowfk
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xgemm,abi_xhpev,abi_xhpgv,cg_normev,hermit
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
 subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
-&                   mcg,mgsc,nband_k,npw_k,nspinor,paral_kgb,&
-&                   subham,subovl,use_subovl,usepaw,me_g0)
+                    mcg,mgsc,nband_k,npw_k,nspinor,paral_kgb,&
+                    subham,subovl,use_subovl,usepaw,me_g0)
 
  use m_linalg_interfaces
  use m_abi_linalg
@@ -4422,7 +4410,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 
 !Local variables-------------------------------
  integer :: iband,ii,ierr,rvectsize,vectsize,use_slk
- character(len=500) :: message
+ character(len=500) :: msg
  ! real(dp) :: tsec(2)
  real(dp),allocatable :: evec_tmp(:,:),subovl_tmp(:),subham_tmp(:)
  real(dp),allocatable :: work(:,:)
@@ -4483,10 +4471,10 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
    do iband=1,nband_k
      do ii=1,nband_k
        if(abs(evec(2*ii,iband))>1.0d-10)then
-         write(message,'(3a,2i0,2es16.6,a,a)')ch10,&
-&         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
-&         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
-         MSG_BUG(message)
+         write(msg,'(3a,2i0,2es16.6,a,a)')ch10,&
+         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
+         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
+         MSG_BUG(msg)
        end if
      end do
    end do
@@ -4649,11 +4637,9 @@ end subroutine subdiago
 !! WARNING: not yet suited for nspinor=2 with istwfk/=1
 !!
 !! PARENTS
-!!      lapackprof,vtowfk,wfconv
+!!      lapackprof,m_inwffil,m_vtowfk
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 

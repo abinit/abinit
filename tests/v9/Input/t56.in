@@ -1,7 +1,7 @@
 # C in diamond structure. 
 # Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 6
+ndtset 5
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
 getddb   20      # Read DDB files from DS20_DDB
@@ -26,7 +26,6 @@ ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with 
 symsigma  1
 dvdb_rspace_cell 1
 dvdb_qdamp 0.1
-eph_mrta 0
 
 optdriver  7
 nband      8
@@ -60,6 +59,7 @@ occopt4 3
 # Setting the Fermi level
 #########
 eph_fermie5 17.5 eV
+tmesh5 300 0 1   # Cannot use more than one Temperature when using eph_fermie
 occopt5 3
 
 # Structure 
@@ -71,20 +71,22 @@ xred 3*0.0 3*0.25
 ntypat  1
 znucl 6
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in, t55.in, t56.in
 #%% [files]
 #%% files_to_test = 
-#%%   t56.out, tolnlines = 10, tolabs = 1.1e-1, tolrel = 2.0e-2
-#%% psp_files = 6c.pspnc
+#%%   t56.out, tolnlines = 50, tolabs = 1.1e-1, tolrel = 2.0e-2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, RTA
 #%% description = 
 #%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
-#%%   Test of the calculation of the fermi level under different conditions
+#%%   Test of the calculation of the Fermi level under different conditions
 #%%<END TEST_INFO>

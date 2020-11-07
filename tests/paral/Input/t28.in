@@ -44,11 +44,13 @@ ngkpt 2 2 2
 prtden 0  prteig 0  prtwf 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "83bi.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 83bi.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

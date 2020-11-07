@@ -76,6 +76,9 @@
  typat  1 2  tolwfr  1.e-8
  znucl  31 33
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pbe_standard/Ga.xml, Pseudodojo_paw_pbe_standard/As.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -83,7 +86,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t11.out, tolnlines = 61, tolabs = 4.000e-04, tolrel = 1.000e+00, fld_options = -medium;
-#%% psp_files = Pseudodojo_PAW_GGA_standard/Ga.xml, Pseudodojo_PAW_GGA_standard/As.xml
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

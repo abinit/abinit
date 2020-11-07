@@ -39,6 +39,7 @@ gwcalctyp   25
 getqps     -1
 ixc_sigma  -428
 pawecutdg  40
+gw_icutcoul   6
 
 # Dataset2: Calculation of the 1st HSE06 iteration
 optdriver2  4 
@@ -131,13 +132,15 @@ diemac  12.0      # Although this is not mandatory, it is worth to
                   # Here, we follow the prescription for bulk silicon.
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "C.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t44.out, tolnlines=64, tolabs= 6.0e-2, tolrel= 1.1e-0, fld_options = -easy
-#%% psp_files = C.psp8
+#%%   t44.out, tolnlines=68, tolabs= 6.0e-2, tolrel= 1.1e-0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

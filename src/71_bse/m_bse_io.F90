@@ -92,7 +92,7 @@ CONTAINS  !====================================================================
 !!  Only writing
 !!
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
 !!      c_f_pointer
@@ -212,7 +212,7 @@ end subroutine exc_read_bshdr
 !!  Skip the header.
 !!
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
 !!      c_f_pointer
@@ -260,7 +260,7 @@ end subroutine exc_skip_bshdr
 !!  ehdr_offset
 !!
 !! PARENTS
-!!      exc_build_block,m_bse_io,m_exc_diago
+!!      m_bse_io,m_exc_build,m_exc_diago
 !!
 !! CHILDREN
 !!      c_f_pointer
@@ -317,7 +317,7 @@ end subroutine exc_skip_bshdr_mpio
 !!  vec_list(hsize,nvec)=Excitonic eigenvectors.
 !!
 !! PARENTS
-!!      exc_plot,m_bse_io
+!!      m_bse_io,m_exc_analyze
 !!
 !! CHILDREN
 !!      c_f_pointer

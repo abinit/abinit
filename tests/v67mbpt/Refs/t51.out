@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h21 )
+.Starting date : Thu 15 Oct 2020.
+- ( at 12h22 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t51/t51.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/TestBot_MPI1/v67mbpt_t51/t51.in
 - output file    -> t51.out
 - root for input  files -> t51i
 - root for output files -> t51o
@@ -61,16 +61,16 @@ _ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =          15        mffmem =           1         mkmem =           3
-       mpw =         266          nfft =        5832          nkpt =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       2.418 Mbytes of memory.
+P This job should need less than                       3.051 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.209 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 
@@ -78,16 +78,16 @@ _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           3
-       mpw =         266          nfft =        5832          nkpt =           3
+       mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       2.325 Mbytes of memory.
+P This job should need less than                       2.946 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+_ WF disk file :      0.113 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -120,18 +120,9 @@ _ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
         bs_loband3          0
         bs_loband4          2
            diemac      1.20000000E+01
-             ecut1     8.00000000E+00 Hartree
-             ecut2     8.00000000E+00 Hartree
-             ecut3     7.56385066E+00 Hartree
-             ecut4     7.56385066E+00 Hartree
-          ecuteps1     4.00000000E+00 Hartree
-          ecuteps2     4.00000000E+00 Hartree
-          ecuteps3     3.78192533E+00 Hartree
-          ecuteps4     3.78192533E+00 Hartree
-          ecutwfn1     8.00000000E+00 Hartree
-          ecutwfn2     8.00000000E+00 Hartree
-          ecutwfn3     7.56385066E+00 Hartree
-          ecutwfn4     7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
+          ecuteps      4.00000000E+00 Hartree
+          ecutwfn      8.00000000E+00 Hartree
 -          fftalg         312
         getbsreso1          0
         getbsreso2          0
@@ -207,10 +198,7 @@ P           mkmem4          3
           nfreqre2         -1
           nfreqre3          1
           nfreqre4         -1
-            ngfft1         20      20      20
-            ngfft2         20      20      20
-            ngfft3         18      18      18
-            ngfft4         18      18      18
+            ngfft          20      20      20
              nkpt1         10
              nkpt2          3
              nkpt3          3
@@ -355,8 +343,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -602,8 +590,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 3, mband: 15, nsppol: 1, nspinor: 1, nspden: 1, mpw: 266, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 3, mband: 15, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -627,26 +615,6 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
  Unit cell volume ucvol=  2.6663072E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
--  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
-- 14.00000   4.00000    940714                znucl, zion, pspdat
-    1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    0   5.907  14.692    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    1   2.617   4.181    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
-   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
-    1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
-  pspatm : epsatm=    1.43386982
-         --- l  ekb(1:nproj) -->
-             0    3.287949
-             1    1.849886
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -687,10 +655,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 - Remaining bands to be divided among processors   nbcw = 10
 - Number of bands treated by each node ~10
 
- Number of electrons calculated from density =    7.9999; Expected =    8.0000
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7087 [eV]
+ omega_plasma =   16.7088 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -703,14 +671,14 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -15.822  -0.000   0.036   0.000   0.036  -0.000   0.036  -0.000
-       -0.000   0.000  -7.860   0.000  -0.254   0.000  -0.254   0.000  -0.254
+    2   0.000 -15.823  -0.000   0.036   0.000   0.036  -0.000   0.036  -0.000
+       -0.000   0.000  -7.859   0.000  -0.254   0.000  -0.254   0.000  -0.254
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  50.4477
-  dielectric constant without local fields =  58.9583
+  dielectric constant =  50.4238
+  dielectric constant without local fields =  58.9278
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     28.20  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -718,10 +686,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
-      0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
+     -0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
-      0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
+     -0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
 
 
 
@@ -731,11 +699,11 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -15.044  -2.218   4.391  -2.058  -3.587  -2.058  -3.587  -2.058  -3.587
-       -0.000  -2.218  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
+    1 -15.045  -2.219   4.391  -2.058  -3.587  -2.058  -3.587  -2.058  -3.587
+        0.000  -2.219  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
 
-    2  -2.218 -12.123  -0.000   0.100   0.000   0.100  -0.000   0.100   0.000
-        2.218   0.000  -6.848  -0.000   0.446  -0.000   0.446  -0.000   0.446
+    2  -2.219 -12.123  -0.000   0.099   0.000   0.099  -0.000   0.099   0.000
+        2.219   0.000  -6.847  -0.000   0.447  -0.000   0.447  -0.000   0.447
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     53.67  [%]
 
@@ -745,11 +713,11 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 --------------------------------------------------------------------------------
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -19.733  -4.427  -0.402  -0.402  -4.427  -0.402  -4.427  -4.427  -0.402
-       -0.000  -4.427   0.402  -0.402   4.427  -0.402   4.427  -4.427   0.402
+    1 -19.733  -4.427  -0.403  -0.403  -4.427  -0.403  -4.427  -4.427  -0.403
+        0.000  -4.427   0.403  -0.403   4.427  -0.403   4.427  -4.427   0.403
 
     2  -4.427 -14.156  -0.000   0.260   0.000   0.260   0.000  -1.040   0.000
-        4.427  -0.000  -4.842   0.000   1.478   0.000   1.478  -0.000  -0.988
+        4.427   0.000  -4.841   0.000   1.479   0.000   1.479  -0.000  -0.988
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     49.10  [%]
 
@@ -760,8 +728,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
-dimensions: {natom: 2, nkpt: 3, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 266, }
-cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 3, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 ...
@@ -822,7 +790,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
  Algorithm: Haydock technique.
  Dimension of the v, W matrices,  npweps  = 113
- Cutoff for the wavefunctions,    npwwfn  = 259
+ Cutoff for the wavefunctions,    npwwfn  = 283
  Number of k-points in the IBZ,   nkibz   = 3
  Highest empty band included,     nband   = 8
  === Spin UP ===
@@ -851,241 +819,241 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  q = (  0.000000  0.813043  0.813043) [r.l.u.]
  q = (  0.813043  0.000000  0.813043) [r.l.u.]
  q = (  0.813043  0.813043  0.000000) [r.l.u.]
- Number of electrons calculated from density =    7.9999; Expected =    8.0000
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
  r_s =    1.9964
- omega_plasma =   16.7087 [eV]
+ omega_plasma =   16.7088 [eV]
 
 . Writing resonant excitonic Hamiltonian on file t51o_DS4_BSR; file size=   0.00 [Gb].
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0001_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0001_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 61 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 73 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 71 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0001_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.5642  -0.0000  46.9558  -0.0000  54.7996   0.0000
-   0.0100  59.5649   0.0043  46.9561   0.0021  54.8001   0.0034
-   0.0200  59.5670   0.0087  46.9572   0.0042  54.8017   0.0068
-   0.0300  59.5706   0.0130  46.9588   0.0063  54.8044   0.0102
-   0.0400  59.5756   0.0173  46.9612   0.0084  54.8082   0.0136
-   0.0500  59.5821   0.0217  46.9642   0.0105  54.8130   0.0171
-   0.0600  59.5900   0.0260  46.9679   0.0126  54.8188   0.0205
-   0.0700  59.5994   0.0304  46.9723   0.0147  54.8258   0.0239
-   0.0800  59.6102   0.0347  46.9773   0.0168  54.8338   0.0273
-   0.0900  59.6224   0.0391  46.9830   0.0189  54.8429   0.0307
+   0.0000  59.5335  -0.0000  46.9316  -0.0000  54.7732   0.0000
+   0.0100  59.5343   0.0043  46.9319   0.0021  54.7737   0.0034
+   0.0200  59.5364   0.0087  46.9329   0.0042  54.7753   0.0068
+   0.0300  59.5400   0.0130  46.9346   0.0063  54.7780   0.0102
+   0.0400  59.5450   0.0173  46.9369   0.0084  54.7817   0.0136
+   0.0500  59.5515   0.0217  46.9400   0.0105  54.7866   0.0171
+   0.0600  59.5594   0.0260  46.9437   0.0126  54.7924   0.0205
+   0.0700  59.5687   0.0304  46.9480   0.0147  54.7994   0.0239
+   0.0800  59.5795   0.0347  46.9531   0.0168  54.8074   0.0273
+   0.0900  59.5917   0.0391  46.9588   0.0189  54.8165   0.0307
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0002_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.6498  -0.0000  47.0083  -0.0000  54.8682   0.0000
-   0.0100  59.6505   0.0048  47.0087   0.0023  54.8688   0.0038
-   0.0200  59.6527   0.0096  47.0097   0.0046  54.8704   0.0076
-   0.0300  59.6563   0.0143  47.0114   0.0070  54.8731   0.0114
-   0.0400  59.6613   0.0191  47.0137   0.0093  54.8768   0.0152
-   0.0500  59.6678   0.0239  47.0168   0.0116  54.8817   0.0190
-   0.0600  59.6758   0.0287  47.0205   0.0139  54.8876   0.0228
-   0.0700  59.6852   0.0335  47.0249   0.0162  54.8945   0.0266
-   0.0800  59.6960   0.0383  47.0299   0.0186  54.9026   0.0304
-   0.0900  59.7083   0.0431  47.0357   0.0209  54.9117   0.0342
+   0.0000  59.6192  -0.0000  46.9841  -0.0000  54.8418   0.0000
+   0.0100  59.6199   0.0048  46.9844   0.0023  54.8424   0.0038
+   0.0200  59.6220   0.0096  46.9854   0.0046  54.8440   0.0076
+   0.0300  59.6256   0.0143  46.9871   0.0070  54.8466   0.0114
+   0.0400  59.6307   0.0191  46.9895   0.0093  54.8504   0.0152
+   0.0500  59.6372   0.0239  46.9925   0.0116  54.8552   0.0190
+   0.0600  59.6451   0.0287  46.9962   0.0139  54.8611   0.0227
+   0.0700  59.6545   0.0335  47.0006   0.0162  54.8681   0.0265
+   0.0800  59.6653   0.0383  47.0057   0.0186  54.8761   0.0303
+   0.0900  59.6776   0.0431  47.0114   0.0209  54.8853   0.0342
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 56 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0003_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.9453  -0.0000  47.1891  -0.0000  55.1028   0.0000
-   0.0100  59.9460   0.0064  47.1894   0.0031  55.1033   0.0051
-   0.0200  59.9482   0.0127  47.1904   0.0061  55.1050   0.0102
-   0.0300  59.9519   0.0191  47.1922   0.0092  55.1077   0.0154
-   0.0400  59.9570   0.0254  47.1945   0.0123  55.1115   0.0205
-   0.0500  59.9636   0.0318  47.1976   0.0154  55.1164   0.0256
-   0.0600  59.9716   0.0381  47.2014   0.0184  55.1224   0.0308
-   0.0700  59.9812   0.0445  47.2058   0.0215  55.1294   0.0359
-   0.0800  59.9922   0.0509  47.2109   0.0246  55.1376   0.0410
-   0.0900  60.0047   0.0573  47.2167   0.0277  55.1468   0.0462
+   0.0000  59.9145  -0.0000  47.1648  -0.0000  55.0763   0.0000
+   0.0100  59.9153   0.0064  47.1651   0.0031  55.0768   0.0051
+   0.0200  59.9175   0.0127  47.1661   0.0061  55.0785   0.0102
+   0.0300  59.9211   0.0191  47.1678   0.0092  55.0812   0.0154
+   0.0400  59.9263   0.0254  47.1702   0.0123  55.0850   0.0205
+   0.0500  59.9329   0.0318  47.1733   0.0154  55.0899   0.0256
+   0.0600  59.9409   0.0381  47.1771   0.0184  55.0958   0.0307
+   0.0700  59.9504   0.0445  47.1815   0.0215  55.1029   0.0359
+   0.0800  59.9614   0.0509  47.1866   0.0246  55.1111   0.0410
+   0.0900  59.9739   0.0573  47.1924   0.0277  55.1203   0.0462
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 45 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 47 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0004_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  60.3384  -0.0000  47.4288  -0.0000  55.4123   0.0000
-   0.0100  60.3392   0.0086  47.4291   0.0041  55.4129   0.0070
-   0.0200  60.3414   0.0171  47.4302   0.0083  55.4145   0.0140
-   0.0300  60.3452   0.0257  47.4319   0.0124  55.4173   0.0209
-   0.0400  60.3504   0.0343  47.4343   0.0165  55.4212   0.0279
-   0.0500  60.3571   0.0429  47.4375   0.0207  55.4262   0.0349
-   0.0600  60.3654   0.0515  47.4413   0.0248  55.4322   0.0419
-   0.0700  60.3751   0.0601  47.4458   0.0289  55.4394   0.0489
-   0.0800  60.3863   0.0687  47.4510   0.0331  55.4477   0.0559
-   0.0900  60.3990   0.0773  47.4569   0.0372  55.4571   0.0629
+   0.0000  60.3076  -0.0000  47.4044  -0.0000  55.3857   0.0000
+   0.0100  60.3083   0.0086  47.4048   0.0041  55.3863   0.0070
+   0.0200  60.3106   0.0171  47.4058   0.0083  55.3879   0.0139
+   0.0300  60.3143   0.0257  47.4075   0.0124  55.3907   0.0209
+   0.0400  60.3196   0.0343  47.4100   0.0165  55.3946   0.0279
+   0.0500  60.3263   0.0429  47.4131   0.0207  55.3995   0.0349
+   0.0600  60.3345   0.0515  47.4169   0.0248  55.4056   0.0419
+   0.0700  60.3442   0.0601  47.4214   0.0289  55.4128   0.0489
+   0.0800  60.3554   0.0687  47.4266   0.0331  55.4211   0.0559
+   0.0900  60.3682   0.0773  47.4325   0.0372  55.4305   0.0629
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0005_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0005_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 45 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0005_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  60.7758  -0.0000  47.6949  -0.0000  55.7547   0.0000
-   0.0100  60.7766   0.0112  47.6952   0.0054  55.7552   0.0091
-   0.0200  60.7789   0.0224  47.6963   0.0107  55.7569   0.0183
-   0.0300  60.7827   0.0336  47.6980   0.0161  55.7597   0.0274
-   0.0400  60.7881   0.0447  47.7005   0.0214  55.7637   0.0365
-   0.0500  60.7949   0.0559  47.7037   0.0268  55.7687   0.0457
-   0.0600  60.8033   0.0672  47.7076   0.0322  55.7749   0.0548
-   0.0700  60.8133   0.0784  47.7122   0.0375  55.7823   0.0639
-   0.0800  60.8248   0.0896  47.7175   0.0429  55.7907   0.0731
-   0.0900  60.8378   0.1008  47.7235   0.0483  55.8003   0.0823
+   0.0000  60.7448  -0.0000  47.6704  -0.0000  55.7279   0.0000
+   0.0100  60.7456   0.0112  47.6708   0.0054  55.7285   0.0091
+   0.0200  60.7479   0.0224  47.6718   0.0107  55.7302   0.0182
+   0.0300  60.7517   0.0335  47.6736   0.0161  55.7330   0.0274
+   0.0400  60.7571   0.0447  47.6760   0.0214  55.7369   0.0365
+   0.0500  60.7639   0.0559  47.6792   0.0268  55.7420   0.0456
+   0.0600  60.7723   0.0671  47.6831   0.0322  55.7482   0.0548
+   0.0700  60.7823   0.0784  47.6877   0.0375  55.7555   0.0639
+   0.0800  60.7938   0.0896  47.6930   0.0429  55.7640   0.0731
+   0.0900  60.8068   0.1008  47.6990   0.0483  55.7735   0.0822
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0006_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0006_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0006_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  61.2355  -0.0000  47.9741  -0.0000  56.1126   0.0000
-   0.0100  61.2363   0.0141  47.9745   0.0067  56.1132   0.0115
-   0.0200  61.2386   0.0282  47.9755   0.0134  56.1149   0.0230
-   0.0300  61.2425   0.0422  47.9773   0.0201  56.1178   0.0345
-   0.0400  61.2480   0.0563  47.9798   0.0268  56.1218   0.0459
-   0.0500  61.2550   0.0704  47.9831   0.0335  56.1269   0.0574
-   0.0600  61.2636   0.0845  47.9870   0.0403  56.1333   0.0690
-   0.0700  61.2738   0.0987  47.9917   0.0470  56.1407   0.0805
-   0.0800  61.2856   0.1128  47.9971   0.0537  56.1493   0.0920
-   0.0900  61.2989   0.1269  48.0032   0.0604  56.1591   0.1035
+   0.0000  61.2043  -0.0000  47.9495  -0.0000  56.0858   0.0000
+   0.0100  61.2051   0.0141  47.9499   0.0067  56.0863   0.0115
+   0.0200  61.2075   0.0281  47.9510   0.0134  56.0880   0.0230
+   0.0300  61.2114   0.0422  47.9528   0.0201  56.0909   0.0344
+   0.0400  61.2168   0.0563  47.9553   0.0268  56.0949   0.0459
+   0.0500  61.2239   0.0704  47.9585   0.0335  56.1001   0.0574
+   0.0600  61.2325   0.0845  47.9625   0.0403  56.1064   0.0689
+   0.0700  61.2427   0.0986  47.9671   0.0470  56.1139   0.0804
+   0.0800  61.2544   0.1128  47.9725   0.0537  56.1225   0.0920
+   0.0900  61.2677   0.1269  47.9786   0.0604  56.1322   0.1035
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0007_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0007_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 41 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0007_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  61.7076  -0.0000  48.2606  -0.0000  56.4785   0.0000
-   0.0100  61.7084   0.0172  48.2610   0.0082  56.4791   0.0140
-   0.0200  61.7108   0.0344  48.2621   0.0163  56.4809   0.0280
-   0.0300  61.7148   0.0517  48.2639   0.0245  56.4838   0.0420
-   0.0400  61.7204   0.0689  48.2665   0.0326  56.4879   0.0561
-   0.0500  61.7276   0.0861  48.2698   0.0408  56.4931   0.0701
-   0.0600  61.7364   0.1034  48.2738   0.0489  56.4996   0.0841
-   0.0700  61.7469   0.1206  48.2786   0.0571  56.5072   0.0982
-   0.0800  61.7589   0.1379  48.2841   0.0653  56.5160   0.1122
-   0.0900  61.7725   0.1552  48.2903   0.0734  56.5259   0.1263
+   0.0000  61.6763  -0.0000  48.2360  -0.0000  56.4515   0.0000
+   0.0100  61.6771   0.0172  48.2364   0.0081  56.4521   0.0140
+   0.0200  61.6795   0.0344  48.2375   0.0163  56.4539   0.0280
+   0.0300  61.6835   0.0516  48.2393   0.0244  56.4568   0.0420
+   0.0400  61.6891   0.0689  48.2418   0.0326  56.4609   0.0560
+   0.0500  61.6963   0.0861  48.2451   0.0408  56.4662   0.0701
+   0.0600  61.7051   0.1034  48.2491   0.0489  56.4726   0.0841
+   0.0700  61.7155   0.1206  48.2539   0.0571  56.4802   0.0981
+   0.0800  61.7276   0.1379  48.2594   0.0653  56.4890   0.1122
+   0.0900  61.7412   0.1552  48.2656   0.0734  56.4989   0.1263
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0008_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0008_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 56 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0008_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  62.1872  -0.0000  48.5516  -0.0000  56.8485   0.0000
-   0.0100  62.1880   0.0206  48.5520   0.0097  56.8491   0.0167
-   0.0200  62.1905   0.0412  48.5531   0.0194  56.8509   0.0334
-   0.0300  62.1946   0.0617  48.5549   0.0290  56.8539   0.0501
-   0.0400  62.2003   0.0823  48.5575   0.0387  56.8580   0.0668
-   0.0500  62.2077   0.1030  48.5609   0.0484  56.8634   0.0835
-   0.0600  62.2167   0.1236  48.5650   0.0581  56.8700   0.1002
-   0.0700  62.2274   0.1442  48.5698   0.0678  56.8777   0.1170
-   0.0800  62.2397   0.1649  48.5754   0.0775  56.8867   0.1337
-   0.0900  62.2536   0.1856  48.5818   0.0872  56.8968   0.1505
+   0.0000  62.1557  -0.0000  48.5268  -0.0000  56.8214   0.0000
+   0.0100  62.1566   0.0206  48.5272   0.0097  56.8220   0.0167
+   0.0200  62.1590   0.0412  48.5283   0.0194  56.8238   0.0334
+   0.0300  62.1631   0.0617  48.5302   0.0290  56.8268   0.0501
+   0.0400  62.1688   0.0823  48.5328   0.0387  56.8309   0.0668
+   0.0500  62.1762   0.1029  48.5361   0.0484  56.8363   0.0835
+   0.0600  62.1852   0.1236  48.5402   0.0581  56.8429   0.1002
+   0.0700  62.1959   0.1442  48.5451   0.0678  56.8506   0.1169
+   0.0800  62.2082   0.1649  48.5507   0.0775  56.8595   0.1337
+   0.0900  62.2221   0.1856  48.5570   0.0872  56.8697   0.1505
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0009_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0009_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0009_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  62.6713  -0.0000  48.8453  -0.0000  57.2203   0.0000
-   0.0100  62.6721   0.0242  48.8456   0.0113  57.2209   0.0195
-   0.0200  62.6746   0.0483  48.8468   0.0226  57.2227   0.0390
-   0.0300  62.6788   0.0725  48.8487   0.0339  57.2257   0.0586
-   0.0400  62.6847   0.0967  48.8513   0.0452  57.2300   0.0781
-   0.0500  62.6922   0.1209  48.8547   0.0565  57.2354   0.0977
-   0.0600  62.7014   0.1451  48.8589   0.0678  57.2421   0.1172
-   0.0700  62.7123   0.1694  48.8638   0.0791  57.2500   0.1368
-   0.0800  62.7249   0.1937  48.8695   0.0904  57.2591   0.1564
-   0.0900  62.7392   0.2180  48.8760   0.1018  57.2694   0.1760
+   0.0000  62.6396  -0.0000  48.8204  -0.0000  57.1930   0.0000
+   0.0100  62.6405   0.0242  48.8208   0.0113  57.1936   0.0195
+   0.0200  62.6430   0.0483  48.8219   0.0226  57.1954   0.0390
+   0.0300  62.6472   0.0725  48.8238   0.0339  57.1985   0.0586
+   0.0400  62.6530   0.0967  48.8265   0.0452  57.2027   0.0781
+   0.0500  62.6606   0.1209  48.8299   0.0565  57.2082   0.0976
+   0.0600  62.6698   0.1451  48.8340   0.0678  57.2149   0.1172
+   0.0700  62.6807   0.1694  48.8390   0.0791  57.2227   0.1368
+   0.0800  62.6933   0.1936  48.8447   0.0904  57.2319   0.1564
+   0.0900  62.7076   0.2179  48.8511   0.1017  57.2422   0.1760
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0010_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0010_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 46 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0010_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  63.1578  -0.0000  49.1406  -0.0000  57.5922   0.0000
-   0.0100  63.1586   0.0280  49.1410   0.0130  57.5928   0.0225
-   0.0200  63.1612   0.0560  49.1421   0.0260  57.5947   0.0450
-   0.0300  63.1655   0.0840  49.1441   0.0390  57.5977   0.0675
-   0.0400  63.1715   0.1120  49.1468   0.0519  57.6021   0.0900
-   0.0500  63.1792   0.1400  49.1502   0.0649  57.6076   0.1126
-   0.0600  63.1886   0.1680  49.1545   0.0779  57.6144   0.1351
-   0.0700  63.1998   0.1961  49.1595   0.0910  57.6225   0.1577
-   0.0800  63.2126   0.2242  49.1653   0.1040  57.6317   0.1802
-   0.0900  63.2272   0.2524  49.1719   0.1170  57.6423   0.2028
+   0.0000  63.1260  -0.0000  49.1156  -0.0000  57.5648   0.0000
+   0.0100  63.1268   0.0280  49.1160   0.0130  57.5654   0.0225
+   0.0200  63.1294   0.0559  49.1172   0.0260  57.5673   0.0450
+   0.0300  63.1337   0.0839  49.1191   0.0389  57.5704   0.0675
+   0.0400  63.1397   0.1119  49.1218   0.0519  57.5747   0.0900
+   0.0500  63.1474   0.1400  49.1253   0.0649  57.5803   0.1125
+   0.0600  63.1568   0.1680  49.1295   0.0779  57.5871   0.1351
+   0.0700  63.1680   0.1961  49.1345   0.0909  57.5951   0.1576
+   0.0800  63.1808   0.2242  49.1403   0.1039  57.6044   0.1802
+   0.0900  63.1954   0.2523  49.1469   0.1170  57.6149   0.2028
   
 
 == END DATASET(S) ==============================================================
@@ -1111,18 +1079,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
         bs_loband3          0
         bs_loband4          2
            diemac      1.20000000E+01
-             ecut1     8.00000000E+00 Hartree
-             ecut2     8.00000000E+00 Hartree
-             ecut3     7.56385066E+00 Hartree
-             ecut4     7.56385066E+00 Hartree
-          ecuteps1     4.00000000E+00 Hartree
-          ecuteps2     4.00000000E+00 Hartree
-          ecuteps3     3.78192533E+00 Hartree
-          ecuteps4     3.78192533E+00 Hartree
-          ecutwfn1     8.00000000E+00 Hartree
-          ecutwfn2     8.00000000E+00 Hartree
-          ecutwfn3     7.56385066E+00 Hartree
-          ecutwfn4     7.56385066E+00 Hartree
+             ecut      8.00000000E+00 Hartree
+          ecuteps      4.00000000E+00 Hartree
+          ecutwfn      8.00000000E+00 Hartree
            etotal1    -8.8756570414E+00
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
@@ -1207,10 +1166,7 @@ P           mkmem4          3
           nfreqre2         -1
           nfreqre3          1
           nfreqre4         -1
-            ngfft1         20      20      20
-            ngfft2         20      20      20
-            ngfft3         18      18      18
-            ngfft4         18      18      18
+            ngfft          20      20      20
              nkpt1         10
              nkpt2          3
              nkpt3          3
@@ -1361,7 +1317,24 @@ P           mkmem4          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1379,7 +1352,9 @@ P           mkmem4          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1392,25 +1367,10 @@ P           mkmem4          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          9.5  wall=         11.6
+- Proc.   0 individual time (sec): cpu=          9.7  wall=         26.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  21 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.5  wall=         11.6
+.Delivered  18 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.7  wall=         26.1

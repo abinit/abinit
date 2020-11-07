@@ -39,11 +39,13 @@ rprim
 natom   2
 znucl   14
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si-LDA.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = Si-LDA.paw
 #%% [paral_info]
 #%% nprocs_to_test = 1, 4
 #%% max_nprocs = 4

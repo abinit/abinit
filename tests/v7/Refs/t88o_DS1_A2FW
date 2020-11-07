@@ -2,7 +2,7 @@
 # ABINIT package: a2F(w) file
 #
 # a2F(w) function integrated over the FS. omega in a.u.
-# ngqpt: [16,16,16]
+# ngqpt: [16, 16, 16]
 # number of frequencies: 473 between omega_min:    -0.164292E-03 Ha and omega_max:     0.157446E-02 Ha with step:    0.367493E-05
 #  the smearing width for gaussians is     0.367493E-04
 # Total DOS at Fermi level     0.438367E+01

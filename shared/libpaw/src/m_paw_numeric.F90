@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_numeric
 !! NAME
 !!  m_paw_numeric
@@ -71,7 +70,7 @@ CONTAINS
 !!    Work space, real(dp) DIAG(N) - should be removed ...
 !!
 !! PARENTS
-!!      dfpt_eltfrxc,m_paw_atom,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp
+!!      m_dfpt_elt,m_paw_atom,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp
 !!      m_pawpwij,m_pawxmlps,m_psps
 !!
 !! CHILDREN
@@ -239,8 +238,8 @@ end subroutine paw_spline
 !!    The input value is incremented by the number of such points.
 !!
 !! PARENTS
-!!      m_paw_atom,m_paw_finegrid,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp
-!!      m_pawxmlps,mkcore,mkcore_inner,mkcore_wvl,mklocl_realspace
+!!      m_mkcore,m_mklocl_realspace,m_paw_atom,m_paw_finegrid,m_paw_gaussfit
+!!      m_paw_pwaves_lmn,m_pawpsp,m_pawxmlps,mkcore_wvl
 !!
 !! CHILDREN
 !!      paw_jbessel
@@ -325,7 +324,7 @@ end subroutine paw_splint
 !!    The input value is incremented by the number of such points.
 !!
 !! PARENTS
-!!      mkcore_inner,mklocl_realspace,mklocl_wavelets
+!!      m_mklocl_realspace,mkcore_wvl
 !!
 !! CHILDREN
 !!      paw_jbessel
@@ -421,8 +420,10 @@ end subroutine paw_splint_der
 !!  if ider=2, compute only the second derivative of the function (in derfun)
 !!
 !! PARENTS
+!!      m_paw_finegrid
 !!
 !! CHILDREN
+!!      paw_jbessel
 !!
 !! SOURCE
 
@@ -719,7 +720,7 @@ end subroutine paw_sort_dp
 !!  bespp= second derivative of j_l at xx (only if order=2)
 !!
 !! PARENTS
-!!      m_paw_atom,m_paw_finegrid,m_paw_numeric,m_vcoul
+!!      m_cutoff_cylinder,m_gtermcutoff,m_paw_atom,m_paw_finegrid,m_paw_numeric
 !!
 !! CHILDREN
 !!      paw_jbessel

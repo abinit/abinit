@@ -13,7 +13,6 @@ teph_1o_DS4_DDB
 #%% [files]
 #%% files_to_test = 
 #%%   teph_2.ddb.out, tolnlines=  4, tolabs=  6.000e-08, tolrel=  4.000e-04, fld_options=-medium
-#%% psp_files =  13al.981214.fhi 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

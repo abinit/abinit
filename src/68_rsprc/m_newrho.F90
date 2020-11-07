@@ -165,12 +165,12 @@ contains
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      ab7_mixing_copy_current_step,ab7_mixing_eval,ab7_mixing_eval_allocate
 !!      ab7_mixing_eval_deallocate,ab7_mixing_use_moving_atoms,fourdp,metric
-!!      prcref,timab,wvl_prcref,wvl_rho_abi2big
+!!      pawrhoij_filter,prcref,timab,wvl_prcref,wvl_rho_abi2big
 !!
 !! SOURCE
 
@@ -204,7 +204,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  integer,intent(in) :: mixtofft(nfftmix*nfftmix_per_nfft)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),ngfftmix(18)
  real(dp),intent(in) :: dielar(7),fcart(3,dtset%natom),grhf(3,dtset%natom)
- real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(in) :: susmat(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)
  real(dp),intent(in), target :: vtrial(nfft,dtset%nspden)
  real(dp),intent(inout) :: dielinv(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)

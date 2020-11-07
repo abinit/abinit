@@ -77,13 +77,15 @@ xred
 0.750157079816 0.49989762789 0.750045461079
 0.500196432698 0.750059558135 0.750198977625
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "05b.soft_tm"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t21.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 05b.soft_tm
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

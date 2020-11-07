@@ -22,13 +22,15 @@
  diemix 0.6
  diemac 5
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t58.in, t59.in
 #%% [files]
 #%% files_to_test = t58.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
-#%% psp_files=14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

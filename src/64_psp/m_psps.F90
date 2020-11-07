@@ -37,7 +37,7 @@ module m_psps
  use netcdf
 #endif
 
- use m_fstrings,      only : itoa, sjoin, yesno
+ use m_fstrings,      only : itoa, sjoin, yesno, atoi
  use m_io_tools,      only : open_file
  use m_symtk,         only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
@@ -87,7 +87,7 @@ contains
 !!  useupf=1 if UPF file.
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -103,7 +103,7 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
 
 !Local variables-------------------------------
 !scalars
- integer :: temp_unit
+ integer :: temp_unit, ii
  character(len=500) :: msg,errmsg
  character(len=70) :: testxml
 
@@ -117,13 +117,26 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
  end if
  rewind (unit=temp_unit,err=10,iomsg=errmsg)
 
- read(temp_unit,*,err=10,iomsg=errmsg) testxml
+ read(temp_unit, "(a)",err=10,iomsg=errmsg) testxml
  if(testxml(1:5)=='<?xml')then
    usexml = 1
    read(temp_unit,*,err=10,iomsg=errmsg) testxml
    if(testxml(1:4)=='<paw') xmlpaw = 1
  else
    usexml = 0
+   if (testxml(1:4) == '<UPF') then
+     ! Make sure this is not UPF version >= 2
+     ! "<UPF version="2.0.1">
+     ii = index(testxml, '"')
+     if (ii /= 0) then
+       if (atoi(testxml(ii+1:ii+1)) >= 2) then
+         MSG_ERROR(sjoin("UPF version >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Pseudo:", path))
+       end if
+     else
+       MSG_ERROR(sjoin("Cannot find version attributed in UPF file:", path))
+     end if
+
+   end if
  end if
 
  !Check if pseudopotential file is a Q-espresso UPF file
@@ -164,7 +177,7 @@ end subroutine test_xml_xmlpaw_upf
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -251,7 +264,7 @@ end subroutine psps_init_global
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -516,7 +529,7 @@ end subroutine psps_init_from_dtset
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver,m_ddb_hdr
+!!      m_ddb_hdr,m_driver
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -736,7 +749,7 @@ end subroutine psps_copy
 !!  Only writing
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -943,7 +956,7 @@ end subroutine psps_print
 !!   path=File name.
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1235,7 +1248,7 @@ end subroutine psp2params_free
 !!  has_tvale=True if the atomic valence density is available.
 !!
 !! PARENTS
-!!      m_psps,pspini
+!!      m_pspini,m_psps
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1281,7 +1294,7 @@ end subroutine nctab_init
 !! Free memory allocated in nctab_t
 !!
 !! PARENTS
-!!      m_psps,pspini
+!!      m_pspini,m_psps
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1364,7 +1377,7 @@ end subroutine nctab_copy
 !!  nctab%d2ncdq0
 !!
 !! PARENTS
-!!      psp8in,psp9in
+!!      m_psp8,m_psp9
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1435,7 +1448,7 @@ end subroutine nctab_eval_tvalespl
 !!  nctab%dncdq0
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1508,7 +1521,7 @@ end subroutine nctab_eval_tcorespl
 !! mixtabs(ntypalch)=NC tables describing the alchemical pseudos
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init

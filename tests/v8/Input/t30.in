@@ -40,7 +40,7 @@ xcart?5   -1.5 0.0 4.0
 
 xcart?6   -1.5 0.0 5.0
            1.5 0.0 5.0
-chksymbreak 0
+ chksymtnons 0
 
 
 # Common data
@@ -64,20 +64,19 @@ tolrff  1.d-2
 diemac    1.0    diemix 0.5d0
 nstep 10
 
-## At present, the tolerances are MUCH too large. Should be fixed !!
+
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "3li.1.hgh, 1h.1.hgh"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t30.out, tolnlines=   0,   tolabs=  0.0e-01,      tolrel= 0.0e-01, fld_options = -easy
-#%% psp_files = HGH/3li.1.hgh, HGH/1h.1.hgh
-## psp_files = Li.LDA-PW-paw.abinit, H.LDA-PW-paw.abinit
+#%%   t30.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. Gonze 
-#%% keywords = PAW
 #%% description = 
 #%%    LiH molecule
 #%%    test the use of spatial chemical potential. The molecule starts aligned along the x direction,

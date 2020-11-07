@@ -81,6 +81,9 @@
     tolvrs 1.d-9
     nstep 20
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -88,7 +91,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t13.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
-#%% psp_files = 26fe.paw
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]

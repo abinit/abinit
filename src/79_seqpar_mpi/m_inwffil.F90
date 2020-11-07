@@ -51,7 +51,6 @@ module m_inwffil
  use m_mpinfo,   only : destroy_mpi_enreg, copy_mpi_enreg, proc_distrb_cycle
  use m_kg,       only : kpgio, ph1d3d, getph
  use m_kpts,     only : listkk
- use m_occ,      only : pareigocc
  use m_rwwf,     only : rwwf, WffReadSkipK
  use m_wvl_wfsinp, only : wvl_wfsinp_disk, wvl_wfsinp_scratch
 
@@ -168,12 +167,12 @@ contains
 !! NOT OUTPUT NOW !
 !!
 !! PARENTS
-!!      dfpt_looppert,dfptnl_loop,gstate,nonlinear,respfn
+!!      m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_gstate,m_longwave,m_nonlinear
+!!      m_pead_nl_loop,m_respfn_driver
 !!
 !! CHILDREN
-!!      copy_mpi_enreg,destroy_mpi_enreg,hdr_check,hdr_free,hdr_io,hdr_ncread
-!!      kpgio,listkk,matr3inv,newkpt,pawrhoij_copy,timab,wffopen,wfsinp,wrtout
-!!      wvl_wfsinp_disk,wvl_wfsinp_scratch
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1103,11 +1102,11 @@ end subroutine inwffil
 !! THE DESCRIPTION IS TO BE COMPLETELY REVISED, AS THIS ONE COMES FROM inwffil.f
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      initwf,mpi_bcast,mpi_recv,mpi_send,pareigocc,timab,wfconv,wffreadskipk
-!!      wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1276,7 +1275,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
      npw0_k=npwarr0(ikpt0)
      if(ikpt0<=nkpt_eff)then
        write(message,'(a,a,2i4)')ch10,' wfsinp: inside loop, init ikpt0,isppol0=',ikpt0,isppol0
-       call wrtout(std_out,message,'PERS')
+       call wrtout(std_out,message)
      end if
 
 !    Must know whether this k point is needed, and in which
@@ -1376,9 +1375,9 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
          if(ikpt<=nkpt_eff)then
            write(message,'(a,i6,a,i8,a,i4,a,i4)') &
 &           ' wfsinp: treating ',nband_k,' bands with npw=',npw_k,' for ikpt=',ikpt,' by node ',me
-           call wrtout(std_out,message,'PERS')
+           call wrtout(std_out,message)
          else if(ikpt==nkpt_eff+1)then
-           call wrtout(std_out,' wfsinp: prtvol=0 or 1, do not print more k-points.','PERS')
+           call wrtout(std_out,' wfsinp: prtvol=0 or 1, do not print more k-points.')
          end if
 
        end if
@@ -1626,7 +1625,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 
              if(ikpt_trial/=0 .and. ikpt_trial<=nkpt_eff)then
                write(message,'(2a,2i5)')ch10,' wfsinp: transfer to ikpt_trial,isppol_trial=',ikpt_trial,isppol_trial
-               call wrtout(std_out,message,'PERS')
+               call wrtout(std_out,message)
              end if
 
              if(ikpt_trial/=0)then
@@ -1829,11 +1828,11 @@ end subroutine wfsinp
 !! ikptsp_old=number of the previous spin-k point, or 0 if first call of present file
 !!
 !! PARENTS
-!!      wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      rwwf,timab,wffreadskipk,wfk_close,wfk_open_read,wfk_read_band_block
-!!      wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1915,13 +1914,13 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 
  if (ikpt<=nkpt_max) then
    write(msg,'(3(a,i0))')' initwf: disk file gives npw= ',npw,' nband= ',nband_disk,' for kpt number= ',ikpt
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
  else if (ikpt==nkpt_max+1) then
-   call wrtout(std_out,' initwf: the number of similar message is sufficient... stop printing them','PERS')
+   call wrtout(std_out,' initwf: the number of similar message is sufficient... stop printing them')
  end if
 
-!Check the number of bands on disk file against desired number. These are not required to agree)
- if (nband_disk /= nband_k) then
+ ! Check the number of bands on disk file against desired number. These are not required to agree)
+ if (nband_disk /= nband_k .and. ikpt<=nkpt_max) then
    write(msg,'(2(a,i0),3a,i0,3a)')&
    'For kpt number ',ikpt,' disk file has ',nband_disk,' bands',ch10,&
    'but input file gave nband= ',nband_k,'.',ch10,&
@@ -1931,7 +1930,7 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 
  if (ikpt<=nkpt_max) then
    write(msg,'(a,i0,a)')' initwf: ',nband_disk,' bands have been initialized from disk'
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
  end if
 
  ikptsp_old=ikpt+(spin-1)*nkpt
@@ -2062,10 +2061,11 @@ end subroutine initwf
 !! * In the present status of this routine, occ is not output.
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      pareigocc,prmat,randac,rdnpw,rwwf,timab,wfconv,wffreadskipk,wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2295,14 +2295,14 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
      if(restart==2)then
        if(ikpt2<=nkpt_eff)then
          write(message,'(a,i4,i8,a,i4,i8)')'- newkpt: read input wf with ikpt,npw=',ikpt1,npw1,', make ikpt,npw=',ikpt2,npw2
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out,message)
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
-           call wrtout(iout,message,'PERS')
+           call wrtout(iout,message)
          end if
        else if(ikpt2==nkpt_eff+1)then
-         call wrtout(std_out, '- newkpt: prtvol=0 or 1, do not print more k-points.', 'PERS')
+         call wrtout(std_out, '- newkpt: prtvol=0 or 1, do not print more k-points.')
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
-           call wrtout(iout,message,'PERS')
+           call wrtout(iout,message)
          end if
        end if
      end if
@@ -2316,7 +2316,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
      if ( nbd2/nspinor2 > nbd1/nspinor1 .and. fill==0) then
        if(ikpt2<=nkpt_eff)then
          write(message, '(a,i8,a,i8,a,i8)' )' newkpt: nband2=',nbd2,' < nband1=',nbd1,' => reset nband2 to ',nbd1
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out,message)
        end if
        nbd2=nbd1
      end if
@@ -2331,7 +2331,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
          ' newkpt: about to call randac',ch10,&
          '  for ikpt1=',ikpt1,', ikpt2=',ikpt2,ch10,&
          '  and isppol1=',isppol1,', isppol2=',isppol2
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out,message)
        end if
 
        !call randac(debug,headform1,ikptsp_prev,ikpt1,isppol1,nband1,nkpt1,nsppol1,wffinp)
@@ -2393,7 +2393,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
          write(message,'(a,i5,a,a,i5,a,i5,a)' ) &
 &         ' newkpt: about to call rwwf with ikpt1=',ikpt1,ch10,&
 &         ' and nband(ikpt1)=',nband1(ikpt1),' nbd2=',nbd2,'.'
-         call wrtout(std_out,message,'PERS')
+         call wrtout(std_out,message)
        end if
 
        if(mpi_enreg1%paralbd==0)tim_rwwf=21
@@ -2656,7 +2656,7 @@ end subroutine newkpt
 !! When the two nspinor differ, one must have nbd1/nspinor1<nbd2/nspinor2
 !!
 !! PARENTS
-!!      newkpt,wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
 !!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
@@ -2700,10 +2700,11 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  integer :: istwf10_k,istwf1_k,istwf2_k,isym,itimrev
  integer :: mgfft1,mgfft2,n1,n2,n3,n4,n5,n6
  integer :: nbremn,npwtot,nspinor_index,nspinor1_this_proc,nspinor2_this_proc
- integer :: order,ortalgo,seed
+ integer :: order,ortalgo 
  real(dp) :: ai,ar,arg,bi,br,eig_tmp,spinrots,spinrotx,spinroty,spinrotz
  character(len=500) :: message
  integer, parameter :: int64 = selected_int_kind(18)
+ integer(KIND=int64) :: seed
  !arrays
  integer :: atindx(1),identity(3,3),ngfft_now(18),no_shift(3),shiftg(3)
  integer :: symm(3,3),symrel_conv(3,3)
@@ -2888,7 +2889,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 &       '         ',gmet1(1:3,2),ch10,&
 &       '         ',gmet1(1:3,3),ch10,&
 &       '  ngfft=',ngfft_now(1:3),' giving npw1=',npw1,'.'
-       call wrtout(std_out,message,'PERS')
+       call wrtout(std_out,message)
      end if
      ikpt10 = ikpt1
      istwf10_k=istwf1_k
@@ -3169,8 +3170,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 !            3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
 !            fold1 is between 0 and 34, fold2 is between 0 and 114. As sums of five
 !            uniform random variables, their distribution is close to a gaussian
-             fold1=mod(seed,3)+mod(seed,5)+mod(seed,7)+mod(seed,11)+mod(seed,13)
-             fold2=mod(seed,17)+mod(seed,19)+mod(seed,23)+mod(seed,29)+mod(seed,31)
+             fold1=modulo(seed,3)+modulo(seed,5)+modulo(seed,7)+modulo(seed,11)+modulo(seed,13)
+             fold2=modulo(seed,17)+modulo(seed,19)+modulo(seed,23)+modulo(seed,29)+modulo(seed,31)
 !            The gaussian distributions are folded, in order to be back to a uniform distribution
 !            foldre is between 0 and 20, foldim is between 0 and 18
              foldre=mod(fold1+fold2,21)
@@ -3178,7 +3179,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
              cg2(1,index+icg2)=dble(foldre)
              cg2(2,index+icg2)=dble(foldim)
            else
-             ! (AL) Simple linear congruential generator from
+             ! (Antoine Levitt) Simple linear congruential generator from
              ! numerical recipes, modulo'ed and 64bit'ed to avoid
              ! overflows (NAG doesn't like overflows, even though
              ! they are perfectly legitimate here). Then, we get some
@@ -3216,7 +3217,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
      if(ikpt2<=nkpt_max)then
        write(message,'(3(a,i6))')' wfconv:',nbremn,' bands initialized randomly with npw=',npw2,', for ikpt=',ikpt2
-       call wrtout(std_out,message,'PERS')
+       call wrtout(std_out,message)
      end if
 
    else if(formeig==1)then
@@ -3236,8 +3237,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
      if(ikpt2<=nkpt_max)then
        nbremn=nbd2-nbd1
-       write(message,'(a,i6,a,i7,a,i4)')' wfconv:',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
-       call wrtout(std_out,message,'PERS')
+       write(message,'(3(a,i0))')' wfconv:',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
+       call wrtout(std_out,message)
      end if
 
    end if ! End of initialisation to 0
@@ -3253,6 +3254,182 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  end if
 
 end subroutine wfconv
+!!***
+
+!!****f* m_inwffil/pareigocc
+!! NAME
+!! pareigocc
+!!
+!! FUNCTION
+!! This subroutine transmit to all processors, using MPI:
+!!   - the eigenvalues and,
+!!   - if ground-state, the occupation numbers
+!!     (In fact, in the present status of the routine,
+!!     occupation numbers are NOT transmitted)
+!!     transmit_occ = 2 is used in case the occ should be transmitted.
+!!     Yet the code is not already written.
+!!
+!! INPUTS
+!!  formeig=format of eigenvalues (0 for GS, 1 for RF)
+!!  localrdwf=(for parallel case) if 1, the eig and occ initial values
+!!            are local to each machine, if 0, they are on proc me=0.
+!!  mband=maximum number of bands of the output wavefunctions
+!!  mpi_enreg=information about MPI parallelization
+!!  nband(nkpt*nsppol)=desired number of bands at each k point
+!!  nkpt=number of k points
+!!  nsppol=1 for unpolarized, 2 for spin-polarized, output wf file processors,
+!!         Warning : defined only when paralbd=1
+!!  transmit_occ/=2 transmit only eigenvalues, =2 for transmission of occ also
+!!         (yet transmit_occ=2 is not safe or finished at all)
+!!
+!! OUTPUT
+!!  (see side effects)
+!!
+!! SIDE EFFECTS
+!!  eigen(mband*nkpt*nsppol)=eigenvalues (input or init to large number), (Ha)
+!!  occ(mband*nkpt*nsppol)=occupation (input or init to 0.0)  NOT USED NOW
+!!
+!! NOTES
+!! * The case paralbd=1 with formeig=0 is implemented, but not yet used.
+!!
+!! * The transmission of occ is not activated yet !
+!!
+!! * The routine takes the eigenvalues in the eigen array on one of the
+!!   processors that possess the wavefunctions, and transmit it to all procs.
+!!   If localrdwf==0, me=0 has the full array at start,
+!!   If localrdwf==1, the transfer might be more complex.
+!!
+!! * This routine should not be used for RF wavefunctions, since
+!!   it does not treat the eigenvalues as a matrix.
+!!
+!! PARENTS
+!!      newkpt,wfsinp
+!!
+!! CHILDREN
+!!      timab,xmpi_bcast,xmpi_sum
+!!
+!! SOURCE
+
+subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,occ,transmit_occ)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: formeig,localrdwf,mband,nkpt,nsppol,transmit_occ
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: nband(nkpt*nsppol)
+ real(dp),intent(inout) :: eigen(mband*(2*mband)**formeig*nkpt*nsppol)
+ real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: band_index,iband,ierr,ikpt,isppol,me,nbks,spaceComm
+ !character(len=500) :: msg
+!arrays
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: buffer1(:),buffer2(:)
+
+! *************************************************************************
+
+ if(xmpi_paral==1)then
+
+!  Init mpi_comm
+   spaceComm=mpi_enreg%comm_cell
+   if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_kpt
+   if(mpi_enreg%paral_hf==1) spaceComm=mpi_enreg%comm_kpt
+!  Init me
+   me=mpi_enreg%me_kpt
+
+   if(localrdwf==0)then
+     call xmpi_bcast(eigen,0,spaceComm,ierr)
+
+   else if(localrdwf==1)then
+
+!    Prepare transmission of eigen (and occ)
+     ABI_MALLOC(buffer1,(2*mband**(formeig+1)*nkpt*nsppol))
+     ABI_MALLOC(buffer2,(2*mband**(formeig+1)*nkpt*nsppol))
+     buffer1(:)=zero
+     buffer2(:)=zero
+
+     band_index=0
+     do isppol=1,nsppol
+       do ikpt=1,nkpt
+         nbks=nband(ikpt+(isppol-1)*nkpt)
+
+         if(mpi_enreg%paralbd==0)then
+
+           if(formeig==0)then
+             buffer1(2*band_index+1:2*band_index+nbks) = eigen(band_index+1:band_index+nbks)
+             if(transmit_occ==2) then
+               buffer1(2*band_index+nbks+1:2*band_index+2*nbks) = occ(band_index+1:band_index+nbks)
+             end if
+             band_index=band_index+nbks
+           else if(formeig==1)then
+             buffer1(band_index+1:band_index+2*nbks**2) = eigen(band_index+1:band_index+2*nbks**2)
+             band_index=band_index+2*nbks**2
+           end if
+
+         else if(mpi_enreg%paralbd==1)then
+
+!          Skip this k-point if not the proper processor
+           if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nbks,isppol,me)) then
+             if(formeig==0) then
+               band_index=band_index+nbks
+             else
+               band_index=band_index+2*nbks**2
+             end if
+             cycle
+           end if
+!          Loop on bands
+           do iband=1,nbks
+             if(mpi_enreg%proc_distrb(ikpt, iband,isppol) /= me)cycle
+             if(formeig==0)then
+               buffer1(2*band_index+iband)=eigen(band_index+iband)
+!              if(transmit_occ==2) buffer1(2*band_index+iband+nbdks)=occ(band_index+iband)
+             else if (formeig==1)then
+               buffer1(band_index+(iband-1)*2*nbks+1:band_index+(iband-1)*2*nbks+2*nbks) = &
+&               eigen(band_index+(iband-1)*2*nbks+1:band_index+(iband-1)*2*nbks+2*nbks)
+             end if
+           end do
+           if(formeig==0)then
+             band_index=band_index+nbks
+           else
+             band_index=band_index+2*nbks**2
+           end if
+         end if
+
+       end do
+     end do
+
+!    Build sum of everything
+     call timab(48,1,tsec)
+     if(formeig==0)band_index=band_index*2
+     call xmpi_sum(buffer1,buffer2,band_index,spaceComm,ierr)
+     call timab(48,2,tsec)
+
+     band_index=0
+     do isppol=1,nsppol
+       do ikpt=1,nkpt
+         nbks=nband(ikpt+(isppol-1)*nkpt)
+         if(formeig==0)then
+           eigen(band_index+1:band_index+nbks) = buffer2(2*band_index+1:2*band_index+nbks)
+           if(transmit_occ==2) then
+             occ(band_index+1:band_index+nbks) = buffer2(2*band_index+nbks+1:2*band_index+2*nbks)
+           end if
+           band_index=band_index+nbks
+         else if(formeig==1)then
+           eigen(band_index+1:band_index+2*nbks**2) = buffer1(band_index+1:band_index+2*nbks**2)
+           band_index=band_index+2*nbks**2
+         end if
+       end do
+     end do
+
+     ABI_FREE(buffer1)
+     ABI_FREE(buffer2)
+   end if
+ end if
+
+end subroutine pareigocc
 !!***
 
 end module m_inwffil

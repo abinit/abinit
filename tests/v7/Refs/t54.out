@@ -71,7 +71,7 @@
      2    5.000000E-01    0.000000E+00    0.000000E+00        5.000000E-01
      3    5.000000E-01    5.000000E-01    0.000000E+00        3.750000E-01
 
- Will write phonon DOS in file t54.out_ep_PDS
+ Will write phonon DOS in file t54_ep_PDS
 
  For checking purposes, write ten values in the present file.
        Index    Energy (in Ha)      DOS

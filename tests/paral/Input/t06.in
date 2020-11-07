@@ -15,7 +15,7 @@
    natrd 10
    typat 2*1 2*2 6*3
 
- xred        -6.2167749428E-04 -6.2167749428E-04 -6.2167749428E-04
+ xred        -6.2167749000E-04 -6.2167749000E-04 -6.2167749000E-04
               4.9937832251E-01  4.9937832251E-01  4.9937832251E-01
               2.8311188469E-01  2.8311188469E-01  2.8311188469E-01
               7.8311188469E-01  7.8311188469E-01  7.8311188469E-01
@@ -51,11 +51,13 @@ nbdbuf 0
 paral_kgb 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "41nb_001023.pspfhi, 03li.pspfhi, 08o_001023.pspfhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 41nb_001023.pspfhi,  03li.pspfhi, 08o_001023.pspfhi
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10

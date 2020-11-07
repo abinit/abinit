@@ -35,17 +35,15 @@
 #I/O parameters
  prtwf 0 prtden 0  prteig 0
 
- pseudos = "6c.pspnc"
- pp_dirpath = "../../Psps_for_tests"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw1_1.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
-#%% psp_files =  6c.pspnc
 #%% output_file = "tpaw1_1.abo"
 #%% [paral_info]
 #%% max_nprocs = 4
@@ -56,5 +54,3 @@
 #%%   Input for PAW1 tutorial
 #%%   Diamond at experimental volume
 #%%<END TEST_INFO>
-
-

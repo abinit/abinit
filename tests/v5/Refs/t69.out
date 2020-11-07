@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h20 )
+.Starting date : Fri 25 Sep 2020.
+- ( at 10h50 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t69/t69.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/v5_t69/t69.in
 - output file    -> t69.out
 - root for input  files -> t69i
 - root for output files -> t69o
@@ -49,11 +49,11 @@ _ WF disk file :      0.710 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
     nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =         399          nfft =       13824          nkpt =           8
+       mpw =         416          nfft =       13824          nkpt =           8
 ================================================================================
-P This job should need less than                       5.753 Mbytes of memory.
+P This job should need less than                       5.799 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      1.018 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
 
@@ -66,11 +66,11 @@ _ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =         399          nfft =       13824          nkpt =           8
+       mpw =         416          nfft =       13824          nkpt =           8
 ================================================================================
-P This job should need less than                       5.753 Mbytes of memory.
+P This job should need less than                       5.799 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      1.018 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
 
@@ -78,16 +78,16 @@ _ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
-     lnmax =       2     mgfft =      15  mpssoang =       3    mqgrid =    3001
+     lnmax =       2     mgfft =      16  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =         126          nfft =        3375          nkpt =           8
+       mpw =         156          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       2.099 Mbytes of memory.
+P This job should need less than                       2.395 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.310 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.383 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
 
@@ -100,11 +100,11 @@ _ WF disk file :      0.310 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
     nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =         399          nfft =       13824          nkpt =           8
+       mpw =         416          nfft =       13824          nkpt =           8
 ================================================================================
-P This job should need less than                       5.753 Mbytes of memory.
+P This job should need less than                       5.799 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      1.018 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
 
@@ -117,11 +117,11 @@ _ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          20        mffmem =           1         mkmem =           8
-       mpw =         399          nfft =       13824          nkpt =           8
+       mpw =         416          nfft =       13824          nkpt =           8
 ================================================================================
-P This job should need less than                       5.753 Mbytes of memory.
+P This job should need less than                       5.799 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      1.018 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -141,29 +141,29 @@ _ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
              bdgw4          2       4       5       5
              bdgw6          2       4       5       5
              ecut1     1.20000000E+01 Hartree
-             ecut2     1.54342366E+01 Hartree
-             ecut3     1.54342366E+01 Hartree
-             ecut4     7.12349382E+00 Hartree
-             ecut5     1.54342366E+01 Hartree
-             ecut6     1.54342366E+01 Hartree
+             ecut2     1.60000000E+01 Hartree
+             ecut3     1.60000000E+01 Hartree
+             ecut4     8.00000000E+00 Hartree
+             ecut5     1.60000000E+01 Hartree
+             ecut6     1.60000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
-          ecuteps2     4.74899588E+00 Hartree
+          ecuteps2     5.00000000E+00 Hartree
           ecuteps3     0.00000000E+00 Hartree
           ecuteps4     0.00000000E+00 Hartree
-          ecuteps5     4.74899588E+00 Hartree
+          ecuteps5     5.00000000E+00 Hartree
           ecuteps6     0.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
-         ecutsigx3     7.12349382E+00 Hartree
-         ecutsigx4     7.12349382E+00 Hartree
+         ecutsigx3     8.00000000E+00 Hartree
+         ecutsigx4     8.00000000E+00 Hartree
          ecutsigx5     0.00000000E+00 Hartree
-         ecutsigx6     7.12349382E+00 Hartree
+         ecutsigx6     8.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
-          ecutwfn2     1.54342366E+01 Hartree
-          ecutwfn3     1.54342366E+01 Hartree
-          ecutwfn4     7.12349382E+00 Hartree
-          ecutwfn5     1.54342366E+01 Hartree
-          ecutwfn6     1.54342366E+01 Hartree
+          ecutwfn2     1.60000000E+01 Hartree
+          ecutwfn3     1.60000000E+01 Hartree
+          ecutwfn4     8.00000000E+00 Hartree
+          ecutwfn5     1.60000000E+01 Hartree
+          ecutwfn6     1.60000000E+01 Hartree
            enunit           1
 -          fftalg         312
            getscr1          0
@@ -190,12 +190,12 @@ _ WF disk file :      0.976 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
          gwencomp4     1.2000000000E+00 Hartree
          gwencomp5     1.2000000000E+00 Hartree
          gwencomp6     1.2000000000E+00 Hartree
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
+      gw_icutcoul1          6
+      gw_icutcoul2          6
+      gw_icutcoul3          3
+      gw_icutcoul4          3
+      gw_icutcoul5          6
+      gw_icutcoul6          3
            istwfk        1    0    1    0    0    0    1    0
               ixc           7
            jdtset        1    2    3    4    5    6
@@ -222,7 +222,7 @@ P           mkmem           8
             ngfft1         18      18      18
             ngfft2         24      24      24
             ngfft3         24      24      24
-            ngfft4         15      15      15
+            ngfft4         16      16      16
             ngfft5         24      24      24
             ngfft6         24      24      24
              nkpt           8
@@ -336,8 +336,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.00791
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -354,8 +354,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -526,8 +526,8 @@ band_energy         :  9.80965829835884E-01
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 399, }
-cutoff_energies: {ecut:  15.4, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 416, }
+cutoff_energies: {ecut:  16.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -553,8 +553,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -571,8 +571,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -648,10 +648,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000 -10.582  -1.026  -1.024  -1.021   0.629   1.745   1.749   1.755
-       -0.000  -0.000   0.002   0.001  -0.000  -1.949  -0.491  -0.489  -0.492
+       -0.000   0.000   0.002   0.001  -0.000  -1.949  -0.491  -0.489  -0.492
 
   chi0(G,G') at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
@@ -671,10 +671,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.102   0.002  -0.005   0.005  -0.002  -0.002   0.005  -0.005   0.002
-     -0.000   0.009  -0.028   0.028  -0.009   0.009  -0.028   0.028  -0.009
+      0.000   0.009  -0.028   0.028  -0.009   0.009  -0.028   0.028  -0.009
        1       2       3       4       5       6       7       8       9
       0.102   0.002  -0.005   0.005  -0.002  -0.002   0.005  -0.005   0.002
-     -0.000  -0.009   0.028  -0.028   0.009  -0.009   0.028  -0.028   0.009
+      0.000  -0.009   0.028  -0.028   0.009  -0.009   0.028  -0.028   0.009
 
 
    Upper and lower wings at the    2 th omega   0.0000  23.4312 [eV]
@@ -697,7 +697,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000  -1.473  -0.591  -0.591  -0.590  -1.873   1.497   1.497   1.497
 
     2  -0.331  -9.176  -1.117  -1.115  -1.114   0.842   1.665   1.670   1.663
-        1.473  -0.000   0.156   0.152   0.155  -1.759  -0.334  -0.330  -0.341
+        1.473   0.000   0.156   0.152   0.155  -1.759  -0.334  -0.330  -0.341
 
   chi0(G,G') at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
@@ -719,7 +719,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000  -1.737  -1.603  -1.602  -1.603  -2.350   2.223   2.223   2.224
 
     2  -0.675  -7.058  -0.630  -0.630  -0.627   0.822   1.295   1.291   1.300
-        1.737  -0.000   0.160   0.157   0.159  -1.499  -0.195  -0.193  -0.199
+        1.737   0.000   0.160   0.157   0.159  -1.499  -0.195  -0.193  -0.199
 
   chi0(G,G') at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
@@ -768,10 +768,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
     1  -2.318  -0.211  -0.144  -0.143  -0.219  -0.021  -0.217  -0.217  -0.199
-       -0.000  -0.634  -0.195  -0.194  -0.569  -0.250   0.625   0.625   0.444
+        0.000  -0.634  -0.195  -0.194  -0.569  -0.250   0.625   0.625   0.444
 
     2  -0.211  -3.226  -0.294  -0.293  -0.249   0.359   0.471   0.474   0.491
-        0.634  -0.000   0.076   0.075   0.030  -0.366  -0.137  -0.133  -0.120
+        0.634   0.000   0.076   0.075   0.030  -0.366  -0.137  -0.133  -0.120
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     64.24  [%]
 
@@ -782,10 +782,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -8.384  -0.278  -0.751  -0.751  -0.627  -0.627  -0.751  -0.751  -0.278
-       -0.000   0.409  -1.972  -1.972  -2.099   2.099   1.973   1.972  -0.409
+        0.000   0.409  -1.972  -1.972  -2.099   2.099   1.973   1.972  -0.409
 
     2  -0.278 -11.339  -0.721  -0.720  -0.971   1.244   1.772   1.776   0.600
-       -0.409  -0.000  -0.110  -0.110  -0.256  -1.352  -0.255  -0.252  -0.583
+       -0.409   0.000  -0.110  -0.110  -0.256  -1.352  -0.255  -0.252  -0.583
 
   chi0(G,G') at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
@@ -812,7 +812,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
     1  -2.997  -0.266  -0.194  -0.194  -0.266  -0.194  -0.265  -0.265  -0.194
-       -0.000  -0.715  -0.290  -0.290  -0.716   0.290   0.716   0.716   0.291
+        0.000  -0.715  -0.290  -0.290  -0.716   0.290   0.716   0.716   0.291
 
     2  -0.266  -3.315  -0.322  -0.321  -0.201   0.475   0.466   0.470   0.457
         0.715   0.000   0.082   0.082   0.000  -0.272  -0.116  -0.113  -0.095
@@ -826,7 +826,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.556  -0.753  -1.015  -1.003  -0.850  -0.850  -1.002  -1.016  -0.754
-       -0.000  -1.202  -2.355  -2.491  -2.164   2.163   2.492   2.356   1.202
+        0.000  -1.202  -2.355  -2.491  -2.164   2.163   2.492   2.356   1.202
 
     2  -0.753 -11.555  -1.091  -0.329  -0.970   1.440   1.723   1.701   0.293
         1.202   0.000  -0.124   0.001  -0.208  -0.878   0.000  -0.092  -0.000
@@ -848,8 +848,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 399, }
-cutoff_energies: {ecut:  15.4, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 416, }
+cutoff_energies: {ecut:  16.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -993,8 +993,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
-dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 126, }
-cutoff_energies: {ecut:   7.1, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 156, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -1022,8 +1022,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1040,8 +1040,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1094,10 +1094,10 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  setmesh: FFT mesh size selected  =  15x 15x 15
           total number of points  =     3375
 
- Number of electrons calculated from density =    7.9723; Expected =    8.0000
- average of density, n =  0.058799
- r_s =    1.5953
- omega_plasma =   23.3906 [eV]
+ Number of electrons calculated from density =    7.9829; Expected =    8.0000
+ average of density, n =  0.058877
+ r_s =    1.5946
+ omega_plasma =   23.4061 [eV]
 
 
  === KS Band Gaps ===
@@ -1147,9 +1147,9 @@ QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        2   9.463 -14.569 -16.758   2.211   0.812  -0.231 -14.551   0.018   9.481
-        3   9.463 -14.569 -16.758   2.211   0.812  -0.231 -14.551   0.018   9.481
-        4   9.463 -14.569 -16.758   2.211   0.812  -0.231 -14.551   0.018   9.481
+        2   9.463 -14.672 -16.858   2.211   0.811  -0.234 -14.652   0.021   9.484
+        3   9.463 -14.672 -16.858   2.211   0.811  -0.234 -14.652   0.021   9.484
+        4   9.463 -14.672 -16.858   2.211   0.811  -0.234 -14.652   0.021   9.484
 ...
 
 
@@ -1162,7 +1162,7 @@ QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        5  10.466 -10.773  -6.317  -3.560   0.831  -0.204 -10.029   0.744  11.210
+        5  10.466 -10.781  -6.330  -3.560   0.831  -0.204 -10.041   0.740  11.207
 ...
 
 
@@ -1173,8 +1173,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
-dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 399, }
-cutoff_energies: {ecut:  15.4, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 416, }
+cutoff_energies: {ecut:  16.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
@@ -1200,8 +1200,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1218,8 +1218,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1303,7 +1303,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000  -5.186  -0.284  -0.284  -0.283   0.282   0.527   0.529   0.530
        -0.000   0.000   0.001   0.000  -0.000  -0.500  -0.147  -0.146  -0.147
@@ -1327,10 +1327,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
       0.555   0.002  -0.005   0.005  -0.002  -0.002   0.005  -0.005   0.002
-     -0.000   0.010  -0.029   0.029  -0.010   0.010  -0.029   0.029  -0.010
+      0.000   0.010  -0.029   0.029  -0.010   0.010  -0.029   0.029  -0.010
        1       2       3       4       5       6       7       8       9
       0.555   0.002  -0.005   0.005  -0.002  -0.002   0.005  -0.005   0.002
-     -0.000  -0.010   0.029  -0.029   0.010  -0.010   0.029  -0.029   0.010
+      0.000  -0.010   0.029  -0.029   0.010  -0.010   0.029  -0.029   0.010
 
 
 
@@ -1371,7 +1371,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
     1  -2.523  -0.238  -0.175  -0.176  -0.175   0.068  -0.224  -0.224  -0.224
-       -0.000  -0.828  -0.369  -0.369  -0.369  -0.529   0.708   0.708   0.708
+        0.000  -0.828  -0.369  -0.369  -0.369  -0.529   0.708   0.708   0.708
 
     2  -0.238  -5.723  -0.230  -0.230  -0.229   0.212   0.726   0.724   0.727
         0.828   0.000   0.050   0.049   0.050  -0.355  -0.105  -0.104  -0.106
@@ -1385,7 +1385,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -5.880  -0.538  -0.256  -0.256  -0.538  -0.256  -0.538  -0.538  -0.256
-       -0.000  -1.878  -0.138  -0.137  -1.878   0.137   1.878   1.878   0.138
+        0.000  -1.878  -0.138  -0.137  -1.878   0.137   1.878   1.878   0.138
 
     2  -0.538 -11.463  -1.181  -1.180  -1.008   1.100   1.861   1.863   1.792
         1.878   0.000   0.152   0.152  -0.000  -1.403  -0.225  -0.224  -0.340
@@ -1418,7 +1418,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000  -0.791  -0.173  -0.173  -0.621  -0.282   0.729   0.729   0.451
 
     2  -0.224  -5.732  -0.250  -0.250  -0.236   0.274   0.731   0.732   0.666
-        0.791  -0.000   0.056   0.056   0.023  -0.351  -0.108  -0.106  -0.095
+        0.791   0.000   0.056   0.056   0.023  -0.351  -0.108  -0.106  -0.095
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :    101.33  [%]
 
@@ -1440,7 +1440,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000   0.240  -0.429  -0.429  -0.686   0.686   0.430   0.429  -0.240
 
     2  -0.006  -3.939  -0.250  -0.250  -0.239   0.296   0.394   0.395   0.010
-       -0.240  -0.000  -0.026  -0.026  -0.058  -0.384  -0.089  -0.088  -0.078
+       -0.240   0.000  -0.026  -0.026  -0.058  -0.384  -0.089  -0.088  -0.078
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :    101.14  [%]
 
@@ -1451,7 +1451,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -10.797  -0.858  -0.718  -0.718  -0.858  -0.718  -0.858  -0.858  -0.718
-       -0.000  -2.433  -1.547  -1.547  -2.434   1.547   2.434   2.434   1.547
+        0.000  -2.433  -1.547  -1.547  -2.434   1.547   2.434   2.434   1.547
 
     2  -0.858 -10.501  -1.005  -1.004  -0.502   1.360   1.659   1.662   1.591
         2.433   0.000   0.151   0.151   0.000  -0.809  -0.152  -0.150  -0.134
@@ -1459,7 +1459,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    2 th omega   0.0000  23.4312 [eV]
        1       2       3       4       5       6       7       8       9
     1  -3.102  -0.269  -0.167  -0.167  -0.269  -0.167  -0.269  -0.269  -0.167
-       -0.000  -0.872  -0.263  -0.262  -0.873   0.262   0.873   0.873   0.263
+        0.000  -0.872  -0.263  -0.262  -0.873   0.262   0.873   0.873   0.263
 
     2  -0.269  -5.738  -0.272  -0.271  -0.211   0.370   0.750   0.751   0.580
         0.872   0.000   0.058   0.058   0.000  -0.263  -0.093  -0.092  -0.075
@@ -1495,8 +1495,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 6, }
-dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 399, }
-cutoff_energies: {ecut:  15.4, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 416, }
+cutoff_energies: {ecut:  16.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 0, }
 ...
@@ -1643,29 +1643,29 @@ data: !SigmaeeData |
              bdgw4          2       4       5       5
              bdgw6          2       4       5       5
              ecut1     1.20000000E+01 Hartree
-             ecut2     1.54342366E+01 Hartree
-             ecut3     1.54342366E+01 Hartree
-             ecut4     7.12349382E+00 Hartree
-             ecut5     1.54342366E+01 Hartree
-             ecut6     1.54342366E+01 Hartree
+             ecut2     1.60000000E+01 Hartree
+             ecut3     1.60000000E+01 Hartree
+             ecut4     8.00000000E+00 Hartree
+             ecut5     1.60000000E+01 Hartree
+             ecut6     1.60000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
-          ecuteps2     4.74899588E+00 Hartree
+          ecuteps2     5.00000000E+00 Hartree
           ecuteps3     0.00000000E+00 Hartree
           ecuteps4     0.00000000E+00 Hartree
-          ecuteps5     4.74899588E+00 Hartree
+          ecuteps5     5.00000000E+00 Hartree
           ecuteps6     0.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
          ecutsigx2     0.00000000E+00 Hartree
-         ecutsigx3     7.12349382E+00 Hartree
-         ecutsigx4     7.12349382E+00 Hartree
+         ecutsigx3     8.00000000E+00 Hartree
+         ecutsigx4     8.00000000E+00 Hartree
          ecutsigx5     0.00000000E+00 Hartree
-         ecutsigx6     7.12349382E+00 Hartree
+         ecutsigx6     8.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
-          ecutwfn2     1.54342366E+01 Hartree
-          ecutwfn3     1.54342366E+01 Hartree
-          ecutwfn4     7.12349382E+00 Hartree
-          ecutwfn5     1.54342366E+01 Hartree
-          ecutwfn6     1.54342366E+01 Hartree
+          ecutwfn2     1.60000000E+01 Hartree
+          ecutwfn3     1.60000000E+01 Hartree
+          ecutwfn4     8.00000000E+00 Hartree
+          ecutwfn5     1.60000000E+01 Hartree
+          ecutwfn6     1.60000000E+01 Hartree
            enunit           1
            etotal1    -1.0418958076E+01
            etotal2     0.0000000000E+00
@@ -1710,12 +1710,12 @@ data: !SigmaeeData |
          gwencomp4     1.2000000000E+00 Hartree
          gwencomp5     1.2000000000E+00 Hartree
          gwencomp6     1.2000000000E+00 Hartree
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
+      gw_icutcoul1          6
+      gw_icutcoul2          6
+      gw_icutcoul3          3
+      gw_icutcoul4          3
+      gw_icutcoul5          6
+      gw_icutcoul6          3
            istwfk        1    0    1    0    0    0    1    0
               ixc           7
            jdtset        1    2    3    4    5    6
@@ -1742,7 +1742,7 @@ P           mkmem           8
             ngfft1         18      18      18
             ngfft2         24      24      24
             ngfft3         24      24      24
-            ngfft4         15      15      15
+            ngfft4         16      16      16
             ngfft5         24      24      24
             ngfft6         24      24      24
              nkpt           8
@@ -1827,10 +1827,57 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         16.3        0.27      0.005
+- Total wall clock time (s,m,h):         19.6        0.33      0.005
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           16.3, wall_time =           19.6
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  3.494  21.4      3.836  19.6              3      -1.00        0.91       0.91
+- pspini                         3.031  18.5      3.041  15.5              6      -1.00        1.00       1.00
+- fourwf%(pot)                   2.018  12.3      2.022  10.3           8010      -1.00        1.00       1.00
+- invars2                        0.509   3.1      0.507   2.6              6      -1.00        1.00       1.00
+- ewald                          0.504   3.1      0.506   2.6              6      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.322   2.0      0.314   1.6             -1      -1.00        1.03       1.03
+- projbd                         0.274   1.7      0.288   1.5           8020      -1.00        0.95       0.95
+- nonlop(apply)                  0.209   1.3      0.224   1.1           8010      -1.00        0.93       0.93
+- getghc-other                   0.119   0.7      0.112   0.6             -1      -1.00        1.06       1.06
+- abinit(2)                      0.119   0.7      0.121   0.6              1      -1.00        0.98       0.98
+- timing timab                   0.111   0.7      0.112   0.6              9      -1.00        0.99       0.99
+- fourwf%(den)                   0.108   0.7      0.117   0.6            736      -1.00        0.93       0.93
+- others (115)                   0.258   1.6      0.245   1.2             -1      -1.00        1.05       1.05
+-<END_TIMER>
+-
+- subtotal                      11.076  67.8     11.445  58.3                                  0.97       0.97
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          16.3, wall_time =          19.6
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  3.494  21.4      3.836  19.6              3      -1.00        0.91       0.91
+- pspini                         3.031  18.5      3.041  15.5              6      -1.00        1.00       1.00
+- fourwf%(pot)                   2.018  12.3      2.022  10.3           8010      -1.00        1.00       1.00
+- invars2                        0.509   3.1      0.507   2.6              6      -1.00        1.00       1.00
+- ewald                          0.504   3.1      0.506   2.6              6      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.322   2.0      0.314   1.6             -1      -1.00        1.03       1.03
+- projbd                         0.274   1.7      0.288   1.5           8020      -1.00        0.95       0.95
+- nonlop(apply)                  0.209   1.3      0.224   1.1           8010      -1.00        0.93       0.93
+- getghc-other                   0.119   0.7      0.112   0.6             -1      -1.00        1.06       1.06
+- abinit(2)                      0.119   0.7      0.121   0.6              1      -1.00        0.98       0.98
+- timing timab                   0.111   0.7      0.112   0.6              9      -1.00        0.99       0.99
+- fourwf%(den)                   0.108   0.7      0.117   0.6            736      -1.00        0.93       0.93
+- others (115)                   0.258   1.6      0.245   1.2             -1      -1.00        1.05       1.05
+-<END_TIMER>
 
+- subtotal                      11.076  67.8     11.445  58.3                                  0.97       0.97
 
 ================================================================================
 
@@ -1915,10 +1962,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         13.6  wall=         14.2
+- Proc.   0 individual time (sec): cpu=         16.3  wall=         19.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  26 WARNINGs and  33 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.6  wall=         14.2
+.Delivered  22 WARNINGs and  45 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.3  wall=         19.6

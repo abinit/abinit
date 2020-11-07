@@ -27,6 +27,9 @@ from tests.pymods.termcolor import cprint
 ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
 
+# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
+#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(ABINIT_ROOTDIR, "Psps_for_tests"))
+#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 
 ALL_BINARIES = [
     "abinit",
@@ -77,7 +80,7 @@ def cd(path):
 
 
 @task
-def make(ctx, jobs="auto", touch=False, clean=False):
+def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
     """
     Touch all modified files and recompile the code
 
@@ -85,6 +88,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
         jobs: Use `jobs` threads for make -jNUM
         touch: Touch all changed files
         clean: Issue `make clean` before `make`.
+        binary: Binary to recompile, default: all
     """
     if touch:
         with cd(ABINIT_ROOTDIR):
@@ -102,7 +106,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
         if clean:
             ctx.run("cd src && make clean && cd ..", pty=True)
             ctx.run("cd shared && make clean && cd ..", pty=True)
-        cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
+        cmd = "make -j%d %s > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % (jobs, binary)
         cprint("Executing: %s" % cmd, "yellow")
         results = ctx.run(cmd, pty=True)
         # TODO Check for errors in make.stderr
@@ -230,7 +234,7 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = "ctags -R shared/ src/"
+        cmd = "ctags -R --langmap=fortran:+.finc.f90 shared/ src/"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
         #ctx.run('ctags -R --exclude="_*"', pty=True)
@@ -246,7 +250,8 @@ def fgrep(ctx, pattern):
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
+        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc]" "%s" src shared' % pattern
+        #cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -286,37 +291,58 @@ def vimt(ctx, tagname):
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
+#@task
+#def gdb(ctx, input_name, exec_name="abinit", run_make=False):
+#    """
+#    Execute `lldb` debugger with the given `input_name`.
+#    """
+#    if run_make: make(ctx)
+#
+#    top = find_top_build_tree(".", with_abinit=True)
+#    binpath = os.path.join(top, "src", "98_main", exec_name)
+#    cprint(f"Using binpath: {binpath}", "green")
+#    cmd = f"gdb {binpath} --one-line 'settings set target.run-args {input_name}'"
+#    cprint(f"Executing gdb command: {cmd}", color="green")
+#    # mpirun -np 2 xterm -e gdb fftprof --command=dbg_file
+#    #cprint("Type run to start lldb debugger", color="green")
+#    #cprint("Then use `bt` to get the backtrace\n\n", color="green")
+#    ctx.run(cmd, pty=True)
+
 
 @task
-def lldb(ctx, input_name, exec_name="abinit"):
+def lldb(ctx, input_name, exec_name="abinit", run_make=False):
     """
     Execute `lldb` debugger with the given `input_name`.
     """
+    if run_make: make(ctx)
+
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
     cprint(f"Using binpath: {binpath}", "green")
     cmd = f"lldb {binpath} --one-line 'settings set target.run-args {input_name}'"
     cprint(f"Executing lldb command: {cmd}", color="green")
-    cprint("Type run to start lldb debugger\n\n", color="green")
+    cprint("Type run to start lldb debugger", color="green")
+    cprint("Then use `bt` to get the backtrace\n\n", color="green")
     ctx.run(cmd, pty=True)
 
 
 @task
-def abinit(ctx, input_name):
+def abinit(ctx, input_name, run_make=False):
     """
     Execute `abinit` with the given `input_name`.
     """
-    _run(ctx, input_name, exec_name="abinit")
+    _run(ctx, input_name, exec_name="abinit", run_make=run_make)
 
 
 @task
-def anaddb(ctx, input_name):
+def anaddb(ctx, input_name, run_make=False):
     """"execute `anaddb` with the given `input_name`."""
-    _run(ctx, input_name, exec_name="anaddb")
+    _run(ctx, input_name, exec_name="anaddb", run_make=run_make)
 
 
-def _run(ctx, input_name, exec_name):
+def _run(ctx, input_name, exec_name, run_make):
     """"Execute `exec_name input_name`"""
+    if run_make: make(ctx)
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
     cprint(f"Using binpath: {binpath}", "green")
@@ -332,6 +358,12 @@ def pull_trunk(ctx):
     ctx.run("git pull trunk develop")
     ctx.run("git stash apply")
 
+@task
+def pull(ctx):
+    """"Execute `git stash && git pull --recurse-submodules && git stash apply`"""
+    ctx.run("git stash")
+    ctx.run("git pull --recurse-submodules")
+    ctx.run("git stash apply")
 
 @task
 def branchoff(ctx, start_point):
@@ -373,7 +405,7 @@ def watchdog(ctx, jobs="auto", sleep_time = 5):
     from watchdog.observers import Observer
     from watchdog.events import PatternMatchingEventHandler
     event_handler = PatternMatchingEventHandler(patterns="*.F90", ignore_patterns="",
-                                                   ignore_directories=False, case_sensitive=True)
+                                                ignore_directories=False, case_sensitive=True)
 
     def on_created(event):
         print(f"hey, {event.src_path} has been created!")

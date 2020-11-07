@@ -224,6 +224,7 @@ module m_bader
 !!      aim
 !!
 !! CHILDREN
+!!      mprod
 !!
 !! SOURCE
 
@@ -277,7 +278,7 @@ end subroutine aim_shutdown
 !!      aim
 !!
 !! CHILDREN
-!!      consist,inread
+!!      mprod
 !!
 !! SOURCE
 
@@ -771,10 +772,10 @@ end subroutine adini
 !! of a module to transfer data should be avoided
 !!
 !! PARENTS
-!!      drvaim
+!!      m_bader
 !!
 !! CHILDREN
-!!      vgh_rho
+!!      mprod
 !!
 !! SOURCE
 
@@ -936,10 +937,10 @@ end subroutine addout
 !! vv(3)= initial point in orthogonal coordinates
 !!
 !! PARENTS
-!!      cpdrv,drvaim,rsurf
+!!      m_bader
 !!
 !! CHILDREN
-!!      critic,onestep,timein,vgh_rho
+!!      mprod
 !!
 !! SOURCE
 
@@ -1283,9 +1284,10 @@ end subroutine aim_follow
 !! This file does not follow the ABINIT coding rules (yet)
 !!
 !! PARENTS
-!!      adini
+!!      m_bader
 !!
 !! CHILDREN
+!!      mprod
 !!
 !! SOURCE
 
@@ -1365,10 +1367,10 @@ end subroutine consist
 !! Should combine parts of code that are similar ...
 !!
 !! PARENTS
-!!      drvaim
+!!      m_bader
 !!
 !! CHILDREN
-!!      aim_follow,critic,sort_dp,timein,vgh_rho,xmpi_sum
+!!      mprod
 !!
 !! SOURCE
 
@@ -2146,9 +2148,10 @@ end subroutine cpdrv
 !! vv(3)= starting point and final point
 !!
 !! PARENTS
-!!      aim_follow,cpdrv,critics
+!!      m_bader
 !!
 !! CHILDREN
+!!      mprod
 !!
 !! SOURCE
 
@@ -2464,9 +2467,10 @@ end subroutine critic
 !!  (to be filled)
 !!
 !! PARENTS
-!!      critic
+!!      m_bader
 !!
 !! CHILDREN
+!!      mprod
 !!
 !! SOURCE
 !!
@@ -2541,10 +2545,10 @@ end subroutine ordr
 !! This file does not follow the ABINIT coding rules (yet)
 !!
 !! PARENTS
-!!      drvaim
+!!      m_bader
 !!
 !! CHILDREN
-!!      bschg1,critic,sort_dp,vgh_rho
+!!      mprod
 !!
 !! SOURCE
 
@@ -2887,6 +2891,7 @@ end subroutine critics
 !!      aim
 !!
 !! CHILDREN
+!!      mprod
 !!
 !! SOURCE
 
@@ -2976,8 +2981,7 @@ end subroutine defad
 !!      aim
 !!
 !! CHILDREN
-!!      addout,aim_follow,cpdrv,critics,graph,initaim,integrho,integvol,plint
-!!      rsurf,surf,timein
+!!      mprod
 !!
 !! SOURCE
 
@@ -3196,9 +3200,10 @@ end subroutine drvaim
 !!  (written in the untg file)
 !!
 !! PARENTS
-!!      drvaim
+!!      m_bader
 !!
 !! CHILDREN
+!!      mprod
 !!
 !! SOURCE
 
@@ -3285,11 +3290,10 @@ end subroutine graph
 !! This file does not follow the ABINIT coding rules (yet)
 !!
 !! PARENTS
-!!      drvaim
+!!      m_bader
 !!
 !! CHILDREN
-!!      bschg1,hdr_bcast,hdr_echo,hdr_fort_read,hdr_free,hdr_ncread,inspln
-!!      lubksb,ludcmp,metric,xmpi_bcast
+!!      mprod
 !!
 !! SOURCE
 
@@ -3681,6 +3685,7 @@ end subroutine initaim
 !!      aim
 !!
 !! CHILDREN
+!!      mprod
 !!
 !! SOURCE
 
@@ -3790,9 +3795,10 @@ end subroutine inpar
 !! This file does not follow the ABINIT coding rules (yet)
 !!
 !! PARENTS
-!!      initaim
+!!      m_bader
 !!
 !! CHILDREN
+!!      mprod
 !!
 !! SOURCE
 
@@ -3891,10 +3897,10 @@ end subroutine inspln
 !! This file does not follow the ABINIT coding rules (yet)
 !!
 !! PARENTS
-!!      drvaim
+!!      m_bader
 !!
 !! CHILDREN
-!!      bschg1,coeffs_gausslegint,spline,vgh_rho
+!!      mprod
 !!
 !! SOURCE
 
@@ -4207,10 +4213,10 @@ end subroutine integrho
 !! This file does not follow the ABINIT coding rules (yet)
 !!
 !! PARENTS
-!!      drvaim
+!!      m_bader
 !!
 !! CHILDREN
-!!      coeffs_gausslegint
+!!      mprod
 !!
 !! SOURCE
 
@@ -4322,10 +4328,10 @@ end subroutine integvol
 !! This file does not follow the ABINIT coding rules (yet)
 !!
 !! PARENTS
-!!      aim_follow
+!!      m_bader
 !!
 !! CHILDREN
-!!      vgh_rho
+!!      mprod
 !!
 !! SOURCE
 
@@ -4411,10 +4417,10 @@ end subroutine onestep
 !! This file does not follow the ABINIT coding rules (yet)
 !!
 !! PARENTS
-!!      drvaim
+!!      m_bader
 !!
 !! CHILDREN
-!!      vgh_rho
+!!      mprod
 !!
 !! SOURCE
 
@@ -4517,10 +4523,10 @@ end subroutine plint
 !! grho(3)= gradient on the surface
 !!
 !! PARENTS
-!!      drvaim,surf
+!!      m_bader
 !!
 !! CHILDREN
-!!      aim_follow,timein,vgh_rho
+!!      mprod
 !!
 !! SOURCE
 
@@ -4693,10 +4699,10 @@ end subroutine rsurf
 !! This file does not follow the ABINIT coding rules (yet)
 !!
 !! PARENTS
-!!      drvaim
+!!      m_bader
 !!
 !! CHILDREN
-!!      coeffs_gausslegint,rsurf,timein,xmpi_sum
+!!      mprod
 !!
 !! SOURCE
 
@@ -5285,10 +5291,10 @@ end subroutine surf
 !!  This routine also works on the data contained in the defs_aimprom and defs_aimfields modules
 !!
 !! PARENTS
-!!      addout,aim_follow,cpdrv,critic,critics,integrho,onestep,plint,rsurf
+!!      m_bader
 !!
 !! CHILDREN
-!!      bschg1,bschg2
+!!      mprod
 !!
 !! SOURCE
 
@@ -5905,7 +5911,7 @@ end function vec_prod
 !! Matrix multiplication cc=aa*bb
 !!
 !! PARENTS
-!!      vnorm
+!!      m_bader
 !!
 !! CHILDREN
 !!      mprod
@@ -5945,7 +5951,7 @@ end subroutine mprod
 !! bschg1: Vector transformation of coordinates
 !!
 !! PARENTS
-!!      critics,initaim,integrho,vgh_rho
+!!      m_bader
 !!
 !! CHILDREN
 !!      mprod
@@ -5996,7 +6002,7 @@ end subroutine bschg1
 !! bschg2: Matrix transformation of coordinates
 !!
 !! PARENTS
-!!      vgh_rho
+!!      m_bader
 !!
 !! CHILDREN
 !!      mprod

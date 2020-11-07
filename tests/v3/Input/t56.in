@@ -23,13 +23,15 @@
  typat  1 2
  znucl  8 12
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/8o.pspnc, PseudosTM_pwteter/12mg.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t56.in, t57.in
 #%% [files]
 #%% files_to_test = t56.out, tolnlines=  1, tolabs=  1.010e-09, tolrel=  2.000e-09
-#%% psp_files=8o.pspnc, 12mg.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [shell]

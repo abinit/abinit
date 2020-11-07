@@ -1,7 +1,7 @@
 # Crystalline AlAs: computation of the phonon spectrum
    ndtset   10
 
-#Set 1: ground state self-consistency
+# Set 1: ground state self-consistency
   getwfk1   0            # Cancel default
   kptopt1   1            # Automatic generation of k points, taking
                          # into account the symmetry
@@ -12,11 +12,15 @@
 # Q vectors for all datasets
 
 # Complete set of symmetry-inequivalent qpt chosen to be commensurate
-# with kpt mesh so that only one set of GS wave functions is needed.
-# Generated automatically by running GS calculation with kptopt=1,
-# nshift=0, shiftk=0 0 0 (to include gamma) and taking output kpt set
-# file as qpt set. Set nstep=1 so only one iteration is performed
-# or `abinit ... --dry-run` command line option.
+# with the kpt mesh so that only one set of GS wave functions is needed.
+# Generated automatically by running GS calculation with 
+#
+#   kptopt = 1
+#   nshift = 0
+#   shiftk = 0 0 0 
+#
+# (to include gamma) and taking output kpt set file. 
+# Set nstep=1 so that only one iteration is performed or use `abinit ... --dry-run` command line option.
 
      nqpt   1  # One qpt for each dataset (only 0 or 1 allowed)
                # This is the default for all datasets and must
@@ -32,7 +36,7 @@
      qpt9   5.00000000E-01  5.00000000E-01  0.00000000E+00
      qpt10 -2.50000000E-01  5.00000000E-01  2.50000000E-01
 
-#Set 2: Response function calculation of d/dk wave function
+# Set 2: Response function calculation of d/dk wave function
 
     iscf2   -3         # Need this non-self-consistent option for d/dk
   kptopt2   2          # Modify default to use time-reversal symmetry
@@ -40,15 +44,15 @@
   rfelfd2   2          # Calculate d/dk wave function only
   tolwfr2   1.0d-22    # Use wave function residual criterion instead
 
-#Set 3: Response function calculation of Q=0 phonons and electric field pert.
+# Set 3: Response function calculation of Q=0 phonons and electric field perturbation.
 
-  getddk3   2          # d/dk wave functions from last dataset
+  getddk3   2          # Take d/dk wave functions from last dataset
   kptopt3   2          # Modify default to use time-reversal symmetry
   rfelfd3   3          # Electric-field perturbation response only
 
-#Sets 4-10: Finite-wave-vector phonon calculations (defaults for all datasets)
+# Sets 4-10: Finite-wave-vector phonon calculations (defaults for all datasets)
 
-   getwfk   1          # Use GS wave functions from dataset1
+   getwfk   1          # Use GS wave functions from dataset 1
    kptopt   3          # Need full k-point set for finite-Q response
    rfphon   1          # Do phonon response
   rfatpol   1 2        # Treat displacements of all atoms
@@ -56,15 +60,15 @@
    tolvrs   1.0d-8     # This default is active for sets 3-10
 
 #######################################################################
-#Common input variables
+# Common input variables
 
-#Definition of the unit cell
+# Definition of the unit cell
     acell   3*10.61         # This is equivalent to 10.61 10.61 10.61
     rprim   0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors
             0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1
             0.5  0.5  0.0   # that is, the default.
 
-#Definition of the atom types
+# Definition of the atom types
    ntypat   2         # There are two types of atom
     znucl   13 33     # The keyword "znucl" refers to the atomic number of the
                       # possible type(s) of atom. The pseudopotential(s)
@@ -72,26 +76,26 @@
                       # to the type(s) of atom. Here, type 1 is the Aluminum,
                       # type 2 is the Arsenic.
 
-#Definition of the atoms
+# Definition of the atoms
     natom   2         # There are two atoms
     typat   1 2       # The first is of type 1 (Al), the second is of type 2 (As).
 
      xred   0.0  0.0  0.0
             0.25 0.25 0.25
 
-#Gives the number of band, explicitely (do not take the default)
+# Gives the number of band, explicitly (do not take the default)
     nband   4
 
-#Exchange-correlation functional
+# Exchange-correlation functional
 
       ixc   1             # LDA Teter Pade parametrization
 
-#Definition of the planewave basis set
+# Definition of the planewave basis set
 
      ecut   3.0           # Maximal kinetic energy cut-off, in Hartree
                           # This is way too low!!
 
-#Definition of the k-point grid
+# Definition of the k-point grid
     ngkpt   4  4  4
   nshiftk   4              # Use one copy of grid only (default)
    shiftk   0.0 0.0 0.5    # This gives the usual fcc Monkhorst-Pack grid
@@ -99,13 +103,16 @@
             0.5 0.0 0.0
             0.5 0.5 0.5
 
-#Definition of the SCF procedure
+# Definition of the SCF procedure
     nstep   25         # Maximal number of SCF cycles
    diemac   9.0        # Although this is not mandatory, it is worth to
                        # precondition the SCF cycle. The model dielectric
                        # function used as the standard preconditioner
                        # is described in the "dielng" input variable section.
                        # The dielectric constant of AlAs is smaller that the one of Si (=12).
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -114,12 +121,11 @@
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_1.out, tolnlines= 90, tolabs=  3.000e-02, tolrel=  6.000e-03
-#%% psp_files =  13al.981214.fhi, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description =
-#%%   E-ph for the mobility in semiconductors
+#%%   Preparatory steps for computing phonon-limited mobility in semiconductors
 #%%<END TEST_INFO>

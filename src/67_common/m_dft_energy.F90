@@ -94,6 +94,7 @@ contains
 !! energies%e_eigenvalues, ek and enl from arbitrary (orthonormal) provided wf,
 !! ehart, enxc, and eei from provided density and potential,
 !! energies%e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
+!! energies%e_zeeman=Zeeman spin energy from applied magnetic field -m.B
 !! ek=kinetic energy, ehart=Hartree electron-electron energy,
 !! enxc,enxcdc=exchange-correlation energies, eei=local pseudopotential energy,
 !! enl=nonlocal pseudopotential energy
@@ -210,18 +211,10 @@ contains
 !!  For example, the density has already been precomputed, so why to compute it again here ??
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      bandfft_kpt_restoretabs,bandfft_kpt_savetabs,destroy_hamiltonian
-!!      dotprod_vn,fftpac,fourdp,gpu_finalize_ffnl_ph3d,gpu_update_ffnl_ph3d
-!!      hartre,init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian
-!!      mag_penalty,make_gemm_nonlop,meanvalue_g,metric,mkffnl,mkkin,mkresi
-!!      mkrho,nonlop,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
-!!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhohxcpositron,rhotoxc,pawrhoij_symrhoij,timab
-!!      transgrid,xcdata_init,xmpi_sum
+!!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab
 !!
 !! SOURCE
 
@@ -293,6 +286,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
  real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vzeeman(4)
+ real(dp) :: magvec(dtset%nspden)
  real(dp),target :: vxctau_dum(0,0,0)
  real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
@@ -361,7 +355,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,rhog,rprimd,vhartr)
+     call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfftf,ngfftf,&
+                 &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
      call xcdata_init(xcdata,dtset=dtset)
      ABI_ALLOCATE(kxc,(1,nkxc))
 !    to be adjusted for the call to rhotoxc
@@ -421,7 +416,11 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    vzeeman(:) = zero
    if(dtset%nspden==2)then
-     vzeeman(2) = -half*dtset%zeemanfield(3) ! For collinear ispden=2 is rho_up only
+!TODO: check this against rhotov and setvtr, where the potential is -1/2 and +1/2 for the 2 spin components.
+! see comment by SPr in rhotov
+! TODO: check this 1/2 factor is for the electron spin magnetic moment.
+     vzeeman(1) = -half*dtset%zeemanfield(3) ! For collinear ispden=1 potential is v_upup
+     vzeeman(2) = +half*dtset%zeemanfield(3) ! For collinear ispden=2 potential is v_dndn
    end if
    if(dtset%nspden==4)then
      vzeeman(1)=-half*dtset%zeemanfield(3)
@@ -429,11 +428,22 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      vzeeman(3)=-half*dtset%zeemanfield(1)
      vzeeman(4)= half*dtset%zeemanfield(2)
    end if
+   magvec = zero
    do ispden=1,dtset%nspden
      do ifft=1,nfftf
+!TODO: the full cell magnetization will need extra PAW terms, and is certainly calculated elsewhere.
+!The calculation of the zeeman energy can be moved there
+       magvec(ispden) = magvec(ispden) + rhor(ifft,ispden)
        vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeeman(ispden)
      end do
    end do
+   if(dtset%nspden==2)then
+     energies%e_zeeman = -half*dtset%zeemanfield(3)*(two*magvec(2)-magvec(1)) !  diff rho = rhoup-rhodown = 2 rhoup - rho
+   else if(dtset%nspden==4)then
+     energies%e_zeeman = -half * (dtset%zeemanfield(1)*magvec(2)& ! x
+&                                +dtset%zeemanfield(2)*magvec(3)& ! y
+&                                +dtset%zeemanfield(3)*magvec(4)) ! z
+   end if
  end if
 
 !Compute the constrained potential for the magnetic moments
@@ -957,7 +967,7 @@ end subroutine energy
 !!   $= \langle C_n \mid H H \mid C_n \rangle- \langle C_n \mid H \mid C_n \rangle^2 $.
 !!
 !! PARENTS
-!!      energy
+!!      m_dft_energy
 !!
 !! CHILDREN
 !!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab

@@ -41,13 +41,15 @@
  znucl 26.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t15.out, tolnlines = 0, tolabs = 1.000e-10, tolrel = 1.000e-10, fld_options = -easy
-#%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

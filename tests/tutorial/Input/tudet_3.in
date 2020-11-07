@@ -44,12 +44,10 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = ujdet
-#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% test_chain = tudet_1.in, tudet_2.in, tudet_3.in
 #%% [files]
 #%% files_to_test = 
 #%%   tudet_3.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -medium
-#%% psp_files =  Fe.GGA_PBE-JTH.xml
 #%% [shell]
 #%% pre_commands = iw_cp tudet_3.in ujdet.in
 #%% post_commands = ww_mv ujdet.out tudet_3.out

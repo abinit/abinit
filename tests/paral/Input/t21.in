@@ -44,6 +44,7 @@
        0.5 0.5 0.0
  xred 0.0  0.0  0.0
       0.22 0.22 0.22
+ chksymtnons 0
  znucl 14
  kptopt 0
  nband 12 occ 4*2 8*0
@@ -62,11 +63,13 @@
 #densfor_pred 6 intxc 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.phoney_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 14si.phoney_mod
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
