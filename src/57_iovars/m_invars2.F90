@@ -1231,6 +1231,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkdilatmx',tread,'INT')
    if(tread==1) dtset%chkdilatmx=intarr(1)
   
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
+   if(tread==1) dtset%chkprim=intarr(1)
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
    if(tread==1) dtset%chksymbreak=intarr(1)
   
@@ -1240,6 +1243,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  else
 
    dtset%chkdilatmx=0
+   dtset%chkprim=0
    dtset%chksymbreak=0
    dtset%chksymtnons=0
 
