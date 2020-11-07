@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 14 Oct 2020.
-- ( at 22h08 )
+.Starting date : Sat  7 Nov 2020.
+- ( at 09h33 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI4/paral_t41_MPI4/t41.in
 - output file    -> t41_MPI4.out
@@ -55,6 +55,7 @@ _ WF disk file :      1.479 Mbytes ; DEN or POT disk file :      3.817 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.5706000000E+01  1.5706000000E+01  1.5706000000E+01 Bohr
               amu      1.96966550E+02
+          chkprim           0
      densfor_pred           6
              ecut      3.00000000E+00 Hartree
            enunit           2
@@ -882,6 +883,7 @@ total_energy_dc_eV  : -7.20591497450591E+03
  -outvars: echo values of variables after computation  --------
             acell      1.5706000000E+01  1.5706000000E+01  1.5706000000E+01 Bohr
               amu      1.96966550E+02
+          chkprim           0
      densfor_pred           6
              ecut      3.00000000E+00 Hartree
            enunit           2
@@ -1084,10 +1086,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         12.1  wall=         14.4
+- Proc.   0 individual time (sec): cpu=         12.1  wall=         13.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         54.4  wall=         56.7
++Overall time at end (sec) : cpu=         52.9  wall=         54.6
