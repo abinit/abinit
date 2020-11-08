@@ -738,7 +738,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! FIXME this is to preserve the old implementation for the head and the wings in ccchi0q0
    ! But has to be rationalized
-   KS_BSt%eig=QP_BSt%eig
+   !KS_BSt%eig=QP_BSt%eig
 
    ! Calculate new occ. factors and fermi level.
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget)
@@ -1309,8 +1309,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      dim_kxcg=0
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
-!  bootstrap --
    case (-3, -4, -5, -6, -7, -8)
+   ! Bootstrap kernel and variants
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      if (Dtset%gwgamma>-5) then
        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel is being added to screening')
@@ -1327,21 +1327,34 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
      ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
-!
+
+   case (7)
+   ! Bootstrap+ALDA hybrid vertex kernel
+     ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
+     MSG_WARNING('EXPERIMENTAL: Bootstrap+ALDA hybrid kernel is being added to screening')
+     ikxc=7; approx_type=7; dim_kxcg=1 
+     option_test=1  ! TESTELECTRON
+     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
+     call kxc_driver(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,rhor_kernel,&
+     Ep%npwe,dim_kxcg,kxcg,Gsph_epsG0%gvec,xmpi_comm_self)
 
    case default
      MSG_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
    end select
 
-   if (approx_type<2) then
+   if (approx_type<2) then !ALDA
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)
-   else if (approx_type<3) then !@WC: ADA
+   else if (approx_type<3) then !ADA
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
-   else if (approx_type<7) then !@WC: bootstrap
+   else if (approx_type<7) then !Bootstrap
+     call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
+     approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
+     chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)
+   else if (approx_type<8) then  !Bootstrap+ALDA
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)

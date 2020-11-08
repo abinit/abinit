@@ -1809,8 +1809,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      dim_kxcg = 0
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
-!  @WC: bootstrap --
    case (-3, -4, -5, -6, -7, -8)
+   !  bootstrap kernels
 !    ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
      ABI_CHECK(Er%ID==0,"Er%ID should be 0")
 
@@ -1849,7 +1849,37 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
      ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
-     ! --@WC
+
+   case (7)
+   !  bootstrap+ALDA kernel
+!    ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
+     ABI_CHECK(Er%ID==0,"Er%ID should be 0")
+
+     if (Dtset%usepaw==1) then
+       ! If we have PAW, we need the full density on the fine grid
+       ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden))
+       if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
+         MSG_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
+       end if
+       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin),"COLL")
+       if (.not. file_exists(dtfil%filpawdensin)) then
+         MSG_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
+       end if
+
+       ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
+
+       call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
+       ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
+
+       call hdr_rhor%free()
+       call pawrhoij_free(tmp_pawrhoij)
+       ABI_FREE(tmp_pawrhoij)
+     end if ! Dtset%usepaw==1
+
+     id_required=4; approx_type=7; ikxc=7; dim_kxcg=1
+     option_test=1
+     ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
+     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
    case default
      MSG_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
