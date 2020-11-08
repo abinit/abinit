@@ -892,6 +892,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
          !Needs one more resymmetrization, for the tnons
          ABI_ALLOCATE(tnons_new,(3,nsym))
+
          call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
 &          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
          tnons(:,1:nsym)=tnons_new(:,:)
@@ -975,6 +976,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
      call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tol8)
      call mkradim(acell,rprim,rprimd)
+
+     !Needs one more resymmetrization, for the tnons
+     ABI_ALLOCATE(tnons_new,(3,nsym))
+     call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
+&          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
+     tnons(:,1:nsym)=tnons_new(:,:)
+     ABI_DEALLOCATE(tnons_new)
+
    end if
 
  end if
