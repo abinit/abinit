@@ -1,6 +1,6 @@
 
 .Version 9.2.2 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  1 Nov 2020.
-- ( at 19h07 )
+.Starting date : Sat  7 Nov 2020.
+- ( at 09h20 )
   
-- input  file    -> /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Test_suite/v9_t17/t17.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI1/v9_t17/t17.in
 - output file    -> t17.out
 - root for input  files -> t17i
 - root for output files -> t17o
@@ -52,6 +52,7 @@ _ WF disk file :      0.063 Mbytes ; DEN or POT disk file :      0.084 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      6.8737560068E+00  6.8737560068E+00  2.2206443012E+01 Bohr
               amu      1.14820000E+02  1.40067400E+01
+          chkprim           0
       chksymtnons           2
            diemac      1.20000000E+01
              ecut      5.00000000E+00 Hartree
@@ -119,7 +120,7 @@ P           mkmem           1
                       -3.4462066526E-03  3.9685648785E+00  1.5304302435E+01
                        3.4334331615E+00  1.9842848020E+00  9.7526916821E+00
                        3.4334331615E+00  1.9842848020E+00  2.0855913188E+01
-             xred      3.3283237330E-01  6.6666666667E-01 -1.8297392218E-04
+             xred      3.3283237330E-01  6.6666666667E-01 -1.8297392219E-04
                        3.3283237330E-01  6.6666666667E-01  4.9981702608E-01
                        6.6616570663E-01  3.3333333333E-01  2.4981702608E-01
                        6.6616570663E-01  3.3333333333E-01  7.4981702608E-01
@@ -134,11 +135,11 @@ P           mkmem           1
  chkinp: Checking input parameters for consistency.
    Found potentially symmetry-breaking value of tnons. 
    The following shift of all reduced symmetry-corrected atomic positions might possibly remove this problem:
-    5.0096003333E-04   -1.7759231585E-16    0.0000000000E+00
+    5.0096003333E-04   -2.2204460493E-16    0.0000000000E+00
 
    For your convenience, you might cut+paste the shifted new atomic positions (for image 1 only):
    xred
-            3.3333333333E-01    6.6666666667E-01   -1.8297392218E-04
+            3.3333333333E-01    6.6666666667E-01   -1.8297392219E-04
             3.3333333333E-01    6.6666666667E-01    4.9981702608E-01
             6.6666666667E-01    3.3333333333E-01    2.4981702608E-01
             6.6666666667E-01    3.3333333333E-01    7.4981702608E-01
@@ -171,8 +172,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.03028
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for In,  from PRB58, 3641 (1998)
 - 49.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -197,8 +198,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    3.321137
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for N,  from PRB58, 3641 (1998)
 -  7.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -331,7 +332,7 @@ force_length_stats: {min:   7.86443537E-02, max:   7.86443537E-02, mean:   7.864
     8       0.000000000000      0.000000000000      1.835770584488
 
  cartesian coordinates (angstrom) at end:
-    1     -0.00182365401663     2.10007408451020    -0.00215015282107
+    1     -0.00182365401663     2.10007408451020    -0.00215015282108
     2     -0.00182365401663     2.10007408451020     5.87342161008046
     3      1.81689457630880     1.05003829255854     2.93563572862969
     4      1.81689457630880     1.05003829255854     8.81120749153123
@@ -352,14 +353,14 @@ force_length_stats: {min:   7.86443537E-02, max:   7.86443537E-02, mean:   7.864
  frms,max,avg= 4.5405339E-02 7.8644354E-02   0.000E+00  0.000E+00 -4.024E-03 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     4.04405492730674
-    2     -0.00000000000000    -0.00000000000000     4.04405492730674
-    3     -0.00000000000000    -0.00000000000000     4.04405492730674
-    4     -0.00000000000000    -0.00000000000000     4.04405492730674
-    5     -0.00000000000000    -0.00000000000000    -4.04405492730674
-    6     -0.00000000000000    -0.00000000000000    -4.04405492730674
-    7     -0.00000000000000    -0.00000000000000    -4.04405492730674
-    8     -0.00000000000000    -0.00000000000000    -4.04405492730674
+    1     -0.00000000000000    -0.00000000000000     4.04405492730673
+    2     -0.00000000000000    -0.00000000000000     4.04405492730673
+    3     -0.00000000000000    -0.00000000000000     4.04405492730673
+    4     -0.00000000000000    -0.00000000000000     4.04405492730673
+    5     -0.00000000000000    -0.00000000000000    -4.04405492730673
+    6     -0.00000000000000    -0.00000000000000    -4.04405492730673
+    7     -0.00000000000000    -0.00000000000000    -4.04405492730673
+    8     -0.00000000000000    -0.00000000000000    -4.04405492730673
  frms,max,avg= 2.3348362E+00 4.0440549E+00   0.000E+00  0.000E+00 -2.069E-01 e/A
  length scales=  6.873756006790  6.873756006790 22.206443012000 bohr
               =  3.637435016202  3.637435016202 11.751143525803 angstroms
@@ -374,14 +375,14 @@ force_length_stats: {min:   7.86443537E-02, max:   7.86443537E-02, mean:   7.864
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.03141887671135E+01
-hartree             :  8.19337783689590E+00
+hartree             :  8.19337783689589E+00
 xc                  : -1.60114138683168E+00
 Ewald energy        : -3.71023095414565E+01
 psp_core            :  2.42916843616356E+00
 local_psp           : -3.20994740833126E+01
 non_local_psp       :  7.48551304571461E+00
 total_energy        : -3.23806769257133E+01
-total_energy_eV     : -8.81123029472230E+02
+total_energy_eV     : -8.81123029472229E+02
 band_energy         : -7.30279604448909E+00
 ...
 
@@ -402,6 +403,7 @@ band_energy         : -7.30279604448909E+00
  -outvars: echo values of variables after computation  --------
             acell      6.8737560068E+00  6.8737560068E+00  2.2206443012E+01 Bohr
               amu      1.14820000E+02  1.40067400E+01
+          chkprim           0
       chksymtnons           2
            diemac      1.20000000E+01
              ecut      5.00000000E+00 Hartree
@@ -480,7 +482,7 @@ P           mkmem           1
                       -3.4462066526E-03  3.9685648785E+00  1.5304302435E+01
                        3.4334331615E+00  1.9842848020E+00  9.7526916821E+00
                        3.4334331615E+00  1.9842848020E+00  2.0855913188E+01
-             xred      3.3283237330E-01  6.6666666667E-01 -1.8297392218E-04
+             xred      3.3283237330E-01  6.6666666667E-01 -1.8297392219E-04
                        3.3283237330E-01  6.6666666667E-01  4.9981702608E-01
                        6.6616570663E-01  3.3333333333E-01  2.4981702608E-01
                        6.6616570663E-01  3.3333333333E-01  7.4981702608E-01
@@ -585,10 +587,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          3.1  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          1.4
++Overall time at end (sec) : cpu=          3.1  wall=          4.0
