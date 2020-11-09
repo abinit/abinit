@@ -682,12 +682,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      !Open *csv file for storing GF values of all cores for this iteration
      write(filename,'(a,I1,a,I3.3,a,I3.3,a)') "GF_values_iatom",fit_iatom,"_proc",my_rank,"_iter",icycle,".csv"
      unit_GF_val = get_unit()
-     if(iam_master)then
-        if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
+     if (open_file(filename,message,unit=unit_GF_val,form="formatted",&
 &          status="unknown",action="write") /= 0) then
            MSG_ERROR(message)
-        end if
-     endif
+     end if
 !    Reset gf_values
      gf_values(:,:) = zero
      do icoeff=1,my_ncoeff
@@ -756,7 +754,14 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        else!In this case the matrix is singular
          gf_values(:,icoeff) = zero
          singular_coeffs(icoeff) = 1
-!         write(message, '(a)') ' The matrix is singular...'
+         write(message, '(a)') ' The matrix is singular...'
+         write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",",&
+!&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
+&                                   trim(my_coeffs(icoeff)%name),",",&
+&                                  "None",",",&
+&                                  "None",",",&
+&                                  "None",",",&
+&                                  "None"                                  
        end if
        if(need_verbose)then
            call wrtout(std_out,message,'COLL')
