@@ -116,10 +116,9 @@ module m_rmm_diis
    procedure :: eval_mats => rmm_diis_eval_mats         ! Compute DIIS matrices
    procedure :: exit_iter => rmm_diis_exit_iter         ! Return True if can exit the DIIS iteration.
    procedure :: print_block => rmm_diis_print_block     ! Print energies, residuals and diffs for a given block.
-   procedure :: rollback => rmm_diis_rollback
+   procedure :: rollback => rmm_diis_rollback           ! select the trial states in the chain with smaller resid.
    ! TODO: Fix problem with last_iter and hist
-   procedure :: push_hist => rmm_diis_push_hist
-   procedure :: push_iter => rmm_diis_push_iter         ! Save results required by DIIS algorithm
+   procedure :: push_iter => rmm_diis_push_iter         ! Save results required the by DIIS algorithm
 
  end type rmm_diis_t
 
@@ -145,7 +144,7 @@ contains
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
-!!  nspinor=number of plane waves at this k point
+!!  my_nspinor=number of plane waves at this k point
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)
@@ -153,7 +152,8 @@ contains
 !!  If usepaw==1:
 !!    gsc_all(2,*)=<g|s|c> matrix elements (s=overlap)
 !!  If usepaw==0
-!!    enlx(nband)=contribution from each band to nonlocal psp + potential Fock ACE part of total energy, at this k-point
+!!    enlx(nband)=contribution from each band to nonlocal psp + potential Fock ACE part
+!!                of total energy, at this k-point
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
@@ -171,15 +171,15 @@ contains
 !! SOURCE
 
 subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc_all, &
-                    mpi_enreg, nband, npw, nspinor, resid, rmm_diis_status)
+                    mpi_enreg, nband, npw, my_nspinor, resid, rmm_diis_status)
 
 !Arguments ------------------------------------
- integer,intent(in) :: istep, ikpt, isppol, nband, npw, nspinor
+ integer,intent(in) :: istep, ikpt, isppol, nband, npw, my_nspinor
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
  type(mpi_type),intent(inout) :: mpi_enreg
- real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
- real(dp),target,intent(inout) :: gsc_all(2,npw*nspinor*nband*dtset%usepaw)
+ real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
+ real(dp),target,intent(inout) :: gsc_all(2,npw*my_nspinor*nband*dtset%usepaw)
  real(dp),intent(inout) :: enlx(nband), resid(nband)
  real(dp),intent(in) :: occ(nband), kinpw(npw)
  real(dp),intent(out) :: eig(nband)
@@ -191,7 +191,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb, ortalgo
  integer :: cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
  integer :: me_g0, nb_pocc, jj, kk, it, accuracy_level, raise_acc, prev_mixprec, after_ortho
- integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy
+ integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy !, nspinor
  logical :: end_with_trial_step, first_call, use_fft_mixprec
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops, max_res_pocc, tol_occupied
@@ -210,7 +210,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
  me_g0 = mpi_enreg%me_g0; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
- npwsp = npw * nspinor; mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
+ !nspinor = dtset%nspinor
+ npwsp = npw * my_nspinor; mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
  prtvol = dtset%prtvol !; prtvol = -level
 
  ! =================
@@ -253,7 +254,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (prev_accuracy_level == 2 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 3
  if (prev_accuracy_level == 3 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 4
  if (raise_acc > 0) then
-   call wrtout(std_out, "Accuracy_level will be automatically increased because we reached the max number of NSCF iterations.")
+   call wrtout(std_out, "Accuracy_level is automatically increased as we reached the max number of NSCF iterations.")
  end if
  raise_acc = max(raise_acc, prev_accuracy_level)
 
@@ -353,7 +354,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! =========================
  ! === Subspace rotation ===
  ! =========================
- call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig, cg, gsc_all, evec)
+ call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc_all, evec)
  ABI_FREE(evec)
 
  ABI_MALLOC(lambda_bk, (bsize))
@@ -391,7 +392,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Compute H |phi_0> with cg block after subdiago.
    phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
 
-   call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+   call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                         eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
 
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input phi_bk is already S-normalized.
@@ -411,7 +412,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    !
    ! Precondition |R_0>, output in kres_bk = |K R_0>
    call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
-   call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
+   call cg_precon_many(istwf_k, npw, my_nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
    if (timeit) call cwtime_report(" first cg_precon ", cpu, wall, gflops)
 
    ! Compute H |K R_0>
@@ -456,14 +457,14 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
        ! Precondition residual, output in kres_bk.
        call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
-       call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
+       call cg_precon_many(istwf_k, npw, my_nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
 
        ! Compute phi_bk with the lambda(ndat) obtained at iteration #1
        call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
      end if
 
      ! Compute H |phi_now> and evaluate new enlx for NC.
-     call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+     call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
 
      ! Store new residuals.
@@ -489,7 +490,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ! the states before returning so here we just update the trial states without recomputing
      ! eigenvalues, residuals and enlx.
      call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
-     call cg_precon_many(istwf_k, npw, nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
+     call cg_precon_many(istwf_k, npw, my_nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
 
      ! Build |Psi_1> = |Phi_0> + lambda |K R_0>
      ! Reuse previous lambda.
@@ -500,7 +501,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      if (usepaw == 1) then
        ! Need to recompute <G|S|Psi> before calling pw_orthon
 #if 0
-       call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+       call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
 #else
        !dimenl1=gs_ham%dimekb1;dimenl2=natom;tim_nonlop=0
@@ -572,7 +573,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
        else
           ! FIXME This call seems to be needed for PAW. Strange as <G|S|psi> is already recomputed in pw_orthon!
-          !call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+          !call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
           !                     eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
           !                     normalize=.False.)
           !                     !normalize=.True.)
@@ -580,7 +581,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
      case (2)
        ! Consistent mode: update enlx_bx, eigens, residuals after orthogonalizalization.
-       call getghc_eigresid(gs_hamk, npw, nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+       call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
                             normalize=.False.)
                             !normalize=.True.)
@@ -612,46 +613,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 end subroutine rmm_diis
 !!***
 
-!!****f* m_rmm_diis/rmm_diis_push_hist
-!! NAME
-!!  rmm_diis_push_hist
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine rmm_diis_push_hist(diis, iter, ndat, eig_bk, resid_bk, enlx_bk, tag)
-
- class(rmm_diis_t),intent(inout) :: diis
- integer,intent(in) :: iter, ndat
- real(dp),intent(in) :: eig_bk(ndat), resid_bk(ndat), enlx_bk(ndat)
- character(len=*),intent(in) :: tag
-
-! *************************************************************************
-
- diis%last_iter = iter
- diis%hist_ene(iter, 1:ndat) = eig_bk
- diis%hist_resid(iter, 1:ndat) = resid_bk
- diis%hist_enlx(iter, 1:ndat) = enlx_bk
- diis%step_type(iter, 1:ndat) = tag
-
-end subroutine rmm_diis_push_hist
-!!***
-
 !!****f* m_rmm_diis/rmm_diis_push_iter
 !! NAME
 !!  rmm_diis_push_iter
 !!
 !! FUNCTION
-!!  Save one iteration of the DIIS.
+!!  Save one iteration of the DIIS algorithm.
 !!
 !! INPUTS
 !!
@@ -879,18 +846,18 @@ end subroutine rmm_diis_print_block
 !!
 !! SOURCE
 
-subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg, prtvol, &
+subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enreg, prtvol, &
                            eig, resid, enlx, residvecs, gvnlxc, normalize)
 
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
- integer,intent(in) :: npw, nspinor, ndat, prtvol
- real(dp),intent(inout) :: cg(2, npw*nspinor*ndat)
- real(dp),intent(out) :: ghc(2,npw*nspinor*ndat), gsc(2,npw*nspinor*ndat*gs_hamk%usepaw)
+ integer,intent(in) :: npw, my_nspinor, ndat, prtvol
+ real(dp),intent(inout) :: cg(2, npw*my_nspinor*ndat)
+ real(dp),intent(out) :: ghc(2,npw*my_nspinor*ndat), gsc(2,npw*my_nspinor*ndat*gs_hamk%usepaw)
  type(mpi_type),intent(inout) :: mpi_enreg
  real(dp),intent(out) :: eig(ndat), resid(ndat), enlx(ndat)
- real(dp),intent(out) :: residvecs(2, npw*nspinor*ndat)
- real(dp),intent(out) :: gvnlxc(2, npw*nspinor*ndat)
+ real(dp),intent(out) :: residvecs(2, npw*my_nspinor*ndat)
+ real(dp),intent(out) :: gvnlxc(2, npw*my_nspinor*ndat)
  logical,optional,intent(in) :: normalize
 
 !Local variables-------------------------------
@@ -908,7 +875,7 @@ subroutine getghc_eigresid(gs_hamk, npw, nspinor, ndat, cg, ghc, gsc, mpi_enreg,
  if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  normalize_ = .True.; if (present(normalize)) normalize_ = normalize
- npwsp = npw * nspinor
+ npwsp = npw * my_nspinor
  usepaw = gs_hamk%usepaw; istwf_k = gs_hamk%istwf_k; me_g0 = mpi_enreg%me_g0
  comm = mpi_enreg%comm_spinorfft; if (mpi_enreg%paral_kgb == 1) comm = mpi_enreg%comm_bandspinorfft
 
@@ -1400,7 +1367,7 @@ end subroutine my_pack_matrix
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
-!!  nspinor=number of plane waves at this k point
+!!  my_nspinor=number of plane waves at this k point
 !!
 !! OUTPUT
 !!  If usepaw==1:
@@ -1418,22 +1385,22 @@ end subroutine my_pack_matrix
 !!
 !! SOURCE
 
-subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig, cg, gsc_all, evec)
+subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc_all, evec)
 
 !Arguments ------------------------------------
- integer,intent(in) :: nband, npw, nspinor
+ integer,intent(in) :: nband, npw, my_nspinor
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
  type(mpi_type),intent(inout) :: mpi_enreg
- real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
- real(dp),target,intent(inout) :: gsc_all(2,npw*nspinor*nband*dtset%usepaw)
+ real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
+ real(dp),target,intent(inout) :: gsc_all(2,npw*my_nspinor*nband*dtset%usepaw)
  real(dp),intent(out) :: eig(nband)
  real(dp),allocatable,intent(out) :: evec(:,:,:)
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, tim_getghc = 0, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, paral_kgb
- integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw
+ integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw !, nspinor
  integer :: me_g0, cplex, comm_bandspinorfft
  real(dp) :: cpu, wall, gflops
  real(dp),parameter :: rdummy = zero
@@ -1452,7 +1419,8 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
  me_g0 = mpi_enreg%me_g0
  comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
- npwsp = npw * nspinor
+ !nspinor = dtset%nspinor
+ npwsp = npw * my_nspinor
 
  ! =======================================
  ! Apply H to input cg to compute <i|H|j>
@@ -1537,7 +1505,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, nspinor, eig
  ! ========================
  ABI_MALLOC(evec, (2, nband, nband))
  mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
- call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, nspinor, paral_kgb, &
+ call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, my_nspinor, paral_kgb, &
                subham, subovl, use_subovl0, usepaw, me_g0)
 
  ABI_FREE(subham)

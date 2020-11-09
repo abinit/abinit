@@ -33,6 +33,7 @@ inp_files = [
 "t29.in",
 "t30.in",
 "t31.in",
+"t32.in",
 "t41.in",
 "-t48.in", # MPI-IO, not tested here!
 "-t49.in", # MPI-IO, not tested here!

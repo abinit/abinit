@@ -3073,7 +3073,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    if (dt%rmm_diis /= 0) then
      ! Check for calculations that are not implemented with RMM-DIIS
-     ABI_CHECK(dt%npspinor == 1, "RMM-DIIS with spinor parallelism is not implemented")
      ABI_CHECK(dt%usefock == 0, "RMM-DIIS with Hartree-Fock or Hybrid Functionals is not implemented")
      ABI_CHECK(dt%wfoptalg /= 1, "RMM-DIIS with Chebyshev is not supported.")
      berryflag = any(dt%berryopt == [4, 14, 6, 16, 7, 17])
@@ -3905,7 +3904,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    write(msg,'(4a)')ch10,&
    ' Checking consistency of input data against itself revealed some problem(s).',ch10,&
    ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).'
-   call wrtout(iout,msg,'COLL')   
+   call wrtout(iout,msg,'COLL')
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above.'
