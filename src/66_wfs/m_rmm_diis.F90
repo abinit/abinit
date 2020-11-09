@@ -253,7 +253,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (prev_accuracy_level == 2 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 3
  if (prev_accuracy_level == 3 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 4
  if (raise_acc > 0) then
-   call wrtout("Accuracy_level will be automatically increased because we reached the max number of NSCF iterations.")
+   call wrtout(std_out, "Accuracy_level will be automatically increased because we reached the max number of NSCF iterations.")
  end if
  raise_acc = max(raise_acc, prev_accuracy_level)
 
