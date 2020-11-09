@@ -3503,7 +3503,7 @@ _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-      chksymbreak           0
+      chksymtnons           0
            diemac      1.20000000E+01
              ecut      4.00000000E+00 Hartree
            enunit11         0
@@ -38988,7 +38988,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-      chksymbreak           0
+      chksymtnons           0
            diemac      1.20000000E+01
              ecut      4.00000000E+00 Hartree
            enunit11         0
