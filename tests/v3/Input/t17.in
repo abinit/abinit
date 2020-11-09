@@ -14,7 +14,7 @@
   xcart3  -2.1225 0 0 2.122 0 0
  getwfk3  1
 
- chksymbreak 0
+ chksymtnons 0
 
 #RF data
    xcart4  -2.122 0 0 2.122 0 0

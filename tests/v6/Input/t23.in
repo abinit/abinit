@@ -4,7 +4,7 @@ ecut 3 # may need to increase this to get portable results
 xcart
 0.1002 0 0.05
 2.5 2.5 2.5
-chksymbreak 0
+ chksymtnons 0
 
 # this turns on the use of delocalized internals for geometry relaxation
 # Broyden algorithm on top
