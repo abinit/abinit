@@ -21866,15 +21866,21 @@ Variable(
     mnemonics="Activate the RMM-DIIS eigensolver in the GS part.",
     added_in_version="9.3.0",
     text=r"""
-Note that this variable is under active development so use it at your own risk.
 
-This variable enables the RMM-DIIS eigensolver to **accelerate**
+!!! warning
+
+    This variable is under active development so use it at your own risk!
+
+This variable activates the RMM-DIIS eigensolver to **accelerate**
 GS computations, structural relaxations and molecular-dynamics simulations.
-Note that the accuracy of the RMM-DIIS solver strongly depends on the quality of the input trial states
-as the RMM-DIIS algorithm is designed to find the closest eigenvector/eigevalue pair.
+It is compatible with NC and PAW and the different MPI levels implemented in the GS part.
+It has no effect for DFPT calculations or other [[opdriver]] values.
+
+CG and LOBPC
+The accuracy and reliability of the RMM-DIIS method **strongly** depends on the quality of the input trial states
+as the algorithm is designed to find the closest eigenvector-eigevalue pair.
 This means that RMM-DIIS is usually used in conjunction with another eigenvalue solver
-that provides an initial guess for the KS eigenstates that are supposed to be reasonably close
-to the exact solution.
+that provides the initial guess for the KS eigenstates
 The algorithm is inspired to XXX although the ABINIT implementation is not
 completely equivalent to the original formulation.
 
@@ -21892,16 +21898,16 @@ Note also [[bandpp]]
 
 If we are running a standard GS calculation. Abinit activates the RMM-DIIS solver after 3 + [[rmm_diis]] SCF iterations
 In the case of structural relaxations, the first SCF cycle is done with 3 + [[rmm_diis]] as usual whereas
-the subsequent relaxation steps activate RMM-DIIS after 1 + [[rmm_diis]] SCF iterations.
-This means that using [[rmm_diis]] 1 in a structural relaxation leads to:
+the subsequent relaxation steps switch to RMM-DIIS after 1 + [[rmm_diis]] SCF iterations.
 
-    - 4 SCF iterations with the "standard" eigensolver followed by RMM-DIIS for the intial crystalline structure
+This means that using [[rmm_diis]] 1 for a structural relaxation leads to:
+
+    - 4 SCF iterations with the "standard" eigensolver followed by RMM-DIIS for the initial GS calculation.
     - 2 SCF iterations with the "Standard" eigesolver followed by the RMM-DIIS when we start the relaxation process.
 
-
 The RMM-DIIS solver usually requires less wall-time per iteration when compared to other approches since the
-explicit orthogonalization of the trial states is avoided during the iterative diagonalization and
-a single full-band orthogonalization is performed per cycle.
+explicit orthogonalization of the trial states is avoided during the optimization step and
+a single full-band orthogonalization is performed only once per SCF cycle.
 On the other hand, RMM-DIIS usually leads to a significant speedup especially for systems
 with relatively large [[mpw]], [[nband]]
 In some cases, RMM-DIIS can be twice as fast **per iteration** as other conventional methods.
@@ -21911,12 +21917,6 @@ Also, the present implementation is optimized for converging occupied states so 
 [[rmm_diis]] for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
 Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
 then restart from the WFK file with more accurate eigenvalue solvers to crosscheck the results.
-
-
-This variable has not effect for DFPT or other optdriver cases.
-This option is compatible with NC and PAW as well as CG and LOBPC
-
-If [[ntime]]
 
 
 """,

@@ -137,8 +137,8 @@ contains
 !! This routine updates the wave functions at a given (k-point, spin), using the RMM-DIIS method.
 !!
 !! INPUTS
-!!  istep,ikpt,isppol
-!!  dtset <type(dataset_type)>=all input variales for this dataset
+!!  istep,ikpt,isppol=Iteration step, k-point index, spin index (mainly for printing purposes).
+!!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (hartree)
 !!  mpi_enreg=information about MPI parallelization
@@ -148,15 +148,15 @@ contains
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)
-!!  resid(nband)=residuals for each states
 !!  If usepaw==1:
-!!    gsc_all(2,*)=<g|s|c> matrix elements (s=overlap)
+!!    gsc(2,*)=<g|s|c> matrix elements (s=overlap)
 !!  If usepaw==0
 !!    enlx(nband)=contribution from each band to nonlocal psp + potential Fock ACE part
 !!                of total energy, at this k-point
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
+!!  resid(nband)=residuals for each states.
 !!  rmm_diis_status(2): Status of the eigensolver.
 !!    The first entry gives the previous accuracy.
 !!    The second entry gives the number of iterations already performed with this level.
@@ -170,7 +170,7 @@ contains
 !!
 !! SOURCE
 
-subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc_all, &
+subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc, &
                     mpi_enreg, nband, npw, my_nspinor, resid, rmm_diis_status)
 
 !Arguments ------------------------------------
@@ -179,7 +179,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  type(dataset_type),intent(in) :: dtset
  type(mpi_type),intent(inout) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
- real(dp),target,intent(inout) :: gsc_all(2,npw*my_nspinor*nband*dtset%usepaw)
+ real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*dtset%usepaw)
  real(dp),intent(inout) :: enlx(nband), resid(nband)
  real(dp),intent(in) :: occ(nband), kinpw(npw)
  real(dp),intent(out) :: eig(nband)
@@ -190,7 +190,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer,parameter :: choice1 = 1, signs1 = 1, signs2 = 2, tim_nonlop = 0, paw_opt0 = 0, paw_opt3 = 3
  integer :: ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb, ortalgo
  integer :: cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
- integer :: me_g0, nb_pocc, jj, kk, it, accuracy_level, raise_acc, prev_mixprec, after_ortho
+ integer :: me_g0, nb_pocc, jj, kk, accuracy_level, raise_acc, prev_mixprec, after_ortho
  integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy !, nspinor
  logical :: end_with_trial_step, first_call, use_fft_mixprec
  real(dp),parameter :: rdummy = zero
@@ -208,9 +208,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 ! *************************************************************************
 
+ ! Define useful vars.
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
  me_g0 = mpi_enreg%me_g0; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
- !nspinor = dtset%nspinor
  npwsp = npw * my_nspinor; mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
  prtvol = dtset%prtvol !; prtvol = -level
 
@@ -354,7 +354,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! =========================
  ! === Subspace rotation ===
  ! =========================
- call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc_all, evec)
+ call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc, evec)
  ABI_FREE(evec)
 
  ABI_MALLOC(lambda_bk, (bsize))
@@ -371,7 +371,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
  end if
 
- ! We loop over nblocks, each block has ndat states.
+ ! We loop over nblocks, each block contains ndat states.
+ !
  ! - Convergence behaviour may depend on bsize as branches are taken according to
  !   the status of all bands in the block.
  ! TODO: Transpose only once per block and then work with already_transposed = .True.
@@ -390,7 +391,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    if (all(occ(ib_start:ib_stop) < diis%tol_occupied)) max_niter_block = max(1 + max_niter / 2, 2)
 
    ! Compute H |phi_0> with cg block after subdiago.
-   phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
+   phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
 
    call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                         eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
@@ -536,8 +537,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! ===============================
  call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
  ortalgo = mpi_enreg%paral_kgb !; ortalgo = 3
- call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc_all, usepaw, cg, me_g0, comm_bandspinorfft)
- !call fxphas(cg, gsc_all, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
+ call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bandspinorfft)
+ !call fxphas(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
@@ -555,7 +556,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
      ndat = (ige - igs + 1) / npwsp
      ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
-     phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
+     phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
 
      select case (after_ortho)
      case (1)
@@ -834,7 +835,7 @@ end subroutine rmm_diis_print_block
 !!  getghc_eigresid
 !!
 !! FUNCTION
-!!  Compute new eigenvalues, residuals, H|psi> and enlx from cg and gsc.
+!!  Compute new eigenvalues, residuals, H |psi> and enlx from cg and gsc.
 !!
 !! INPUTS
 !!
@@ -922,6 +923,7 @@ end subroutine getghc_eigresid
 !!  rmm_diis_new
 !!
 !! FUNCTION
+!!  Build new rmm_diis_t instance.
 !!
 !! INPUTS
 !!
@@ -1155,7 +1157,7 @@ end subroutine rmm_diis_update_block
 !!  rmm_diis_eval_mats
 !!
 !! FUNCTION
-!!  Compute matrix elements required by DIIS method.
+!!  Compute matrix elements required by the RMM-DIIS method.
 !!
 !! INPUTS
 !!
@@ -1353,25 +1355,30 @@ subroutine my_pack_matrix(n, mat_in, mat_out)
 end subroutine my_pack_matrix
 !!***
 
-!!****f* ABINIT/rmm_diis
+!!****f* ABINIT/subspace_rotation
 !! NAME
-!! rmm_diis
+!! subspace_rotation
 !!
 !! FUNCTION
-!! This routine updates the wave functions at a given k-point, using the RMM-DIIS method.
+!!  This routine compute the <i|H|j> matrix elements and then performs the subspace rotation
+!!  of the orbitals (rayleigh-ritz procedure)
+!!  The main difference with respect to other similar routines is that this implementation does not require
+!!  the <i|H|j> matrix elements as input so it can be used before performing the wavefunction optimation
+!!  as required e.g. by the RMM-DIIS method.
 !!
 !! INPUTS
-!!  istep,ikpt,isppol
-!!  dtset <type(dataset_type)>=all input variales for this dataset
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
+!!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  mpi_enreg=information about MPI parallelization
-!!  nband=number of bands at this k point for that spin polarization
+!!  nband=number of bands at this k point and spin
 !!  npw=number of plane waves at this k point
-!!  my_nspinor=number of plane waves at this k point
+!!  my_nspinor=number of spinor components treated by this MPI proc.
 !!
 !! OUTPUT
+!!  eig(nband): New eigvalues from subspace rotation.
 !!  If usepaw==1:
-!!    gsc_all(2,*)=<g|s|c> matrix elements (s=overlap)
+!!    gsc(2,*)=<g|S|c> matrix elements (S=overlap)
+!!  evec(nband, nband)=array for holding eigenvectors. Allocated here.
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
@@ -1385,7 +1392,7 @@ end subroutine my_pack_matrix
 !!
 !! SOURCE
 
-subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc_all, evec)
+subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc, evec)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband, npw, my_nspinor
@@ -1393,18 +1400,17 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  type(dataset_type),intent(in) :: dtset
  type(mpi_type),intent(inout) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
- real(dp),target,intent(inout) :: gsc_all(2,npw*my_nspinor*nband*dtset%usepaw)
+ real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*dtset%usepaw)
  real(dp),intent(out) :: eig(nband)
  real(dp),allocatable,intent(out) :: evec(:,:,:)
 
 !Local variables-------------------------------
  integer,parameter :: type_calc0 = 0, tim_getghc = 0, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, paral_kgb
- integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw !, nspinor
+ integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw
  integer :: me_g0, cplex, comm_bandspinorfft
  real(dp) :: cpu, wall, gflops
  real(dp),parameter :: rdummy = zero
- !character(len=500) :: msg
 !arrays
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
@@ -1416,10 +1422,9 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  if (timeit) call cwtime(cpu, wall, gflops, "start")
 
- usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
- me_g0 = mpi_enreg%me_g0
+ usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k
+ paral_kgb = mpi_enreg%paral_kgb; me_g0 = mpi_enreg%me_g0
  comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
- !nspinor = dtset%nspinor
  npwsp = npw * my_nspinor
 
  ! =======================================
@@ -1446,7 +1451,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
    igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
    ndat = (ige - igs + 1) / npwsp
    ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
-   if (usepaw == 1) gsc_bk => gsc_all(1:2,igs:ige)
+   if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
 
    if (paral_kgb == 0) then
      call getghc(cpopt, cg(:,igs:ige), cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
@@ -1505,7 +1510,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  ! ========================
  ABI_MALLOC(evec, (2, nband, nband))
  mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
- call subdiago(cg, eig, evec, gsc_all, 0, 0, istwf_k, mcg, mgsc, nband, npw, my_nspinor, paral_kgb, &
+ call subdiago(cg, eig, evec, gsc, 0, 0, istwf_k, mcg, mgsc, nband, npw, my_nspinor, paral_kgb, &
                subham, subovl, use_subovl0, usepaw, me_g0)
 
  ABI_FREE(subham)
