@@ -58,7 +58,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : orbmag,orbmag_type,nucdip_energy
+ use m_orbmag,           only : orbmag,orbmag_type,ndpw_energy
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -549,9 +549,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
  if(with_vectornd .EQ. 1) then
-   call nucdip_energy(cg,dtset,ndenergy,gmet,mcg,mpi_enreg,nfftf,npwarr,pawfgr,&
+   call ndpw_energy(cg,dtset,ndenergy,gmet,mcg,mpi_enreg,dtset%mband,nfftf,npwarr,pawfgr,&
     & ucvol,vectornd,with_vectornd)
-  write(std_out,'(a,es16.8)')'JWZ Debug nucdip_energy returned ',ndenergy
+  write(std_out,'(a,es16.8)')'JWZ Debug ndpw_energy returned ',ndenergy
  end if
  
  if(dtset%orbmag.NE.0) then

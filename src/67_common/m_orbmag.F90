@@ -169,7 +169,8 @@ module m_orbmag
   ! Bound methods:
   public :: destroy_orbmag
   public :: initorbmag
-  public :: nucdip_energy
+  public :: ndpw_energy
+  public :: ndpaw_energy
   public :: orbmag
 
   private :: orbmag_wf
@@ -4052,12 +4053,12 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,nband_
 end subroutine make_onsite_bm
 !!***
 
-!!****f* ABINIT/nucdip_energy
+!!****f* ABINIT/ndpaw_energy
 !! NAME
-!! nucdip_energy
+!! ndpaw_energy
 !!
 !! FUNCTION
-!! Compute the energy due to the nuclear magnetic dipoles
+!! Compute the PAW energy due to the nuclear magnetic dipoles
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2020 ABINIT  group
@@ -4083,13 +4084,139 @@ end subroutine make_onsite_bm
 !!
 !! SOURCE
 
-subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nfftf,npwarr,pawfgr,&
+subroutine ndpaw_energy(atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,pawrad,pawtab)
+
+ !Arguments ------------------------------------
+
+ !scalars
+ integer,intent(in) :: mcprj 
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type), intent(inout) :: mpi_enreg
+
+ !arrays
+ integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat)
+ type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+ !Local variables -------------------------
+
+ !scalars
+ integer :: me,my_nspinor,ncpgr,nproc,spaceComm
+
+ !arrays
+ integer,allocatable :: dimlmn(:)
+ real(dp),allocatable :: dijnd(:,:)
+ type(pawcprj_type),allocatable :: cprj_k(:,:)
+
+ !-----------------------------------------------------------------------
+ !Init MPI
+ spaceComm=mpi_enreg%comm_cell
+ nproc=xmpi_comm_size(spaceComm)
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ me = mpi_enreg%me_kpt
+ 
+ ncpgr = cprj(1,1)%ncpgr
+ ABI_ALLOCATE(dimlmn,(dtset%natom))
+ call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'R')
+
+ ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,nband_k))
+ call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
+
+ do iatom = 1, dtset%natom
+
+   if(.NOT. ANY(ABS(dtset%nucdipmom(:,iatom)>tol8))) cycle
+
+   itypat = dtset%typat(iatom)
+   lmn2_size=pawtab(itypat)
+   cplex_dij=
+   ndij=
+    
+   ABI_ALLOCATE(dijnd,(lmn2_size,ndij))
+   call pawdijnd(dijnd,cplex_dij,ndij,dtset%nucdipmom(:,iatom),pawrad(itypat),pawtab(itypat))
+
+   icprj = 0 
+   do ikpt = 1, dtset%nkpt
+
+     ! if the current kpt is not on the current processor, cycle
+     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,dtset%nband(ikpt),-1,me)) cycle
+
+     call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
+       &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
+
+     cgdijcb = czero
+     do ilmn = 1, pawtab(itypat)%lmn_size
+       cpg=cmplx(cprj_kg(iatom,ng)%cp(1,ilmn),cprj_kg(iatom,ng)%cp(2,ilmn),KIND=dpc)
+       do jlmn = 1, pawtab(itypat)%lmn_size
+         cpb=cmplx(cprj_kb(iatom,nb)%cp(1,jlmn),cprj_kb(iatom,nb)%cp(2,jlmn),KIND=dpc)
+         if (jlmn .LE. ilmn) then
+           klmn = (ilmn-1)*ilmn/2 + jlmn
+         else
+           klmn = (jlmn-1)*jlmn/2 + ilmn
+         end if
+         if (cplex_dij .EQ. 2) then
+           cdij=cmplx(dijnd(2*klmn-1,1),dijnd(2*klmn,1),KIND=dpc)
+           if (jlmn .GT. ilmn) cdij=conjg(cdij)
+         else
+           cdij=cmplx(dijnd(klmn,1),zero,KIND=dpc)
+         end if
+         cgdijcb = cgdijcb + conjg(cpg)*cdij*cpb
+       end do ! end loop over jlmn
+     end do ! end loop over ilmn
+   end do ! end loop over ikpt
+   icprj = icprj + nband_k
+
+   ABI_DEALLOCATE(dijnd)
+
+ end do ! end loop over iatom
+
+
+ ABI_DEALLOCATE(dimlmn)
+ call pawcprj_free(cprj_k)
+ ABI_DATATYPE_DEALLOCATE(cprj_k)
+ 
+end subroutine ndpaw_energy
+!!***
+
+
+!!****f* ABINIT/ndpw_energy
+!! NAME
+!! ndpw_energy
+!!
+!! FUNCTION
+!! Compute the planewave energy due to the nuclear magnetic dipoles
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ndpw_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_occ,nfftf,npwarr,pawfgr,&
     & ucvol,vectornd,with_vectornd)
 
  !Arguments ------------------------------------
 
  !scalars
- integer,intent(in) :: mcg,nfftf,with_vectornd
+ integer,intent(in) :: mcg,nband_occ,nfftf,with_vectornd
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: energy
  type(dataset_type),intent(in) :: dtset
@@ -4175,7 +4302,9 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nfftf,npwarr,pawfgr,
   
     call sphereboundary(gbound_k,istwf_k,kg_k,dtset%mgfft,npw_k)
 
-    do nn = 1, dtset%nband(ikpt)
+    ! assume all occupied bands contain two electrons
+    ! could be generalized for metals
+    do nn = 1, nband_occ
 
       cwavef(1:2,1:npw_k) = cg(1:2,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
 
@@ -4183,8 +4312,8 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nfftf,npwarr,pawfgr,
 &       dtset%mgfft,mpi_enreg,ndat,dtset%ngfft,npw_k,nvloc,&
 &       ngfft4,ngfft5,ngfft6,my_nspinor,vectornd,0)
 
-      energy = energy + DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k)) &
-            &           + DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k))
+      energy = energy + (DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k)) &
+            &           + DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k)))*dtset%wtk(ikpt)*two
     end do
 
     icg = icg + npw_k*dtset%nband(ikpt)
@@ -4198,7 +4327,8 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nfftf,npwarr,pawfgr,
  if (nproc>1) then
    call xmpi_sum(energy,spaceComm,ierr)
  end if
- energy = energy/(ucvol*dtset%nkpt)
+! energy = energy/(ucvol*dtset%nkpt)
+! energy = energy/dtset%nkpt
 
  if(has_vectornd) then
     ABI_DEALLOCATE(vectornd_pac)
@@ -4207,7 +4337,7 @@ subroutine nucdip_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nfftf,npwarr,pawfgr,
  ABI_DEALLOCATE(kg_k)
  ABI_DEALLOCATE(gbound_k)
 
-end subroutine nucdip_energy
+end subroutine ndpw_energy
 !!***
 
 
