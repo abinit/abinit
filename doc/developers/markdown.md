@@ -364,10 +364,6 @@ To specify the name of the anchor in a bibliographic citation use the syntax wit
 
 that is rendered in HTML as: Please consult [[cite:Gonze2016 | the last generic ABINIT article]].
 
-!!! warning
-
-    Please use the `cite` namespace. The syntax **without** namespace is deprecated and will be removed.
-
 The script does a bit of formatting in these examples: it keeps one pair of square brackets
 in the case of a bibliographic reference, and addd *~abinit/* in the case of a path.
 The syntax `[[test:libxc_41]]` is preferable when documenting new tests in the release notes.
