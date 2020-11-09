@@ -1673,7 +1673,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
 !Local variables-------------------------------
 !scalars
  integer  :: iatom,ib,ii,info,irank,isym,isym2
- integer  :: jj,mismatch_fft_tnons_isym
+ integer  :: jj,mismatch_fft_tnons_current
  real(dp) :: diff
  logical  :: dissimilar
 !arrays
@@ -1695,16 +1695,16 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
  if (nsym>1) then
 
 !DEBUG
-!  write(std_out,*) 
-!  write(std_out,'(a,i4)') 'symmetrize_xred: enter, nsym=',nsym
-!  do iatom=1,natom
-!    write(std_out,'(a,i4,3es16.6)') 'iatom,xred=',iatom,xred(:,iatom)
-!  enddo
-!  do isym=1,nsym
-!    write(std_out,'(a,i4,9i3,3es16.6)') 'isym,symrel,tnons',isym,symrel(:,:,isym),tnons(:,isym)
-!  enddo
-!  write(std_out,*)' present(tnons_new),present(tolsym)=',present(tnons_new),present(tolsym)
-!  write(std_out,*) 
+! write(std_out,*) 
+! write(std_out,'(a,i4)') 'symmetrize_xred: enter, nsym=',nsym
+! do iatom=1,natom
+!   write(std_out,'(a,i4,3es16.6)') 'iatom,xred=',iatom,xred(:,iatom)
+! enddo
+! do isym=1,nsym
+!   write(std_out,'(a,i4,9i3,3es16.6)') 'isym,symrel,tnons',isym,symrel(:,:,isym),tnons(:,isym)
+! enddo
+! write(std_out,*)' present(tnons_new),present(tolsym)=',present(tnons_new),present(tolsym)
+! write(std_out,*) 
 !ENDDEBUG
 
    ABI_ALLOCATE(xredsym,(3,natom))
@@ -1739,29 +1739,30 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
    endif ! present(indsym)
 
 !DEBUG
-! do iatom=1,natom
-!   write(std_out,'(a,i4,3es20.10)') 'iatom,xredsym=',iatom,xredsym(:,iatom)
-! enddo
+!do iatom=1,natom
+!  write(std_out,'(a,i4,3es20.10)') 'iatom,xredsym=',iatom,xredsym(:,iatom)
+!enddo
 !ENDDEBUG
 
 !  Loop over symmetry operations to determine possibly new tnons, as well as symmetrized positions.
    if(present(tolsym) .and. present(tnons_new) .and. present(fixed_mismatch) .and. present(mismatch_fft_tnons))then
      fixed_mismatch=0
      mismatch_fft_tnons=0
+     !The use of tolsym here is only to favor 0.5 over -0.5
      tnons_new(:,:)=tnons(:,:)-nint(tnons(:,:)-tolsym)
      do isym=1,nsym
-       mismatch_fft_tnons_isym=0
+       mismatch_fft_tnons_current=0
        do ii=1,3
          delta(:)=tnons(ii,isym)*mult(:)
          delta(:)=delta(:)-nint(delta(:))
          ! Is there is a mismatch between FFT and isym for all multipliers ?
-         if( all(abs(delta(:))>tol8) ) mismatch_fft_tnons_isym=1
+         if( all(abs(delta(:))>tol8*mult(:)) ) mismatch_fft_tnons_current=1
        enddo
        !Declare the first symmetry operation that induces a problem
-       if(mismatch_fft_tnons_isym>0 .and. (mismatch_fft_tnons==0)) mismatch_fft_tnons=isym
+       if(mismatch_fft_tnons_current>0 .and. (mismatch_fft_tnons==0)) mismatch_fft_tnons=isym
 
        ! However, also try to propose a solution.
-       if(mismatch_fft_tnons_isym==1)then
+       if(mismatch_fft_tnons_current==1)then
          ! Compute the pseudo-inverse of symrel-1, then multiply tnons
          mat(:,:)=zero; mat(1,1)=one; mat(2,2)=one; mat(3,3)=one
          ! This is symrel-1
@@ -1776,6 +1777,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
            enddo
          enddo
          call dgelss(3,3,1,mat,3,xredshift(:,1),3,sgval,tol5,irank,work,15,info)
+
          ! xredshift(:,1) is now the tentative shift, to be tested for all symmetries
          if( all(abs(xredshift(:,1))<tolsym) )then
            fixed_mismatch=1
@@ -1783,20 +1785,17 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
              tnons_new(:,isym2)=tnons(:,isym2)+xredshift(:,1)-matmul(symrel(:,:,isym2),xredshift(:,1))
              do ii=1,3
                !tnons might now be slighly non-zero. Set to zero such values
-               if(abs(tnons_new(ii,isym))<tol6**2)tnons_new(ii,isym)=zero
-               delta(:)=tnons_new(ii,isym)*mult(:)
+               if(abs(tnons_new(ii,isym2))<tol6**2)tnons_new(ii,isym2)=zero
+               delta(:)=tnons_new(ii,isym2)*mult(:)
                delta(:)=delta(:)-nint(delta(:))
                ! Is the mismatch between FFT and symmetries still present for all the multipliers ??
-               if( all(abs(delta(:))>tol8) ) fixed_mismatch=0
+               if( all(abs(delta(:))>tol8*mult(:)) ) fixed_mismatch=0
              enddo
+             if(fixed_mismatch==0)exit
            enddo
          endif
-!DEBUG
-!        write(std_out,*) 'fixed_mismatch',fixed_mismatch
-!        write(std_out,'(a,3es20.10)') 'xredshift=',xredshift(:,1)
-!ENDDEBUG
          if(fixed_mismatch==1)exit
-       endif ! mismatch_fft_tnons_isym==1
+       endif ! mismatch_fft_tnons_current==1
      end do ! isym
      if(mismatch_fft_tnons/=0)then
        if(fixed_mismatch==1)then
@@ -1807,10 +1806,11 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
      endif
 
 !DEBUG
-!    write(std_out,*) ' mismatch_fft_tnons, fixed_mismatch=',mismatch_fft_tnons, fixed_mismatch
-!    do iatom=1,natom
-!      write(std_out,'(a,i4,3es20.10)') 'iatom,xredsym=',iatom,xredsym(:,iatom)
-!    enddo
+!   write(std_out,*) ' '
+!   write(std_out,*) ' mismatch_fft_tnons, fixed_mismatch=',mismatch_fft_tnons, fixed_mismatch
+!   do iatom=1,natom
+!     write(std_out,'(a,i4,3es20.10)') ' iatom,xredsym=',iatom,xredsym(:,iatom)
+!   enddo
 !ENDDEBUG
 
    endif ! present(tolsym) .and. present(tnons_new)
@@ -1857,17 +1857,17 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
  end if
 
 !DEBUG
-! write(std_out,*) 
-! write(std_out,'(a)') 'symmetrize_xred : exit'
-! do iatom=1,natom
-!   write(std_out,'(a,i4,3es20.10)') 'iatom,xred=',iatom,xred(:,iatom)
-! enddo
-! if(present(tnons_new))then
-!   do isym=1,nsym
-!     write(std_out,'(a,i4,9i3,3es20.10)') 'isym,symrel,tnons_new',isym,symrel(:,:,isym),tnons_new(:,isym)
-!   enddo
-! endif
-! write(std_out,*) 
+!write(std_out,*) 
+!write(std_out,'(a)') 'symmetrize_xred : exit'
+!do iatom=1,natom
+!  write(std_out,'(a,i4,3es20.10)') 'iatom,xred=',iatom,xred(:,iatom)
+!enddo
+!if(present(tnons_new))then
+!  do isym=1,nsym
+!    write(std_out,'(a,i4,9i3,3es20.10)') 'isym,symrel,tnons_new',isym,symrel(:,:,isym),tnons_new(:,isym)
+!  enddo
+!endif
+!write(std_out,*) 
 !ENDDEBUG
 
 end subroutine symmetrize_xred

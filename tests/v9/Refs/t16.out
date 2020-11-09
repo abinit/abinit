@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 23 Oct 2020.
-- ( at 19h12 )
+.Starting date : Sat  7 Nov 2020.
+- ( at 09h20 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI1/v9_t16/t16.in
 - output file    -> t16.out
@@ -52,6 +52,7 @@ _ WF disk file :      0.040 Mbytes ; DEN or POT disk file :      0.029 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      5.6691783750E+00  5.6691783750E+00  2.0786987375E+01 Bohr
               amu      1.14820000E+02  6.97230000E+01  1.40067400E+01
+          chkprim           0
              ecut      3.00000000E+00 Hartree
            ecutsm      5.00000000E-01 Hartree
 -          fftalg         312
@@ -399,6 +400,7 @@ total_energy_dc     : -2.84140508445079E+02
  -outvars: echo values of variables after computation  --------
             acell      5.6691783750E+00  5.6691783750E+00  2.0786987375E+01 Bohr
               amu      1.14820000E+02  6.97230000E+01  1.40067400E+01
+          chkprim           0
              ecut      3.00000000E+00 Hartree
            ecutsm      5.00000000E-01 Hartree
            etotal     -2.8414050845E+02
@@ -573,10 +575,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.7  wall=         12.5
+- Proc.   0 individual time (sec): cpu=          4.7  wall=          5.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.7  wall=         12.5
++Overall time at end (sec) : cpu=          4.7  wall=          5.9

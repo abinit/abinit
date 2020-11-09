@@ -991,6 +991,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ! MT oct 14: Should use chkint_eq but the msg is not clear enough
    end if
 
+!  expert_user
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'expert_user',dt%expert_user,4,(/0,1,2,3/),iout)
+
    ! fermie_nest
    call chkdpr(0,0,cond_string,cond_values,ierr,'fermie_nest',dt%fermie_nest,1,0.0_dp,iout)
 

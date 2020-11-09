@@ -575,7 +575,7 @@ By J. Zwanziger (MR 469, 500, 545, 588)
 By M. Giantomassi
 
 **D.4** Speed-up of susceptibility matrix calculations and GW analytic continuation calculations.
-See the new input variable [[gwaclowrank]] and new test [[test:v9_22]].
+See the new input variable [[gwaclowrank]] and new test [[test:v9_32]].
 
 By F. Bruneval (MR 687).
 

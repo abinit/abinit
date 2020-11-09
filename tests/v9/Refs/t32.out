@@ -17,10 +17,10 @@
 .Starting date : Tue 28 Jul 2020.
 - ( at 14h51 )
   
-- input  file    -> /home/bruneval/devel/abinit/tests/Test_suite/v9_t22/t22.in
-- output file    -> t22.out
-- root for input  files -> t22i
-- root for output files -> t22o
+- input  file    -> /home/bruneval/devel/abinit/tests/Test_suite/v9_t32/t32.in
+- output file    -> t32.out
+- root for input  files -> t32i
+- root for output files -> t32o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -440,7 +440,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
- prteigrs : about to open file t22o_DS1_EIG
+ prteigrs : about to open file t32o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.27122   Average Vxc (hartree)=  -0.35218
  Eigenvalues (hartree) for nkpt=   6  k points:
  kpt#   1, nband= 55, wtk=  0.18750, kpt= -0.2500 -0.2500  0.0000 (reduced coord)

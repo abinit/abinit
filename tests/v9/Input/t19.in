@@ -1,4 +1,4 @@
-# Check of not tolerated value of tnons, and associated suggestions for correction.
+# Disable all checks (and associated fixes) thanks to expert_user .
   
 nband   16
 tolvrs 1.0e-10
@@ -8,9 +8,8 @@ rprim     1.0000000000E+00 -6.8780443909E-07 -1.5175935869E-37
          -5.0000059566E-01  8.6602505988E-01 -1.5175935869E-37
           6.1232339957E-17  1.0605752387E-16  1.0000000000E+00
 acell     6.8737601012E+00  6.8737601012E+00  2.2206443012E+01
-chkprim 0
-chksymtnons 2
-tolsym 1.0e-3
+
+expert_user 3
 
 # Definition of the atom types
 ntypat   2
@@ -51,7 +50,7 @@ usekden 1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t17.out , tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t19.out , tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
@@ -60,13 +59,6 @@ usekden 1
 #%% keywords = 
 #%% description =
 #%%   InN non-primitive cell, doubled wurtzite, rather inaccurate rprimd and xred.
-#%%   Test automatic correction of rprimd, tnons and xred, as well as final
-#%%   proposal of atomic positions that would given tolerated values of tnons
-#%%   if chksymtnons is not set to zero.
-#%%   WARNING XG20201109: the xred is presently too symmetric (with respect to symrel), so that it is fully
-#%%   matching the FFT grid at the end. One should shift the xred by 0.01.
-#%%   I tried this, but then the symmetrize_xred was unable to select the correcting proposal. 
-#%%   In order to debug, one should likely select a simpler case, with orthogonal rprim
-#%%   So, at present there is no test of properly working chksymtnons 2 .
+#%%   Test disabling all checks and fixes of atomic positions or cell parameters. Otherwise, similar to v9#17
 #%% topics = crystal
 #%%<END TEST_INFO>
