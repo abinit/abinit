@@ -517,7 +517,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    ! If RMM-DIIS is used, decrease the number of NSCF steps done with wfoptalg before activating RMM-DIIS.
    ! Usually 4 for itime 1 and then 2.
    if (scfcv_args%dtset%rmm_diis /= 0 .and. itime == 2) then
-     _IADD(scfcv_args%dtset%rmm_diis, -2)
+     scfcv_args%dtset%rmm_diis = scfcv_args%dtset%rmm_diis -2
      if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
      call wrtout(std_out, sjoin(" itime == 0 with RMM-DIIS --> setting rmm_diis to:", itoa(scfcv_args%dtset%rmm_diis)))
    end if

@@ -73,8 +73,10 @@
 
 /* var = var + increment
  * Because Fortran does not provide inplace add.
+ * but NAG does not like this CPP macro so we cannot use it!
+ *
+#define IADD(var, increment) var = var + increment
 */ 
-#define _IADD(var, increment) var = var + increment
 
 /*
  * ABI_  abinit macros.

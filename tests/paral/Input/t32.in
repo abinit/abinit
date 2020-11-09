@@ -8,6 +8,8 @@ nspinor 2 nspden 1 # spin-orbit, non-magnetic.
 nband 16
 
 npkpt 1 npfft 1 npspinor 2 npband 2 bandpp 4
+iomode 1  # enforce MPI-IO for the time being because netcdf with MPI-IO
+          # does not support npspinor = 2.
 
 # SCF cycle options
 nstep 20
