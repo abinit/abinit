@@ -145,8 +145,8 @@ subroutine cgwf_paw(cg,chkexit,cprj_cwavef_bands,cpus,eig,&
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
 integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  integer,save :: nskip=0
- integer :: counter,cpopt,itypat
- integer :: i1,i2,i3,ia,iband,ibandmin,ibandmax,isubh,isubh0,jband,me_g0
+ integer :: counter,cpopt
+ integer :: i1,i2,i3,iband,ibandmin,ibandmax,isubh,isubh0,jband,me_g0
  integer :: ibdblock,iblock,igs
  integer :: iline,ipw,ispinor,istwf_k
  integer :: n4,n5,n6,natom,ncpgr,nblock
@@ -792,6 +792,7 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  nullify(cprj_cwavef)
  call pawcprj_free(cprj_direc)
  call pawcprj_free(cprj_conjgr)
+ ABI_DATATYPE_DEALLOCATE(cprj_direc)
  ABI_DATATYPE_DEALLOCATE(cprj_conjgr)
 ! ABI_DEALLOCATE(dimlmn)
  ABI_DEALLOCATE(conjgr)
@@ -833,6 +834,11 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
  real(dp), pointer :: cwavef(:,:),cwavef_left(:,:)
  real(dp),pointer :: cwavef_bands(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:),cprj_cwavef_left(:,:)
+ !LTEST
+! integer :: iatom
+! real(dp) :: re
+! type(pawcprj_type),allocatable :: cprj_tmp(:,:)
+ !LTEST
 
 ! *********************************************************************
 
@@ -840,6 +846,7 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
  cpopt=2
 
  cwavef_bands => cg(:,1+icg:nband*wfsize+icg)
+
  do iband=1,nband
    cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
    cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
@@ -851,10 +858,30 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
 &    gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
  end do
 
+ !LTEST
+! ABI_DATATYPE_ALLOCATE(cprj_tmp,(gs_hamk%natom,1))
+! call pawcprj_alloc(cprj_tmp,0,gs_hamk%dimcprj)
+ !LTEST
+
  isubh=1
  do iband=1,nband
    cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
    cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+   !LTEST
+!   call getcprj(1,0,cwavef,cprj_tmp,&
+!&    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+!&    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+!&    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+!&    gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+!   do iatom=1,gs_hamk%natom
+!     re = sum(abs(cprj_tmp(iatom,1)%cp-cprj_cwavef(iatom,1)%cp))
+!     if (re>tol12) then
+!       write(std_out,'(a,2i5)') 'iband,iatom:',iband,iatom
+!       flush(std_out)
+!       MSG_ERROR('dif too large')
+!     end if
+!   end do
+   !LTEST
    cwavef_left => cwavef_bands(:,1:iband*wfsize)
    cprj_cwavef_left => cprj_cwavef_bands(:,1:iband)
    ! Compute csc matrix
@@ -863,6 +890,11 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
      &          gs_hamk,mpi_enreg,iband,tim_getcsc_band)
    isubh=isubh+2*iband
  end do
+
+ !LTEST
+! call pawcprj_free(cprj_tmp)
+! ABI_DATATYPE_DEALLOCATE(cprj_tmp)
+ !LTEST
 
 end subroutine mksubovl
 !!***

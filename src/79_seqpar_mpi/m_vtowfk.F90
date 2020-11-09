@@ -40,7 +40,8 @@ module m_vtowfk
  use m_fstrings,    only : sjoin, itoa, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_paw_dmft,    only : paw_dmft_type
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, &
+   &                       pawcprj_put,pawcprj_copy,pawcprj_set_zero
  use m_paw_dmft,    only : paw_dmft_type
  use m_gwls_hamiltonian, only : build_H
  use m_fftcore,     only : fftcore_set_mixprec, fftcore_mixprec
@@ -52,6 +53,7 @@ module m_vtowfk
  use m_chebfi,      only : chebfi
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
+ use m_cgprj,       only : cprj_rotate
  use m_fft,         only : fourwf
 
  implicit none
@@ -210,7 +212,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
+ type(pawcprj_type),allocatable :: cwaveprj(:,:),cprj_tmp(:,:)
  type(pawcprj_type),allocatable :: cprj_cwavef_bands(:,:)
 
 ! **********************************************************************
@@ -463,7 +465,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
 &       subham,subovl,use_subovl,0,mpi_enreg%me_g0)
+!       ABI_DATATYPE_ALLOCATE(cprj_tmp ,(natom,nband_k))
+!       call pawcprj_alloc(cprj_tmp,0,gs_hamk%dimcprj)
+!       call pawcprj_set_zero(cprj_tmp)
+!       call cprj_rotate(cprj_cwavef_bands,cprj_tmp,evec,&
+!         &   gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!         &   natom,gs_hamk%nattyp,nband_k,gs_hamk%nspinor,gs_hamk%ntypat)
+!       call pawcprj_copy(cprj_tmp,cprj_cwavef_bands)
+!       call pawcprj_free(cprj_tmp)
+!       ABI_DATATYPE_DEALLOCATE(cprj_tmp)
        call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
+       !LTEST
+       !return
+       !LTEST
      end if
      call timab(585,2,tsec)
    end if
