@@ -1,6 +1,6 @@
 
-.Version 9.1.5 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  2 Jul 2020.
-- ( at 15h08 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 19h05 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_add_test_icutcoul/tests/TestBot_MPI1/v9_t31/t31.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t31/t31.in
 - output file    -> t31.out
 - root for input  files -> t31i
 - root for output files -> t31o
@@ -49,11 +49,11 @@ _ WF disk file :      0.301 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       0
 -    mband =          12        mffmem =           1         mkmem =           3
-       mpw =         476          nfft =       13824          nkpt =           3
+       mpw =         544          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       4.963 Mbytes of memory.
+P This job should need less than                       5.020 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.263 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      0.301 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
 
@@ -66,11 +66,11 @@ _ WF disk file :      0.263 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       0
 -    mband =          12        mffmem =           1         mkmem =           3
-       mpw =         476          nfft =       13824          nkpt =           3
+       mpw =         544          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       4.963 Mbytes of memory.
+P This job should need less than                       5.020 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.263 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      0.301 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
 
@@ -83,11 +83,11 @@ _ WF disk file :      0.263 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       0
 -    mband =          12        mffmem =           1         mkmem =           3
-       mpw =         476          nfft =       13824          nkpt =           3
+       mpw =         544          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       4.963 Mbytes of memory.
+P This job should need less than                       5.020 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.263 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      0.301 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -104,28 +104,22 @@ _ WF disk file :      0.263 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
              bdgw           1       8       1       8       1       8
-             ecut1     1.20000000E+01 Hartree
-             ecut2     1.11566797E+01 Hartree
-             ecut3     1.11566797E+01 Hartree
-             ecut4     1.11566797E+01 Hartree
-         ecutsigx1     8.00000000E+00 Hartree
-         ecutsigx2     7.56385066E+00 Hartree
-         ecutsigx3     7.56385066E+00 Hartree
-         ecutsigx4     7.56385066E+00 Hartree
+             ecut      1.20000000E+01 Hartree
+         ecutsigx      8.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
-          ecutwfn2     1.11566797E+01 Hartree
-          ecutwfn3     1.11566797E+01 Hartree
-          ecutwfn4     1.11566797E+01 Hartree
+          ecutwfn2     1.20000000E+01 Hartree
+          ecutwfn3     1.20000000E+01 Hartree
+          ecutwfn4     1.20000000E+01 Hartree
 -          fftalg         312
            getwfk1          0
            getwfk2          1
            getwfk3          1
            getwfk4          1
         gwcalctyp           5
-        gw_icutcoul1          6
-        gw_icutcoul2         16
-        gw_icutcoul3         15
-        gw_icutcoul4         14
+      gw_icutcoul1          6
+      gw_icutcoul2         16
+      gw_icutcoul3         15
+      gw_icutcoul4         14
            istwfk        1    1    1
               ixc          11
         ixc_sigma          40
@@ -298,8 +292,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_add_test_icutcoul/tests/Psps_for_tests/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_add_test_icutcoul/tests/Psps_for_tests/Si-GGA.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si-GGA.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si-GGA.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    150713                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -447,8 +441,8 @@ band_energy         : -1.93138498951266E-02
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 3, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 476, }
-cutoff_energies: {ecut:  11.2, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 3, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 544, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 5, }
 ...
@@ -472,23 +466,6 @@ meta: {optdriver: 4, gwcalctyp: 5, }
  R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
  Unit cell volume ucvol=  2.6663072E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
---- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_add_test_icutcoul/tests/Psps_for_tests/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/bruneval_add_test_icutcoul/tests/Psps_for_tests/Si-GGA.psp8
-- Si    ONCVPSP  r_core=  1.60  1.72  1.92
-- 14.00000   4.00000    150713                znucl, zion, pspdat
-    8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    5.99000000000000    4.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
-     nproj     2     2     2
-     extension_switch     1
-  pspatm : epsatm=    9.35284323
-         --- l  ekb(1:nproj) -->
-             0    5.077596    0.840525
-             1    2.714235    0.601251
-             2  -10.098774   -0.937313
- pspatm: atomic psp has been read  and splines computed
-
 --------------------------------------------------------------------------------
 
  ==== K-mesh for the wavefunctions ====
@@ -515,8 +492,8 @@ meta: {optdriver: 4, gwcalctyp: 5, }
  yields     8 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  20x 20x 20
-          total number of points  =     8000
+ setmesh: FFT mesh size selected  =    20x   20x   20
+          total number of points  =         8000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
@@ -565,9 +542,9 @@ data: !SigmaeeData |
         2   4.766 -11.454 -14.002   0.000   1.000   0.000 -14.002  -2.548   2.218
         3   4.766 -11.454 -14.002   0.000   1.000   0.000 -14.002  -2.548   2.218
         4   4.766 -11.454 -14.002   0.000   1.000   0.000 -14.002  -2.548   2.218
-        5   7.204  -9.989  -5.111   0.000   1.000   0.000  -5.111   4.878  12.082
-        6   7.204  -9.989  -5.111   0.000   1.000   0.000  -5.111   4.878  12.082
-        7   7.204  -9.989  -5.111   0.000   1.000   0.000  -5.111   4.878  12.082
+        5   7.204  -9.989  -5.111   0.000   1.000   0.000  -5.111   4.879  12.082
+        6   7.204  -9.989  -5.111   0.000   1.000   0.000  -5.111   4.879  12.082
+        7   7.204  -9.989  -5.111   0.000   1.000   0.000  -5.111   4.879  12.082
         8   8.275 -10.869  -5.047   0.000   1.000   0.000  -5.047   5.822  14.097
 ...
 
@@ -577,11 +554,11 @@ iteration_state: {dtset: 2, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.773
-QP_gap     :   10.290
-Delta_QP_KS:    7.517
+QP_gap     :   10.289
+Delta_QP_KS:    7.516
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-        1  -4.966 -10.902 -16.542   0.000   1.000   0.000 -16.542  -5.640 -10.606
+        1  -4.966 -10.902 -16.542   0.000   1.000   0.000 -16.542  -5.639 -10.606
         2  -2.345 -10.158 -14.239   0.000   1.000   0.000 -14.239  -4.082  -6.426
         3   3.522 -11.154 -13.842   0.000   1.000   0.000 -13.842  -2.688   0.834
         4   3.522 -11.154 -13.842   0.000   1.000   0.000 -13.842  -2.688   0.834
@@ -597,7 +574,7 @@ iteration_state: {dtset: 2, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :    3.526
-QP_gap     :   10.917
+QP_gap     :   10.916
 Delta_QP_KS:    7.390
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
@@ -607,18 +584,18 @@ data: !SigmaeeData |
         4   1.807 -10.623 -13.591   0.000   1.000   0.000 -13.591  -2.968  -1.162
         5   5.333  -8.820  -4.398   0.000   1.000   0.000  -4.398   4.422   9.755
         6   5.333  -8.820  -4.398   0.000   1.000   0.000  -4.398   4.422   9.755
-        7  14.916 -10.508  -3.848   0.000   1.000   0.000  -3.848   6.661  21.577
-        8  14.916 -10.508  -3.848   0.000   1.000   0.000  -3.848   6.661  21.577
+        7  14.916 -10.508  -3.848   0.000   1.000   0.000  -3.848   6.660  21.576
+        8  14.916 -10.508  -3.848   0.000   1.000   0.000  -3.848   6.660  21.576
 ...
 
 
- New Fermi energy :        2.200037E-01 Ha ,    5.986605E+00 eV
- New Exchange energy :    -2.151670E+00 Ha ,   -5.854991E+01 eV
+ New Fermi energy :        2.200055E-01 Ha ,    5.986653E+00 eV
+ New Exchange energy :    -2.151669E+00 Ha ,   -5.854989E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   9.8638 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   7.5365 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   9.8637 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   7.5363 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.5000  0.5000  0.0000
 
 ================================================================================
@@ -628,8 +605,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 3, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 476, }
-cutoff_energies: {ecut:  11.2, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 3, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 544, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 5, }
 ...
@@ -679,8 +656,8 @@ meta: {optdriver: 4, gwcalctyp: 5, }
  yields     8 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  20x 20x 20
-          total number of points  =     8000
+ setmesh: FFT mesh size selected  =    20x   20x   20
+          total number of points  =         8000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
@@ -721,7 +698,7 @@ iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.438
-QP_gap     :    6.258
+QP_gap     :    6.257
 Delta_QP_KS:    3.820
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
@@ -750,8 +727,8 @@ data: !SigmaeeData |
         3   3.522 -11.154 -10.152   0.000   1.000   0.000 -10.152   1.002   4.524
         4   3.522 -11.154 -10.152   0.000   1.000   0.000 -10.152   1.002   4.524
         5   6.295 -10.044  -5.146   0.000   1.000   0.000  -5.146   4.898  11.193
-        6   7.958  -9.582  -4.537   0.000   1.000   0.000  -4.537   5.046  13.003
-        7   7.958  -9.582  -4.537   0.000   1.000   0.000  -4.537   5.046  13.003
+        6   7.958  -9.582  -4.537   0.000   1.000   0.000  -4.537   5.045  13.003
+        7   7.958  -9.582  -4.537   0.000   1.000   0.000  -4.537   5.045  13.003
         8  12.423  -7.370  -2.084   0.000   1.000   0.000  -2.084   5.286  17.709
 ...
 
@@ -771,18 +748,18 @@ data: !SigmaeeData |
         4   1.807 -10.623  -9.896   0.000   1.000   0.000  -9.896   0.727   2.534
         5   5.333  -8.820  -4.326   0.000   1.000   0.000  -4.326   4.495   9.828
         6   5.333  -8.820  -4.326   0.000   1.000   0.000  -4.326   4.495   9.828
-        7  14.916 -10.508  -3.813   0.000   1.000   0.000  -3.813   6.696  21.612
-        8  14.916 -10.508  -3.813   0.000   1.000   0.000  -3.813   6.696  21.612
+        7  14.916 -10.508  -3.813   0.000   1.000   0.000  -3.813   6.695  21.611
+        8  14.916 -10.508  -3.813   0.000   1.000   0.000  -3.813   6.695  21.611
 ...
 
 
- New Fermi energy :        2.890782E-01 Ha ,    7.866219E+00 eV
- New Exchange energy :    -1.604021E+00 Ha ,   -4.364763E+01 eV
+ New Fermi energy :        2.890800E-01 Ha ,    7.866268E+00 eV
+ New Exchange energy :    -1.604020E+00 Ha ,   -4.364760E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   6.2576 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.9229 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   6.2575 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.9227 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.5000  0.5000  0.0000
 
 ================================================================================
@@ -792,8 +769,8 @@ data: !SigmaeeData |
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
-dimensions: {natom: 2, nkpt: 3, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 476, }
-cutoff_energies: {ecut:  11.2, pawecutdg:  -1.0, }
+dimensions: {natom: 2, nkpt: 3, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 544, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 5, }
 ...
@@ -843,8 +820,8 @@ meta: {optdriver: 4, gwcalctyp: 5, }
  yields     8 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  20x 20x 20
-          total number of points  =     8000
+ setmesh: FFT mesh size selected  =    20x   20x   20
+          total number of points  =         8000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
@@ -886,7 +863,7 @@ kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.438
 QP_gap     :    4.579
-Delta_QP_KS:    2.142
+Delta_QP_KS:    2.141
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1  -7.351 -10.466  -3.828   0.000   1.000   0.000  -3.828   6.638  -0.713
@@ -905,7 +882,7 @@ iteration_state: {dtset: 4, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.773
-QP_gap     :    5.284
+QP_gap     :    5.283
 Delta_QP_KS:    2.511
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
@@ -914,8 +891,8 @@ data: !SigmaeeData |
         3   3.522 -11.154  -3.690   0.000   1.000   0.000  -3.690   7.464  10.986
         4   3.522 -11.154  -3.690   0.000   1.000   0.000  -3.690   7.464  10.986
         5   6.295 -10.044  -0.070   0.000   1.000   0.000  -0.070   9.974  16.269
-        6   7.958  -9.582  -0.071   0.000   1.000   0.000  -0.071   9.511  17.469
-        7   7.958  -9.582  -0.071   0.000   1.000   0.000  -0.071   9.511  17.469
+        6   7.958  -9.582  -0.071   0.000   1.000   0.000  -0.071   9.511  17.468
+        7   7.958  -9.582  -0.071   0.000   1.000   0.000  -0.071   9.511  17.468
         8  12.423  -7.370  -0.014   0.000   1.000   0.000  -0.014   7.356  19.779
 ...
 
@@ -931,8 +908,8 @@ data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1  -3.137 -10.893  -3.759   0.000   1.000   0.000  -3.759   7.134   3.997
         2  -3.137 -10.893  -3.759   0.000   1.000   0.000  -3.759   7.134   3.997
-        3   1.807 -10.623  -3.695   0.000   1.000   0.000  -3.695   6.927   8.734
-        4   1.807 -10.623  -3.695   0.000   1.000   0.000  -3.695   6.927   8.734
+        3   1.807 -10.623  -3.695   0.000   1.000   0.000  -3.695   6.928   8.734
+        4   1.807 -10.623  -3.695   0.000   1.000   0.000  -3.695   6.928   8.734
         5   5.333  -8.820  -0.073   0.000   1.000   0.000  -0.073   8.747  14.080
         6   5.333  -8.820  -0.073   0.000   1.000   0.000  -0.073   8.747  14.080
         7  14.916 -10.508  -0.035   0.000   1.000   0.000  -0.035  10.473  25.389
@@ -940,8 +917,8 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        4.575372E-01 Ha ,    1.245022E+01 eV
- New Exchange energy :    -5.476488E-01 Ha ,   -1.490228E+01 eV
+ New Fermi energy :        4.575388E-01 Ha ,    1.245026E+01 eV
+ New Exchange energy :    -5.476489E-01 Ha ,   -1.490229E+01 eV
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -950,18 +927,12 @@ data: !SigmaeeData |
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
              bdgw           1       8       1       8       1       8
-             ecut1     1.20000000E+01 Hartree
-             ecut2     1.11566797E+01 Hartree
-             ecut3     1.11566797E+01 Hartree
-             ecut4     1.11566797E+01 Hartree
-         ecutsigx1     8.00000000E+00 Hartree
-         ecutsigx2     7.56385066E+00 Hartree
-         ecutsigx3     7.56385066E+00 Hartree
-         ecutsigx4     7.56385066E+00 Hartree
+             ecut      1.20000000E+01 Hartree
+         ecutsigx      8.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
-          ecutwfn2     1.11566797E+01 Hartree
-          ecutwfn3     1.11566797E+01 Hartree
-          ecutwfn4     1.11566797E+01 Hartree
+          ecutwfn2     1.20000000E+01 Hartree
+          ecutwfn3     1.20000000E+01 Hartree
+          ecutwfn4     1.20000000E+01 Hartree
            etotal1    -8.3679743316E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -980,10 +951,10 @@ data: !SigmaeeData |
            getwfk3          1
            getwfk4          1
         gwcalctyp           5
-        gw_icutcoul1          6
-        gw_icutcoul2         16
-        gw_icutcoul3         15
-        gw_icutcoul4         14
+      gw_icutcoul1          6
+      gw_icutcoul2         16
+      gw_icutcoul3         15
+      gw_icutcoul4         14
            istwfk        1    1    1
               ixc          11
         ixc_sigma          40
@@ -1127,41 +1098,10 @@ P           mkmem           3
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         44.6        0.74      0.012
-- Total wall clock time (s,m,h):         45.3        0.76      0.013
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           44.6, wall_time =           45.3
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                 42.213  94.6     42.444  93.7              3      -1.00        0.99       0.99
-- pspini                         1.116   2.5      1.117   2.5              4      -1.00        1.00       1.00
-- fourwf%(pot)                   0.703   1.6      0.707   1.6           1782      -1.00        0.99       0.99
-- ewald                          0.319   0.7      0.319   0.7              4      -1.00        1.00       1.00
-- others (122)                   0.910   2.0      0.906   2.0             -1      -1.00        1.00       1.00
--<END_TIMER>
--
-- subtotal                      45.261 101.4     45.493 100.4                                  0.99       0.99
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          44.6, wall_time =          45.3
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                 42.213  94.6     42.444  93.7              3      -1.00        0.99       0.99
-- pspini                         1.116   2.5      1.117   2.5              4      -1.00        1.00       1.00
-- fourwf%(pot)                   0.703   1.6      0.707   1.6           1782      -1.00        0.99       0.99
-- ewald                          0.319   0.7      0.319   0.7              4      -1.00        1.00       1.00
-- others (122)                   0.910   2.0      0.906   2.0             -1      -1.00        1.00       1.00
--<END_TIMER>
 
-- subtotal                      45.261 101.4     45.493 100.4                                  0.99       0.99
 
 ================================================================================
 
@@ -1200,7 +1140,24 @@ P           mkmem           3
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [3] Recent developments in the ABINIT software package.
+- [3] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1218,7 +1175,9 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1231,25 +1190,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=         44.6  wall=         45.3
+- Proc.   0 individual time (sec): cpu=         27.5  wall=         30.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         44.6  wall=         45.3
+.Delivered   4 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         27.5  wall=         30.0
