@@ -251,7 +251,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
  real(dp) :: qtmp(3),qmin(3),qmin_cart(3),qpg(3)
  real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3),ucvol_sc
  real(dp) :: qcart2red(3,3)
- real(dp) :: qqgg(3)
+ !real(dp) :: qqgg(3)
 
 ! *************************************************************************
 
@@ -824,16 +824,13 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,gw_icutcoul,vcutgeo,ecut,n
    q0_vol=(two_pi)**3/(Kmesh%nbz*ucvol) ; bz_geometry_factor=zero
    ! * the choice of alfa (the width of gaussian) is somehow empirical
    alfa = 150.0/ecut
-   !write(msg,'(2a,2x,f12.4,2x,f12.4)')ch10, ' alfa, ecutsigx = ', alfa, ecut
-   !call wrtout(std_out,msg,'COLL')
 
    do iq_bz=1,Qmesh%nbz
      do ig = 1,ng
-        qqgg(:) = Qmesh%bz(:,iq_bz) + Gsph%gvec(:,ig)
-        qqgg(:) = qqgg(1)*b1(:) + qqgg(2)*b2(:) + qqgg(3)*b3(:)
-        qbz_norm=SQRT(SUM(qqgg(:)**2))
-     if (qbz_norm>tolq0*0.01) then
-        bz_geometry_factor = bz_geometry_factor - EXP(-alfa*qbz_norm**2)/qbz_norm**2
+        qpg(:) = Qmesh%bz(:,iq_bz) + Gsph%gvec(:,ig)
+        qpg2 = normv(qpg,gmet,'G')**2
+     if (qpg2>tolq0) then
+        bz_geometry_factor = bz_geometry_factor - EXP(-alfa*qpg2)/qpg2
      end if
      end do
    end do

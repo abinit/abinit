@@ -1435,11 +1435,11 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  complex(dpc),allocatable :: buffer_lwing(:,:),buffer_uwing(:,:)
  complex(gwpc),allocatable :: kxcg_mat(:,:)
 
-!bootstrap
+!bootstrap and LR
  integer :: istep,nstep
- real(dp) :: conv_err, alpha
+ real(dp) :: conv_err, alpha, Zr, qpg2
  real(gwpc) :: chi00_head, fxc_head
- complex(gwpc),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
+ complex(gwpc),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), vfxc_lr(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
 
 ! *************************************************************************
@@ -1626,12 +1626,8 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ', chi00_head
    call wrtout(std_out,msg,'COLL')
    ! loop
-   istep = 0; conv_err = 0.1
-   do while (conv_err > tol4)
-     istep = istep + 1
-     if (istep > nstep) then
-       exit
-     end if
+   conv_err = 0.1
+   do istep=1, nstep
      chi0 = chi0_save
      io=1 ! for now only at omega=0
      call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
@@ -1648,6 +1644,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      call wrtout(std_out,msg,'COLL')
      write(msg,'(a,2f10.6)')  '    v^-1*fxc(head): ', fxc_head
      call wrtout(std_out,msg,'COLL')
+     if (conv_err <= tol4) exit
      !
      chi0_tmp = chi0(:,:,1)
      vfxc_boot = chi0(:,:,1)/chi00_head
@@ -1660,7 +1657,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
        vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
      end do
    end do
-   !
+   ! end loop
    if (istep <= nstep) then
      write(msg,'(a,i4,a)') ' => bootstrap fxc converged after ', istep, ' iterations'
      call wrtout(std_out,msg,'COLL')
@@ -1862,12 +1859,8 @@ CASE(6)
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ', chi00_head
    call wrtout(std_out,msg,'COLL')
    ! loop
-   istep = 0; conv_err = 0.1
-   do while (conv_err > tol4)
-     istep = istep + 1
-     if (istep > nstep) then
-       exit
-     end if
+   conv_err = 0.1
+   do istep=1, nstep
      chi0 = chi0_save
      io=1 ! for now only at omega=0
      call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
@@ -1884,6 +1877,7 @@ CASE(6)
      call wrtout(std_out,msg,'COLL')
      write(msg,'(a,2f10.6)')  '    v^-1*fxc(head): ', fxc_head
      call wrtout(std_out,msg,'COLL')
+     if (conv_err <= tol4) exit
      !
      chi0_tmp = chi0(:,:,1)
      vfxc_boot = chi0(:,:,1)/chi00_head
@@ -1896,7 +1890,7 @@ CASE(6)
        vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
      end do
    end do
-   !
+   ! end loop
    if (istep <= nstep) then
      write(msg,'(a,i4,a)') ' => bootstrap fxc converged after ', istep, ' iterations'
      call wrtout(std_out,msg,'COLL')
@@ -1907,14 +1901,31 @@ CASE(6)
    ! 
    write(msg,'(a)') ' Constructing bootstrap+ALDA fxc kernel'
    call wrtout(std_out,msg,'COLL')
-   do ig1=2,npwe
-     vfxc_boot(ig1,2:npwe) = kxcg_mat(ig1,2:npwe)
-     vfxc_boot(1,ig1) = vfxc_boot(1,ig1) + kxcg_mat(1,ig1)
-     vfxc_boot(ig1,1) = vfxc_boot(ig1,1) + kxcg_mat(ig1,1)
-   end do
-   if (iqibz > 1) then
-     vfxc_boot(1,1) = vfxc_boot(1,1) + kxcg_mat(1,1)
-   end if
+   !
+   do ig1 = 1, npwe
+     do ig2 = 1, npwe
+       qpg2 = normv(Vcp%qibz(:,iqibz)+gvec(:,ig1),gmet,'G')**2
+       qpg2 = max(qpg2, normv(Vcp%qibz(:,iqibz)+gvec(:,ig2),gmet,'G')**2)
+       if (ig1+ig2 < 50) then
+         write(msg,'(2i4,4f16.4,f10.4)') ig1,ig2,vfxc_boot(ig1,ig2),kxcg_mat(ig1,ig2),qpg2
+         call wrtout(std_out,msg,'COLL')
+       end if
+       vfxc_boot(ig1,ig2) = vfxc_boot(ig1,ig2)*exp(-qpg2/four)+kxcg_mat(ig1,ig2)*(one-exp(-qpg2/four)) 
+       if (ig1+ig2 < 50) then
+         write(msg,'(2i4,2f16.4)') ig1,ig2,vfxc_boot(ig1,ig2)
+         call wrtout(std_out,msg,'COLL')
+       end if
+     end do
+   end do  
+
+   !do ig1=2,npwe
+   !  vfxc_boot(ig1,2:npwe) = kxcg_mat(ig1,2:npwe)
+   !  vfxc_boot(1,ig1) = vfxc_boot(1,ig1) + kxcg_mat(1,ig1)
+   !  vfxc_boot(ig1,1) = vfxc_boot(ig1,1) + kxcg_mat(ig1,1)
+   !end do
+   !if (.not. is_qeq0) then
+   !  vfxc_boot(1,1) = vfxc_boot(1,1) + kxcg_mat(1,1)
+   !end if
    !
    chi0 = chi0_save
    do io=1,nomega
@@ -1932,6 +1943,88 @@ CASE(6)
    ABI_FREE(chi0_save)
    ABI_FREE(vfxc_boot)
    ABI_FREE(vfxc_boot0)
+
+   do io=1,nomega
+     write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
+     call wrtout(std_out,msg,'COLL')
+     call print_arr(chi0(:,:,io),mode_paral='PERS')
+   end do
+
+ CASE (8)
+   ! LR+ALDA hybrid vertex kernel by Tal
+   ! First ALDA
+   ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
+   ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
+   ! Make kxcg_mat(G1,G2) = kxcg(G1-G2) from kxcg defined on the FFT mesh.
+   ABI_MALLOC_OR_DIE(kxcg_mat,(npwe,npwe), ierr)
+   ierr=0
+   do ig2=1,npwe
+     do ig1=1,npwe
+       g1mg2_idx = g2ifft(gvec(:,ig1)-gvec(:,ig2),ngfft)
+       if (g1mg2_idx>0) then
+         kxcg_mat(ig1,ig2) = kxcg(g1mg2_idx,1)
+       else
+         ierr=ierr+1
+         kxcg_mat(ig1,ig2) = czero
+       end if
+     end do
+   end do
+   if (ierr/=0) then
+     write(msg,'(a,i4,3a)')&
+&     'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
+&     'Enlarge the FFT mesh to get rid of this problem. '
+     MSG_WARNING(msg)
+   end if
+   !FIXME "recheck TDDFT code and parallel"
+   ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
+
+   ! Now LR: (1-Z)*chi0^-1
+   ABI_MALLOC_OR_DIE(vfxc_lr,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
+
+   if (iqibz==1) then
+     vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
+   else
+     vc_sqrt => Vcp%vc_sqrt(:,iqibz)
+   end if
+
+   Zr = 0.78 
+   chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
+   fxc_head = czero; vfxc_lr = czero; 
+   epsm_lf = czero; epsm_nlf = czero; eelf = zero
+   write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ', chi00_head
+   call wrtout(std_out,msg,'COLL')
+   ! 
+   chi0_tmp = chi0(:,:,1)
+   call xginv(chi0_tmp,npwe,comm=comm)
+   vfxc_lr = (one-Zr)*chi0_tmp(:,:)
+   !do ig1=1,npwe
+   !  vfxc_lr(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_lr(ig1,:) 
+   !end do
+   write(msg,'(a)') ' Constructing LR+ALDA fxc kernel'
+   call wrtout(std_out,msg,'COLL')
+   do ig1=2,npwe
+     vfxc_lr(ig1,2:npwe) = kxcg_mat(ig1,2:npwe)
+     vfxc_lr(1,ig1) = vfxc_lr(1,ig1) + kxcg_mat(1,ig1)
+     vfxc_lr(ig1,1) = vfxc_lr(ig1,1) + kxcg_mat(ig1,1)
+   end do
+   if (iqibz > 1) then
+     vfxc_lr(1,1) = vfxc_lr(1,1) + kxcg_mat(1,1)
+   end if
+   !
+   do io=1,nomega
+     if (omega_distrb(io) == my_rank) then
+       call atddft_hyb_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_lr,kxcg_mat,option_test,my_nqlwl,dim_wing,omega(io),&
+&        chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+       epsm_lf(io,:) = tmp_lf
+       epsm_nlf(io,:) = tmp_nlf
+       eelf(io,:) = tmp_eelf
+     end if
+   end do
+
+   ABI_FREE(kxcg_mat)
+   ABI_FREE(chi0_tmp)
+   ABI_FREE(vfxc_lr)
 
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
@@ -2339,7 +2432,7 @@ end subroutine atddft_symepsm1
 !! FUNCTION
 !!  Calculate $\tilde\epsilon^{-1}$ using ALDA within TDDFT
 !!
-!!  Based on atddft_symepsm1, modified for the bootstrap+ALDA hybrid kernel
+!!  Based on atddft_symepsm1, modified for the LR+ALDA hybrid kernel
 !!
 !!  Output the electron energy loss function and the macroscopic dielectric function with and
 !!  without local field effects (only if non-zero real frequencies are available)
