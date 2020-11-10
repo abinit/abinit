@@ -21874,7 +21874,7 @@ Variable(
 This variable activates the RMM-DIIS eigensolver to **accelerate**
 GS computations, structural relaxations and molecular-dynamics simulations.
 It is compatible with NC and PAW and the different MPI levels implemented in the GS part.
-It has no effect for DFPT calculations or other [[opdriver]] values.
+It has no effect for DFPT calculations or other [[optdriver]] values.
 
 CG and LOBPC
 The accuracy and reliability of the RMM-DIIS method **strongly** depends on the quality of the input trial states
