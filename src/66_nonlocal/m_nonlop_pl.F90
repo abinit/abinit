@@ -376,11 +376,13 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
  if(signs==2) vectout(:,:)=zero
 
- if(choice==3.or.choice==23) then
-   strsnl(:)=zero
-   if(mpssoang>mpsang) strsso(:,:)=zero
- end if
+ !if(choice==3.or.choice==23) then
+ !  strsnl(:)=zero
+ !  if(mpssoang>mpsang) strsso(:,:)=zero
+ !end if
  enlk=zero
+ strsso = zero
+ strsnl = zero
 
 !In the case vectin is a spinor, split its second part.
 !Also, eventually take into account the storage format of the wavefunction
@@ -1241,7 +1243,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  end if
 
  if (mpi_enreg%paral_spinor==1) then
-   call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
+   if (size(enlout)>0) call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
    call xmpi_sum(strsnl,mpi_enreg%comm_spinor,ierr)
    call xmpi_sum(enlk,mpi_enreg%comm_spinor,ierr)
    call xmpi_sum(strsso,mpi_enreg%comm_spinor,ierr)
