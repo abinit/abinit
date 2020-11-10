@@ -131,7 +131,7 @@ contains
     character(len=fnlen) :: name
 
     integer :: filetype,ii,lenstr
-    integer :: natom,nph1l,nrpt,ntypat
+    integer :: natom,nph1l,nrpt,ntypat,isym,iat
     integer :: option
     logical :: need_analyze_anh_pot,need_prt_files
 ! MS
@@ -434,10 +434,10 @@ elec_eval = .FALSE.
                     &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
                     &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on)
              else 
-                inp%fit_nfixcoeff = -1
                 need_prt_files=.FALSE.
-                do ii=1,natom
+                do ii=1,reference_effective_potential%crystal%nirredat
                   if(ii == natom)need_prt_files=.TRUE.
+                  if(ii > 1)inp%fit_nfixcoeff = -1 
                   call fit_polynomial_coeff_fit(reference_effective_potential,&
                        &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                        &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
@@ -448,7 +448,8 @@ elec_eval = .FALSE.
                        &         verbose=.true.,positive=.false.,&
                        &         anharmstr=inp%fit_anhaStrain==1,&
                        &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
-                       &         fit_iatom=ii,prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on)
+                       &         fit_iatom=reference_effective_potential%crystal%irredatindx(ii),&
+                       &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on)
                 enddo 
              endif 
           end if

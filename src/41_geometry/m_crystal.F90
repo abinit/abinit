@@ -82,6 +82,9 @@ MODULE m_crystal
   integer :: ntypat
   ! Number of type of atoms
 
+  integer :: nirredat
+  ! Number of irreducibel atoms
+
   integer :: npsp
   ! No. of pseudopotentials
 
@@ -144,6 +147,9 @@ MODULE m_crystal
   integer,allocatable :: nattyp(:)
   ! typat(natom), nattyp(ntypat)
   ! Type of each natom and number of atoms of each type.
+
+  integer,allocatable :: irredatindx(:) 
+  ! Index of irreducible atoms 
 
   real(dp),allocatable :: tnons(:,:)
   ! tnons(3,nsym)
@@ -326,6 +332,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  integer,pointer :: symrel_noI(:,:,:)
  real(dp),pointer :: tnons_noI(:,:)
+ logical :: irredat_tmp(natom) 
 ! *************************************************************************
 
  !@crystal_t
@@ -449,6 +456,32 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  tolsym8=tol8
  call symatm(cryst%indsym, natom, Cryst%nsym, Cryst%symrec, Cryst%tnons, tolsym8, Cryst%typat, Cryst%xred)
 
+ ! Find list of irreducible atoms by using the indsym 
+ cryst%nirredat = 0 
+ irredat_tmp = .TRUE.
+ do iat = 1,natom 
+   if(irredat_tmp(iat))then  
+      cryst%nirredat = cryst%nirredat + 1    
+      do isym = 1,nsym 
+         if (cryst%indsym(4,isym,iat) /= iat)then  
+            if (all(cryst%indsym(:3,isym,iat) == (/0,0,0/)))then
+               irredat_tmp(cryst%indsym(4,isym,iat)) = .FALSE.  
+            endif
+         endif 
+      enddo 
+   endif
+ enddo 
+
+ !Write indexes of irreducible atoms 
+ ABI_MALLOC(cryst%irredatindx,(cryst%nirredat))
+ indx = 0 
+ do iat = 1,natom
+    if(irredat_tmp(iat))then 
+        indx = indx + 1
+        cryst%irredatindx(indx) = iat
+    endif 
+ enddo 
+
  ! Rotations in spinor space
  ABI_MALLOC(Cryst%spinrot, (4, Cryst%nsym))
  do isym=1,Cryst%nsym
@@ -525,6 +558,7 @@ subroutine crystal_free(Cryst)
  ABI_SFREE(Cryst%atindx1)
  ABI_SFREE(Cryst%typat)
  ABI_SFREE(Cryst%nattyp)
+ ABI_SFREE(Cryst%irredatindx)
 
 !real
  ABI_SFREE(Cryst%tnons)
