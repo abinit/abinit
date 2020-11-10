@@ -2,11 +2,12 @@
 
 Version 9.2, released on September 30, 2020.
 List of changes with respect to version 8.10.
+Release notes updated on November 10, 2020.
 
 Many thanks to the contributors to the ABINIT project between
-October 2018 and September 2020. These release notes
+October 2018 and November 2020. These release notes
 are relative to modifications/improvements of ABINIT v9.2 with respect to v8.10
-(merge requests up to and including MR692 are taken into account, also MR 697)
+merge requests up to and including MR692 are taken into account, also MR 697-702, 705, 707-710, 712, 715)
 
 The list of contributors includes:
 B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen,
@@ -65,6 +66,8 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
     of [[tolsym]], 1e-5, is more in line with the tolerances of other codes, so that for users of such
     codes, one barrier to the use of ABINIT is removed. By the same token, some bug in the recognition of symmetries
     has been fixed, when [[tolsym]] is close to the default, see the new tests [[test:v9_15]] and [[test:v9_16]].
+    The new input variable [[chksymtnons]] has been introduced, to govern the possible automatic alignment
+    of the [[tnons]] with the FFT grid (actually needed for GW calculations).
     By X. Gonze (MR 689 and others)
 
 **A.4** The initialization of the wavefunctions when [[paral_kgb]]=1 and [[nspinor]]=2 has been changed, since the previous one could prevent the code to converge.
@@ -575,7 +578,7 @@ By J. Zwanziger (MR 469, 500, 545, 588)
 By M. Giantomassi
 
 **D.4** Speed-up of susceptibility matrix calculations and GW analytic continuation calculations.
-See the new input variable [[gwaclowrank]] and new test [[test:v9_22]].
+See the new input variable [[gwaclowrank]] and new test [[test:v9_32]].
 
 By F. Bruneval (MR 687).
 
@@ -745,8 +748,21 @@ Due to a subtle reordering of nonlinear core correction terms, some pead refs ar
 
 By L. Baguet (MR 650).
 
+**D.39** Anaddb output data prefix
 
-**D.39** Miscellaneous additional bug fixes, improvements of documentation including for the build system.
+The former writing of anaddb.nc (fixed path and fixed name) has been made more flexible, by
+introducing a prefix
+
+By J. Bieder and He Xu (MR702)
+
+**D.40** New "macro" input variable [[expert_user]]
+
+When non-zero [[expert_user]] automatically switch off all checks done by [[chkprim]], [[chkdilatmx]], [[chksymbreak]] and [[chksymtnons]].
+
+By X. Gonze (MR715)
+
+
+**D.41** Miscellaneous additional bug fixes, improvements of documentation including for the build system.
 G. Antonius, L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze,
 F. Jollet, R. Outerovitch, N. Pike, Y Pouillon, M. Royo, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
 
