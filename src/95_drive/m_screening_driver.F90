@@ -738,7 +738,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! FIXME this is to preserve the old implementation for the head and the wings in ccchi0q0
    ! But has to be rationalized
-   !KS_BSt%eig=QP_BSt%eig
+   ! KS_BSt%eig=QP_BSt%eig
 
    ! Calculate new occ. factors and fermi level.
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget)
@@ -1328,11 +1328,17 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
-   case (7)
-   ! Bootstrap+ALDA hybrid vertex kernel
+   case (11,13)
+   ! Bootstrap/LR+ALDA hybrid vertex kernel
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
-     MSG_WARNING('EXPERIMENTAL: Bootstrap+ALDA hybrid kernel is being added to screening')
-     ikxc=7; approx_type=7; dim_kxcg=1 
+     ikxc=7; dim_kxcg=1 
+     if (Dtset%gwgamma<13) then
+       MSG_WARNING('EXPERIMENTAL: Bootstrap+ALDA hybrid kernel is being added to screening')
+       approx_type=7
+     else
+       MSG_WARNING('EXPERIMENTAL: LR+ALDA hybrid kernel is being added to screening')
+       approx_type=8
+     end if
      option_test=1  ! TESTELECTRON
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
      call kxc_driver(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,rhor_kernel,&
@@ -1354,7 +1360,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)
-   else if (approx_type<8) then  !Bootstrap+ALDA
+   else if (approx_type<9) then  !LR+ALDA
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)
