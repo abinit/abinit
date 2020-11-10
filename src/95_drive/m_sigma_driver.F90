@@ -427,7 +427,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call timab(402,1,tsec) ! Init1
 
  if (nprocs>Sigp%nbnds) then
-   msg='Impossible to continue when MPI processes is lower than the number of bands [n_procs=max(1,nband)].'
+   msg='Impossible to continue when the number of MPI processes is higher than the number of bands [i.e. max(nprocs)=nband].'
    MSG_ERROR(msg)
  end if
 
