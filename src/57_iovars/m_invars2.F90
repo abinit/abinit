@@ -148,7 +148,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
 
    ABI_DEALLOCATE(zionpsp)
 
-   if (ANY(dtsets(idtset)%optdriver == [RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_RDMFT])) then   ! MRM
+   if (ANY(dtsets(idtset)%optdriver == [RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE])) then
     ! For GW or BSE calculations, we only use (npwwfn|ecutwfn) G-vectors read from the KSS file,
     ! therefore the FFT box for the density should be defined according to ecut=ecutwfn.
 
@@ -973,7 +973,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) then
    dtset%ecutwfn=dprarr(1)
  else
-   if(dtset%optdriver==RUNL_SCREENING .or. dtset%optdriver==RUNL_SIGMA .or. dtset%optdriver==RUNL_RDMFT) dtset%ecutwfn=dtset%ecut
+   if(dtset%optdriver==RUNL_SCREENING .or. dtset%optdriver==RUNL_SIGMA) dtset%ecutwfn=dtset%ecut
  end if
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'omegasimax',tread,'ENE')
  if(tread==1) dtset%omegasimax=dprarr(1)

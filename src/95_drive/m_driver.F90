@@ -60,7 +60,6 @@ module m_driver
  use m_respfn_driver,    only : respfn
  use m_screening_driver, only : screening
  use m_sigma_driver,     only : sigma
- use m_rdmft,            only : rdmft  ! MRM
  use m_bethe_salpeter,   only : bethe_salpeter
  use m_eph_driver,       only : eph
  use m_wfk_analyze,      only : wfk_analyze
@@ -352,10 +351,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      case (RUNL_SCREENING, RUNL_SIGMA)
        call ydoc%add_ints("optdriver, gwcalctyp", &
          [dtset%optdriver, dtset%gwcalctyp] , dict_key="meta")
-
-     case(RUNL_RDMFT)
-       call ydoc%add_ints("optdriver", [dtset%optdriver], &
-         dict_key="meta")
 
      case (RUNL_BSE)
        call ydoc%add_ints("optdriver, bs_calctype, bs_algorithm", &
@@ -695,9 +690,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  ****************************************************************************
 !  Exchange-correlation
    
-   if (dtset%optdriver/=RUNL_RDMFT) then
-     call echo_xc_name(dtset%ixc)
-   endif
+   call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
      call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
@@ -800,9 +793,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case(RUNL_SIGMA)
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
    
-   case(RUNL_RDMFT)
-     call rdmft(acell,codvsn,dtfil,dtset,pawrad,pawtab,psps,rprim,converged)
-
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 

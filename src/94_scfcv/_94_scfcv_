@@ -17,7 +17,6 @@
 !! m_afterscfloop.F90
 !! m_elpolariz.F90
 !! m_outscfcv.F90
-!! m_rdmft.F90
 !! m_scfcv.F90
 !! m_scfcv_core.F90
 !!

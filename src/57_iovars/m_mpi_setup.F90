@@ -256,12 +256,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  From total number of procs, compute all possible distributions
 !  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_RDMFT, RUNL_EPH, RUNL_NONLINEAR])) then 
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) then 
        iexit = 0
    else
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
-   !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_RDMFT, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
+   !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
 
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
 &   (dtsets(idtset)%npkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
@@ -691,7 +691,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if(dtsets(idtset)%paral_kgb==1) mpi_enregs(idtset)%paralbd=0
 
 !  Check if some MPI processes are empty (MBPT code uses a complete different MPI algorithm)
-   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_RDMFT, RUNL_BSE, RUNL_EPH])
+   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])
    if (dtsets(idtset)%usewvl == 0 .and. do_check) then
      if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),mband_upper,&
 &     dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=message)) then

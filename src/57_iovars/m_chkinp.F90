@@ -788,23 +788,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  ecutsigx
-! MRM
-   if ( optdriver == RUNL_RDMFT) then
-     call chkdpr(0,0,cond_string,cond_values,ierr,'ecutsigx',dt%ecutsigx,1,0.0_dp,iout)
-     if(dt%fftgw<20)then
-       if(dt%ecutwfn<dt%ecutsigx-tol8)then
-         write(msg,'(a,es16.6,a,es16.6,a,6a)')&
-          'The values of ecutwfn and ecutsigx are ', dt%ecutwfn,' and ',dt%ecutsigx,ch10,&
-          'With fftgw lower than 20, one expect ecutsigx to be smaller or equal to ecutwfn.',ch10,&
-          'Indeed, one is wasting memory without gaining CPU time or accuracy.',ch10,&
-          'Action: use another value of fftgw (e.g. 21), or adjust ecutwfn with ecutsigx.'
-         MSG_ERROR_NOSTOP(msg, ierr)
-       end if
-     end if
-     if (dt%nspinor == 2 .or. dt%usepaw == 1) then
-       MSG_ERROR_NOSTOP("URDMFT or the used of PAW are not implemented", ierr)
-     endif 
-   endif
 
    ! Check for GW calculations that are not implemented.
    if (ANY(optdriver == [RUNL_SCREENING, RUNL_SIGMA])) then
@@ -862,7 +845,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  of the Kleynman-Bylander form factors as the spline in Psps% is done with ecut
 !  while we need |q+G| up to ecut. enlargement due to the q is already
 !  taken into account by enlarging the spline mesh by around 20%.
-   if ( ANY(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_RDMFT]) ) then
+   if ( ANY(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE]) ) then
      call chkdpr(0,0,cond_string,cond_values,ierr,'ecutwfn',dt%ecuteps,1,0.0_dp,iout)
      if(dt%ecut<dt%ecutwfn-tol8)then
        write(msg,'(a,es16.6,a,es16.6,a,6a)')&
@@ -1346,7 +1329,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 !  Mixing on density is only allowed for GS calculations or for drivers where it is not used.
    if(optdriver /= RUNL_GSTATE .and. all(optdriver/=[RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_EPH,&
-&     RUNL_WFK,RUNL_NONLINEAR,RUNL_RDMFT])) then
+&     RUNL_WFK,RUNL_NONLINEAR])) then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint_le(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,9,iout)
    end if
@@ -2275,9 +2258,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  end if
 
 !  optdriver 
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,11,&
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,10,&
 &   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE,&
-&   RUNL_RDMFT, RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE],iout)
+&   RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE],iout)
    if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR,RUNL_LONGWAVE])) then
      write(msg,'(a,i3,3a,14(a,i2),4a)' )&
 &     'The input variable optdriver=',dt%optdriver,ch10,&
