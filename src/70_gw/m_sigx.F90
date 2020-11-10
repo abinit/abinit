@@ -638,7 +638,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
            !      * Only the upper triangle if HF, SEX, or COHSEX.
            do irow=1,Sigxij_tab(spin)%col(kb)%size1
              jb = Sigxij_tab(spin)%col(kb)%bidx(irow)
-             rhotwg = rhotwg_ki(:,jb)
+             rhotwg(:) = rhotwg_ki(:,jb)
              ! Calculate bare exchange <phi_j|Sigma_x|phi_k>.
              ! Do the scalar product only if ib_sum is occupied.
              do iab=1,Sigp%nsig_ab
