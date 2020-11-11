@@ -75,7 +75,7 @@ module m_sigma_driver
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
  use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
  use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
-                             mels_get_haene, mels_get_kiene, write_sigma_header, write_sigma_results
+                             mels_get_haene, mels_get_kiene, sigma_get_excene, write_sigma_header, write_sigma_results
  use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
  use m_melemts,       only : melflags_reset, melements_print, melements_free, melflags_t, melements_t, melements_zero
@@ -222,8 +222,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: etot,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
- real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb 
+ real(dp) :: etot,etot2,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
+ real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy 
  real(dp) :: ucvol,ucvol_local,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -2706,7 +2706,8 @@ endif
      end do
      call xmpi_barrier(Wfd%comm)
      call vcoul_free(Vcp_full)
-     ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)                            ! Save the new total exchange energy Ex = Ex[GW.1RDM] 
+     ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)         ! Save the new total exchange energy Ex = Ex[GW.1RDM] 
+     exc_mbb_energy=sigma_get_excene(Sr,Kmesh,QP_BSt)   ! Save the new total exchange-correlation MBB energy Exc = Exc^MBB[GW.1RDM] 
      !
      ! Transform      <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>,
      !                <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>,
@@ -2805,6 +2806,7 @@ endif
      eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
      ekin_energy=mels_get_kiene(Sr,GW1RDM_me,Kmesh,QP_BSt)
      etot=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy
+     etot2=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+exc_mbb_energy
      write(msg,'(a1)')' '
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2827,7 +2829,10 @@ endif
      write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Efock      = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Ex         = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Exc[MBB]   = : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Enn        = : ',QP_energies%e_ewald,' Ha ,',QP_energies%e_ewald*Ha_eV,' eV'
@@ -2837,10 +2842,16 @@ endif
              &--------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Etot       = : ',etot,' Ha ,',etot*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Etot[SD]   = : ',etot,' Ha ,',etot*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Etot[MBB]  = : ',etot2,' Ha ,',etot2*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Vee[MBB]   = : ',(exc_mbb_energy+eh_energy),' Ha ,',(exc_mbb_energy+eh_energy)*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,1(es16.6))')  ' Density    = : ',den_int

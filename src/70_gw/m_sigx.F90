@@ -193,9 +193,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  integer :: isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
  integer :: gwx_nfftot,nfftf,mgfftf,nhat12_grdim,npwx
  real(dp) :: cpu_time,wall_time,gflops
- real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty
+ real(dp) :: fact_sp,theta_mu_minus_esum,theta_mu_minus_esum2,tol_empty
  complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
- complex(gwpc) :: gwpc_sigxme
+ complex(gwpc) :: gwpc_sigxme,gwpc_sigxme2,xdot_tmp
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
@@ -214,8 +214,8 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  complex(gwpc),allocatable :: rhotwg_ki(:,:)
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_ibz(:)
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
- complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
- complex(dpc),allocatable :: sigxme_tmp(:,:,:),sym_sigx(:,:,:),sigx(:,:,:,:)
+ complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:),sigxcme_tmp(:,:)
+ complex(dpc),allocatable  :: sigxme_tmp(:,:,:),sym_sigx(:,:,:),sigx(:,:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
  logical :: can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
@@ -385,8 +385,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  end if
 
  ABI_MALLOC(sigxme_tmp, (minbnd:maxbnd, minbnd:maxbnd, Wfd%nsppol*Sigp%nsig_ab))
+ ABI_MALLOC(sigxcme_tmp, (minbnd:maxbnd, Wfd%nsppol*Sigp%nsig_ab))
  ABI_MALLOC(sigx,(2, ib1:ib2, ib1:ib2, nsppol*Sigp%nsig_ab))
- sigxme_tmp = czero; sigx = czero
+ sigxme_tmp = czero; sigxcme_tmp = czero; sigx = czero
 
  nq_summed=Kmesh%nbz
  if (Sigp%symsigma > 0) then
@@ -626,8 +627,9 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
          end if
        end do ! jb Got all matrix elements from minbnd up to maxbnd.
 
-       theta_mu_minus_esum = fact_sp * qp_occ(ib_sum,ik_ibz,spin)
-       if (abs(theta_mu_minus_esum/fact_sp) >= tol_empty) then     ! MRM allow negative occ numbers
+       theta_mu_minus_esum  = fact_sp * qp_occ(ib_sum,ik_ibz,spin)
+       theta_mu_minus_esum2 = sqrt(abs(fact_sp * qp_occ(ib_sum,ik_ibz,spin))) ! MBB Nat. orb. funct. approx. sqrt(occ)
+       if (abs(theta_mu_minus_esum/fact_sp) >= tol_empty) then     ! MRM: allow negative occ numbers
          do kb=ib1,ib2
            ! Compute the ket Sigma_x |phi_{k,kb}>.
            rhotwgp(:) = rhotwg_ki(:,kb)
@@ -643,12 +645,18 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
              ! Do the scalar product only if ib_sum is occupied.
              do iab=1,Sigp%nsig_ab
                spadx1 = spinor_padx(1, iab); spadx2 = spinor_padx(2, iab)
-               gwpc_sigxme = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1) * theta_mu_minus_esum
+               xdot_tmp = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1) 
+               gwpc_sigxme  = xdot_tmp * theta_mu_minus_esum
+               gwpc_sigxme2 = xdot_tmp * theta_mu_minus_esum2
                ! Accumulate and symmetrize Sigma_x
                ! -wtqm comes from time-reversal (exchange of band indeces)
                is_idx = spin; if (nspinor == 2) is_idx = iab
                sigxme_tmp(jb, kb, is_idx) = sigxme_tmp(jb, kb, is_idx) + &
 &                (wtqp + wtqm)*DBLE(gwpc_sigxme) + (wtqp - wtqm)*j_gw*AIMAG(gwpc_sigxme)
+               if(jb==kb) then
+                 sigxcme_tmp(jb, is_idx) = sigxcme_tmp(jb, is_idx) + &
+&                (wtqp + wtqm)*DBLE(gwpc_sigxme2) + (wtqp - wtqm)*j_gw*AIMAG(gwpc_sigxme2)
+               end if
          
                sigx(1, jb, kb, is_idx) = sigx(1, jb, kb, is_idx) + wtqp *      gwpc_sigxme
                sigx(2, jb, kb, is_idx) = sigx(2, jb, kb, is_idx) + wtqm *CONJG(gwpc_sigxme)
@@ -689,11 +697,13 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  ! Gather contributions from all the CPUs.
  call xmpi_sum(sigxme_tmp, wfd%comm, ierr)
+ call xmpi_sum(sigxcme_tmp, wfd%comm, ierr)
  call xmpi_sum(sigx, wfd%comm, ierr)
 
  ! Multiply by constants. For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
- sigxme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp * Sigp%sigma_mixing
- sigx       = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx       * Sigp%sigma_mixing
+ sigxme_tmp  = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxme_tmp  * Sigp%sigma_mixing
+ sigxcme_tmp = (one/(Cryst%ucvol*Kmesh%nbz)) * sigxcme_tmp * Sigp%sigma_mixing
+ sigx        = (one/(Cryst%ucvol*Kmesh%nbz)) * sigx        * Sigp%sigma_mixing
 
  !
  ! If we have summed over the IBZ_q now we have to average over degenerate states.
@@ -764,9 +774,11 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      do iab=1,Sigp%nsig_ab
        is_idx = spin; if (Sigp%nsig_ab > 1) is_idx = iab
        if (is_idx <= 2) then
-         Sr%sigxme(jb,jk_ibz,is_idx) = DBLE(sigxme_tmp(jb,jb,is_idx))
+         Sr%sigxme(jb,jk_ibz,is_idx)     = DBLE( sigxme_tmp(jb,jb,is_idx))
+         Sr%sigxcnofme(jb,jk_ibz,is_idx) = DBLE(sigxcme_tmp(jb,is_idx))
        else
-         Sr%sigxme(jb,jk_ibz,is_idx) = sigxme_tmp(jb,jb,is_idx)
+         Sr%sigxme(jb,jk_ibz,is_idx)     =  sigxme_tmp(jb,jb,is_idx)
+         Sr%sigxcnofme(jb,jk_ibz,is_idx) = sigxcme_tmp(jb,is_idx)
        end if
      end do
      !if (Sigp%nsig_ab>1) then
@@ -778,6 +790,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ! Save full exchange matrix in Sr%
  Sr%x_mat(minbnd:maxbnd,minbnd:maxbnd,jk_ibz,:) = sigxme_tmp(minbnd:maxbnd,minbnd:maxbnd,:)
  ABI_FREE(sigxme_tmp)
+ ABI_FREE(sigxcme_tmp)
 
  ! ===========================
  ! ==== Deallocate memory ====
