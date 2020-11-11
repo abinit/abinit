@@ -36,7 +36,7 @@ module m_vtowfk
  use m_dtfil
 
  use defs_abitypes, only : MPI_type
- use m_time,        only : timab, cwtime, sec2str
+ use m_time,        only : timab, cwtime, cwtime_report, sec2str
  use m_fstrings,    only : sjoin, itoa, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_paw_dmft,    only : paw_dmft_type
@@ -274,13 +274,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ! rmm_diis > 0 --> Activate it after (3 + rmm_diis) iterations with wfoptalg algorithm.
  ! rmm_diis < 0 --> Start with RMM-DIIS directly (risky)
  use_rmm_diis = .False.
- if (dtset%rmm_diis /= 0 .and. dtset%use_gpu_cuda == 0) then
+ if (dtset%rmm_diis /= 0 .and. iscf > 0) then
    use_rmm_diis = istep > 3 + dtset%rmm_diis
-   !if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver.")
+   !if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver in SCF mode.")
  end if
  nonlop_counter = 0
 
- if ((.not. newlobpcg) .or. use_rmm_diis) then
+ if ((.not. newlobpcg) .or. dtset%rmm_diis /= 0) then
    ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
    gsc=zero
  end if
@@ -337,6 +337,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  do inonsc=1,nnsclo_now
    if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
+
+   if (dtset%rmm_diis /= 0 .and. iscf < 0) then
+     use_rmm_diis = inonsc > 3 + dtset%rmm_diis
+     !if (use_rmm_diis) call wrtout(std_out, " Activating RMM-DIIS eigensolver in NSCF mode.")
+   end if
 
    ! This initialisation is needed for the MPI-parallelisation (gathering using sum)
    if(wfopta10 /= 1 .and. .not. newlobpcg) then
@@ -532,7 +537,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
 
    if (iscf < 0) then
-
      if (residk > dtset%tolwfr .and. residk < tol7) then
        if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")
        ii = fftcore_set_mixprec(0)
@@ -611,6 +615,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !which threads performs the call to MPI_ALL_REDUCE.
 !This problem can be easily solved by removing MPI_enreg from meanvalue_g so that
 !the MPI call is done only once outside the OMP parallel region.
+
+ call cwtime(cpu, wall, gflops, "start")
 
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
@@ -828,6 +834,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if ! iscf>0 or iscf=-3
 
  end do !  End of loop on blocks
+ call cwtime_report(" Block loop", cpu, wall, gflops)
 
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(enlout)
@@ -852,7 +859,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ! returns results in packed form.
  ! CHEBYSHEV, NEW LOBPCG and RMM-DIIS are smarter and return enlx_k directly
  !
- rotate_subvnlx = gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg
+ rotate_subvnlx = gs_hamk%usepaw == 0 .and. wfopta10 /= 1 .and. .not. newlobpcg
+ !if (dtset%rmm_diis /= 0) rotate_subvnlx = .False.
  if (use_rmm_diis) rotate_subvnlx = .False.
 
  if (rotate_subvnlx) then

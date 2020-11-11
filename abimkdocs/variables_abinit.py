@@ -21863,7 +21863,7 @@ Variable(
     topics=['TuningSpeed_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Activate the RMM-DIIS eigensolver in the GS part.",
+    mnemonics="Activate the RMM-DIIS eigensolver for GS calculations.",
     added_in_version="9.3.0",
     text=r"""
 
@@ -21872,20 +21872,20 @@ Variable(
     This variable is under active development so use it at your own risk!
 
 This variable activates the RMM-DIIS eigensolver to **accelerate**
-GS computations, structural relaxations and molecular-dynamics simulations.
-It is compatible with NC and PAW and the different MPI levels implemented in the GS part.
-It has no effect for DFPT calculations or other [[optdriver]] values.
+GS computations, structural relaxations and molecular-dynamics runs.
+The flag is compatible with NC and PAW as well as the [[paral_kgb]] distribution
+It has no meaning when [[optdriver]] > 0.
 
-CG and LOBPC
+The RMM-DIIS method is usually used in conjunction with another eigenvalue solvers (CG and LOBPC)
+that provide the initial guess for the KS eigenstates
 The accuracy and reliability of the RMM-DIIS method **strongly** depends on the quality of the input trial states
-as the algorithm is designed to find the closest eigenvector-eigevalue pair.
-This means that RMM-DIIS is usually used in conjunction with another eigenvalue solver
-that provides the initial guess for the KS eigenstates
+as the algorithm find the closest eigenvector-eigevalue pair.
 The algorithm is inspired to XXX although the ABINIT implementation is not
 completely equivalent to the original formulation.
 
-RMM-DIIS can be used both with the conjugate-gradient and the LOBPCG solver although it is strongly suggested
-to use [[paral_kgb]] = 1 to take advantage of LOBPCG, its better efficiency and improved parallel MPI scalability.
+RMM-DIIS can be used both with the conjugate-gradient and the LOBPCG solver although
+it is strongly suggested to use [[paral_kgb]] = 1 to take advantage of LOBPCG, its better efficiency
+and improved parallel MPI scalability.
 In a nutshell, to activate RMM-DIIS with LOBPCG it is sufficient to use:
 
 ```
@@ -21897,8 +21897,8 @@ and then select the value of [[npband]], [[npkpt]], [[npfft]], [[npspinor]] acco
 Note also [[bandpp]]
 
 If we are running a standard GS calculation. Abinit activates the RMM-DIIS solver after 3 + [[rmm_diis]] SCF iterations
-In the case of structural relaxations, the first SCF cycle is done with 3 + [[rmm_diis]] as usual whereas
-the subsequent relaxation steps switch to RMM-DIIS after 1 + [[rmm_diis]] SCF iterations.
+In the case of structural relaxations, the first SCF cycle is performed with 3 + [[rmm_diis]] as usual while
+the subsequent relaxation steps activate RMM-DIIS after 1 + [[rmm_diis]] SCF iterations.
 
 This means that using [[rmm_diis]] 1 for a structural relaxation leads to:
 
@@ -21908,7 +21908,7 @@ This means that using [[rmm_diis]] 1 for a structural relaxation leads to:
 The RMM-DIIS solver usually requires less wall-time per iteration when compared to other approches since the
 explicit orthogonalization of the trial states is avoided during the optimization step and
 a single full-band orthogonalization is performed only once per SCF cycle.
-On the other hand, RMM-DIIS usually leads to a significant speedup especially for systems
+On the other hand, RMM-DIIS usually leads to faster iterations especially for systems
 with relatively large [[mpw]], [[nband]]
 In some cases, RMM-DIIS can be twice as fast **per iteration** as other conventional methods.
 On the other hand, please keep in mind that RMM-DIIS is not guaranteed to find the correct ground-state.
@@ -21916,9 +21916,7 @@ Moreover the algorith may have problems to converge and more iterations may be n
 Also, the present implementation is optimized for converging occupied states so we do not recommend
 [[rmm_diis]] for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
 Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
-then restart from the WFK file with more accurate eigenvalue solvers to crosscheck the results.
-
-
+then restart from the WFK file using e.g. the LOBPCG solver to reconverge the results with stricter tolerance.
 """,
 ),
 

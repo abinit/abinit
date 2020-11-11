@@ -260,8 +260,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  ! Define tolerance for occupied states on the basis of prev_accuracy_level
  ! and compute max of residuals for this bands.
- tol_occupied = tol3; if (any(prev_accuracy_level == [1])) tol_occupied = tol2
- nb_pocc = count(occ > tol_occupied)
+ tol_occupied = zero
+ if (dtset%iscf > 0) then
+   tol_occupied = tol3; if (any(prev_accuracy_level == [1])) tol_occupied = tol2
+ end if
+ nb_pocc = count(occ >= tol_occupied)
  max_res_pocc = maxval(resid(1:nb_pocc))
 
  ! Define accuracy_level for this run.
@@ -292,6 +295,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  end if
  ! FIXME: There's no real evidence that trial step is really needed
  end_with_trial_step = .False.
+ !if (dtset%iscf < 0) max_niter = dtset%nline
 
  ! Define accuracy_ene for SCF.
  accuracy_ene = zero
@@ -388,7 +392,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    !if dtset%
    !if dtset%occopt == 2
    max_niter_block = max_niter
-   if (all(occ(ib_start:ib_stop) < diis%tol_occupied)) max_niter_block = max(1 + max_niter / 2, 2)
+   if (dtset%iscf > 0) then
+     if (all(occ(ib_start:ib_stop) < diis%tol_occupied)) max_niter_block = max(1 + max_niter / 2, 2)
+   end if
 
    ! Compute H |phi_0> with cg block after subdiago.
    phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
@@ -718,7 +724,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
    ! Relative criterion on eigenvalue differerence.
    ! Abinit default in the CG part is 0.005 that is really low (0.3 in V).
    ! Here we increase it depending whether the state is occupied or empty
-   fact = one !; if (abs(occ_bk(idat)) < diis%tol_occupied) fact = three
+   fact = one !; if (dtset%iscf > 0 .and. abs(occ_bk(idat)) < diis%tol_occupied) fact = three
    if (diis%accuracy_level == 1) fact = fact * 18
    if (diis%accuracy_level == 2) fact = fact * 12
    if (diis%accuracy_level == 3) fact = fact * 6
@@ -739,7 +745,7 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
      end if
 
      ! Absolute criterion on eigenvalue difference. Assuming error on Etot ~ band_energy.
-     fact = one; if (abs(occ_bk(idat)) < diis%tol_occupied) fact = ten
+     fact = one; if (dtset%iscf > 0 .and. abs(occ_bk(idat)) < diis%tol_occupied) fact = ten
      if (sqrt(abs(resid)) < fact * accuracy_ene) then
        checks(idat) = 1; msg_list(idat) = 'resid < accuracy_ene'; cycle
      end if
