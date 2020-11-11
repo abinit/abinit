@@ -1,6 +1,6 @@
 
-.Version 9.2.2 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  8 Nov 2020.
-- ( at 16h13 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h37 )
   
-- input  file    -> /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Test_suite/v9_t21/t21.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t21/t21.in
 - output file    -> t21.out
 - root for input  files -> t21i
 - root for output files -> t21o
@@ -100,20 +100,20 @@ P           mkmem           1
             typat      1  1  2  2  3  3
            xangst      2.8796300385E+00  1.6625553555E+00  1.7375555000E+00
                        2.8796301923E+00 -1.6625550890E+00  5.2126665000E+00
-                       7.9925793548E-17 -4.6145129482E-17  0.0000000000E+00
-                       7.9925793548E-17 -4.6145129482E-17  3.4751110000E+00
+                       8.5411638471E-24 -1.8458066474E-16  0.0000000000E+00
+                       8.5411638471E-24 -1.8458066474E-16  3.4751110000E+00
                        2.8796300385E+00  1.6625553555E+00  5.2126665000E+00
                        2.8796301923E+00 -1.6625550890E+00  1.7375555000E+00
             xcart      5.4417121367E+00  3.1417743027E+00  3.2835040357E+00
                        5.4417124275E+00 -3.1417737991E+00  9.8505121071E+00
-                       1.5103786076E-16 -8.7201657087E-17  0.0000000000E+00
-                       1.5103786076E-16 -8.7201657087E-17  6.5670080714E+00
+                       1.6140460527E-23 -3.4880690579E-16  0.0000000000E+00
+                       1.6140460527E-23 -3.4880690579E-16  6.5670080714E+00
                        5.4417121367E+00  3.1417743027E+00  9.8505121071E+00
                        5.4417124275E+00 -3.1417737991E+00  3.2835040357E+00
              xred      3.3333333333E-01  6.6666666667E-01  2.5000000000E-01
                        6.6666666667E-01  3.3333333333E-01  7.5000000000E-01
-                       1.8503712665E-17  9.2518629502E-18  0.0000000000E+00
-                       1.8503712665E-17  9.2518629502E-18  5.0000000000E-01
+                       1.8503712665E-17 -1.8503712665E-17  0.0000000000E+00
+                       1.8503712665E-17 -1.8503712665E-17  5.0000000000E-01
                        3.3333333333E-01  6.6666666667E-01  7.5000000000E-01
                        6.6666666667E-01  3.3333333333E-01  2.5000000000E-01
             znucl       56.00000   47.00000   51.00000
@@ -151,8 +151,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.02747
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/56ba.2.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/56ba.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/56ba.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/56ba.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ba,  from PRB58, 3641 (1998)
 - 56.00000   2.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -177,8 +177,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -6.472077
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/47ag.1.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/47ag.1.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/47ag.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/47ag.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ag,  from PRB58, 3641 (1998)
 - 47.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -203,8 +203,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -0.616167
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/51sb.5.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/51sb.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/51sb.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/51sb.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Sb,  from PRB58, 3641 (1998)
 - 51.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -278,8 +278,8 @@ pressure_GPa:  -2.7209E+01
 xred      :
 - [  3.3333E-01,   6.6667E-01,   2.5000E-01, Ba]
 - [  6.6667E-01,   3.3333E-01,   7.5000E-01, Ba]
-- [  1.8504E-17,   9.2519E-18,   0.0000E+00, Ag]
-- [  1.8504E-17,   9.2519E-18,   5.0000E-01, Ag]
+- [  1.8504E-17,  -1.8504E-17,   0.0000E+00, Ag]
+- [  1.8504E-17,  -1.8504E-17,   5.0000E-01, Ag]
 - [  3.3333E-01,   6.6667E-01,   7.5000E-01, Sb]
 - [  6.6667E-01,   3.3333E-01,   2.5000E-01, Sb]
 cartesian_forces: # hartree/bohr
@@ -309,8 +309,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  reduced coordinates (array xred) for    6 atoms
        0.333333333333      0.666666666667      0.250000000000
        0.666666666667      0.333333333333      0.750000000000
-       0.000000000000      0.000000000000      0.000000000000
-       0.000000000000      0.000000000000      0.500000000000
+       0.000000000000     -0.000000000000      0.000000000000
+       0.000000000000     -0.000000000000      0.500000000000
        0.333333333333      0.666666666667      0.750000000000
        0.666666666667      0.333333333333      0.250000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -364,7 +364,7 @@ xc                  : -3.46684164720768E+00
 Ewald energy        : -1.21884367255288E+01
 psp_core            :  1.02172222631012E+00
 local_psp           : -1.51236407832339E+00
-non_local_psp       :  3.50935912438166E-01
+non_local_psp       :  3.50935912438167E-01
 total_energy        : -1.16855849947332E+01
 total_energy_eV     : -3.17980938920342E+02
 band_energy         : -5.99812543722562E-01
@@ -444,20 +444,20 @@ P           mkmem           1
             typat      1  1  2  2  3  3
            xangst      2.8796300385E+00  1.6625553555E+00  1.7375555000E+00
                        2.8796301923E+00 -1.6625550890E+00  5.2126665000E+00
-                       7.9925793548E-17 -4.6145129482E-17  0.0000000000E+00
-                       7.9925793548E-17 -4.6145129482E-17  3.4751110000E+00
+                       8.5411638471E-24 -1.8458066474E-16  0.0000000000E+00
+                       8.5411638471E-24 -1.8458066474E-16  3.4751110000E+00
                        2.8796300385E+00  1.6625553555E+00  5.2126665000E+00
                        2.8796301923E+00 -1.6625550890E+00  1.7375555000E+00
             xcart      5.4417121367E+00  3.1417743027E+00  3.2835040357E+00
                        5.4417124275E+00 -3.1417737991E+00  9.8505121071E+00
-                       1.5103786076E-16 -8.7201657087E-17  0.0000000000E+00
-                       1.5103786076E-16 -8.7201657087E-17  6.5670080714E+00
+                       1.6140460527E-23 -3.4880690579E-16  0.0000000000E+00
+                       1.6140460527E-23 -3.4880690579E-16  6.5670080714E+00
                        5.4417121367E+00  3.1417743027E+00  9.8505121071E+00
                        5.4417124275E+00 -3.1417737991E+00  3.2835040357E+00
              xred      3.3333333333E-01  6.6666666667E-01  2.5000000000E-01
                        6.6666666667E-01  3.3333333333E-01  7.5000000000E-01
-                       1.8503712665E-17  9.2518629502E-18  0.0000000000E+00
-                       1.8503712665E-17  9.2518629502E-18  5.0000000000E-01
+                       1.8503712665E-17 -1.8503712665E-17  0.0000000000E+00
+                       1.8503712665E-17 -1.8503712665E-17  5.0000000000E-01
                        3.3333333333E-01  6.6666666667E-01  7.5000000000E-01
                        6.6666666667E-01  3.3333333333E-01  2.5000000000E-01
             znucl       56.00000   47.00000   51.00000
@@ -551,10 +551,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.5  wall=          0.6
++Overall time at end (sec) : cpu=          0.6  wall=          0.6

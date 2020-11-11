@@ -42,8 +42,50 @@ cp TestBot_MPI*/tutoparal_t*/*out      tutoparal/Refs
 cp TestBot_MPI*/unitary_t*/*out        unitary/Refs
 
 # For the serial reference machine
-#cp TestBot_MPI1/seq_t*/*out      seq/Refs
+#p TestBot_MPI1/seq_t*/*out      seq/Refs
 
 # For the gpu reference machine
 #cp TestBot_MPI*/gpu_t*/*out      gpu/Refs
+
+# Now, suppress the corresponding fldiff files, to see whether some relevant files have not been copied
+# Normal directories
+rm TestBot_MPI1/v1_t*/*out.fldiff
+rm TestBot_MPI1/v2_t*/*out.fldiff  
+rm TestBot_MPI1/v3_t*/*out.fldiff TestBot_MPI1/v3_t*/*DOS*.fldiff
+rm TestBot_MPI1/v3_t*/*_k*_b*.fldiff TestBot_MPI1/v3_t*/t79_*.fldiff
+rm TestBot_MPI1/v4_t*/*out.fldiff TestBot_MPI1/v4_t*/*DOS*.fldiff TestBot_MPI1/v4_t*/*AV.fldiff 
+rm TestBot_MPI1/v5_t*/*out.fldiff TestBot_MPI1/v5_t*/*DOS*.fldiff TestBot_MPI1/v5_t*/*xml.fldiff                   
+rm TestBot_MPI1/v5_t*/t10_*.fldiff  TestBot_MPI1/v5_t*/*FATBANDS*.fldiff   
+rm TestBot_MPI1/v6_t*/*out.fldiff TestBot_MPI1/v6_t*/*BLZTRP*.fldiff 
+rm TestBot_MPI1/v7_t*/*out.fldiff TestBot_MPI1/v7_t*/*DOS*.fldiff
+rm TestBot_MPI1/v7_t*/*DMFT.fldiff TestBot_MPI1/v7_t*/*SBK.fldiff 
+rm TestBot_MPI1/v8_t*/*out.fldiff TestBot_MPI1/v8_t*/*dat*.fldiff TestBot_MPI1/v8_t*/*xml.fldiff
+rm TestBot_MPI1/v9_t*/*out.fldiff TestBot_MPI1/v9_t*/*KERANGE.fldiff  
+rm TestBot_MPI1/v67mbpt_t*/*out.fldiff  TestBot_MPI1/v67mbpt_t*/*MDF.fldiff TestBot_MPI1/v67mbpt_t*/*_k*_b*.fldiff
+rm TestBot_MPI1/atompaw_t*/*out.fldiff  
+rm TestBot_MPI1/bigdft_t*/*out.fldiff
+rm TestBot_MPI1/etsf_io_t*/*out.fldiff
+rm TestBot_MPI1/fast_t*/*out.fldiff  TestBot_MPI1/fast_t*/*GEO.fldiff
+rm TestBot_MPI1/libxc_t*/*out.fldiff TestBot_MPI1/libxc_t*/*data.fldiff
+rm TestBot_MPI1/psml_t*/*out.fldiff   
+rm TestBot_MPI1/tutomultibinit_t*/*out.fldiff TestBot_MPI1/tutomultibinit_t*/*xml.fldiff
+rm TestBot_MPI1/tutoplugs_t*/*out.fldiff
+rm TestBot_MPI1/tutorespfn_t*/*out.fldiff
+rm TestBot_MPI1/tutorial_t*/*out.fldiff  TestBot_MPI1/tutorial_t*/*f2b.fldiff
+rm TestBot_MPI1/unitary_t*/*out.fldiff
+rm TestBot_MPI1/vdwxc_t*/*out.fldiff
+rm TestBot_MPI1/wannier90_t*/*out.fldiff
+
+# Directories for parallel tests
+rm TestBot_MPI*/bigdft_paral_t*/*out.fldiff
+rm TestBot_MPI*/mpiio_t*/*out.fldiff TestBot_MPI*/mpiio_t*/*DOS*.fldiff
+rm TestBot_MPI*/paral_t*/*out.fldiff TestBot_MPI*/paral_t*/*MDF.fldiff   TestBot_MPI*/paral_t*/*xml.fldiff    TestBot_MPI*/paral_t*/*dat.fldiff  TestBot_MPI*/paral_t*/*DDB.fldiff 
+rm TestBot_MPI*/tutoparal_t*/*out.fldiff  
+rm TestBot_MPI*/unitary_t*/*out.fldiff
+
+# For the serial reference machine
+#rm TestBot_MPI1/seq_t*/*out.fldiff
+
+# For the gpu reference machine
+#rm TestBot_MPI*/gpu_t*/*out.fldiff      
 

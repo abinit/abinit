@@ -1,6 +1,6 @@
 
-.Version 9.2.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  7 Nov 2020.
-- ( at 09h22 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h40 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t79.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t79.in
 - output file    -> t79.out
 - root for input  files -> t79i
 - root for output files -> t79o
@@ -161,8 +161,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -179,8 +179,8 @@ meta: {optdriver: 1, rfphon: 1, }
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -230,18 +230,18 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   246.44103238013     -1.406E+03 1.082E-01 1.451E+05
- ETOT  2   24.567167586887     -2.219E+02 1.028E-01 2.110E+03
- ETOT  3   21.188681279245     -3.378E+00 1.914E-02 5.172E+01
- ETOT  4   20.971354778637     -2.173E-01 7.960E-03 7.711E+00
- ETOT  5   20.894450799468     -7.690E-02 4.043E-03 1.116E+00
- ETOT  6   20.864399991811     -3.005E-02 2.051E-03 1.123E-01
- ETOT  7   20.850389072530     -1.401E-02 1.200E-03 3.044E-01
- ETOT  8   20.842710062967     -7.679E-03 6.180E-04 5.486E-03
- ETOT  9   20.839032759138     -3.677E-03 3.638E-04 9.963E-02
- ETOT 10   20.836858895264     -2.174E-03 1.943E-04 3.673E-03
- ETOT 11   20.835818342953     -1.041E-03 1.158E-04 4.826E-02
- ETOT 12   20.835170399463     -6.479E-04 6.172E-05 8.308E-03
+-ETOT  1   246.44103238014     -1.406E+03 1.082E-01 1.451E+05
+ ETOT  2   24.567167586897     -2.219E+02 1.028E-01 2.110E+03
+ ETOT  3   21.188681279265     -3.378E+00 1.914E-02 5.172E+01
+ ETOT  4   20.971354778649     -2.173E-01 7.960E-03 7.711E+00
+ ETOT  5   20.894450799485     -7.690E-02 4.043E-03 1.116E+00
+ ETOT  6   20.864399991831     -3.005E-02 2.051E-03 1.123E-01
+ ETOT  7   20.850389072545     -1.401E-02 1.200E-03 3.044E-01
+ ETOT  8   20.842710062987     -7.679E-03 6.180E-04 5.486E-03
+ ETOT  9   20.839032759146     -3.677E-03 3.638E-04 9.963E-02
+ ETOT 10   20.836858895281     -2.174E-03 1.943E-04 3.673E-03
+ ETOT 11   20.835818342967     -1.041E-03 1.158E-04 4.826E-02
+ ETOT 12   20.835170399478     -6.479E-04 6.172E-05 8.308E-03
 
  scprqt:  WARNING -
   nstep=   12 was not enough SCF cycles to converge;
@@ -268,7 +268,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -4.78205562E+02  frxc 2 =   4.93798975E+02
  Resulting in :
- 2DEtotal=    0.2083517040E+02 Ha. Also 2DEtotal=    0.566953819528E+03 eV
+ 2DEtotal=    0.2083517040E+02 Ha. Also 2DEtotal=    0.566953819529E+03 eV
     (2DErelax=   -1.6312517909E+03 Ha. 2DEnonrelax=    1.6520869613E+03 Ha)
     (  non-var. 2DEtotal :    2.0883098233E+01 Ha)
 
@@ -515,10 +515,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         26.7  wall=         27.2
+- Proc.   0 individual time (sec): cpu=         29.7  wall=         29.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.7  wall=         27.2
++Overall time at end (sec) : cpu=         29.7  wall=         29.8

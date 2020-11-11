@@ -1,6 +1,6 @@
 
-.Version 9.2.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  7 Nov 2020.
-- ( at 09h19 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h37 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t72.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t72.in
 - output file    -> t72.out
 - root for input  files -> t72i
 - root for output files -> t72o
@@ -161,8 +161,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -179,8 +179,8 @@ meta: {optdriver: 1, rfelfd: 2, }
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -229,16 +229,16 @@ tolerances: {tolwfr: 1.00E-16, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -52.052392134311     -5.205E+01 1.525E-02 0.000E+00
- ETOT  2  -52.164970528635     -1.126E-01 3.142E-05 0.000E+00
- ETOT  3  -52.165193386199     -2.229E-04 5.573E-07 0.000E+00
- ETOT  4  -52.165194864598     -1.478E-06 6.804E-09 0.000E+00
- ETOT  5  -52.165194878679     -1.408E-08 9.001E-11 0.000E+00
- ETOT  6  -52.165194879038     -3.589E-10 6.660E-12 0.000E+00
- ETOT  7  -52.165194879051     -1.243E-11 1.441E-13 0.000E+00
- ETOT  8  -52.165194879051     -7.461E-13 1.562E-14 0.000E+00
- ETOT  9  -52.165194879051     -7.105E-14 1.455E-15 0.000E+00
- ETOT 10  -52.165194879051      7.105E-15 9.980E-17 0.000E+00
+-ETOT  1  -52.052392134309     -5.205E+01 1.525E-02 0.000E+00
+ ETOT  2  -52.164970528634     -1.126E-01 3.142E-05 0.000E+00
+ ETOT  3  -52.165193386198     -2.229E-04 5.573E-07 0.000E+00
+ ETOT  4  -52.165194864597     -1.478E-06 6.804E-09 0.000E+00
+ ETOT  5  -52.165194878678     -1.408E-08 9.001E-11 0.000E+00
+ ETOT  6  -52.165194879037     -3.588E-10 6.660E-12 0.000E+00
+ ETOT  7  -52.165194879050     -1.305E-11 1.441E-13 0.000E+00
+ ETOT  8  -52.165194879050     -6.750E-13 1.562E-14 0.000E+00
+ ETOT  9  -52.165194879050     -2.842E-14 1.455E-15 0.000E+00
+ ETOT 10  -52.165194879050      7.105E-15 9.980E-17 0.000E+00
 
  At SCF step   10   max residual=  9.98E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
@@ -468,10 +468,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         17.9  wall=         18.7
+- Proc.   0 individual time (sec): cpu=         19.0  wall=         19.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.9  wall=         18.7
++Overall time at end (sec) : cpu=         19.0  wall=         19.0

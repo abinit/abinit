@@ -1,6 +1,6 @@
 
-.Version 9.3.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 24 Sep 2020.
-- ( at 17h04 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h26 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/v4_t85/t85.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t85/t85.in
 - output file    -> t85.out
 - root for input  files -> t85i
 - root for output files -> t85o
@@ -436,8 +436,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01132
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -473,7 +473,7 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  3  -2.4777725099716    -2.460E-05 2.683E-05 2.434E-05
  ETOT  4  -2.4777725332916    -2.332E-08 2.557E-08 1.560E-07
  ETOT  5  -2.4777725334742    -1.826E-10 1.502E-10 9.721E-10
- ETOT  6  -2.4777725334755    -1.294E-12 6.929E-11 3.527E-12
+ ETOT  6  -2.4777725334755    -1.293E-12 6.929E-11 3.527E-12
 
  At SCF step    6   max residual=  6.93E-11 < tolwfr=  1.00E-10 =>converged.
 
@@ -493,7 +493,7 @@ lattice_vectors:
 lattice_lengths: [   5.41078,    5.41078,    5.41078, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1201209E+02
-convergence: {deltae: -1.294E-12, res2:  3.527E-12, residm:  6.929E-11, diffor: null, }
+convergence: {deltae: -1.293E-12, res2:  3.527E-12, residm:  6.929E-11, diffor: null, }
 etotal    :  -2.47777253E+00
 entropy   :   0.00000000E+00
 fermie    :   2.75190256E-01
@@ -566,18 +566,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.92187590187911E-01
-hartree             :  3.39807425191160E-03
+kinetic             :  8.92187590187914E-01
+hartree             :  3.39807425191162E-03
 xc                  : -1.20605025377335E+00
 Ewald energy        : -2.69627278273813E+00
 psp_core            :  5.93380416496286E-03
-local_psp           :  1.33781061290997E-01
-non_local_psp       :  4.84032132168665E-01
+local_psp           :  1.33781061290998E-01
+non_local_psp       :  4.84032132168667E-01
 internal            : -2.38299037444703E+00
-'-kT*entropy'       : -9.47821590284901E-02
+'-kT*entropy'       : -9.47821590284899E-02
 total_energy        : -2.47777253347552E+00
-total_energy_eV     : -6.74236195261672E+01
-band_energy         :  4.08122356901056E-01
+total_energy_eV     : -6.74236195261671E+01
+band_energy         :  4.08122356901058E-01
 ...
 
 
@@ -659,8 +659,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  yields    64 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =   9x  9x  9
-          total number of points  =      729
+ setmesh: FFT mesh size selected  =     9x    9x    9
+          total number of points  =          729
 
  Number of electrons calculated from density =    3.0000; Expected =    3.0000
  average of density, n =  0.026783
@@ -686,10 +686,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
 
     2  -0.000  -7.928   0.313   0.794   0.330   0.794   0.330   0.794   0.329
-       -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
+       -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
   chi0(G,G') at the    2 th omega   6.8028   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -726,7 +726,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    6 th omega   0.0000   3.8998 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
-        0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+       -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
     2  -0.000  -6.378   0.208   0.473   0.275   0.473   0.275   0.473   0.275
        -0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000
@@ -765,10 +765,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.014  -0.001   0.001   0.002  -0.002  -0.002   0.002   0.001  -0.001
-     -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
+      0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
        1       2       3       4       5       6       7       8       9
       0.014  -0.001   0.001   0.002  -0.002  -0.002   0.002   0.001  -0.001
-     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
+      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000
 
 
    Upper and lower wings at the    2 th omega   6.8028   0.0000 [eV]
@@ -810,10 +810,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    6 th omega   0.0000   3.8998 [eV]
        1       2       3       4       5       6       7       8       9
       0.136  -0.002   0.002   0.005  -0.005  -0.005   0.005   0.002  -0.002
-      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
        1       2       3       4       5       6       7       8       9
       0.136  -0.002   0.002   0.005  -0.005  -0.005   0.005   0.002  -0.002
-      0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
+     -0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
 
    Upper and lower wings at the    7 th omega   0.0000  10.6897 [eV]
@@ -851,7 +851,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.200  -0.206  -0.239  -0.214  -0.200  -0.214  -0.200  -0.214  -0.200
-       -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000
+        0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
     2  -0.206  -5.428   0.200   0.569   0.380   0.569   0.379   0.569   0.379
         0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000
@@ -929,10 +929,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -10.201  -0.223  -0.219  -0.239  -0.176  -0.239  -0.176  -0.240  -0.176
-       -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+        0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
     2  -0.223  -2.418   0.176   0.377   0.142   0.377   0.141   0.377   0.141
-        0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000  -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
   chi0(G,G') at the    2 th omega   6.8028   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1010,7 +1010,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
         0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
     2  -0.171  -5.915   0.216   0.604   0.334   0.604   0.333   0.492   0.385
-        0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
   chi0(G,G') at the    2 th omega   6.8028   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1085,7 +1085,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -10.643  -0.226  -0.230  -0.220  -0.207  -0.220  -0.207  -0.210  -0.215
-       -0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+        0.000  -0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -0.226  -3.101   0.177   0.450   0.163   0.450   0.163   0.360   0.288
         0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000
@@ -1163,10 +1163,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -9.217  -0.245  -0.159  -0.185  -0.185  -0.185  -0.185  -0.159  -0.245
-       -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
+        0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000
 
     2  -0.245  -9.361   0.162   0.770   0.296   0.770   0.296   0.576   0.229
-        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
+        0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
   chi0(G,G') at the    2 th omega   6.8028   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1322,7 +1322,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
        -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
 
     2  -0.225  -9.597   0.162   0.531   0.333   0.711   0.356   0.365   0.167
-        0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
+        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
 
   chi0(G,G') at the    2 th omega   6.8028   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1460,8 +1460,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  yields    64 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    3.0000; Expected =    3.0000
  average of density, n =  0.026783
@@ -1598,8 +1598,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  yields    64 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    3.0000; Expected =    3.0000
  average of density, n =  0.026783
@@ -1989,55 +1989,10 @@ P           mkmem           8
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          6.8        0.11      0.002
-- Total wall clock time (s,m,h):          7.8        0.13      0.002
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            6.8, wall_time =            7.8
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  2.027  29.8      2.291  29.3              2      -1.00        0.88       0.88
-- fourwf%(pot)                   0.441   6.5      0.455   5.8           6981      -1.00        0.97       0.97
-- pspini                         0.413   6.1      0.413   5.3              4      -1.00        1.00       1.00
-- invars2                        0.287   4.2      0.287   3.7              4      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.247   3.6      0.247   3.2             -1      -1.00        1.00       1.00
-- projbd                         0.173   2.5      0.174   2.2           9482      -1.00        0.99       0.99
-- timing timab                   0.112   1.6      0.112   1.4              9      -1.00        1.00       1.00
-- nonlop(apply)                  0.082   1.2      0.084   1.1           6981      -1.00        0.98       0.98
-- getghc-other                   0.077   1.1      0.070   0.9             -1      -1.00        1.10       1.10
-- abinit(2)                      0.062   0.9      0.062   0.8              1      -1.00        1.00       1.00
-- ewald                          0.053   0.8      0.052   0.7              4      -1.00        1.02       1.02
-- others (116)                   0.088   1.3      0.089   1.1             -1      -1.00        0.98       0.98
--<END_TIMER>
--
-- subtotal                       4.061  59.8      4.336  55.5                                  0.94       0.94
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           6.8, wall_time =           7.8
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  2.027  29.8      2.291  29.3              2      -1.00        0.88       0.88
-- fourwf%(pot)                   0.441   6.5      0.455   5.8           6981      -1.00        0.97       0.97
-- pspini                         0.413   6.1      0.413   5.3              4      -1.00        1.00       1.00
-- invars2                        0.287   4.2      0.287   3.7              4      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.247   3.6      0.247   3.2             -1      -1.00        1.00       1.00
-- projbd                         0.173   2.5      0.174   2.2           9482      -1.00        0.99       0.99
-- timing timab                   0.112   1.6      0.112   1.4              9      -1.00        1.00       1.00
-- nonlop(apply)                  0.082   1.2      0.084   1.1           6981      -1.00        0.98       0.98
-- getghc-other                   0.077   1.1      0.070   0.9             -1      -1.00        1.10       1.10
-- abinit(2)                      0.062   0.9      0.062   0.8              1      -1.00        1.00       1.00
-- ewald                          0.053   0.8      0.052   0.7              4      -1.00        1.02       1.02
-- others (116)                   0.088   1.3      0.089   1.1             -1      -1.00        0.98       0.98
--<END_TIMER>
 
-- subtotal                       4.061  59.8      4.336  55.5                                  0.94       0.94
 
 ================================================================================
 
@@ -2071,7 +2026,24 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -2089,7 +2061,9 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -2102,25 +2076,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          6.8  wall=          7.8
+- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.8  wall=          7.8
+.Delivered   8 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.1  wall=          5.2
