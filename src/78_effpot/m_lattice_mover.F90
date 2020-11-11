@@ -19,7 +19,7 @@
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!! For the initials of contributorsi see ~abinit/doc/developers/contributors.txt .
 !!
 !! SOURCE
 
@@ -42,6 +42,8 @@ module m_lattice_mover
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only:  rng_t
   use m_hashtable_strval, only: hash_table_t
+  use m_lattice_ncfile, only: lattice_ncfile_t
+  use m_mpi_scheduler, only: init_mpi_info
 !!***
 
   implicit none
@@ -69,10 +71,13 @@ module m_lattice_mover
      !type(lattice_hist_t) :: hist
 
      real(dp) :: mass_total 
+     type(lattice_ncfile_t) :: ncfile
    contains
      procedure:: initialize       ! perhaps each effpot type should have own 
      procedure :: finalize
      procedure :: set_params
+     procedure :: prepare_ncfile
+     procedure :: set_ncfile_name
      procedure :: set_initial_state ! initial state
      procedure :: force_stationary
      procedure :: run_one_step
@@ -185,7 +190,6 @@ contains
           self%current_vcart(:,i) = xi(:, i) *sqrt(self%temperature/self%masses(i))
        end do
        call self%force_stationary()
-       self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
        call self%get_T_and_Ek()
     else if(mode==2) then ! Use reference structure and 0 velocity.
        ! other modes.
@@ -196,11 +200,45 @@ contains
           self%current_vcart(:,i) = 0.0
        end do
        self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
+       call self%get_T_and_Ek()
     end if
 
     ABI_UNUSED(restart_hist_fname)
 
   end subroutine set_initial_state
+
+  subroutine prepare_ncfile(self, params, fname)
+    class(lattice_mover_t), intent(inout) :: self
+    type(multibinit_dtset_type) :: params
+    character(len=*), intent(in) :: fname
+    integer :: master, my_rank, comm, nproc
+    logical :: iam_master
+    ABI_UNUSED_A(params)
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    if(iam_master) then
+       call self%ncfile%initialize( trim(fname), 1)
+       call self%ncfile%write_cell(self%supercell)
+       call self%ncfile%def_lattice_var()
+    end if
+  end subroutine prepare_ncfile
+
+
+  !-------------------------------------------------------------------!
+  !set_ncfile_name :
+  !-------------------------------------------------------------------!
+  subroutine set_ncfile_name(self, params, fname)
+    class(lattice_mover_t), intent(inout) :: self
+    type(multibinit_dtset_type) :: params
+    character(len=fnlen), intent(in) :: fname
+    integer :: master, my_rank, comm, nproc
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
+    if (iam_master) then
+       call self%prepare_ncfile(params, trim(fname)//'_latthist.nc')
+       call self%ncfile%write_one_step(self%current_xcart, self%current_vcart, self%energy, self%Ek )
+    endif
+  end subroutine set_ncfile_name
+
 
 
   !-------------------------------------------------------------------!
@@ -329,7 +367,7 @@ contains
             & "Epot(Ha/uc)", "ETOT(Ha/uc)"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-
+    
     nstep=floor(self%thermal_time/self%dt)
     do i =1, nstep
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
@@ -339,13 +377,16 @@ contains
     do i =1, nstep
        !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
-       
-       write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
-            & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &
-            & (self%Ek+self%energy)/self%supercell%ncell
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
+       if(modulo(i, self%params%nctime)==0) then
+          write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
+               & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &
+               & (self%Ek+self%energy)/self%supercell%ncell
+          call wrtout(std_out,msg,'COLL')
+          call wrtout(ab_out, msg, 'COLL')
 
+          self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)+self%displacement
+          call self%ncfile%write_one_step(self%current_xcart, self%current_vcart, self%energy, self%Ek)
+       end if
        !TODO: output, observables
     end do
 
@@ -385,6 +426,7 @@ contains
     ! write to hist file
     class(lattice_mover_t), intent(inout) :: self
     ABI_UNUSED_A(self)
+
   end subroutine write_hist
 
   !-------------------------------------------------------------------!

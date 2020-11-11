@@ -41,6 +41,7 @@ sources = [
     "m_lattice_io_netcdf.F90",
     "m_lattice_langevin_mover.F90",
     "m_lattice_mover.F90",
+    "m_lattice_ncfile.F90",
     "m_lattice_verlet_mover.F90",
     "m_linked_list.F90",
     "m_lwf_hist.F90",
@@ -91,6 +92,7 @@ sources = [
     "m_spmat_lco.F90",
     "m_spmat_lil.F90",
     "m_spmat_NDCOO.F90",
+    "m_spmat_spvec.F90",
     "m_supercell_maker.F90",
     "m_tightbinding.F90",
     "m_twobody_interaction.F90"

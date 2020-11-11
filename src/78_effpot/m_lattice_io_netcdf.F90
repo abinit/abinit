@@ -157,7 +157,7 @@ contains
 
     ierr =nf90_inq_varid(ncid, "ref_energy", varid)
     NCF_CHECK_MSG(ierr, "ref_energy")
-    ierr = nf90_get_var(ncid, varid, masses)
+    ierr = nf90_get_var(ncid, varid, ref_energy)
     NCF_CHECK_MSG(ierr, "ref_energy")
 
 
@@ -207,7 +207,7 @@ contains
     do iR =1, nR
        do i=1 , natom3
           do j=1, natom3
-             if (abs(ifc_vallist(j, i, iR))>1e-9) then
+             if (abs(ifc_vallist(j, i, iR))>1e-2) then
                 ! NOTE: in fortran the order of index in reversed when reading netcdf array.
                 call self%coeff%add_entry([iR, i, j], ifc_vallist(j, i, iR))
              end if

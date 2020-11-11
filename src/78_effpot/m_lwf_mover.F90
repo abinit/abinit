@@ -246,7 +246,7 @@ contains
          self%lwf(:)=0.0
       ! read from lwf hist file
       case(4)
-         print*, "Reading from lwf hist file: ", trim(restart_hist_fname)
+         !print*, "Reading from lwf hist file: ", trim(restart_hist_fname)
          call self%read_hist_lwf_state(restart_hist_fname)
       end select
 
@@ -332,7 +332,7 @@ contains
       endif
     end subroutine set_ncfile_name
 
-
+    
 
   !!****f* m_lwf_mover/run_varT
   !!
@@ -363,15 +363,15 @@ contains
     type(hash_table_t), optional, intent(inout) :: energy_table
     real(dp) :: T_start, T_end
     integer :: T_nstep
-    type(lwf_ncfile_t) :: lwf_ncfile
+    !type(lwf_ncfile_t) :: lwf_ncfile
     character(len=4) :: post_fname
     real(dp) :: T, T_step
-    integer :: i, ii
+    integer :: i
     !integer :: Tfile, iostat
     character(len=90) :: msg
-    character(len=4200) :: Tmsg ! to write to var T file
-    character(len=150) :: iomsg
-    character(fnlen) :: Tfname ! file name for output various T calculation
+    !character(len=4200) :: Tmsg ! to write to var T file
+    !character(len=150) :: iomsg
+    !character(fnlen) :: Tfname ! file name for output various T calculation
     !real(dp), allocatable :: Tlist(:), chi_list(:), Cv_list(:), binderU4_list(:)
     !real(dp), allocatable :: Mst_sub_norm_list(:, :)
     !real(dp), allocatable ::  Mst_norm_total_list(:)

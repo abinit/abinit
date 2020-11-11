@@ -480,6 +480,7 @@ contains
 
     if (self%params%dynamics>0) then
        call self%set_lattice_mover()
+
     end if
 
     if (self%params%lwf_dynamics>0) then
@@ -565,7 +566,10 @@ contains
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
     call self%set_movers()
+
+    call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%lattice_mover%run_time(self%pots, energy_table=self%energy_table)
+    call self%lattice_mover%ncfile%finalize()
   end subroutine run_lattice_dynamics
 
   !-------------------------------------------------------------------!

@@ -177,7 +177,7 @@ contains
     real(dp) :: e
     call p1%initialize(2, 0.1_dp, [1, 2,4], [2,1] )
     e=p1%evaluate(vals) 
-    print *, "e: ", e
+    !print *, "e: ", e
     d1=0.0
     call p1%add_to_first_derivative(vals, d1)
     !print *, "d1", d1

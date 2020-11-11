@@ -91,13 +91,13 @@ contains
     real(dp), intent(out) :: b(self%mshape(2))
     integer:: ind, ind_i, ind_j
     b(:)=0.0D0
-!!!    !$OMP PARALLEL DO private(ind, ind_i, ind_j)
+    !$OMP PARALLEL DO private(ind, ind_i, ind_j)
     do ind = 1, self%nnz
        ind_i=self%ind%data(1, ind)
        ind_j=self%ind%data(2, ind)
        b(ind_i)=b(ind_i)+self%val%data(ind)*x(ind_j)
     end do
-!!!   !$OMP END PARALLEL DO
+   !$OMP END PARALLEL DO
   end subroutine  mv
 
   !-----------------------------------------------------------------------
