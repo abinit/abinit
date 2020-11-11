@@ -222,7 +222,7 @@ AC_DEFUN([_ABI_FC_CHECK_LLVM],[
 ]) # _ABI_FC_CHECK_LLVM
 
 
-# _ABI_FC_CHECK_AMD(COMPILER)
+# _ABI_FC_CHECK_AOCC(COMPILER)
 # ----------------------------
 #
 # Checks whether the specified Fortran compiler is the AOCC Flang compiler.
@@ -252,7 +252,7 @@ AC_DEFUN([_ABI_FC_CHECK_AOCC],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_FC_CHECK_AMD
+]) # _ABI_FC_CHECK_AOCC
 
 
 # _ABI_FC_CHECK_NAG(COMPILER)
