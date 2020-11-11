@@ -583,7 +583,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
+ integer,parameter :: master = 0
  integer :: iv1,ii,ierr,unt,fform,nqpt,iq,iq_found,cplex,trev_q
  integer :: idir,ipert,my_rank, nprocs, iatom, pertcase
  real(dp) :: cpu, wall, gflops
@@ -5324,7 +5324,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
       ! netcdf array has shape [cplex, n1, n2, n3, nspden]
       NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
       do ispden=1,hdr1%nspden
-        NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
+        NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
         write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
       end do
       ! Add rhog1(G=0)

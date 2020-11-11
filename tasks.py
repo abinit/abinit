@@ -234,7 +234,7 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = "ctags -R shared/ src/"
+        cmd = "ctags -R --langmap=fortran:+.finc.f90 shared/ src/"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
         #ctx.run('ctags -R --exclude="_*"', pty=True)
@@ -250,7 +250,8 @@ def fgrep(ctx, pattern):
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
+        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc]" "%s" src shared' % pattern
+        #cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -357,6 +358,12 @@ def pull_trunk(ctx):
     ctx.run("git pull trunk develop")
     ctx.run("git stash apply")
 
+@task
+def pull(ctx):
+    """"Execute `git stash && git pull --recurse-submodules && git stash apply`"""
+    ctx.run("git stash")
+    ctx.run("git pull --recurse-submodules")
+    ctx.run("git stash apply")
 
 @task
 def branchoff(ctx, start_point):

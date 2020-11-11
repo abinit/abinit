@@ -44,7 +44,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = ujdet
-#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% test_chain = tudet_1.in, tudet_2.in, tudet_3.in
 #%% [files]
 #%% files_to_test = 

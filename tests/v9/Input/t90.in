@@ -1,0 +1,68 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    Test the inclusion of a file in an input file              #
+#                                                               #
+#              Graphene, 2 atoms in the box                     #
+#################################################################
+
+
+!Unit cell
+ acell    2*4.6487    20.0
+ angdeg   90.0  90.0  120.0
+ ntypat   1  
+ natom    2  
+ typat  2*1
+ znucl    6
+ xred      0   0   0
+          2/3 1/3  0
+ 
+!Gamma point calculation
+kptopt       1
+ngkpt        1 1 1
+
+!Convergence parameters
+ ecut   36.0
+ tolvrs 1.d-10
+ nstep  50
+
+!XC used
+ ixc         7
+
+!Miscelaneous
+ 
+ ndtset      4
+
+ !NO CUT-OFF
+ icutcoul1    3
+
+ !SPHERICAL CUT-OFF
+ icutcoul2    0
+ 
+ !2D Beigi CUT-OFF
+ icutcoul3    2
+ vcutgeo3     1 1 0
+
+ !2D Rozzi CUT-OFF
+ icutcoul4    2
+ vcutgeo4    -1 1 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos    "C.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [shell]
+#%% pre_commands = 
+#%% [files]
+#%% files_to_test = 
+#%%   t90.out, tolnlines = 0, tolabs = 1.0E-7, tolrel = 5.0E-4
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = B. Guster
+#%% keywords = 
+#%% description = 
+#%%   Test the 0D and 2D Coulomb cut-off functionality 
+#%%   in the ground state  for graphene. 
+#%%<END TEST_INFO>

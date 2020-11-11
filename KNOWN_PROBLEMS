@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv9.1.6 is for development
+The present release ABINITv9.3.1 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -14,7 +14,7 @@ The present release ABINITv9.1.6 is for development
 ================================================================
 0. Platforms
 
-For ABINITv9.2.0, list closed on 2020 09 20
+For ABINITv9.3.1, list closed on 2020 10 YY
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -823,7 +823,7 @@ The kptgw input variables, with default values  is echoed, while the reference d
 
 P811.2 (XG190930)
 Test v8_t24 on Ubu Intel 17
-Numerical results are wrong. But on everyother machine, it is OK. Should clarify ...
+Numerical results are wrong. But on all other machines, it is OK. Should clarify ...
 
 P90.1 (XG200309)
 Test tutoparal ucrpa_2 24 procs

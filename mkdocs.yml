@@ -37,6 +37,7 @@ pages:
         - MacOS: INSTALL_MacOS.md
         - Ubuntu: INSTALL_Ubuntu.md
         - CentOS: INSTALL_CentOS.md
+        - EasyBuild: INSTALL_EasyBuild.md
         - GPUs: INSTALL_gpu.md
 
 - Topics:
@@ -327,7 +328,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.2.1
+    version: 9.3.1
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt

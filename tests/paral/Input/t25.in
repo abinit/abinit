@@ -29,6 +29,7 @@
        0.5 0.5 0.0
  xred 0.0  0.0  0.0
       0.22 0.22 0.22
+ chksymtnons 0
  znucl 6
  nband 12 occ 4*2 8*0
  ntypat 1 typat 1 1  natom 2

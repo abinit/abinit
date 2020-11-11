@@ -1566,49 +1566,80 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable governs the behaviour of the code when there are potential
-source of symmetry breaking, related e.g. to the k point grid or the presence
-of non-symmorphic translations which might not be coherent with the exchange-correlation grid.
+This variable governs the behaviour of the code when there is a potential
+source of symmetry breaking related to the k point grid.
 
-When **chksymbreak** = 1, the code stops (or issue a warning) if:
-
-  * (1) The k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
-  * (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
-    or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
+When **chksymbreak** = 1, the code stops if
+the k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
 
 Note that the check is disabled when the number of k-points in the BZ is greater than 40 ** 3.
 
 When **chksymbreak** = 0, there is no such check.
 
-When **chksymbreak** = -1, the code stops if the condition (1) is met,
-but in case the condition (2) is met, there will be a trial to shift the
-atomic coordinates such as to obtain symmetry operations with the adequate non-symmorphic part.
-
 Explanation:
 In the ground-state calculation, such breaking of the symmetry is usually
 harmless. However, if the user is doing a calculation of phonons using DFPT
 ([[rfphon]] = 1), the convergence with respect to the number of k points will be
-much worse with a non-symmetric grid than with a symmetric one. Also, if the
-user is doing a GW calculation, the presence of non-symmorphic translations
-that are not coherent with the FFT grid might cause problems. In the GW part,
-indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
+worse with a non-symmetric grid than with a symmetric one.
+
+So, it was decided to warn the user about such problem already at
+the level of the ground state calculations, although such warning might be irrelevant.
+
+If you encounter a problem outlined above, you have two choices: change your
+k point grid, to make it more symmetric, or ignore the problem, and set **chksymbreak** = 0.
+""",
+),
+
+Variable(
+    abivarname="chksymtnons",
+    varset="gstate",
+    vartype="integer",
+    topics=['crystal_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="CHecK SYMmetry of TNONS",
+    characteristics=['[[INPUT_ONLY]]'],
+    added_in_version="v9.2",
+    text=r"""
+This variable governs the behaviour of the code when there is a potential
+symmetry breaking, related to the presence
+of non-symmorphic translations not leaving the FFT exchange-correlation grid invariant.
+
+When **chksymtnons** = 1, the code stops if
+the non-symmorphic translation part of the symmetry operations has components that are not zero,
+or simple fractions with 2, 3, 4, 5, 6, 8, 9, 10 or 12 as denominators. Also, suggestions
+to bypass the problem are made in the output file.
+
+When **chksymtnons** = 2, the code makes similar check, but does not stop after providing
+in the output file suggestions to bypass the problem.
+
+When **chksymtnons** = 0, the code skips the check.
+
+Explanation:
+In ground-state or DFPT calculations, such breaking of the symmetry is harmless.
+However, for a GW or BSE calculation, the presence of non-symmorphic translations
+that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault).
+In the GW or BSE parts, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
 for calculating both the polarizability and the self-energy. The wavefunctions
 in the full Brillouin zone are obtained from the irreducible wedge by applying
 the symmetry operations of the space group of the crystal. In the present
 implementation, the symmetrisation of the wavefunctions is done in real space
 on the FFT mesh that, therefore, has to be coherent both with the rotational
 part as well as with the fractional translation of each symmetry operation. If
-the condition (2) is met, the GW code will not be able to find a symmetry
-preserving FFT mesh.
+the condition above (2, 3, 4, 5, 6, 7, 8, 9, 10, or 12 as denominator) is not met,
+the GW/BSE code will not be able to find a symmetry preserving FFT mesh.
 
-So, it was decided to warn the user about these possible problems already at
-the level of the ground state calculations, although such warning might be irrelevant.
+So, it was decided to warn the user about such problem already at
+the level of the ground-state calculations, although such warning might be irrelevant.
 
-If you encounter a problem outlined above, you have two choices: change your
+If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
-symmetric point; or ignore the problem, and set **chksymbreak** = 0.
+symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0.
+If **chksymtnons** = 2, ABINIT makes a suggestion of a possible global translation,
+and corresponding translated atomic positions.
 """,
 ),
+
 
 Variable(
     abivarname="chneut",
@@ -2467,12 +2498,12 @@ Variable(
 [[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
 on-the-flight enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
 Useful only when doing cell optimization, e.g. [[optcell]]/=0, usually with [[ionmov]] == 2 or 22.
-Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large), 
+Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large),
 then the recommended value of [[dilatmx]] is 1.05.
 When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
 you need an accurate estimation of the geometry, then make a first
-run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using 
-the newly estimated geometry, with [[chkdilatmx]]=0 and [[dilatmx]] set to 1.05. 
+run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using
+the newly estimated geometry, with [[chkdilatmx]]=0 and [[dilatmx]] set to 1.05.
 If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]]=0 only once.
 
 In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
@@ -3820,6 +3851,7 @@ Variable(
 Number of electrons per unit cell to be added/subtracted to the initial value computed
 from the pseudopotentials and the unit cell.
 Can be used to simulate doping within the rigid band approximation.
+Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
 See also [[eph_doping]] to specify the same quantity in terms of charge/cm^3
 """,
 ),
@@ -3907,7 +3939,7 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval="2 (tetra) except when [[eph_task]] = +4 where 1 is used as default.",
+    defaultval="2 (tetra) except when [[eph_task]] = 4 and when ([[eph_task]] = -4 and symsigma == 0), where 1 is used as default.",
     mnemonics="Electron-Phonon: INTegration METHod",
     added_in_version="before_v9",
     text=r"""
@@ -3926,13 +3958,13 @@ Phonon linewidths in metals (**eph_task** = 1):
     A negative value activates the adaptive Gaussian broadening.
     See also [[eph_fsewin]].
 
-Electron-phonon self-energy with **eph_task** = 4):
+Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
-:   The default is Lorentzian method with broadening specified by [[zcut]].
+:   The default is [[eph_intmeth]]==1, Lorentzian method with broadening specified by [[zcut]]. Note that [[eph_intmeth]]==2 is still in development for this case (ABINITv9.2).
 
 Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
 
-:   The default is Tetrahedron method
+:   The default is [[eph_intmeth]]==2, Tetrahedron method except when symsigma == 0, where it is [[eph_intmeth]]==1..
 """,
 ),
 
@@ -4000,7 +4032,7 @@ The choice is among:
 * 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
 * -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
 * 3 --> Compute phonon self-energy.
-* 4 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections. Generate SIGEPH.nc file.
+* 4 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function. Generate SIGEPH.nc file.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy). Generate SIGEPH.nc file.
 * 5 --> Interpolate DFPT potentials to produce a new DVDB file on the [[eph_ngqpt_fine]] q-mesh that can be read with [[getdvdb]]
 * -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]]. Note that, in this case,
@@ -10226,8 +10258,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
-[[nband]] bands, are to be considered as part of a buffer. This concept is
-useful in three situations: in non-self-consistent calculations, for the
+[[nband]] bands, are to be considered as part of a buffer.
+A negative value is interpreted as percentage of [[nband]] (added in v9).
+
+This concept is useful in three situations: in non-self-consistent calculations, for the
 determination of the convergence tolerance; for response functions of metals,
 to avoid instabilities, and also when finite electric fields or non-linear
 responses (with electric field perturbations) are considered. For the two
@@ -11085,18 +11119,18 @@ Gives the maximum number of non-self-consistent loops of [[nline]] line
 minimisations, in the SCF case (when [[iscf]] >0). In the case [[iscf]] <=0,
 the number of non-self-consistent loops is determined by [[nstep]].
 
-    * The Default value of 0 -- for standard plane-wave calculations -- corresponds
-    to make the two first fixed potential determinations of wavefunctions have 2
-    non-self consistent loops, and the next ones to have only 1 non-self
-    consistent loop.
+* The Default value of 0 -- for standard plane-wave calculations -- corresponds
+to make the two first fixed potential determinations of wavefunctions have 2
+non-self consistent loops, and the next ones to have only 1 non-self
+consistent loop.
 
-    * The Default value of 0 -- for wavelets calculations ([[usewvl]] = 1) --
-    corresponds to make 2 steps with 3 non-self consistent loops, 2 steps with 2
-    non-self consistent loops, then the next ones with 1 non-self consistent loop.
+* The Default value of 0 -- for wavelets calculations ([[usewvl]] = 1) --
+corresponds to make 2 steps with 3 non-self consistent loops, 2 steps with 2
+non-self consistent loops, then the next ones with 1 non-self consistent loop.
 
-    * A negative value corresponds to make the abs([[nnsclo]]) first fixed potential determinations
-    of wavefunctions have 5 non-self consistent loops, and the next ones to have only 1 non-self
-    consistent loop.
+* A negative value corresponds to make the abs([[nnsclo]]) first fixed potential determinations
+of wavefunctions have 5 non-self consistent loops, and the next ones to have only 1 non-self
+consistent loop.
 
 """,
 ),
@@ -11300,10 +11334,10 @@ Variable(
     requires="[[optdriver]] == 1 and [[paral_kgb]] == 1 (Ground-state calculations with LOBPCG algorithm)",
     added_in_version="before_v9",
     text=r"""
-When using Scalapack (or any similar Matrix Algebra library), the efficiency
-of the eigenproblem resolution saturates as the number of CPU cores increases.
-It is better to use a smaller number of CPU cores for the LINALG calls.
-This maximum number of cores can be set with [[np_slk]].
+When using Scalapack (or any similar Matrix Algebra library such as ELPA), the efficiency
+of the eigenproblem solver saturates as the number of CPU cores increases.
+In this case, it is more efficient to use a smaller number of CPUs for the LINALG calls.
+The maximum number of cores can be set with [[np_slk]].
 A large number for [[np_slk]] (i.e. 1000000) means that all cores are used for
 the Linear Algebra calls.
 np_slk must divide the number of processors involved in diagonalizations
@@ -17859,8 +17893,14 @@ their action on the direct (or real) space primitive translations.
 It turns out that these can always be expressed as integers.
 Always give the identity matrix even if no other symmetries hold, e.g.
 [[symrel]] 1 0 0 0 1 0 0 0 1.
+
 Also note that for this array, as for all others, the array elements are filled
-in a columnwise order as is usual for Fortran.
+in a columnwise order as is usual for Fortran.  Explicitly,
+[[symrel]] 1 0 0 -1 -1 0 0 0 1 for symmetry operation isym is stored internally as
+symrel(1,1,isym)=1, symrel(1,2)=-1, ...
+The atom located at xred(1:3) is send to location
+xred_sym(jj)=symrel(jj,1,isym)*xred(1)+symrel(jj,2,isym)*xred(2)+symrel(jj,3,isym)*xred(3)+tnons(jj).
+
 The relation between the above symmetry matrices [[symrel]], expressed in the
 basis of primitive translations, and the same symmetry matrices expressed in
 cartesian coordinates, is as follows. Denote the matrix whose columns are the
@@ -18127,6 +18167,13 @@ system of coordinates, see "[[xred]]"). If all elements of the space group
 leave 0 0 0 invariant, then these are all 0.
 When the symmetry finder is used (see [[nsym]]), [[tnons]] is computed
 automatically.
+
+For the ground-state and DFPT drivers of ABINIT, the value of tnons is unrestricted.
+However, for GW and BSE, the symmetry operations must leave the FFT grid invariant.
+Preparatory (Ground-state) runs must also use the same atomic geometry, hence the same tnons.
+As ABINIT cannot guess whether the user has in mind to do a GW or BSE run after the GS run,
+a conservative approach is implemented, requiring such match of symmetry operations
+and FFT grid also in the GS case. See more details in the section describing the input variable [[chksymtnons]].
 
 See also [[symafm]] for the complete description of the symmetry operation.
 """,
@@ -21761,6 +21808,7 @@ Variable(
 Gives the doping charge in units of |e_charge| / cm^3.
 Negative for n-doping, positive for p-doping.
 Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
+Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
 """,
 ),
 
@@ -21774,11 +21822,11 @@ Variable(
     mnemonics="EPH PHonon FACTor for energy WINdow",
     added_in_version="9.2.0",
     text=r"""
-This variable is used to define the effective energy window for the $\kq$ KS states
-in the computation of electron lifetimes ([[eph_task]] -4) and predict
+This variable defines the effective energy window for the $\kq$ KS states
+in the computation of electron lifetimes ([[eph_task]] -4) and is used to predict
 the list of $\qq$-points in the BZ that will be needeed during the calculation.
 
-The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk}$ but then this
+The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk$ but then this
 initial energy window must be increased a bit to accomodate for phonon absorption/emission (from $\kk$ to $\kq$).
 This is importat for $\nk$ states that are close to edge of the initial energy window as this states may be needed
 for the linear interpolation used in tetrahedron method.
@@ -21788,6 +21836,20 @@ The default value is a compromise between numerical stability and efficiency.
 Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substancial decrease in the number of
 $\kq$ KS states that must be read from file with a subsequent decrease in the memory requirements for the wavefunctions.
 We recommended to perform initial tests to decide whether a value smaller than four can be used.
+""",
+),
+
+Variable(
+    abivarname="rifcsph",
+    varset="eph",
+    vartype="real",
+    topics=['Phonons_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Radius of the Interatomic Force Constant SPHere",
+    added_in_version="9.2.0",
+    text=r"""
+Same meaning as [[rifcsph@anaddb]]
 """,
 ),
 

@@ -40,7 +40,7 @@ xcart?5   -1.5 0.0 4.0
 
 xcart?6   -1.5 0.0 5.0
            1.5 0.0 5.0
-chksymbreak 0
+ chksymtnons 0
 
 
 # Common data
