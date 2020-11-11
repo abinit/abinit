@@ -1,6 +1,6 @@
 
-.Version 9.2.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  7 Nov 2020.
-- ( at 08h55 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h23 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI1/tutorial_tpositron_3/tpositron_3.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tpositron_3/tpositron_3.in
 - output file    -> tpositron_3.out
 - root for input  files -> tpositron_3i
 - root for output files -> tpositron_3o
@@ -206,8 +206,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.13510
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
 - Paw atomic data for element Si - Generated with atompaw v3.1.0.3
 - 14.00000   4.00000  20170718                znucl, zion, pspdat
     7    7    1    0      1390   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -251,24 +251,24 @@ TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
  ETOT  4  -60.147017398618    -1.726E-04 1.246E-04 6.339E-03
  ETOT  5  -60.147023819023    -6.420E-06 7.298E-05 3.360E-04
  ETOT  6  -60.147017645441     6.174E-06 1.089E-04 5.438E-05
- ETOT  7  -60.147017718009    -7.257E-08 1.303E-04 2.218E-06
+ ETOT  7  -60.147017718010    -7.257E-08 1.303E-04 2.218E-06
  ETOT  8  -60.147017755016    -3.701E-08 1.747E-04 7.919E-07
- ETOT  9  -60.147017747424     7.593E-09 1.147E-04 8.839E-08
- ETOT 10  -60.147017746139     1.285E-09 1.122E-04 9.719E-09
+ ETOT  9  -60.147017747424     7.592E-09 1.147E-04 8.839E-08
+ ETOT 10  -60.147017746140     1.285E-09 1.122E-04 9.719E-09
 
  At SCF step   10, etot is converged : 
   for the second time, diff in etot=  1.285E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 11  -60.528169531897    -3.812E-01 4.392E-01 1.517E-01
- ETOT 12  -60.563306918609    -3.514E-02 3.980E-02 4.628E-02
- ETOT 13  -60.564142442926    -8.355E-04 5.680E-02 2.410E-02
- ETOT 14  -60.564257012022    -1.146E-04 8.358E-03 5.172E-03
- ETOT 15  -60.564273947087    -1.694E-05 1.743E-02 5.944E-04
- ETOT 16  -60.564277385484    -3.438E-06 3.495E-03 9.797E-05
- ETOT 17  -60.564278039604    -6.541E-07 2.238E-03 1.635E-05
+ ETOT 11  -60.528169532155    -3.812E-01 4.392E-01 1.517E-01
+ ETOT 12  -60.563306918239    -3.514E-02 3.980E-02 4.628E-02
+ ETOT 13  -60.564142442838    -8.355E-04 5.680E-02 2.410E-02
+ ETOT 14  -60.564257012018    -1.146E-04 8.358E-03 5.172E-03
+ ETOT 15  -60.564273947089    -1.694E-05 1.743E-02 5.944E-04
+ ETOT 16  -60.564277385485    -3.438E-06 3.495E-03 9.797E-05
+ ETOT 17  -60.564278039605    -6.541E-07 2.238E-03 1.635E-05
  ETOT 18  -60.564278163377    -1.238E-07 6.446E-04 2.867E-06
- ETOT 19  -60.564278188781    -2.540E-08 7.884E-04 4.733E-07
+ ETOT 19  -60.564278188782    -2.540E-08 7.884E-04 4.733E-07
  ETOT 20  -60.564278194162    -5.381E-09 2.377E-04 2.053E-08
  ETOT 21  -60.564278195329    -1.167E-09 4.847E-04 6.013E-10
 
@@ -276,186 +276,186 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   for the second time, diff in etot=  1.167E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   3 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 22  -60.606121746827    -4.184E-02 1.220E-03 5.101E-01
- ETOT 23  -60.583193545215     2.293E-02 2.216E-04 4.611E-02
- ETOT 24  -60.580747936890     2.446E-03 1.822E-04 1.539E-02
- ETOT 25  -60.580309401866     4.385E-04 7.305E-06 6.920E-03
- ETOT 26  -60.579904100901     4.053E-04 2.133E-05 2.936E-04
- ETOT 27  -60.579902813676     1.287E-06 2.700E-06 8.462E-05
+ ETOT 22  -60.606121748165    -4.184E-02 1.220E-03 5.101E-01
+ ETOT 23  -60.583193548634     2.293E-02 2.216E-04 4.611E-02
+ ETOT 24  -60.580747938417     2.446E-03 1.822E-04 1.539E-02
+ ETOT 25  -60.580309399659     4.385E-04 7.305E-06 6.920E-03
+ ETOT 26  -60.579904100816     4.053E-04 2.133E-05 2.936E-04
+ ETOT 27  -60.579902813663     1.287E-06 2.700E-06 8.462E-05
  ETOT 28  -60.579901652486     1.161E-06 4.766E-06 2.103E-05
- ETOT 29  -60.579901357767     2.947E-07 2.227E-06 1.831E-06
- ETOT 30  -60.579901343711     1.406E-08 3.534E-06 7.504E-08
- ETOT 31  -60.579901342465     1.246E-09 1.648E-06 1.395E-08
- ETOT 32  -60.579901342259     2.061E-10 2.718E-06 1.122E-09
+ ETOT 29  -60.579901357773     2.947E-07 2.227E-06 1.831E-06
+ ETOT 30  -60.579901343717     1.406E-08 3.534E-06 7.504E-08
+ ETOT 31  -60.579901342470     1.247E-09 1.648E-06 1.395E-08
+ ETOT 32  -60.579901342263     2.072E-10 2.718E-06 1.122E-09
 
  At SCF step   32, etot is converged : 
-  for the second time, diff in etot=  2.061E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  2.072E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 33  -60.585119405761    -5.218E-03 1.746E-03 1.615E-02
- ETOT 34  -60.585129795923    -1.039E-05 8.514E-04 8.161E-03
- ETOT 35  -60.585129905468    -1.095E-07 7.670E-04 1.206E-03
- ETOT 36  -60.585129918543    -1.308E-08 7.342E-04 3.323E-04
- ETOT 37  -60.585129921159    -2.615E-09 9.430E-04 1.057E-04
- ETOT 38  -60.585129921883    -7.245E-10 6.872E-04 5.174E-06
+ ETOT 33  -60.585119405724    -5.218E-03 1.746E-03 1.615E-02
+ ETOT 34  -60.585129795886    -1.039E-05 8.512E-04 8.161E-03
+ ETOT 35  -60.585129905431    -1.095E-07 7.669E-04 1.206E-03
+ ETOT 36  -60.585129918507    -1.308E-08 7.361E-04 3.323E-04
+ ETOT 37  -60.585129921122    -2.615E-09 9.427E-04 1.057E-04
+ ETOT 38  -60.585129921846    -7.245E-10 6.817E-04 5.174E-06
 
  At SCF step   38, etot is converged : 
   for the second time, diff in etot=  7.245E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   5 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 39  -60.588863324364    -3.733E-03 2.318E-04 4.986E-02
- ETOT 40  -60.586570459209     2.293E-03 2.624E-05 5.789E-03
- ETOT 41  -60.586240299208     3.302E-04 3.742E-05 1.634E-03
- ETOT 42  -60.586183764136     5.654E-05 1.672E-06 5.176E-04
- ETOT 43  -60.586151402326     3.236E-05 4.400E-06 1.861E-05
- ETOT 44  -60.586151298525     1.038E-07 1.846E-06 5.146E-06
- ETOT 45  -60.586151261566     3.696E-08 1.942E-07 1.177E-06
- ETOT 46  -60.586151236207     2.536E-08 1.165E-06 5.817E-08
- ETOT 47  -60.586151235998     2.089E-10 1.369E-07 5.888E-09
- ETOT 48  -60.586151235885     1.125E-10 8.379E-07 1.557E-09
+ ETOT 39  -60.588863324730    -3.733E-03 2.318E-04 4.986E-02
+ ETOT 40  -60.586570459260     2.293E-03 2.624E-05 5.789E-03
+ ETOT 41  -60.586240299358     3.302E-04 3.742E-05 1.634E-03
+ ETOT 42  -60.586183764375     5.653E-05 1.672E-06 5.176E-04
+ ETOT 43  -60.586151402430     3.236E-05 4.400E-06 1.861E-05
+ ETOT 44  -60.586151298639     1.038E-07 1.846E-06 5.147E-06
+ ETOT 45  -60.586151261683     3.696E-08 1.942E-07 1.177E-06
+ ETOT 46  -60.586151236324     2.536E-08 1.165E-06 5.817E-08
+ ETOT 47  -60.586151236115     2.088E-10 1.369E-07 5.888E-09
+ ETOT 48  -60.586151236002     1.127E-10 8.379E-07 1.557E-09
 
  At SCF step   48, etot is converged : 
-  for the second time, diff in etot=  1.125E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.127E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   6 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 49  -60.587711158817    -1.560E-03 8.803E-04 2.432E-03
- ETOT 50  -60.587717463957    -6.305E-06 9.020E-04 1.196E-03
- ETOT 51  -60.587717511507    -4.755E-08 6.407E-04 1.256E-04
- ETOT 52  -60.587717514337    -2.830E-09 6.157E-04 9.255E-05
- ETOT 53  -60.587717514704    -3.668E-10 4.190E-04 1.522E-05
+ ETOT 49  -60.587711158780    -1.560E-03 8.627E-04 2.432E-03
+ ETOT 50  -60.587717463916    -6.305E-06 9.201E-04 1.196E-03
+ ETOT 51  -60.587717511466    -4.755E-08 6.297E-04 1.256E-04
+ ETOT 52  -60.587717514296    -2.830E-09 6.664E-04 9.255E-05
+ ETOT 53  -60.587717514663    -3.668E-10 4.249E-04 1.522E-05
 
  At SCF step   53, etot is converged : 
   for the second time, diff in etot=  3.668E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 54  -60.584977303230     2.740E-03 2.942E-05 5.104E-03
- ETOT 55  -60.584743113194     2.342E-04 2.982E-06 7.017E-04
- ETOT 56  -60.584703191326     3.992E-05 3.821E-06 1.695E-04
- ETOT 57  -60.584697473779     5.718E-06 1.693E-07 4.569E-05
- ETOT 58  -60.584694640968     2.833E-06 4.103E-07 1.754E-06
- ETOT 59  -60.584694651880    -1.091E-08 5.557E-08 4.877E-07
- ETOT 60  -60.584694642131     9.749E-09 1.843E-07 5.234E-08
- ETOT 61  -60.584694640626     1.505E-09 4.031E-08 3.934E-09
+ ETOT 54  -60.584977302773     2.740E-03 2.942E-05 5.104E-03
+ ETOT 55  -60.584743112742     2.342E-04 2.982E-06 7.017E-04
+ ETOT 56  -60.584703190858     3.992E-05 3.821E-06 1.695E-04
+ ETOT 57  -60.584697473367     5.717E-06 1.693E-07 4.570E-05
+ ETOT 58  -60.584694640520     2.833E-06 4.103E-07 1.754E-06
+ ETOT 59  -60.584694651433    -1.091E-08 5.557E-08 4.877E-07
+ ETOT 60  -60.584694641682     9.751E-09 1.843E-07 5.234E-08
+ ETOT 61  -60.584694640176     1.506E-09 4.031E-08 3.934E-09
 
  At SCF step   61, etot is converged : 
-  for the second time, diff in etot=  1.505E-09 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.506E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP   8 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 62  -60.588037492254    -3.343E-03 4.885E-04 3.102E-04
- ETOT 63  -60.588038994568    -1.502E-06 2.433E-04 1.567E-04
- ETOT 64  -60.588039006476    -1.191E-08 2.825E-04 1.735E-05
- ETOT 65  -60.588039007224    -7.481E-10 1.630E-04 1.260E-05
- ETOT 66  -60.588039007348    -1.239E-10 2.279E-04 2.004E-06
+ ETOT 62  -60.588037492415    -3.343E-03 5.501E-04 3.102E-04
+ ETOT 63  -60.588038994733    -1.502E-06 2.688E-04 1.567E-04
+ ETOT 64  -60.588039006641    -1.191E-08 3.780E-04 1.735E-05
+ ETOT 65  -60.588039007389    -7.482E-10 1.917E-04 1.260E-05
+ ETOT 66  -60.588039007513    -1.238E-10 2.976E-04 2.004E-06
 
  At SCF step   66, etot is converged : 
-  for the second time, diff in etot=  1.239E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.238E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 67  -60.587036453819     1.003E-03 3.766E-06 6.324E-04
- ETOT 68  -60.587007125739     2.933E-05 3.235E-07 9.133E-05
- ETOT 69  -60.587001869449     5.256E-06 5.097E-07 2.144E-05
- ETOT 70  -60.587001174850     6.946E-07 4.939E-08 6.208E-06
- ETOT 71  -60.587000788252     3.866E-07 7.261E-08 2.054E-07
- ETOT 72  -60.587000792386    -4.135E-09 3.849E-08 7.842E-08
- ETOT 73  -60.587000790573     1.813E-09 5.885E-08 6.300E-09
+ ETOT 67  -60.587036453346     1.003E-03 3.766E-06 6.324E-04
+ ETOT 68  -60.587007125277     2.933E-05 3.235E-07 9.133E-05
+ ETOT 69  -60.587001868988     5.256E-06 5.097E-07 2.144E-05
+ ETOT 70  -60.587001174388     6.946E-07 4.939E-08 6.208E-06
+ ETOT 71  -60.587000787790     3.866E-07 7.261E-08 2.054E-07
+ ETOT 72  -60.587000791924    -4.134E-09 3.849E-08 7.842E-08
+ ETOT 73  -60.587000790111     1.814E-09 5.885E-08 6.300E-09
 
  At SCF step   73, etot is converged : 
-  for the second time, diff in etot=  1.813E-09 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.814E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP  10 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 74  -60.588082810271    -1.082E-03 1.446E-04 3.883E-05
- ETOT 75  -60.588083028847    -2.186E-07 2.400E-04 1.981E-05
- ETOT 76  -60.588083030624    -1.777E-09 1.504E-04 2.271E-06
- ETOT 77  -60.588083030739    -1.147E-10 2.854E-04 1.596E-06
+ ETOT 74  -60.588082810290    -1.082E-03 1.628E-04 3.883E-05
+ ETOT 75  -60.588083028868    -2.186E-07 2.914E-04 1.981E-05
+ ETOT 76  -60.588083030645    -1.777E-09 1.624E-04 2.271E-06
+ ETOT 77  -60.588083030760    -1.147E-10 3.309E-04 1.596E-06
 
  At SCF step   77, etot is converged : 
   for the second time, diff in etot=  1.147E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP  11 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 78  -60.587286003955     7.970E-04 3.906E-07 6.405E-05
- ETOT 79  -60.587283061009     2.943E-06 4.840E-08 9.663E-06
- ETOT 80  -60.587282509944     5.511E-07 3.702E-08 2.153E-06
- ETOT 81  -60.587282442136     6.781E-08 3.715E-08 5.872E-07
- ETOT 82  -60.587282406204     3.593E-08 2.667E-08 1.944E-08
- ETOT 83  -60.587282406643    -4.385E-10 3.156E-08 7.374E-09
- ETOT 84  -60.587282406468     1.748E-10 2.285E-08 4.738E-10
+ ETOT 78  -60.587286005927     7.970E-04 3.906E-07 6.405E-05
+ ETOT 79  -60.587283062988     2.943E-06 4.840E-08 9.663E-06
+ ETOT 80  -60.587282511919     5.511E-07 3.702E-08 2.153E-06
+ ETOT 81  -60.587282444118     6.780E-08 3.715E-08 5.873E-07
+ ETOT 82  -60.587282408183     3.593E-08 2.667E-08 1.944E-08
+ ETOT 83  -60.587282408623    -4.393E-10 3.156E-08 7.374E-09
+ ETOT 84  -60.587282408445     1.772E-10 2.285E-08 4.738E-10
 
  At SCF step   84, etot is converged : 
-  for the second time, diff in etot=  1.748E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.772E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP  12 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 85  -60.588084653312    -8.022E-04 3.239E-04 5.426E-06
- ETOT 86  -60.588084679595    -2.628E-08 3.511E-04 2.878E-06
- ETOT 87  -60.588084679813    -2.179E-10 9.441E-04 3.948E-07
- ETOT 88  -60.588084679830    -1.750E-11 7.011E-04 3.045E-07
+ ETOT 85  -60.588084653334    -8.022E-04 3.306E-04 5.426E-06
+ ETOT 86  -60.588084679618    -2.628E-08 4.075E-04 2.878E-06
+ ETOT 87  -60.588084679836    -2.178E-10 9.662E-04 3.948E-07
+ ETOT 88  -60.588084679853    -1.749E-11 7.180E-04 3.045E-07
 
  At SCF step   88, etot is converged : 
-  for the second time, diff in etot=  1.750E-11 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.749E-11 < toldfe=  1.000E-08
 
 TC-DFT STEP  13 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 89  -60.587730034321     3.546E-04 7.235E-08 1.187E-05
- ETOT 90  -60.587729473018     5.613E-07 2.170E-08 1.677E-06
- ETOT 91  -60.587729374684     9.833E-08 2.104E-08 4.070E-07
- ETOT 92  -60.587729361887     1.280E-08 1.799E-08 1.381E-07
- ETOT 93  -60.587729353135     8.752E-09 1.904E-08 4.272E-09
- ETOT 94  -60.587729353245    -1.100E-10 1.560E-08 1.923E-09
+ ETOT 89  -60.587730035347     3.546E-04 7.235E-08 1.187E-05
+ ETOT 90  -60.587729474044     5.613E-07 2.170E-08 1.677E-06
+ ETOT 91  -60.587729375709     9.833E-08 2.104E-08 4.070E-07
+ ETOT 92  -60.587729362912     1.280E-08 1.799E-08 1.381E-07
+ ETOT 93  -60.587729354161     8.751E-09 1.904E-08 4.272E-09
+ ETOT 94  -60.587729354270    -1.095E-10 1.560E-08 1.924E-09
 
  At SCF step   94, etot is converged : 
-  for the second time, diff in etot=  1.100E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.095E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP  14 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 95  -60.588086317429    -3.570E-04 2.305E-03 8.360E-07
- ETOT 96  -60.588086320842    -3.413E-09 1.338E-03 4.452E-07
- ETOT 97  -60.588086320871    -2.844E-11 3.865E-03 6.281E-08
+ ETOT 95  -60.588086317447    -3.570E-04 2.354E-03 8.360E-07
+ ETOT 96  -60.588086320860    -3.413E-09 1.357E-03 4.452E-07
+ ETOT 97  -60.588086320889    -2.842E-11 3.901E-03 6.281E-08
 
  At SCF step   97, etot is converged : 
-  for the second time, diff in etot=  2.844E-11 < toldfe=  1.000E-08
+  for the second time, diff in etot=  2.842E-11 < toldfe=  1.000E-08
 
 TC-DFT STEP  15 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT 98  -60.588071653480     1.467E-05 1.510E-08 1.060E-06
- ETOT 99  -60.588071603597     4.988E-08 1.397E-08 1.673E-07
- ETOT  100  -60.588071593991     9.606E-09 1.385E-08 3.855E-08
- ETOT  101  -60.588071592759     1.232E-09 1.208E-08 1.088E-08
+ ETOT 98  -60.588071653773     1.467E-05 1.510E-08 1.060E-06
+ ETOT 99  -60.588071603889     4.988E-08 1.397E-08 1.673E-07
+ ETOT  100  -60.588071594283     9.606E-09 1.385E-08 3.855E-08
+ ETOT  101  -60.588071593050     1.233E-09 1.208E-08 1.088E-08
 
  At SCF step  101, etot is converged : 
-  for the second time, diff in etot=  1.232E-09 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.233E-09 < toldfe=  1.000E-08
 
 TC-DFT STEP  16 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT  102  -60.588093108392    -2.152E-05 1.580E-03 1.625E-07
- ETOT  103  -60.588093108917    -5.251E-10 3.897E-03 9.976E-08
- ETOT  104  -60.588093108922    -5.691E-12 1.164E-03 1.378E-08
+ ETOT  102  -60.588093108386    -2.152E-05 1.575E-03 1.625E-07
+ ETOT  103  -60.588093108911    -5.251E-10 3.865E-03 9.976E-08
+ ETOT  104  -60.588093108917    -5.670E-12 1.140E-03 1.378E-08
 
  At SCF step  104, etot is converged : 
-  for the second time, diff in etot=  5.691E-12 < toldfe=  1.000E-08
+  for the second time, diff in etot=  5.670E-12 < toldfe=  1.000E-08
 
 TC-DFT STEP  17 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT  105  -60.588074486270     1.862E-05 1.128E-08 4.587E-07
- ETOT  106  -60.588074463927     2.234E-08 1.074E-08 6.033E-08
- ETOT  107  -60.588074460300     3.627E-09 1.016E-08 1.594E-08
- ETOT  108  -60.588074459784     5.160E-10 9.317E-09 6.051E-09
+ ETOT  105  -60.588074485869     1.862E-05 1.128E-08 4.587E-07
+ ETOT  106  -60.588074463527     2.234E-08 1.074E-08 6.033E-08
+ ETOT  107  -60.588074459900     3.627E-09 1.016E-08 1.594E-08
+ ETOT  108  -60.588074459384     5.162E-10 9.317E-09 6.051E-09
 
  At SCF step  108, etot is converged : 
-  for the second time, diff in etot=  5.160E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  5.162E-10 < toldfe=  1.000E-08
 
 TC-DFT STEP  18 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT  109  -60.588090944494    -1.648E-05 2.532E-03 3.742E-08
- ETOT  110  -60.588090944568    -7.382E-11 2.285E-03 2.307E-08
- ETOT  111  -60.588090944569    -9.521E-13 1.257E-03 3.375E-09
+ ETOT  109  -60.588090944529    -1.649E-05 2.472E-03 3.742E-08
+ ETOT  110  -60.588090944603    -7.385E-11 2.424E-03 2.307E-08
+ ETOT  111  -60.588090944604    -9.734E-13 1.214E-03 3.375E-09
 
  At SCF step  111, etot is converged : 
-  for the second time, diff in etot=  9.521E-13 < toldfe=  1.000E-08
+  for the second time, diff in etot=  9.734E-13 < toldfe=  1.000E-08
 
 TC-DFT STEP  19 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
- ETOT  112  -60.588081980243     8.964E-06 8.580E-09 1.060E-07
- ETOT  113  -60.588081974934     5.309E-09 8.186E-09 1.412E-08
- ETOT  114  -60.588081974082     8.520E-10 7.602E-09 3.934E-09
+ ETOT  112  -60.588081980250     8.964E-06 8.580E-09 1.060E-07
+ ETOT  113  -60.588081974942     5.308E-09 8.186E-09 1.412E-08
+ ETOT  114  -60.588081974089     8.525E-10 7.602E-09 3.934E-09
 
  At SCF step  114, etot is converged : 
-  for the second time, diff in etot=  8.520E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  8.525E-10 < toldfe=  1.000E-08
 
  At SCF step  114, the difference between
  etotal from electronic calculation and etotal from positronic calculation
- is converged :  diff(etot_el-etot_pos)=  8.970E-06 < postoldfe=  1.000E-05
+ is converged :  diff(etot_el-etot_pos)=  8.971E-06 < postoldfe=  1.000E-05
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -467,7 +467,7 @@ lattice_vectors:
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.1608573E+03
-convergence: {deltae:  8.520E-10, res2:  3.934E-09, residm:  7.602E-09, diffor:  0.000E+00, }
+convergence: {deltae:  8.525E-10, res2:  3.934E-09, residm:  7.602E-09, diffor:  0.000E+00, }
 etotal    :  -6.05880820E+01
 entropy   :   0.00000000E+00
 fermie    :   2.04075779E-01
@@ -515,8 +515,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -1.554163385527077
- Compensation charge over fine fft grid    =     -1.554174670407671
+ Compensation charge over spherical meshes =     -1.554163385534146
+ Compensation charge over fine fft grid    =     -1.554174670418153
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -583,18 +583,18 @@ force_length_stats: {min: null, max: null, mean: null, }
  Annihilation rate with IPM for core elec. (ns-1) =  3.34360603E+00
 
  Annihilation rate core/valence decomposition:
-   Core    contribution to ann.rate          (ns-1) =  9.87611911E-02
+   Core    contribution to ann.rate          (ns-1) =  9.87611910E-02
    Valence contribution to ann.rate          (ns-1) =  3.27056870E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  6.93049228E-02
+   Core    contribution to ann.rate with IPM (ns-1) =  6.93049227E-02
    Valence contribution to ann.rate with IPM (ns-1) =  3.27430111E+00
 
  Annihilation rate PAW decomposition:
    Plane-wave contribution to ann.rate          (ns-1) =  3.32752634E+00
    Plane-wave valence contribution to ann.rate  (ns-1) =  3.27351161E+00
-   On-site core contribution to ann.rate        (ns-1) =  4.47464598E-02
-   On-site valence contribution to ann.rate     (ns-1) = -2.94290716E-03
+   On-site core contribution to ann.rate        (ns-1) =  4.47464594E-02
+   On-site valence contribution to ann.rate     (ns-1) = -2.94290715E-03
    Plane-wave contribution to ann.rate with IPM (ns-1) =  3.30409879E+00
-   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  2.50419161E-02
+   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  2.50419163E-02
 
 ########## Lifetime computation 2
 
@@ -611,16 +611,16 @@ force_length_stats: {min: null, max: null, mean: null, }
  Annihilation rate core/valence decomposition:
    Core    contribution to ann.rate          (ns-1) =  9.87709378E-02
    Valence contribution to ann.rate          (ns-1) =  3.81333022E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  6.93049228E-02
+   Core    contribution to ann.rate with IPM (ns-1) =  6.93049227E-02
    Valence contribution to ann.rate with IPM (ns-1) =  3.81710447E+00
 
  Annihilation rate PAW decomposition:
    Plane-wave contribution to ann.rate          (ns-1) =  3.87030168E+00
    Plane-wave valence contribution to ann.rate  (ns-1) =  3.81627309E+00
-   On-site core contribution to ann.rate        (ns-1) =  4.47423501E-02
-   On-site valence contribution to ann.rate     (ns-1) = -2.94286621E-03
+   On-site core contribution to ann.rate        (ns-1) =  4.47423497E-02
+   On-site valence contribution to ann.rate     (ns-1) = -2.94286624E-03
    Plane-wave contribution to ann.rate with IPM (ns-1) =  3.84689910E+00
-   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  2.50419161E-02
+   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  2.50419163E-02
 
       (*) IPM=Independent particle Model
 
@@ -694,35 +694,35 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.21961162343588E+01
-hartree             :  4.81571531101407E+00
-xc                  : -3.55798950207632E+01
+kinetic             :  2.21961162343925E+01
+hartree             :  4.81571531094449E+00
+xc                  : -3.55798950207638E+01
 Ewald energy        : -6.05835621191802E+01
 psp_core            :  1.63276322547783E+00
-local_psp           : -2.02030454139574E+01
-spherical_terms     :  2.76102964151686E+01
-electronic          : -6.01116113678816E+01
-positronic          : -6.29044981105278E-01
-electron_positron_interaction:  1.52550808515270E-01
-total_energy        : -6.05881055404716E+01
-total_energy_eV     : -1.64868619721196E+03
+local_psp           : -2.02030454138640E+01
+spherical_terms     :  2.76102964151947E+01
+electronic          : -6.01116113677984E+01
+positronic          : -6.29044981143649E-01
+electron_positron_interaction:  1.52550808525195E-01
+total_energy        : -6.05881055404168E+01
+total_energy_eV     : -1.64868619721048E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.76498707418012E-01
+band_energy         : -4.76498707463358E-01
 Ewald energy        : -6.05835621191802E+01
 psp_core            :  1.63276322547783E+00
-xc_dc               : -1.47468940422335E+01
-spherical_terms     :  1.44621517969939E+01
-electron_positron_dc: -3.99547955132204E-01
-electronic          : -6.01115878014922E+01
-positronic          : -6.29044981105278E-01
-electron_positron_interaction:  1.52550808515270E-01
-total_energy_dc     : -6.05880819740822E+01
-total_energy_dc_eV  : -1.64868555593790E+03
+xc_dc               : -1.47468940421638E+01
+spherical_terms     :  1.44621517970020E+01
+electron_positron_dc: -3.99547955143476E-01
+electronic          : -6.01115878014709E+01
+positronic          : -6.29044981143649E-01
+electron_positron_interaction:  1.52550808525195E-01
+total_energy_dc     : -6.05880819740893E+01
+total_energy_dc_eV  : -1.64868555593809E+03
 ...
 
 
@@ -948,10 +948,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        162.1  wall=        164.2
+- Proc.   0 individual time (sec): cpu=        135.6  wall=        136.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered 229 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        162.1  wall=        164.2
++Overall time at end (sec) : cpu=        135.6  wall=        136.1

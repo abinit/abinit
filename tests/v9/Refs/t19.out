@@ -1,6 +1,6 @@
 
-.Version 9.2.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  7 Nov 2020.
-- ( at 09h20 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h37 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI1/v9_t19/t19.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t19/t19.in
 - output file    -> t19.out
 - root for input  files -> t19i
 - root for output files -> t19o
@@ -144,8 +144,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.03028
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for In,  from PRB58, 3641 (1998)
 - 49.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -170,8 +170,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    3.321137
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for N,  from PRB58, 3641 (1998)
 -  7.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -325,14 +325,14 @@ force_length_stats: {min:   8.31232753E-02, max:   8.78642074E-02, mean:   8.549
  frms,max,avg= 4.9378804E-02 7.8624707E-02   0.000E+00  0.000E+00 -4.036E-03 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -1.20125919887183     0.69354732183155     4.04304464783344
-    2     -1.20125919887183     0.69354732183155     4.04304464783344
-    3      1.20125919887183    -0.69354732183155     4.04304464783344
-    4      1.20125919887183    -0.69354732183155     4.04304464783344
-    5     -1.74661440323403     1.00840829587240    -4.04304464783344
-    6     -1.74661440323403     1.00840829587240    -4.04304464783344
-    7      1.74661440323403    -1.00840829587240    -4.04304464783344
-    8      1.74661440323403    -1.00840829587240    -4.04304464783344
+    1     -1.20125919887182     0.69354732183155     4.04304464783343
+    2     -1.20125919887182     0.69354732183155     4.04304464783343
+    3      1.20125919887182    -0.69354732183155     4.04304464783343
+    4      1.20125919887182    -0.69354732183155     4.04304464783343
+    5     -1.74661440323405     1.00840829587241    -4.04304464783343
+    6     -1.74661440323405     1.00840829587241    -4.04304464783343
+    7      1.74661440323405    -1.00840829587241    -4.04304464783343
+    8      1.74661440323405    -1.00840829587241    -4.04304464783343
  frms,max,avg= 2.5391600E+00 4.0430446E+00   0.000E+00  0.000E+00 -2.076E-01 e/A
  length scales=  6.873760101200  6.873760101200 22.206443012000 bohr
               =  3.637437182870  3.637437182870 11.751143525803 angstroms
@@ -354,7 +354,7 @@ psp_core            :  2.42916747152958E+00
 local_psp           : -3.20960043400130E+01
 non_local_psp       :  7.48750039373325E+00
 total_energy        : -3.23710036770737E+01
-total_energy_eV     : -8.80859806990324E+02
+total_energy_eV     : -8.80859806990323E+02
 band_energy         : -7.30228886760653E+00
 ...
 
@@ -545,10 +545,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          4.3
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          4.3
++Overall time at end (sec) : cpu=          2.2  wall=          2.2

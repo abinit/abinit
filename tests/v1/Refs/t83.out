@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h15 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h25 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t83/t83.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t83/t83.in
 - output file    -> t83.out
 - root for input  files -> t83i
 - root for output files -> t83o
@@ -442,8 +442,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -478,7 +478,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.8218165462487    -4.771E-03 7.325E-08 6.080E-02
  ETOT  3  -8.8218851239700    -6.858E-05 3.309E-07 1.444E-03
  ETOT  4  -8.8218866049640    -1.481E-06 1.920E-08 8.939E-05
- ETOT  5  -8.8218867929260    -1.880E-07 1.797E-09 4.787E-07
+ ETOT  5  -8.8218867929259    -1.880E-07 1.797E-09 4.787E-07
  ETOT  6  -8.8218867936106    -6.846E-10 4.041E-12 4.544E-10
 
  At SCF step    6, etot is converged : 
@@ -513,9 +513,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  4.13590306E-26,  -8.27180613E-26,   5.51453742E-26, ]
-- [ -4.13590306E-26,   8.27180613E-26,  -5.51453742E-26, ]
-force_length_stats: {min:   1.07674785E-25, max:   1.07674785E-25, mean:   1.07674785E-25, }
+- [  5.51453742E-26,  -2.75726871E-26,   2.75726871E-26, ]
+- [ -5.51453742E-26,   2.75726871E-26,  -2.75726871E-26, ]
+force_length_stats: {min:   6.75390142E-26, max:   6.75390142E-26, mean:   6.75390142E-26, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -531,9 +531,9 @@ force_length_stats: {min:   1.07674785E-25, max:   1.07674785E-25, mean:   1.076
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  3.7334E-25; max dE/dt=  2.7573E-25; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000      0.000000000000
-    2      -0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  4.2863E-25; max dE/dt=  5.5145E-25; dE/dt below (all hartree)
+    1       0.000000000000     -0.000000000000     -0.000000000000
+    2       0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.66147151073750    -0.66147151073750    -0.66147151073750
@@ -542,12 +542,12 @@ force_length_stats: {min:   1.07674785E-25, max:   1.07674785E-25, mean:   1.076
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000    -0.00000000000000     0.00000000000000
     2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 6.2166066E-26 8.2718061E-26   0.000E+00  0.000E+00  0.000E+00 h/b
+ frms,max,avg= 3.8993668E-26 5.5145374E-26   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000    -0.00000000000000     0.00000000000000
     2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 3.1967074E-24 4.2535334E-24   0.000E+00  0.000E+00  0.000E+00 e/A
+ frms,max,avg= 2.0051349E-24 2.8356889E-24   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
  prteigrs : about to open file t83o_DS11_EIG
@@ -567,16 +567,16 @@ force_length_stats: {min:   1.07674785E-25, max:   1.07674785E-25, mean:   1.076
 --- !EnergyTerms
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.05562797575403E+00
-hartree             :  5.06873670738329E-01
-xc                  : -3.57917637868025E+00
+kinetic             :  3.05562797575364E+00
+hartree             :  5.06873670737988E-01
+xc                  : -3.57917637868012E+00
 Ewald energy        : -8.61887687062694E+00
 psp_core            :  9.17676685691355E-02
-local_psp           : -2.33792219528825E+00
-non_local_psp       :  2.05981933592337E+00
-total_energy        : -8.82188679361058E+00
+local_psp           : -2.33792219528787E+00
+non_local_psp       :  2.05981933592359E+00
+total_energy        : -8.82188679361057E+00
 total_energy_eV     : -2.40055747910402E+02
-band_energy         :  4.20317458443099E-01
+band_energy         :  4.20317458443034E-01
 ...
 
 
@@ -635,12 +635,12 @@ tolerances: {toldfe: 1.00E-06, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.8237686521416    -8.824E+00 4.691E-09 4.983E-02
  ETOT  2  -8.8238489173687    -8.027E-05 6.433E-11 8.843E-04
- ETOT  3  -8.8238500213980    -1.104E-06 5.855E-09 1.460E-05
- ETOT  4  -8.8238500334533    -1.206E-08 6.642E-11 1.884E-08
- ETOT  5  -8.8238500334639    -1.069E-11 2.398E-14 6.167E-11
+ ETOT  3  -8.8238500213979    -1.104E-06 5.855E-09 1.460E-05
+ ETOT  4  -8.8238500334532    -1.206E-08 6.642E-11 1.884E-08
+ ETOT  5  -8.8238500334639    -1.070E-11 2.398E-14 6.167E-11
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  1.069E-11 < toldfe=  1.000E-06
+  for the second time, diff in etot=  1.070E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.80787219E-04  sigma(3 2)=  0.00000000E+00
@@ -658,7 +658,7 @@ lattice_vectors:
 lattice_lengths: [   7.14178,    7.14178,    7.14178, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5757525E+02
-convergence: {deltae: -1.069E-11, res2:  6.167E-11, residm:  2.398E-14, diffor: null, }
+convergence: {deltae: -1.070E-11, res2:  6.167E-11, residm:  2.398E-14, diffor: null, }
 etotal    :  -8.82385003E+00
 entropy   :   0.00000000E+00
 fermie    :   2.03915821E-01
@@ -671,9 +671,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -2.72996902E-26,  -5.45993804E-26,   8.18990705E-26, ]
-- [  2.72996902E-26,   5.45993804E-26,  -8.18990705E-26, ]
-force_length_stats: {min:   1.02146087E-25, max:   1.02146087E-25, mean:   1.02146087E-25, }
+- [  4.77744578E-26,  -1.16023683E-25,   1.02373838E-25, ]
+- [ -4.77744578E-26,   1.16023683E-25,  -1.02373838E-25, ]
+force_length_stats: {min:   1.61939176E-25, max:   1.61939176E-25, mean:   1.61939176E-25, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -689,23 +689,23 @@ force_length_stats: {min:   1.02146087E-25, max:   1.02146087E-25, mean:   1.021
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  4.7089E-25; max dE/dt=  4.1359E-25; dE/dt below (all hartree)
+ rms dE/dt=  5.6000E-25; max dE/dt=  8.2718E-25; dE/dt below (all hartree)
     1       0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000     -0.000000000000     -0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.66808622584487    -0.66808622584487    -0.66808622584487
     2      0.66808622584487     0.66808622584487     0.66808622584487
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 5.8974071E-26 8.1899071E-26   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 9.3495627E-26 1.1602368E-25   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 3.0325684E-24 4.2114192E-24   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 4.8077380E-24 5.9661772E-24   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.100000000000 10.100000000000 10.100000000000 bohr
               =  5.344689806759  5.344689806759  5.344689806759 angstroms
  prteigrs : about to open file t83o_DS12_EIG
@@ -725,16 +725,16 @@ force_length_stats: {min:   1.02146087E-25, max:   1.02146087E-25, mean:   1.021
 --- !EnergyTerms
 iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.01528711737269E+00
-hartree             :  5.19232544803103E-01
-xc                  : -3.56039706235783E+00
+kinetic             :  3.01528711737270E+00
+hartree             :  5.19232544803106E-01
+xc                  : -3.56039706235782E+00
 Ewald energy        : -8.53354145606624E+00
 psp_core            :  8.90687950114922E-02
-local_psp           : -2.40093153394576E+00
-non_local_psp       :  2.04743156171860E+00
+local_psp           : -2.40093153394578E+00
+non_local_psp       :  2.04743156171861E+00
 total_energy        : -8.82385003346394E+00
 total_energy_eV     : -2.40109170383661E+02
-band_energy         :  3.52138883330739E-01
+band_energy         :  3.52138883330718E-01
 ...
 
 
@@ -829,9 +829,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  2.70320462E-26,  -4.05480692E-26,   1.35160231E-26, ]
-- [ -2.70320462E-26,   4.05480692E-26,  -1.35160231E-26, ]
-force_length_stats: {min:   5.05723276E-26, max:   5.05723276E-26, mean:   5.05723276E-26, }
+- [  6.75801154E-26,   5.40640923E-26,  -1.08128185E-25, ]
+- [ -6.75801154E-26,  -5.40640923E-26,   1.08128185E-25, ]
+force_length_stats: {min:   1.38498023E-25, max:   1.38498023E-25, mean:   1.38498023E-25, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -847,23 +847,23 @@ force_length_stats: {min:   5.05723276E-26, max:   5.05723276E-26, mean:   5.057
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  3.4695E-25; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000     -0.000000000000
-    2      -0.000000000000     -0.000000000000     -0.000000000000
+ rms dE/dt=  4.3596E-25; max dE/dt=  4.1359E-25; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000     -0.000000000000
+    2      -0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.67470094095225    -0.67470094095225    -0.67470094095225
     2      0.67470094095225     0.67470094095225     0.67470094095225
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.9197947E-26 4.0548069E-26   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 7.9961871E-26 1.0812818E-25   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.5014187E-24 2.0850654E-24   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 4.1118044E-24 5.5601743E-24   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.200000000000 10.200000000000 10.200000000000 bohr
               =  5.397607527618  5.397607527618  5.397607527618 angstroms
  prteigrs : about to open file t83o_DS13_EIG
@@ -884,15 +884,15 @@ force_length_stats: {min:   5.05723276E-26, max:   5.05723276E-26, mean:   5.057
 iteration_state     : {dtset: 13, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.97633171593346E+00
-hartree             :  5.31625232251914E-01
+hartree             :  5.31625232251913E-01
 xc                  : -3.54215624664068E+00
 Ewald energy        : -8.44987928492837E+00
 psp_core            :  8.64747236820072E-02
-local_psp           : -2.46347473061649E+00
+local_psp           : -2.46347473061648E+00
 non_local_psp       :  2.03635154851909E+00
 total_energy        : -8.82472704179907E+00
 total_energy_eV     : -2.40133034994117E+02
-band_energy         :  2.86571820104056E-01
+band_energy         :  2.86571820104059E-01
 ...
 
 
@@ -987,9 +987,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  0.00000000E+00,  -5.35391982E-26,   4.01543987E-26, ]
-- [  0.00000000E+00,   5.35391982E-26,  -4.01543987E-26, ]
-force_length_stats: {min:   6.69239978E-26, max:   6.69239978E-26, mean:   6.69239978E-26, }
+- [  1.67309994E-26,   3.68081988E-26,  -1.67309994E-26, ]
+- [ -1.67309994E-26,  -3.68081988E-26,   1.67309994E-26, ]
+force_length_stats: {min:   4.37572415E-26, max:   4.37572415E-26, mean:   4.37572415E-26, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1005,23 +1005,23 @@ force_length_stats: {min:   6.69239978E-26, max:   6.69239978E-26, mean:   6.692
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  3.4695E-25; max dE/dt=  2.0680E-25; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000     -0.000000000000
-    2       0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  1.9699E-25; max dE/dt=  4.1359E-25; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000     -0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.68131565605962    -0.68131565605962    -0.68131565605962
     2      0.68131565605962     0.68131565605962     0.68131565605962
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 3.8638588E-26 5.3539198E-26   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 2.5263255E-26 3.6808199E-26   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.9868759E-24 2.7530960E-24   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 1.2990887E-24 1.8927535E-24   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.300000000000 10.300000000000 10.300000000000 bohr
               =  5.450525248477  5.450525248477  5.450525248477 angstroms
  prteigrs : about to open file t83o_DS14_EIG
@@ -1102,8 +1102,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1172,9 +1172,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -3.15544362E-31,  -3.15544362E-31,   1.05181454E-31, ]
-- [  3.15544362E-31,   3.15544362E-31,  -1.05181454E-31, ]
-force_length_stats: {min:   4.58475329E-31, max:   4.58475329E-31, mean:   4.58475329E-31, }
+- [  6.31088724E-31,  -8.75811540E-47,  -8.41451632E-31, ]
+- [ -6.31088724E-31,   0.00000000E+00,   8.41451632E-31, ]
+force_length_stats: {min:   1.05181454E-30, max:   1.05181454E-30, mean:   1.05181454E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1190,23 +1190,23 @@ force_length_stats: {min:   4.58475329E-31, max:   4.58475329E-31, mean:   4.584
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  3.3261E-30; max dE/dt=  2.1036E-30; dE/dt below (all hartree)
-    1      -0.000000000000     -0.000000000000      0.000000000000
-    2      -0.000000000000     -0.000000000000     -0.000000000000
+ rms dE/dt=  4.8581E-30; max dE/dt=  1.0518E-29; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000     -0.000000000000
+    2       0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.66147151073750    -0.66147151073750    -0.66147151073750
     2      0.66147151073750     0.66147151073750     0.66147151073750
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.6470085E-31 3.1554436E-31   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 6.0726541E-31 8.4145163E-31   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.3611464E-29 1.6225942E-29   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 3.1226840E-29 4.3269179E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
  prteigrs : about to open file t83o_DS21_EIG
@@ -1235,7 +1235,7 @@ local_psp           : -2.34252125623303E+00
 non_local_psp       :  2.00921525624349E+00
 total_energy        : -8.84293411710272E+00
 total_energy_eV     : -2.40628474709172E+02
-band_energy         :  4.04993122478473E-01
+band_energy         :  4.04993122478475E-01
 ...
 
 
@@ -1337,9 +1337,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.45796075E-30,   2.08280107E-31,   1.04140053E-30, ]
-- [  1.45796075E-30,  -2.08280107E-31,  -1.04140053E-30, ]
-force_length_stats: {min:   1.80375864E-30, max:   1.80375864E-30, mean:   1.80375864E-30, }
+- [  4.16560214E-31,  -8.33120428E-31,   8.33120428E-31, ]
+- [ -4.16560214E-31,   8.33120428E-31,  -8.33120428E-31, ]
+force_length_stats: {min:   1.24968064E-30, max:   1.24968064E-30, mean:   1.24968064E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1355,23 +1355,23 @@ force_length_stats: {min:   1.80375864E-30, max:   1.80375864E-30, mean:   1.803
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  8.2373E-30; max dE/dt=  1.6829E-29; dE/dt below (all hartree)
-    1      -0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000     -0.000000000000      0.000000000000
+ rms dE/dt=  1.2622E-29; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1      -0.000000000000     -0.000000000000      0.000000000000
+    2      -0.000000000000     -0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.66808622584487    -0.66808622584487    -0.66808622584487
     2      0.66808622584487     0.66808622584487     0.66808622584487
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 1.0414005E-30 1.4579607E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 7.2150346E-31 8.3312043E-31   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 5.3550964E-29 7.4971350E-29   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 3.7101196E-29 4.2840771E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.100000000000 10.100000000000 10.100000000000 bohr
               =  5.344689806759  5.344689806759  5.344689806759 angstroms
  prteigrs : about to open file t83o_DS22_EIG
@@ -1468,10 +1468,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.8456814490031    -8.021E-05 2.361E-10 1.084E-03
  ETOT  3  -8.8456825851288    -1.136E-06 6.245E-09 1.927E-05
  ETOT  4  -8.8456825986726    -1.354E-08 7.939E-11 2.121E-08
- ETOT  5  -8.8456825986864    -1.382E-11 4.624E-14 8.775E-11
+ ETOT  5  -8.8456825986864    -1.381E-11 4.624E-14 8.775E-11
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  1.382E-11 < toldfe=  1.000E-06
+  for the second time, diff in etot=  1.381E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.65569847E-05  sigma(3 2)=  0.00000000E+00
@@ -1489,7 +1489,7 @@ lattice_vectors:
 lattice_lengths: [   7.21249,    7.21249,    7.21249, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6530200E+02
-convergence: {deltae: -1.382E-11, res2:  8.775E-11, residm:  4.624E-14, diffor: null, }
+convergence: {deltae: -1.381E-11, res2:  8.775E-11, residm:  4.624E-14, diffor: null, }
 etotal    :  -8.84568260E+00
 entropy   :   0.00000000E+00
 fermie    :   1.92734659E-01
@@ -1502,9 +1502,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  2.06238145E-30,   1.64990516E-30,  -2.47485774E-30, ]
-- [ -2.06238145E-30,  -1.64990516E-30,   2.47485774E-30, ]
-force_length_stats: {min:   3.61946476E-30, max:   3.61946476E-30, mean:   3.61946476E-30, }
+- [  4.33100105E-30,  -2.26861960E-30,  -6.18714435E-31, ]
+- [ -4.33100105E-30,   2.26861960E-30,   6.18714435E-31, ]
+force_length_stats: {min:   4.92818552E-30, max:   4.92818552E-30, mean:   4.92818552E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1520,23 +1520,23 @@ force_length_stats: {min:   3.61946476E-30, max:   3.61946476E-30, mean:   3.619
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  1.5928E-29; max dE/dt=  1.6829E-29; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000     -0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  1.6021E-29; max dE/dt=  2.1036E-29; dE/dt below (all hartree)
+    1       0.000000000000     -0.000000000000     -0.000000000000
+    2      -0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.67470094095225    -0.67470094095225    -0.67470094095225
     2      0.67470094095225     0.67470094095225     0.67470094095225
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 2.0896990E-30 2.4748577E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 2.8452892E-30 4.3310010E-30   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.0745663E-28 1.2726229E-28   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 1.4631064E-28 2.2270901E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.200000000000 10.200000000000 10.200000000000 bohr
               =  5.397607527618  5.397607527618  5.397607527618 angstroms
  prteigrs : about to open file t83o_DS23_EIG
@@ -1565,7 +1565,7 @@ local_psp           : -2.46595245623238E+00
 non_local_psp       :  1.98275375608661E+00
 total_energy        : -8.84568259868644E+00
 total_energy_eV     : -2.40703264696579E+02
-band_energy         :  2.71614897173606E-01
+band_energy         :  2.71614897173607E-01
 ...
 
 
@@ -1660,9 +1660,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -2.04235833E-31,  -1.42965083E-30,   1.83812250E-30, ]
-- [  2.04235833E-31,   1.42965083E-30,  -1.83812250E-30, ]
-force_length_stats: {min:   2.33758595E-30, max:   2.33758595E-30, mean:   2.33758595E-30, }
+- [  6.12707499E-31,   6.12707499E-31,  -1.02117917E-30, ]
+- [ -6.12707499E-31,  -6.12707499E-31,   1.02117917E-30, ]
+force_length_stats: {min:   1.33926392E-30, max:   1.33926392E-30, mean:   1.33926392E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1678,23 +1678,23 @@ force_length_stats: {min:   2.33758595E-30, max:   2.33758595E-30, mean:   2.337
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  8.5880E-30; max dE/dt=  1.2622E-29; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  4.5444E-30; max dE/dt=  4.2073E-30; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000     -0.000000000000
+    2      -0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.68131565605962    -0.68131565605962    -0.68131565605962
     2      0.68131565605962     0.68131565605962     0.68131565605962
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.3496059E-30 1.8381225E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 7.7322438E-31 1.0211792E-30   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 6.9399519E-29 9.4520051E-29   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 3.9760793E-29 5.2511140E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.300000000000 10.300000000000 10.300000000000 bohr
               =  5.450525248477  5.450525248477  5.450525248477 angstroms
  prteigrs : about to open file t83o_DS24_EIG
@@ -1723,7 +1723,7 @@ local_psp           : -2.52797119037498E+00
 non_local_psp       :  1.97161292801420E+00
 total_energy        : -8.84587621873026E+00
 total_energy_eV     : -2.40708533365914E+02
-band_energy         :  2.08420615890100E-01
+band_energy         :  2.08420615890099E-01
 ...
 
 
@@ -1768,8 +1768,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1804,10 +1804,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.8550994382224    -6.727E-04 2.355E-09 7.128E-03
  ETOT  3  -8.8551066999254    -7.262E-06 4.306E-08 1.220E-04
  ETOT  4  -8.8551067860580    -8.613E-08 5.908E-10 9.404E-08
- ETOT  5  -8.8551067861498    -9.173E-11 3.060E-13 5.429E-10
+ ETOT  5  -8.8551067861498    -9.172E-11 3.060E-13 5.429E-10
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  9.173E-11 < toldfe=  1.000E-06
+  for the second time, diff in etot=  9.172E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.14916294E-04  sigma(3 2)=  0.00000000E+00
@@ -1825,7 +1825,7 @@ lattice_vectors:
 lattice_lengths: [   7.07107,    7.07107,    7.07107, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5000000E+02
-convergence: {deltae: -9.173E-11, res2:  5.429E-10, residm:  3.060E-13, diffor: null, }
+convergence: {deltae: -9.172E-11, res2:  5.429E-10, residm:  3.060E-13, diffor: null, }
 etotal    :  -8.85510679E+00
 entropy   :   0.00000000E+00
 fermie    :   2.14332953E-01
@@ -1897,11 +1897,11 @@ hartree             :  5.16813014529356E-01
 xc                  : -3.58213650353212E+00
 Ewald energy        : -8.61887687062694E+00
 psp_core            :  9.17676685691355E-02
-local_psp           : -2.33111636169498E+00
-non_local_psp       :  1.95929834792630E+00
+local_psp           : -2.33111636169499E+00
+non_local_psp       :  1.95929834792631E+00
 total_energy        : -8.85510678614976E+00
 total_energy_eV     : -2.40959709879212E+02
-band_energy         :  3.95996308486732E-01
+band_energy         :  3.95996308486727E-01
 ...
 
 
@@ -1996,9 +1996,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  1.66624086E-30,  -1.24968064E-30,  -2.08280107E-30, ]
-- [ -1.66624086E-30,   1.24968064E-30,   2.08280107E-30, ]
-force_length_stats: {min:   2.94552552E-30, max:   2.94552552E-30, mean:   2.94552552E-30, }
+- [  1.04140053E-30,   1.04140053E-30,  -6.24840321E-31, ]
+- [ -1.04140053E-30,  -1.04140053E-30,   6.24840321E-31, ]
+force_length_stats: {min:   1.59982986E-30, max:   1.59982986E-30, mean:   1.59982986E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2014,23 +2014,23 @@ force_length_stats: {min:   2.94552552E-30, max:   2.94552552E-30, mean:   2.945
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  1.7176E-29; max dE/dt=  2.1036E-29; dE/dt below (all hartree)
+ rms dE/dt=  8.9249E-30; max dE/dt=  2.1036E-29; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.66808622584487    -0.66808622584487    -0.66808622584487
     2      0.66808622584487     0.66808622584487     0.66808622584487
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 1.7006000E-30 2.0828011E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 9.2366220E-31 1.0414005E-30   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 8.7448358E-29 1.0710193E-28   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 4.7496616E-29 5.3550964E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.100000000000 10.100000000000 10.100000000000 bohr
               =  5.344689806759  5.344689806759  5.344689806759 angstroms
  prteigrs : about to open file t83o_DS32_EIG
@@ -2055,7 +2055,7 @@ hartree             :  5.29483335542385E-01
 xc                  : -3.56340445452496E+00
 Ewald energy        : -8.53354145606624E+00
 psp_core            :  8.90687950114922E-02
-local_psp           : -2.39202739727632E+00
+local_psp           : -2.39202739727633E+00
 non_local_psp       :  1.94441462019925E+00
 total_energy        : -8.85690547582847E+00
 total_energy_eV     : -2.41008654714504E+02
@@ -2154,9 +2154,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -2.26861960E-30,   2.06238145E-31,   1.03119073E-30, ]
-- [  2.26861960E-30,  -2.06238145E-31,  -1.03119073E-30, ]
-force_length_stats: {min:   2.50050462E-30, max:   2.50050462E-30, mean:   2.50050462E-30, }
+- [  2.26861960E-30,   2.26861960E-30,  -1.85614331E-30, ]
+- [ -2.26861960E-30,  -2.26861960E-30,   1.85614331E-30, ]
+force_length_stats: {min:   3.70655335E-30, max:   3.70655335E-30, mean:   3.70655335E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2172,8 +2172,8 @@ force_length_stats: {min:   2.50050462E-30, max:   2.50050462E-30, mean:   2.500
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  1.1263E-29; max dE/dt=  2.1036E-29; dE/dt below (all hartree)
-    1      -0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  1.8096E-29; max dE/dt=  3.7865E-29; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000     -0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
@@ -2181,14 +2181,14 @@ force_length_stats: {min:   2.50050462E-30, max:   2.50050462E-30, mean:   2.500
     2      0.67470094095225     0.67470094095225     0.67470094095225
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 1.4436670E-30 2.2686196E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 2.1399796E-30 2.2686196E-30   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 7.4236337E-29 1.1665710E-28   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 1.1004216E-28 1.1665710E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.200000000000 10.200000000000 10.200000000000 bohr
               =  5.397607527618  5.397607527618  5.397607527618 angstroms
  prteigrs : about to open file t83o_DS33_EIG
@@ -2215,7 +2215,7 @@ Ewald energy        : -8.44987928492837E+00
 psp_core            :  8.64747236820072E-02
 local_psp           : -2.45328025993474E+00
 non_local_psp       :  1.93156190033009E+00
-total_energy        : -8.85772909723306E+00
+total_energy        : -8.85772909723307E+00
 total_energy_eV     : -2.41031066592700E+02
 band_energy         :  2.62885875680404E-01
 ...
@@ -2319,9 +2319,9 @@ xred      :
 - [ -1.2500E-01,  -1.2500E-01,  -1.2500E-01, Si]
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -2.04235833E-31,  -4.08471666E-31,   8.75811540E-47, ]
-- [  2.04235833E-31,   4.08471666E-31,  -8.75811540E-47, ]
-force_length_stats: {min:   4.56685206E-31, max:   4.56685206E-31, mean:   4.56685206E-31, }
+- [  5.10589583E-31,  -1.02117917E-31,  -1.02117917E-31, ]
+- [ -5.10589583E-31,   1.02117917E-31,   1.02117917E-31, ]
+force_length_stats: {min:   5.30620259E-31, max:   5.30620259E-31, mean:   5.30620259E-31, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2337,23 +2337,23 @@ force_length_stats: {min:   4.56685206E-31, max:   4.56685206E-31, mean:   4.566
  reduced coordinates (array xred) for    2 atoms
       -0.125000000000     -0.125000000000     -0.125000000000
        0.125000000000      0.125000000000      0.125000000000
- rms dE/dt=  4.6248E-30; max dE/dt=  1.0518E-30; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000      0.000000000000
-    2      -0.000000000000     -0.000000000000     -0.000000000000
+ rms dE/dt=  1.8218E-30; max dE/dt=  2.1036E-30; dE/dt below (all hartree)
+    1       0.000000000000     -0.000000000000     -0.000000000000
+    2      -0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.68131565605962    -0.68131565605962    -0.68131565605962
     2      0.68131565605962     0.68131565605962     0.68131565605962
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.6366733E-31 4.0847167E-31   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 3.0635375E-31 5.1058958E-31   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.3558318E-29 2.1004456E-29   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 1.5753342E-29 2.6255570E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.300000000000 10.300000000000 10.300000000000 bohr
               =  5.450525248477  5.450525248477  5.450525248477 angstroms
  prteigrs : about to open file t83o_DS34_EIG
@@ -2374,15 +2374,15 @@ force_length_stats: {min:   4.56685206E-31, max:   4.56685206E-31, mean:   4.566
 iteration_state     : {dtset: 34, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.99317944853147E+00
-hartree             :  5.54961497366188E-01
+hartree             :  5.54961497366189E-01
 xc                  : -3.52763573795671E+00
 Ewald energy        : -8.36784162196786E+00
 psp_core            :  8.39804164893294E-02
 local_psp           : -2.51471350509350E+00
-non_local_psp       :  1.92037423152368E+00
+non_local_psp       :  1.92037423152369E+00
 total_energy        : -8.85769527110740E+00
 total_energy_eV     : -2.41030146137010E+02
-band_energy         :  1.99969746059065E-01
+band_energy         :  1.99969746059066E-01
 ...
 
 
@@ -2440,30 +2440,30 @@ band_energy         :  1.99969746059065E-01
            etotal32   -8.8569054758E+00
            etotal33   -8.8577290972E+00
            etotal34   -8.8576952711E+00
-            fcart11    4.1359030628E-26 -8.2718061255E-26  5.5145374170E-26
-                      -4.1359030628E-26  8.2718061255E-26 -5.5145374170E-26
-            fcart12   -2.7299690183E-26 -5.4599380367E-26  8.1899070550E-26
-                       2.7299690183E-26  5.4599380367E-26 -8.1899070550E-26
-            fcart13    2.7032046162E-26 -4.0548069243E-26  1.3516023081E-26
-                      -2.7032046162E-26  4.0548069243E-26 -1.3516023081E-26
-            fcart14    0.0000000000E+00 -5.3539198223E-26  4.0154398668E-26
-                       0.0000000000E+00  5.3539198223E-26 -4.0154398668E-26
-            fcart21   -3.1554436209E-31 -3.1554436209E-31  1.0518145403E-31
-                       3.1554436209E-31  3.1554436209E-31 -1.0518145403E-31
-            fcart22   -1.4579607489E-30  2.0828010699E-31  1.0414005349E-30
-                       1.4579607489E-30 -2.0828010699E-31 -1.0414005349E-30
-            fcart23    2.0623814516E-30  1.6499051612E-30 -2.4748577419E-30
-                      -2.0623814516E-30 -1.6499051612E-30  2.4748577419E-30
-            fcart24   -2.0423583307E-31 -1.4296508315E-30  1.8381224976E-30
-                       2.0423583307E-31  1.4296508315E-30 -1.8381224976E-30
+            fcart11    5.5145374170E-26 -2.7572687085E-26  2.7572687085E-26
+                      -5.5145374170E-26  2.7572687085E-26 -2.7572687085E-26
+            fcart12    4.7774457821E-26 -1.1602368328E-25  1.0237383819E-25
+                      -4.7774457821E-26  1.1602368328E-25 -1.0237383819E-25
+            fcart13    6.7580115405E-26  5.4064092324E-26 -1.0812818465E-25
+                      -6.7580115405E-26 -5.4064092324E-26  1.0812818465E-25
+            fcart14    1.6730999445E-26  3.6808198779E-26 -1.6730999445E-26
+                      -1.6730999445E-26 -3.6808198779E-26  1.6730999445E-26
+            fcart21    6.3108872418E-31 -8.7581154020E-47 -8.4145163224E-31
+                      -6.3108872418E-31  0.0000000000E+00  8.4145163224E-31
+            fcart22    4.1656021398E-31 -8.3312042796E-31  8.3312042796E-31
+                      -4.1656021398E-31  8.3312042796E-31 -8.3312042796E-31
+            fcart23    4.3310010483E-30 -2.2686195967E-30 -6.1871443547E-31
+                      -4.3310010483E-30  2.2686195967E-30  6.1871443547E-31
+            fcart24    6.1270749920E-31  6.1270749920E-31 -1.0211791653E-30
+                      -6.1270749920E-31 -6.1270749920E-31  1.0211791653E-30
             fcart31   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart32    1.6662408559E-30 -1.2496806419E-30 -2.0828010699E-30
-                      -1.6662408559E-30  1.2496806419E-30  2.0828010699E-30
-            fcart33   -2.2686195967E-30  2.0623814516E-31  1.0311907258E-30
-                       2.2686195967E-30 -2.0623814516E-31 -1.0311907258E-30
-            fcart34   -2.0423583307E-31 -4.0847166613E-31  8.7581154020E-47
-                       2.0423583307E-31  4.0847166613E-31 -8.7581154020E-47
+            fcart32    1.0414005349E-30  1.0414005349E-30 -6.2484032097E-31
+                      -1.0414005349E-30 -1.0414005349E-30  6.2484032097E-31
+            fcart33    2.2686195967E-30  2.2686195967E-30 -1.8561433064E-30
+                      -2.2686195967E-30 -2.2686195967E-30  1.8561433064E-30
+            fcart34    5.1058958267E-31 -1.0211791653E-31 -1.0211791653E-31
+                      -5.1058958267E-31  1.0211791653E-31  1.0211791653E-31
 -          fftalg         312
            getwfk          -1
             intxc           1
@@ -2642,7 +2642,24 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -2660,7 +2677,9 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -2673,25 +2692,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.9
+- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  77 WARNINGs and  33 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.7  wall=          4.9
+.Delivered  73 WARNINGs and  37 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.1  wall=          3.2

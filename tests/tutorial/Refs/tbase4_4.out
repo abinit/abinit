@@ -1,6 +1,6 @@
 
-.Version 9.2.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  7 Nov 2020.
-- ( at 08h53 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h22 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI1/tutorial_tbase4_4/tbase4_4.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tbase4_4/tbase4_4.in
 - output file    -> tbase4_4.out
 - root for input  files -> tbase4_4i
 - root for output files -> tbase4_4o
@@ -172,8 +172,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05055
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -287,18 +287,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.75222082220266E+00
-hartree             :  8.47074275283273E-03
+kinetic             :  1.75222082220265E+00
+hartree             :  8.47074275283310E-03
 xc                  : -1.62779615986096E+00
 Ewald energy        : -5.49773618317307E+00
 psp_core            :  7.73696647515159E-02
-local_psp           :  1.91200001763776E-01
-non_local_psp       :  9.01758793902757E-01
-internal            : -4.19451231766050E+00
-'-kT*entropy'       : -1.78494336468859E-03
+local_psp           :  1.91200001763749E-01
+non_local_psp       :  9.01758793902791E-01
+internal            : -4.19451231766049E+00
+'-kT*entropy'       : -1.78494336468861E-03
 total_energy        : -4.19629726102518E+00
 total_energy_eV     : -1.14187055560423E+02
-band_energy         :  7.41150518880695E-01
+band_energy         :  7.41150518880699E-01
 ...
 
 
@@ -363,7 +363,7 @@ P           mkmem          12
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
-           strten      2.5934802343E-05  2.5934802343E-05  2.6254618622E-05
+           strten      2.5934802342E-05  2.5934802342E-05  2.6254618622E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0  1
                       -1  0  0   0 -1  0   0  0 -1      -1  0  0   0 -1  0   0  0 -1
@@ -505,10 +505,10 @@ P           mkmem          12
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          6.0
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          6.0
+.Delivered   7 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.7  wall=          0.7

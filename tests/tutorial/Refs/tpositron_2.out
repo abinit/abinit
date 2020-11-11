@@ -1,6 +1,6 @@
 
-.Version 9.2.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  7 Nov 2020.
-- ( at 08h55 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h23 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI1/tutorial_tpositron_2/tpositron_2.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tpositron_2/tpositron_2.in
 - output file    -> tpositron_2.out
 - root for input  files -> tpositron_2i
 - root for output files -> tpositron_2o
@@ -247,8 +247,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.13510
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
 - Paw atomic data for element Si - Generated with atompaw v3.1.0.3
 - 14.00000   4.00000  20170718                znucl, zion, pspdat
     7    7    1    0      1390   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -291,10 +291,10 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  4  -60.147017398618    -1.726E-04 1.246E-04 6.339E-03
  ETOT  5  -60.147023819023    -6.420E-06 7.298E-05 3.360E-04
  ETOT  6  -60.147017645441     6.174E-06 1.089E-04 5.438E-05
- ETOT  7  -60.147017718009    -7.257E-08 1.303E-04 2.218E-06
+ ETOT  7  -60.147017718010    -7.257E-08 1.303E-04 2.218E-06
  ETOT  8  -60.147017755016    -3.701E-08 1.747E-04 7.919E-07
- ETOT  9  -60.147017747424     7.593E-09 1.147E-04 8.839E-08
- ETOT 10  -60.147017746139     1.285E-09 1.122E-04 9.719E-09
+ ETOT  9  -60.147017747424     7.592E-09 1.147E-04 8.839E-08
+ ETOT 10  -60.147017746140     1.285E-09 1.122E-04 9.719E-09
 
  At SCF step   10       nres2   =  9.72E-09 < tolvrs=  1.00E-08 =>converged.
 
@@ -356,8 +356,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -1.563809209579639
- Compensation charge over fine fft grid    =     -1.563830294952573
+ Compensation charge over spherical meshes =     -1.563809209620081
+ Compensation charge over fine fft grid    =     -1.563830294928312
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -485,28 +485,28 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.23424903265980E+01
-hartree             :  5.15962363335957E+00
-xc                  : -3.56437686708281E+01
+kinetic             :  2.23424903266006E+01
+hartree             :  5.15962363335644E+00
+xc                  : -3.56437686708577E+01
 Ewald energy        : -6.05835621191802E+01
 psp_core            :  1.63276322547783E+00
-local_psp           : -2.07393296238544E+01
-spherical_terms     :  2.76847522358531E+01
-total_energy        : -6.01470309925741E+01
-total_energy_eV     : -1.63668394837825E+03
+local_psp           : -2.07393296238411E+01
+spherical_terms     :  2.76847522358855E+01
+total_energy        : -6.01470309925586E+01
+total_energy_eV     : -1.63668394837783E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.76437954518644E-01
+band_energy         : -5.76437954530514E-01
 Ewald energy        : -6.05835621191802E+01
 psp_core            :  1.63276322547783E+00
-xc_dc               : -1.50780825170864E+01
-spherical_terms     :  1.44583016191680E+01
-total_energy_dc     : -6.01470177461393E+01
-total_energy_dc_eV  : -1.63668358792443E+03
+xc_dc               : -1.50780825170832E+01
+spherical_terms     :  1.44583016191763E+01
+total_energy_dc     : -6.01470177461398E+01
+total_energy_dc_eV  : -1.63668358792444E+03
 ...
 
 
@@ -548,8 +548,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.13510
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Si.LDA-PW-paw.abinit
 - Paw atomic data for element Si - Generated with atompaw v3.1.0.3
 - 14.00000   4.00000  20170718                znucl, zion, pspdat
     7    7    1    0      1390   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -586,14 +586,14 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -60.576707455525    -6.058E+01 6.809E-02 4.520E-02
- ETOT  2  -60.578162245746    -1.455E-03 3.981E-03 2.584E-02
+ ETOT  2  -60.578162245747    -1.455E-03 3.981E-03 2.584E-02
  ETOT  3  -60.578176418459    -1.417E-05 2.541E-03 5.391E-03
- ETOT  4  -60.578179133097    -2.715E-06 1.213E-03 2.353E-03
- ETOT  5  -60.578179770686    -6.376E-07 1.258E-03 2.181E-04
+ ETOT  4  -60.578179133098    -2.715E-06 1.213E-03 2.353E-03
+ ETOT  5  -60.578179770687    -6.376E-07 1.258E-03 2.181E-04
  ETOT  6  -60.578179927149    -1.565E-07 8.557E-04 1.620E-05
  ETOT  7  -60.578179968270    -4.112E-08 8.550E-04 3.515E-06
  ETOT  8  -60.578179979145    -1.087E-08 7.527E-04 6.383E-07
- ETOT  9  -60.578179982032    -2.888E-09 7.927E-04 5.321E-08
+ ETOT  9  -60.578179982033    -2.888E-09 7.927E-04 5.321E-08
  ETOT 10  -60.578179982802    -7.693E-10 5.909E-04 1.324E-09
 
  At SCF step   10       nres2   =  1.32E-09 < tolvrs=  1.00E-08 =>converged.
@@ -656,8 +656,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.001652783412382
- Compensation charge over fine fft grid    =     -0.001666824210480
+ Compensation charge over spherical meshes =     -0.001652783412336
+ Compensation charge over fine fft grid    =     -0.001666824210435
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -733,7 +733,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    Plane-wave contribution to ann.rate          (ns-1) =  3.68115852E+00
    Plane-wave valence contribution to ann.rate  (ns-1) =  3.56637803E+00
    On-site core contribution to ann.rate        (ns-1) =  4.41290746E-02
-   On-site valence contribution to ann.rate     (ns-1) = -6.69184421E-03
+   On-site valence contribution to ann.rate     (ns-1) = -6.69184418E-03
    Plane-wave contribution to ann.rate with IPM (ns-1) =  3.63116789E+00
    Plane-wave core contrb. to ann.rate with IPM (ns-1) =  5.43494038E-02
 
@@ -833,28 +833,28 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.11903990381611E-01
-local_psp           : -5.49910609167564E-01
-spherical_terms     : -7.66833344155634E-03
-positronic          : -4.45674952227508E-01
-electronic          : -6.01470177461393E+01
-electron_positron_interaction:  1.45631722326715E-02
-total_energy        : -6.05781295261341E+01
-total_energy_eV     : -1.64841473605644E+03
+kinetic             :  1.11903990381440E-01
+local_psp           : -5.49910609167133E-01
+spherical_terms     : -7.66833344131804E-03
+positronic          : -4.45674952227011E-01
+electronic          : -6.01470177461398E+01
+electron_positron_interaction:  1.45631722322033E-02
+total_energy        : -6.05781295261346E+01
+total_energy_eV     : -1.64841473605645E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.31162236662390E-01
+band_energy         : -4.31162236662269E-01
 spherical_terms     :  0.00000000000000E+00
-electron_positron_dc: -1.45631722326026E-02
-positronic          : -4.45725408894996E-01
-electronic          : -6.01470177461393E+01
-electron_positron_interaction:  1.45631722326715E-02
-total_energy_dc     : -6.05781799828016E+01
-total_energy_dc_eV  : -1.64841610905218E+03
+electron_positron_dc: -1.45631722322298E-02
+positronic          : -4.45725408894499E-01
+electronic          : -6.01470177461398E+01
+electron_positron_interaction:  1.45631722322033E-02
+total_energy_dc     : -6.05781799828020E+01
+total_energy_dc_eV  : -1.64841610905219E+03
 ...
 
 
@@ -1118,10 +1118,10 @@ P           mkmem2          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         25.3  wall=         27.7
+- Proc.   0 individual time (sec): cpu=         20.3  wall=         20.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  45 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.3  wall=         27.7
++Overall time at end (sec) : cpu=         20.3  wall=         20.3
