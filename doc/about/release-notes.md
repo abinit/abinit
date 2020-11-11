@@ -6,8 +6,8 @@ Release notes updated on November 10, 2020.
 
 Many thanks to the contributors to the ABINIT project between
 October 2018 and November 2020. These release notes
-are relative to modifications/improvements of ABINIT v9.2 with respect to v8.10
-merge requests up to and including MR692 are taken into account, also MR 697-702, 705, 707-710, 712, 715)
+are relative to modifications/improvements of ABINIT v9.2 with respect to v8.10.
+Merge requests up to and including MR692 are taken into account, also MR 697-702, 705, 707-710, 712, 715.
 
 The list of contributors includes:
 B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen,
