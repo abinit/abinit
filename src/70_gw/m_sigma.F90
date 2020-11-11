@@ -133,6 +133,10 @@ MODULE m_sigma
   ! sigxme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! Diagonal matrix elements $\<nks|\Sigma_x|nks\>$
 
+  real(dp),allocatable :: sigxcnofme(:,:,:)
+  ! sigxcnofme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
+  ! Diagonal matrix elements $\<nks|\Sigma_xc|nks\>$ taking sqrt(occs) in \Sigma_x, occs in [0,1]
+
   complex(dp),allocatable :: x_mat(:,:,:,:)
   ! x_mat(b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab))
   ! Matrix elements of $\<nks|\Sigma_x|nk's\>$
@@ -220,6 +224,7 @@ MODULE m_sigma
  public  :: sigma_init                  ! Initialize the object
  public  :: sigma_free                  ! Deallocate memory
  public  :: sigma_get_exene             ! Compute exchange energy.
+ public  :: sigma_get_excene            ! Compute exchange-correlation MBB (Nat. Orb. Funct. Approx.) energy.
  public  :: mels_get_haene              ! Compute hartree energy.
  public  :: mels_get_kiene              ! Compute kinetic energy.
  public  :: sigma_ncwrite               ! Write data in netcdf format.
@@ -993,6 +998,7 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
  ABI_CALLOC(Sr%vxcme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%vUme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%sigxme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%sigxcnofme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%x_mat, (b1gw:b2gw,b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%sigcme, (b1gw:b2gw,Sr%nkibz,Sr%nomega_r,Sr%nsppol*Sr%nsig_ab))
  ABI_CALLOC(Sr%sigxcme, (b1gw:b2gw,Sr%nkibz,Sr%nomega_r,Sr%nsppol*Sr%nsig_ab))
@@ -1075,6 +1081,7 @@ subroutine sigma_free(Sr)
  ABI_SFREE(Sr%omega_r)
  ABI_SFREE(Sr%kptgw)
  ABI_SFREE(Sr%sigxme)
+ ABI_SFREE(Sr%sigxcnofme)
  ABI_SFREE(Sr%x_mat)
  ABI_SFREE(Sr%vxcme)
  ABI_SFREE(Sr%vUme)
@@ -1152,6 +1159,57 @@ pure function sigma_get_exene(sigma,kmesh,bands) result(ex_energy)
  end do
 
 end function sigma_get_exene
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigma/sigma_get_excene
+!! NAME
+!!  sigma_get_excene
+!!
+!! FUNCTION
+!!  Compute exchange correlation energy using MBB (nat. orb. functional approx.).
+!!
+!! INPUTS
+!!  sigma<sigma_t>=Sigma results
+!!  kmesh<kmesh_t>=BZ sampling.
+!!  bands<band_t>=Bands with occupation factors
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+pure function sigma_get_excene(sigma,kmesh,bands) result(exc_energy)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: exc_energy
+ type(sigma_t),intent(in) :: sigma
+ type(kmesh_t),intent(in) :: kmesh
+ type(ebands_t),intent(in) :: bands
+
+!Local variables-------------------------------
+!scalars
+ integer :: ik,ib,spin
+ real(dp) :: wtk,occ_bks
+
+! *************************************************************************
+
+ exc_energy = zero
+
+ do spin=1,sigma%nsppol
+   do ik=1,sigma%nkibz
+     wtk = kmesh%wt(ik)
+     do ib=sigma%b1gw,sigma%b2gw
+       occ_bks = bands%occ(ib,ik,spin)
+       if (sigma%nsig_ab==1) then
+         exc_energy = exc_energy + sqrt( abs( half * occ_bks ) ) * wtk * sigma%sigxcnofme(ib,ik,spin) ! half times 2 and 2*sqrt(occ_i), occ in [0,1].
+       end if
+     end do
+   end do
+ end do
+
+end function sigma_get_excene
 !!***
 
 !----------------------------------------------------------------------
