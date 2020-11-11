@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h42 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h19 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutoplugs_tw90_4/tw90_4.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutoplugs_tw90_4/tw90_4.in
 - output file    -> tw90_4.out
 - root for input  files -> tw90_4i
 - root for output files -> tw90_4o
@@ -316,8 +316,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.19033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -349,12 +349,12 @@ tolerances: {tolvrs: 1.00E-10, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -8.8437771683708    -8.844E+00 1.062E-03 2.899E+00 0.000E+00 0.000E+00
- ETOT  2  -8.8485141358888    -4.737E-03 5.235E-06 8.693E-02 1.148E-29 1.148E-29
- ETOT  3  -8.8485960459575    -8.191E-05 2.480E-06 1.948E-03 1.148E-29 0.000E+00
- ETOT  4  -8.8485974761878    -1.430E-06 8.813E-08 1.173E-04 0.000E+00 0.000E+00
+ ETOT  2  -8.8485141358888    -4.737E-03 5.235E-06 8.693E-02 8.199E-30 8.199E-30
+ ETOT  3  -8.8485960459575    -8.191E-05 2.480E-06 1.948E-03 1.148E-29 9.839E-30
+ ETOT  4  -8.8485974761878    -1.430E-06 8.813E-08 1.173E-04 9.839E-30 0.000E+00
  ETOT  5  -8.8485977063350    -2.301E-07 5.657E-09 6.769E-07 0.000E+00 0.000E+00
  ETOT  6  -8.8485977072708    -9.358E-10 4.258E-10 8.707E-10 0.000E+00 0.000E+00
- ETOT  7  -8.8485977072716    -7.674E-13 3.402E-11 9.801E-12 0.000E+00 0.000E+00
+ ETOT  7  -8.8485977072716    -7.745E-13 3.402E-11 9.801E-12 0.000E+00 0.000E+00
 
  At SCF step    7       vres2   =  9.80E-12 < tolvrs=  1.00E-10 =>converged.
 
@@ -374,7 +374,7 @@ lattice_vectors:
 lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7024832E+02
-convergence: {deltae: -7.674E-13, res2:  9.801E-12, residm:  3.402E-11, diffor:  0.000E+00, }
+convergence: {deltae: -7.745E-13, res2:  9.801E-12, residm:  3.402E-11, diffor:  0.000E+00, }
 etotal    :  -8.84859771E+00
 entropy   :   0.00000000E+00
 fermie    :   2.15391113E-01
@@ -442,15 +442,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.99352956517788E+00
-hartree             :  5.49123895743979E-01
+hartree             :  5.49123895743980E-01
 xc                  : -3.53431940991171E+00
 Ewald energy        : -8.39800922793230E+00
 psp_core            :  8.48919894711432E-02
-local_psp           : -2.50665039605457E+00
+local_psp           : -2.50665039605458E+00
 non_local_psp       :  1.96283587623403E+00
-total_energy        : -8.84859770727155E+00
+total_energy        : -8.84859770727156E+00
 total_energy_eV     : -2.40782588835282E+02
-band_energy         :  2.31525780628160E-01
+band_energy         :  2.31525780628161E-01
 ...
 
 
@@ -710,29 +710,29 @@ force_length_stats: {min: null, max: null, mean: null, }
    m=n=1:3, ikb=1, ik=1
 
 ;   (   0.994536  -0.006720 ,   0.051935  -0.059563 ,   0.000000  -0.000000 ,    )
-;   (   0.007689  -0.000052 ,  -0.106976   0.122689 ,   0.439685   0.734925 ,    )
-;   (   0.009773  -0.000066 ,  -0.135981   0.155955 ,   0.001443   0.002394 ,    )
+;   (   0.007688  -0.000052 ,  -0.106973   0.122686 ,   0.439686   0.734923 ,    )
+;   (   0.009771  -0.000066 ,  -0.135955   0.155925 ,   0.001442   0.002445 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
 ;   (   0.000001  -0.000000 ,  -0.000002  -0.000003 ,  -0.046485   0.202089 ,    )
-;   (  -0.145369   0.101336 ,  -0.089716  -0.085464 ,   0.000012   0.000003 ,    )
-;   (  -0.009061  -0.123577 ,  -0.170587   0.047964 ,   0.000006  -0.000012 ,    )
+;   (  -0.145369   0.101337 ,  -0.089717  -0.085463 ,   0.000012   0.000003 ,    )
+;   (  -0.009060  -0.123577 ,  -0.170587   0.047963 ,   0.000006  -0.000012 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
-;   (   0.298937  -0.000000 ,   0.298937   0.000000 ,   0.298937   0.000000 ,    )
-;   (  -0.147823  -0.000000 ,   0.627016   0.000000 ,  -0.427487   0.000000 ,    )
-;   (  -0.187904   0.000000 ,  -0.187879   0.000000 ,  -0.291278   0.000000 ,    )
+;   (   0.298937   0.000000 ,   0.298937  -0.000000 ,   0.298937   0.000000 ,    )
+;   (  -0.147820  -0.000000 ,   0.627022   0.000000 ,  -0.427476   0.000000 ,    )
+;   (  -0.187867   0.000000 ,  -0.187869   0.000000 ,  -0.291319  -0.000000 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
 ;   (  -0.108291  -0.050361 ,  -0.108291  -0.050361 ,  -0.108290  -0.050361 ,    )
-;   (  -0.092196   0.089421 ,   0.172239   0.020351 ,  -0.080034  -0.109773 ,    )
-;   (   0.161985  -0.024872 ,  -0.029939   0.111260 ,  -0.132037  -0.086388 ,    )
+;   (  -0.092196   0.089421 ,   0.172239   0.020352 ,  -0.080034  -0.109773 ,    )
+;   (   0.161985  -0.024872 ,  -0.029939   0.111260 ,  -0.132038  -0.086387 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see tw90_4o_DS3_w90.wout for details.
@@ -1007,7 +1007,24 @@ P           mkmem3         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1025,7 +1042,9 @@ P           mkmem3         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1038,25 +1057,10 @@ P           mkmem3         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          7.2  wall=          7.6
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.2  wall=          7.6
+.Delivered   8 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.8  wall=          4.9

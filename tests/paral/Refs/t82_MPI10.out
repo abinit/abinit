@@ -1,6 +1,6 @@
 
-.Version 9.1.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
+.Version 9.3.1 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Mar 2020.
-- ( at 17h27 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h54 )
   
 -  nproc =   10
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t82_sys.xml
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -71,8 +71,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t82_sys.xml
--Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t82_sys.xml with LibXML library
+-Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_sys.xml
+-Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_sys.xml with Fortran
 
  Bound for ifc SR:
 
@@ -159,13 +159,13 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t82_coeffs.xml
--Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t82_coeffs.xml with LibXML library
+-Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_coeffs.xml
+-Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_coeffs.xml with Fortran
 
 ================================================================================
 
 -Reading the training-set file :
--/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t81_HIST
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t81_HIST
 
 
 ================================================================================
@@ -199,11 +199,11 @@ dipdip_range         1         1         1
  4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
  Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   8.5804227751883015E+00
+   Energy          :   8.5804227751882269E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7876180836315539E-03
-   Forces          :   3.6336164702180985E-03
-   Stresses        :   1.5400161341345506E-04
+   Forces+Stresses :   3.7876180836315487E-03
+   Forces          :   3.6336164702180937E-03
+   Stresses        :   1.5400161341345517E-04
 
 
 ================================================================================
@@ -213,10 +213,10 @@ dipdip_range         1         1         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          0.9
 
 ================================================================================
 
-+Total cpu time      1.568  and wall time      1.672 sec
++Total cpu time      9.182  and wall time      9.207 sec
 
  multibinit : the run completed succesfully.

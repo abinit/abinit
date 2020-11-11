@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 25 Feb 2020.
-- ( at 00h22 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h19 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Test_suite/seq_tsv3_04/tsv3_04.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/TestBot_MPI1/seq_tsv3_04/tsv3_04.in
 - output file    -> tsv3_04.out
 - root for input  files -> tsv3_04i
 - root for output files -> tsv3_04o
@@ -439,8 +439,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.03856
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/31ga.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/31ga.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/31ga.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/31ga.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, only for tests )
 - 31.00000   3.00000    900101                znucl, zion, pspdat
     5    3    2    2       267   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -458,8 +458,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -0.525725
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -493,15 +493,15 @@ tolerances: {toldfe: 1.00E-10, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.4797023528867    -8.480E+00 1.542E-02 1.789E-01
  ETOT  2  -8.4812919669021    -1.590E-03 4.400E-04 9.393E-03
- ETOT  3  -8.4813200786887    -2.811E-05 2.049E-04 2.729E-04
+ ETOT  3  -8.4813200786886    -2.811E-05 2.049E-04 2.729E-04
  ETOT  4  -8.4813211643476    -1.086E-06 3.402E-04 1.199E-05
  ETOT  5  -8.4813211804399    -1.609E-08 2.579E-04 6.548E-07
  ETOT  6  -8.4813211816298    -1.190E-09 1.355E-04 6.003E-09
  ETOT  7  -8.4813211816544    -2.454E-11 9.000E-05 1.822E-10
- ETOT  8  -8.4813211816553    -9.450E-13 4.563E-05 4.192E-12
+ ETOT  8  -8.4813211816553    -9.308E-13 4.563E-05 4.192E-12
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  9.450E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  9.308E-13 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  8.80624296E-04  sigma(3 2)=  0.00000000E+00
@@ -519,7 +519,7 @@ lattice_vectors:
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
-convergence: {deltae: -9.450E-13, res2:  4.192E-12, residm:  4.563E-05, diffor: null, }
+convergence: {deltae: -9.308E-13, res2:  4.192E-12, residm:  4.563E-05, diffor: null, }
 etotal    :  -8.48132118E+00
 entropy   :   0.00000000E+00
 fermie    :   1.67558753E-02
@@ -580,16 +580,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.94326903392047E+00
-hartree             :  7.21328324738288E-01
-xc                  : -2.36350965443049E+00
+kinetic             :  2.94326903392020E+00
+hartree             :  7.21328324737447E-01
+xc                  : -2.36350965443011E+00
 Ewald energy        : -8.42671708709658E+00
 psp_core            :  1.20389435295917E+00
-local_psp           : -2.51517575292627E+00
-non_local_psp       : -4.44103988198923E-02
-total_energy        : -8.48132118165531E+00
-total_energy_eV     : -2.30788486313972E+02
-band_energy         : -1.25595568523578E+00
+local_psp           : -2.51517575292556E+00
+non_local_psp       : -4.44103988198610E-02
+total_energy        : -8.48132118165530E+00
+total_energy_eV     : -2.30788486313971E+02
+band_energy         : -1.25595568523304E+00
 ...
 
 
@@ -653,7 +653,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  From band number    1  to band number    4
 
  Summary of the results
- Electronic Berry phase    -2.399282227E-03
+ Electronic Berry phase    -2.399282220E-03
             Ionic phase    -7.500000000E-01
             Total phase    -7.523992822E-01
     Remapping in [-1,1]    -7.523992822E-01
@@ -668,7 +668,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  From band number    1  to band number    4
 
  Summary of the results
- Electronic Berry phase    -1.442486633E-03
+ Electronic Berry phase    -1.442486625E-03
             Ionic phase    -7.500000000E-01
             Total phase    -7.514424866E-01
     Remapping in [-1,1]    -7.514424866E-01
@@ -687,7 +687,7 @@ lattice_vectors:
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.947E-13, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.945E-13, diffor:  0.000E+00, }
 etotal    :  -8.48132118E+00
 entropy   :   0.00000000E+00
 fermie    :   1.67558753E-02
@@ -709,7 +709,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   38.501E-14; max=  99.467E-14
+ Mean square residual over all n,k,spin=   38.501E-14; max=  99.451E-14
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -776,7 +776,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  From band number    1  to band number    4
 
  Summary of the results
- Electronic Berry phase    -1.375302379E-03
+ Electronic Berry phase    -1.375302366E-03
             Ionic phase    -7.500000000E-01
             Total phase    -7.513753024E-01
     Remapping in [-1,1]    -7.513753024E-01
@@ -795,7 +795,7 @@ lattice_vectors:
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.947E-13, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.945E-13, diffor:  0.000E+00, }
 etotal    :  -8.48132118E+00
 entropy   :   0.00000000E+00
 fermie    :   1.67558753E-02
@@ -817,7 +817,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   36.932E-14; max=  99.467E-14
+ Mean square residual over all n,k,spin=   36.931E-14; max=  99.451E-14
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -884,7 +884,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  From band number    1  to band number    4
 
  Summary of the results
- Electronic Berry phase    -1.509670887E-03
+ Electronic Berry phase    -1.509670885E-03
             Ionic phase    -7.500000000E-01
             Total phase    -7.515096709E-01
     Remapping in [-1,1]    -7.515096709E-01
@@ -1252,59 +1252,53 @@ P           mkmem4         80
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          2.9        0.05      0.001
-- Total wall clock time (s,m,h):          3.1        0.05      0.001
+- Total cpu        time (s,m,h):          2.5        0.04      0.001
+- Total wall clock time (s,m,h):          2.5        0.04      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.9, wall_time =            3.1
+- cpu_time =            2.5, wall_time =            2.5
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   0.883  30.0      0.877  28.2          14586      -1.00        1.01       1.01
-- ewald                          0.332  11.3      0.333  10.7              4      -1.00        1.00       1.00
-- nonlop(apply)                  0.217   7.4      0.223   7.2          14586      -1.00        0.97       0.97
-- pspini                         0.196   6.7      0.197   6.3              4      -1.00        0.99       0.99
-- invars2                        0.192   6.5      0.198   6.4              4      -1.00        0.97       0.97
-- getghc-other                   0.143   4.9      0.130   4.2             -1      -1.00        1.10       1.10
-- vtowfk(ssdiag)                 0.131   4.5      0.148   4.8             -1      -1.00        0.89       0.89
-- timing timab                   0.116   3.9      0.116   3.7              9      -1.00        1.00       1.00
-- projbd                         0.101   3.4      0.111   3.6          20916      -1.00        0.91       0.91
-- stress                         0.045   1.5      0.046   1.5              1      -1.00        0.99       0.99
-- ewald2 (+vdw_dftd)             0.045   1.5      0.046   1.5              1      -1.00        0.98       0.98
-- abinit(2)                      0.036   1.2      0.038   1.2              1      -1.00        0.95       0.95
-- newkpt(excl. rwwf   )          0.021   0.7      0.023   0.7             -1      -1.00        0.92       0.92
-- others (121)                   0.054   1.8      0.055   1.8             -1      -1.00        0.98       0.98
+- fourwf%(pot)                   0.983  39.0      1.019  40.1          14586      -1.00        0.97       0.97
+- invars2                        0.201   8.0      0.201   7.9              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.186   7.4      0.185   7.3          14586      -1.00        1.00       1.00
+- getghc-other                   0.132   5.2      0.126   5.0             -1      -1.00        1.05       1.05
+- timing timab                   0.106   4.2      0.107   4.2             10      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.089   3.5      0.080   3.1             -1      -1.00        1.11       1.11
+- pspini                         0.079   3.1      0.081   3.2              4      -1.00        0.98       0.98
+- projbd                         0.078   3.1      0.075   3.0          20916      -1.00        1.04       1.04
+- ewald                          0.050   2.0      0.049   1.9              4      -1.00        1.01       1.01
+- abinit(2)                      0.047   1.9      0.048   1.9              1      -1.00        0.98       0.98
+- others (117)                   0.101   4.0      0.099   3.9             -1      -1.00        1.02       1.02
 -<END_TIMER>
 -
-- subtotal                       2.512  85.4      2.541  81.8                                  0.99       0.99
+- subtotal                       2.052  81.4      2.070  81.5                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           2.9, wall_time =           3.1
+- cpu_time =           2.5, wall_time =           2.5
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   0.883  30.0      0.877  28.2          14586      -1.00        1.01       1.01
-- ewald                          0.332  11.3      0.333  10.7              4      -1.00        1.00       1.00
-- nonlop(apply)                  0.217   7.4      0.223   7.2          14586      -1.00        0.97       0.97
-- pspini                         0.196   6.7      0.197   6.3              4      -1.00        0.99       0.99
-- invars2                        0.192   6.5      0.198   6.4              4      -1.00        0.97       0.97
-- getghc-other                   0.143   4.9      0.130   4.2             -1      -1.00        1.10       1.10
-- vtowfk(ssdiag)                 0.131   4.5      0.148   4.8             -1      -1.00        0.89       0.89
-- timing timab                   0.116   3.9      0.116   3.7              9      -1.00        1.00       1.00
-- projbd                         0.101   3.4      0.111   3.6          20916      -1.00        0.91       0.91
-- stress                         0.045   1.5      0.046   1.5              1      -1.00        0.99       0.99
-- ewald2 (+vdw_dftd)             0.045   1.5      0.046   1.5              1      -1.00        0.98       0.98
-- abinit(2)                      0.036   1.2      0.038   1.2              1      -1.00        0.95       0.95
-- newkpt(excl. rwwf   )          0.021   0.7      0.023   0.7             -1      -1.00        0.92       0.92
-- others (121)                   0.054   1.8      0.055   1.8             -1      -1.00        0.98       0.98
+- fourwf%(pot)                   0.983  39.0      1.019  40.1          14586      -1.00        0.97       0.97
+- invars2                        0.201   8.0      0.201   7.9              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.186   7.4      0.185   7.3          14586      -1.00        1.00       1.00
+- getghc-other                   0.132   5.2      0.126   5.0             -1      -1.00        1.05       1.05
+- timing timab                   0.106   4.2      0.107   4.2             10      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.089   3.5      0.080   3.1             -1      -1.00        1.11       1.11
+- pspini                         0.079   3.1      0.081   3.2              4      -1.00        0.98       0.98
+- projbd                         0.078   3.1      0.075   3.0          20916      -1.00        1.04       1.04
+- ewald                          0.050   2.0      0.049   1.9              4      -1.00        1.01       1.01
+- abinit(2)                      0.047   1.9      0.048   1.9              1      -1.00        0.98       0.98
+- others (117)                   0.101   4.0      0.099   3.9             -1      -1.00        1.02       1.02
 -<END_TIMER>
 
-- subtotal                       2.512  85.4      2.541  81.8                                  0.99       0.99
+- subtotal                       2.052  81.4      2.070  81.5                                  0.99       0.99
 
 ================================================================================
 
@@ -1338,7 +1332,24 @@ P           mkmem4         80
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1356,7 +1367,9 @@ P           mkmem4         80
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1369,25 +1382,10 @@ P           mkmem4         80
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.1
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.9  wall=          3.1
+.Delivered   6 WARNINGs and  28 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.5  wall=          2.5
