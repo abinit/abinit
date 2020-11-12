@@ -461,6 +461,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
 &       subham,subovl,use_subovl,gs_hamk%usepaw,mpi_enreg%me_g0)
+       call timab(585,2,tsec)
      else
        call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
@@ -474,12 +475,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !       call pawcprj_copy(cprj_tmp,cprj_cwavef_bands)
 !       call pawcprj_free(cprj_tmp)
 !       ABI_DATATYPE_DEALLOCATE(cprj_tmp)
+       call timab(585,2,tsec)
        call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
        !LTEST
        !return
        !LTEST
      end if
-     call timab(585,2,tsec)
    end if
 
 !  Print energies

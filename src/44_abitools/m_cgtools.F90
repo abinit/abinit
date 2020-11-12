@@ -4586,18 +4586,6 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
    end if
 
    ABI_DEALLOCATE(work)
-
-   if (use_subovl==1) then
-     ABI_MALLOC_OR_DIE(work,(2,nband_k*(nband_k+1)), ierr)
-
-     do iband=1,nband_k
-       do ii=1,iband
-
-       end do
-     end do
-     ABI_DEALLOCATE(work)
-   end if
-
  end if
 
  contains
