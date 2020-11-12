@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h21 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h29 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t60/t60.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t60/t60.in
 - output file    -> t60.out
 - root for input  files -> t60i
 - root for output files -> t60o
@@ -225,8 +225,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -267,9 +267,9 @@ tolerances: {tolvrs: 1.00E-08, }
  At SCF step    6       vres2   =  4.16E-09 < tolvrs=  1.00E-08 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -6.60962502E-05  sigma(3 2)=  1.01118366E-11
-  sigma(2 2)= -6.60962396E-05  sigma(3 1)= -8.64846187E-10
-  sigma(3 3)= -6.60962551E-05  sigma(2 1)= -1.23187244E-10
+  sigma(1 1)= -6.60962502E-05  sigma(3 2)=  1.01118373E-11
+  sigma(2 2)= -6.60962396E-05  sigma(3 1)= -8.64846185E-10
+  sigma(3 3)= -6.60962551E-05  sigma(2 1)= -1.23187246E-10
 
 
 --- !ResultsGS
@@ -287,17 +287,17 @@ etotal    :  -8.84568563E+00
 entropy   :   0.00000000E+00
 fermie    :   1.92672722E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -6.60962502E-05,  -1.23187244E-10,  -8.64846187E-10, ]
-- [ -1.23187244E-10,  -6.60962396E-05,   1.01118366E-11, ]
-- [ -8.64846187E-10,   1.01118366E-11,  -6.60962551E-05, ]
+- [ -6.60962502E-05,  -1.23187246E-10,  -8.64846185E-10, ]
+- [ -1.23187246E-10,  -6.60962396E-05,   1.01118373E-11, ]
+- [ -8.64846185E-10,   1.01118373E-11,  -6.60962551E-05, ]
 pressure_GPa:   1.9446E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  3.71374366E-09,  -2.78898940E-08,  -6.96020163E-09, ]
-- [ -3.71374366E-09,   2.78898940E-08,   6.96020163E-09, ]
-force_length_stats: {min:   2.89841765E-08, max:   2.89841765E-08, mean:   2.89841765E-08, }
+- [  3.71374370E-09,  -2.78898938E-08,  -6.96020135E-09, ]
+- [ -3.71374370E-09,   2.78898938E-08,   6.96020135E-09, ]
+force_length_stats: {min:   2.89841762E-08, max:   2.89841762E-08, mean:   2.89841762E-08, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -327,9 +327,9 @@ force_length_stats: {min:   2.89841765E-08, max:   2.89841765E-08, mean:   2.898
  frms,max,avg= 1.6734022E-08 2.7889894E-08  -2.013E-09 -1.681E-09 -1.747E-09 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000019096836    -0.00000143415589    -0.00000035790793
-    2     -0.00000019096836     0.00000143415589     0.00000035790793
- frms,max,avg= 8.6049794E-07 1.4341559E-06  -1.035E-07 -8.646E-08 -8.981E-08 e/A
+    1      0.00000019096836    -0.00000143415588    -0.00000035790791
+    2     -0.00000019096836     0.00000143415588     0.00000035790791
+ frms,max,avg= 8.6049793E-07 1.4341559E-06  -1.035E-07 -8.646E-08 -8.981E-08 e/A
  length scales= 10.200586500707 10.200586500707 10.200586500707 bohr
               =  5.397917890425  5.397917890425  5.397917890425 angstroms
  prteigrs : about to open file t60o_DS1_EIG
@@ -352,19 +352,19 @@ local_psp           : -2.46631650273005E+00
 non_local_psp       :  1.98268609211873E+00
 total_energy        : -8.84568563419602E+00
 total_energy_eV     : -2.40703347296995E+02
-band_energy         :  2.71238393849681E-01
+band_energy         :  2.71238393849680E-01
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -6.60962502E-05  sigma(3 2)=  1.01118366E-11
-  sigma(2 2)= -6.60962396E-05  sigma(3 1)= -8.64846187E-10
-  sigma(3 3)= -6.60962551E-05  sigma(2 1)= -1.23187244E-10
+  sigma(1 1)= -6.60962502E-05  sigma(3 2)=  1.01118373E-11
+  sigma(2 2)= -6.60962396E-05  sigma(3 1)= -8.64846185E-10
+  sigma(3 3)= -6.60962551E-05  sigma(2 1)= -1.23187246E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.9446E+00 GPa]
-- sigma(1 1)= -1.94461849E+00  sigma(3 2)=  2.97500455E-07
+- sigma(1 1)= -1.94461849E+00  sigma(3 2)=  2.97500473E-07
 - sigma(2 2)= -1.94461818E+00  sigma(3 1)= -2.54446490E-05
-- sigma(3 3)= -1.94461863E+00  sigma(2 1)= -3.62429323E-06
+- sigma(3 3)= -1.94461863E+00  sigma(2 1)= -3.62429328E-06
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -440,10 +440,10 @@ tolerances: {tolvrs: 1.00E-04, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.723271225424     -3.794E+01 5.198E-02 2.388E+03
- ETOT  2   7.3377787754180     -8.385E+00 2.221E-02 9.810E+00
- ETOT  3   7.3101895803568     -2.759E-02 3.088E-04 8.794E-01
- ETOT  4   7.3084354300130     -1.754E-03 1.269E-05 1.229E-02
+-ETOT  1   15.723271225429     -3.794E+01 5.198E-02 2.388E+03
+ ETOT  2   7.3377787754184     -8.385E+00 2.221E-02 9.810E+00
+ ETOT  3   7.3101895803567     -2.759E-02 3.088E-04 8.794E-01
+ ETOT  4   7.3084354300131     -1.754E-03 1.269E-05 1.229E-02
  ETOT  5   7.3084177630032     -1.767E-05 3.895E-07 1.847E-04
  ETOT  6   7.3084175140705     -2.489E-07 5.267E-09 3.305E-06
 
@@ -495,12 +495,12 @@ tolerances: {tolvrs: 1.00E-04, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.724519336795     -3.794E+01 5.198E-02 2.389E+03
- ETOT  2   7.3379400493859     -8.387E+00 2.221E-02 9.791E+00
- ETOT  3   7.3101756958883     -2.776E-02 3.080E-04 8.761E-01
+-ETOT  1   15.724519336794     -3.794E+01 5.198E-02 2.389E+03
+ ETOT  2   7.3379400493858     -8.387E+00 2.221E-02 9.791E+00
+ ETOT  3   7.3101756958882     -2.776E-02 3.080E-04 8.761E-01
  ETOT  4   7.3084318730306     -1.744E-03 1.289E-05 1.208E-02
  ETOT  5   7.3084145396992     -1.733E-05 3.853E-07 1.804E-04
- ETOT  6   7.3084142967109     -2.430E-07 5.244E-09 3.233E-06
+ ETOT  6   7.3084142967110     -2.430E-07 5.244E-09 3.233E-06
 
  At SCF step    6       vres2   =  3.23E-06 < tolvrs=  1.00E-04 =>converged.
 ================================================================================
@@ -550,12 +550,12 @@ tolerances: {tolvrs: 1.00E-04, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.723647599415     -3.794E+01 5.198E-02 2.388E+03
- ETOT  2   7.3377960997529     -8.386E+00 2.221E-02 9.812E+00
+-ETOT  1   15.723647599420     -3.794E+01 5.198E-02 2.388E+03
+ ETOT  2   7.3377960997530     -8.386E+00 2.221E-02 9.812E+00
  ETOT  3   7.3101897469808     -2.761E-02 3.090E-04 8.796E-01
  ETOT  4   7.3084345727726     -1.755E-03 1.269E-05 1.233E-02
  ETOT  5   7.3084168547728     -1.772E-05 3.900E-07 1.853E-04
- ETOT  6   7.3084166050605     -2.497E-07 5.276E-09 3.321E-06
+ ETOT  6   7.3084166050606     -2.497E-07 5.276E-09 3.321E-06
 
  At SCF step    6       vres2   =  3.32E-06 < tolvrs=  1.00E-04 =>converged.
 ================================================================================
@@ -605,9 +605,9 @@ tolerances: {tolvrs: 1.00E-04, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.723476241819     -3.794E+01 5.198E-02 2.388E+03
- ETOT  2   7.3379551252799     -8.386E+00 2.221E-02 9.810E+00
- ETOT  3   7.3103656396267     -2.759E-02 3.088E-04 8.794E-01
+-ETOT  1   15.723476241823     -3.794E+01 5.198E-02 2.388E+03
+ ETOT  2   7.3379551252803     -8.386E+00 2.221E-02 9.810E+00
+ ETOT  3   7.3103656396266     -2.759E-02 3.088E-04 8.794E-01
  ETOT  4   7.3086114772490     -1.754E-03 1.269E-05 1.229E-02
  ETOT  5   7.3085938100317     -1.767E-05 3.895E-07 1.847E-04
  ETOT  6   7.3085935610951     -2.489E-07 5.267E-09 3.305E-06
@@ -660,9 +660,9 @@ tolerances: {tolvrs: 1.00E-04, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.724733731613     -3.794E+01 5.198E-02 2.389E+03
- ETOT  2   7.3381246067921     -8.387E+00 2.221E-02 9.791E+00
- ETOT  3   7.3103599545252     -2.776E-02 3.080E-04 8.761E-01
+-ETOT  1   15.724733731611     -3.794E+01 5.198E-02 2.389E+03
+ ETOT  2   7.3381246067920     -8.387E+00 2.221E-02 9.791E+00
+ ETOT  3   7.3103599545251     -2.776E-02 3.080E-04 8.761E-01
  ETOT  4   7.3086161197492     -1.744E-03 1.289E-05 1.208E-02
  ETOT  5   7.3085987862319     -1.733E-05 3.853E-07 1.804E-04
  ETOT  6   7.3085985432523     -2.430E-07 5.244E-09 3.233E-06
@@ -715,11 +715,11 @@ tolerances: {tolvrs: 1.00E-04, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.723855590866     -3.794E+01 5.198E-02 2.388E+03
- ETOT  2   7.3379748750119     -8.386E+00 2.221E-02 9.812E+00
+-ETOT  1   15.723855590871     -3.794E+01 5.198E-02 2.388E+03
+ ETOT  2   7.3379748750121     -8.386E+00 2.221E-02 9.812E+00
  ETOT  3   7.3103682292850     -2.761E-02 3.090E-04 8.796E-01
  ETOT  4   7.3086130430103     -1.755E-03 1.269E-05 1.233E-02
- ETOT  5   7.3085953248124     -1.772E-05 3.900E-07 1.853E-04
+ ETOT  5   7.3085953248123     -1.772E-05 3.900E-07 1.853E-04
  ETOT  6   7.3085950751001     -2.497E-07 5.276E-09 3.321E-06
 
  At SCF step    6       vres2   =  3.32E-06 < tolvrs=  1.00E-04 =>converged.
@@ -752,24 +752,24 @@ tolerances: {tolvrs: 1.00E-04, }
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -3.1471783354E+00    0.0000000000E+00
    1   1   2   1   -1.7593245117E+00    4.7042167487E-02
-   1   1   3   1   -1.4449681162E+00    4.4857159166E-07
+   1   1   3   1   -1.4449681162E+00    4.4857159607E-07
    2   1   1   1   -1.7593245117E+00   -4.7042167487E-02
    2   1   2   1   -2.9000279672E+00    0.0000000000E+00
-   2   1   3   1   -1.4449680478E+00    7.8118697863E-07
-   3   1   1   1   -1.4449681162E+00   -4.4857159168E-07
-   3   1   2   1   -1.4449680478E+00   -7.8118697861E-07
+   2   1   3   1   -1.4449680478E+00    7.8118698304E-07
+   3   1   1   1   -1.4449681162E+00   -4.4857159612E-07
+   3   1   2   1   -1.4449680478E+00   -7.8118698300E-07
    3   1   3   1   -2.8899375101E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    4.0067494687E-03    0.0000000000E+00
-   1   1   2   1   -5.9815329228E-02    2.1084736916E-09
-   1   1   3   1    4.4321512325E-08    0.0000000000E+00
-   2   1   1   1   -5.9815329228E-02   -2.1084736916E-09
+   1   1   2   1   -5.9815329228E-02    2.1084747453E-09
+   1   1   3   1    4.4321512185E-08    0.0000000000E+00
+   2   1   1   1   -5.9815329228E-02   -2.1084747453E-09
    2   1   2   1    8.9296262569E-01    0.0000000000E+00
-   2   1   3   1   -6.6166069956E-07    0.0000000000E+00
-   3   1   1   1    4.4321512325E-08    0.0000000000E+00
-   3   1   2   1   -6.6166069956E-07    0.0000000000E+00
+   2   1   3   1   -6.6166069747E-07    0.0000000000E+00
+   3   1   1   1    4.4321512185E-08    0.0000000000E+00
+   3   1   2   1   -6.6166069747E-07    0.0000000000E+00
    3   1   3   1    0.0000000000E+00    0.0000000000E+00
 ================================================================================
 
@@ -929,8 +929,8 @@ tolerances: {tolvrs: 1.00E-04, }
            esmear      5.00000000E-03 Hartree
            etotal1    -8.8456856342E+00
            etotal2     7.3085950751E+00
-            fcart1     3.7137436611E-09 -2.7889894028E-08 -6.9602016332E-09
-                      -3.7137436611E-09  2.7889894028E-08  6.9602016332E-09
+            fcart1     3.7137436983E-09 -2.7889893815E-08 -6.9602013499E-09
+                      -3.7137436983E-09  2.7889893815E-08  6.9602013499E-09
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
@@ -1024,7 +1024,7 @@ P          mk1mem2         32
           smdelta           1
           spgroup           1
            strten1    -6.6096250153E-05 -6.6096239650E-05 -6.6096255078E-05
-                       1.0111836630E-11 -8.6484618657E-10 -1.2318724376E-10
+                       1.0111837253E-11 -8.6484618528E-10 -1.2318724559E-10
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            tolvrs1     1.00000000E-08
@@ -1110,7 +1110,24 @@ P          mk1mem2         32
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [6] Recent developments in the ABINIT software package.
+- [6] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [7] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1128,23 +1145,10 @@ P          mk1mem2         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [7] ABINIT: First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- Proc.   0 individual time (sec): cpu=          6.1  wall=          7.8
+- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  40 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.1  wall=          7.8
++Overall time at end (sec) : cpu=          6.0  wall=          6.0

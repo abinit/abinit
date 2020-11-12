@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of CUT3D 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of CUT3D 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  CUT3D comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h16 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h26 )
   
 
   What is the name of the 3D function (density, potential or wavef) file ?
@@ -27,7 +27,7 @@
  ECHO of the ABINIT file header 
  
  First record :
-.codvsn,headform,fform = 9.0.0      80    2
+.codvsn,headform,fform = 9.3.1      80    2
  
  Second record :
  bantot,intxc,ixc,natom  =    30     0     7     1
@@ -79,7 +79,7 @@
   lmnmax  =  3
  
  Last record :
- residm,etot,fermie=    9.966699E-17   -1.912169624853E+00   -7.655537E-02
+ residm,etot,fermie=    9.966434E-17   -1.912169624853E+00   -7.655537E-02
  xred =
             2.000000E-01    3.000000E-01    4.000000E-01
  End the ECHO of the ABINIT file header 
@@ -774,7 +774,7 @@
  Total over all atoms and l=0 to 4 :  0.458452
 
  Charge in the sphere around each atom 
- Atom number    1 :  charge =    0.46209279
+ Atom number    1 :  charge =    0.46209278
 
   3D wave function was read. Ready for further treatment.
 
@@ -1050,7 +1050,7 @@
 
   Run interpolation again? (1=default=yes,0=no)
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.5
 
   Thank you for using me
 

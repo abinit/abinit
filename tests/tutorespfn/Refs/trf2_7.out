@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h46 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h23 )
   
 
 ================================================================================
@@ -90,19 +90,19 @@
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
-         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
-         1         3    9.041670E-17    9.041670E-17    2.115792E+00
-         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
-         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
-         2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
+         1         1    2.115792E+00   -1.150854E-16   -1.153161E-16
+         1         2   -1.150854E-16    2.115792E+00    1.148547E-16
+         1         3    1.150854E-16    1.150854E-16    2.115792E+00
+         2         1   -2.115792E+00    1.150854E-16    1.153161E-16
+         2         2    1.150854E-16   -2.115792E+00   -1.148547E-16
+         2         3   -1.150854E-16   -1.150854E-16   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 
 ================================================================================
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.026  and twall      0.027 sec
+-begin at tcpu      0.028  and twall      0.029 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -311,10 +311,10 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
   1.800E+02  5.3732223E+03  1.1749439E+04  3.5423427E+01  3.7183864E+01  2.0022938E+02
   2.000E+02  4.6241910E+03  1.2512641E+04  3.9442251E+01  3.9069448E+01  2.0495243E+02
 -
-- Proc.   0 individual time (sec): cpu=          7.5  wall=          7.5
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
 
 ================================================================================
 
-+Total cpu time      7.476  and wall time      7.497 sec
++Total cpu time      1.459  and wall time      1.463 sec
 
  anaddb : the run completed succesfully.
