@@ -1,4 +1,4 @@
-# coding: utf-8
+#i coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 executable = "abinit"
@@ -1559,56 +1559,87 @@ Variable(
     abivarname="chksymbreak",
     varset="gstate",
     vartype="integer",
-    topics=['k-points_basic'],
+    topics=['k-points_useful'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="CHecK SYMmetry BREAKing",
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable governs the behaviour of the code when there are potential
-source of symmetry breaking, related e.g. to the k point grid or the presence
-of non-symmorphic translations which might not be coherent with the exchange-correlation grid.
+This variable governs the behaviour of the code when there is a potential
+source of symmetry breaking related to the k point grid.
 
-When **chksymbreak** = 1, the code stops (or issue a warning) if:
-
-  * (1) The k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
-  * (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
-    or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
+When **chksymbreak** = 1, the code stops if
+the k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
 
 Note that the check is disabled when the number of k-points in the BZ is greater than 40 ** 3.
 
 When **chksymbreak** = 0, there is no such check.
 
-When **chksymbreak** = -1, the code stops if the condition (1) is met,
-but in case the condition (2) is met, there will be a trial to shift the
-atomic coordinates such as to obtain symmetry operations with the adequate non-symmorphic part.
-
 Explanation:
 In the ground-state calculation, such breaking of the symmetry is usually
 harmless. However, if the user is doing a calculation of phonons using DFPT
 ([[rfphon]] = 1), the convergence with respect to the number of k points will be
-much worse with a non-symmetric grid than with a symmetric one. Also, if the
-user is doing a GW calculation, the presence of non-symmorphic translations
-that are not coherent with the FFT grid might cause problems. In the GW part,
-indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
+worse with a non-symmetric grid than with a symmetric one.
+
+So, it was decided to warn the user about such problem already at
+the level of the ground state calculations, although such warning might be irrelevant.
+
+If you encounter a problem outlined above, you have two choices: change your
+k point grid, to make it more symmetric, or ignore the problem, and set **chksymbreak** = 0.
+""",
+),
+
+Variable(
+    abivarname="chksymtnons",
+    varset="gstate",
+    vartype="integer",
+    topics=['crystal_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="CHecK SYMmetry of TNONS",
+    characteristics=['[[INPUT_ONLY]]'],
+    added_in_version="v9.2",
+    text=r"""
+This variable governs the behaviour of the code when there is a potential
+symmetry breaking, related to the presence
+of non-symmorphic translations not leaving the FFT exchange-correlation grid invariant.
+
+When **chksymtnons** = 1, the code stops if
+the non-symmorphic translation part of the symmetry operations has components that are not zero,
+or simple fractions with 2, 3, 4, 5, 6, 8, 9, 10 or 12 as denominators. Also, suggestions
+to bypass the problem are made in the output file.
+
+When **chksymtnons** = 2, the code makes similar check, but does not stop after providing
+in the output file suggestions to bypass the problem.
+
+When **chksymtnons** = 0, the code skips the check.
+
+Explanation:
+In ground-state or DFPT calculations, such breaking of the symmetry is harmless.
+However, for a GW or BSE calculation, the presence of non-symmorphic translations
+that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault).
+In the GW or BSE parts, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
 for calculating both the polarizability and the self-energy. The wavefunctions
 in the full Brillouin zone are obtained from the irreducible wedge by applying
 the symmetry operations of the space group of the crystal. In the present
 implementation, the symmetrisation of the wavefunctions is done in real space
 on the FFT mesh that, therefore, has to be coherent both with the rotational
 part as well as with the fractional translation of each symmetry operation. If
-the condition (2) is met, the GW code will not be able to find a symmetry
-preserving FFT mesh.
+the condition above (2, 3, 4, 5, 6, 7, 8, 9, 10, or 12 as denominator) is not met,
+the GW/BSE code will not be able to find a symmetry preserving FFT mesh.
 
-So, it was decided to warn the user about these possible problems already at
-the level of the ground state calculations, although such warning might be irrelevant.
+So, it was decided to warn the user about such problem already at
+the level of the ground-state calculations, although such warning might be irrelevant.
 
-If you encounter a problem outlined above, you have two choices: change your
+If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
-symmetric point; or ignore the problem, and set **chksymbreak** = 0.
+symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0.
+If **chksymtnons** = 2, ABINIT makes a suggestion of a possible global translation,
+and corresponding translated atomic positions.
 """,
 ),
+
 
 Variable(
     abivarname="chneut",
@@ -3277,10 +3308,10 @@ Variable(
 Defines the linear grid resolution (energy increment) to be used for the
 computation of the Density-Of-States, when [[prtdos]] is non-zero.
 If [[dosdeltae]] is set to zero (the default value), the actual increment is
-0.001 Ha if [[prtdos]] = 1, and the much smaller value 0.00005 Ha if
-[[prtdos]] = 2. This different default value arises because the [[prtdos]] = 1
-case, based on a smearing technique, gives a quite smooth DOS, while the DOS
-from the tetrahedron method, [[prtdos]] = 2, is rapidly varying.
+0.001 Ha if [[prtdos]] = 1 or 4 (smearing technique), and the much smaller value 0.00005 Ha if
+[[prtdos]] = 2, 3 or 5 (tetrahedron technique). This different default value arises because the 
+smearing technique gives a quite smooth DOS, while the DOS
+from the tetrahedron method is rapidly varying.
 """,
 ),
 
@@ -3908,7 +3939,7 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval="2 (tetra) except when [[eph_task]] = +4 where 1 is used as default.",
+    defaultval="2 (tetra) except when [[eph_task]] = 4 and when ([[eph_task]] = -4 and symsigma == 0), where 1 is used as default.",
     mnemonics="Electron-Phonon: INTegration METHod",
     added_in_version="before_v9",
     text=r"""
@@ -3927,13 +3958,13 @@ Phonon linewidths in metals (**eph_task** = 1):
     A negative value activates the adaptive Gaussian broadening.
     See also [[eph_fsewin]].
 
-Electron-phonon self-energy with **eph_task** = 4):
+Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
-:   The default is Lorentzian method with broadening specified by [[zcut]].
+:   The default is [[eph_intmeth]]==1, Lorentzian method with broadening specified by [[zcut]]. Note that [[eph_intmeth]]==2 is still in development for this case (ABINITv9.2).
 
 Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
 
-:   The default is Tetrahedron method
+:   The default is [[eph_intmeth]]==2, Tetrahedron method except when symsigma == 0, where it is [[eph_intmeth]]==1..
 """,
 ),
 
@@ -4001,7 +4032,7 @@ The choice is among:
 * 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
 * -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
 * 3 --> Compute phonon self-energy.
-* 4 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections. Generate SIGEPH.nc file.
+* 4 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function. Generate SIGEPH.nc file.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy). Generate SIGEPH.nc file.
 * 5 --> Interpolate DFPT potentials to produce a new DVDB file on the [[eph_ngqpt_fine]] q-mesh that can be read with [[getdvdb]]
 * -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]]. Note that, in this case,
@@ -4110,6 +4141,23 @@ If [[exchn2n3d]] is 1, the internal representation of the FFT arrays in
 reciprocal space will be array(n1,n3,n2), where the second and third
 dimensions have been switched. This is to allow to be coherent with the
 [[exchn2n3d]] = 4xx FFT treatment.
+""",
+),
+
+Variable(
+    abivarname="expert_user",
+    varset="gstate",
+    vartype="integer",
+    topics=['UnitCell_expert','crystal_expert','SmartSymm_expert','GeoOpt_expert','k-points_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EXPERTise of the USER",
+    added_in_version="v9.2.2",
+    text=r"""
+If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
+If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero).
+(In the future, the level three will always be the maximum allowed value, with all checks set to zero, while a more refined behaviour
+might be implemented for [[expert_user]]==1 or 2).
 """,
 ),
 
@@ -6880,11 +6928,11 @@ Variable(
     dimensions=['[[natsph]]'],
     defaultval=Range(start=1, stop='[[natsph]]'),
     mnemonics="Index for the ATomic SPHeres of the atom-projected density-of-states",
-    requires="[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]",
+    requires="[[prtdos]] == 3 or 4 or [[pawfatbnd]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
 [[iatsph]] gives the number of the [[natsph]] atoms around which the sphere
-for atom-projected density-of-states will be build, in the [[prtdos]] = 3 case.
+for atom-projected density-of-states will be build, in the [[prtdos]] = 3 or 4 cases.
 The radius of these spheres is given by [[ratsph]].
 If [[pawfatbnd]] = 1 or 2, it gives the number of the [[natsph]] atoms around
 which atom-projected band structure will be built.
@@ -10066,11 +10114,11 @@ Variable(
     dimensions="scalar",
     defaultval="[[natom]]",
     mnemonics="Number of ATomic SPHeres for the atom-projected density-of-states",
-    requires="[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]",
+    requires="[[prtdos]] == 3 or 4 or [[pawfatbnd]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
 [[natsph]] gives the number of atoms around which the sphere for atom-projected
-density-of-states will be built, in the [[prtdos]] = 3 case. The
+density-of-states will be built, in the [[prtdos]] = 3 or 4 case. The
 indices of these atoms are given by [[iatsph]]. The radius of these spheres is given by [[ratsph]].
 If [[pawfatbnd]] = 1 or 2, it gives the number of atoms around which atom-projected
 band structure will be built (the indices of these atoms are given by [[iatsph]]).
@@ -10085,11 +10133,11 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of ATomic SPHeres for the l-projected density-of-states in EXTRA set",
-    requires="[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]",
+    requires="[[prtdos]] == 3 or 4 or [[pawfatbnd]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
 [[natsph_extra]] gives the number of extra spheres for which the angular-
-momentum-projected density-of-states will be built, in the [[prtdos]] = 3 case.
+momentum-projected density-of-states will be built, in the [[prtdos]] = 3 or 4 case.
 The radius of these spheres is given by [[ratsph_extra]]. This simulates the
 STS signal for an STM tip atom placed at the sphere position, according to the
 chemical nature of the tip (s- p- d- wave etc...).
@@ -14682,11 +14730,13 @@ Variable(
     mnemonics="PRinT the Density Of States",
     added_in_version="before_v9",
     text=r"""
-Provide output of Density of States if set to 1, 2 or 3. Can either use a
-smearing technique ([[prtdos]] = 1), or the tetrahedron method ([[prtdos]] = 2).
-If [[prtdos]] = 3, provide output of Local Density of States inside a sphere
-centered on an atom, as well as the angular-momentum projected DOS, in the
-same sphere. The resolution of the linear grid of energies for which the DOS
+Provide output of Density of States if set to 1...5. Can either use a
+smearing technique ([[prtdos]] = 1 or 4), or the tetrahedron method ([[prtdos]] = 2, 3 or 5).
+If [[prtdos]] = 3 or 4, provide output of angular-momentum projected Local Density of States inside a sphere
+centered on different atoms (all or only those specified by [[iatsph]]),
+and possibly output m-decomposed LDOS if [[prtdosm]] is defined.
+
+The resolution of the linear grid of energies for which the DOS
 is computed can be tuned thanks to [[dosdeltae]].
 
 If [[prtdos]] = 1, the smeared density of states is obtained from the
@@ -14731,8 +14781,8 @@ step, with the name being made of
   * then followed by _DOS.
 
 If [[prtdos]] = 3, the same tetrahedron method as for [[prtdos]] = 2 is used, but
-the DOS inside a sphere centered on some atom is delivered, as well as the
-angular-momentum projected (l=0,1,2,3,4) DOS in the same sphere. The
+the angular-momentum projected (l=0,1,2,3,4) DOS in sphere centered on the atoms
+is computed (not directly the total atom-cenetered DOS). The
 preparation of this case, the parameters under which the computation is to be
 done, and the file denomination is similar to the [[prtdos]] = 2 case. However,
 three additional input variables might be provided, describing the atoms that
@@ -14742,19 +14792,14 @@ In case of PAW, [[ratsph]] radius has to be greater or equal to the largest PAW
 radius of the atom types considered (which is read from the PAW atomic data
 file; see rc_sph or r_paw). Additionally, printing and/or approximations in PAW
 mode can be controlled with [[pawprtdos]] keyword (in
-particular,[[pawprtdos]] = 2 can be used to compute quickly a very good
+particular, [[pawprtdos]] = 2 can be used to compute quickly a very good
 approximation of the DOS).
 
- * Note 1: when [[prtdos]] = 3, it is possible to output m-decomposed LDOS in _DOS
-file; simply use [[prtdosm]] keyword.
- * Note 2: the integrated total DOS in spheres around atoms can be obtained when
-[[prtdensph]] flag is activated. It can be compared to the integrated DOS
-provided in _DOS file when [[prtdos]] = 3.
+If [[prtdos]] = 4, delivers the sphere-projected DOS (like [[prtdos]] = 3), on the
+basis of a smearing approach (like [[prtdos]] = 1). See (like [[prtdos]] = 1
+for the additional input variables to be specified.
 
-[[prtdos]] = 4 delivers the sphere-projected DOS (like [[prtdos]] = 3), on the
-basis of a smearing approach (like [[prtdos]] = 1)
-
-[[prtdos]] = 5 delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
+If [[prtdos]] = 5, delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
 tetrahedron method (as [[prtdos]] = 2).
 """,
 ),
@@ -16141,7 +16186,7 @@ In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
 considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
 In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
 
-When [[prtdos]] = 3:
+When [[prtdos]] = 3 or 4 :
 
 Provides the radius of the spheres around the [[natsph]] atoms of indices
 [[iatsph]], in which the local DOS and its angular-momentum projections will
@@ -17862,8 +17907,14 @@ their action on the direct (or real) space primitive translations.
 It turns out that these can always be expressed as integers.
 Always give the identity matrix even if no other symmetries hold, e.g.
 [[symrel]] 1 0 0 0 1 0 0 0 1.
+
 Also note that for this array, as for all others, the array elements are filled
-in a columnwise order as is usual for Fortran.
+in a columnwise order as is usual for Fortran.  Explicitly,
+[[symrel]] 1 0 0 -1 -1 0 0 0 1 for symmetry operation isym is stored internally as
+symrel(1,1,isym)=1, symrel(1,2)=-1, ...
+The atom located at xred(1:3) is send to location
+xred_sym(jj)=symrel(jj,1,isym)*xred(1)+symrel(jj,2,isym)*xred(2)+symrel(jj,3,isym)*xred(3)+tnons(jj).
+
 The relation between the above symmetry matrices [[symrel]], expressed in the
 basis of primitive translations, and the same symmetry matrices expressed in
 cartesian coordinates, is as follows. Denote the matrix whose columns are the
@@ -18130,6 +18181,13 @@ system of coordinates, see "[[xred]]"). If all elements of the space group
 leave 0 0 0 invariant, then these are all 0.
 When the symmetry finder is used (see [[nsym]]), [[tnons]] is computed
 automatically.
+
+For the ground-state and DFPT drivers of ABINIT, the value of tnons is unrestricted.
+However, for GW and BSE, the symmetry operations must leave the FFT grid invariant.
+Preparatory (Ground-state) runs must also use the same atomic geometry, hence the same tnons.
+As ABINIT cannot guess whether the user has in mind to do a GW or BSE run after the GS run,
+a conservative approach is implemented, requiring such match of symmetry operations
+and FFT grid also in the GS case. See more details in the section describing the input variable [[chksymtnons]].
 
 See also [[symafm]] for the complete description of the symmetry operation.
 """,

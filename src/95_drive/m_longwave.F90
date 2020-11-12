@@ -320,7 +320,7 @@ ecore=zero
 & phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
 
 !Symmetrize atomic coordinates over space group elements:
- call symmetrize_xred(indsym,natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
+ call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.

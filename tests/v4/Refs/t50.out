@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h27 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h26 )
   
 
 ================================================================================
@@ -148,7 +148,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.030  and twall      0.032 sec
+-begin at tcpu      0.060  and twall      0.061 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -177,10 +177,10 @@
 -  1.588315E+02  1.656651E+02  1.656651E+02  2.810933E+02  2.810933E+02
 -  2.810934E+02  4.452215E+02  4.533531E+02  4.533531E+02  6.311288E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.2035615629E-02
+   in atomic units:     0.2035615630E-02
    in units km/s:              4.45330
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1049673360E-02
+   in atomic units:     0.1049673361E-02
    in SI units K  :            331.46024
 
  Speed of sound for this q and mode:
@@ -645,17 +645,17 @@
 -  1.588309E+02  1.656652E+02  1.656665E+02  2.810931E+02  2.810937E+02
 -  2.810943E+02  4.452218E+02  4.533529E+02  4.533531E+02  6.311286E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.2035614896E-02
+   in atomic units:     0.2035614897E-02
    in units km/s:              4.45330
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1049672982E-02
    in SI units K  :            331.46012
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2098225454E-02
+   in atomic units:     0.2098225455E-02
    in units km/s:              4.59027
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1081958367E-02
+   in atomic units:     0.1081958368E-02
    in SI units K  :            341.65502
 
  Speed of sound for this q and mode:
@@ -833,10 +833,10 @@
 -  1.588304E+02  1.656650E+02  1.656650E+02  2.810929E+02  2.810929E+02
 -  2.810929E+02  4.452209E+02  4.533533E+02  4.533533E+02  6.311288E+02
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
 
 ================================================================================
 
-+Total cpu time      1.326  and wall time      1.341 sec
++Total cpu time      0.361  and wall time      0.373 sec
 
  anaddb : the run completed succesfully.

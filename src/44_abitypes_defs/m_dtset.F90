@@ -112,6 +112,7 @@ type, public :: dataset_type
  integer :: chneut = 1
  integer :: chkprim
  integer :: chksymbreak
+ integer :: chksymtnons
  integer :: cineb_start
 !D
  integer :: delayperm
@@ -176,6 +177,7 @@ type, public :: dataset_type
  integer :: eph_use_ftinterp = 0
  integer :: exchn2n3d
  integer :: extrapwf
+ integer :: expert_user
 !F
  integer :: fftgw = 21
  integer :: fockoptmix
@@ -1312,6 +1314,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chkexit            = dtin%chkexit
  dtout%chkprim            = dtin%chkprim
  dtout%chksymbreak        = dtin%chksymbreak
+ dtout%chksymtnons        = dtin%chksymtnons
  dtout%cineb_start        = dtin%cineb_start
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
@@ -1419,6 +1422,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 ! end eph variables
 
  dtout%exchn2n3d          = dtin%exchn2n3d
+ dtout%expert_user        = dtin%expert_user
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
@@ -3070,7 +3074,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim'
- list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
+ list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
@@ -3108,7 +3112,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
- list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d extrapwf'
+ list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'

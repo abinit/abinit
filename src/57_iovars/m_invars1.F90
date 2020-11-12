@@ -1123,7 +1123,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: chksymbreak,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_geo
+ integer :: chksymbreak,expert_user,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_geo
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
  integer :: natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
@@ -1627,9 +1627,16 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqpt',tread,'INT')
    if(tread==1) nqpt=intarr(1)
 
-   chksymbreak=1
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
-   if(tread==1) chksymbreak=intarr(1)
+   expert_user=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'expert_user',tread,'INT')
+   if(tread==1) expert_user=intarr(1)
+   if(expert_user==0)then
+     chksymbreak=1
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
+     if(tread==1) chksymbreak=intarr(1)
+   else
+     chksymbreak=0
+   endif
 
    ! Use the first image to predict k and/or q points, except if an intermediate image is available
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
@@ -2124,6 +2131,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
+   dtsets(idtset)%chksymtnons=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
 !  D
@@ -2219,6 +2227,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%exchn2n3d=0
    dtsets(idtset)%extrapwf=0
    dtsets(idtset)%exchmix=quarter
+   dtsets(idtset)%expert_user=0
 !  F
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0

@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h15 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h25 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t71-t72/t72.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t71-t72/t72.in
 - output file    -> t72.out
 - root for input  files -> t71o
 - root for output files -> t72o
@@ -166,8 +166,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.500   => boxcut(ratio)=   2.16250
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
 -  Troullier-Martins psp for element  Mo        Thu Oct 27 17:40:28 EDT 1994
 - 42.00000   6.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -261,7 +261,7 @@ tolerances: {toldff: 5.00E-05, }
     1     0.00000000000E+00    0.00000000000E+00   -1.35176918509E-02
     2     0.00000000000E+00    0.00000000000E+00    2.39386927135E-02
     3     0.00000000000E+00    0.00000000000E+00    2.02430359353E-01
-    4     0.00000000000E+00    0.00000000000E+00   -1.40075023723E-02
+    4     0.00000000000E+00    0.00000000000E+00   -1.40075023724E-02
     5     0.00000000000E+00    0.00000000000E+00   -1.98843857843E-01
  prteigrs : about to open file t72o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.08029   Average Vxc (hartree)=  -0.38134
@@ -361,7 +361,7 @@ tolerances: {toldff: 5.00E-05, }
     1     0.00000000000E+00    0.00000000000E+00   -1.28198875471E-02
     2     0.00000000000E+00    0.00000000000E+00    1.91762230627E-02
     3     0.00000000000E+00    0.00000000000E+00    1.99088695003E-01
-    4     0.00000000000E+00    0.00000000000E+00   -9.28776389603E-03
+    4     0.00000000000E+00    0.00000000000E+00   -9.28776389604E-03
     5     0.00000000000E+00    0.00000000000E+00   -1.96157266623E-01
  prteigrs : about to open file t72o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.06959   Average Vxc (hartree)=  -0.38206
@@ -411,7 +411,7 @@ tolerances: {toldff: 5.00E-05, }
     1     0.00000000000E+00    0.00000000000E+00   -1.29479363673E-02
     2     0.00000000000E+00    0.00000000000E+00    1.92895792175E-02
     3     0.00000000000E+00    0.00000000000E+00    1.99223006485E-01
-    4     0.00000000000E+00    0.00000000000E+00   -9.70566105617E-03
+    4     0.00000000000E+00    0.00000000000E+00   -9.70566105616E-03
     5     0.00000000000E+00    0.00000000000E+00   -1.95858988279E-01
  prteigrs : about to open file t72o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.06940   Average Vxc (hartree)=  -0.38208
@@ -462,7 +462,7 @@ tolerances: {toldff: 5.00E-05, }
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00 -1.88E-06
     1     0.00000000000E+00    0.00000000000E+00   -1.29228563795E-02
-    2     0.00000000000E+00    0.00000000000E+00    1.92809978373E-02
+    2     0.00000000000E+00    0.00000000000E+00    1.92809978374E-02
     3     0.00000000000E+00    0.00000000000E+00    1.99217640252E-01
     4     0.00000000000E+00    0.00000000000E+00   -9.62166060032E-03
     5     0.00000000000E+00    0.00000000000E+00   -1.95954121109E-01
@@ -508,7 +508,7 @@ tolerances: {toldff: 5.00E-05, }
   -4.86467   -4.56045   -4.34112   -4.04276   -2.99391   -2.79865   -2.24807   -1.92713
   -1.10358   -0.93110   -0.02179    0.54451
 
- ETOT  7  -42.759979897123    -7.876E-07 6.131E-05 7.632E-06 2.607E-05 1.992E-01
+ ETOT  7  -42.759979897122    -7.876E-07 6.131E-05 7.632E-06 2.607E-05 1.992E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00  8.15E-07
     1     0.00000000000E+00    0.00000000000E+00   -1.29154910405E-02
@@ -561,7 +561,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  8  -42.759980414552    -5.174E-07 3.472E-05 1.175E-06 1.139E-05 1.992E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00 -7.43E-08
-    1     0.00000000000E+00    0.00000000000E+00   -1.29138924982E-02
+    1     0.00000000000E+00    0.00000000000E+00   -1.29138924981E-02
     2     0.00000000000E+00    0.00000000000E+00    1.93109293178E-02
     3     0.00000000000E+00    0.00000000000E+00    1.99192302220E-01
     4     0.00000000000E+00    0.00000000000E+00   -9.64744568255E-03
@@ -665,17 +665,17 @@ force_length_stats: {min:   9.64744568E-03, max:   1.99192302E-01, mean:   8.740
 
  Mean square residual over all n,k,spin=   64.025E-08; max=  34.720E-06
    0.1250  0.1250  0.2500    1  3.47197E-05 kpt; spin; max resid(k); each band:
-  2.17E-12 7.89E-12 9.82E-12 9.98E-12 3.10E-12 1.12E-11 8.61E-12 1.38E-11
-  2.07E-11 9.61E-12 4.59E-12 6.67E-12 2.21E-11 2.57E-11 1.37E-11 1.64E-11
-  1.16E-09 2.69E-08 3.51E-06 3.47E-05
+   2.17E-12  7.89E-12  9.82E-12  9.98E-12  3.10E-12  1.12E-11  8.61E-12  1.38E-11
+   2.07E-11  9.61E-12  4.59E-12  6.67E-12  2.21E-11  2.57E-11  1.37E-11  1.64E-11
+   1.16E-09  2.69E-08  3.51E-06  3.47E-05
    0.3750  0.3750  0.2500    1  1.51016E-07 kpt; spin; max resid(k); each band:
-  2.73E-12 5.59E-12 1.83E-12 7.77E-12 1.03E-12 2.00E-12 6.51E-12 1.41E-12
-  5.69E-12 3.90E-12 4.92E-12 5.28E-12 6.62E-12 1.56E-11 1.32E-11 7.11E-12
-  1.04E-11 1.72E-11 1.81E-11 1.51E-07
+   2.73E-12  5.59E-12  1.83E-12  7.77E-12  1.03E-12  2.00E-12  6.51E-12  1.41E-12
+   5.69E-12  3.90E-12  4.92E-12  5.28E-12  6.62E-12  1.56E-11  1.32E-11  7.11E-12
+   1.04E-11  1.72E-11  1.81E-11  1.51E-07
    0.1250  0.3750  0.2500    1  1.44179E-09 kpt; spin; max resid(k); each band:
-  2.90E-12 8.29E-12 5.81E-12 7.40E-12 1.14E-11 8.49E-12 7.62E-12 6.02E-12
-  7.74E-12 2.74E-12 4.58E-12 7.16E-12 6.59E-12 1.51E-11 1.50E-11 1.68E-11
-  1.39E-11 1.92E-11 9.67E-11 1.44E-09
+   2.90E-12  8.29E-12  5.81E-12  7.40E-12  1.14E-11  8.49E-12  7.62E-12  6.02E-12
+   7.74E-12  2.74E-12  4.58E-12  7.16E-12  6.59E-12  1.51E-11  1.50E-11  1.68E-11
+   1.39E-11  1.92E-11  9.67E-11  1.44E-09
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.001000000000
        0.500000000000      0.500000000000      0.125000000000
@@ -697,19 +697,19 @@ force_length_stats: {min:   9.64744568E-03, max:   1.99192302E-01, mean:   8.740
     5      0.00000000000000     0.00000000000000    -3.19623033988360
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.01291389249816
+    1     -0.00000000000000    -0.00000000000000    -0.01291389249815
     2     -0.00000000000000    -0.00000000000000     0.01931092931779
-    3     -0.00000000000000    -0.00000000000000     0.19919230221992
+    3     -0.00000000000000    -0.00000000000000     0.19919230221993
     4     -0.00000000000000    -0.00000000000000    -0.00964744568255
     5     -0.00000000000000    -0.00000000000000    -0.19594189335702
  frms,max,avg= 7.2435513E-02 1.9919230E-01   0.000E+00  0.000E+00 -7.426E-08 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.66405899609781
-    2     -0.00000000000000    -0.00000000000000     0.99300782768019
-    3     -0.00000000000000    -0.00000000000000    10.24287915215768
-    4     -0.00000000000000    -0.00000000000000    -0.49609156153140
-    5     -0.00000000000000    -0.00000000000000   -10.07573642220866
+    1     -0.00000000000000    -0.00000000000000    -0.66405899609741
+    2     -0.00000000000000    -0.00000000000000     0.99300782767981
+    3     -0.00000000000000    -0.00000000000000    10.24287915215773
+    4     -0.00000000000000    -0.00000000000000    -0.49609156153142
+    5     -0.00000000000000    -0.00000000000000   -10.07573642220871
  frms,max,avg= 3.7247835E+00 1.0242879E+01   0.000E+00  0.000E+00 -3.818E-06 e/A
  length scales=  6.040000000000  6.040000000000 24.160000000000 bohr
               =  3.196230339884  3.196230339884 12.784921359534 angstroms
@@ -769,13 +769,13 @@ hartree             :  3.74650241444564E+01
 xc                  : -2.07941815773563E+01
 Ewald energy        : -6.67573965170043E+00
 psp_core            :  1.51866811340446E+01
-local_psp           : -7.80844861380149E+01
-non_local_psp       : -6.27679223528703E+00
-internal            : -4.27567913451653E+01
-'-kT*entropy'       : -3.18906938674647E-03
-total_energy        : -4.27599804145520E+01
-total_energy_eV     : -1.16355824090646E+03
-band_energy         : -7.16117372293823E+00
+local_psp           : -7.80844861380151E+01
+non_local_psp       : -6.27679223528704E+00
+internal            : -4.27567913451656E+01
+'-kT*entropy'       : -3.18906938674654E-03
+total_energy        : -4.27599804145523E+01
+total_energy_eV     : -1.16355824090647E+03
+band_energy         : -7.16117372293828E+00
 ...
 
 
@@ -787,17 +787,17 @@ band_energy         : -7.16117372293823E+00
     4      -0.000000000000     -0.000000000000    113.600869565997
     5       0.000000000000      0.000000000000    206.810321827768
  nonlocal contribution to red. grads
-    1       0.000000000000      0.000000000000     -0.037171676881
+    1      -0.000000000000      0.000000000000     -0.037171676881
     2       0.000000000000      0.000000000000      0.322735108251
-    3       0.000000000000      0.000000000000      2.882890853555
+    3      -0.000000000000      0.000000000000      2.882890853555
     4       0.000000000000      0.000000000000     -0.278325725376
-    5      -0.000000000000      0.000000000000     -2.886986039119
+    5       0.000000000000      0.000000000000     -2.886986039119
  local psp contribution to red. grads
-    1      -0.000000000000     -0.000000000000     -0.066983215043
+    1      -0.000000000000     -0.000000000000     -0.066983215042
     2       0.000000000000      0.000000000000    112.563206349099
     3      -0.000000000000     -0.000000000000    198.120148121199
     4       0.000000000000      0.000000000000   -113.074480544989
-    5      -0.000000000000     -0.000000000000   -197.544553292739
+    5      -0.000000000000     -0.000000000000   -197.544553292740
  core charge xc contribution to reduced grads
     1      -0.000000000000      0.000000000000     -0.047348812363
     2      -0.000000000000     -0.000000000000      0.051440166537
@@ -807,9 +807,9 @@ band_energy         : -7.16117372293823E+00
  residual contribution to red. grads
     1       0.000000000000      0.000000000000     -0.000747775697
     2       0.000000000000      0.000000000000     -0.000464916290
-    3       0.000000000000      0.000000000000      0.000399248513
+    3       0.000000000000      0.000000000000      0.000399248514
     4       0.000000000000      0.000000000000     -0.000412459699
-    5       0.000000000000      0.000000000000     -0.000112563604
+    5       0.000000000000      0.000000000000     -0.000112563603
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.55704942E-04  sigma(3 2)=  0.00000000E+00
@@ -939,7 +939,24 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [3] Recent developments in the ABINIT software package.
+- [3] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -957,7 +974,9 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -970,25 +989,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          4.1  wall=          4.4
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          2.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.1  wall=          4.4
++Overall time at end (sec) : cpu=          2.9  wall=          2.9

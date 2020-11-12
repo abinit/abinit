@@ -30,7 +30,8 @@ module m_symfind
  use m_abicore
  use m_symlist
 
- use m_symtk,     only : chkgrp, chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, smallprim, print_symmetries
+ use m_symtk, &
+& only : chkgrp, chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, smallprim, print_symmetries, sg_multable
  use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
 
@@ -564,7 +565,8 @@ contains
    ABI_DEALLOCATE(spinatred)
  end if
 
- call chkgrp(nsym,symafm,symrel,ierr_)
+! call chkgrp(nsym,symafm,symrel,ierr_)
+ call sg_multable(nsym, symafm, symrel, tnons, tolsym, ierr_)
  if (ierr_/=0) then
    call print_symmetries(nsym,symrel,tnons,symafm)
  end if
@@ -576,14 +578,14 @@ contains
  endif
 
 !DEBUG
-! write(message,'(a,I0,a)')' symfind : exit, nsym=',nsym,ch10
-! write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
-! call wrtout(std_out,message,'COLL')
-! do isym=1,nsym
-!   write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
-!&   symafm(isym),tnons(:,isym)
-!   call wrtout(std_out,message,'COLL')
-! end do
+!  write(message,'(a,I0,es16.6,a)')' symfind : exit, nsym, tolsym=',nsym,tolsym,ch10
+!  write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
+!  call wrtout(std_out,message,'COLL')
+!  do isym=1,nsym
+!    write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
+! &   symafm(isym),tnons(:,isym)
+!    call wrtout(std_out,message,'COLL')
+!  end do
 !stop
 !ENDDEBUG
 
@@ -1692,6 +1694,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
    iholohedry=list_holo(index)
 
 !  DEBUG
+!  write(std_out,*)
 !  write(std_out,*)' symlatt : trial holohedry',iholohedry
 !  ENDDEBUG
 
@@ -1725,6 +1728,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          cell_base(:,1)=minim(:,ia)
          cell_base(:,2)=minim(:,ib)
          cell_base(:,3)=minim(:,itrial)
+!DEBUG
+!      write(std_out,*)' cell_base(:,1)=',cell_base(:,1)
+!      write(std_out,*)' cell_base(:,2)=',cell_base(:,2)
+!      write(std_out,*)' cell_base(:,3)=',cell_base(:,3)
+!ENDDEBUG
 !        Checks that the basis vectors are OK for the target holohedry
          call holocell(cell_base,0,foundc,iholohedry,tolsym)
        else if(abs(reduceda-0.5d0)<tolsym)then
@@ -2581,6 +2589,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !DEBUG
 !write(std_out,'(a)') ' symlatt : exit '
+!stop
 !ENDDEBUG
 
 end subroutine symlatt

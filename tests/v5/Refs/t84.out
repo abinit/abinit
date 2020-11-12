@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h20 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h28 )
   
 
 ================================================================================
@@ -52,14 +52,14 @@
  Unit cell volume ucvol=  8.9119484E+03 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  Now the whole DDB is in central memory
- asrflag is     1
- Largest and smallest values from svd  7.57997561E+00  2.86905735E-18
+ asrflag is 1
+ Largest and smallest values from svd  7.57997561E+00  2.01758193E-17
 
 ================================================================================
 
  Treat the first list of vectors 
 
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2 -3.339E-06
   1  1  3 -1.916E-03
@@ -101,7 +101,7 @@
   1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
  Symmetry characters of vibration mode #   6
   1.0  0.5 -0.5 -0.0  0.6  0.0 -1.0 -0.5
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  7.777E-05
   1  1  3 -2.455E-03
@@ -149,7 +149,7 @@
    in atomic units:     0.1709915176E-04
    in SI units K  :              5.39948
 
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  3.115E-04
   1  1  3 -1.846E-03
@@ -197,7 +197,7 @@
    in atomic units:     0.1912490876E-04
    in SI units K  :              6.03916
 
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  6.625E-04
   1  1  3 -7.117E-04
@@ -245,7 +245,7 @@
    in atomic units:     0.2786322793E-04
    in SI units K  :              8.79850
 
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  1.073E-03
   1  1  3  7.389E-04
@@ -293,7 +293,7 @@
    in atomic units:     0.3556458420E-04
    in SI units K  :             11.23039
 
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  1.463E-03
   1  1  3  2.320E-03
@@ -320,7 +320,7 @@
  Phonon frequencies in cm-1    :
 - -6.980472E+00 -3.506414E+00  7.768259E+00  9.231290E+00  1.837740E+01
 -  1.875424E+01
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  1.744E-03
   1  1  3  3.842E-03
@@ -347,7 +347,7 @@
  Phonon frequencies in cm-1    :
 - -8.579268E+00 -5.076399E+00  1.041197E+01  1.358152E+01  2.043464E+01
 -  2.295318E+01
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  1.837E-03
   1  1  3  5.152E-03
@@ -374,7 +374,7 @@
  Phonon frequencies in cm-1    :
 - -9.508352E+00 -6.493591E+00  1.303672E+01  1.751397E+01  2.127399E+01
 -  2.564513E+01
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  1.713E-03
   1  1  3  6.154E-03
@@ -401,7 +401,7 @@
  Phonon frequencies in cm-1    :
 - -9.807992E+00 -7.647378E+00  1.550151E+01  2.094821E+01  2.133600E+01
 -  2.686671E+01
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  1.452E-03
   1  1  3  6.782E-03
@@ -428,7 +428,7 @@
  Phonon frequencies in cm-1    :
 - -9.598825E+00 -8.489864E+00  1.767786E+01  2.069811E+01  2.374882E+01
 -  2.685094E+01
- asrflag is     2
+ asrflag is 2
   1  1  1  0.000E+00
   1  1  2  1.304E-03
   1  1  3  6.996E-03
@@ -456,10 +456,10 @@
 - -9.107235E+00 -9.107235E+00  1.944638E+01  1.944638E+01  2.576455E+01
 -  2.576455E+01
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.034  and wall time      0.060 sec
++Total cpu time      0.040  and wall time      0.042 sec
 
  anaddb : the run completed succesfully.

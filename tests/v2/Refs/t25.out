@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h25 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h25 )
   
 
 ================================================================================
@@ -118,7 +118,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.018  and twall      0.019 sec
+-begin at tcpu      0.039  and twall      0.040 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1082,19 +1082,19 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
-  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
-  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
+  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
+  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
+ -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
-  3.0  0.0  0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
-  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0  0.0
- -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
+  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0 -0.0  1.0
+  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
+  0.0  1.0 -1.0 -1.0 -1.0  0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
-  3.0 -0.0 -0.0 -1.0 -1.0 -1.0  1.0 -0.0  0.0  1.0 -1.0 -1.0  1.0  0.0  0.0 -1.0
- -1.0  1.0  1.0  0.0 -0.0 -1.0  1.0 -1.0 -3.0  0.0  0.0  1.0  1.0  1.0 -1.0  0.0
- -0.0 -1.0  1.0  1.0 -1.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -0.0  0.0  1.0 -1.0  1.0
+  3.0 -0.0 -0.0 -1.0 -1.0 -1.0  1.0 -0.0  0.0  1.0 -1.0 -1.0  1.0  0.0 -0.0 -1.0
+ -1.0  1.0  1.0 -0.0 -0.0 -1.0  1.0 -1.0 -3.0  0.0  0.0  1.0  1.0  1.0 -1.0  0.0
+ -0.0 -1.0  1.0  1.0 -1.0 -0.0  0.0  1.0  1.0 -1.0 -1.0  0.0  0.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  10
        degenerate with vibration modes #  11 to   12
   3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
@@ -1102,9 +1102,9 @@
   0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
-  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
-  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
-  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
+  3.0  0.0  0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0  0.0  1.0
+  1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0  0.0
+ -0.0  1.0 -1.0 -1.0 -1.0 -0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0  0.0 -1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1212,10 +1212,10 @@
 -  3.435503E+01  3.435503E+01  3.435503E+01  8.091622E+01  1.603365E+02
 -  1.603365E+02  3.201188E+02  5.939924E+02  5.939924E+02  7.196054E+02
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
 
 ================================================================================
 
-+Total cpu time      1.682  and wall time      1.698 sec
++Total cpu time      0.344  and wall time      0.348 sec
 
  anaddb : the run completed succesfully.

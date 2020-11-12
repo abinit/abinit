@@ -1,6 +1,6 @@
 
 .Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 12 Oct 2020.
-- ( at 17h21 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h45 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/TestBot_MPI2/paral_t74_MPI2/t74.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI2/paral_t74_MPI2/t74.in
 - output file    -> t74_MPI2.out
 - root for input  files -> t74_MPI2i
 - root for output files -> t74_MPI2o
@@ -270,8 +270,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15366
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -307,10 +307,10 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  3  -8.8297455470592    -1.211E-04 1.640E-04 2.011E-03
  ETOT  4  -8.8297470661129    -1.519E-06 3.108E-05 5.430E-06
  ETOT  5  -8.8297470720674    -5.954E-09 2.978E-05 5.902E-09
- ETOT  6  -8.8297470720721    -4.722E-12 6.428E-06 6.415E-11
+ ETOT  6  -8.8297470720721    -4.720E-12 6.428E-06 6.415E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  4.722E-12 < toldfe=  1.000E-08
+  for the second time, diff in etot=  4.720E-12 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.27124077E-04  sigma(3 2)=  0.00000000E+00
@@ -328,7 +328,7 @@ lattice_vectors:
 lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7024832E+02
-convergence: {deltae: -4.722E-12, res2:  6.415E-11, residm:  6.428E-06, diffor: null, }
+convergence: {deltae: -4.720E-12, res2:  6.415E-11, residm:  6.428E-06, diffor: null, }
 etotal    :  -8.82974707E+00
 entropy   :   0.00000000E+00
 fermie    :   2.16158158E-01
@@ -454,8 +454,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -508,8 +508,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  yields    64 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
 
 - screening: taking advantage of time-reversal symmetry 
@@ -544,7 +544,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000 -10.816  -0.000  -0.115  -0.000  -0.101  -0.002  -0.106   0.001
        -0.000   0.000  -4.811   0.000   0.041   0.000   0.047   0.000   0.044
@@ -608,7 +608,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the    9 th omega   0.0000   4.0732 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -8.685  -0.000  -0.063  -0.000  -0.049  -0.002  -0.053   0.002
        -0.000   0.000  -3.558   0.000   0.032   0.000   0.038   0.000   0.035
@@ -624,7 +624,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the   11 th omega   0.0000  23.5125 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -1.815  -0.000   0.015  -0.000   0.022  -0.001   0.020   0.001
        -0.000   0.000  -0.640   0.000  -0.021   0.000  -0.017   0.000  -0.018
@@ -632,7 +632,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the   12 th omega   0.0000  45.0108 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -0.600  -0.000   0.006  -0.000   0.009  -0.000   0.008   0.000
        -0.000   0.000  -0.207   0.000  -0.010   0.000  -0.009   0.000  -0.009
@@ -647,10 +647,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.046   0.004  -0.004  -0.013   0.013   0.013  -0.013  -0.004   0.004
-     -0.000   0.004   0.004  -0.013  -0.013   0.013   0.013  -0.004  -0.004
+      0.000   0.004   0.004  -0.013  -0.013   0.013   0.013  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.046   0.004  -0.004  -0.013   0.013   0.013  -0.013  -0.004   0.004
-     -0.000  -0.004  -0.004   0.013   0.013  -0.013  -0.013   0.004   0.004
+      0.000  -0.004  -0.004   0.013   0.013  -0.013  -0.013   0.004   0.004
 
 
    Upper and lower wings at the    2 th omega   3.8873   0.0000 [eV]
@@ -719,10 +719,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the    9 th omega   0.0000   4.0732 [eV]
        1       2       3       4       5       6       7       8       9
       0.102   0.006  -0.006  -0.019   0.019   0.019  -0.019  -0.006   0.006
-      0.000   0.006   0.006  -0.019  -0.019   0.019   0.019  -0.006  -0.006
+     -0.000   0.006   0.006  -0.019  -0.019   0.019   0.019  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.102   0.006  -0.006  -0.019   0.019   0.019  -0.019  -0.006   0.006
-      0.000  -0.006  -0.006   0.019   0.019  -0.019  -0.019   0.006   0.006
+     -0.000  -0.006  -0.006   0.019   0.019  -0.019  -0.019   0.006   0.006
 
 
    Upper and lower wings at the   10 th omega   0.0000  11.1650 [eV]
@@ -737,19 +737,19 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the   11 th omega   0.0000  23.5125 [eV]
        1       2       3       4       5       6       7       8       9
       0.650   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-     -0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
+      0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.650   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-     -0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
+      0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
 
 
    Upper and lower wings at the   12 th omega   0.0000  45.0108 [eV]
        1       2       3       4       5       6       7       8       9
       0.867   0.003  -0.003  -0.008   0.008   0.008  -0.008  -0.003   0.003
-     -0.000   0.003   0.003  -0.008  -0.008   0.008   0.008  -0.003  -0.003
+      0.000   0.003   0.003  -0.008  -0.008   0.008   0.008  -0.003  -0.003
        1       2       3       4       5       6       7       8       9
       0.867   0.003  -0.003  -0.008   0.008   0.008  -0.008  -0.003   0.003
-     -0.000  -0.003  -0.003   0.008   0.008  -0.008  -0.008   0.003   0.003
+      0.000  -0.003  -0.003   0.008   0.008  -0.008  -0.008   0.003   0.003
 
 
 
@@ -1537,8 +1537,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  yields    64 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    7.8959; Expected =    8.0000
  average of density, n =  0.029217
@@ -2074,10 +2074,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.5  wall=         19.3
+- Proc.   0 individual time (sec): cpu=          5.5  wall=         13.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.8  wall=         38.2
++Overall time at end (sec) : cpu=         11.2  wall=         27.4

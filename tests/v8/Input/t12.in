@@ -1,7 +1,7 @@
 # Test for ionmov = 24 velocity verlet MD
 # bcc Fe, low ecut, coars kpt grid
 
-  chksymbreak 0
+ chksymtnons 0
 
   natom   2
   ntypat  1

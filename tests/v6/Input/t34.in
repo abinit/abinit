@@ -12,7 +12,7 @@ xred:?            # This keyword indicate that the location of the atoms
    0.0  0.0  0.0  # Triplet giving the REDUCED coordinate of atom 1.
    1/4  1/4  1/4  # Triplet giving the REDUCED coordinate of atom 2.
 xred+?   6*0.0001
-chksymbreak 0
+ chksymtnons 0
 
 #Definition of the planewave basis set
  ecut 4.0

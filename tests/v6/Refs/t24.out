@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h20 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h29 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t24/t24.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t24/t24.in
 - output file    -> t24.out
 - root for input  files -> t24i
 - root for output files -> t24o
@@ -201,8 +201,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -214,8 +214,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -312,8 +312,8 @@ force_length_stats: {min:   3.26647832E-02, max:   3.26647832E-02, mean:   3.266
  frms,max,avg= 1.8859021E-02 2.1507565E-02  -1.977E-11 -8.768E-13 -8.768E-13 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      1.10596338625382     0.89392542248831     0.89392542248831
-    2     -1.10596338625382    -0.89392542248831    -0.89392542248831
+    1      1.10596338625381     0.89392542248830     0.89392542248830
+    2     -1.10596338625381    -0.89392542248830    -0.89392542248830
  frms,max,avg= 9.6976979E-01 1.1059634E+00  -1.017E-09 -4.509E-11 -4.509E-11 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -329,7 +329,7 @@ iteration_state     : {dtset: 1, timimage: 1, image: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.32668004160786E+00
 hartree             :  7.70496124912695E-02
-xc                  : -7.76373752375019E-01
+xc                  : -7.76373752375020E-01
 Ewald energy        : -1.08797538150788E+00
 psp_core            :  6.22030071870939E-03
 local_psp           : -6.03254174083316E-01
@@ -388,8 +388,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0519901513502    -3.837E-04 1.466E-10 4.365E-03 1.440E-03 1.856E-02
  ETOT  3  -1.0519922273186    -2.076E-06 1.145E-08 1.012E-05 8.822E-05 1.861E-02
  ETOT  4  -1.0519922299229    -2.604E-09 2.222E-11 6.312E-09 3.944E-06 1.861E-02
- ETOT  5  -1.0519922299248    -1.840E-12 1.162E-14 2.316E-12 4.999E-07 1.860E-02
- ETOT  6  -1.0519922299248     0.000E+00 5.974E-18 3.005E-15 7.721E-09 1.860E-02
+ ETOT  5  -1.0519922299248    -1.839E-12 1.162E-14 2.316E-12 4.999E-07 1.860E-02
+ ETOT  6  -1.0519922299248    -4.441E-16 5.974E-18 3.005E-15 7.721E-09 1.860E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  7.721E-09 < toldff=  2.000E-06
@@ -410,7 +410,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae:  0.000E+00, res2:  3.005E-15, residm:  5.974E-18, diffor:  7.721E-09, }
+convergence: {deltae: -4.441E-16, res2:  3.005E-15, residm:  5.974E-18, diffor:  7.721E-09, }
 etotal    :  -1.05199223E+00
 entropy   :   0.00000000E+00
 fermie    :   3.16287680E-01
@@ -457,7 +457,7 @@ force_length_stats: {min:   2.90610731E-02, max:   2.90610731E-02, mean:   2.906
  cartesian forces (eV/Angstrom) at end:
     1      0.63455196589909     0.95669127804602     0.95669127804602
     2     -0.63455196589909    -0.95669127804602    -0.95669127804602
- frms,max,avg= 8.6278089E-01 9.5669128E-01   2.980E-11 -6.687E-12 -6.687E-12 e/A
+ frms,max,avg= 8.6278089E-01 9.5669128E-01   2.980E-11 -6.685E-12 -6.685E-12 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
  Fermi (or HOMO) energy (hartree) =   0.31629   Average Vxc (hartree)=  -0.45753
@@ -531,8 +531,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0519901507641    -3.835E-04 1.468E-10 4.366E-03 1.429E-03 1.856E-02
  ETOT  3  -1.0519922273203    -2.077E-06 1.145E-08 1.012E-05 8.830E-05 1.861E-02
  ETOT  4  -1.0519922299229    -2.603E-09 2.224E-11 6.291E-09 3.941E-06 1.861E-02
- ETOT  5  -1.0519922299248    -1.838E-12 1.161E-14 2.310E-12 4.997E-07 1.860E-02
- ETOT  6  -1.0519922299248    -1.110E-15 6.027E-18 3.041E-15 7.661E-09 1.860E-02
+ ETOT  5  -1.0519922299248    -1.837E-12 1.161E-14 2.310E-12 4.997E-07 1.860E-02
+ ETOT  6  -1.0519922299248    -8.882E-16 6.027E-18 3.041E-15 7.661E-09 1.860E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  7.661E-09 < toldff=  2.000E-06
@@ -553,7 +553,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -1.110E-15, res2:  3.041E-15, residm:  6.027E-18, diffor:  7.661E-09, }
+convergence: {deltae: -8.882E-16, res2:  3.041E-15, residm:  6.027E-18, diffor:  7.661E-09, }
 etotal    :  -1.05199223E+00
 entropy   :   0.00000000E+00
 fermie    :   3.16287680E-01
@@ -598,8 +598,8 @@ force_length_stats: {min:   2.90610732E-02, max:   2.90610732E-02, mean:   2.906
  frms,max,avg= 1.6778418E-02 1.8604685E-02  -4.040E-12  4.687E-12  4.687E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.63455196605914     0.95669127825694     0.95669127825694
-    2      0.63455196605914    -0.95669127825694    -0.95669127825694
+    1     -0.63455196605913     0.95669127825694     0.95669127825694
+    2      0.63455196605913    -0.95669127825694    -0.95669127825694
  frms,max,avg= 8.6278089E-01 9.5669128E-01  -2.077E-10  2.410E-10  2.410E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -620,9 +620,9 @@ Ewald energy        : -1.12223048054044E+00
 psp_core            :  6.22030071870939E-03
 local_psp           : -5.11258443255105E-01
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.05199222992478E+00
+total_energy        : -1.05199222992477E+00
 total_energy_eV     : -2.86261643862204E+01
-band_energy         : -1.12125686592313E-01
+band_energy         : -1.12125686592312E-01
 ...
 
 
@@ -675,7 +675,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0576533420181    -1.698E-06 8.315E-09 3.991E-05 1.574E-04 2.153E-02
  ETOT  4  -1.0576533531458    -1.113E-08 7.530E-11 1.021E-08 1.943E-05 2.151E-02
  ETOT  5  -1.0576533531484    -2.534E-12 8.950E-15 2.659E-12 6.031E-07 2.151E-02
- ETOT  6  -1.0576533531484    -3.775E-15 1.154E-17 1.552E-15 6.162E-09 2.151E-02
+ ETOT  6  -1.0576533531484    -2.442E-15 1.154E-17 1.552E-15 6.162E-09 2.151E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  6.162E-09 < toldff=  2.000E-06
@@ -696,7 +696,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -3.775E-15, res2:  1.552E-15, residm:  1.154E-17, diffor:  6.162E-09, }
+convergence: {deltae: -2.442E-15, res2:  1.552E-15, residm:  1.154E-17, diffor:  6.162E-09, }
 etotal    :  -1.05765335E+00
 entropy   :   0.00000000E+00
 fermie    :   2.97445024E-01
@@ -758,10 +758,10 @@ iteration_state     : {dtset: 1, timimage: 1, image: 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.32668004161617E+00
 hartree             :  7.70496124941920E-02
-xc                  : -7.76373752376889E-01
+xc                  : -7.76373752376888E-01
 Ewald energy        : -1.08797538150788E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -6.03254174092676E-01
+local_psp           : -6.03254174092675E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05765335314837E+00
 total_energy_eV     : -2.87802113833364E+01
@@ -827,7 +827,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0606996926052    -1.835E-06 7.230E-09 7.489E-05 2.072E-04 1.206E-02
  ETOT  4  -1.0606997140422    -2.144E-08 9.467E-11 1.702E-08 3.435E-05 1.203E-02
  ETOT  5  -1.0606997140463    -4.085E-12 2.165E-14 4.741E-12 6.671E-07 1.203E-02
- ETOT  6  -1.0606997140463    -1.776E-15 1.832E-17 3.653E-15 9.855E-09 1.203E-02
+ ETOT  6  -1.0606997140463    -1.998E-15 1.832E-17 3.653E-15 9.855E-09 1.203E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  9.855E-09 < toldff=  2.000E-06
@@ -848,7 +848,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -1.776E-15, res2:  3.653E-15, residm:  1.832E-17, diffor:  9.855E-09, }
+convergence: {deltae: -1.998E-15, res2:  3.653E-15, residm:  1.832E-17, diffor:  9.855E-09, }
 etotal    :  -1.06069971E+00
 entropy   :   0.00000000E+00
 fermie    :   2.72938181E-01
@@ -893,8 +893,8 @@ force_length_stats: {min:   1.57577759E-02, max:   1.57577759E-02, mean:   1.575
  frms,max,avg= 9.0977562E-03 1.2028787E-02  -2.084E-11 -1.941E-11 -1.941E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.61854501973852     0.37012420303294     0.37012420303294
-    2     -0.61854501973852    -0.37012420303294    -0.37012420303294
+    1      0.61854501973851     0.37012420303294     0.37012420303294
+    2     -0.61854501973851    -0.37012420303294    -0.37012420303294
  frms,max,avg= 4.6782539E-01 6.1854502E-01  -1.071E-09 -9.980E-10 -9.980E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -913,10 +913,10 @@ hartree             :  9.50969874870537E-02
 xc                  : -7.87353141417893E-01
 Ewald energy        : -1.04707767155201E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -6.98189617394521E-01
+local_psp           : -6.98189617394520E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.06069971404629E+00
-total_energy_eV     : -2.88631070791058E+01
+total_energy_eV     : -2.88631070791059E+01
 band_energy         : -1.66611113894464E-01
 ...
 
@@ -969,8 +969,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0551336255755    -4.940E-04 2.588E-10 5.561E-03 2.252E-03 1.514E-02
  ETOT  3  -1.0551361055312    -2.480E-06 1.126E-08 1.612E-05 1.232E-04 1.518E-02
  ETOT  4  -1.0551361095544    -4.023E-09 4.223E-11 1.109E-08 6.059E-06 1.518E-02
- ETOT  5  -1.0551361095574    -3.039E-12 2.216E-14 3.667E-12 5.823E-07 1.518E-02
- ETOT  6  -1.0551361095574    -4.663E-15 5.458E-18 2.085E-15 1.130E-08 1.518E-02
+ ETOT  5  -1.0551361095574    -3.037E-12 2.216E-14 3.667E-12 5.823E-07 1.518E-02
+ ETOT  6  -1.0551361095574    -5.551E-15 5.458E-18 2.085E-15 1.130E-08 1.518E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.130E-08 < toldff=  2.000E-06
@@ -991,7 +991,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -4.663E-15, res2:  2.085E-15, residm:  5.458E-18, diffor:  1.130E-08, }
+convergence: {deltae: -5.551E-15, res2:  2.085E-15, residm:  5.458E-18, diffor:  1.130E-08, }
 etotal    :  -1.05513611E+00
 entropy   :   0.00000000E+00
 fermie    :   3.02344738E-01
@@ -1036,8 +1036,8 @@ force_length_stats: {min:   2.51015053E-02, max:   2.51015053E-02, mean:   2.510
  frms,max,avg= 1.4492361E-02 1.5181889E-02  -7.133E-12 -2.291E-11 -2.291E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.66869656114761     0.78068405118978     0.78068405118978
-    2     -0.66869656114761    -0.78068405118978    -0.78068405118978
+    1      0.66869656114761     0.78068405118979     0.78068405118979
+    2     -0.66869656114761    -0.78068405118979    -0.78068405118979
  frms,max,avg= 7.4522709E-01 7.8068405E-01  -3.668E-10 -1.178E-09 -1.178E-09 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -1113,7 +1113,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0551361055360    -2.481E-06 1.127E-08 1.611E-05 1.233E-04 1.518E-02
  ETOT  4  -1.0551361095550    -4.019E-09 4.232E-11 1.105E-08 6.057E-06 1.518E-02
  ETOT  5  -1.0551361095580    -3.030E-12 2.211E-14 3.648E-12 5.822E-07 1.518E-02
- ETOT  6  -1.0551361095580    -2.220E-15 5.470E-18 2.107E-15 1.124E-08 1.518E-02
+ ETOT  6  -1.0551361095580    -1.998E-15 5.470E-18 2.107E-15 1.124E-08 1.518E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.124E-08 < toldff=  2.000E-06
@@ -1134,7 +1134,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -2.220E-15, res2:  2.107E-15, residm:  5.470E-18, diffor:  1.124E-08, }
+convergence: {deltae: -1.998E-15, res2:  2.107E-15, residm:  5.470E-18, diffor:  1.124E-08, }
 etotal    :  -1.05513611E+00
 entropy   :   0.00000000E+00
 fermie    :   3.02344738E-01
@@ -1179,8 +1179,8 @@ force_length_stats: {min:   2.51015053E-02, max:   2.51015053E-02, mean:   2.510
  frms,max,avg= 1.4492361E-02 1.5181889E-02   1.052E-12 -1.731E-11 -1.731E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.66869656080735     0.78068405110558     0.78068405110558
-    2      0.66869656080735    -0.78068405110558    -0.78068405110558
+    1     -0.66869656080737     0.78068405110558     0.78068405110558
+    2      0.66869656080737    -0.78068405110558    -0.78068405110558
  frms,max,avg= 7.4522709E-01 7.8068405E-01   5.410E-11 -8.899E-10 -8.899E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -1202,7 +1202,7 @@ psp_core            :  6.22030071870939E-03
 local_psp           : -5.64207333558126E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05513610955803E+00
-total_energy_eV     : -2.87117137017306E+01
+total_energy_eV     : -2.87117137017305E+01
 band_energy         : -1.30355531101428E-01
 ...
 
@@ -1256,7 +1256,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0606996926187    -1.835E-06 7.221E-09 7.486E-05 2.073E-04 1.206E-02
  ETOT  4  -1.0606997140425    -2.142E-08 9.459E-11 1.701E-08 3.434E-05 1.203E-02
  ETOT  5  -1.0606997140466    -4.085E-12 2.169E-14 4.739E-12 6.670E-07 1.203E-02
- ETOT  6  -1.0606997140466    -6.661E-16 1.835E-17 3.645E-15 9.855E-09 1.203E-02
+ ETOT  6  -1.0606997140466    -1.332E-15 1.835E-17 3.645E-15 9.855E-09 1.203E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  9.855E-09 < toldff=  2.000E-06
@@ -1277,7 +1277,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -6.661E-16, res2:  3.645E-15, residm:  1.835E-17, diffor:  9.855E-09, }
+convergence: {deltae: -1.332E-15, res2:  3.645E-15, residm:  1.835E-17, diffor:  9.855E-09, }
 etotal    :  -1.06069971E+00
 entropy   :   0.00000000E+00
 fermie    :   2.72938181E-01
@@ -1319,11 +1319,11 @@ force_length_stats: {min:   1.57577759E-02, max:   1.57577759E-02, mean:   1.575
  cartesian forces (hartree/bohr) at end:
     1     -0.01202878650235     0.00719777037198     0.00719777037198
     2      0.01202878650235    -0.00719777037198    -0.00719777037198
- frms,max,avg= 9.0977562E-03 1.2028787E-02   1.629E-11 -1.573E-11 -1.573E-11 h/b
+ frms,max,avg= 9.0977562E-03 1.2028787E-02   1.628E-11 -1.573E-11 -1.573E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.61854501964983     0.37012420291120     0.37012420291120
-    2      0.61854501964983    -0.37012420291120    -0.37012420291120
+    1     -0.61854501964985     0.37012420291120     0.37012420291120
+    2      0.61854501964985    -0.37012420291120    -0.37012420291120
  frms,max,avg= 4.6782539E-01 6.1854502E-01   8.374E-10 -8.088E-10 -8.088E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -1338,14 +1338,14 @@ force_length_stats: {min:   1.57577759E-02, max:   1.57577759E-02, mean:   1.575
 iteration_state     : {dtset: 1, timimage: 2, image: 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.37060342811597E+00
-hartree             :  9.50969874887448E-02
+hartree             :  9.50969874887447E-02
 xc                  : -7.87353141418888E-01
 Ewald energy        : -1.04707767154512E+00
 psp_core            :  6.22030071870939E-03
 local_psp           : -6.98189617406003E-01
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.06069971404658E+00
-total_energy_eV     : -2.88631070791138E+01
+total_energy        : -1.06069971404659E+00
+total_energy_eV     : -2.88631070791139E+01
 band_energy         : -1.66611113888269E-01
 ...
 
@@ -1408,8 +1408,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0611727443808    -1.582E-03 1.045E-09 7.662E-03 6.556E-03 1.877E-03
  ETOT  3  -1.0611746627735    -1.918E-06 7.088E-09 1.010E-04 2.201E-04 1.657E-03
  ETOT  4  -1.0611746920168    -2.924E-08 1.365E-10 2.153E-08 4.289E-05 1.614E-03
- ETOT  5  -1.0611746920217    -4.973E-12 2.624E-14 5.825E-12 7.192E-07 1.613E-03
- ETOT  6  -1.0611746920217     1.110E-15 1.383E-17 4.657E-15 1.019E-08 1.613E-03
+ ETOT  5  -1.0611746920217    -4.974E-12 2.624E-14 5.825E-12 7.192E-07 1.613E-03
+ ETOT  6  -1.0611746920217     1.554E-15 1.383E-17 4.657E-15 1.019E-08 1.613E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.019E-08 < toldff=  2.000E-06
@@ -1430,7 +1430,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae:  1.110E-15, res2:  4.657E-15, residm:  1.383E-17, diffor:  1.019E-08, }
+convergence: {deltae:  1.554E-15, res2:  4.657E-15, residm:  1.383E-17, diffor:  1.019E-08, }
 etotal    :  -1.06117469E+00
 entropy   :   0.00000000E+00
 fermie    :   2.58797814E-01
@@ -1475,8 +1475,8 @@ force_length_stats: {min:   2.03014361E-03, max:   2.03014361E-03, mean:   2.030
  frms,max,avg= 1.1721040E-03 1.6133890E-03  -1.068E-11 -1.352E-11 -1.352E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.08296378936319    -0.04480598742743    -0.04480598742743
-    2     -0.08296378936319     0.04480598742743     0.04480598742743
+    1      0.08296378936318    -0.04480598742744    -0.04480598742744
+    2     -0.08296378936318     0.04480598742744     0.04480598742744
  frms,max,avg= 6.0272004E-02 8.2963789E-02  -5.490E-10 -6.951E-10 -6.951E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -1552,7 +1552,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0572648197673    -2.812E-06 1.087E-08 2.339E-05 1.542E-04 1.286E-02
  ETOT  4  -1.0572648255867    -5.819E-09 5.455E-11 1.717E-08 8.726E-06 1.285E-02
  ETOT  5  -1.0572648255913    -4.589E-12 3.242E-14 5.519E-12 6.283E-07 1.285E-02
- ETOT  6  -1.0572648255913    -2.887E-15 8.560E-18 1.387E-15 1.460E-08 1.285E-02
+ ETOT  6  -1.0572648255913    -3.109E-15 8.560E-18 1.387E-15 1.460E-08 1.285E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.460E-08 < toldff=  2.000E-06
@@ -1573,7 +1573,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -2.887E-15, res2:  1.387E-15, residm:  8.560E-18, diffor:  1.460E-08, }
+convergence: {deltae: -3.109E-15, res2:  1.387E-15, residm:  8.560E-18, diffor:  1.460E-08, }
 etotal    :  -1.05726483E+00
 entropy   :   0.00000000E+00
 fermie    :   2.89817800E-01
@@ -1634,7 +1634,7 @@ force_length_stats: {min:   2.06560222E-02, max:   2.06560222E-02, mean:   2.065
 iteration_state     : {dtset: 1, timimage: 3, image: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.32422117481822E+00
-hartree             :  7.76644713554721E-02
+hartree             :  7.76644713554723E-02
 xc                  : -7.76528713419428E-01
 Ewald energy        : -1.07763411922870E+00
 psp_core            :  6.22030071870939E-03
@@ -1695,7 +1695,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0572648197744    -2.812E-06 1.087E-08 2.338E-05 1.544E-04 1.286E-02
  ETOT  4  -1.0572648255869    -5.813E-09 5.463E-11 1.711E-08 8.723E-06 1.285E-02
  ETOT  5  -1.0572648255915    -4.582E-12 3.237E-14 5.493E-12 6.283E-07 1.285E-02
- ETOT  6  -1.0572648255915    -3.109E-15 8.678E-18 1.391E-15 1.454E-08 1.285E-02
+ ETOT  6  -1.0572648255915    -2.665E-15 8.678E-18 1.391E-15 1.454E-08 1.285E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.454E-08 < toldff=  2.000E-06
@@ -1716,7 +1716,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -3.109E-15, res2:  1.391E-15, residm:  8.678E-18, diffor:  1.454E-08, }
+convergence: {deltae: -2.665E-15, res2:  1.391E-15, residm:  8.678E-18, diffor:  1.454E-08, }
 etotal    :  -1.05726483E+00
 entropy   :   0.00000000E+00
 fermie    :   2.89817800E-01
@@ -1761,8 +1761,8 @@ force_length_stats: {min:   2.06560222E-02, max:   2.06560222E-02, mean:   2.065
  frms,max,avg= 1.1925760E-02 1.2854415E-02  -1.525E-12 -1.201E-11 -1.201E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.66100054056740     0.58791776870702     0.58791776870702
-    2      0.66100054056740    -0.58791776870702    -0.58791776870702
+    1     -0.66100054056739     0.58791776870702     0.58791776870702
+    2      0.66100054056739    -0.58791776870702    -0.58791776870702
  frms,max,avg= 6.1324718E-01 6.6100054E-01  -7.844E-11 -6.178E-10 -6.178E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -1777,11 +1777,11 @@ force_length_stats: {min:   2.06560222E-02, max:   2.06560222E-02, mean:   2.065
 iteration_state     : {dtset: 1, timimage: 3, image: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.32422117482683E+00
-hartree             :  7.76644713585237E-02
+hartree             :  7.76644713585235E-02
 xc                  : -7.76528713421368E-01
 Ewald energy        : -1.07763411922639E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -6.11207939847811E-01
+local_psp           : -6.11207939847810E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05726482559150E+00
 total_energy_eV     : -2.87696390108464E+01
@@ -1837,8 +1837,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0611727436993    -1.582E-03 1.044E-09 7.663E-03 6.547E-03 1.877E-03
  ETOT  3  -1.0611746627916    -1.919E-06 7.081E-09 1.009E-04 2.202E-04 1.657E-03
  ETOT  4  -1.0611746920168    -2.923E-08 1.364E-10 2.153E-08 4.289E-05 1.614E-03
- ETOT  5  -1.0611746920217    -4.974E-12 2.611E-14 5.828E-12 7.188E-07 1.613E-03
- ETOT  6  -1.0611746920217     2.220E-15 1.393E-17 4.659E-15 1.020E-08 1.613E-03
+ ETOT  5  -1.0611746920217    -4.973E-12 2.611E-14 5.828E-12 7.188E-07 1.613E-03
+ ETOT  6  -1.0611746920217     2.887E-15 1.393E-17 4.659E-15 1.020E-08 1.613E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.020E-08 < toldff=  2.000E-06
@@ -1859,7 +1859,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae:  2.220E-15, res2:  4.659E-15, residm:  1.393E-17, diffor:  1.020E-08, }
+convergence: {deltae:  2.887E-15, res2:  4.659E-15, residm:  1.393E-17, diffor:  1.020E-08, }
 etotal    :  -1.06117469E+00
 entropy   :   0.00000000E+00
 fermie    :   2.58797814E-01
@@ -1904,8 +1904,8 @@ force_length_stats: {min:   2.03014361E-03, max:   2.03014361E-03, mean:   2.030
  frms,max,avg= 1.1721040E-03 1.6133890E-03   1.134E-11 -1.480E-11 -1.480E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.08296378923440    -0.04480598751148    -0.04480598751148
-    2      0.08296378923440     0.04480598751148     0.04480598751148
+    1     -0.08296378923441    -0.04480598751149    -0.04480598751149
+    2      0.08296378923441     0.04480598751149     0.04480598751149
  frms,max,avg= 6.0272004E-02 8.2963789E-02   5.829E-10 -7.609E-10 -7.609E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -1990,8 +1990,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0611479444300    -1.557E-03 1.071E-09 7.633E-03 6.554E-03 2.667E-03
  ETOT  3  -1.0611498778797    -1.933E-06 7.570E-09 9.911E-05 2.238E-04 2.443E-03
  ETOT  4  -1.0611499065953    -2.872E-08 1.336E-10 2.147E-08 4.264E-05 2.400E-03
- ETOT  5  -1.0611499066004    -5.024E-12 2.701E-14 5.700E-12 7.185E-07 2.400E-03
- ETOT  6  -1.0611499066004    -3.109E-15 1.462E-17 4.474E-15 1.027E-08 2.400E-03
+ ETOT  5  -1.0611499066004    -5.025E-12 2.701E-14 5.700E-12 7.185E-07 2.400E-03
+ ETOT  6  -1.0611499066004    -2.887E-15 1.462E-17 4.474E-15 1.027E-08 2.400E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.027E-08 < toldff=  2.000E-06
@@ -2012,7 +2012,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -3.109E-15, res2:  4.474E-15, residm:  1.462E-17, diffor:  1.027E-08, }
+convergence: {deltae: -2.887E-15, res2:  4.474E-15, residm:  1.462E-17, diffor:  1.027E-08, }
 etotal    :  -1.06114991E+00
 entropy   :   0.00000000E+00
 fermie    :   2.59483041E-01
@@ -2057,8 +2057,8 @@ force_length_stats: {min:   2.46491265E-03, max:   2.46491265E-03, mean:   2.464
  frms,max,avg= 1.4231180E-03 2.3997641E-03  -1.426E-11 -1.283E-11 -1.283E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.12340082327099    -0.02046980585724    -0.02046980585724
-    2     -0.12340082327099     0.02046980585724     0.02046980585724
+    1      0.12340082327100    -0.02046980585723    -0.02046980585723
+    2     -0.12340082327100     0.02046980585723     0.02046980585723
  frms,max,avg= 7.3179663E-02 1.2340082E-01  -7.332E-10 -6.597E-10 -6.597E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -2133,8 +2133,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0585908734967    -7.015E-04 4.875E-10 7.661E-03 3.939E-03 1.181E-02
  ETOT  3  -1.0585939688377    -3.095E-06 1.039E-08 3.125E-05 1.772E-04 1.163E-02
  ETOT  4  -1.0585939766868    -7.849E-09 6.945E-11 2.350E-08 1.235E-05 1.162E-02
- ETOT  5  -1.0585939766930    -6.145E-12 3.613E-14 8.259E-12 6.296E-07 1.162E-02
- ETOT  6  -1.0585939766930    -2.220E-15 3.247E-17 3.113E-15 1.863E-08 1.162E-02
+ ETOT  5  -1.0585939766930    -6.144E-12 3.613E-14 8.259E-12 6.296E-07 1.162E-02
+ ETOT  6  -1.0585939766930    -3.331E-15 3.247E-17 3.113E-15 1.863E-08 1.162E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.863E-08 < toldff=  2.000E-06
@@ -2155,7 +2155,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -2.220E-15, res2:  3.113E-15, residm:  3.247E-17, diffor:  1.863E-08, }
+convergence: {deltae: -3.331E-15, res2:  3.113E-15, residm:  3.247E-17, diffor:  1.863E-08, }
 etotal    :  -1.05859398E+00
 entropy   :   0.00000000E+00
 fermie    :   2.78792873E-01
@@ -2200,8 +2200,8 @@ force_length_stats: {min:   1.59954850E-02, max:   1.59954850E-02, mean:   1.599
  frms,max,avg= 9.2349976E-03 1.1618890E-02  -3.207E-12 -1.971E-12 -1.971E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.59746730471770     0.39973325661549     0.39973325661549
-    2     -0.59746730471770    -0.39973325661549    -0.39973325661549
+    1      0.59746730471771     0.39973325661548     0.39973325661548
+    2     -0.59746730471771    -0.39973325661548    -0.39973325661548
  frms,max,avg= 4.7488263E-01 5.9746730E-01  -1.649E-10 -1.014E-10 -1.014E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -2216,11 +2216,11 @@ force_length_stats: {min:   1.59954850E-02, max:   1.59954850E-02, mean:   1.599
 iteration_state     : {dtset: 1, timimage: 4, image: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.34180565607911E+00
-hartree             :  8.52409989908336E-02
+hartree             :  8.52409989908337E-02
 xc                  : -7.81114362022478E-01
 Ewald energy        : -1.05869703935626E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -6.52049531102894E-01
+local_psp           : -6.52049531102896E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05859397669297E+00
 total_energy_eV     : -2.88058070516764E+01
@@ -2276,8 +2276,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0585908730105    -7.013E-04 4.851E-10 7.662E-03 3.924E-03 1.181E-02
  ETOT  3  -1.0585939688476    -3.096E-06 1.039E-08 3.123E-05 1.774E-04 1.163E-02
  ETOT  4  -1.0585939766868    -7.839E-09 6.951E-11 2.343E-08 1.234E-05 1.162E-02
- ETOT  5  -1.0585939766929    -6.126E-12 3.618E-14 8.229E-12 6.294E-07 1.162E-02
- ETOT  6  -1.0585939766930    -3.109E-15 3.237E-17 3.102E-15 1.860E-08 1.162E-02
+ ETOT  5  -1.0585939766930    -6.126E-12 3.618E-14 8.229E-12 6.294E-07 1.162E-02
+ ETOT  6  -1.0585939766930    -1.776E-15 3.237E-17 3.102E-15 1.860E-08 1.162E-02
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.860E-08 < toldff=  2.000E-06
@@ -2298,7 +2298,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -3.109E-15, res2:  3.102E-15, residm:  3.237E-17, diffor:  1.860E-08, }
+convergence: {deltae: -1.776E-15, res2:  3.102E-15, residm:  3.237E-17, diffor:  1.860E-08, }
 etotal    :  -1.05859398E+00
 entropy   :   0.00000000E+00
 fermie    :   2.78792873E-01
@@ -2343,8 +2343,8 @@ force_length_stats: {min:   1.59954850E-02, max:   1.59954850E-02, mean:   1.599
  frms,max,avg= 9.2349976E-03 1.1618890E-02   1.845E-12 -2.067E-12 -2.067E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.59746730472698     0.39973325660153     0.39973325660153
-    2      0.59746730472698    -0.39973325660153    -0.39973325660153
+    1     -0.59746730472697     0.39973325660153     0.39973325660153
+    2      0.59746730472697    -0.39973325660153    -0.39973325660153
  frms,max,avg= 4.7488263E-01 5.9746730E-01   9.489E-11 -1.063E-10 -1.063E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -2359,11 +2359,11 @@ force_length_stats: {min:   1.59954850E-02, max:   1.59954850E-02, mean:   1.599
 iteration_state     : {dtset: 1, timimage: 4, image: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.34180565608163E+00
-hartree             :  8.52409989917047E-02
+hartree             :  8.52409989917046E-02
 xc                  : -7.81114362023045E-01
 Ewald energy        : -1.05869703935623E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -6.52049531105729E-01
+local_psp           : -6.52049531105728E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05859397669295E+00
 total_energy_eV     : -2.88058070516758E+01
@@ -2420,7 +2420,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0611498778965    -1.934E-06 7.563E-09 9.907E-05 2.239E-04 2.443E-03
  ETOT  4  -1.0611499065953    -2.870E-08 1.336E-10 2.146E-08 4.263E-05 2.400E-03
  ETOT  5  -1.0611499066003    -5.022E-12 2.688E-14 5.703E-12 7.181E-07 2.400E-03
- ETOT  6  -1.0611499066003     4.441E-16 1.472E-17 4.476E-15 1.028E-08 2.400E-03
+ ETOT  6  -1.0611499066003     2.220E-16 1.472E-17 4.476E-15 1.028E-08 2.400E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.028E-08 < toldff=  2.000E-06
@@ -2441,7 +2441,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae:  4.441E-16, res2:  4.476E-15, residm:  1.472E-17, diffor:  1.028E-08, }
+convergence: {deltae:  2.220E-16, res2:  4.476E-15, residm:  1.472E-17, diffor:  1.028E-08, }
 etotal    :  -1.06114991E+00
 entropy   :   0.00000000E+00
 fermie    :   2.59483041E-01
@@ -2486,8 +2486,8 @@ force_length_stats: {min:   2.46491265E-03, max:   2.46491265E-03, mean:   2.464
  frms,max,avg= 1.4231180E-03 2.3997641E-03   1.463E-11 -1.404E-11 -1.404E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.12340082329492    -0.02046980582729    -0.02046980582729
-    2      0.12340082329492     0.02046980582729     0.02046980582729
+    1     -0.12340082329493    -0.02046980582729    -0.02046980582729
+    2      0.12340082329493     0.02046980582729     0.02046980582729
  frms,max,avg= 7.3179663E-02 1.2340082E-01   7.525E-10 -7.218E-10 -7.218E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -2572,8 +2572,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0611218689815    -1.567E-03 1.092E-09 7.730E-03 6.700E-03 1.923E-03
  ETOT  3  -1.0611238294004    -1.960E-06 7.939E-09 1.007E-04 2.282E-04 1.695E-03
  ETOT  4  -1.0611238586099    -2.921E-08 1.356E-10 2.201E-08 4.332E-05 1.652E-03
- ETOT  5  -1.0611238586151    -5.184E-12 2.927E-14 5.683E-12 7.262E-07 1.651E-03
- ETOT  6  -1.0611238586151    -1.998E-15 1.412E-17 4.439E-15 1.029E-08 1.651E-03
+ ETOT  5  -1.0611238586151    -5.185E-12 2.927E-14 5.683E-12 7.262E-07 1.651E-03
+ ETOT  6  -1.0611238586151    -1.776E-15 1.412E-17 4.439E-15 1.029E-08 1.651E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.029E-08 < toldff=  2.000E-06
@@ -2594,7 +2594,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -1.998E-15, res2:  4.439E-15, residm:  1.412E-17, diffor:  1.029E-08, }
+convergence: {deltae: -1.776E-15, res2:  4.439E-15, residm:  1.412E-17, diffor:  1.029E-08, }
 etotal    :  -1.06112386E+00
 entropy   :   0.00000000E+00
 fermie    :   2.58428385E-01
@@ -2639,8 +2639,8 @@ force_length_stats: {min:   2.17884615E-03, max:   2.17884615E-03, mean:   2.178
  frms,max,avg= 1.2579574E-03 1.6514842E-03  -1.630E-11 -1.140E-11 -1.140E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.08492272680732    -0.05167815467998    -0.05167815467998
-    2     -0.08492272680732     0.05167815467998     0.05167815467998
+    1      0.08492272680731    -0.05167815467999    -0.05167815467999
+    2     -0.08492272680731     0.05167815467999     0.05167815467999
  frms,max,avg= 6.4686765E-02 8.4922727E-02  -8.381E-10 -5.864E-10 -5.864E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -2662,7 +2662,7 @@ psp_core            :  6.22030071870939E-03
 local_psp           : -7.53538706595349E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.06112385861510E+00
-total_energy_eV     : -2.88746486397800E+01
+total_energy_eV     : -2.88746486397799E+01
 band_energy         : -1.83881984741492E-01
 ...
 
@@ -2715,8 +2715,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0593140748454    -7.927E-04 5.493E-10 8.445E-03 4.778E-03 1.015E-02
  ETOT  3  -1.0593173652040    -3.290E-06 9.842E-09 3.950E-05 1.957E-04 9.951E-03
  ETOT  4  -1.0593173753206    -1.012E-08 7.904E-11 3.011E-08 1.512E-05 9.936E-03
- ETOT  5  -1.0593173753285    -7.923E-12 4.545E-14 1.010E-11 6.472E-07 9.936E-03
- ETOT  6  -1.0593173753285     2.887E-15 3.661E-17 3.768E-15 1.948E-08 9.936E-03
+ ETOT  5  -1.0593173753285    -7.924E-12 4.545E-14 1.010E-11 6.472E-07 9.936E-03
+ ETOT  6  -1.0593173753285     2.442E-15 3.661E-17 3.768E-15 1.948E-08 9.936E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.948E-08 < toldff=  2.000E-06
@@ -2737,7 +2737,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae:  2.887E-15, res2:  3.768E-15, residm:  3.661E-17, diffor:  1.948E-08, }
+convergence: {deltae:  2.442E-15, res2:  3.768E-15, residm:  3.661E-17, diffor:  1.948E-08, }
 etotal    :  -1.05931738E+00
 entropy   :   0.00000000E+00
 fermie    :   2.70045036E-01
@@ -2779,12 +2779,12 @@ force_length_stats: {min:   1.20099569E-02, max:   1.20099569E-02, mean:   1.200
  cartesian forces (hartree/bohr) at end:
     1      0.00993569276831     0.00477080049861     0.00477080049861
     2     -0.00993569276831    -0.00477080049861    -0.00477080049861
- frms,max,avg= 6.9339519E-03 9.9356928E-03  -7.060E-13 -1.316E-12 -1.316E-12 h/b
+ frms,max,avg= 6.9339519E-03 9.9356928E-03  -7.061E-13 -1.316E-12 -1.316E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1      0.51091382139048     0.24532440471679     0.24532440471679
     2     -0.51091382139048    -0.24532440471679    -0.24532440471679
- frms,max,avg= 3.5655811E-01 5.1091382E-01  -3.630E-11 -6.767E-11 -6.767E-11 e/A
+ frms,max,avg= 3.5655811E-01 5.1091382E-01  -3.631E-11 -6.767E-11 -6.767E-11 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
  Fermi (or HOMO) energy (hartree) =   0.27005   Average Vxc (hartree)=  -0.45140
@@ -2799,14 +2799,14 @@ iteration_state     : {dtset: 1, timimage: 5, image: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.35606080667339E+00
 hartree             :  9.12181114239872E-02
-xc                  : -7.84736332898113E-01
+xc                  : -7.84736332898112E-01
 Ewald energy        : -1.04342020128581E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -6.84660059960637E-01
+local_psp           : -6.84660059960639E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05931737532847E+00
 total_energy_eV     : -2.88254917296308E+01
-band_energy         : -1.71918500689800E-01
+band_energy         : -1.71918500689801E-01
 ...
 
 
@@ -2925,8 +2925,8 @@ force_length_stats: {min:   1.20099569E-02, max:   1.20099569E-02, mean:   1.200
  frms,max,avg= 6.9339519E-03 9.9356928E-03   3.466E-13 -1.795E-12 -1.795E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.51091382130026     0.24532440468168     0.24532440468168
-    2      0.51091382130026    -0.24532440468168    -0.24532440468168
+    1     -0.51091382130027     0.24532440468169     0.24532440468169
+    2      0.51091382130027    -0.24532440468169    -0.24532440468169
  frms,max,avg= 3.5655811E-01 5.1091382E-01   1.782E-11 -9.230E-11 -9.230E-11 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -2941,15 +2941,15 @@ force_length_stats: {min:   1.20099569E-02, max:   1.20099569E-02, mean:   1.200
 iteration_state     : {dtset: 1, timimage: 5, image: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.35606080667148E+00
-hartree             :  9.12181114233256E-02
+hartree             :  9.12181114233253E-02
 xc                  : -7.84736332897705E-01
 Ewald energy        : -1.04342020128586E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -6.84660059958429E-01
+local_psp           : -6.84660059958428E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05931737532847E+00
-total_energy_eV     : -2.88254917296307E+01
-band_energy         : -1.71918500684217E-01
+total_energy_eV     : -2.88254917296308E+01
+band_energy         : -1.71918500684216E-01
 ...
 
 
@@ -3001,8 +3001,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0611218683844    -1.567E-03 1.092E-09 7.731E-03 6.692E-03 1.924E-03
  ETOT  3  -1.0611238294174    -1.961E-06 7.930E-09 1.007E-04 2.283E-04 1.695E-03
  ETOT  4  -1.0611238586099    -2.919E-08 1.356E-10 2.200E-08 4.331E-05 1.652E-03
- ETOT  5  -1.0611238586151    -5.179E-12 2.913E-14 5.687E-12 7.258E-07 1.651E-03
- ETOT  6  -1.0611238586151    -7.105E-15 1.424E-17 4.423E-15 1.030E-08 1.651E-03
+ ETOT  5  -1.0611238586151    -5.180E-12 2.913E-14 5.687E-12 7.258E-07 1.651E-03
+ ETOT  6  -1.0611238586151    -6.661E-15 1.424E-17 4.423E-15 1.030E-08 1.651E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.030E-08 < toldff=  2.000E-06
@@ -3023,7 +3023,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -7.105E-15, res2:  4.423E-15, residm:  1.424E-17, diffor:  1.030E-08, }
+convergence: {deltae: -6.661E-15, res2:  4.423E-15, residm:  1.424E-17, diffor:  1.030E-08, }
 etotal    :  -1.06112386E+00
 entropy   :   0.00000000E+00
 fermie    :   2.58428385E-01
@@ -3068,8 +3068,8 @@ force_length_stats: {min:   2.17884614E-03, max:   2.17884614E-03, mean:   2.178
  frms,max,avg= 1.2579574E-03 1.6514842E-03   1.678E-11 -1.283E-11 -1.283E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.08492272668925    -0.05167815439591    -0.05167815439591
-    2      0.08492272668925     0.05167815439591     0.05167815439591
+    1     -0.08492272668924    -0.05167815439592    -0.05167815439592
+    2      0.08492272668924     0.05167815439592     0.05167815439592
  frms,max,avg= 6.4686765E-02 8.4922727E-02   8.629E-10 -6.599E-10 -6.599E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -3155,7 +3155,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0610972297721    -1.983E-06 8.358E-09 1.006E-04 2.321E-04 1.684E-03
  ETOT  4  -1.0610972589763    -2.920E-08 1.350E-10 2.229E-08 4.349E-05 1.640E-03
  ETOT  5  -1.0610972589816    -5.312E-12 3.093E-14 5.615E-12 7.311E-07 1.640E-03
- ETOT  6  -1.0610972589816    -4.441E-16 1.413E-17 4.347E-15 1.030E-08 1.640E-03
+ ETOT  6  -1.0610972589816    -1.332E-15 1.413E-17 4.347E-15 1.030E-08 1.640E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.030E-08 < toldff=  2.000E-06
@@ -3176,7 +3176,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -4.441E-16, res2:  4.347E-15, residm:  1.413E-17, diffor:  1.030E-08, }
+convergence: {deltae: -1.332E-15, res2:  4.347E-15, residm:  1.413E-17, diffor:  1.030E-08, }
 etotal    :  -1.06109726E+00
 entropy   :   0.00000000E+00
 fermie    :   2.58206212E-01
@@ -3221,8 +3221,8 @@ force_length_stats: {min:   2.25018904E-03, max:   2.25018904E-03, mean:   2.250
  frms,max,avg= 1.2991472E-03 1.6397146E-03  -1.892E-11 -1.041E-11 -1.041E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.08431750789605    -0.05603219840110    -0.05603219840110
-    2     -0.08431750789605     0.05603219840110     0.05603219840110
+    1      0.08431750789606    -0.05603219840109    -0.05603219840109
+    2     -0.08431750789606     0.05603219840109     0.05603219840109
  frms,max,avg= 6.6804832E-02 8.4317508E-02  -9.727E-10 -5.351E-10 -5.351E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -3239,13 +3239,13 @@ comment             : Components of total free energy in Hartree
 kinetic             :  1.39635838247184E+00
 hartree             :  1.05392814474986E-01
 xc                  : -7.93593754480765E-01
-Ewald energy        : -1.02158519048062E+00
+Ewald energy        : -1.02158519048063E+00
 psp_core            :  6.22030071870939E-03
 local_psp           : -7.53889811685781E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.06109725898163E+00
-total_energy_eV     : -2.88739248269430E+01
-band_energy         : -1.84209988232001E-01
+total_energy_eV     : -2.88739248269431E+01
+band_energy         : -1.84209988232000E-01
 ...
 
 
@@ -3294,11 +3294,11 @@ tolerances: {toldff: 2.00E-06, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -1.0587811680359    -1.059E+00 2.909E-06 1.162E+00 1.383E-02 1.383E-02
- ETOT  2  -1.0596478202920    -8.667E-04 1.008E-09 9.010E-03 5.504E-03 8.324E-03
+ ETOT  2  -1.0596478202919    -8.667E-04 1.008E-09 9.010E-03 5.504E-03 8.324E-03
  ETOT  3  -1.0596512387448    -3.418E-06 9.874E-09 4.684E-05 2.095E-04 8.114E-03
  ETOT  4  -1.0596512509462    -1.220E-08 1.202E-10 3.566E-08 1.727E-05 8.097E-03
  ETOT  5  -1.0596512509560    -9.829E-12 5.301E-14 1.158E-11 6.887E-07 8.097E-03
- ETOT  6  -1.0596512509560    -2.665E-15 8.908E-18 4.198E-15 1.826E-08 8.097E-03
+ ETOT  6  -1.0596512509560    -3.109E-15 8.908E-18 4.198E-15 1.826E-08 8.097E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.826E-08 < toldff=  2.000E-06
@@ -3319,7 +3319,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -2.665E-15, res2:  4.198E-15, residm:  8.908E-18, diffor:  1.826E-08, }
+convergence: {deltae: -3.109E-15, res2:  4.198E-15, residm:  8.908E-18, diffor:  1.826E-08, }
 etotal    :  -1.05965125E+00
 entropy   :   0.00000000E+00
 fermie    :   2.63655955E-01
@@ -3356,17 +3356,17 @@ force_length_stats: {min:   8.87406463E-03, max:   8.87406463E-03, mean:   8.874
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.69760686003158     0.23707567205631     0.23707567205631
+    2      0.69760686003157     0.23707567205631     0.23707567205631
 
  cartesian forces (hartree/bohr) at end:
     1      0.00809696620445     0.00256789421053     0.00256789421053
     2     -0.00809696620445    -0.00256789421053    -0.00256789421053
- frms,max,avg= 5.1234436E-03 8.0969662E-03  -5.482E-13 -2.124E-12 -2.124E-12 h/b
+ frms,max,avg= 5.1234436E-03 8.0969662E-03  -5.481E-13 -2.124E-12 -2.124E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.41636270783062     0.13204641836483     0.13204641836483
-    2     -0.41636270783062    -0.13204641836483    -0.13204641836483
- frms,max,avg= 2.6345804E-01 4.1636271E-01  -2.819E-11 -1.092E-10 -1.092E-10 e/A
+    1      0.41636270783063     0.13204641836483     0.13204641836483
+    2     -0.41636270783063    -0.13204641836483    -0.13204641836483
+ frms,max,avg= 2.6345804E-01 4.1636271E-01  -2.818E-11 -1.092E-10 -1.092E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
  Fermi (or HOMO) energy (hartree) =   0.26366   Average Vxc (hartree)=  -0.45061
@@ -3380,15 +3380,15 @@ force_length_stats: {min:   8.87406463E-03, max:   8.87406463E-03, mean:   8.874
 iteration_state     : {dtset: 1, timimage: 6, image: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.36662442078193E+00
-hartree             :  9.55607515091291E-02
+hartree             :  9.55607515091293E-02
 xc                  : -7.87369824320603E-01
 Ewald energy        : -1.03213501321841E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.08551886426794E-01
+local_psp           : -7.08551886426795E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05965125095603E+00
 total_energy_eV     : -2.88345769474938E+01
-band_energy         : -1.80040426701865E-01
+band_energy         : -1.80040426701866E-01
 ...
 
 
@@ -3441,7 +3441,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0596512387584    -3.419E-06 9.850E-09 4.681E-05 2.098E-04 8.114E-03
  ETOT  4  -1.0596512509461    -1.219E-08 1.203E-10 3.559E-08 1.727E-05 8.097E-03
  ETOT  5  -1.0596512509560    -9.813E-12 5.279E-14 1.155E-11 6.882E-07 8.097E-03
- ETOT  6  -1.0596512509560    -3.997E-15 8.842E-18 4.180E-15 1.824E-08 8.097E-03
+ ETOT  6  -1.0596512509560    -3.775E-15 8.842E-18 4.180E-15 1.824E-08 8.097E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.824E-08 < toldff=  2.000E-06
@@ -3462,7 +3462,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -3.997E-15, res2:  4.180E-15, residm:  8.842E-18, diffor:  1.824E-08, }
+convergence: {deltae: -3.775E-15, res2:  4.180E-15, residm:  8.842E-18, diffor:  1.824E-08, }
 etotal    :  -1.05965125E+00
 entropy   :   0.00000000E+00
 fermie    :   2.63655955E-01
@@ -3504,11 +3504,11 @@ force_length_stats: {min:   8.87406463E-03, max:   8.87406463E-03, mean:   8.874
  cartesian forces (hartree/bohr) at end:
     1     -0.00809696620370     0.00256789421071     0.00256789421071
     2      0.00809696620370    -0.00256789421071    -0.00256789421071
- frms,max,avg= 5.1234436E-03 8.0969662E-03   2.148E-12 -3.589E-12 -3.589E-12 h/b
+ frms,max,avg= 5.1234436E-03 8.0969662E-03   2.147E-12 -3.589E-12 -3.589E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.41636270779184     0.13204641837428     0.13204641837428
-    2      0.41636270779184    -0.13204641837428    -0.13204641837428
+    1     -0.41636270779183     0.13204641837428     0.13204641837428
+    2      0.41636270779183    -0.13204641837428    -0.13204641837428
  frms,max,avg= 2.6345804E-01 4.1636271E-01   1.104E-10 -1.846E-10 -1.846E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -3523,11 +3523,11 @@ force_length_stats: {min:   8.87406463E-03, max:   8.87406463E-03, mean:   8.874
 iteration_state     : {dtset: 1, timimage: 6, image: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.36662442077253E+00
-hartree             :  9.55607515057771E-02
+hartree             :  9.55607515057769E-02
 xc                  : -7.87369824318503E-01
 Ewald energy        : -1.03213501322063E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.08551886413844E-01
+local_psp           : -7.08551886413842E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05965125095596E+00
 total_energy_eV     : -2.88345769474917E+01
@@ -3579,12 +3579,12 @@ tolerances: {toldff: 2.00E-06, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -1.0595359094050    -1.060E+00 9.158E-07 1.751E+00 8.682E-03 8.682E-03
+ ETOT  1  -1.0595359094049    -1.060E+00 9.158E-07 1.751E+00 8.682E-03 8.682E-03
  ETOT  2  -1.0610952460528    -1.559E-03 1.111E-09 7.770E-03 6.766E-03 1.916E-03
  ETOT  3  -1.0610972297893    -1.984E-06 8.349E-09 1.006E-04 2.322E-04 1.684E-03
  ETOT  4  -1.0610972589763    -2.919E-08 1.350E-10 2.228E-08 4.348E-05 1.640E-03
  ETOT  5  -1.0610972589816    -5.313E-12 3.078E-14 5.616E-12 7.307E-07 1.640E-03
- ETOT  6  -1.0610972589816     8.882E-16 1.424E-17 4.343E-15 1.032E-08 1.640E-03
+ ETOT  6  -1.0610972589816    -8.882E-16 1.424E-17 4.343E-15 1.032E-08 1.640E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.032E-08 < toldff=  2.000E-06
@@ -3605,7 +3605,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae:  8.882E-16, res2:  4.343E-15, residm:  1.424E-17, diffor:  1.032E-08, }
+convergence: {deltae: -8.882E-16, res2:  4.343E-15, residm:  1.424E-17, diffor:  1.032E-08, }
 etotal    :  -1.06109726E+00
 entropy   :   0.00000000E+00
 fermie    :   2.58206212E-01
@@ -3650,8 +3650,8 @@ force_length_stats: {min:   2.25018904E-03, max:   2.25018904E-03, mean:   2.250
  frms,max,avg= 1.2991472E-03 1.6397146E-03   1.928E-11 -1.183E-11 -1.183E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.08431750763200    -0.05603219855818    -0.05603219855818
-    2      0.08431750763200     0.05603219855818     0.05603219855818
+    1     -0.08431750763202    -0.05603219855819    -0.05603219855819
+    2      0.08431750763202     0.05603219855819     0.05603219855819
  frms,max,avg= 6.6804832E-02 8.4317508E-02   9.916E-10 -6.083E-10 -6.083E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -3673,7 +3673,7 @@ psp_core            :  6.22030071870939E-03
 local_psp           : -7.53889811682031E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.06109725898163E+00
-total_energy_eV     : -2.88739248269430E+01
+total_energy_eV     : -2.88739248269431E+01
 band_energy         : -1.84209988197095E-01
 ...
 
@@ -3736,8 +3736,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0610734026401    -1.558E-03 1.123E-09 7.812E-03 6.849E-03 1.753E-03
  ETOT  3  -1.0610754050829    -2.002E-06 8.661E-09 1.009E-04 2.351E-04 1.518E-03
  ETOT  4  -1.0610754343825    -2.930E-08 1.348E-10 2.258E-08 4.370E-05 1.474E-03
- ETOT  5  -1.0610754343879    -5.424E-12 3.246E-14 5.574E-12 7.368E-07 1.474E-03
- ETOT  6  -1.0610754343879    -5.995E-15 1.391E-17 4.306E-15 1.029E-08 1.474E-03
+ ETOT  5  -1.0610754343879    -5.422E-12 3.246E-14 5.574E-12 7.368E-07 1.474E-03
+ ETOT  6  -1.0610754343879    -6.661E-15 1.391E-17 4.306E-15 1.029E-08 1.474E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.029E-08 < toldff=  2.000E-06
@@ -3758,7 +3758,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -5.995E-15, res2:  4.306E-15, residm:  1.391E-17, diffor:  1.029E-08, }
+convergence: {deltae: -6.661E-15, res2:  4.306E-15, residm:  1.391E-17, diffor:  1.029E-08, }
 etotal    :  -1.06107543E+00
 entropy   :   0.00000000E+00
 fermie    :   2.57858368E-01
@@ -3803,8 +3803,8 @@ force_length_stats: {min:   2.31210731E-03, max:   2.31210731E-03, mean:   2.312
  frms,max,avg= 1.3348958E-03 1.4735907E-03  -2.016E-11 -9.583E-12 -9.583E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.07577507233865    -0.06478333874926    -0.06478333874926
-    2     -0.07577507233865     0.06478333874926     0.06478333874926
+    1      0.07577507233864    -0.06478333874926    -0.06478333874926
+    2     -0.07577507233864     0.06478333874926     0.06478333874926
  frms,max,avg= 6.8643095E-02 7.5775072E-02  -1.036E-09 -4.928E-10 -4.928E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -3827,7 +3827,7 @@ local_psp           : -7.54840235970844E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.06107543438792E+00
 total_energy_eV     : -2.88733309495460E+01
-band_energy         : -1.84672219726022E-01
+band_energy         : -1.84672219726023E-01
 ...
 
 
@@ -3880,7 +3880,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0597799456056    -3.500E-06 1.045E-08 5.246E-05 2.176E-04 6.506E-03
  ETOT  4  -1.0597799594311    -1.383E-08 1.341E-10 3.966E-08 1.870E-05 6.487E-03
  ETOT  5  -1.0597799594423    -1.122E-11 8.090E-14 1.327E-11 7.073E-07 6.487E-03
- ETOT  6  -1.0597799594423     6.661E-16 1.621E-17 7.433E-15 1.718E-08 6.487E-03
+ ETOT  6  -1.0597799594423     1.332E-15 1.621E-17 7.433E-15 1.718E-08 6.487E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.718E-08 < toldff=  2.000E-06
@@ -3901,7 +3901,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae:  6.661E-16, res2:  7.433E-15, residm:  1.621E-17, diffor:  1.718E-08, }
+convergence: {deltae:  1.332E-15, res2:  7.433E-15, residm:  1.621E-17, diffor:  1.718E-08, }
 etotal    :  -1.05977996E+00
 entropy   :   0.00000000E+00
 fermie    :   2.59331223E-01
@@ -3962,11 +3962,11 @@ force_length_stats: {min:   6.66883126E-03, max:   6.66883126E-03, mean:   6.668
 iteration_state     : {dtset: 1, timimage: 7, image: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.37383549402197E+00
-hartree             :  9.84866825035657E-02
+hartree             :  9.84866825035658E-02
 xc                  : -7.89144867253676E-01
 Ewald energy        : -1.02443728353443E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.24740285898470E-01
+local_psp           : -7.24740285898471E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05977995944233E+00
 total_energy_eV     : -2.88380792835206E+01
@@ -4023,7 +4023,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0597799456198    -3.501E-06 1.043E-08 5.243E-05 2.179E-04 6.506E-03
  ETOT  4  -1.0597799594311    -1.381E-08 1.339E-10 3.960E-08 1.870E-05 6.487E-03
  ETOT  5  -1.0597799594423    -1.119E-11 7.998E-14 1.321E-11 7.063E-07 6.487E-03
- ETOT  6  -1.0597799594423    -4.441E-15 1.588E-17 7.065E-15 1.761E-08 6.487E-03
+ ETOT  6  -1.0597799594423    -3.553E-15 1.588E-17 7.065E-15 1.761E-08 6.487E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.761E-08 < toldff=  2.000E-06
@@ -4044,7 +4044,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -4.441E-15, res2:  7.065E-15, residm:  1.588E-17, diffor:  1.761E-08, }
+convergence: {deltae: -3.553E-15, res2:  7.065E-15, residm:  1.588E-17, diffor:  1.761E-08, }
 etotal    :  -1.05977996E+00
 entropy   :   0.00000000E+00
 fermie    :   2.59331224E-01
@@ -4089,8 +4089,8 @@ force_length_stats: {min:   6.66883120E-03, max:   6.66883120E-03, mean:   6.668
  frms,max,avg= 3.8502515E-03 6.4868352E-03   3.711E-12 -3.853E-12 -3.853E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.33356644887156     0.05626286832749     0.05626286832749
-    2      0.33356644887156    -0.05626286832749    -0.05626286832749
+    1     -0.33356644887157     0.05626286832748     0.05626286832748
+    2      0.33356644887157    -0.05626286832748    -0.05626286832748
  frms,max,avg= 1.9798788E-01 3.3356645E-01   1.908E-10 -1.981E-10 -1.981E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -4105,11 +4105,11 @@ force_length_stats: {min:   6.66883120E-03, max:   6.66883120E-03, mean:   6.668
 iteration_state     : {dtset: 1, timimage: 7, image: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.37383549391358E+00
-hartree             :  9.84866824696823E-02
+hartree             :  9.84866824696821E-02
 xc                  : -7.89144867231539E-01
 Ewald energy        : -1.02443728353630E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.24740285776427E-01
+local_psp           : -7.24740285776426E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05977995944229E+00
 total_energy_eV     : -2.88380792835195E+01
@@ -4165,8 +4165,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0610734020428    -1.557E-03 1.124E-09 7.814E-03 6.840E-03 1.753E-03
  ETOT  3  -1.0610754051003    -2.003E-06 8.651E-09 1.008E-04 2.352E-04 1.518E-03
  ETOT  4  -1.0610754343825    -2.928E-08 1.348E-10 2.256E-08 4.370E-05 1.474E-03
- ETOT  5  -1.0610754343879    -5.420E-12 3.230E-14 5.575E-12 7.365E-07 1.474E-03
- ETOT  6  -1.0610754343879    -1.332E-15 1.403E-17 4.300E-15 1.031E-08 1.474E-03
+ ETOT  5  -1.0610754343879    -5.421E-12 3.230E-14 5.575E-12 7.365E-07 1.474E-03
+ ETOT  6  -1.0610754343879    -6.661E-16 1.403E-17 4.300E-15 1.031E-08 1.474E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.031E-08 < toldff=  2.000E-06
@@ -4187,7 +4187,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -1.332E-15, res2:  4.300E-15, residm:  1.403E-17, diffor:  1.031E-08, }
+convergence: {deltae: -6.661E-16, res2:  4.300E-15, residm:  1.403E-17, diffor:  1.031E-08, }
 etotal    :  -1.06107543E+00
 entropy   :   0.00000000E+00
 fermie    :   2.57858368E-01
@@ -4232,8 +4232,8 @@ force_length_stats: {min:   2.31210731E-03, max:   2.31210731E-03, mean:   2.312
  frms,max,avg= 1.3348958E-03 1.4735907E-03   2.044E-11 -1.100E-11 -1.100E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.07577507242919    -0.06478333867087    -0.06478333867087
-    2      0.07577507242919     0.06478333867087     0.06478333867087
+    1     -0.07577507242920    -0.06478333867086    -0.06478333867086
+    2      0.07577507242920     0.06478333867086     0.06478333867086
  frms,max,avg= 6.8643095E-02 7.5775072E-02   1.051E-09 -5.655E-10 -5.655E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -4319,7 +4319,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0610597826597    -2.016E-06 8.879E-09 1.008E-04 2.372E-04 1.528E-03
  ETOT  4  -1.0610598119388    -2.928E-08 1.342E-10 2.275E-08 4.377E-05 1.484E-03
  ETOT  5  -1.0610598119443    -5.502E-12 3.346E-14 5.535E-12 7.408E-07 1.484E-03
- ETOT  6  -1.0610598119443    -8.882E-16 1.380E-17 4.266E-15 1.028E-08 1.484E-03
+ ETOT  6  -1.0610598119443     0.000E+00 1.380E-17 4.266E-15 1.028E-08 1.484E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.028E-08 < toldff=  2.000E-06
@@ -4340,7 +4340,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -8.882E-16, res2:  4.266E-15, residm:  1.380E-17, diffor:  1.028E-08, }
+convergence: {deltae:  0.000E+00, res2:  4.266E-15, residm:  1.380E-17, diffor:  1.028E-08, }
 etotal    :  -1.06105981E+00
 entropy   :   0.00000000E+00
 fermie    :   2.57749893E-01
@@ -4385,8 +4385,8 @@ force_length_stats: {min:   2.35520648E-03, max:   2.35520648E-03, mean:   2.355
  frms,max,avg= 1.3597791E-03 1.4838018E-03  -2.096E-11 -9.099E-12 -9.099E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.07630014738579    -0.06650495083979    -0.06650495083979
-    2     -0.07630014738579     0.06650495083979     0.06650495083979
+    1      0.07630014738580    -0.06650495083979    -0.06650495083979
+    2     -0.07630014738580     0.06650495083979     0.06650495083979
  frms,max,avg= 6.9922646E-02 7.6300147E-02  -1.078E-09 -4.679E-10 -4.679E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -4402,10 +4402,10 @@ iteration_state     : {dtset: 1, timimage: 8, image: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.39660349303910E+00
 hartree             :  1.05547711433829E-01
-xc                  : -7.93679086237233E-01
+xc                  : -7.93679086237232E-01
 Ewald energy        : -1.02079100921880E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.54961221679897E-01
+local_psp           : -7.54961221679896E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.06105981194430E+00
 total_energy_eV     : -2.88729058412357E+01
@@ -4462,7 +4462,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0598195697957    -3.551E-06 1.086E-08 5.635E-05 2.221E-04 5.297E-03
  ETOT  4  -1.0598195847577    -1.496E-08 1.261E-10 4.226E-08 1.972E-05 5.278E-03
  ETOT  5  -1.0598195847695    -1.179E-11 6.330E-14 1.417E-11 7.103E-07 5.277E-03
- ETOT  6  -1.0598195847695    -3.997E-15 3.549E-17 1.078E-14 1.627E-08 5.277E-03
+ ETOT  6  -1.0598195847695    -3.331E-15 3.549E-17 1.078E-14 1.627E-08 5.277E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.627E-08 < toldff=  2.000E-06
@@ -4483,7 +4483,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -3.997E-15, res2:  1.078E-14, residm:  3.549E-17, diffor:  1.627E-08, }
+convergence: {deltae: -3.331E-15, res2:  1.078E-14, residm:  3.549E-17, diffor:  1.627E-08, }
 etotal    :  -1.05981958E+00
 entropy   :   0.00000000E+00
 fermie    :   2.56552796E-01
@@ -4528,8 +4528,8 @@ force_length_stats: {min:   5.28236684E-03, max:   5.28236684E-03, mean:   5.282
  frms,max,avg= 3.0497759E-03 5.2772840E-03  -5.479E-12 -1.817E-12 -1.817E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.27136883278974     0.00842386113272     0.00842386113272
-    2     -0.27136883278974    -0.00842386113272    -0.00842386113272
+    1      0.27136883278973     0.00842386113272     0.00842386113272
+    2     -0.27136883278973    -0.00842386113272    -0.00842386113272
  frms,max,avg= 1.5682577E-01 2.7136883E-01  -2.817E-10 -9.342E-11 -9.342E-11 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -4548,11 +4548,11 @@ hartree             :  1.00358110041832E-01
 xc                  : -7.90280338866384E-01
 Ewald energy        : -1.01946733518657E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.35134707231658E-01
+local_psp           : -7.35134707231659E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05981958476952E+00
 total_energy_eV     : -2.88391575435093E+01
-band_energy         : -1.89013649340226E-01
+band_energy         : -1.89013649340227E-01
 ...
 
 
@@ -4605,7 +4605,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0598195698096    -3.552E-06 1.083E-08 5.631E-05 2.223E-04 5.297E-03
  ETOT  4  -1.0598195847569    -1.495E-08 1.258E-10 4.221E-08 1.972E-05 5.278E-03
  ETOT  5  -1.0598195847686    -1.178E-11 6.304E-14 1.413E-11 7.098E-07 5.277E-03
- ETOT  6  -1.0598195847686     6.661E-16 3.516E-17 1.066E-14 1.627E-08 5.277E-03
+ ETOT  6  -1.0598195847686     8.882E-16 3.516E-17 1.066E-14 1.627E-08 5.277E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.627E-08 < toldff=  2.000E-06
@@ -4626,7 +4626,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae:  6.661E-16, res2:  1.066E-14, residm:  3.516E-17, diffor:  1.627E-08, }
+convergence: {deltae:  8.882E-16, res2:  1.066E-14, residm:  3.516E-17, diffor:  1.627E-08, }
 etotal    :  -1.05981958E+00
 entropy   :   0.00000000E+00
 fermie    :   2.56552796E-01
@@ -4671,8 +4671,8 @@ force_length_stats: {min:   5.28236684E-03, max:   5.28236684E-03, mean:   5.282
  frms,max,avg= 3.0497759E-03 5.2772840E-03   5.682E-12 -3.031E-12 -3.031E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.27136883307974     0.00842386161068     0.00842386161068
-    2      0.27136883307974    -0.00842386161068    -0.00842386161068
+    1     -0.27136883307973     0.00842386161067     0.00842386161067
+    2      0.27136883307973    -0.00842386161067    -0.00842386161067
  frms,max,avg= 1.5682577E-01 2.7136883E-01   2.922E-10 -1.558E-10 -1.558E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -4688,14 +4688,14 @@ iteration_state     : {dtset: 1, timimage: 8, image: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.37848438568233E+00
 hartree             :  1.00358110014613E-01
-xc                  : -7.90280338849653E-01
+xc                  : -7.90280338849652E-01
 Ewald energy        : -1.01946733523861E+00
 psp_core            :  6.22030071870939E-03
 local_psp           : -7.35134707096025E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05981958476864E+00
 total_energy_eV     : -2.88391575434852E+01
-band_energy         : -1.89013649265804E-01
+band_energy         : -1.89013649265803E-01
 ...
 
 
@@ -4747,7 +4747,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0610577659835    -1.552E-03 1.132E-09 7.835E-03 6.880E-03 1.765E-03
  ETOT  3  -1.0610597826769    -2.017E-06 8.869E-09 1.007E-04 2.374E-04 1.528E-03
  ETOT  4  -1.0610598119388    -2.926E-08 1.342E-10 2.274E-08 4.376E-05 1.484E-03
- ETOT  5  -1.0610598119443    -5.495E-12 3.329E-14 5.536E-12 7.405E-07 1.484E-03
+ ETOT  5  -1.0610598119443    -5.494E-12 3.329E-14 5.536E-12 7.405E-07 1.484E-03
  ETOT  6  -1.0610598119443    -6.883E-15 1.392E-17 4.260E-15 1.030E-08 1.484E-03
 
  At SCF step    6, forces are converged : 
@@ -4814,8 +4814,8 @@ force_length_stats: {min:   2.35520648E-03, max:   2.35520648E-03, mean:   2.355
  frms,max,avg= 1.3597791E-03 1.4838018E-03   2.121E-11 -1.059E-11 -1.059E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.07630014741884    -0.06650495080273    -0.06650495080273
-    2      0.07630014741884     0.06650495080273     0.06650495080273
+    1     -0.07630014741883    -0.06650495080274    -0.06650495080274
+    2      0.07630014741883     0.06650495080274     0.06650495080274
  frms,max,avg= 6.9922646E-02 7.6300147E-02   1.091E-09 -5.445E-10 -5.445E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -4831,14 +4831,14 @@ iteration_state     : {dtset: 1, timimage: 8, image: 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.39660349301837E+00
 hartree             :  1.05547711426533E-01
-xc                  : -7.93679086232688E-01
+xc                  : -7.93679086232689E-01
 Ewald energy        : -1.02079100922656E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.54961221648661E-01
+local_psp           : -7.54961221648662E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.06105981194430E+00
 total_energy_eV     : -2.88729058412357E+01
-band_energy         : -1.84839059006840E-01
+band_energy         : -1.84839059006841E-01
 ...
 
 
@@ -4900,7 +4900,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0610472243544    -1.550E-03 1.136E-09 7.850E-03 6.918E-03 1.751E-03
  ETOT  3  -1.0610492497014    -2.025E-06 9.019E-09 1.007E-04 2.386E-04 1.512E-03
  ETOT  4  -1.0610492789806    -2.928E-08 1.338E-10 2.288E-08 4.381E-05 1.468E-03
- ETOT  5  -1.0610492789861    -5.556E-12 3.416E-14 5.511E-12 7.436E-07 1.468E-03
+ ETOT  5  -1.0610492789861    -5.557E-12 3.416E-14 5.511E-12 7.436E-07 1.468E-03
  ETOT  6  -1.0610492789861    -1.110E-15 1.366E-17 4.247E-15 1.027E-08 1.468E-03
 
  At SCF step    6, forces are converged : 
@@ -4967,8 +4967,8 @@ force_length_stats: {min:   2.38605113E-03, max:   2.38605113E-03, mean:   2.386
  frms,max,avg= 1.3775873E-03 1.4680904E-03  -2.141E-11 -8.797E-12 -8.797E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.07549223891456    -0.06839279838483    -0.06839279838483
-    2     -0.07549223891456     0.06839279838483     0.06839279838483
+    1      0.07549223891457    -0.06839279838484    -0.06839279838484
+    2     -0.07549223891457     0.06839279838484     0.06839279838484
  frms,max,avg= 7.0838379E-02 7.5492239E-02  -1.101E-09 -4.524E-10 -4.524E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -4987,11 +4987,11 @@ hartree             :  1.05567939985445E-01
 xc                  : -7.93688899946680E-01
 Ewald energy        : -1.02062344675583E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.55137381133653E-01
+local_psp           : -7.55137381133654E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.06104927898614E+00
 total_energy_eV     : -2.88726192248681E+01
-band_energy         : -1.84978960478808E-01
+band_energy         : -1.84978960478809E-01
 ...
 
 
@@ -5044,7 +5044,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0598265985336    -3.583E-06 1.112E-08 5.884E-05 2.245E-04 4.476E-03
  ETOT  4  -1.0598266142320    -1.570E-08 1.359E-10 4.392E-08 2.032E-05 4.455E-03
  ETOT  5  -1.0598266142446    -1.265E-11 7.068E-14 1.546E-11 7.200E-07 4.455E-03
- ETOT  6  -1.0598266142446    -5.107E-15 4.911E-17 1.704E-14 1.485E-08 4.455E-03
+ ETOT  6  -1.0598266142446    -5.551E-15 4.911E-17 1.704E-14 1.485E-08 4.455E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.485E-08 < toldff=  2.000E-06
@@ -5065,7 +5065,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -5.107E-15, res2:  1.704E-14, residm:  4.911E-17, diffor:  1.485E-08, }
+convergence: {deltae: -5.551E-15, res2:  1.704E-14, residm:  4.911E-17, diffor:  1.485E-08, }
 etotal    :  -1.05982661E+00
 entropy   :   0.00000000E+00
 fermie    :   2.54829983E-01
@@ -5105,13 +5105,13 @@ force_length_stats: {min:   4.49109392E-03, max:   4.49109392E-03, mean:   4.491
     2      0.69215105771058     0.20984742833693     0.20984742833693
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00445475589719    -0.00040315907942    -0.00040315907942
-    2     -0.00445475589719     0.00040315907942     0.00040315907942
+    1      0.00445475589720    -0.00040315907942    -0.00040315907942
+    2     -0.00445475589720     0.00040315907942     0.00040315907942
  frms,max,avg= 2.5929343E-03 4.4547559E-03  -8.728E-12 -2.405E-12 -2.405E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.22907273925149    -0.02073127165834    -0.02073127165834
-    2     -0.22907273925149     0.02073127165834     0.02073127165834
+    1      0.22907273925150    -0.02073127165835    -0.02073127165835
+    2     -0.22907273925150     0.02073127165835     0.02073127165835
  frms,max,avg= 1.3333403E-01 2.2907274E-01  -4.488E-10 -1.237E-10 -1.237E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -5130,7 +5130,7 @@ hartree             :  1.01513388920925E-01
 xc                  : -7.90981282273747E-01
 Ewald energy        : -1.01637627888238E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.41569642709789E-01
+local_psp           : -7.41569642709790E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05982661424461E+00
 total_energy_eV     : -2.88393488252542E+01
@@ -5187,7 +5187,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  3  -1.0598265985485    -3.583E-06 1.110E-08 5.881E-05 2.247E-04 4.476E-03
  ETOT  4  -1.0598266142316    -1.568E-08 1.356E-10 4.386E-08 2.032E-05 4.455E-03
  ETOT  5  -1.0598266142442    -1.262E-11 7.044E-14 1.541E-11 7.196E-07 4.455E-03
- ETOT  6  -1.0598266142442    -5.773E-15 4.844E-17 1.686E-14 1.486E-08 4.455E-03
+ ETOT  6  -1.0598266142442    -4.663E-15 4.844E-17 1.686E-14 1.486E-08 4.455E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.486E-08 < toldff=  2.000E-06
@@ -5208,7 +5208,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae: -5.773E-15, res2:  1.686E-14, residm:  4.844E-17, diffor:  1.486E-08, }
+convergence: {deltae: -4.663E-15, res2:  1.686E-14, residm:  4.844E-17, diffor:  1.486E-08, }
 etotal    :  -1.05982661E+00
 entropy   :   0.00000000E+00
 fermie    :   2.54829983E-01
@@ -5253,8 +5253,8 @@ force_length_stats: {min:   4.49109392E-03, max:   4.49109392E-03, mean:   4.491
  frms,max,avg= 2.5929343E-03 4.4547559E-03   8.513E-12 -3.312E-12 -3.312E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.22907273939814    -0.02073127138818    -0.02073127138818
-    2      0.22907273939814     0.02073127138818     0.02073127138818
+    1     -0.22907273939813    -0.02073127138818    -0.02073127138818
+    2      0.22907273939813     0.02073127138818     0.02073127138818
  frms,max,avg= 1.3333403E-01 2.2907274E-01   4.377E-10 -1.703E-10 -1.703E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -5270,14 +5270,14 @@ iteration_state     : {dtset: 1, timimage: 9, image: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.38136689993019E+00
 hartree             :  1.01513388901888E-01
-xc                  : -7.90981282262003E-01
+xc                  : -7.90981282262002E-01
 Ewald energy        : -1.01637627891513E+00
 psp_core            :  6.22030071870939E-03
-local_psp           : -7.41569642617858E-01
+local_psp           : -7.41569642617857E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.05982661424420E+00
 total_energy_eV     : -2.88393488252432E+01
-band_energy         : -1.91181546353294E-01
+band_energy         : -1.91181546353293E-01
 ...
 
 
@@ -5329,8 +5329,8 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  2  -1.0610472237290    -1.550E-03 1.137E-09 7.852E-03 6.909E-03 1.751E-03
  ETOT  3  -1.0610492497187    -2.026E-06 9.009E-09 1.007E-04 2.388E-04 1.512E-03
  ETOT  4  -1.0610492789806    -2.926E-08 1.338E-10 2.286E-08 4.381E-05 1.468E-03
- ETOT  5  -1.0610492789861    -5.554E-12 3.399E-14 5.512E-12 7.432E-07 1.468E-03
- ETOT  6  -1.0610492789861     3.331E-15 1.380E-17 4.239E-15 1.029E-08 1.468E-03
+ ETOT  5  -1.0610492789861    -5.555E-12 3.399E-14 5.512E-12 7.432E-07 1.468E-03
+ ETOT  6  -1.0610492789861     3.775E-15 1.380E-17 4.239E-15 1.029E-08 1.468E-03
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  1.029E-08 < toldff=  2.000E-06
@@ -5351,7 +5351,7 @@ lattice_vectors:
 lattice_lengths: [   3.00000,    3.00000,    3.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7000000E+01
-convergence: {deltae:  3.331E-15, res2:  4.239E-15, residm:  1.380E-17, diffor:  1.029E-08, }
+convergence: {deltae:  3.775E-15, res2:  4.239E-15, residm:  1.380E-17, diffor:  1.029E-08, }
 etotal    :  -1.06104928E+00
 entropy   :   0.00000000E+00
 fermie    :   2.57653222E-01
@@ -5396,8 +5396,8 @@ force_length_stats: {min:   2.38605113E-03, max:   2.38605113E-03, mean:   2.386
  frms,max,avg= 1.3775873E-03 1.4680904E-03   2.167E-11 -1.028E-11 -1.028E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.07549223893643    -0.06839279835782    -0.06839279835782
-    2      0.07549223893643     0.06839279835782     0.06839279835782
+    1     -0.07549223893643    -0.06839279835781    -0.06839279835781
+    2      0.07549223893643     0.06839279835781     0.06839279835781
  frms,max,avg= 7.0838379E-02 7.5492239E-02   1.114E-09 -5.286E-10 -5.286E-10 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
               =  1.587531625770  1.587531625770  1.587531625770 angstroms
@@ -5604,7 +5604,24 @@ P           mkmem          20
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -5622,7 +5639,9 @@ P           mkmem          20
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -5635,25 +5654,10 @@ P           mkmem          20
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          9.2  wall=         10.8
+- Proc.   0 individual time (sec): cpu=          6.8  wall=          7.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  85 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.2  wall=         10.8
+.Delivered  11 WARNINGs and  85 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.8  wall=          7.0

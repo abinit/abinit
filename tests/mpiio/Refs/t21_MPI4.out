@@ -1,6 +1,6 @@
 
-.Version 9.2.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 14 Oct 2020.
-- ( at 22h05 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h46 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/TestBot_MPI4/mpiio_t21_MPI4/t21.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI4/mpiio_t21_MPI4/t21.in
 - output file    -> t21_MPI4.out
 - root for input  files -> t21_MPI4i
 - root for output files -> t21_MPI4o
@@ -172,6 +172,7 @@ _ WF disk file :      0.198 Mbytes ; DEN or POT disk file :      0.055 Mbytes.
 -          iomode           1
             acell      1.0366000000E+01  1.0366000000E+01  1.0366000000E+01 Bohr
               amu      2.80855000E+01
+      chksymtnons           0
      densfor_pred           6
            diemac      1.20000000E+01
              ecut      1.00000000E+01 Hartree
@@ -442,8 +443,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/14si.phoney_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.2/tests/Psps_for_tests/14si.phoney_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.phoney_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.phoney_mod
 - 2 bohr rc 15 hartree ec psp for silicon 8 November 1991 (new)
 - 14.00000   4.00000    980710                znucl, zion, pspdat
     5    3    2    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -481,11 +482,11 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  4  -7.2585848183441    -6.457E-06 2.559E-09 1.158E-04
  ETOT  5  -7.2585848331385    -1.479E-08 1.938E-11 1.099E-06
  ETOT  6  -7.2585848333226    -1.842E-10 9.674E-14 3.261E-08
- ETOT  7  -7.2585848333285    -5.844E-12 7.285E-15 5.877E-10
- ETOT  8  -7.2585848333286    -1.057E-13 7.056E-16 3.900E-12
+ ETOT  7  -7.2585848333285    -5.839E-12 7.285E-15 5.877E-10
+ ETOT  8  -7.2585848333286    -1.066E-13 7.056E-16 3.900E-12
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  1.057E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  1.066E-13 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.27964518E-03  sigma(3 2)= -2.72091507E-04
@@ -503,7 +504,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -1.057E-13, res2:  3.900E-12, residm:  7.056E-16, diffor: null, }
+convergence: {deltae: -1.066E-13, res2:  3.900E-12, residm:  7.056E-16, diffor: null, }
 etotal    :  -7.25858483E+00
 entropy   :   0.00000000E+00
 fermie    :   2.92768399E-01
@@ -530,7 +531,7 @@ force_length_stats: {min:   1.87644222E-01, max:   1.87644222E-01, mean:   1.876
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   63.818E-18; max=  70.565E-17
+ Mean square residual over all n,k,spin=   63.813E-18; max=  70.558E-17
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.220000000000      0.220000000000      0.220000000000
@@ -548,8 +549,8 @@ force_length_stats: {min:   1.87644222E-01, max:   1.87644222E-01, mean:   1.876
  frms,max,avg= 1.0833644E-01 1.0833644E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -5.57088337747437    -5.57088337747437    -5.57088337747437
-    2      5.57088337747437     5.57088337747437     5.57088337747437
+    1     -5.57088337747435    -5.57088337747435    -5.57088337747435
+    2      5.57088337747435     5.57088337747435     5.57088337747435
  frms,max,avg= 5.5708834E+00 5.5708834E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.366000000000 10.366000000000 10.366000000000 bohr
               =  5.485450944244  5.485450944244  5.485450944244 angstroms
@@ -569,7 +570,7 @@ force_length_stats: {min:   1.87644222E-01, max:   1.87644222E-01, mean:   1.876
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.06784172216941E+00
-hartree             :  8.43091005065605E-01
+hartree             :  8.43091005065604E-01
 xc                  : -2.50122326124592E+00
 Ewald energy        : -8.26608138368135E+00
 psp_core            : -1.04593088893961E-01
@@ -642,11 +643,11 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  4  -7.2585848183441    -6.457E-06 2.559E-09 1.158E-04
  ETOT  5  -7.2585848331385    -1.479E-08 1.938E-11 1.099E-06
  ETOT  6  -7.2585848333226    -1.842E-10 9.674E-14 3.261E-08
- ETOT  7  -7.2585848333285    -5.844E-12 7.285E-15 5.877E-10
- ETOT  8  -7.2585848333286    -1.057E-13 7.056E-16 3.900E-12
+ ETOT  7  -7.2585848333285    -5.839E-12 7.285E-15 5.877E-10
+ ETOT  8  -7.2585848333286    -1.066E-13 7.056E-16 3.900E-12
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  1.057E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  1.066E-13 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.27964518E-03  sigma(3 2)= -2.72091507E-04
@@ -664,7 +665,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -1.057E-13, res2:  3.900E-12, residm:  7.056E-16, diffor: null, }
+convergence: {deltae: -1.066E-13, res2:  3.900E-12, residm:  7.056E-16, diffor: null, }
 etotal    :  -7.25858483E+00
 entropy   :   0.00000000E+00
 fermie    :   3.01007192E-01
@@ -691,7 +692,7 @@ force_length_stats: {min:   1.87644222E-01, max:   1.87644222E-01, mean:   1.876
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   63.818E-18; max=  70.565E-17
+ Mean square residual over all n,k,spin=   63.813E-18; max=  70.558E-17
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.220000000000      0.220000000000      0.220000000000
@@ -709,8 +710,8 @@ force_length_stats: {min:   1.87644222E-01, max:   1.87644222E-01, mean:   1.876
  frms,max,avg= 1.0833644E-01 1.0833644E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -5.57088337747437    -5.57088337747437    -5.57088337747437
-    2      5.57088337747437     5.57088337747437     5.57088337747437
+    1     -5.57088337747435    -5.57088337747435    -5.57088337747435
+    2      5.57088337747435     5.57088337747435     5.57088337747435
  frms,max,avg= 5.5708834E+00 5.5708834E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.366000000000 10.366000000000 10.366000000000 bohr
               =  5.485450944244  5.485450944244  5.485450944244 angstroms
@@ -733,7 +734,7 @@ force_length_stats: {min:   1.87644222E-01, max:   1.87644222E-01, mean:   1.876
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.06784172216941E+00
-hartree             :  8.43091005065605E-01
+hartree             :  8.43091005065604E-01
 xc                  : -2.50122326124592E+00
 Ewald energy        : -8.26608138368135E+00
 psp_core            : -1.04593088893961E-01
@@ -808,11 +809,11 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  4  -7.8994189633235    -3.109E-06 4.003E-06 1.785E-04
  ETOT  5  -7.8994190140632    -5.074E-08 5.183E-06 2.629E-07
  ETOT  6  -7.8994190142808    -2.176E-10 1.068E-06 3.023E-09
- ETOT  7  -7.8994190142823    -1.487E-12 8.325E-07 6.009E-11
- ETOT  8  -7.8994190142823    -3.020E-14 1.361E-07 1.067E-12
+ ETOT  7  -7.8994190142823    -1.484E-12 8.325E-07 6.009E-11
+ ETOT  8  -7.8994190142823    -2.753E-14 1.361E-07 1.067E-12
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  3.020E-14 < toldfe=  1.000E-10
+  for the second time, diff in etot=  2.753E-14 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.33256062E-05  sigma(3 2)= -2.51514435E-04
@@ -830,7 +831,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -3.020E-14, res2:  1.067E-12, residm:  1.361E-07, diffor: null, }
+convergence: {deltae: -2.753E-14, res2:  1.067E-12, residm:  1.361E-07, diffor: null, }
 etotal    :  -7.89941901E+00
 entropy   :   0.00000000E+00
 fermie    :   2.24581389E-01
@@ -875,8 +876,8 @@ force_length_stats: {min:   1.01353513E-01, max:   1.01353513E-01, mean:   1.013
  frms,max,avg= 5.8516478E-02 5.8516478E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -3.00903804275776    -3.00903804275776    -3.00903804275776
-    2      3.00903804275776     3.00903804275776     3.00903804275776
+    1     -3.00903804275777    -3.00903804275777    -3.00903804275777
+    2      3.00903804275777     3.00903804275777     3.00903804275777
  frms,max,avg= 3.0090380E+00 3.0090380E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.366000000000 10.366000000000 10.366000000000 bohr
               =  5.485450944244  5.485450944244  5.485450944244 angstroms
@@ -908,7 +909,7 @@ local_psp           : -2.57393839981377E+00
 non_local_psp       :  1.78432411586566E+00
 total_energy        : -7.89941901428232E+00
 total_energy_eV     : -2.14954123068619E+02
-band_energy         :  3.24737668906336E-01
+band_energy         :  3.24737668906335E-01
 ...
 
 
@@ -973,11 +974,11 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  4  -7.8994189633235    -3.109E-06 4.003E-06 1.785E-04
  ETOT  5  -7.8994190140632    -5.074E-08 5.183E-06 2.629E-07
  ETOT  6  -7.8994190142808    -2.176E-10 1.068E-06 3.023E-09
- ETOT  7  -7.8994190142823    -1.487E-12 8.325E-07 6.009E-11
- ETOT  8  -7.8994190142823    -3.020E-14 1.361E-07 1.067E-12
+ ETOT  7  -7.8994190142823    -1.484E-12 8.325E-07 6.009E-11
+ ETOT  8  -7.8994190142823    -2.753E-14 1.361E-07 1.067E-12
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  3.020E-14 < toldfe=  1.000E-10
+  for the second time, diff in etot=  2.753E-14 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.33256062E-05  sigma(3 2)= -2.51514435E-04
@@ -995,7 +996,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -3.020E-14, res2:  1.067E-12, residm:  1.361E-07, diffor: null, }
+convergence: {deltae: -2.753E-14, res2:  1.067E-12, residm:  1.361E-07, diffor: null, }
 etotal    :  -7.89941901E+00
 entropy   :   0.00000000E+00
 fermie    :   2.36354276E-01
@@ -1040,8 +1041,8 @@ force_length_stats: {min:   1.01353513E-01, max:   1.01353513E-01, mean:   1.013
  frms,max,avg= 5.8516478E-02 5.8516478E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -3.00903804275776    -3.00903804275776    -3.00903804275776
-    2      3.00903804275776     3.00903804275776     3.00903804275776
+    1     -3.00903804275777    -3.00903804275777    -3.00903804275777
+    2      3.00903804275777     3.00903804275777     3.00903804275777
  frms,max,avg= 3.0090380E+00 3.0090380E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.366000000000 10.366000000000 10.366000000000 bohr
               =  5.485450944244  5.485450944244  5.485450944244 angstroms
@@ -1078,7 +1079,7 @@ internal            : -7.89941901428232E+00
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy        : -7.89941901428232E+00
 total_energy_eV     : -2.14954123068619E+02
-band_energy         :  3.24737668906336E-01
+band_energy         :  3.24737668906335E-01
 ...
 
 
@@ -1151,7 +1152,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  4  -7.2585848183441    -6.457E-06 2.559E-09 1.158E-04 2.775E-05 1.083E-01
  ETOT  5  -7.2585848331385    -1.479E-08 1.938E-11 1.099E-06 2.200E-06 1.083E-01
  ETOT  6  -7.2585848333226    -1.842E-10 9.674E-14 3.261E-08 5.492E-07 1.083E-01
- ETOT  7  -7.2585848333285    -5.844E-12 7.285E-15 5.877E-10 1.713E-07 1.083E-01
+ ETOT  7  -7.2585848333285    -5.839E-12 7.285E-15 5.877E-10 1.713E-07 1.083E-01
 
  At SCF step    7, forces are converged : 
   for the second time, max diff in force=  1.713E-07 < toldff=  1.000E-06
@@ -1172,7 +1173,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -5.844E-12, res2:  5.877E-10, residm:  7.285E-15, diffor:  1.713E-07, }
+convergence: {deltae: -5.839E-12, res2:  5.877E-10, residm:  7.285E-15, diffor:  1.713E-07, }
 etotal    :  -7.25858483E+00
 entropy   :   0.00000000E+00
 fermie    :   2.92768394E-01
@@ -1230,7 +1231,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  4  -7.3011190738374    -3.382E-08 4.743E-12 3.151E-06 2.989E-05 2.743E-02
  ETOT  5  -7.3011190745427    -7.053E-10 4.158E-14 3.057E-08 1.896E-06 2.743E-02
  ETOT  6  -7.3011190745482    -5.484E-12 1.804E-15 7.943E-10 2.625E-07 2.743E-02
- ETOT  7  -7.3011190745484    -2.318E-13 5.450E-17 2.518E-12 1.139E-08 2.743E-02
+ ETOT  7  -7.3011190745484    -2.274E-13 5.450E-17 2.518E-12 1.139E-08 2.743E-02
 
  At SCF step    7, forces are converged : 
   for the second time, max diff in force=  1.139E-08 < toldff=  1.000E-06
@@ -1251,7 +1252,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -2.318E-13, res2:  2.518E-12, residm:  5.450E-17, diffor:  1.139E-08, }
+convergence: {deltae: -2.274E-13, res2:  2.518E-12, residm:  5.450E-17, diffor:  1.139E-08, }
 etotal    :  -7.30111907E+00
 entropy   :   0.00000000E+00
 fermie    :   2.69769379E-01
@@ -1284,11 +1285,11 @@ force_length_stats: {min:   4.75043221E-02, max:   4.75043221E-02, mean:   4.750
  -1.04511350045749E-02 -1.04511350045749E-02 -1.04511350045749E-02
   2.30451135004575E-01  2.30451135004575E-01  2.30451135004575E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.74266E-02 2.74266E-02 (free atoms)
- -2.74266331387869E-02 -2.74266331387869E-02 -2.74266331387869E-02
-  2.74266331387869E-02  2.74266331387869E-02  2.74266331387869E-02
+ -2.74266331387871E-02 -2.74266331387871E-02 -2.74266331387871E-02
+  2.74266331387871E-02  2.74266331387871E-02  2.74266331387871E-02
  Reduced forces (fred)
-  2.84304479116665E-01  2.84304479116665E-01  2.84304479116665E-01
- -2.84304479116665E-01 -2.84304479116665E-01 -2.84304479116665E-01
+  2.84304479116667E-01  2.84304479116667E-01  2.84304479116667E-01
+ -2.84304479116667E-01 -2.84304479116667E-01 -2.84304479116667E-01
  Total energy (etotal) [Ha]= -7.30111907454838E+00
 
  Difference of energy with previous step (new-old):
@@ -1312,7 +1313,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  3  -7.3049058256709    -4.257E-08 1.044E-10 1.011E-05 1.160E-06 9.088E-04
  ETOT  4  -7.3049058280205    -2.350E-09 2.721E-12 1.754E-07 1.579E-06 9.103E-04
  ETOT  5  -7.3049058280525    -3.202E-11 1.486E-14 9.410E-10 3.367E-07 9.107E-04
- ETOT  6  -7.3049058280527    -1.812E-13 8.133E-16 5.118E-12 7.279E-09 9.107E-04
+ ETOT  6  -7.3049058280527    -1.847E-13 8.133E-16 5.118E-12 7.279E-09 9.107E-04
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  7.279E-09 < toldff=  1.000E-06
@@ -1333,7 +1334,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -1.812E-13, res2:  5.118E-12, residm:  8.133E-16, diffor:  7.279E-09, }
+convergence: {deltae: -1.847E-13, res2:  5.118E-12, residm:  8.133E-16, diffor:  7.279E-09, }
 etotal    :  -7.30490583E+00
 entropy   :   0.00000000E+00
 fermie    :   2.60653233E-01
@@ -1360,17 +1361,17 @@ force_length_stats: {min:   1.57734131E-03, max:   1.57734131E-03, mean:   1.577
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.57170788879279E-01 -1.57170788879279E-01 -1.57170788879279E-01
-  2.43769078887928E+00  2.43769078887928E+00  2.43769078887928E+00
+ -1.57170788879263E-01 -1.57170788879263E-01 -1.57170788879263E-01
+  2.43769078887926E+00  2.43769078887926E+00  2.43769078887926E+00
  Reduced coordinates (xred)
- -1.51621444027859E-02 -1.51621444027859E-02 -1.51621444027859E-02
-  2.35162144402786E-01  2.35162144402786E-01  2.35162144402786E-01
+ -1.51621444027844E-02 -1.51621444027844E-02 -1.51621444027844E-02
+  2.35162144402784E-01  2.35162144402784E-01  2.35162144402784E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.10678E-04 9.10678E-04 (free atoms)
-  9.10678430585684E-04  9.10678430585684E-04  9.10678430585684E-04
- -9.10678430585684E-04 -9.10678430585684E-04 -9.10678430585684E-04
+  9.10678430576411E-04  9.10678430576411E-04  9.10678430576411E-04
+ -9.10678430576411E-04 -9.10678430576411E-04 -9.10678430576411E-04
  Reduced forces (fred)
- -9.44009261145120E-03 -9.44009261145120E-03 -9.44009261145120E-03
-  9.44009261145120E-03  9.44009261145120E-03  9.44009261145120E-03
+ -9.44009261135507E-03 -9.44009261135507E-03 -9.44009261135507E-03
+  9.44009261135507E-03  9.44009261135507E-03  9.44009261135507E-03
  Total energy (etotal) [Ha]= -7.30490582805270E+00
 
  Difference of energy with previous step (new-old):
@@ -1391,15 +1392,15 @@ tolerances: {toldff: 1.00E-06, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.3049104216012    -7.305E+00 4.323E-12 1.368E-06 9.120E-04 1.366E-06
  ETOT  2  -7.3049104217182    -1.170E-10 1.669E-16 2.499E-08 1.828E-07 1.548E-06
- ETOT  3  -7.3049104217221    -3.889E-12 7.524E-16 1.010E-09 6.025E-08 1.609E-06
+ ETOT  3  -7.3049104217221    -3.907E-12 7.524E-16 1.010E-09 6.025E-08 1.609E-06
 
  At SCF step    3, forces are converged : 
   for the second time, max diff in force=  6.025E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29214540E-09
-  sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29214540E-09
-  sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29214540E-09
+  sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29214511E-09
+  sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29214511E-09
+  sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29214511E-09
 
 
 --- !ResultsGS
@@ -1412,22 +1413,22 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -3.889E-12, res2:  1.010E-09, residm:  7.524E-16, diffor:  6.025E-08, }
+convergence: {deltae: -3.907E-12, res2:  1.010E-09, residm:  7.524E-16, diffor:  6.025E-08, }
 etotal    :  -7.30491042E+00
 entropy   :   0.00000000E+00
 fermie    :   2.59965066E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.11808120E-03,  -3.29214540E-09,  -3.29214540E-09, ]
-- [ -3.29214540E-09,  -1.11808120E-03,  -3.29214540E-09, ]
-- [ -3.29214540E-09,  -3.29214540E-09,  -1.11808120E-03, ]
+- [ -1.11808120E-03,  -3.29214511E-09,  -3.29214511E-09, ]
+- [ -3.29214511E-09,  -1.11808120E-03,  -3.29214511E-09, ]
+- [ -3.29214511E-09,  -3.29214511E-09,  -1.11808120E-03, ]
 pressure_GPa:   3.2895E+01
 xred      :
 - [ -1.5000E-02,  -1.5000E-02,  -1.5000E-02, Si]
 - [  2.3500E-01,   2.3500E-01,   2.3500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.60863250E-06,  -1.60863250E-06,  -1.60863250E-06, ]
-- [  1.60863250E-06,   1.60863250E-06,   1.60863250E-06, ]
-force_length_stats: {min:   2.78623322E-06, max:   2.78623322E-06, mean:   2.78623322E-06, }
+- [ -1.60863251E-06,  -1.60863251E-06,  -1.60863251E-06, ]
+- [  1.60863251E-06,   1.60863251E-06,   1.60863251E-06, ]
+force_length_stats: {min:   2.78623323E-06, max:   2.78623323E-06, mean:   2.78623323E-06, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1439,18 +1440,18 @@ force_length_stats: {min:   2.78623322E-06, max:   2.78623322E-06, mean:   2.786
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.55487675770065E-01 -1.55487675770065E-01 -1.55487675770065E-01
-  2.43600767577006E+00  2.43600767577006E+00  2.43600767577006E+00
+ -1.55487675770071E-01 -1.55487675770071E-01 -1.55487675770071E-01
+  2.43600767577007E+00  2.43600767577007E+00  2.43600767577007E+00
  Reduced coordinates (xred)
- -1.49997757833364E-02 -1.49997757833364E-02 -1.49997757833364E-02
-  2.34999775783336E-01  2.34999775783336E-01  2.34999775783336E-01
+ -1.49997757833370E-02 -1.49997757833370E-02 -1.49997757833370E-02
+  2.34999775783337E-01  2.34999775783337E-01  2.34999775783337E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.60863E-06 1.60863E-06 (free atoms)
- -1.60863249680513E-06 -1.60863249680513E-06 -1.60863249680513E-06
-  1.60863249680513E-06  1.60863249680513E-06  1.60863249680513E-06
+ -1.60863250534155E-06 -1.60863250534155E-06 -1.60863250534155E-06
+  1.60863250534155E-06  1.60863250534155E-06  1.60863250534155E-06
  Reduced forces (fred)
-  1.66750844618820E-05  1.66750844618820E-05  1.66750844618820E-05
- -1.66750844618820E-05 -1.66750844618820E-05 -1.66750844618820E-05
- Total energy (etotal) [Ha]= -7.30491042172206E+00
+  1.66750845503705E-05  1.66750845503705E-05  1.66750845503705E-05
+ -1.66750845503705E-05 -1.66750845503705E-05 -1.66750845503705E-05
+ Total energy (etotal) [Ha]= -7.30491042172208E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-4.59367E-06
@@ -1463,26 +1464,26 @@ force_length_stats: {min:   2.78623322E-06, max:   2.78623322E-06, mean:   2.786
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   90.918E-18; max=  75.240E-17
+ Mean square residual over all n,k,spin=   90.917E-18; max=  75.240E-17
  reduced coordinates (array xred) for    2 atoms
       -0.014999775783     -0.014999775783     -0.014999775783
        0.234999775783      0.234999775783      0.234999775783
  rms dE/dt=  1.6675E-05; max dE/dt=  1.6675E-05; dE/dt below (all hartree)
-    1       0.000016675084      0.000016675084      0.000016675084
-    2      -0.000016675084     -0.000016675084     -0.000016675084
+    1       0.000016675085      0.000016675085      0.000016675085
+    2      -0.000016675085     -0.000016675085     -0.000016675085
 
  cartesian coordinates (angstrom) at end:
     1     -0.08228053423415    -0.08228053423415    -0.08228053423415
     2      1.28907974196782     1.28907974196782     1.28907974196782
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000160863250    -0.00000160863250    -0.00000160863250
-    2      0.00000160863250     0.00000160863250     0.00000160863250
+    1     -0.00000160863251    -0.00000160863251    -0.00000160863251
+    2      0.00000160863251     0.00000160863251     0.00000160863251
  frms,max,avg= 1.6086325E-06 1.6086325E-06   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00008271920190    -0.00008271920190    -0.00008271920190
-    2      0.00008271920190     0.00008271920190     0.00008271920190
+    1     -0.00008271920234    -0.00008271920234    -0.00008271920234
+    2      0.00008271920234     0.00008271920234     0.00008271920234
  frms,max,avg= 8.2719202E-05 8.2719202E-05   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.366000000000 10.366000000000 10.366000000000 bohr
               =  5.485450944244  5.485450944244  5.485450944244 angstroms
@@ -1501,16 +1502,16 @@ force_length_stats: {min:   2.78623322E-06, max:   2.78623322E-06, mean:   2.786
 --- !EnergyTerms
 iteration_state     : {dtset: 5, itime: 4, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.03530259064028E+00
-hartree             :  8.42601639612447E-01
-xc                  : -2.50138411292199E+00
+kinetic             :  4.03530259064004E+00
+hartree             :  8.42601639612383E-01
+xc                  : -2.50138411292197E+00
 Ewald energy        : -8.31456383428406E+00
 psp_core            : -1.04593088893961E-01
-local_psp           : -2.86840001932594E+00
-non_local_psp       :  1.60612640345117E+00
-total_energy        : -7.30491042172206E+00
-total_energy_eV     : -1.98776721548393E+02
-band_energy         :  1.19502935208683E+00
+local_psp           : -2.86840001932569E+00
+non_local_psp       :  1.60612640345118E+00
+total_energy        : -7.30491042172208E+00
+total_energy_eV     : -1.98776721548394E+02
+band_energy         :  1.19502935208684E+00
 ...
 
  rms coord change=  1.5000E-02   atom, delta coord (reduced):
@@ -1518,14 +1519,14 @@ band_energy         :  1.19502935208683E+00
      2        0.014999775783      0.014999775783      0.014999775783
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29214540E-09
-  sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29214540E-09
-  sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29214540E-09
+  sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29214511E-09
+  sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29214511E-09
+  sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29214511E-09
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.2895E+01 GPa]
-- sigma(1 1)= -3.28950789E+01  sigma(3 2)= -9.68582454E-05
-- sigma(2 2)= -3.28950789E+01  sigma(3 1)= -9.68582454E-05
-- sigma(3 3)= -3.28950789E+01  sigma(2 1)= -9.68582454E-05
+- sigma(1 1)= -3.28950789E+01  sigma(3 2)= -9.68582369E-05
+- sigma(2 2)= -3.28950789E+01  sigma(3 1)= -9.68582369E-05
+- sigma(3 3)= -3.28950789E+01  sigma(2 1)= -9.68582369E-05
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1586,7 +1587,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  4  -7.2585848183441    -6.457E-06 2.559E-09 1.158E-04 2.775E-05 1.083E-01
  ETOT  5  -7.2585848331385    -1.479E-08 1.938E-11 1.099E-06 2.200E-06 1.083E-01
  ETOT  6  -7.2585848333226    -1.842E-10 9.674E-14 3.261E-08 5.492E-07 1.083E-01
- ETOT  7  -7.2585848333285    -5.844E-12 7.285E-15 5.877E-10 1.713E-07 1.083E-01
+ ETOT  7  -7.2585848333285    -5.839E-12 7.285E-15 5.877E-10 1.713E-07 1.083E-01
 
  At SCF step    7, forces are converged : 
   for the second time, max diff in force=  1.713E-07 < toldff=  1.000E-06
@@ -1607,7 +1608,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -5.844E-12, res2:  5.877E-10, residm:  7.285E-15, diffor:  1.713E-07, }
+convergence: {deltae: -5.839E-12, res2:  5.877E-10, residm:  7.285E-15, diffor:  1.713E-07, }
 etotal    :  -7.25858483E+00
 entropy   :   0.00000000E+00
 fermie    :   3.01007145E-01
@@ -1665,7 +1666,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  4  -7.3011190738374    -3.382E-08 4.743E-12 3.151E-06 2.989E-05 2.743E-02
  ETOT  5  -7.3011190745427    -7.053E-10 4.158E-14 3.057E-08 1.896E-06 2.743E-02
  ETOT  6  -7.3011190745482    -5.484E-12 1.804E-15 7.943E-10 2.625E-07 2.743E-02
- ETOT  7  -7.3011190745484    -2.318E-13 5.450E-17 2.518E-12 1.139E-08 2.743E-02
+ ETOT  7  -7.3011190745484    -2.274E-13 5.450E-17 2.518E-12 1.139E-08 2.743E-02
 
  At SCF step    7, forces are converged : 
   for the second time, max diff in force=  1.139E-08 < toldff=  1.000E-06
@@ -1686,7 +1687,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -2.318E-13, res2:  2.518E-12, residm:  5.450E-17, diffor:  1.139E-08, }
+convergence: {deltae: -2.274E-13, res2:  2.518E-12, residm:  5.450E-17, diffor:  1.139E-08, }
 etotal    :  -7.30111907E+00
 entropy   :   0.00000000E+00
 fermie    :   3.24866611E-01
@@ -1719,11 +1720,11 @@ force_length_stats: {min:   4.75043221E-02, max:   4.75043221E-02, mean:   4.750
  -1.04511350045749E-02 -1.04511350045749E-02 -1.04511350045749E-02
   2.30451135004575E-01  2.30451135004575E-01  2.30451135004575E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.74266E-02 2.74266E-02 (free atoms)
- -2.74266331387869E-02 -2.74266331387869E-02 -2.74266331387869E-02
-  2.74266331387869E-02  2.74266331387869E-02  2.74266331387869E-02
+ -2.74266331387871E-02 -2.74266331387871E-02 -2.74266331387871E-02
+  2.74266331387871E-02  2.74266331387871E-02  2.74266331387871E-02
  Reduced forces (fred)
-  2.84304479116665E-01  2.84304479116665E-01  2.84304479116665E-01
- -2.84304479116665E-01 -2.84304479116665E-01 -2.84304479116665E-01
+  2.84304479116667E-01  2.84304479116667E-01  2.84304479116667E-01
+ -2.84304479116667E-01 -2.84304479116667E-01 -2.84304479116667E-01
  Total energy (etotal) [Ha]= -7.30111907454838E+00
 
  Difference of energy with previous step (new-old):
@@ -1747,7 +1748,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  3  -7.3049058256709    -4.257E-08 1.044E-10 1.011E-05 1.160E-06 9.088E-04
  ETOT  4  -7.3049058280205    -2.350E-09 2.721E-12 1.754E-07 1.579E-06 9.103E-04
  ETOT  5  -7.3049058280525    -3.202E-11 1.486E-14 9.410E-10 3.367E-07 9.107E-04
- ETOT  6  -7.3049058280527    -1.812E-13 8.133E-16 5.118E-12 7.279E-09 9.107E-04
+ ETOT  6  -7.3049058280527    -1.847E-13 8.133E-16 5.118E-12 7.279E-09 9.107E-04
 
  At SCF step    6, forces are converged : 
   for the second time, max diff in force=  7.279E-09 < toldff=  1.000E-06
@@ -1768,7 +1769,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -1.812E-13, res2:  5.118E-12, residm:  8.133E-16, diffor:  7.279E-09, }
+convergence: {deltae: -1.847E-13, res2:  5.118E-12, residm:  8.133E-16, diffor:  7.279E-09, }
 etotal    :  -7.30490583E+00
 entropy   :   0.00000000E+00
 fermie    :   3.29459133E-01
@@ -1795,17 +1796,17 @@ force_length_stats: {min:   1.57734131E-03, max:   1.57734131E-03, mean:   1.577
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.57170788879279E-01 -1.57170788879279E-01 -1.57170788879279E-01
-  2.43769078887928E+00  2.43769078887928E+00  2.43769078887928E+00
+ -1.57170788879263E-01 -1.57170788879263E-01 -1.57170788879263E-01
+  2.43769078887926E+00  2.43769078887926E+00  2.43769078887926E+00
  Reduced coordinates (xred)
- -1.51621444027859E-02 -1.51621444027859E-02 -1.51621444027859E-02
-  2.35162144402786E-01  2.35162144402786E-01  2.35162144402786E-01
+ -1.51621444027844E-02 -1.51621444027844E-02 -1.51621444027844E-02
+  2.35162144402784E-01  2.35162144402784E-01  2.35162144402784E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.10678E-04 9.10678E-04 (free atoms)
-  9.10678430585684E-04  9.10678430585684E-04  9.10678430585684E-04
- -9.10678430585684E-04 -9.10678430585684E-04 -9.10678430585684E-04
+  9.10678430576411E-04  9.10678430576411E-04  9.10678430576411E-04
+ -9.10678430576411E-04 -9.10678430576411E-04 -9.10678430576411E-04
  Reduced forces (fred)
- -9.44009261145120E-03 -9.44009261145120E-03 -9.44009261145120E-03
-  9.44009261145120E-03  9.44009261145120E-03  9.44009261145120E-03
+ -9.44009261135507E-03 -9.44009261135507E-03 -9.44009261135507E-03
+  9.44009261135507E-03  9.44009261135507E-03  9.44009261135507E-03
  Total energy (etotal) [Ha]= -7.30490582805270E+00
 
  Difference of energy with previous step (new-old):
@@ -1826,15 +1827,15 @@ tolerances: {toldff: 1.00E-06, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.3049104216012    -7.305E+00 4.323E-12 1.368E-06 9.120E-04 1.366E-06
  ETOT  2  -7.3049104217182    -1.170E-10 1.669E-16 2.499E-08 1.828E-07 1.548E-06
- ETOT  3  -7.3049104217221    -3.889E-12 7.524E-16 1.010E-09 6.025E-08 1.609E-06
+ ETOT  3  -7.3049104217221    -3.907E-12 7.524E-16 1.010E-09 6.025E-08 1.609E-06
 
  At SCF step    3, forces are converged : 
   for the second time, max diff in force=  6.025E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29214540E-09
-  sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29214540E-09
-  sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29214540E-09
+  sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29214511E-09
+  sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29214511E-09
+  sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29214511E-09
 
 
 --- !ResultsGS
@@ -1847,22 +1848,22 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -3.889E-12, res2:  1.010E-09, residm:  7.524E-16, diffor:  6.025E-08, }
+convergence: {deltae: -3.907E-12, res2:  1.010E-09, residm:  7.524E-16, diffor:  6.025E-08, }
 etotal    :  -7.30491042E+00
 entropy   :   0.00000000E+00
 fermie    :   3.29319495E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.11808120E-03,  -3.29214540E-09,  -3.29214540E-09, ]
-- [ -3.29214540E-09,  -1.11808120E-03,  -3.29214540E-09, ]
-- [ -3.29214540E-09,  -3.29214540E-09,  -1.11808120E-03, ]
+- [ -1.11808120E-03,  -3.29214511E-09,  -3.29214511E-09, ]
+- [ -3.29214511E-09,  -1.11808120E-03,  -3.29214511E-09, ]
+- [ -3.29214511E-09,  -3.29214511E-09,  -1.11808120E-03, ]
 pressure_GPa:   3.2895E+01
 xred      :
 - [ -1.5000E-02,  -1.5000E-02,  -1.5000E-02, Si]
 - [  2.3500E-01,   2.3500E-01,   2.3500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.60863250E-06,  -1.60863250E-06,  -1.60863250E-06, ]
-- [  1.60863250E-06,   1.60863250E-06,   1.60863250E-06, ]
-force_length_stats: {min:   2.78623322E-06, max:   2.78623322E-06, mean:   2.78623322E-06, }
+- [ -1.60863251E-06,  -1.60863251E-06,  -1.60863251E-06, ]
+- [  1.60863251E-06,   1.60863251E-06,   1.60863251E-06, ]
+force_length_stats: {min:   2.78623323E-06, max:   2.78623323E-06, mean:   2.78623323E-06, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1874,18 +1875,18 @@ force_length_stats: {min:   2.78623322E-06, max:   2.78623322E-06, mean:   2.786
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.55487675770065E-01 -1.55487675770065E-01 -1.55487675770065E-01
-  2.43600767577006E+00  2.43600767577006E+00  2.43600767577006E+00
+ -1.55487675770071E-01 -1.55487675770071E-01 -1.55487675770071E-01
+  2.43600767577007E+00  2.43600767577007E+00  2.43600767577007E+00
  Reduced coordinates (xred)
- -1.49997757833364E-02 -1.49997757833364E-02 -1.49997757833364E-02
-  2.34999775783336E-01  2.34999775783336E-01  2.34999775783336E-01
+ -1.49997757833370E-02 -1.49997757833370E-02 -1.49997757833370E-02
+  2.34999775783337E-01  2.34999775783337E-01  2.34999775783337E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.60863E-06 1.60863E-06 (free atoms)
- -1.60863249680513E-06 -1.60863249680513E-06 -1.60863249680513E-06
-  1.60863249680513E-06  1.60863249680513E-06  1.60863249680513E-06
+ -1.60863250534155E-06 -1.60863250534155E-06 -1.60863250534155E-06
+  1.60863250534155E-06  1.60863250534155E-06  1.60863250534155E-06
  Reduced forces (fred)
-  1.66750844618820E-05  1.66750844618820E-05  1.66750844618820E-05
- -1.66750844618820E-05 -1.66750844618820E-05 -1.66750844618820E-05
- Total energy (etotal) [Ha]= -7.30491042172206E+00
+  1.66750845503705E-05  1.66750845503705E-05  1.66750845503705E-05
+ -1.66750845503705E-05 -1.66750845503705E-05 -1.66750845503705E-05
+ Total energy (etotal) [Ha]= -7.30491042172208E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-4.59367E-06
@@ -1898,26 +1899,26 @@ force_length_stats: {min:   2.78623322E-06, max:   2.78623322E-06, mean:   2.786
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   90.918E-18; max=  75.240E-17
+ Mean square residual over all n,k,spin=   90.917E-18; max=  75.240E-17
  reduced coordinates (array xred) for    2 atoms
       -0.014999775783     -0.014999775783     -0.014999775783
        0.234999775783      0.234999775783      0.234999775783
  rms dE/dt=  1.6675E-05; max dE/dt=  1.6675E-05; dE/dt below (all hartree)
-    1       0.000016675084      0.000016675084      0.000016675084
-    2      -0.000016675084     -0.000016675084     -0.000016675084
+    1       0.000016675085      0.000016675085      0.000016675085
+    2      -0.000016675085     -0.000016675085     -0.000016675085
 
  cartesian coordinates (angstrom) at end:
     1     -0.08228053423415    -0.08228053423415    -0.08228053423415
     2      1.28907974196782     1.28907974196782     1.28907974196782
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000160863250    -0.00000160863250    -0.00000160863250
-    2      0.00000160863250     0.00000160863250     0.00000160863250
+    1     -0.00000160863251    -0.00000160863251    -0.00000160863251
+    2      0.00000160863251     0.00000160863251     0.00000160863251
  frms,max,avg= 1.6086325E-06 1.6086325E-06   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00008271920190    -0.00008271920190    -0.00008271920190
-    2      0.00008271920190     0.00008271920190     0.00008271920190
+    1     -0.00008271920234    -0.00008271920234    -0.00008271920234
+    2      0.00008271920234     0.00008271920234     0.00008271920234
  frms,max,avg= 8.2719202E-05 8.2719202E-05   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.366000000000 10.366000000000 10.366000000000 bohr
               =  5.485450944244  5.485450944244  5.485450944244 angstroms
@@ -1939,18 +1940,18 @@ force_length_stats: {min:   2.78623322E-06, max:   2.78623322E-06, mean:   2.786
 --- !EnergyTerms
 iteration_state     : {dtset: 6, itime: 4, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.03530259064028E+00
-hartree             :  8.42601639612447E-01
-xc                  : -2.50138411292199E+00
+kinetic             :  4.03530259064004E+00
+hartree             :  8.42601639612383E-01
+xc                  : -2.50138411292197E+00
 Ewald energy        : -8.31456383428406E+00
 psp_core            : -1.04593088893961E-01
-local_psp           : -2.86840001932594E+00
-non_local_psp       :  1.60612640345117E+00
-internal            : -7.30491042172206E+00
+local_psp           : -2.86840001932569E+00
+non_local_psp       :  1.60612640345118E+00
+internal            : -7.30491042172208E+00
 '-kT*entropy'       : -7.55261880796144E-19
-total_energy        : -7.30491042172206E+00
-total_energy_eV     : -1.98776721548393E+02
-band_energy         :  1.19502935208683E+00
+total_energy        : -7.30491042172208E+00
+total_energy_eV     : -1.98776721548394E+02
+band_energy         :  1.19502935208684E+00
 ...
 
  rms coord change=  1.5000E-02   atom, delta coord (reduced):
@@ -1958,14 +1959,14 @@ band_energy         :  1.19502935208683E+00
      2        0.014999775783      0.014999775783      0.014999775783
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29214540E-09
-  sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29214540E-09
-  sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29214540E-09
+  sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29214511E-09
+  sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29214511E-09
+  sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29214511E-09
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.2895E+01 GPa]
-- sigma(1 1)= -3.28950789E+01  sigma(3 2)= -9.68582454E-05
-- sigma(2 2)= -3.28950789E+01  sigma(3 1)= -9.68582454E-05
-- sigma(3 3)= -3.28950789E+01  sigma(2 1)= -9.68582454E-05
+- sigma(1 1)= -3.28950789E+01  sigma(3 2)= -9.68582369E-05
+- sigma(2 2)= -3.28950789E+01  sigma(3 1)= -9.68582369E-05
+- sigma(3 3)= -3.28950789E+01  sigma(2 1)= -9.68582369E-05
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -2026,9 +2027,9 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  4  -7.8994189633235    -3.109E-06 4.003E-06 1.785E-04 1.067E-04 5.853E-02
  ETOT  5  -7.8994190140632    -5.074E-08 5.183E-06 2.629E-07 1.520E-05 5.852E-02
  ETOT  6  -7.8994190142808    -2.176E-10 1.068E-06 3.023E-09 1.027E-06 5.852E-02
- ETOT  7  -7.8994190142823    -1.487E-12 8.325E-07 6.009E-11 1.658E-07 5.852E-02
- ETOT  8  -7.8994190142823    -3.020E-14 1.361E-07 1.067E-12 4.819E-09 5.852E-02
- ETOT  9  -7.8994190142823    -1.243E-14 6.902E-08 4.300E-15 4.726E-10 5.852E-02
+ ETOT  7  -7.8994190142823    -1.484E-12 8.325E-07 6.009E-11 1.658E-07 5.852E-02
+ ETOT  8  -7.8994190142823    -2.753E-14 1.361E-07 1.067E-12 4.819E-09 5.852E-02
+ ETOT  9  -7.8994190142823    -1.688E-14 6.902E-08 4.300E-15 4.726E-10 5.852E-02
 
  At SCF step    9, forces are converged : 
   for the second time, max diff in force=  4.726E-10 < toldff=  1.000E-07
@@ -2049,7 +2050,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -1.243E-14, res2:  4.300E-15, residm:  6.902E-08, diffor:  4.726E-10, }
+convergence: {deltae: -1.688E-14, res2:  4.300E-15, residm:  6.902E-08, diffor:  4.726E-10, }
 etotal    :  -7.89941901E+00
 entropy   :   0.00000000E+00
 fermie    :   2.24581390E-01
@@ -2082,11 +2083,11 @@ force_length_stats: {min:   1.01353513E-01, max:   1.01353513E-01, mean:   1.013
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.20000000000000E-01  2.20000000000000E-01  2.20000000000000E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.85165E-02 5.85165E-02 (free atoms)
- -5.85164777852213E-02 -5.85164777852213E-02 -5.85164777852213E-02
-  5.85164777852213E-02  5.85164777852213E-02  5.85164777852213E-02
+ -5.85164777852214E-02 -5.85164777852214E-02 -5.85164777852214E-02
+  5.85164777852214E-02  5.85164777852214E-02  5.85164777852214E-02
  Reduced forces (fred)
-  6.06581808721604E-01  6.06581808721604E-01  6.06581808721604E-01
- -6.06581808721604E-01 -6.06581808721604E-01 -6.06581808721604E-01
+  6.06581808721605E-01  6.06581808721605E-01  6.06581808721605E-01
+ -6.06581808721605E-01 -6.06581808721605E-01 -6.06581808721605E-01
  Total energy (etotal) [Ha]= -7.89941901428234E+00
 
 --- Iteration: (2/5) Internal Cycle: (1/1)
@@ -2105,10 +2106,10 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  2  -7.9150505947073    -1.483E-04 2.868E-07 1.518E-03 1.244E-05 3.142E-02
  ETOT  3  -7.9150512333374    -6.386E-07 6.166E-08 7.641E-05 2.125E-04 3.163E-02
  ETOT  4  -7.9150512561877    -2.285E-08 4.066E-08 1.886E-06 1.315E-05 3.164E-02
- ETOT  5  -7.9150512566399    -4.522E-10 7.646E-09 1.258E-08 6.839E-07 3.164E-02
- ETOT  6  -7.9150512566432    -3.264E-12 1.867E-08 9.949E-11 2.356E-07 3.164E-02
- ETOT  7  -7.9150512566433    -6.928E-14 3.174E-09 9.281E-13 2.714E-08 3.164E-02
- ETOT  8  -7.9150512566433     1.865E-14 2.441E-09 1.263E-14 3.611E-10 3.164E-02
+ ETOT  5  -7.9150512566399    -4.523E-10 7.646E-09 1.258E-08 6.839E-07 3.164E-02
+ ETOT  6  -7.9150512566432    -3.271E-12 1.867E-08 9.949E-11 2.356E-07 3.164E-02
+ ETOT  7  -7.9150512566433    -6.395E-14 3.174E-09 9.281E-13 2.714E-08 3.164E-02
+ ETOT  8  -7.9150512566433     2.220E-14 2.441E-09 1.263E-14 3.611E-10 3.164E-02
 
  At SCF step    8, forces are converged : 
   for the second time, max diff in force=  3.611E-10 < toldff=  1.000E-07
@@ -2129,7 +2130,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae:  1.865E-14, res2:  1.263E-14, residm:  2.441E-09, diffor:  3.611E-10, }
+convergence: {deltae:  2.220E-14, res2:  1.263E-14, residm:  2.441E-09, diffor:  3.611E-10, }
 etotal    :  -7.91505126E+00
 entropy   :   0.00000000E+00
 fermie    :   2.15021596E-01
@@ -2159,7 +2160,7 @@ force_length_stats: {min:   5.48040605E-02, max:   5.48040605E-02, mean:   5.480
  -5.85164777852213E-02 -5.85164777852213E-02 -5.85164777852213E-02
   2.33903647778522E+00  2.33903647778522E+00  2.33903647778522E+00
  Reduced coordinates (xred)
- -5.64503933872480E-03 -5.64503933872480E-03 -5.64503933872480E-03
+ -5.64503933872481E-03 -5.64503933872481E-03 -5.64503933872481E-03
   2.25645039338725E-01  2.25645039338725E-01  2.25645039338725E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.16411E-02 3.16411E-02 (free atoms)
  -3.16411390742629E-02 -3.16411390742629E-02 -3.16411390742629E-02
@@ -2190,7 +2191,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  3  -7.9235528063748    -4.868E-07 1.205E-05 8.642E-05 1.724E-05 4.754E-04
  ETOT  4  -7.9235528301391    -2.376E-08 9.094E-04 1.470E-06 5.349E-08 4.753E-04
  ETOT  5  -7.9235528304705    -3.313E-10 4.607E-06 1.428E-08 5.795E-07 4.759E-04
- ETOT  6  -7.9235528304741    -3.680E-12 1.435E-06 5.181E-11 1.569E-08 4.759E-04
+ ETOT  6  -7.9235528304741    -3.681E-12 1.435E-06 5.181E-11 1.569E-08 4.759E-04
  ETOT  7  -7.9235528304741     1.776E-15 6.650E-07 1.457E-12 7.899E-09 4.759E-04
 
  At SCF step    7, forces are converged : 
@@ -2225,8 +2226,8 @@ xred      :
 - [ -1.5181E-02,  -1.5181E-02,  -1.5181E-02, Si]
 - [  2.3518E-01,   2.3518E-01,   2.3518E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  4.75918529E-04,   4.75918529E-04,   4.75918529E-04, ]
-- [ -4.75918529E-04,  -4.75918529E-04,  -4.75918529E-04, ]
+- [  4.75918530E-04,   4.75918530E-04,   4.75918530E-04, ]
+- [ -4.75918530E-04,  -4.75918530E-04,  -4.75918530E-04, ]
 force_length_stats: {min:   8.24315073E-04, max:   8.24315073E-04, mean:   8.24315073E-04, }
 ...
 
@@ -2239,18 +2240,18 @@ force_length_stats: {min:   8.24315073E-04, max:   8.24315073E-04, mean:   8.243
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.57369533915142E-01 -1.57369533915142E-01 -1.57369533915142E-01
-  2.43788953391514E+00  2.43788953391514E+00  2.43788953391514E+00
+ -1.57369533916517E-01 -1.57369533916517E-01 -1.57369533916517E-01
+  2.43788953391652E+00  2.43788953391652E+00  2.43788953391652E+00
  Reduced coordinates (xred)
- -1.51813171826300E-02 -1.51813171826300E-02 -1.51813171826300E-02
-  2.35181317182630E-01  2.35181317182630E-01  2.35181317182630E-01
+ -1.51813171827626E-02 -1.51813171827626E-02 -1.51813171827626E-02
+  2.35181317182762E-01  2.35181317182762E-01  2.35181317182762E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.75919E-04 4.75919E-04 (free atoms)
-  4.75918529165750E-04  4.75918529165750E-04  4.75918529165750E-04
- -4.75918529165750E-04 -4.75918529165750E-04 -4.75918529165750E-04
+  4.75918529511425E-04  4.75918529511425E-04  4.75918529511425E-04
+ -4.75918529511425E-04 -4.75918529511425E-04 -4.75918529511425E-04
  Reduced forces (fred)
- -4.93337147333217E-03 -4.93337147333217E-03 -4.93337147333217E-03
-  4.93337147333217E-03  4.93337147333217E-03  4.93337147333217E-03
- Total energy (etotal) [Ha]= -7.92355283047413E+00
+ -4.93337147691543E-03 -4.93337147691543E-03 -4.93337147691543E-03
+  4.93337147691543E-03  4.93337147691543E-03  4.93337147691543E-03
+ Total energy (etotal) [Ha]= -7.92355283047414E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-8.50157E-03
@@ -2270,17 +2271,17 @@ tolerances: {toldff: 1.00E-07, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.9235555153524    -7.924E+00 5.080E-08 1.031E-05 4.785E-04 2.609E-06
  ETOT  2  -7.9235555181793    -2.827E-09 1.252E-08 1.743E-07 3.009E-06 4.007E-07
- ETOT  3  -7.9235555182221    -4.285E-11 7.156E-09 7.010E-09 2.355E-07 1.652E-07
- ETOT  4  -7.9235555182241    -1.943E-12 3.592E-09 1.232E-10 2.834E-09 1.623E-07
- ETOT  5  -7.9235555182241    -1.155E-14 1.933E-09 1.249E-12 3.991E-09 1.583E-07
+ ETOT  3  -7.9235555182222    -4.288E-11 7.156E-09 7.010E-09 2.355E-07 1.652E-07
+ ETOT  4  -7.9235555182241    -1.917E-12 3.592E-09 1.232E-10 2.834E-09 1.623E-07
+ ETOT  5  -7.9235555182241    -1.421E-14 1.933E-09 1.249E-12 3.991E-09 1.583E-07
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  3.991E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38051529E-10
-  sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38051529E-10
-  sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38051529E-10
+  sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38051546E-10
+  sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38051546E-10
+  sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38051546E-10
 
 
 --- !ResultsGS
@@ -2293,22 +2294,22 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -1.155E-14, res2:  1.249E-12, residm:  1.933E-09, diffor:  3.991E-09, }
+convergence: {deltae: -1.421E-14, res2:  1.249E-12, residm:  1.933E-09, diffor:  3.991E-09, }
 etotal    :  -7.92355552E+00
 entropy   :   0.00000000E+00
 fermie    :   1.98262008E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.48837604E-04,   7.38051529E-10,   7.38051529E-10, ]
-- [  7.38051529E-10,   1.48837604E-04,   7.38051529E-10, ]
-- [  7.38051529E-10,   7.38051529E-10,   1.48837604E-04, ]
+- [  1.48837604E-04,   7.38051546E-10,   7.38051546E-10, ]
+- [  7.38051546E-10,   1.48837604E-04,   7.38051546E-10, ]
+- [  7.38051546E-10,   7.38051546E-10,   1.48837604E-04, ]
 pressure_GPa:  -4.3790E+00
 xred      :
 - [ -1.5000E-02,  -1.5000E-02,  -1.5000E-02, Si]
 - [  2.3500E-01,   2.3500E-01,   2.3500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  1.58343465E-07,   1.58343465E-07,   1.58343465E-07, ]
-- [ -1.58343465E-07,  -1.58343465E-07,  -1.58343465E-07, ]
-force_length_stats: {min:   2.74258926E-07, max:   2.74258926E-07, mean:   2.74258926E-07, }
+- [  1.58343468E-07,   1.58343468E-07,   1.58343468E-07, ]
+- [ -1.58343468E-07,  -1.58343468E-07,  -1.58343468E-07, ]
+force_length_stats: {min:   2.74258932E-07, max:   2.74258932E-07, mean:   2.74258932E-07, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2320,18 +2321,18 @@ force_length_stats: {min:   2.74258926E-07, max:   2.74258926E-07, mean:   2.742
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.55490864728106E-01 -1.55490864728106E-01 -1.55490864728106E-01
-  2.43601086472811E+00  2.43601086472811E+00  2.43601086472811E+00
+ -1.55490864728118E-01 -1.55490864728118E-01 -1.55490864728118E-01
+  2.43601086472812E+00  2.43601086472812E+00  2.43601086472812E+00
  Reduced coordinates (xred)
- -1.50000834196514E-02 -1.50000834196514E-02 -1.50000834196514E-02
-  2.35000083419651E-01  2.35000083419651E-01  2.35000083419651E-01
+ -1.50000834196525E-02 -1.50000834196525E-02 -1.50000834196525E-02
+  2.35000083419652E-01  2.35000083419652E-01  2.35000083419652E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.58343E-07 1.58343E-07 (free atoms)
-  1.58343464507644E-07  1.58343464507644E-07  1.58343464507644E-07
- -1.58343464507644E-07 -1.58343464507644E-07 -1.58343464507644E-07
+  1.58343468176643E-07  1.58343468176643E-07  1.58343468176643E-07
+ -1.58343468176643E-07 -1.58343468176643E-07 -1.58343468176643E-07
  Reduced forces (fred)
- -1.64138835308624E-06 -1.64138835308624E-06 -1.64138835308624E-06
-  1.64138835308624E-06  1.64138835308624E-06  1.64138835308624E-06
- Total energy (etotal) [Ha]= -7.92355551822409E+00
+ -1.64138839111908E-06 -1.64138839111908E-06 -1.64138839111908E-06
+  1.64138839111908E-06  1.64138839111908E-06  1.64138839111908E-06
+ Total energy (etotal) [Ha]= -7.92355551822410E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.68775E-06
@@ -2353,18 +2354,18 @@ force_length_stats: {min:   2.74258926E-07, max:   2.74258926E-07, mean:   2.742
     2       0.000001641388      0.000001641388      0.000001641388
 
  cartesian coordinates (angstrom) at end:
-    1     -0.08228222175806    -0.08228222175806    -0.08228222175806
-    2      1.28908142949173     1.28908142949173     1.28908142949173
+    1     -0.08228222175807    -0.08228222175807    -0.08228222175807
+    2      1.28908142949174     1.28908142949174     1.28908142949174
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000015834346     0.00000015834346     0.00000015834346
-    2     -0.00000015834346    -0.00000015834346    -0.00000015834346
- frms,max,avg= 1.5834346E-07 1.5834346E-07   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000015834347     0.00000015834347     0.00000015834347
+    2     -0.00000015834347    -0.00000015834347    -0.00000015834347
+ frms,max,avg= 1.5834347E-07 1.5834347E-07   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000814234764     0.00000814234764     0.00000814234764
-    2     -0.00000814234764    -0.00000814234764    -0.00000814234764
- frms,max,avg= 8.1423476E-06 8.1423476E-06   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000814234783     0.00000814234783     0.00000814234783
+    2     -0.00000814234783    -0.00000814234783    -0.00000814234783
+ frms,max,avg= 8.1423478E-06 8.1423478E-06   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.366000000000 10.366000000000 10.366000000000 bohr
               =  5.485450944244  5.485450944244  5.485450944244 angstroms
  prteigrs : about to open file t21_MPI4o_DS7_EIG
@@ -2387,15 +2388,15 @@ force_length_stats: {min:   2.74258926E-07, max:   2.74258926E-07, mean:   2.742
 iteration_state     : {dtset: 7, itime: 4, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.04405880678089E+00
-hartree             :  5.69182400540780E-01
+hartree             :  5.69182400540781E-01
 xc                  : -2.38288567128887E+00
 Ewald energy        : -8.31456383429078E+00
 psp_core            : -1.04593088893961E-01
-local_psp           : -2.49534829507899E+00
+local_psp           : -2.49534829507900E+00
 non_local_psp       :  1.76059416400684E+00
-total_energy        : -7.92355551822409E+00
+total_energy        : -7.92355551822410E+00
 total_energy_eV     : -2.15610910742417E+02
-band_energy         :  3.40453014982658E-01
+band_energy         :  3.40453014982668E-01
 ...
 
  rms coord change=  1.5000E-02   atom, delta coord (reduced):
@@ -2403,14 +2404,14 @@ band_energy         :  3.40453014982658E-01
      2        0.015000083420      0.015000083420      0.015000083420
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38051529E-10
-  sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38051529E-10
-  sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38051529E-10
+  sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38051546E-10
+  sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38051546E-10
+  sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38051546E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.3790E+00 GPa]
-- sigma(1 1)=  4.37895275E+00  sigma(3 2)=  2.17142220E-05
-- sigma(2 2)=  4.37895275E+00  sigma(3 1)=  2.17142220E-05
-- sigma(3 3)=  4.37895275E+00  sigma(2 1)=  2.17142220E-05
+- sigma(1 1)=  4.37895275E+00  sigma(3 2)=  2.17142225E-05
+- sigma(2 2)=  4.37895275E+00  sigma(3 1)=  2.17142225E-05
+- sigma(3 3)=  4.37895275E+00  sigma(2 1)=  2.17142225E-05
 
 ================================================================================
 == DATASET  8 ==================================================================
@@ -2471,9 +2472,9 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  4  -7.8994189633235    -3.109E-06 4.003E-06 1.785E-04 1.067E-04 5.853E-02
  ETOT  5  -7.8994190140632    -5.074E-08 5.183E-06 2.629E-07 1.520E-05 5.852E-02
  ETOT  6  -7.8994190142808    -2.176E-10 1.068E-06 3.023E-09 1.027E-06 5.852E-02
- ETOT  7  -7.8994190142823    -1.487E-12 8.325E-07 6.009E-11 1.658E-07 5.852E-02
- ETOT  8  -7.8994190142823    -3.020E-14 1.361E-07 1.067E-12 4.819E-09 5.852E-02
- ETOT  9  -7.8994190142823    -1.243E-14 6.902E-08 4.300E-15 4.726E-10 5.852E-02
+ ETOT  7  -7.8994190142823    -1.484E-12 8.325E-07 6.009E-11 1.658E-07 5.852E-02
+ ETOT  8  -7.8994190142823    -2.753E-14 1.361E-07 1.067E-12 4.819E-09 5.852E-02
+ ETOT  9  -7.8994190142823    -1.688E-14 6.902E-08 4.300E-15 4.726E-10 5.852E-02
 
  At SCF step    9, forces are converged : 
   for the second time, max diff in force=  4.726E-10 < toldff=  1.000E-07
@@ -2494,7 +2495,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -1.243E-14, res2:  4.300E-15, residm:  6.902E-08, diffor:  4.726E-10, }
+convergence: {deltae: -1.688E-14, res2:  4.300E-15, residm:  6.902E-08, diffor:  4.726E-10, }
 etotal    :  -7.89941901E+00
 entropy   :   0.00000000E+00
 fermie    :   2.36351668E-01
@@ -2527,11 +2528,11 @@ force_length_stats: {min:   1.01353513E-01, max:   1.01353513E-01, mean:   1.013
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.20000000000000E-01  2.20000000000000E-01  2.20000000000000E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.85165E-02 5.85165E-02 (free atoms)
- -5.85164777852213E-02 -5.85164777852213E-02 -5.85164777852213E-02
-  5.85164777852213E-02  5.85164777852213E-02  5.85164777852213E-02
+ -5.85164777852214E-02 -5.85164777852214E-02 -5.85164777852214E-02
+  5.85164777852214E-02  5.85164777852214E-02  5.85164777852214E-02
  Reduced forces (fred)
-  6.06581808721604E-01  6.06581808721604E-01  6.06581808721604E-01
- -6.06581808721604E-01 -6.06581808721604E-01 -6.06581808721604E-01
+  6.06581808721605E-01  6.06581808721605E-01  6.06581808721605E-01
+ -6.06581808721605E-01 -6.06581808721605E-01 -6.06581808721605E-01
  Total energy (etotal) [Ha]= -7.89941901428234E+00
 
 --- Iteration: (2/5) Internal Cycle: (1/1)
@@ -2550,10 +2551,10 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  2  -7.9150505947073    -1.483E-04 2.868E-07 1.518E-03 1.244E-05 3.142E-02
  ETOT  3  -7.9150512333374    -6.386E-07 6.166E-08 7.641E-05 2.125E-04 3.163E-02
  ETOT  4  -7.9150512561877    -2.285E-08 4.066E-08 1.886E-06 1.315E-05 3.164E-02
- ETOT  5  -7.9150512566399    -4.522E-10 7.646E-09 1.258E-08 6.839E-07 3.164E-02
- ETOT  6  -7.9150512566432    -3.264E-12 1.867E-08 9.949E-11 2.356E-07 3.164E-02
- ETOT  7  -7.9150512566433    -6.928E-14 3.174E-09 9.281E-13 2.714E-08 3.164E-02
- ETOT  8  -7.9150512566433     1.865E-14 2.441E-09 1.263E-14 3.611E-10 3.164E-02
+ ETOT  5  -7.9150512566399    -4.523E-10 7.646E-09 1.258E-08 6.839E-07 3.164E-02
+ ETOT  6  -7.9150512566432    -3.271E-12 1.867E-08 9.949E-11 2.356E-07 3.164E-02
+ ETOT  7  -7.9150512566433    -6.395E-14 3.174E-09 9.281E-13 2.714E-08 3.164E-02
+ ETOT  8  -7.9150512566433     2.220E-14 2.441E-09 1.263E-14 3.611E-10 3.164E-02
 
  At SCF step    8, forces are converged : 
   for the second time, max diff in force=  3.611E-10 < toldff=  1.000E-07
@@ -2574,7 +2575,7 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae:  1.865E-14, res2:  1.263E-14, residm:  2.441E-09, diffor:  3.611E-10, }
+convergence: {deltae:  2.220E-14, res2:  1.263E-14, residm:  2.441E-09, diffor:  3.611E-10, }
 etotal    :  -7.91505126E+00
 entropy   :   0.00000000E+00
 fermie    :   2.50376786E-01
@@ -2604,7 +2605,7 @@ force_length_stats: {min:   5.48040605E-02, max:   5.48040605E-02, mean:   5.480
  -5.85164777852213E-02 -5.85164777852213E-02 -5.85164777852213E-02
   2.33903647778522E+00  2.33903647778522E+00  2.33903647778522E+00
  Reduced coordinates (xred)
- -5.64503933872480E-03 -5.64503933872480E-03 -5.64503933872480E-03
+ -5.64503933872481E-03 -5.64503933872481E-03 -5.64503933872481E-03
   2.25645039338725E-01  2.25645039338725E-01  2.25645039338725E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.16411E-02 3.16411E-02 (free atoms)
  -3.16411390742629E-02 -3.16411390742629E-02 -3.16411390742629E-02
@@ -2635,7 +2636,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  3  -7.9235528063748    -4.868E-07 1.205E-05 8.642E-05 1.724E-05 4.754E-04
  ETOT  4  -7.9235528301391    -2.376E-08 9.094E-04 1.470E-06 5.349E-08 4.753E-04
  ETOT  5  -7.9235528304705    -3.313E-10 4.607E-06 1.428E-08 5.795E-07 4.759E-04
- ETOT  6  -7.9235528304741    -3.680E-12 1.435E-06 5.181E-11 1.569E-08 4.759E-04
+ ETOT  6  -7.9235528304741    -3.681E-12 1.435E-06 5.181E-11 1.569E-08 4.759E-04
  ETOT  7  -7.9235528304741     1.776E-15 6.650E-07 1.457E-12 7.899E-09 4.759E-04
 
  At SCF step    7, forces are converged : 
@@ -2670,8 +2671,8 @@ xred      :
 - [ -1.5181E-02,  -1.5181E-02,  -1.5181E-02, Si]
 - [  2.3518E-01,   2.3518E-01,   2.3518E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  4.75918529E-04,   4.75918529E-04,   4.75918529E-04, ]
-- [ -4.75918529E-04,  -4.75918529E-04,  -4.75918529E-04, ]
+- [  4.75918530E-04,   4.75918530E-04,   4.75918530E-04, ]
+- [ -4.75918530E-04,  -4.75918530E-04,  -4.75918530E-04, ]
 force_length_stats: {min:   8.24315073E-04, max:   8.24315073E-04, mean:   8.24315073E-04, }
 ...
 
@@ -2684,18 +2685,18 @@ force_length_stats: {min:   8.24315073E-04, max:   8.24315073E-04, mean:   8.243
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.57369533915142E-01 -1.57369533915142E-01 -1.57369533915142E-01
-  2.43788953391514E+00  2.43788953391514E+00  2.43788953391514E+00
+ -1.57369533916517E-01 -1.57369533916517E-01 -1.57369533916517E-01
+  2.43788953391652E+00  2.43788953391652E+00  2.43788953391652E+00
  Reduced coordinates (xred)
- -1.51813171826300E-02 -1.51813171826300E-02 -1.51813171826300E-02
-  2.35181317182630E-01  2.35181317182630E-01  2.35181317182630E-01
+ -1.51813171827626E-02 -1.51813171827626E-02 -1.51813171827626E-02
+  2.35181317182762E-01  2.35181317182762E-01  2.35181317182762E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.75919E-04 4.75919E-04 (free atoms)
-  4.75918529165750E-04  4.75918529165750E-04  4.75918529165750E-04
- -4.75918529165750E-04 -4.75918529165750E-04 -4.75918529165750E-04
+  4.75918529511425E-04  4.75918529511425E-04  4.75918529511425E-04
+ -4.75918529511425E-04 -4.75918529511425E-04 -4.75918529511425E-04
  Reduced forces (fred)
- -4.93337147333217E-03 -4.93337147333217E-03 -4.93337147333217E-03
-  4.93337147333217E-03  4.93337147333217E-03  4.93337147333217E-03
- Total energy (etotal) [Ha]= -7.92355283047413E+00
+ -4.93337147691543E-03 -4.93337147691543E-03 -4.93337147691543E-03
+  4.93337147691543E-03  4.93337147691543E-03  4.93337147691543E-03
+ Total energy (etotal) [Ha]= -7.92355283047414E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-8.50157E-03
@@ -2715,17 +2716,17 @@ tolerances: {toldff: 1.00E-07, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.9235555153524    -7.924E+00 5.080E-08 1.031E-05 4.785E-04 2.609E-06
  ETOT  2  -7.9235555181793    -2.827E-09 1.252E-08 1.743E-07 3.009E-06 4.007E-07
- ETOT  3  -7.9235555182221    -4.285E-11 7.156E-09 7.010E-09 2.355E-07 1.652E-07
- ETOT  4  -7.9235555182241    -1.943E-12 3.592E-09 1.232E-10 2.834E-09 1.623E-07
- ETOT  5  -7.9235555182241    -1.155E-14 1.933E-09 1.249E-12 3.991E-09 1.583E-07
+ ETOT  3  -7.9235555182222    -4.288E-11 7.156E-09 7.010E-09 2.355E-07 1.652E-07
+ ETOT  4  -7.9235555182241    -1.917E-12 3.592E-09 1.232E-10 2.834E-09 1.623E-07
+ ETOT  5  -7.9235555182241    -1.421E-14 1.933E-09 1.249E-12 3.991E-09 1.583E-07
 
  At SCF step    5, forces are converged : 
   for the second time, max diff in force=  3.991E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38051529E-10
-  sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38051529E-10
-  sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38051529E-10
+  sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38051546E-10
+  sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38051546E-10
+  sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38051546E-10
 
 
 --- !ResultsGS
@@ -2738,22 +2739,22 @@ lattice_vectors:
 lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7846693E+02
-convergence: {deltae: -1.155E-14, res2:  1.249E-12, residm:  1.933E-09, diffor:  3.991E-09, }
+convergence: {deltae: -1.421E-14, res2:  1.249E-12, residm:  1.933E-09, diffor:  3.991E-09, }
 etotal    :  -7.92355552E+00
 entropy   :   0.00000000E+00
 fermie    :   2.48652253E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.48837604E-04,   7.38051529E-10,   7.38051529E-10, ]
-- [  7.38051529E-10,   1.48837604E-04,   7.38051529E-10, ]
-- [  7.38051529E-10,   7.38051529E-10,   1.48837604E-04, ]
+- [  1.48837604E-04,   7.38051546E-10,   7.38051546E-10, ]
+- [  7.38051546E-10,   1.48837604E-04,   7.38051546E-10, ]
+- [  7.38051546E-10,   7.38051546E-10,   1.48837604E-04, ]
 pressure_GPa:  -4.3790E+00
 xred      :
 - [ -1.5000E-02,  -1.5000E-02,  -1.5000E-02, Si]
 - [  2.3500E-01,   2.3500E-01,   2.3500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  1.58343465E-07,   1.58343465E-07,   1.58343465E-07, ]
-- [ -1.58343465E-07,  -1.58343465E-07,  -1.58343465E-07, ]
-force_length_stats: {min:   2.74258926E-07, max:   2.74258926E-07, mean:   2.74258926E-07, }
+- [  1.58343468E-07,   1.58343468E-07,   1.58343468E-07, ]
+- [ -1.58343468E-07,  -1.58343468E-07,  -1.58343468E-07, ]
+force_length_stats: {min:   2.74258932E-07, max:   2.74258932E-07, mean:   2.74258932E-07, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2765,18 +2766,18 @@ force_length_stats: {min:   2.74258926E-07, max:   2.74258926E-07, mean:   2.742
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.55490864728106E-01 -1.55490864728106E-01 -1.55490864728106E-01
-  2.43601086472811E+00  2.43601086472811E+00  2.43601086472811E+00
+ -1.55490864728118E-01 -1.55490864728118E-01 -1.55490864728118E-01
+  2.43601086472812E+00  2.43601086472812E+00  2.43601086472812E+00
  Reduced coordinates (xred)
- -1.50000834196514E-02 -1.50000834196514E-02 -1.50000834196514E-02
-  2.35000083419651E-01  2.35000083419651E-01  2.35000083419651E-01
+ -1.50000834196525E-02 -1.50000834196525E-02 -1.50000834196525E-02
+  2.35000083419652E-01  2.35000083419652E-01  2.35000083419652E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.58343E-07 1.58343E-07 (free atoms)
-  1.58343464507644E-07  1.58343464507644E-07  1.58343464507644E-07
- -1.58343464507644E-07 -1.58343464507644E-07 -1.58343464507644E-07
+  1.58343468176643E-07  1.58343468176643E-07  1.58343468176643E-07
+ -1.58343468176643E-07 -1.58343468176643E-07 -1.58343468176643E-07
  Reduced forces (fred)
- -1.64138835308624E-06 -1.64138835308624E-06 -1.64138835308624E-06
-  1.64138835308624E-06  1.64138835308624E-06  1.64138835308624E-06
- Total energy (etotal) [Ha]= -7.92355551822409E+00
+ -1.64138839111908E-06 -1.64138839111908E-06 -1.64138839111908E-06
+  1.64138839111908E-06  1.64138839111908E-06  1.64138839111908E-06
+ Total energy (etotal) [Ha]= -7.92355551822410E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.68775E-06
@@ -2798,18 +2799,18 @@ force_length_stats: {min:   2.74258926E-07, max:   2.74258926E-07, mean:   2.742
     2       0.000001641388      0.000001641388      0.000001641388
 
  cartesian coordinates (angstrom) at end:
-    1     -0.08228222175806    -0.08228222175806    -0.08228222175806
-    2      1.28908142949173     1.28908142949173     1.28908142949173
+    1     -0.08228222175807    -0.08228222175807    -0.08228222175807
+    2      1.28908142949174     1.28908142949174     1.28908142949174
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000015834346     0.00000015834346     0.00000015834346
-    2     -0.00000015834346    -0.00000015834346    -0.00000015834346
- frms,max,avg= 1.5834346E-07 1.5834346E-07   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000015834347     0.00000015834347     0.00000015834347
+    2     -0.00000015834347    -0.00000015834347    -0.00000015834347
+ frms,max,avg= 1.5834347E-07 1.5834347E-07   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000814234764     0.00000814234764     0.00000814234764
-    2     -0.00000814234764    -0.00000814234764    -0.00000814234764
- frms,max,avg= 8.1423476E-06 8.1423476E-06   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000814234783     0.00000814234783     0.00000814234783
+    2     -0.00000814234783    -0.00000814234783    -0.00000814234783
+ frms,max,avg= 8.1423478E-06 8.1423478E-06   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.366000000000 10.366000000000 10.366000000000 bohr
               =  5.485450944244  5.485450944244  5.485450944244 angstroms
  prteigrs : about to open file t21_MPI4o_DS8_EIG
@@ -2835,17 +2836,17 @@ force_length_stats: {min:   2.74258926E-07, max:   2.74258926E-07, mean:   2.742
 iteration_state     : {dtset: 8, itime: 4, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.04405880678089E+00
-hartree             :  5.69182400540780E-01
+hartree             :  5.69182400540781E-01
 xc                  : -2.38288567128887E+00
 Ewald energy        : -8.31456383429078E+00
 psp_core            : -1.04593088893961E-01
-local_psp           : -2.49534829507899E+00
+local_psp           : -2.49534829507900E+00
 non_local_psp       :  1.76059416400684E+00
-internal            : -7.92355551822409E+00
+internal            : -7.92355551822410E+00
 '-kT*entropy'       : -7.55261880796144E-19
-total_energy        : -7.92355551822409E+00
+total_energy        : -7.92355551822410E+00
 total_energy_eV     : -2.15610910742417E+02
-band_energy         :  3.40453014982658E-01
+band_energy         :  3.40453014982668E-01
 ...
 
  rms coord change=  1.5000E-02   atom, delta coord (reduced):
@@ -2853,14 +2854,14 @@ band_energy         :  3.40453014982658E-01
      2        0.015000083420      0.015000083420      0.015000083420
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38051529E-10
-  sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38051529E-10
-  sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38051529E-10
+  sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38051546E-10
+  sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38051546E-10
+  sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38051546E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.3790E+00 GPa]
-- sigma(1 1)=  4.37895275E+00  sigma(3 2)=  2.17142220E-05
-- sigma(2 2)=  4.37895275E+00  sigma(3 1)=  2.17142220E-05
-- sigma(3 3)=  4.37895275E+00  sigma(2 1)=  2.17142220E-05
+- sigma(1 1)=  4.37895275E+00  sigma(3 2)=  2.17142225E-05
+- sigma(2 2)=  4.37895275E+00  sigma(3 1)=  2.17142225E-05
+- sigma(3 3)=  4.37895275E+00  sigma(2 1)=  2.17142225E-05
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2869,6 +2870,7 @@ band_energy         :  3.40453014982658E-01
 -          iomode           1
             acell      1.0366000000E+01  1.0366000000E+01  1.0366000000E+01 Bohr
               amu      2.80855000E+01
+      chksymtnons           0
      densfor_pred           6
            diemac      1.20000000E+01
              ecut      1.00000000E+01 Hartree
@@ -2889,14 +2891,14 @@ band_energy         :  3.40453014982658E-01
                        5.8516478258E-02  5.8516478258E-02  5.8516478258E-02
             fcart4    -5.8516478258E-02 -5.8516478258E-02 -5.8516478258E-02
                        5.8516478258E-02  5.8516478258E-02  5.8516478258E-02
-            fcart5    -1.6086324968E-06 -1.6086324968E-06 -1.6086324968E-06
-                       1.6086324968E-06  1.6086324968E-06  1.6086324968E-06
-            fcart6    -1.6086324968E-06 -1.6086324968E-06 -1.6086324968E-06
-                       1.6086324968E-06  1.6086324968E-06  1.6086324968E-06
-            fcart7     1.5834346451E-07  1.5834346451E-07  1.5834346451E-07
-                      -1.5834346451E-07 -1.5834346451E-07 -1.5834346451E-07
-            fcart8     1.5834346451E-07  1.5834346451E-07  1.5834346451E-07
-                      -1.5834346451E-07 -1.5834346451E-07 -1.5834346451E-07
+            fcart5    -1.6086325053E-06 -1.6086325053E-06 -1.6086325053E-06
+                       1.6086325053E-06  1.6086325053E-06  1.6086325053E-06
+            fcart6    -1.6086325053E-06 -1.6086325053E-06 -1.6086325053E-06
+                       1.6086325053E-06  1.6086325053E-06  1.6086325053E-06
+            fcart7     1.5834346818E-07  1.5834346818E-07  1.5834346818E-07
+                      -1.5834346818E-07 -1.5834346818E-07 -1.5834346818E-07
+            fcart8     1.5834346818E-07  1.5834346818E-07  1.5834346818E-07
+                      -1.5834346818E-07 -1.5834346818E-07 -1.5834346818E-07
 -          fftalg         312
            ionmov1          0
            ionmov2          0
@@ -3057,13 +3059,13 @@ P           mkmem8          5
            strten4     2.3325606228E-05  2.3325606228E-05  2.3325606228E-05
                       -2.5151443470E-04 -2.5151443470E-04 -2.5151443470E-04
            strten5    -1.1180811961E-03 -1.1180811961E-03 -1.1180811961E-03
-                      -3.2921454024E-09 -3.2921454019E-09 -3.2921454023E-09
+                      -3.2921451112E-09 -3.2921451104E-09 -3.2921451107E-09
            strten6    -1.1180811961E-03 -1.1180811961E-03 -1.1180811961E-03
-                      -3.2921454024E-09 -3.2921454019E-09 -3.2921454023E-09
+                      -3.2921451112E-09 -3.2921451104E-09 -3.2921451107E-09
            strten7     1.4883760373E-04  1.4883760373E-04  1.4883760373E-04
-                       7.3805152902E-10  7.3805152903E-10  7.3805152904E-10
+                       7.3805154616E-10  7.3805154625E-10  7.3805154616E-10
            strten8     1.4883760373E-04  1.4883760373E-04  1.4883760373E-04
-                       7.3805152902E-10  7.3805152903E-10  7.3805152904E-10
+                       7.3805154616E-10  7.3805154625E-10  7.3805154616E-10
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
                        0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
@@ -3173,218 +3175,219 @@ P           mkmem8          5
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    1.8009E-06 sec,    Wall time =    1.8233E-06 sec
+- CPU time =    9.6267E-07 sec,    Wall time =    9.6494E-07 sec
 
-- Total cpu        time (s,m,h):         88.5        1.47      0.025
-- Total wall clock time (s,m,h):         98.7        1.64      0.027
+- Total cpu        time (s,m,h):         69.0        1.15      0.019
+- Total wall clock time (s,m,h):         69.4        1.16      0.019
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           16.4, wall_time =           25.2
+- cpu_time =           17.2, wall_time =           17.4
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- vtowfk(ssdiag)                11.893  13.4     11.938  12.1             -1      -1.00        1.00       1.00
-- lobpcgwf2                     11.889  13.4     11.934  12.1            552      -1.00        1.00       1.00
-- fourwf%(pot)                   7.930   9.0      7.958   8.1          16560      -1.00        1.00       1.00
-- nonlop(apply)                  0.688   0.8      0.697   0.7          16560      -1.00        0.99       0.99
-- invars2                        0.665   0.8      0.665   0.7              8      -1.00        1.00       1.00
-- ewald                          0.573   0.6      0.579   0.6             20      -1.00        0.99       0.99
-- stress                         0.379   0.4      0.380   0.4             20      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.366   0.4      0.366   0.4             20      -1.00        1.00       1.00
-- pspini                         0.304   0.3      0.306   0.3              8      -1.00        0.99       0.99
-- fourdp                         0.289   0.3      0.290   0.3            820      -1.00        0.99       0.99
-- vtowfk(contrib)                0.215   0.2      0.216   0.2            432      -1.00        1.00       1.00
-- getghc-other                   0.144   0.2      0.136   0.1             -1      -1.00        1.06       1.06
-- mkrho/=                        0.142   0.2      0.144   0.1            136      -1.00        0.99       0.99
-- abinit(2)                      0.140   0.2      0.143   0.1              1      -1.00        0.98       0.98
-- timing timab                   0.104   0.1      0.105   0.1             11      -1.00        0.99       0.99
-- forces                         0.102   0.1      0.103   0.1            108      -1.00        0.99       0.99
-- nonlop(forces)                 0.073   0.1      0.074   0.1           3312      -1.00        0.99       0.99
-- symrhg(no FFT)                 0.070   0.1      0.071   0.1            136      -1.00        0.99       0.99
-- xc:pot/=fourdp                 0.068   0.1      0.068   0.1            156      -1.00        1.00       1.00
-- setsym                         0.012   0.0      0.012   0.0              8      -1.00        1.00       1.00
-- scfcv-scprqt                   0.007   0.0      0.008   0.0            136      -1.00        0.86       0.86
+- vtowfk(ssdiag)                13.522  19.6     13.573  19.6             -1      -1.00        1.00       1.00
+- lobpcgwf2                     13.518  19.6     13.569  19.6            552      -1.00        1.00       1.00
+- fourwf%(pot)                   9.460  13.7      9.496  13.7          16560      -1.00        1.00       1.00
+- nonlop(apply)                  0.735   1.1      0.740   1.1          16560      -1.00        0.99       0.99
+- invars2                        0.598   0.9      0.599   0.9              8      -1.00        1.00       1.00
+- fourdp                         0.339   0.5      0.341   0.5            820      -1.00        0.99       0.99
+- ewald                          0.302   0.4      0.303   0.4             20      -1.00        1.00       1.00
+- vtowfk(contrib)                0.240   0.3      0.241   0.3            432      -1.00        1.00       1.00
+- stress                         0.228   0.3      0.228   0.3             20      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.217   0.3      0.217   0.3             20      -1.00        1.00       1.00
+- mkrho/=                        0.157   0.2      0.158   0.2            136      -1.00        1.00       1.00
+- pspini                         0.132   0.2      0.132   0.2              8      -1.00        1.00       1.00
+- abinit(2)                      0.128   0.2      0.128   0.2              1      -1.00        1.00       1.00
+- timing timab                   0.125   0.2      0.125   0.2             13      -1.00        1.00       1.00
+- forces                         0.093   0.1      0.094   0.1            108      -1.00        1.00       1.00
+- nonlop(forces)                 0.088   0.1      0.088   0.1           3312      -1.00        0.99       0.99
+- getghc-other                   0.086   0.1      0.083   0.1             -1      -1.00        1.04       1.04
+- symrhg(no FFT)                 0.065   0.1      0.066   0.1            136      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.060   0.1      0.060   0.1            156      -1.00        1.00       1.00
+- setsym                         0.008   0.0      0.008   0.0              8      -1.00        1.00       1.00
+- scfcv-scprqt                   0.007   0.0      0.007   0.0            136      -1.00        0.99       0.99
 - mkffnl                         0.005   0.0      0.005   0.0            120      -1.00        1.00       1.00
+- kpgsph                         0.005   0.0      0.005   0.0             48      -1.00        1.00       1.00
 - prep_bandfft_tabs              0.004   0.0      0.004   0.0            120      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.002   0.0      0.002   0.0             -1      -1.00        0.94       0.94
-- kpgsph                         0.002   0.0      0.002   0.0             48      -1.00        0.90       0.90
-- vtowfk  (1)                    0.001   0.0      0.001   0.0            432      -1.00        1.01       1.01
-- others (101)                   0.000   0.0      0.000   0.0             -1      -1.00        1.02       1.02
+- newkpt(excl. rwwf   )          0.002   0.0      0.002   0.0             -1      -1.00        0.99       0.99
+- vtowfk  (1)                    0.001   0.0      0.001   0.0            432      -1.00        0.98       0.98
+- others (101)                   0.000   0.0      0.000   0.0             -1      -1.00        0.98       0.98
 -<END_TIMER>
 -
-- subtotal                      36.067  40.8     36.207  36.7                                  1.00       1.00
+- subtotal                      40.125  58.2     40.274  58.0                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          88.5, wall_time =          98.7
+- cpu_time =          69.0, wall_time =          69.4
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- vtowfk(ssdiag)                47.668  53.9     47.775  48.4             -4      -1.00        1.00       1.00
-- lobpcgwf2                     47.653  53.9     47.759  48.4           2208      -1.00        1.00       1.00
-- fourwf%(pot)                  31.642  35.8     31.717  32.1          66240      -1.00        1.00       1.00
-- prep_bandfft_tabs              9.960  11.3      9.962  10.1            480      -1.00        1.00       1.00
-- invars2                        2.793   3.2      2.795   2.8             32      -1.00        1.00       1.00
-- nonlop(apply)                  2.659   3.0      2.686   2.7          66240      -1.00        0.99       0.99
-- ewald                          2.300   2.6      2.309   2.3             80      -1.00        1.00       1.00
-- stress                         1.519   1.7      1.521   1.5             80      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             1.467   1.7      1.468   1.5             80      -1.00        1.00       1.00
-- pspini                         1.234   1.4      1.238   1.3             32      -1.00        1.00       1.00
-- fourdp                         1.205   1.4      1.212   1.2           3280      -1.00        0.99       0.99
-- vtowfk(contrib)                0.862   1.0      0.862   0.9           1728      -1.00        1.00       1.00
-- mkrho/=                        0.558   0.6      0.560   0.6            544      -1.00        1.00       1.00
-- abinit(2)                      0.551   0.6      0.572   0.6              4      -1.00        0.96       0.96
-- getghc-other                   0.518   0.6      0.492   0.5             -4      -1.00        1.05       1.05
-- timing timab                   0.420   0.5      0.423   0.4             44      -1.00        0.99       0.99
-- forces                         0.408   0.5      0.409   0.4            432      -1.00        1.00       1.00
-- nonlop(forces)                 0.293   0.3      0.296   0.3          13248      -1.00        0.99       0.99
-- symrhg(no FFT)                 0.283   0.3      0.285   0.3            544      -1.00        0.99       0.99
-- xc:pot/=fourdp                 0.271   0.3      0.272   0.3            624      -1.00        1.00       1.00
-- scfcv-scprqt                   0.058   0.1      0.060   0.1            544      -1.00        0.98       0.98
-- setsym                         0.047   0.1      0.047   0.0             32      -1.00        1.00       1.00
-- mkffnl                         0.018   0.0      0.018   0.0            480      -1.00        1.00       1.00
-- kpgsph                         0.009   0.0      0.009   0.0            192      -1.00        0.98       0.98
-- newkpt(excl. rwwf   )          0.006   0.0      0.007   0.0             -4      -1.00        0.98       0.98
-- vtowfk  (1)                    0.005   0.0      0.005   0.0           1728      -1.00        1.01       1.01
-- inwffil(excl. calls)           0.000   0.0      0.000   0.0             32      -1.00        1.00       1.00
+- vtowfk(ssdiag)                54.097  78.4     54.300  78.2             -4      -1.00        1.00       1.00
+- lobpcgwf2                     54.081  78.4     54.284  78.2           2208      -1.00        1.00       1.00
+- fourwf%(pot)                  36.431  52.8     36.575  52.7          66240      -1.00        1.00       1.00
+- nonlop(apply)                  2.880   4.2      2.894   4.2          66240      -1.00        0.99       0.99
+- invars2                        2.603   3.8      2.611   3.8             32      -1.00        1.00       1.00
+- fourdp                         1.354   2.0      1.361   2.0           3280      -1.00        0.99       0.99
+- ewald                          1.223   1.8      1.227   1.8             80      -1.00        1.00       1.00
+- getghc-other                   1.196   1.7      1.187   1.7             -4      -1.00        1.01       1.01
+- vtowfk(contrib)                0.962   1.4      0.965   1.4           1728      -1.00        1.00       1.00
+- stress                         0.931   1.3      0.934   1.3             80      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.890   1.3      0.892   1.3             80      -1.00        1.00       1.00
+- prep_bandfft_tabs              0.754   1.1      0.756   1.1            480      -1.00        1.00       1.00
+- mkrho/=                        0.618   0.9      0.620   0.9            544      -1.00        1.00       1.00
+- pspini                         0.570   0.8      0.572   0.8             32      -1.00        1.00       1.00
+- abinit(2)                      0.537   0.8      0.539   0.8              4      -1.00        1.00       1.00
+- timing timab                   0.510   0.7      0.511   0.7             52      -1.00        1.00       1.00
+- forces                         0.371   0.5      0.372   0.5            432      -1.00        1.00       1.00
+- nonlop(forces)                 0.342   0.5      0.345   0.5          13248      -1.00        0.99       0.99
+- symrhg(no FFT)                 0.263   0.4      0.264   0.4            544      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.241   0.3      0.242   0.3            624      -1.00        1.00       1.00
+- scfcv-scprqt                   0.038   0.1      0.038   0.1            544      -1.00        0.99       0.99
+- setsym                         0.032   0.0      0.032   0.0             32      -1.00        0.99       0.99
+- mkffnl                         0.021   0.0      0.021   0.0            480      -1.00        1.00       1.00
+- kpgsph                         0.009   0.0      0.009   0.0            192      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )          0.006   0.0      0.006   0.0             -4      -1.00        0.99       0.99
+- vtowfk  (1)                    0.004   0.0      0.004   0.0           1728      -1.00        0.99       0.99
+- inwffil(excl. calls)           0.000   0.0      0.000   0.0             32      -1.00        1.01       1.01
 - others (100)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 
-- subtotal                     154.410 174.5    154.758 156.8                                  1.00       1.00
+- subtotal                     160.964 233.3    161.561 232.8                                  1.00       1.00
 
  Partitioning of abinit
-- abinit                        88.492 100.0     98.684 100.0              4                   0.90       0.90
+- abinit                        68.984 100.0     69.401 100.0              4                   0.99       0.99
  
-- abinit(1)                      0.264   0.3      0.304   0.3              4                   0.87       0.87
-- abinit(2)                      0.551   0.6      0.572   0.6              4                   0.96       0.96
-- indefo+macroin+invars2m        2.799   3.2      2.800   2.8              4                   1.00       1.00
-- abinit(4)                      4.022   4.5      4.455   4.5              4                   0.90       0.90
-- abinit(5)                      1.702   1.9      1.704   1.7              4                   1.00       1.00
-- driver                        82.130  92.8     91.364  92.6              4                   0.90       0.90
-- abinit(6)                      0.192   0.2      0.711   0.7              4                   0.27       0.27
-- timing timab                   0.420   0.5      0.423   0.4             44                   0.99       0.99
+- abinit(1)                      0.155   0.2      0.156   0.2              4                   0.99       0.99
+- abinit(2)                      0.537   0.8      0.539   0.8              4                   1.00       1.00
+- indefo+macroin+invars2m        2.609   3.8      2.617   3.8              4                   1.00       1.00
+- abinit(4)                      3.782   5.5      3.796   5.5              4                   1.00       1.00
+- abinit(5)                      0.480   0.7      0.482   0.7              4                   1.00       1.00
+- driver                        64.067  92.9     64.462  92.9              4                   0.99       0.99
+- abinit(6)                      0.128   0.2      0.132   0.2              4                   0.96       0.96
+- timing timab                   0.510   0.7      0.511   0.7             52                   1.00       1.00
 
-- subtotal                      88.492 100.0     98.684 100.0                                  0.90       0.90
+- subtotal                      68.984 100.0     69.401 100.0                                  0.99       0.99
 
  Partitioning of driver
-- driver                        82.130  92.8     91.364  92.6              4                   0.90       0.90
+- driver                        64.067  92.9     64.462  92.9              4                   0.99       0.99
  
-- gstateimg                     81.887  92.5     91.116  92.3             32                   0.90       0.90
-- driver(aft. select case)       0.235   0.3      0.238   0.2             32                   0.98       0.98
+- gstateimg                     64.017  92.8     64.411  92.8             32                   0.99       0.99
+- driver(aft. select case)       0.044   0.1      0.044   0.1             32                   1.00       1.00
 
-- subtotal                      82.130  92.8     91.364  92.6                                  0.90       0.90
+- subtotal                      64.067  92.9     64.462  92.9                                  0.99       0.99
 
  Partitioning of gstateimg+gstate
-- gstateimg                     81.887  92.5     91.116  92.3             32                   0.90       0.90
+- gstateimg                     64.017  92.8     64.411  92.8             32                   0.99       0.99
  
-- gstate->kpgsph                 0.092   0.1      0.092   0.1             64                   0.99       0.99
-- gstate(pspini)                 1.234   1.4      1.238   1.3             32                   1.00       1.00
-- gstate  (2)                    0.108   0.1      0.108   0.1             32                   1.00       1.00
-- gstate(...scfcv)              74.104  83.7     81.789  82.9             32                   0.91       0.91
-- gstate  (3)                    6.347   7.2      7.888   8.0             32                   0.80       0.80
+- gstate->kpgsph                 0.142   0.2      0.142   0.2             64                   1.00       1.00
+- gstate(pspini)                 0.570   0.8      0.572   0.8             32                   1.00       1.00
+- gstate  (2)                    0.139   0.2      0.140   0.2             32                   1.00       1.00
+- gstate(...scfcv)              62.487  90.6     62.850  90.6             32                   0.99       0.99
+- gstate  (3)                    0.677   1.0      0.706   1.0             32                   0.96       0.96
 
-- subtotal                      81.886  92.5     91.116  92.3                                  0.90       0.90
+- subtotal                      64.017  92.8     64.411  92.8                                  0.99       0.99
 
  Partitioning of scfcv_core
-- scfcv_core                    74.067  83.7     81.749  82.8             80                   0.91       0.91
+- scfcv_core                    62.459  90.5     62.822  90.5             80                   0.99       0.99
  
-- scfcv_core(iniloop, setv       2.552   2.9      2.564   2.6            544                   1.00       1.00
-- scfcv_core(vtorho(f))         59.990  67.8     60.107  60.9            544                   1.00       1.00
-- scfcv_core(etotfor)            0.395   0.4      0.397   0.4           1088                   1.00       1.00
-- scfcv-scprqt                   0.058   0.1      0.060   0.1            544                   0.98       0.98
-- scfcv_core(rhotov)             0.564   0.6      0.566   0.6            544                   1.00       1.00
-- scfcv_core(mix pot)            0.470   0.5      0.474   0.5            464                   0.99       0.99
-- scfcv_core(afterscfloop)       1.621   1.8      1.623   1.6             80                   1.00       1.00
-- scfcv_core(outscfcv)           8.386   9.5     15.926  16.1             80                   0.53       0.53
+- scfcv_core(iniloop, setv       1.464   2.1      1.468   2.1            544                   1.00       1.00
+- scfcv_core(vtorho(f))         57.410  83.2     57.624  83.0            544                   1.00       1.00
+- scfcv_core(etotfor)            0.360   0.5      0.361   0.5           1088                   1.00       1.00
+- scfcv-scprqt                   0.038   0.1      0.038   0.1            544                   0.99       0.99
+- scfcv_core(rhotov)             0.539   0.8      0.541   0.8            544                   1.00       1.00
+- scfcv_core(mix pot)            0.507   0.7      0.509   0.7            464                   1.00       1.00
+- scfcv_core(afterscfloop)       1.040   1.5      1.043   1.5             80                   1.00       1.00
+- scfcv_core(outscfcv)           1.076   1.6      1.211   1.7             80                   0.89       0.89
 
-- subtotal                      74.067  83.7     81.749  82.8                                  0.91       0.91
+- subtotal                      62.459  90.5     62.822  90.5                                  0.99       0.99
 
  Partitioning of rhotov
-- rhotov                         0.562   0.6      0.564   0.6            544                   1.00       1.00
+- rhotov                         0.538   0.8      0.540   0.8            544                   1.00       1.00
  
-- rhotov(rhotoxc)                0.238   0.3      0.238   0.2            544                   1.00       1.00
-- rhotov(other)                  0.046   0.1      0.047   0.0            544                   1.00       1.00
-- (other)                        0.270   0.3      0.271   0.3             -1                   1.00       1.00
+- rhotov(rhotoxc)                0.212   0.3      0.213   0.3            544                   1.00       1.00
+- rhotov(other)                  0.052   0.1      0.052   0.1            544                   1.00       1.00
+- (other)                        0.267   0.4      0.268   0.4             -1                   1.00       1.00
 
-- subtotal                       0.562   0.6      0.564   0.6                                  1.00       1.00
+- subtotal                       0.538   0.8      0.540   0.8                                  1.00       1.00
 
  Partitioning of vtorho
-- vtorho                        59.988  67.8     60.105  60.9            544                   1.00       1.00
+- vtorho                        57.408  83.2     57.622  83.0            544                   1.00       1.00
  
-- vtorho(bef. vtowfk)            9.975  11.3      9.977  10.1           1728                   1.00       1.00
-- vtowfk                        48.535  54.8     48.642  49.3           1728                   1.00       1.00
-- vtorho(aft. kpt loop)          0.052   0.1      0.053   0.1            544                   0.99       0.99
-- vtorho(newocc)                 0.121   0.1      0.122   0.1            272                   0.99       0.99
-- vtorho(mkrho 1)                0.881   1.0      0.885   0.9            272                   1.00       1.00
-- vtorho(mkrho 2)                0.374   0.4      0.378   0.4            816                   0.99       0.99
+- vtorho(bef. kpt  loop)         0.020   0.0      0.020   0.0            544                   0.99       0.99
+- vtorho(bef. vtowfk)            0.770   1.1      0.772   1.1           1728                   1.00       1.00
+- vtowfk                        55.063  79.8     55.269  79.6           1728                   1.00       1.00
+- vtorho(aft. kpt loop)          0.068   0.1      0.069   0.1            544                   0.99       0.99
+- vtorho(newocc)                 0.118   0.2      0.119   0.2            272                   1.00       1.00
+- vtorho(mkrho 1)                0.951   1.4      0.954   1.4            272                   1.00       1.00
+- vtorho(mkrho 2)                0.390   0.6      0.392   0.6            816                   1.00       1.00
 
-- subtotal                      59.988  67.8     60.105  60.9                                  1.00       1.00
+- subtotal                      57.408  83.2     57.622  83.0                                  1.00       1.00
 
  Partitioning of vtowfk
-- vtowfk                        48.535  54.8     48.642  49.3           1728                   1.00       1.00
+- vtowfk                        55.063  79.8     55.269  79.6           1728                   1.00       1.00
  
-- vtowfk(2)                     47.666  53.9     47.772  48.4             -4                   1.00       1.00
-- prep_nonlop%vtowfk             0.325   0.4      0.325   0.3           5376                   1.00       1.00
-- prep_fourwf%vtow               0.473   0.5      0.473   0.5           5184                   1.00       1.00
-- vtowfk(3)                      0.063   0.1      0.064   0.1             -4                   1.00       1.00
+- vtowfk(2)                     54.095  78.4     54.298  78.2             -4                   1.00       1.00
+- prep_nonlop%vtowfk             0.348   0.5      0.349   0.5           5376                   1.00       1.00
+- prep_fourwf%vtow               0.541   0.8      0.543   0.8           5184                   1.00       1.00
+- vtowfk(3)                      0.073   0.1      0.074   0.1             -4                   0.99       0.99
 
-- subtotal                      48.535  54.8     48.642  49.3                                  1.00       1.00
+- subtotal                      55.063  79.8     55.269  79.6                                  1.00       1.00
 
  Partitioning of getghc
-- getghc                        34.820  39.3     34.894  35.4          66240                   1.00       1.00
+- getghc                        40.507  58.7     40.656  58.6          66240                   1.00       1.00
  
-- fourwf%getghc                 31.642  35.8     31.717  32.1          66240                   1.00       1.00
-- nonlop%getghc                  2.659   3.0      2.686   2.7          66240                   0.99       0.99
-- getghc-other                   0.518   0.6      0.492   0.5             -4                   1.05       1.05
+- fourwf%getghc                 36.431  52.8     36.575  52.7          66240                   1.00       1.00
+- nonlop%getghc                  2.880   4.2      2.894   4.2          66240                   0.99       0.99
+- getghc-other                   1.196   1.7      1.187   1.7             -4                   1.01       1.01
 
-- subtotal                      34.820  39.3     34.894  35.4                                  1.00       1.00
+- subtotal                      40.507  58.7     40.656  58.6                                  1.00       1.00
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                        32.515  36.7     32.590  33.0          69696                   1.00       1.00
+- fourwf                        37.409  54.2     37.557  54.1          69696                   1.00       1.00
  
-- fourwf%getghc                 31.642  35.8     31.717  32.1          66240                   1.00       1.00
-- fourwf%prep_four               0.873   1.0      0.874   0.9           3456                   1.00       1.00
+- fourwf%getghc                 36.431  52.8     36.575  52.7          66240                   1.00       1.00
+- fourwf%prep_four               0.978   1.4      0.982   1.4           3456                   1.00       1.00
 
-- subtotal                      32.515  36.7     32.590  33.0                                  1.00       1.00
+- subtotal                      37.409  54.2     37.557  54.1                                  1.00       1.00
 
  Partitioning of prep_getghc
-- prep_getghc                   36.275  41.0     36.350  36.8          66240                   1.00       1.00
+- prep_getghc                   43.404  62.9     43.562  62.8          66240                   1.00       1.00
  
-- prep_getghc(before if)         0.209   0.2      0.210   0.2          66240                   0.99       0.99
-- prep_getghc(alltoall)          0.956   1.1      0.963   1.0         132480                   0.99       0.99
-- prep_getghc(getghc - 1 )      35.010  39.6     35.081  35.5          66240                   1.00       1.00
-- (other)                        0.100   0.1      0.097   0.1             -1                   1.04       1.04
+- prep_getghc(before if)         0.157   0.2      0.158   0.2          66240                   0.99       0.99
+- prep_getghc(alltoall)          2.547   3.7      2.566   3.7         132480                   0.99       0.99
+- prep_getghc(getghc - 1 )      40.631  58.9     40.776  58.8          66240                   1.00       1.00
+- (other)                        0.068   0.1      0.062   0.1             -1                   1.10       1.10
 
-- subtotal                      36.275  41.0     36.350  36.8                                  1.00       1.00
+- subtotal                      43.404  62.9     43.562  62.8                                  1.00       1.00
 
  Partitioning of prep_fourwf
-- prep_fourwf                    0.950   1.1      0.950   1.0          10368                   1.00       1.00
+- prep_fourwf                    1.068   1.5      1.071   1.5          10368                   1.00       1.00
  
-- fourwf%prep_four               0.873   1.0      0.874   0.9           3456                   1.00       1.00
-- alltoall%prep_fo               0.041   0.0      0.041   0.0          10368                   0.99       0.99
+- fourwf%prep_four               0.978   1.4      0.982   1.4           3456                   1.00       1.00
+- alltoall%prep_fo               0.039   0.1      0.039   0.1          10368                   0.99       0.99
 
-- subtotal                       0.913   1.0      0.915   0.9                                  1.00       1.00
+- subtotal                       1.017   1.5      1.021   1.5                                  1.00       1.00
 
  Partitioning of prep_nonlop
-- prep_nonlop                    0.763   0.9      0.764   0.8          19104                   1.00       1.00
+- prep_nonlop                    0.825   1.2      0.829   1.2          19104                   1.00       1.00
  
-- nonlop%prep_nonl%vtowfk        0.258   0.3      0.259   0.3           5376                   0.99       0.99
-- nonlop%prep_nonl%forstrn       0.030   0.0      0.030   0.0            480                   0.99       0.99
-- prep_nonlop(alltoall)          0.066   0.1      0.067   0.1          19104                   0.99       0.99
-- (other)                        0.409   0.5      0.407   0.4             -1                   1.00       1.00
+- nonlop%prep_nonl%vtowfk        0.265   0.4      0.267   0.4           5376                   0.99       0.99
+- nonlop%prep_nonl%forstrn       0.024   0.0      0.025   0.0            480                   0.99       0.99
+- prep_nonlop(alltoall)          0.070   0.1      0.071   0.1          19104                   0.99       0.99
+- (other)                        0.465   0.7      0.466   0.7             -1                   1.00       1.00
 
-- subtotal                       0.763   0.9      0.764   0.8                                  1.00       1.00
+- subtotal                       0.825   1.2      0.829   1.2                                  1.00       1.00
 
  Partitioning of mkrho (upwards partitioning)
-- mkrho                          0.880   1.0      0.884   0.9            272                   1.00       1.00
+- mkrho                          0.950   1.4      0.953   1.4            272                   1.00       1.00
  
-- mkrho%vtorho                   0.880   1.0      0.884   0.9            272                   1.00       1.00
+- mkrho%vtorho                   0.950   1.4      0.953   1.4            272                   1.00       1.00
 
-- subtotal                       0.880   1.0      0.884   0.9                                  1.00       1.00
+- subtotal                       0.950   1.4      0.953   1.4                                  1.00       1.00
 
  Partitioning of inwffil
 - inwffil                        0.007   0.0      0.007   0.0             32                   0.99       0.99
@@ -3396,98 +3399,99 @@ P           mkmem8          5
 - newkpt                         0.007   0.0      0.007   0.0             32                   0.99       0.99
  
 
-- subtotal                       0.006   0.0      0.007   0.0                                  0.98       0.98
+- subtotal                       0.006   0.0      0.006   0.0                                  0.99       0.99
 
  Partitioning of newvtr
-- newvtr                         0.468   0.5      0.473   0.5            464                   0.99       0.99
+- newvtr                         0.505   0.7      0.507   0.7            464                   1.00       1.00
  
-- newvtr(call prcref_PMA)        0.323   0.4      0.326   0.3            464                   0.99       0.99
-- newvtr(aft. prcref_PMA)        0.117   0.1      0.119   0.1            464                   0.98       0.98
+- newvtr(call prcref_PMA)        0.349   0.5      0.351   0.5            464                   1.00       1.00
+- newvtr(aft. prcref_PMA)        0.128   0.2      0.129   0.2            464                   1.00       1.00
 
-- subtotal                       0.468   0.5      0.473   0.5                                  0.99       0.99
+- subtotal                       0.505   0.7      0.507   0.7                                  1.00       1.00
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                         1.205   1.4      1.212   1.2           3280                   0.99       0.99
+- fourdp                         1.354   2.0      1.361   2.0           3280                   0.99       0.99
  
-- fourdp%(other)                 1.205   1.4      1.212   1.2           3280                   0.99       0.99
+- fourdp%(other)                 1.354   2.0      1.361   2.0           3280                   0.99       0.99
 
-- subtotal                       1.205   1.4      1.212   1.2                                  0.99       0.99
+- subtotal                       1.354   2.0      1.361   2.0                                  0.99       0.99
 
  Partitioning of afterscfloop
-- afterscfloop                   1.620   1.8      1.622   1.6             80                   1.00       1.00
+- afterscfloop                   1.040   1.5      1.043   1.5             80                   1.00       1.00
  
-- afterscfloop(forstr)           1.607   1.8      1.609   1.6             80                   1.00       1.00
+- afterscfloop(forstr)           1.009   1.5      1.012   1.5             80                   1.00       1.00
+- afterscfloop(final)            0.030   0.0      0.030   0.0             80                   1.00       1.00
 
-- subtotal                       1.620   1.8      1.622   1.6                                  1.00       1.00
+- subtotal                       1.039   1.5      1.042   1.5                                  1.00       1.00
 
  Partitioning of forstr
-- forstr                         1.607   1.8      1.609   1.6             80                   1.00       1.00
+- forstr                         1.009   1.5      1.012   1.5             80                   1.00       1.00
  
-- forstr(forstrnps)              0.071   0.1      0.071   0.1             80                   1.00       1.00
-- forstr(stress)                 1.519   1.7      1.521   1.5             80                   1.00       1.00
+- forstr(forstrnps)              0.064   0.1      0.064   0.1             80                   1.00       1.00
+- forstr(stress)                 0.931   1.3      0.934   1.3             80                   1.00       1.00
 
-- subtotal                       1.606   1.8      1.608   1.6                                  1.00       1.00
+- subtotal                       1.009   1.5      1.012   1.5                                  1.00       1.00
 
  Partitioning of forstrnps
-- forstrnps                      0.071   0.1      0.071   0.1             80                   1.00       1.00
+- forstrnps                      0.064   0.1      0.064   0.1             80                   0.99       0.99
  
-- forstrnps(bef.loop band)       0.020   0.0      0.020   0.0            240                   1.00       1.00
-- forstrnps(nonlop+prep_ba       0.036   0.0      0.036   0.0            480                   1.00       1.00
+- forstrnps(bef.loop band)       0.019   0.0      0.019   0.0            240                   1.00       1.00
+- forstrnps(nonlop+prep_ba       0.029   0.0      0.029   0.0            480                   0.99       0.99
 
-- subtotal                       0.071   0.1      0.071   0.1                                  1.00       1.00
+- subtotal                       0.064   0.1      0.064   0.1                                  0.99       0.99
 
  Partitioning of outscfcv
-- outscfcv                       8.385   9.5     15.925  16.1             80                   0.53       0.53
+- outscfcv                       1.075   1.6      1.211   1.7             80                   0.89       0.89
  
-- outscfcv([PAW]prtden)          0.031   0.0      0.482   0.5             80                   0.06       0.06
-- outscfcv(prtelf)               0.637   0.7      7.699   7.8             40                   0.08       0.08
-- outscfcv(calcdenmagsph)        7.707   8.7      7.711   7.8             80                   1.00       1.00
+- outscfcv([PAW]prtden)          0.030   0.0      0.031   0.0             80                   0.97       0.97
+- outscfcv(prtelf)               0.449   0.7      0.581   0.8             40                   0.77       0.77
+- outscfcv(calcdenmagsph)        0.588   0.9      0.590   0.8             80                   1.00       1.00
 
-- subtotal                       8.375   9.5     15.894  16.1                                  0.53       0.53
+- subtotal                       1.068   1.5      1.202   1.7                                  0.89       0.89
 
  Partitioning of lobpcgwf2 core engine
-- lobpcgwf2                     47.653  53.9     47.759  48.4           2208                   1.00       1.00
+- lobpcgwf2                     54.081  78.4     54.284  78.2           2208                   1.00       1.00
  
-- lobpcg_init                    0.028   0.0      0.034   0.0           2208                   0.84       0.84
-- lobpcg_run                    47.178  53.3     47.278  47.9           2208                   1.00       1.00
-- lobpcg_orthoWrtPrev            0.751   0.8      0.754   0.8          55200                   1.00       1.00
-- lobpcg_Bortho                  2.487   2.8      2.492   2.5          68448                   1.00       1.00
-- lobpcg_RayleighRitz            6.186   7.0      6.201   6.3          68448                   1.00       1.00
-- lobpcg_maxResidu               0.380   0.4      0.384   0.4         119232                   0.99       0.99
-- lobpcg_run@getAX_BX           36.620  41.4     36.697  37.2          66240                   1.00       1.00
-- lobpcg_pcond                   0.075   0.1      0.076   0.1          52992                   0.99       0.99
-- lobpcg_RayleighRitz@hegv       1.656   1.9      1.661   1.7          68448                   1.00       1.00
+- lobpcg_init                    0.028   0.0      0.028   0.0           2208                   0.99       0.99
+- lobpcg_run                    53.571  77.7     53.772  77.5           2208                   1.00       1.00
+- lobpcg_orthoWrtPrev            0.600   0.9      0.603   0.9          55200                   1.00       1.00
+- lobpcg_Bortho                  2.401   3.5      2.413   3.5          68448                   0.99       0.99
+- lobpcg_RayleighRitz            5.681   8.2      5.705   8.2          68448                   1.00       1.00
+- lobpcg_maxResidu               0.635   0.9      0.639   0.9         119232                   0.99       0.99
+- lobpcg_run@getAX_BX           43.624  63.2     43.784  63.1          66240                   1.00       1.00
+- lobpcg_pcond                   0.056   0.1      0.057   0.1          52992                   0.99       0.99
+- lobpcg_RayleighRitz@hegv       1.447   2.1      1.453   2.1          68448                   1.00       1.00
 
-- subtotal                      95.360 107.8     95.575  96.8                                  1.00       1.00
+- subtotal                     108.044 156.6    108.454 156.3                                  1.00       1.00
 
  Partitioning of low-level xgBlock type
-- xgBlock_potrf                  0.148   0.2      0.147   0.1          68448                   1.01       1.01
+- xgBlock_potrf                  0.110   0.2      0.111   0.2          68448                   0.99       0.99
  
-- xgBlock_trsm                   1.184   1.3      1.194   1.2         205344                   0.99       0.99
-- xgBlock_gemm                   3.781   4.3      3.848   3.9         850080                   0.98       0.98
-- xgBlock_heev                   0.211   0.2      0.213   0.2          15456                   0.99       0.99
-- xgBlock_hegvx                  1.293   1.5      1.304   1.3          52992                   0.99       0.99
-- xgBlock_copy                   0.572   0.6      0.571   0.6         496800                   1.00       1.00
-- xgBlock_cshift                 0.088   0.1      0.089   0.1          52992                   0.99       0.99
+- xgBlock_trsm                   1.246   1.8      1.265   1.8         205344                   0.98       0.98
+- xgBlock_gemm                   3.980   5.8      4.037   5.8         850080                   0.99       0.99
+- xgBlock_heev                   0.208   0.3      0.210   0.3          15456                   0.99       0.99
+- xgBlock_hegvx                  1.134   1.6      1.143   1.6          52992                   0.99       0.99
+- xgBlock_copy                   0.398   0.6      0.403   0.6         496800                   0.99       0.99
+- xgBlock_cshift                 0.060   0.1      0.061   0.1          52992                   0.99       0.99
 
-- subtotal                       7.129   8.1      7.219   7.3                                  0.99       0.99
+- subtotal                       7.027  10.2      7.118  10.3                                  0.99       0.99
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   7.740   8.7      7.744   7.8           4188                   1.00       1.00
+- communic.MPI                   0.640   0.9      0.641   0.9           4188                   1.00       1.00
 -
-- forstrnps:synchr               0.000   0.0      0.000   0.0             96                   1.07       1.07
-- mkrho :MPIrhor                 0.000   0.0      0.000   0.0            272                   0.99       0.99
-- alltoall%back_wf               1.085   1.2      1.079   1.1          69696                   1.01       1.01
-- alltoall%forw_wf               0.807   0.9      0.813   0.8          66240                   0.99       0.99
-- subtotal                       1.893   2.1      1.892   1.9                                  1.00       1.00
+- forstrnps:synchr               0.000   0.0      0.000   0.0             96                   1.29       1.29
+- mkrho :MPIrhor                 0.000   0.0      0.000   0.0            272                   1.05       1.05
+- alltoall%back_wf               2.185   3.2      2.209   3.2          69696                   0.99       0.99
+- alltoall%forw_wf               1.167   1.7      1.187   1.7          66240                   0.98       0.98
+- subtotal                       3.353   4.9      3.397   4.9                                  0.99       0.99
 
  Additional information
-- timana(1)                      0.000   0.0      0.000   0.0              4                   1.00       1.00
-- total timab                    5.979   6.8      6.017   6.1        3280508                   0.99       0.99
-- fourwf                        32.515  36.7     32.590  33.0          69696                   1.00       1.00
-- mklocl(2)                      0.128   0.1      0.128   0.1            432                   1.00       1.00
-- newocc                         0.120   0.1      0.121   0.1            272                   0.99       0.99
-- nonlop(total)                  3.240   3.7      3.272   3.3          85344                   0.99       0.99
+- timana(1)                      0.000   0.0      0.000   0.0              4                   0.98       0.98
+- total timab                    3.505   5.1      3.514   5.1        3568784                   1.00       1.00
+- fourwf                        37.409  54.2     37.557  54.1          69696                   1.00       1.00
+- mklocl(2)                      0.103   0.1      0.104   0.1            432                   1.00       1.00
+- newocc                         0.118   0.2      0.118   0.2            272                   1.00       1.00
+- nonlop(total)                  3.511   5.1      3.530   5.1          85344                   0.99       0.99
 
  timana : in multi dataset mode, the more detailed analysis is not done.
 
@@ -3580,10 +3584,10 @@ P           mkmem8          5
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         16.4  wall=         25.2
+- Proc.   0 individual time (sec): cpu=         17.2  wall=         17.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered 144 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         90.6  wall=        100.8
+.Delivered   0 WARNINGs and  28 COMMENTs to log file.
++Overall time at end (sec) : cpu=         69.4  wall=         69.8

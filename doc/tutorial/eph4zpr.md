@@ -1023,7 +1023,7 @@ This is the value one should obtain when summing all the bands up to maximum num
     Note, however, that the cost of the Sternheimer method quickly increases with [[nband]]
     due to the orthogonalization process. This means that a ZPR calculation with 300 bands (occ + empty)
     **without** the Sternheimer method is much faster than the same computation done with [[eph_stern]] 1.
-    As a matter of fact, we use the Sternheimer method so that we don't need 300 bands to convergence the results.
+    As a matter of fact, we use the Sternheimer method so that we don't need 300 bands to converge the results.
 
 ??? note "Exercise"
 

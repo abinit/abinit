@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h42 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h18 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t81/t81.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/libxc_t81/t81.in
 - output file    -> t81.out
 - root for input  files -> t81i
 - root for output files -> t81o
@@ -1220,8 +1220,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1340,16 +1340,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.94861718896809E+00
-hartree             :  5.29283492434846E-01
-xc                  : -5.61196983300401E+00
+kinetic             :  2.94861718896806E+00
+hartree             :  5.29283492434833E-01
+xc                  : -5.61196983300398E+00
 Ewald energy        : -8.43334331763888E+00
 psp_core            :  5.45974994332637E-01
-local_psp           : -2.46259440288338E+00
-non_local_psp       :  1.65856251203448E+00
+local_psp           : -2.46259440288329E+00
+non_local_psp       :  1.65856251203444E+00
 total_energy        : -1.08254693657562E+01
-total_energy_eV     : -2.94576002376263E+02
-band_energy         : -1.53070948962174E-01
+total_energy_eV     : -2.94576002376262E+02
+band_energy         : -1.53070948962175E-01
 ...
 
 
@@ -1387,8 +1387,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1507,15 +1507,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.94861718896806E+00
-hartree             :  5.29283492434834E-01
+hartree             :  5.29283492434832E-01
 xc                  : -5.61196983300395E+00
 Ewald energy        : -8.43334331763888E+00
 psp_core            :  5.45974994332637E-01
-local_psp           : -2.46259440288330E+00
+local_psp           : -2.46259440288329E+00
 non_local_psp       :  1.65856251203445E+00
 total_energy        : -1.08254693657561E+01
 total_energy_eV     : -2.94576002376261E+02
-band_energy         : -1.53070948962151E-01
+band_energy         : -1.53070948962153E-01
 ...
 
 
@@ -1558,8 +1558,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1623,9 +1623,9 @@ xred      :
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 - [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -9.90138970E-20,   9.90138970E-20,  -4.24345273E-20, ]
-- [  9.90138970E-20,  -9.90138970E-20,   4.24345273E-20, ]
-force_length_stats: {min:   1.46315388E-19, max:   1.46315388E-19, mean:   1.46315388E-19, }
+- [ -8.48690546E-20,   0.00000000E+00,  -3.26838038E-37, ]
+- [  8.48690546E-20,   0.00000000E+00,   3.26838038E-37, ]
+force_length_stats: {min:   8.48690546E-20, max:   8.48690546E-20, mean:   8.48690546E-20, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1641,9 +1641,9 @@ force_length_stats: {min:   1.46315388E-19, max:   1.46315388E-19, mean:   1.463
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
- rms dE/dt=  4.8666E-19; max dE/dt=  1.0119E-18; dE/dt below (all hartree)
-    1      -0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000     -0.000000000000      0.000000000000
+ rms dE/dt=  4.2557E-19; max dE/dt=  7.2280E-19; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000     -0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.67602388397372     0.67602388397372     0.67602388397372
@@ -1651,13 +1651,13 @@ force_length_stats: {min:   1.46315388E-19, max:   1.46315388E-19, mean:   1.463
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 8.4475229E-20 9.9013897E-20   0.000E+00  0.000E+00  0.000E+00 h/b
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 4.8999172E-20 8.4869055E-20   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 4.3438905E-18 5.0914989E-18   0.000E+00  0.000E+00  0.000E+00 e/A
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 2.5196385E-18 4.3641419E-18   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.220000000000 10.220000000000 10.220000000000 bohr
               =  5.408191071790  5.408191071790  5.408191071790 angstroms
  prteigrs : about to open file t81o_DS13_EIG
@@ -1686,7 +1686,7 @@ local_psp           : -2.46783879277762E+00
 non_local_psp       :  1.65227246967458E+00
 total_energy        : -1.09356819936195E+01
 total_energy_eV     : -2.97575040499270E+02
-band_energy         : -8.81422333383395E-02
+band_energy         : -8.81422333383385E-02
 ...
 
 
@@ -1724,8 +1724,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1789,9 +1789,9 @@ xred      :
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 - [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  2.82896849E-20,  -2.82896849E-20,   2.82896849E-20, ]
-- [ -2.82896849E-20,   2.82896849E-20,  -2.82896849E-20, ]
-force_length_stats: {min:   4.89991715E-20, max:   4.89991715E-20, mean:   4.89991715E-20, }
+- [ -9.90138970E-20,  -1.41448424E-20,   1.27303582E-19, ]
+- [  9.90138970E-20,   1.41448424E-20,  -1.27303582E-19, ]
+force_length_stats: {min:   1.61895121E-19, max:   1.61895121E-19, mean:   1.61895121E-19, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1807,23 +1807,23 @@ force_length_stats: {min:   4.89991715E-20, max:   4.89991715E-20, mean:   4.899
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
- rms dE/dt=  2.8912E-19; max dE/dt=  5.7824E-19; dE/dt below (all hartree)
-    1      -0.000000000000      0.000000000000      0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  4.7945E-19; max dE/dt=  5.7824E-19; dE/dt below (all hartree)
+    1      -0.000000000000     -0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.67602388397372     0.67602388397372     0.67602388397372
     2      4.73216718781608     4.73216718781608     4.73216718781608
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.8289685E-20 2.8289685E-20   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 9.3470192E-20 1.2730358E-19   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.4547140E-18 1.4547140E-18   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 4.8064301E-18 6.5462128E-18   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.220000000000 10.220000000000 10.220000000000 bohr
               =  5.408191071790  5.408191071790  5.408191071790 angstroms
  prteigrs : about to open file t81o_DS14_EIG
@@ -1843,7 +1843,7 @@ force_length_stats: {min:   4.89991715E-20, max:   4.89991715E-20, mean:   4.899
 --- !EnergyTerms
 iteration_state     : {dtset: 14, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.95539445431455E+00
+kinetic             :  2.95539445431454E+00
 hartree             :  5.36576068556620E-01
 xc                  : -5.72471689302634E+00
 Ewald energy        : -8.43334331763888E+00
@@ -1852,7 +1852,7 @@ local_psp           : -2.46783885993589E+00
 non_local_psp       :  1.65227246971915E+00
 total_energy        : -1.09356810836781E+01
 total_energy_eV     : -2.97575015738507E+02
-band_energy         : -8.81413268406928E-02
+band_energy         : -8.81413268406932E-02
 ...
 
 
@@ -1895,8 +1895,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2015,7 +2015,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 15, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.94896188586315E+00
-hartree             :  5.29649129877232E-01
+hartree             :  5.29649129877231E-01
 xc                  : -5.61182218401005E+00
 Ewald energy        : -8.43334331763888E+00
 psp_core            :  5.45974994332637E-01
@@ -2061,8 +2061,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2227,8 +2227,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2346,16 +2346,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 17, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.94896179711167E+00
+kinetic             :  2.94896179711168E+00
 hartree             :  5.29649046737724E-01
-xc                  : -5.61182025028938E+00
+xc                  : -5.61182025028937E+00
 Ewald energy        : -8.43334331763888E+00
 psp_core            :  5.45974994332637E-01
 local_psp           : -2.46383089143433E+00
 non_local_psp       :  1.65933308454254E+00
 total_energy        : -1.08250755366380E+01
 total_energy_eV     : -2.94565285740952E+02
-band_energy         : -1.51397065560969E-01
+band_energy         : -1.51397065560970E-01
 ...
 
 
@@ -2401,8 +2401,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2447,9 +2447,9 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.329219303215     -1.033E+01 3.936E-03 0.000E+00
+-ETOT  1  -10.329219303227     -1.033E+01 3.936E-03 0.000E+00
  ETOT  2  -10.329783323002     -5.640E-04 6.402E-06 0.000E+00
- ETOT  3  -10.329783506156     -1.832E-07 2.401E-07 0.000E+00
+ ETOT  3  -10.329783506155     -1.832E-07 2.401E-07 0.000E+00
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
@@ -2539,8 +2539,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2585,9 +2585,9 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.329219303215     -1.033E+01 3.936E-03 0.000E+00
+-ETOT  1  -10.329219303227     -1.033E+01 3.936E-03 0.000E+00
  ETOT  2  -10.329783323002     -5.640E-04 6.402E-06 0.000E+00
- ETOT  3  -10.329783506156     -1.832E-07 2.401E-07 0.000E+00
+ ETOT  3  -10.329783506155     -1.832E-07 2.401E-07 0.000E+00
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
@@ -2682,8 +2682,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2820,8 +2820,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2963,8 +2963,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3009,7 +3009,7 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.328210679399     -1.033E+01 3.941E-03 0.000E+00
+-ETOT  1  -10.328210679402     -1.033E+01 3.941E-03 0.000E+00
  ETOT  2  -10.328775766728     -5.651E-04 6.312E-06 0.000E+00
  ETOT  3  -10.328775950375     -1.836E-07 2.372E-07 0.000E+00
 
@@ -3101,8 +3101,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3147,7 +3147,7 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.328210679399     -1.033E+01 3.941E-03 0.000E+00
+-ETOT  1  -10.328210679402     -1.033E+01 3.941E-03 0.000E+00
  ETOT  2  -10.328775766729     -5.651E-04 6.312E-06 0.000E+00
  ETOT  3  -10.328775950375     -1.836E-07 2.372E-07 0.000E+00
 
@@ -3239,8 +3239,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3285,7 +3285,7 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.328208645582     -1.033E+01 3.941E-03 0.000E+00
+-ETOT  1  -10.328208645585     -1.033E+01 3.941E-03 0.000E+00
  ETOT  2  -10.328773731634     -5.651E-04 6.312E-06 0.000E+00
  ETOT  3  -10.328773915280     -1.836E-07 2.372E-07 0.000E+00
 
@@ -3384,8 +3384,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3431,9 +3431,9 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.722988455030     -3.273E+01 3.215E-02 9.955E+02
- ETOT  2   16.457065419204     -8.266E+00 1.406E-02 4.191E+00
- ETOT  3   16.434737926999     -2.233E-02 3.170E-04 3.038E-01
+-ETOT  1   24.722988461497     -3.273E+01 3.215E-02 9.955E+02
+ ETOT  2   16.457065419113     -8.266E+00 1.406E-02 4.191E+00
+ ETOT  3   16.434737926987     -2.233E-02 3.170E-04 3.038E-01
 -open ddk wf file :t81o_DS21_1WF7
 
  scprqt:  WARNING -
@@ -3463,7 +3463,7 @@ tolerances: {tolvrs: 1.00E-10, }
  Resulting in :
  2DEtotal=    0.1643473793E+02 Ha. Also 2DEtotal=    0.447211962370E+03 eV
     (2DErelax=   -4.1022463372E+01 Ha. 2DEnonrelax=    5.7457201299E+01 Ha)
-    (  non-var. 2DEtotal :    1.6297802167E+01 Ha)
+    (  non-var. 2DEtotal :    1.6297802168E+01 Ha)
 
 ================================================================================
 
@@ -3477,86 +3477,86 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.2978255260         0.0000000000
-   1    1   2    1         8.1489127630         0.0000000000
-   1    1   3    1         8.1489127630         0.0000000000
-   1    1   1    2        -6.4514925599         0.0000000000
-   1    1   2    2        -3.2257462799         0.0000000000
-   1    1   3    2        -3.2257462799         0.0000000000
-   1    1   1    4       -31.2145205949         0.0000000000
+   1    1   1    1        16.2978255249         0.0000000000
+   1    1   2    1         8.1489127625         0.0000000000
+   1    1   3    1         8.1489127625         0.0000000000
+   1    1   1    2        -6.4514925544         0.0000000000
+   1    1   2    2        -3.2257462772         0.0000000000
+   1    1   3    2        -3.2257462772         0.0000000000
+   1    1   1    4       -31.2145205919         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1489127630         0.0000000000
-   2    1   2    1        16.2978255260         0.0000000000
-   2    1   3    1         8.1489127630         0.0000000000
-   2    1   1    2        -3.2257462799         0.0000000000
-   2    1   2    2        -6.4514925599         0.0000000000
-   2    1   3    2        -3.2257462799         0.0000000000
+   2    1   1    1         8.1489127625         0.0000000000
+   2    1   2    1        16.2978255249         0.0000000000
+   2    1   3    1         8.1489127625         0.0000000000
+   2    1   1    2        -3.2257462772         0.0000000000
+   2    1   2    2        -6.4514925544         0.0000000000
+   2    1   3    2        -3.2257462772         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2145205949         0.0000000000
+   2    1   2    4       -31.2145205919         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1489127630         0.0000000000
-   3    1   2    1         8.1489127630         0.0000000000
-   3    1   3    1        16.2978255260         0.0000000000
-   3    1   1    2        -3.2257462799         0.0000000000
-   3    1   2    2        -3.2257462799         0.0000000000
-   3    1   3    2        -6.4514925599         0.0000000000
+   3    1   1    1         8.1489127625         0.0000000000
+   3    1   2    1         8.1489127625         0.0000000000
+   3    1   3    1        16.2978255249         0.0000000000
+   3    1   1    2        -3.2257462772         0.0000000000
+   3    1   2    2        -3.2257462772         0.0000000000
+   3    1   3    2        -6.4514925544         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2145205949         0.0000000000
+   3    1   3    4       -31.2145205919         0.0000000000
   
-   1    2   1    1        -6.4514925599        -0.0000000000
-   1    2   2    1        -3.2257462799        -0.0000000000
-   1    2   3    1        -3.2257462799        -0.0000000000
-   1    2   1    2        16.2978255260         0.0000000000
-   1    2   2    2         8.1489127630         0.0000000000
-   1    2   3    2         8.1489127630         0.0000000000
-   1    2   1    4       -31.2145205949         0.0000000000
+   1    2   1    1        -6.4514925544        -0.0000000000
+   1    2   2    1        -3.2257462772        -0.0000000000
+   1    2   3    1        -3.2257462772        -0.0000000000
+   1    2   1    2        16.2978255249         0.0000000000
+   1    2   2    2         8.1489127625         0.0000000000
+   1    2   3    2         8.1489127625         0.0000000000
+   1    2   1    4       -31.2145205919         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2257462799        -0.0000000000
-   2    2   2    1        -6.4514925599        -0.0000000000
-   2    2   3    1        -3.2257462799        -0.0000000000
-   2    2   1    2         8.1489127630         0.0000000000
-   2    2   2    2        16.2978255260         0.0000000000
-   2    2   3    2         8.1489127630         0.0000000000
+   2    2   1    1        -3.2257462772        -0.0000000000
+   2    2   2    1        -6.4514925544        -0.0000000000
+   2    2   3    1        -3.2257462772        -0.0000000000
+   2    2   1    2         8.1489127625         0.0000000000
+   2    2   2    2        16.2978255249         0.0000000000
+   2    2   3    2         8.1489127625         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2145205949         0.0000000000
+   2    2   2    4       -31.2145205919         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2257462799        -0.0000000000
-   3    2   2    1        -3.2257462799        -0.0000000000
-   3    2   3    1        -6.4514925599        -0.0000000000
-   3    2   1    2         8.1489127630         0.0000000000
-   3    2   2    2         8.1489127630         0.0000000000
-   3    2   3    2        16.2978255260         0.0000000000
+   3    2   1    1        -3.2257462772        -0.0000000000
+   3    2   2    1        -3.2257462772        -0.0000000000
+   3    2   3    1        -6.4514925544        -0.0000000000
+   3    2   1    2         8.1489127625         0.0000000000
+   3    2   2    2         8.1489127625         0.0000000000
+   3    2   3    2        16.2978255249         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2145205949         0.0000000000
+   3    2   3    4       -31.2145205919         0.0000000000
   
-   1    4   1    1       -31.2145205949         0.0000000000
+   1    4   1    1       -31.2145205919         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2145205949         0.0000000000
+   1    4   1    2       -31.2145205919         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2145205949         0.0000000000
+   2    4   2    1       -31.2145205919         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2145205949         0.0000000000
+   2    4   2    2       -31.2145205919         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2145205949         0.0000000000
+   3    4   3    1       -31.2145205919         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2145205949         0.0000000000
+   3    4   3    2       -31.2145205919         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -3565,35 +3565,35 @@ tolerances: {tolvrs: 1.00E-10, }
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.3120742017         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.1235345407         0.0000000000
+   1    1   1    2        -0.1235345406         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.3120742017         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1235345407         0.0000000000
+   2    1   2    2        -0.1235345406         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
-   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.3120742017         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1235345407         0.0000000000
+   3    1   3    2        -0.1235345406         0.0000000000
   
-   1    2   1    1        -0.1235345407        -0.0000000000
+   1    2   1    1        -0.1235345406        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.3120742017         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   3    2         0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1235345407        -0.0000000000
+   2    2   2    1        -0.1235345406        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         0.3120742017         0.0000000000
@@ -3601,8 +3601,8 @@ tolerances: {tolvrs: 1.00E-10, }
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1235345407        -0.0000000000
-   3    2   1    2        -0.0000000000         0.0000000000
+   3    2   3    1        -0.1235345406        -0.0000000000
+   3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
    3    2   3    2         0.3120742017         0.0000000000
   
@@ -3612,29 +3612,29 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9679452489         0.0000000000
+   1    4   1    1        -0.9679452484         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9679452489         0.0000000000
+   2    4   2    1        -0.9679452484         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9679452489         0.0000000000
+   3    4   3    1        -0.9679452484         0.0000000000
   
-   1    4   1    2        -0.9679452489         0.0000000000
+   1    4   1    2        -0.9679452484         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9679452489         0.0000000000
+   2    4   2    2        -0.9679452484         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9679452489         0.0000000000
+   3    4   3    2        -0.9679452484         0.0000000000
   
   
   
@@ -3685,8 +3685,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3732,9 +3732,9 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.722988455029     -3.273E+01 3.215E-02 9.955E+02
- ETOT  2   16.457065419204     -8.266E+00 1.406E-02 4.191E+00
- ETOT  3   16.434737926999     -2.233E-02 3.170E-04 3.038E-01
+-ETOT  1   24.722988461497     -3.273E+01 3.215E-02 9.955E+02
+ ETOT  2   16.457065419113     -8.266E+00 1.406E-02 4.191E+00
+ ETOT  3   16.434737926987     -2.233E-02 3.170E-04 3.038E-01
 -open ddk wf file :t81o_DS21_1WF7
 
  scprqt:  WARNING -
@@ -3764,7 +3764,7 @@ tolerances: {tolvrs: 1.00E-10, }
  Resulting in :
  2DEtotal=    0.1643473793E+02 Ha. Also 2DEtotal=    0.447211962370E+03 eV
     (2DErelax=   -4.1022463372E+01 Ha. 2DEnonrelax=    5.7457201299E+01 Ha)
-    (  non-var. 2DEtotal :    1.6297802167E+01 Ha)
+    (  non-var. 2DEtotal :    1.6297802168E+01 Ha)
 
 ================================================================================
 
@@ -3778,86 +3778,86 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.2978255260         0.0000000000
-   1    1   2    1         8.1489127630         0.0000000000
-   1    1   3    1         8.1489127630         0.0000000000
-   1    1   1    2        -6.4514925599         0.0000000000
-   1    1   2    2        -3.2257462799         0.0000000000
-   1    1   3    2        -3.2257462799         0.0000000000
-   1    1   1    4       -31.2145205949         0.0000000000
+   1    1   1    1        16.2978255249         0.0000000000
+   1    1   2    1         8.1489127625         0.0000000000
+   1    1   3    1         8.1489127625         0.0000000000
+   1    1   1    2        -6.4514925544         0.0000000000
+   1    1   2    2        -3.2257462772         0.0000000000
+   1    1   3    2        -3.2257462772         0.0000000000
+   1    1   1    4       -31.2145205919         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1489127630         0.0000000000
-   2    1   2    1        16.2978255260         0.0000000000
-   2    1   3    1         8.1489127630         0.0000000000
-   2    1   1    2        -3.2257462799         0.0000000000
-   2    1   2    2        -6.4514925599         0.0000000000
-   2    1   3    2        -3.2257462799         0.0000000000
+   2    1   1    1         8.1489127625         0.0000000000
+   2    1   2    1        16.2978255249         0.0000000000
+   2    1   3    1         8.1489127625         0.0000000000
+   2    1   1    2        -3.2257462772         0.0000000000
+   2    1   2    2        -6.4514925544         0.0000000000
+   2    1   3    2        -3.2257462772         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2145205949         0.0000000000
+   2    1   2    4       -31.2145205919         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1489127630         0.0000000000
-   3    1   2    1         8.1489127630         0.0000000000
-   3    1   3    1        16.2978255260         0.0000000000
-   3    1   1    2        -3.2257462799         0.0000000000
-   3    1   2    2        -3.2257462799         0.0000000000
-   3    1   3    2        -6.4514925599         0.0000000000
+   3    1   1    1         8.1489127625         0.0000000000
+   3    1   2    1         8.1489127625         0.0000000000
+   3    1   3    1        16.2978255249         0.0000000000
+   3    1   1    2        -3.2257462772         0.0000000000
+   3    1   2    2        -3.2257462772         0.0000000000
+   3    1   3    2        -6.4514925544         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2145205949         0.0000000000
+   3    1   3    4       -31.2145205919         0.0000000000
   
-   1    2   1    1        -6.4514925599        -0.0000000000
-   1    2   2    1        -3.2257462799        -0.0000000000
-   1    2   3    1        -3.2257462799        -0.0000000000
-   1    2   1    2        16.2978255260         0.0000000000
-   1    2   2    2         8.1489127630         0.0000000000
-   1    2   3    2         8.1489127630         0.0000000000
-   1    2   1    4       -31.2145205949         0.0000000000
+   1    2   1    1        -6.4514925544        -0.0000000000
+   1    2   2    1        -3.2257462772        -0.0000000000
+   1    2   3    1        -3.2257462772        -0.0000000000
+   1    2   1    2        16.2978255249         0.0000000000
+   1    2   2    2         8.1489127625         0.0000000000
+   1    2   3    2         8.1489127625         0.0000000000
+   1    2   1    4       -31.2145205919         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2257462799        -0.0000000000
-   2    2   2    1        -6.4514925599        -0.0000000000
-   2    2   3    1        -3.2257462799        -0.0000000000
-   2    2   1    2         8.1489127630         0.0000000000
-   2    2   2    2        16.2978255260         0.0000000000
-   2    2   3    2         8.1489127630         0.0000000000
+   2    2   1    1        -3.2257462772        -0.0000000000
+   2    2   2    1        -6.4514925544        -0.0000000000
+   2    2   3    1        -3.2257462772        -0.0000000000
+   2    2   1    2         8.1489127625         0.0000000000
+   2    2   2    2        16.2978255249         0.0000000000
+   2    2   3    2         8.1489127625         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2145205949         0.0000000000
+   2    2   2    4       -31.2145205919         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2257462799        -0.0000000000
-   3    2   2    1        -3.2257462799        -0.0000000000
-   3    2   3    1        -6.4514925599        -0.0000000000
-   3    2   1    2         8.1489127630         0.0000000000
-   3    2   2    2         8.1489127630         0.0000000000
-   3    2   3    2        16.2978255260         0.0000000000
+   3    2   1    1        -3.2257462772        -0.0000000000
+   3    2   2    1        -3.2257462772        -0.0000000000
+   3    2   3    1        -6.4514925544        -0.0000000000
+   3    2   1    2         8.1489127625         0.0000000000
+   3    2   2    2         8.1489127625         0.0000000000
+   3    2   3    2        16.2978255249         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2145205949         0.0000000000
+   3    2   3    4       -31.2145205919         0.0000000000
   
-   1    4   1    1       -31.2145205949         0.0000000000
+   1    4   1    1       -31.2145205919         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2145205949         0.0000000000
+   1    4   1    2       -31.2145205919         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2145205949         0.0000000000
+   2    4   2    1       -31.2145205919         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2145205949         0.0000000000
+   2    4   2    2       -31.2145205919         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2145205949         0.0000000000
+   3    4   3    1       -31.2145205919         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2145205949         0.0000000000
+   3    4   3    2       -31.2145205919         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -3868,15 +3868,15 @@ tolerances: {tolvrs: 1.00E-10, }
    1    1   1    1         0.3120742017         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.1235345407         0.0000000000
+   1    1   1    2        -0.1235345406         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.3120742017         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1235345407         0.0000000000
+   2    1   2    2        -0.1235345406         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
@@ -3884,9 +3884,9 @@ tolerances: {tolvrs: 1.00E-10, }
    3    1   3    1         0.3120742017         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1235345407         0.0000000000
+   3    1   3    2        -0.1235345406         0.0000000000
   
-   1    2   1    1        -0.1235345407        -0.0000000000
+   1    2   1    1        -0.1235345406        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.3120742017         0.0000000000
@@ -3894,17 +3894,17 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1235345407        -0.0000000000
+   2    2   2    1        -0.1235345406        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         0.3120742017         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   3    2        -0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1235345407        -0.0000000000
+   3    2   3    1        -0.1235345406        -0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
+   3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2         0.3120742017         0.0000000000
   
   Effective charges, in cartesian coordinates,
@@ -3913,29 +3913,29 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9679452489         0.0000000000
+   1    4   1    1        -0.9679452484         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9679452489         0.0000000000
+   2    4   2    1        -0.9679452484         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9679452489         0.0000000000
+   3    4   3    1        -0.9679452484         0.0000000000
   
-   1    4   1    2        -0.9679452489         0.0000000000
+   1    4   1    2        -0.9679452484         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9679452489         0.0000000000
+   2    4   2    2        -0.9679452484         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9679452489         0.0000000000
+   3    4   3    2        -0.9679452484         0.0000000000
   
   
   
@@ -3991,8 +3991,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4040,7 +4040,7 @@ tolerances: {tolvrs: 1.00E-10, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -10.550018072864     -3.130E+01 2.635E-02 8.532E+02
  ETOT  2  -17.531751836794     -6.982E+00 1.293E-02 5.502E+00
- ETOT  3  -17.552063391933     -2.031E-02 3.925E-04 3.174E-01
+ ETOT  3  -17.552063391932     -2.031E-02 3.925E-04 3.174E-01
 -open ddk wf file :t81o_DS23_1WF7
 
  scprqt:  WARNING -
@@ -4204,7 +4204,7 @@ tolerances: {tolvrs: 1.00E-10, }
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2        -0.1505734885         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   3    2        -0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
@@ -4292,8 +4292,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4598,8 +4598,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4645,9 +4645,9 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.790536882567     -3.276E+01 3.209E-02 9.939E+02
- ETOT  2   16.538034932750     -8.253E+00 1.401E-02 4.203E+00
- ETOT  3   16.515666156531     -2.237E-02 3.161E-04 3.030E-01
+-ETOT  1   24.790536917556     -3.276E+01 3.209E-02 9.939E+02
+ ETOT  2   16.538034932262     -8.253E+00 1.401E-02 4.203E+00
+ ETOT  3   16.515666156469     -2.237E-02 3.161E-04 3.030E-01
 -open ddk wf file :t81o_DS25_1WF7
 
  scprqt:  WARNING -
@@ -4675,9 +4675,9 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.79655924E+01  frxc 2 =   9.51544201E+01
  Resulting in :
- 2DEtotal=    0.1651566616E+02 Ha. Also 2DEtotal=    0.449414131489E+03 eV
+ 2DEtotal=    0.1651566616E+02 Ha. Also 2DEtotal=    0.449414131487E+03 eV
     (2DErelax=   -4.1034253308E+01 Ha. 2DEnonrelax=    5.7549919464E+01 Ha)
-    (  non-var. 2DEtotal :    1.6378956033E+01 Ha)
+    (  non-var. 2DEtotal :    1.6378956034E+01 Ha)
 
 ================================================================================
 
@@ -4691,86 +4691,86 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.3789794568         0.0000000000
-   1    1   2    1         8.1894897284         0.0000000000
-   1    1   3    1         8.1894897284         0.0000000000
-   1    1   1    2        -6.4481362009         0.0000000000
-   1    1   2    2        -3.2240681004         0.0000000000
-   1    1   3    2        -3.2240681004         0.0000000000
-   1    1   1    4       -31.2193471173         0.0000000000
+   1    1   1    1        16.3789794526         0.0000000000
+   1    1   2    1         8.1894897263         0.0000000000
+   1    1   3    1         8.1894897263         0.0000000000
+   1    1   1    2        -6.4481361702         0.0000000000
+   1    1   2    2        -3.2240680851         0.0000000000
+   1    1   3    2        -3.2240680851         0.0000000000
+   1    1   1    4       -31.2193471071         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1894897284         0.0000000000
-   2    1   2    1        16.3789794568         0.0000000000
-   2    1   3    1         8.1894897284         0.0000000000
-   2    1   1    2        -3.2240681004         0.0000000000
-   2    1   2    2        -6.4481362009         0.0000000000
-   2    1   3    2        -3.2240681004         0.0000000000
+   2    1   1    1         8.1894897263         0.0000000000
+   2    1   2    1        16.3789794526         0.0000000000
+   2    1   3    1         8.1894897263         0.0000000000
+   2    1   1    2        -3.2240680851         0.0000000000
+   2    1   2    2        -6.4481361702         0.0000000000
+   2    1   3    2        -3.2240680851         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2193471173         0.0000000000
+   2    1   2    4       -31.2193471071         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1894897284         0.0000000000
-   3    1   2    1         8.1894897284         0.0000000000
-   3    1   3    1        16.3789794568         0.0000000000
-   3    1   1    2        -3.2240681004         0.0000000000
-   3    1   2    2        -3.2240681004         0.0000000000
-   3    1   3    2        -6.4481362009         0.0000000000
+   3    1   1    1         8.1894897263         0.0000000000
+   3    1   2    1         8.1894897263         0.0000000000
+   3    1   3    1        16.3789794526         0.0000000000
+   3    1   1    2        -3.2240680851         0.0000000000
+   3    1   2    2        -3.2240680851         0.0000000000
+   3    1   3    2        -6.4481361702         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2193471173         0.0000000000
+   3    1   3    4       -31.2193471071         0.0000000000
   
-   1    2   1    1        -6.4481362009        -0.0000000000
-   1    2   2    1        -3.2240681004        -0.0000000000
-   1    2   3    1        -3.2240681004        -0.0000000000
-   1    2   1    2        16.3789794568         0.0000000000
-   1    2   2    2         8.1894897284         0.0000000000
-   1    2   3    2         8.1894897284         0.0000000000
-   1    2   1    4       -31.2193471173         0.0000000000
+   1    2   1    1        -6.4481361702        -0.0000000000
+   1    2   2    1        -3.2240680851        -0.0000000000
+   1    2   3    1        -3.2240680851        -0.0000000000
+   1    2   1    2        16.3789794526         0.0000000000
+   1    2   2    2         8.1894897263         0.0000000000
+   1    2   3    2         8.1894897263         0.0000000000
+   1    2   1    4       -31.2193471071         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2240681004        -0.0000000000
-   2    2   2    1        -6.4481362009        -0.0000000000
-   2    2   3    1        -3.2240681004        -0.0000000000
-   2    2   1    2         8.1894897284         0.0000000000
-   2    2   2    2        16.3789794568         0.0000000000
-   2    2   3    2         8.1894897284         0.0000000000
+   2    2   1    1        -3.2240680851        -0.0000000000
+   2    2   2    1        -6.4481361702        -0.0000000000
+   2    2   3    1        -3.2240680851        -0.0000000000
+   2    2   1    2         8.1894897263         0.0000000000
+   2    2   2    2        16.3789794526         0.0000000000
+   2    2   3    2         8.1894897263         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2193471173         0.0000000000
+   2    2   2    4       -31.2193471071         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2240681004        -0.0000000000
-   3    2   2    1        -3.2240681004        -0.0000000000
-   3    2   3    1        -6.4481362009        -0.0000000000
-   3    2   1    2         8.1894897284         0.0000000000
-   3    2   2    2         8.1894897284         0.0000000000
-   3    2   3    2        16.3789794568         0.0000000000
+   3    2   1    1        -3.2240680851        -0.0000000000
+   3    2   2    1        -3.2240680851        -0.0000000000
+   3    2   3    1        -6.4481361702        -0.0000000000
+   3    2   1    2         8.1894897263         0.0000000000
+   3    2   2    2         8.1894897263         0.0000000000
+   3    2   3    2        16.3789794526         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2193471173         0.0000000000
+   3    2   3    4       -31.2193471071         0.0000000000
   
-   1    4   1    1       -31.2193471173         0.0000000000
+   1    4   1    1       -31.2193471071         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2193471173         0.0000000000
+   1    4   1    2       -31.2193471071         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2193471173         0.0000000000
+   2    4   2    1       -31.2193471071         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2193471173         0.0000000000
+   2    4   2    2       -31.2193471071         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2193471173         0.0000000000
+   3    4   3    1       -31.2193471071         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2193471173         0.0000000000
+   3    4   3    2       -31.2193471071         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -4778,47 +4778,47 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3136281543         0.0000000000
+   1    1   1    1         0.3136281542         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.1234702724         0.0000000000
+   1    1   1    2        -0.1234702718         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1         0.3136281543         0.0000000000
+   2    1   2    1         0.3136281542         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1234702724         0.0000000000
+   2    1   2    2        -0.1234702718         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
-   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.3136281543         0.0000000000
+   3    1   3    1         0.3136281542         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1234702724         0.0000000000
+   3    1   3    2        -0.1234702718         0.0000000000
   
-   1    2   1    1        -0.1234702724        -0.0000000000
+   1    2   1    1        -0.1234702718        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3136281543         0.0000000000
+   1    2   1    2         0.3136281542         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   3    2         0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1234702724        -0.0000000000
+   2    2   2    1        -0.1234702718        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.3136281543         0.0000000000
+   2    2   2    2         0.3136281542         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1234702724        -0.0000000000
+   3    2   3    1        -0.1234702718        -0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.3136281543         0.0000000000
+   3    2   3    2         0.3136281542         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
@@ -4826,29 +4826,29 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9687134138         0.0000000000
+   1    4   1    1        -0.9687134122         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9687134138         0.0000000000
+   2    4   2    1        -0.9687134122         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9687134138         0.0000000000
+   3    4   3    1        -0.9687134122         0.0000000000
   
-   1    4   1    2        -0.9687134138         0.0000000000
+   1    4   1    2        -0.9687134122         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9687134138         0.0000000000
+   2    4   2    2        -0.9687134122         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9687134138         0.0000000000
+   3    4   3    2        -0.9687134122         0.0000000000
   
   
   
@@ -4899,8 +4899,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4946,9 +4946,9 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.790536882566     -3.276E+01 3.209E-02 9.939E+02
- ETOT  2   16.538034932749     -8.253E+00 1.401E-02 4.203E+00
- ETOT  3   16.515666156530     -2.237E-02 3.161E-04 3.030E-01
+-ETOT  1   24.790536917555     -3.276E+01 3.209E-02 9.939E+02
+ ETOT  2   16.538034932261     -8.253E+00 1.401E-02 4.203E+00
+ ETOT  3   16.515666156468     -2.237E-02 3.161E-04 3.030E-01
 -open ddk wf file :t81o_DS25_1WF7
 
  scprqt:  WARNING -
@@ -4976,9 +4976,9 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.79655924E+01  frxc 2 =   9.51544201E+01
  Resulting in :
- 2DEtotal=    0.1651566616E+02 Ha. Also 2DEtotal=    0.449414131489E+03 eV
+ 2DEtotal=    0.1651566616E+02 Ha. Also 2DEtotal=    0.449414131487E+03 eV
     (2DErelax=   -4.1034253308E+01 Ha. 2DEnonrelax=    5.7549919464E+01 Ha)
-    (  non-var. 2DEtotal :    1.6378956033E+01 Ha)
+    (  non-var. 2DEtotal :    1.6378956034E+01 Ha)
 
 ================================================================================
 
@@ -4992,86 +4992,86 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.3789794568         0.0000000000
-   1    1   2    1         8.1894897284         0.0000000000
-   1    1   3    1         8.1894897284         0.0000000000
-   1    1   1    2        -6.4481362009         0.0000000000
-   1    1   2    2        -3.2240681004         0.0000000000
-   1    1   3    2        -3.2240681004         0.0000000000
-   1    1   1    4       -31.2193471173         0.0000000000
+   1    1   1    1        16.3789794526         0.0000000000
+   1    1   2    1         8.1894897263         0.0000000000
+   1    1   3    1         8.1894897263         0.0000000000
+   1    1   1    2        -6.4481361702         0.0000000000
+   1    1   2    2        -3.2240680851         0.0000000000
+   1    1   3    2        -3.2240680851         0.0000000000
+   1    1   1    4       -31.2193471071         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1894897284         0.0000000000
-   2    1   2    1        16.3789794568         0.0000000000
-   2    1   3    1         8.1894897284         0.0000000000
-   2    1   1    2        -3.2240681004         0.0000000000
-   2    1   2    2        -6.4481362009         0.0000000000
-   2    1   3    2        -3.2240681004         0.0000000000
+   2    1   1    1         8.1894897263         0.0000000000
+   2    1   2    1        16.3789794526         0.0000000000
+   2    1   3    1         8.1894897263         0.0000000000
+   2    1   1    2        -3.2240680851         0.0000000000
+   2    1   2    2        -6.4481361702         0.0000000000
+   2    1   3    2        -3.2240680851         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2193471173         0.0000000000
+   2    1   2    4       -31.2193471071         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1894897284         0.0000000000
-   3    1   2    1         8.1894897284         0.0000000000
-   3    1   3    1        16.3789794568         0.0000000000
-   3    1   1    2        -3.2240681004         0.0000000000
-   3    1   2    2        -3.2240681004         0.0000000000
-   3    1   3    2        -6.4481362009         0.0000000000
+   3    1   1    1         8.1894897263         0.0000000000
+   3    1   2    1         8.1894897263         0.0000000000
+   3    1   3    1        16.3789794526         0.0000000000
+   3    1   1    2        -3.2240680851         0.0000000000
+   3    1   2    2        -3.2240680851         0.0000000000
+   3    1   3    2        -6.4481361702         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2193471173         0.0000000000
+   3    1   3    4       -31.2193471071         0.0000000000
   
-   1    2   1    1        -6.4481362009        -0.0000000000
-   1    2   2    1        -3.2240681004        -0.0000000000
-   1    2   3    1        -3.2240681004        -0.0000000000
-   1    2   1    2        16.3789794568         0.0000000000
-   1    2   2    2         8.1894897284         0.0000000000
-   1    2   3    2         8.1894897284         0.0000000000
-   1    2   1    4       -31.2193471173         0.0000000000
+   1    2   1    1        -6.4481361702        -0.0000000000
+   1    2   2    1        -3.2240680851        -0.0000000000
+   1    2   3    1        -3.2240680851        -0.0000000000
+   1    2   1    2        16.3789794526         0.0000000000
+   1    2   2    2         8.1894897263         0.0000000000
+   1    2   3    2         8.1894897263         0.0000000000
+   1    2   1    4       -31.2193471071         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2240681004        -0.0000000000
-   2    2   2    1        -6.4481362009        -0.0000000000
-   2    2   3    1        -3.2240681004        -0.0000000000
-   2    2   1    2         8.1894897284         0.0000000000
-   2    2   2    2        16.3789794568         0.0000000000
-   2    2   3    2         8.1894897284         0.0000000000
+   2    2   1    1        -3.2240680851        -0.0000000000
+   2    2   2    1        -6.4481361702        -0.0000000000
+   2    2   3    1        -3.2240680851        -0.0000000000
+   2    2   1    2         8.1894897263         0.0000000000
+   2    2   2    2        16.3789794526         0.0000000000
+   2    2   3    2         8.1894897263         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2193471173         0.0000000000
+   2    2   2    4       -31.2193471071         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2240681004        -0.0000000000
-   3    2   2    1        -3.2240681004        -0.0000000000
-   3    2   3    1        -6.4481362009        -0.0000000000
-   3    2   1    2         8.1894897284         0.0000000000
-   3    2   2    2         8.1894897284         0.0000000000
-   3    2   3    2        16.3789794568         0.0000000000
+   3    2   1    1        -3.2240680851        -0.0000000000
+   3    2   2    1        -3.2240680851        -0.0000000000
+   3    2   3    1        -6.4481361702        -0.0000000000
+   3    2   1    2         8.1894897263         0.0000000000
+   3    2   2    2         8.1894897263         0.0000000000
+   3    2   3    2        16.3789794526         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2193471173         0.0000000000
+   3    2   3    4       -31.2193471071         0.0000000000
   
-   1    4   1    1       -31.2193471173         0.0000000000
+   1    4   1    1       -31.2193471071         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2193471173         0.0000000000
+   1    4   1    2       -31.2193471071         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2193471173         0.0000000000
+   2    4   2    1       -31.2193471071         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2193471173         0.0000000000
+   2    4   2    2       -31.2193471071         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2193471173         0.0000000000
+   3    4   3    1       -31.2193471071         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2193471173         0.0000000000
+   3    4   3    2       -31.2193471071         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -5079,47 +5079,47 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3136281543         0.0000000000
+   1    1   1    1         0.3136281542         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.1234702724         0.0000000000
+   1    1   1    2        -0.1234702718         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
    2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.3136281543         0.0000000000
+   2    1   2    1         0.3136281542         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1234702724         0.0000000000
+   2    1   2    2        -0.1234702718         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.3136281543         0.0000000000
+   3    1   3    1         0.3136281542         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1234702724         0.0000000000
+   3    1   3    2        -0.1234702718         0.0000000000
   
-   1    2   1    1        -0.1234702724        -0.0000000000
+   1    2   1    1        -0.1234702718        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3136281543         0.0000000000
+   1    2   1    2         0.3136281542         0.0000000000
    1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1234702724        -0.0000000000
+   2    2   2    1        -0.1234702718        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2        -0.0000000000         0.0000000000
-   2    2   2    2         0.3136281543         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
+   2    2   2    2         0.3136281542         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1234702724        -0.0000000000
+   3    2   3    1        -0.1234702718        -0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.3136281543         0.0000000000
+   3    2   3    2         0.3136281542         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
@@ -5127,29 +5127,29 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9687134138         0.0000000000
+   1    4   1    1        -0.9687134122         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9687134138         0.0000000000
+   2    4   2    1        -0.9687134122         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9687134138         0.0000000000
+   3    4   3    1        -0.9687134122         0.0000000000
   
-   1    4   1    2        -0.9687134138         0.0000000000
+   1    4   1    2        -0.9687134122         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9687134138         0.0000000000
+   2    4   2    2        -0.9687134122         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9687134138         0.0000000000
+   3    4   3    2        -0.9687134122         0.0000000000
   
   
   
@@ -5200,8 +5200,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5247,9 +5247,9 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.790536395625     -3.276E+01 3.209E-02 9.939E+02
- ETOT  2   16.538038719419     -8.252E+00 1.401E-02 4.203E+00
- ETOT  3   16.515669941982     -2.237E-02 3.161E-04 3.030E-01
+-ETOT  1   24.790536430614     -3.276E+01 3.209E-02 9.939E+02
+ ETOT  2   16.538038718931     -8.252E+00 1.401E-02 4.203E+00
+ ETOT  3   16.515669941921     -2.237E-02 3.161E-04 3.030E-01
 -open ddk wf file :t81o_DS25_1WF7
 
  scprqt:  WARNING -
@@ -5264,12 +5264,12 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.94299637E+01 eigvalue=  -1.98235742E+00  local=  -2.74057142E+01
+     kin0=   4.94299637E+01 eigvalue=  -1.98235741E+00  local=  -2.74057142E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
  loc psp =  -6.84494693E+01  Hartree=   1.37761958E+01     xc=  -5.18469884E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   2.18430139E+00     enl0=   1.04899755E+01   enl1=  -1.38924424E+01
+    edocc=   2.18430139E+00     enl0=   1.04899755E+01   enl1=  -1.38924425E+01
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -4.10342458E+01
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
@@ -5277,9 +5277,9 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.79655702E+01  frxc 2 =   9.51543942E+01
  Resulting in :
- 2DEtotal=    0.1651566994E+02 Ha. Also 2DEtotal=    0.449414234496E+03 eV
+ 2DEtotal=    0.1651566994E+02 Ha. Also 2DEtotal=    0.449414234495E+03 eV
     (2DErelax=   -4.1034245810E+01 Ha. 2DEnonrelax=    5.7549915752E+01 Ha)
-    (  non-var. 2DEtotal :    1.6378959867E+01 Ha)
+    (  non-var. 2DEtotal :    1.6378959868E+01 Ha)
 
 ================================================================================
 
@@ -5293,86 +5293,86 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.3789832903         0.0000000000
-   1    1   2    1         8.1894916451         0.0000000000
-   1    1   3    1         8.1894916451         0.0000000000
-   1    1   1    2        -6.4481376811         0.0000000000
-   1    1   2    2        -3.2240688405         0.0000000000
-   1    1   3    2        -3.2240688405         0.0000000000
-   1    1   1    4       -31.2193418014         0.0000000000
+   1    1   1    1        16.3789832861         0.0000000000
+   1    1   2    1         8.1894916430         0.0000000000
+   1    1   3    1         8.1894916430         0.0000000000
+   1    1   1    2        -6.4481376504         0.0000000000
+   1    1   2    2        -3.2240688252         0.0000000000
+   1    1   3    2        -3.2240688252         0.0000000000
+   1    1   1    4       -31.2193417912         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1894916451         0.0000000000
-   2    1   2    1        16.3789832903         0.0000000000
-   2    1   3    1         8.1894916451         0.0000000000
-   2    1   1    2        -3.2240688405         0.0000000000
-   2    1   2    2        -6.4481376811         0.0000000000
-   2    1   3    2        -3.2240688405         0.0000000000
+   2    1   1    1         8.1894916430         0.0000000000
+   2    1   2    1        16.3789832861         0.0000000000
+   2    1   3    1         8.1894916430         0.0000000000
+   2    1   1    2        -3.2240688252         0.0000000000
+   2    1   2    2        -6.4481376504         0.0000000000
+   2    1   3    2        -3.2240688252         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2193418014         0.0000000000
+   2    1   2    4       -31.2193417912         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1894916451         0.0000000000
-   3    1   2    1         8.1894916451         0.0000000000
-   3    1   3    1        16.3789832903         0.0000000000
-   3    1   1    2        -3.2240688405         0.0000000000
-   3    1   2    2        -3.2240688405         0.0000000000
-   3    1   3    2        -6.4481376811         0.0000000000
+   3    1   1    1         8.1894916430         0.0000000000
+   3    1   2    1         8.1894916430         0.0000000000
+   3    1   3    1        16.3789832861         0.0000000000
+   3    1   1    2        -3.2240688252         0.0000000000
+   3    1   2    2        -3.2240688252         0.0000000000
+   3    1   3    2        -6.4481376504         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2193418014         0.0000000000
+   3    1   3    4       -31.2193417912         0.0000000000
   
-   1    2   1    1        -6.4481376811        -0.0000000000
-   1    2   2    1        -3.2240688405        -0.0000000000
-   1    2   3    1        -3.2240688405        -0.0000000000
-   1    2   1    2        16.3789832903         0.0000000000
-   1    2   2    2         8.1894916451         0.0000000000
-   1    2   3    2         8.1894916451         0.0000000000
-   1    2   1    4       -31.2193418014         0.0000000000
+   1    2   1    1        -6.4481376504        -0.0000000000
+   1    2   2    1        -3.2240688252        -0.0000000000
+   1    2   3    1        -3.2240688252        -0.0000000000
+   1    2   1    2        16.3789832861         0.0000000000
+   1    2   2    2         8.1894916430         0.0000000000
+   1    2   3    2         8.1894916430         0.0000000000
+   1    2   1    4       -31.2193417912         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2240688405        -0.0000000000
-   2    2   2    1        -6.4481376811        -0.0000000000
-   2    2   3    1        -3.2240688405        -0.0000000000
-   2    2   1    2         8.1894916451         0.0000000000
-   2    2   2    2        16.3789832903         0.0000000000
-   2    2   3    2         8.1894916451         0.0000000000
+   2    2   1    1        -3.2240688252        -0.0000000000
+   2    2   2    1        -6.4481376504        -0.0000000000
+   2    2   3    1        -3.2240688252        -0.0000000000
+   2    2   1    2         8.1894916430         0.0000000000
+   2    2   2    2        16.3789832861         0.0000000000
+   2    2   3    2         8.1894916430         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2193418014         0.0000000000
+   2    2   2    4       -31.2193417912         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2240688405        -0.0000000000
-   3    2   2    1        -3.2240688405        -0.0000000000
-   3    2   3    1        -6.4481376811        -0.0000000000
-   3    2   1    2         8.1894916451         0.0000000000
-   3    2   2    2         8.1894916451         0.0000000000
-   3    2   3    2        16.3789832903         0.0000000000
+   3    2   1    1        -3.2240688252        -0.0000000000
+   3    2   2    1        -3.2240688252        -0.0000000000
+   3    2   3    1        -6.4481376504        -0.0000000000
+   3    2   1    2         8.1894916430         0.0000000000
+   3    2   2    2         8.1894916430         0.0000000000
+   3    2   3    2        16.3789832861         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2193418014         0.0000000000
+   3    2   3    4       -31.2193417912         0.0000000000
   
-   1    4   1    1       -31.2193418014         0.0000000000
+   1    4   1    1       -31.2193417912         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2193418014         0.0000000000
+   1    4   1    2       -31.2193417912         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2193418014         0.0000000000
+   2    4   2    1       -31.2193417912         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2193418014         0.0000000000
+   2    4   2    2       -31.2193417912         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2193418014         0.0000000000
+   3    4   3    1       -31.2193417912         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2193418014         0.0000000000
+   3    4   3    2       -31.2193417912         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -5380,47 +5380,47 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3136282277         0.0000000000
+   1    1   1    1         0.3136282276         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.1234703008         0.0000000000
+   1    1   1    2        -0.1234703002         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
    2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.3136282277         0.0000000000
+   2    1   2    1         0.3136282276         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1234703008         0.0000000000
+   2    1   2    2        -0.1234703002         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
-   3    1   3    1         0.3136282277         0.0000000000
+   3    1   3    1         0.3136282276         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1234703008         0.0000000000
+   3    1   3    2        -0.1234703002         0.0000000000
   
-   1    2   1    1        -0.1234703008        -0.0000000000
+   1    2   1    1        -0.1234703002        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3136282277         0.0000000000
+   1    2   1    2         0.3136282276         0.0000000000
    1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1234703008        -0.0000000000
+   2    2   2    1        -0.1234703002        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
-   2    2   2    2         0.3136282277         0.0000000000
+   2    2   2    2         0.3136282276         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1234703008        -0.0000000000
+   3    2   3    1        -0.1234703002        -0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
-   3    2   3    2         0.3136282277         0.0000000000
+   3    2   3    2         0.3136282276         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
@@ -5428,29 +5428,29 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9687125678         0.0000000000
+   1    4   1    1        -0.9687125661         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9687125678         0.0000000000
+   2    4   2    1        -0.9687125661         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9687125678         0.0000000000
+   3    4   3    1        -0.9687125661         0.0000000000
   
-   1    4   1    2        -0.9687125678         0.0000000000
+   1    4   1    2        -0.9687125661         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9687125678         0.0000000000
+   2    4   2    2        -0.9687125661         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9687125678         0.0000000000
+   3    4   3    2        -0.9687125661         0.0000000000
   
   
   
@@ -5498,17 +5498,17 @@ tolerances: {tolvrs: 1.00E-10, }
            etotal32    1.6434737927E+01
            etotal33   -1.7552063392E+01
            etotal34   -1.7552097188E+01
-           etotal35    1.6515666157E+01
-           etotal36    1.6515666157E+01
+           etotal35    1.6515666156E+01
+           etotal36    1.6515666156E+01
            etotal37    1.6515669942E+01
             fcart11   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart12   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart13   -9.9013897031E-20  9.9013897031E-20 -4.2434527299E-20
-                       9.9013897031E-20 -9.9013897031E-20  4.2434527299E-20
-            fcart14    2.8289684866E-20 -2.8289684866E-20  2.8289684866E-20
-                      -2.8289684866E-20  2.8289684866E-20 -2.8289684866E-20
+            fcart13   -8.4869054598E-20  0.0000000000E+00 -3.2683803790E-37
+                       8.4869054598E-20  0.0000000000E+00  3.2683803790E-37
+            fcart14   -9.9013897031E-20 -1.4144842433E-20  1.2730358190E-19
+                       9.9013897031E-20  1.4144842433E-20 -1.2730358190E-19
             fcart15   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart16   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -6358,7 +6358,24 @@ P          mk1mem37        16
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
-- [6] Recent developments in the ABINIT software package.
+- [6] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [7] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -6376,23 +6393,10 @@ P          mk1mem37        16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [7] ABINIT: First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- Proc.   0 individual time (sec): cpu=         16.7  wall=         25.2
+- Proc.   0 individual time (sec): cpu=          8.7  wall=          9.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  73 WARNINGs and 105 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.7  wall=         25.2
+.Delivered  90 WARNINGs and 109 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.7  wall=          9.0

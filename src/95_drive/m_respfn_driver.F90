@@ -520,7 +520,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 & phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
 
 !Symmetrize atomic coordinates over space group elements:
- call symmetrize_xred(indsym,natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
+ call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
 !Examine the symmetries of the q wavevector
  ABI_ALLOCATE(symq,(4,2,dtset%nsym))
