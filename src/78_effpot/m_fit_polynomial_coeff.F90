@@ -161,12 +161,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical :: need_prt_files
 !arrays
  real(dp) :: mingf(4)
- real(dp) :: gf_values_iter(4,ncycle_in+1)
  integer :: sc_size(3)
  integer,allocatable  :: buffsize(:),buffdisp(:),buffin(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),list_coeffs_tmp2(:)
  integer,allocatable  :: my_coeffindexes(:),singular_coeffs(:)
  integer,allocatable  :: my_coefflist(:) ,stat_coeff(:)
+ real(dp),allocatable :: gf_values_iter(:,:)
  real(dp),allocatable :: buffGF(:,:),coeff_values(:),energy_coeffs(:,:)
  real(dp),allocatable :: energy_coeffs_tmp(:,:)
  real(dp),allocatable :: fcart_coeffs(:,:,:,:),gf_values(:,:),gf_mpi(:,:)
@@ -232,8 +232,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  else 
     fit_iatom_in = -1 
  endif
- !initialize gf_values_iter array with holds gf values for each fit itertion 
- gf_values_iter(:,:) = zero 
 
 !Set the tolerance for the fit
  tolMSDF=zero;tolMSDS=zero;tolMSDE=zero;tolMSDFS=zero;tolGF=zero 
@@ -351,6 +349,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
       ncoeff_fix = nfixcoeff 
    endif 
  endif 
+
 
 !Get the list with the number of coeff on each CPU
 !In order to be abble to compute the my_coeffindexes array which is for example:
@@ -635,6 +634,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    call wrtout(std_out,message,'COLL')
  end if
 
+ ABI_ALLOCATE(gf_values_iter,(4,ncycle+1))
+ gf_values_iter(:,:) = zero 
  !Store initial gf_values as first value in gf_values_iter 
  gf_values_iter(:,1) = gf_values(:,1)
 
@@ -661,7 +662,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        if(nproc > 1)  then
          if(my_ncoeff>=1) then
            write(message, '(2a,I0,a)')trim(message), ' (only the ',my_ncoeff,&
-&                                                ' first are printed for this CPU)'
+&                                                ' first are printed for this CPU)'         
          else
            write(message, '(2a)')trim(message), ' (no coefficient treated by this CPU)'
          end if
@@ -699,7 +700,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      do icoeff=1,my_ncoeff
 !    cycle if this coefficient is not allowed
        if(any(list_coeffs==my_coeffindexes(icoeff)).or.singular_coeffs(icoeff) == 1)then
-          write(*,*) 'Im here, icoeff: ', icoeff
           gf_values(:,icoeff) = zero
           cycle
        endif
@@ -818,10 +818,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        end do
      end if
 
-     !Store GF Values of this iteration 
-     gf_values_iter(:,icycle+1) = mingf(:)
-     write(*,*) gf_values_iter(:,icycle+1)
-     write(*,*) "index_min ", index_min
 !    Check if there is still coefficient
      if(index_min==0) then
        exit
@@ -894,6 +890,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      end if
 
      ncycle_tot = ncycle_tot + 1
+     
+     !Store GF Values of this iteration 
+     gf_values_iter(:,icycle_tmp+1) = mingf(:)
 
 !    Check the stopping criterion
      converge = .false.
@@ -1214,6 +1213,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  end do
 
  ABI_DATATYPE_DEALLOCATE(my_coeffs)
+ ABI_DEALLOCATE(gf_values_iter)
  ABI_DEALLOCATE(buffsize)
  ABI_DEALLOCATE(buffdisp)
  ABI_DEALLOCATE(buffGF)
