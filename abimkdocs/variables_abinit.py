@@ -21917,6 +21917,19 @@ Also, the present implementation is optimized for converging occupied states so 
 [[rmm_diis]] for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
 Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
 then restart from the WFK file using e.g. the LOBPCG solver to reconverge the results with stricter tolerance.
+
+TIP:
+
+Don't try to reach the same precision as the other eigenvalue solvers.
+RMM-DIIS usually takes more iterations than other eigensolvers to reach the same precision.
+Use more permissive tolerances and then restart with tighter settings.
+Use [[tolwfr]] only if you are using RMM-DIIS for NSCF band structure calculations
+
+If the RMM-DIIS has troubles to converge:
+
+* Increase [[nband]] to enlarge the subspace used for the subspace rotation (Rayleigh-Ritz)
+* Increase [[rmm_diis]] so that more iterations are done with LOBPCG/CG
+* Play with the mixing algorithm
 """,
 ),
 
