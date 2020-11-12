@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.3.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -511,7 +511,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.1403E+00  1.2538E+00  1.5184E+00  1.5586E+00  1.6729E+00  1.9308E+00
   1.9497E+00  2.0315E+00  2.2594E+00  2.4946E+00  2.5164E+00  2.5223E+00
   2.6744E+00  2.6809E+00
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  1.26207E-05
+  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  1.26241E-05
  Non-SCF case, kpt    3 (  0.43750  0.31250  0.00000), residuals and eigenvalues=
   3.98E-13  2.86E-12  3.28E-12  9.28E-12  1.02E-11  3.86E-12  7.50E-13  2.84E-11
   1.11E-12  5.61E-11  8.17E-11  1.96E-12  2.49E-11  1.05E-11  6.53E-12  5.27E-11
@@ -555,7 +555,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.2324E+00  1.3172E+00  1.4269E+00  1.5380E+00  1.6774E+00  1.9364E+00
   2.0408E+00  2.1252E+00  2.1710E+00  2.4377E+00  2.4605E+00  2.5673E+00
   2.6532E+00  2.7696E+00
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  3.15900E-04
+  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  3.16039E-04
  Non-SCF case, kpt    8 ( -0.31250  0.25000  0.06250), residuals and eigenvalues=
   9.07E-13  4.62E-13  5.58E-11  4.03E-13  8.90E-12  5.84E-13  2.72E-11  5.06E-11
   1.94E-12  6.80E-13  1.15E-11  8.43E-11  4.43E-11  5.69E-11  1.65E-11  4.92E-11
@@ -582,7 +582,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.4707E+00  1.6425E+00  1.7070E+00  1.7719E+00  1.7911E+00  1.8560E+00
   1.9305E+00  1.9885E+00  1.9985E+00  2.0712E+00  2.1366E+00  2.3002E+00
   2.5912E+00  2.7277E+00
-  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  1.26354E-03
+  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  1.26332E-03
 
 
 --- !ResultsGS
