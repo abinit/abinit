@@ -31,11 +31,14 @@ inp_files = [
 "t16.in", # check slightly incorrect xred, with large tolsym
 "t17.in", # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
 "t18.in", # check slightly incorrect rprim and xred, yielding correction to tnons, tolerated.
+"t19.in", # disable all checks thanks to expert_user
+"t20.in", # test treatment of inaccurate POSCAR file
+"t21.in", # test treatment of inaccurate POSCAR file
 "t29.in", # RMM-DIIS eigsolver for NC.
 "t30.in", # RMM-DIIS eigsolver for PAW.
 # GW/BSE
-"t21.in", # HF exchange checking q->0 terms
-"t22.in", # AC GW
+"t31.in", # HF exchange checking q->0 terms
+"t32.in", # AC GW
 # DFPT
 "t41.in",
 "t42.in",

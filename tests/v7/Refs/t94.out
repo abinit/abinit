@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h36 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h33 )
   
 
 ================================================================================
@@ -85,7 +85,7 @@ Phonon band structure files, with atomic projections, will be output
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.016  and twall      0.016 sec
+-begin at tcpu      0.032  and twall      0.033 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -117,9 +117,9 @@ Phonon band structure files, with atomic projections, will be output
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00   -1.205639E-20    0.000000E+00
-       2        0.000000E+00   -5.167025E-21    0.000000E+00
-       3        0.000000E+00   -1.636225E-20    0.000000E+00
+       1        0.000000E+00   -9.903819E-21    0.000000E+00
+       2        0.000000E+00    8.612063E-21    0.000000E+00
+       3        0.000000E+00    3.875269E-21    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -135,9 +135,9 @@ Phonon band structure files, with atomic projections, will be output
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00   -1.205639E-20    0.000000E+00
-       2        0.000000E+00   -5.167025E-21    0.000000E+00
-       3        0.000000E+00   -1.636225E-20    0.000000E+00
+       1        0.000000E+00   -9.903819E-21    0.000000E+00
+       2        0.000000E+00    8.612063E-21    0.000000E+00
+       3        0.000000E+00    3.875269E-21    0.000000E+00
 
  Q point =    5.000000E-01    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -175,12 +175,12 @@ Phonon band structure files, with atomic projections, will be output
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  0.00000000E+00  8.89014669E-03
+-  1  0.00000000E+00  3.33354325E-07 -8.89014669E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  8.89014669E-03  0.00000000E+00
+-  1  0.00000000E+00  8.89014669E-03  3.33354325E-07
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -194,8 +194,8 @@ Phonon band structure files, with atomic projections, will be output
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -221,10 +221,10 @@ Phonon band structure files, with atomic projections, will be output
 ;  1  0.00000000E+00  6.28628301E-03  6.28628301E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=         42.7  wall=         42.8
+- Proc.   0 individual time (sec): cpu=         27.7  wall=         27.8
 
 ================================================================================
 
-+Total cpu time     42.666  and wall time     42.782 sec
++Total cpu time     27.688  and wall time     27.773 sec
 
  anaddb : the run completed succesfully.

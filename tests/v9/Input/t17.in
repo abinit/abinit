@@ -63,5 +63,10 @@ usekden 1
 #%%   Test automatic correction of rprimd, tnons and xred, as well as final
 #%%   proposal of atomic positions that would given tolerated values of tnons
 #%%   if chksymtnons is not set to zero.
+#%%   WARNING XG20201109: the xred is presently too symmetric (with respect to symrel), so that it is fully
+#%%   matching the FFT grid at the end. One should shift the xred by 0.01.
+#%%   I tried this, but then the symmetrize_xred was unable to select the correcting proposal. 
+#%%   In order to debug, one should likely select a simpler case, with orthogonal rprim
+#%%   So, at present there is no test of properly working chksymtnons 2 .
 #%% topics = crystal
 #%%<END TEST_INFO>

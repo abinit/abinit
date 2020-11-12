@@ -1,6 +1,6 @@
 
 .Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 12 Oct 2020.
-- ( at 16h34 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h18 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/TestBot_MPI1/paral_t74_MPI1/t74.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/paral_t74_MPI1/t74.in
 - output file    -> t74_MPI1.out
 - root for input  files -> t74_MPI1i
 - root for output files -> t74_MPI1o
@@ -270,8 +270,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15366
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -307,10 +307,10 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  3  -8.8297455470592    -1.211E-04 1.640E-04 2.011E-03
  ETOT  4  -8.8297470661129    -1.519E-06 3.108E-05 5.430E-06
  ETOT  5  -8.8297470720674    -5.954E-09 2.978E-05 5.902E-09
- ETOT  6  -8.8297470720721    -4.723E-12 6.428E-06 6.415E-11
+ ETOT  6  -8.8297470720721    -4.716E-12 6.428E-06 6.415E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  4.723E-12 < toldfe=  1.000E-08
+  for the second time, diff in etot=  4.716E-12 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.27124077E-04  sigma(3 2)=  0.00000000E+00
@@ -328,7 +328,7 @@ lattice_vectors:
 lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7024832E+02
-convergence: {deltae: -4.723E-12, res2:  6.415E-11, residm:  6.428E-06, diffor: null, }
+convergence: {deltae: -4.716E-12, res2:  6.415E-11, residm:  6.428E-06, diffor: null, }
 etotal    :  -8.82974707E+00
 entropy   :   0.00000000E+00
 fermie    :   2.16158158E-01
@@ -404,9 +404,9 @@ Ewald energy        : -8.39800922793230E+00
 psp_core            :  8.48919894711432E-02
 local_psp           : -2.51053572180808E+00
 non_local_psp       :  2.01909949475527E+00
-total_energy        : -8.82974707207214E+00
+total_energy        : -8.82974707207213E+00
 total_energy_eV     : -2.40269636964866E+02
-band_energy         :  2.45124870416214E-01
+band_energy         :  2.45124870416216E-01
 ...
 
 
@@ -454,8 +454,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -508,8 +508,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  yields    64 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
 
 - screening: taking advantage of time-reversal symmetry 
@@ -632,7 +632,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   chi0(G,G') at the   12 th omega   0.0000  45.0108 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -0.600  -0.000   0.006  -0.000   0.009  -0.000   0.008   0.000
        -0.000   0.000  -0.207   0.000  -0.010   0.000  -0.009   0.000  -0.009
@@ -746,10 +746,10 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    Upper and lower wings at the   12 th omega   0.0000  45.0108 [eV]
        1       2       3       4       5       6       7       8       9
       0.867   0.003  -0.003  -0.008   0.008   0.008  -0.008  -0.003   0.003
-     -0.000   0.003   0.003  -0.008  -0.008   0.008   0.008  -0.003  -0.003
+      0.000   0.003   0.003  -0.008  -0.008   0.008   0.008  -0.003  -0.003
        1       2       3       4       5       6       7       8       9
       0.867   0.003  -0.003  -0.008   0.008   0.008  -0.008  -0.003   0.003
-     -0.000  -0.003  -0.003   0.008   0.008  -0.008  -0.008   0.003   0.003
+      0.000  -0.003  -0.003   0.008   0.008  -0.008  -0.008   0.003   0.003
 
 
 
@@ -1537,8 +1537,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  yields    64 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    7.8959; Expected =    8.0000
  average of density, n =  0.029217
@@ -1600,7 +1600,7 @@ data: !SigmaeeData |
         3   5.882 -10.694 -11.293   2.244   0.818  -0.222  -9.348   1.345   7.227
         3   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
         4   5.882 -10.694 -11.298   2.244   0.818  -0.222  -9.352   1.342   7.224
-        4   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+        4   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
         5   8.371  -9.796  -5.052  -2.114   0.822  -0.216  -7.633   2.162  10.533
         5   0.000   0.000   0.000   0.002   0.000   0.000   0.001   0.001   0.001
         6   8.371  -9.796  -5.041  -2.111   0.822  -0.216  -7.621   2.175  10.546
@@ -2074,10 +2074,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.4  wall=          9.6
+- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.4  wall=          9.6
++Overall time at end (sec) : cpu=          5.0  wall=          5.1
