@@ -169,6 +169,7 @@ module m_multibinit_dataset
   real(dp) :: fit_tolMSDS
   real(dp) :: fit_tolMSDE
   real(dp) :: fit_tolMSDFS
+  real(dp) :: fit_tolGF
   real(dp) :: strfact
   real(dp) :: temperature
   real(dp) :: rifcsph
@@ -360,6 +361,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_tolMSDS=zero
  multibinit_dtset%fit_tolMSDF=zero
  multibinit_dtset%fit_tolMSDFS=zero
+ multibinit_dtset%fit_tolGF=zero
  multibinit_dtset%ifcana=0
  multibinit_dtset%ifcflag=1
  multibinit_dtset%ifcout=-1
@@ -2138,6 +2140,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_tolMSDFS is',multibinit_dtset%fit_tolMSDFS,', but the only allowed values',ch10,&
 &   'are positives for multibinit.',ch10,&
 &   'Action: correct fit_tolMSDFS in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_tolGF=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_tolGF',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_tolGF=dprarr(1)
+ if(multibinit_dtset%fit_tolGF<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_tolGF is',multibinit_dtset%fit_tolGF,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_tolGF in your input file.'
    MSG_ERROR(message)
  end if
 

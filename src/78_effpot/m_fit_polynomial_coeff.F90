@@ -124,7 +124,7 @@ CONTAINS
 subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,power_disps,&
 &                                   nbancoeff,ncycle_in,nfixcoeff,option,comm,cutoff_in,&
 &                                   max_power_strain,initialize_data,&
-&                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,&
+&                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,fit_tolGF,&
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_anh,& 
 &                                   fit_iatom,prt_files,fit_on,sel_on)
@@ -142,6 +142,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  type(abihist),intent(inout) :: hist
  integer,optional,intent(in) :: max_power_strain,prt_anh,fit_iatom
  real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
+ real(dp),optional,intent(in) :: fit_tolGF
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
  logical,optional,intent(in) :: only_odd_power,only_even_power
  logical,optional,intent(in) :: initialize_data,prt_files
@@ -152,7 +153,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix
  integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val
- real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
+ real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS,tolGF,check_value
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients,need_prt_anh
@@ -160,6 +161,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical :: need_prt_files
 !arrays
  real(dp) :: mingf(4)
+ real(dp) :: gf_values_iter(4,ncycle_in+1)
  integer :: sc_size(3)
  integer,allocatable  :: buffsize(:),buffdisp(:),buffin(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),list_coeffs_tmp2(:)
@@ -230,13 +232,16 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  else 
     fit_iatom_in = -1 
  endif
+ !initialize gf_values_iter array with holds gf values for each fit itertion 
+ gf_values_iter(:,:) = zero 
 
 !Set the tolerance for the fit
- tolMSDF=zero;tolMSDS=zero;tolMSDE=zero;tolMSDFS=zero
+ tolMSDF=zero;tolMSDS=zero;tolMSDE=zero;tolMSDFS=zero;tolGF=zero 
  if(present(fit_tolMSDF)) tolMSDF  = fit_tolMSDF
  if(present(fit_tolMSDS)) tolMSDS  = fit_tolMSDS
  if(present(fit_tolMSDE)) tolMSDE  = fit_tolMSDE
  if(present(fit_tolMSDFS))tolMSDFS = fit_tolMSDFS
+ if(present(fit_tolGF))      tolGF = fit_tolGF
 
  if(need_verbose) then
    write(message,'(a,(80a))') ch10,('=',ii=1,80)
@@ -630,6 +635,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    call wrtout(std_out,message,'COLL')
  end if
 
+ !Store initial gf_values as first value in gf_values_iter 
+ gf_values_iter(:,1) = gf_values(:,1)
+
  select case(option)
 
  case(1)
@@ -690,9 +698,16 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      gf_values(:,:) = zero
      do icoeff=1,my_ncoeff
 !    cycle if this coefficient is not allowed
-       if(any(list_coeffs==my_coeffindexes(icoeff)).or.singular_coeffs(icoeff) == 1) cycle
+       if(any(list_coeffs==my_coeffindexes(icoeff)).or.singular_coeffs(icoeff) == 1)then
+          write(*,*) 'Im here, icoeff: ', icoeff
+          gf_values(:,icoeff) = zero
+          cycle
+       endif
        if(nbancoeff >= 1)then
-         if(any(bancoeff==my_coeffindexes(icoeff))) cycle
+         if(any(bancoeff==my_coeffindexes(icoeff)))then 
+            gf_values(:,icoeff) = zero
+            cycle
+         endif
        end if
        list_coeffs(icycle) = my_coeffindexes(icoeff)
 
@@ -767,7 +782,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
            call wrtout(std_out,message,'COLL')
            call wrtout(unit_GF_val,message2,'PERS',do_flush=.TRUE.)
        endif
-     end do
+     end do !icoeff=1,my_ncoeff
 
      !Close *csv file for GF values of this iteration 
      close(unit_GF_val) 
@@ -803,6 +818,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        end do
      end if
 
+     !Store GF Values of this iteration 
+     gf_values_iter(:,icycle+1) = mingf(:)
+     write(*,*) gf_values_iter(:,icycle+1)
+     write(*,*) "index_min ", index_min
 !    Check if there is still coefficient
      if(index_min==0) then
        exit
@@ -878,6 +897,16 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
 !    Check the stopping criterion
      converge = .false.
+     if(tolGF > zero)then 
+       check_value =  (sum(gf_values(2:4,icycle),MASK=sel_on) - sum(gf_values(2:4,icycle+1),MASK=sel_on)) & 
+&                   /(sum(gf_values(2:4,1),MASK=sel_on) - sum(gf_values(2:4,icycle+1),MASK=sel_on))
+       if(tolGF > check_value)then
+         write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
+&                                                check_value ," < ",tolGF,&
+&                                              ' Goal Function is converged'
+         converge = .true.
+       end if
+     endif 
      if(tolMSDE  > zero)then
        if(abs(tolMSDE) > abs(mingf(4)* (Ha_eV *1000)**2 *factor))then
          write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
@@ -924,7 +953,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        end if
      end if
 
-   end do
+   end do !icycle_tmp=1,ncycle
 
  case(2)
 

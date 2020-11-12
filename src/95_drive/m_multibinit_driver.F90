@@ -428,13 +428,16 @@ elec_eval = .FALSE.
                     &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
                     &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
                     &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
-                    &         fit_tolMSDFS=inp%fit_tolMSDFS,&
+                    &         fit_tolMSDFS=inp%fit_tolMSDFS,fit_tolGF=inp%fit_tolGF,&
                     &         verbose=.true.,positive=.false.,&
                     &         anharmstr=inp%fit_anhaStrain==1,&
                     &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
                     &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on)
              else 
                 need_prt_files=.FALSE.
+                write(*,*) reference_effective_potential%crystal%atindx
+                write(*,*) reference_effective_potential%crystal%atindx1
+                write(*,*) reference_effective_potential%crystal%irredatindx
                 do ii=1,reference_effective_potential%crystal%nirredat
                   if(ii == natom)need_prt_files=.TRUE.
                   if(ii > 1)inp%fit_nfixcoeff = -1 
@@ -444,7 +447,7 @@ elec_eval = .FALSE.
                        &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
                        &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
                        &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
-                       &         fit_tolMSDFS=inp%fit_tolMSDFS,&
+                       &         fit_tolMSDFS=inp%fit_tolMSDFS,fit_tolGF=inp%fit_tolGF,&
                        &         verbose=.true.,positive=.false.,&
                        &         anharmstr=inp%fit_anhaStrain==1,&
                        &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
