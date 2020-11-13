@@ -46,7 +46,7 @@ module m_vtowfk
  use m_gwls_hamiltonian, only : build_H
  use m_fftcore,     only : fftcore_set_mixprec, fftcore_mixprec
  use m_cgwf,        only : cgwf
- use m_cgwf_paw,    only : cgwf_paw,mksubovl
+ use m_cgwf_paw,    only : cgwf_paw,mksubovl,update_cprj
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
  use m_spacepar,    only : meanvalue_g
@@ -186,7 +186,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp), intent(out) :: grnl_k(3*natom,nband_k*optforces)
  real(dp), intent(out) :: resid_k(nband_k)
  real(dp), intent(inout) :: cg(2,mcg),rhoaug(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc)
- type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
+ type(pawcprj_type),intent(inout),target :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
  logical :: has_fock,newlobpcg,enable_cgwf_paw
@@ -213,7 +213,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cprj_tmp(:,:)
- type(pawcprj_type),allocatable :: cprj_cwavef_bands(:,:)
+ type(pawcprj_type),pointer :: cprj_cwavef_bands(:,:)
 
 ! **********************************************************************
 
@@ -321,9 +321,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  if (enable_cgwf_paw) then
-   ncpgr = 0 ! no need of gradients here
-   ABI_DATATYPE_ALLOCATE(cprj_cwavef_bands,(natom,nband_k))
-   call pawcprj_alloc(cprj_cwavef_bands,ncpgr,gs_hamk%dimcprj)
+!   ncpgr = 0 ! no need of gradients here
+!   ABI_DATATYPE_ALLOCATE(cprj_cwavef_bands,(natom,nband_k))
+!   call pawcprj_alloc(cprj_cwavef_bands,ncpgr,gs_hamk%dimcprj)
+   cprj_cwavef_bands => cprj(:,1+(ikpt-1)*my_nspinor*nband_k:ikpt*my_nspinor*nband_k)
  end if
 
 !Electric field: initialize dphase_k
@@ -552,6 +553,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end if
 
+   !LTEST
+   call update_cprj(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg)
+   !LTEST
+
    ! Exit loop over inonsc if converged
    if (residk < dtset%tolwfr) then
      if (iscf < 0) call wrtout(std_out, sjoin("   NSCF loop completed after", itoa(inonsc), "iterations"))
@@ -580,7 +585,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    paw_opt=0;cpopt=-1;tim_nonlop=2
  else
    choice=2*optforces
-   paw_opt=2;cpopt=0;tim_nonlop=10-8*optforces
+   paw_opt=2;tim_nonlop=10-8*optforces
+   !LTEST
+   cpopt=1
+   !LTEST
    if (dtset%usefock==1) then
 !     if (dtset%optforces/= 0) then
      if (optforces/= 0) then
@@ -995,10 +1003,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
- if (enable_cgwf_paw) then
-   call pawcprj_free(cprj_cwavef_bands)
-   ABI_DATATYPE_DEALLOCATE(cprj_cwavef_bands)
- end if
+! if (enable_cgwf_paw) then
+!   call pawcprj_free(cprj_cwavef_bands)
+!   ABI_DATATYPE_DEALLOCATE(cprj_cwavef_bands)
+! end if
 
  !Hamiltonian constructor for gwls_sternheimer
  if(dtset%optdriver==RUNL_GWLS) then

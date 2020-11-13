@@ -102,6 +102,7 @@ module m_gstate
  use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
+ use m_cgprj,            only : ctocprj
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -268,9 +269,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: icoulomb
 #endif
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
- integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
+ integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,iorder_cprj,ios,itypat
  integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
- integer :: nblok,ncpgr,nfftf,nfftot,npwmin
+ integer :: nblok,ncpgr,ncprj,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
@@ -305,7 +306,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: efield_band(3),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),tsec(2)
  real(dp),allocatable :: doccde(:)
- real(dp),allocatable :: ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
+ real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
@@ -992,16 +993,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 ! Initialisation of cprj
  usecprj=0; mcprj=0;mband_cprj=0
  if (dtset%usepaw==1) then
-   if (associated(electronpositron)) then
-     if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
-   end if
-   if (dtset%prtnabla>0) usecprj=1
-   if (dtset%extrapwf>0) usecprj=1
-   if (dtset%pawfatbnd>0)usecprj=1
-   if (dtset%prtdos==3)  usecprj=1
-   if (dtset%usewvl==1)  usecprj=1
-   if (dtset%nstep==0) usecprj=0
-   if (dtset%usefock==1)  usecprj=1
+   !if (associated(electronpositron)) then
+   !  if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
+   !end if
+   !if (dtset%prtnabla>0) usecprj=1
+   !if (dtset%extrapwf>0) usecprj=1
+   !if (dtset%pawfatbnd>0)usecprj=1
+   !if (dtset%prtdos==3)  usecprj=1
+   !if (dtset%usewvl==1)  usecprj=1
+   !if (dtset%nstep==0) usecprj=0
+   !if (dtset%usefock==1)  usecprj=1
+   usecprj=1
  end if
  if (usecprj==0) then
    ABI_DATATYPE_ALLOCATE(cprj,(0,0))
@@ -1027,6 +1029,21 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
    call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
+
+   choice      =1 ! no derivative
+   idir        =0 ! so no direction
+   iatom       =0 ! and no iatom
+   iorder_cprj =0 ! ordered by atom types
+   ncprj       = dtset%natom
+!  Compute structure factor phases and large sphere cut-off (gsqcut):
+   ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+   call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
+   call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
+& iorder_cprj,dtset%istwfk,kg,dtset%kpt,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+& dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
+& dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
+   ABI_DEALLOCATE(ph1d)
+
  end if
 
 

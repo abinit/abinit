@@ -51,6 +51,7 @@ module m_cgwf_paw
 
  public :: cgwf_paw
  public :: mksubovl
+ public :: update_cprj
 
 !!***
 
@@ -248,29 +249,29 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 
  cwavef_bands => cg(:,1+icg:nblock*npw*nspinor+icg)
 
- do iblock=1,nblock
-   ibandmin=1+(iblock-1)*nbdblock
-   ibandmax=min(iblock*nbdblock,nband)
-   do iband=ibandmin,ibandmax
-     ibdblock=iband-(iblock-1)*nbdblock
-
-     cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
-     cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
-!     cwavef_r => cwavef_r_bands(:,:,:,:,iband)
-
-     call getcprj(1,0,cwavef,cprj_cwavef,&
-&      gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&      gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
-&      gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&      gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
-
-!     ! Compute wavefunction in real space
-!     call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
-!&      gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
-!&      n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
-
-   end do
- end do
+! do iblock=1,nblock
+!   ibandmin=1+(iblock-1)*nbdblock
+!   ibandmax=min(iblock*nbdblock,nband)
+!   do iband=ibandmin,ibandmax
+!     ibdblock=iband-(iblock-1)*nbdblock
+!
+!     cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
+!     cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+!!     cwavef_r => cwavef_r_bands(:,:,:,:,iband)
+!
+!     call getcprj(1,0,cwavef,cprj_cwavef,&
+!&      gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+!&      gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
+!&      gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+!&      gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+!
+!!     ! Compute wavefunction in real space
+!!     call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
+!!&      gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,gs_hamk%npw_fft_k,gs_hamk%npw_fft_k,&
+!!&      n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
+!
+!   end do
+! end do
 
  isubh=1
  isubh0=1
@@ -845,23 +846,26 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
  wfsize=gs_hamk%npw_k*gs_hamk%nspinor
  cpopt=2
 
- cwavef_bands => cg(:,1+icg:nband*wfsize+icg)
+ call update_cprj(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
 
- do iband=1,nband
-   cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
-   cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
-
-   call getcprj(1,0,cwavef,cprj_cwavef,&
-&    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
-&    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
-&    gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
- end do
+! cwavef_bands => cg(:,1+icg:nband*wfsize+icg)
+! do iband=1,nband
+!   cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
+!   cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+!
+!   call getcprj(1,0,cwavef,cprj_cwavef,&
+!&    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+!&    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+!&    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+!&    gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+! end do
 
  !LTEST
 ! ABI_DATATYPE_ALLOCATE(cprj_tmp,(gs_hamk%natom,1))
 ! call pawcprj_alloc(cprj_tmp,0,gs_hamk%dimcprj)
  !LTEST
+
+ cwavef_bands => cg(:,1+icg:nband*wfsize+icg)
 
  isubh=1
  do iband=1,nband
@@ -897,6 +901,39 @@ subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
  !LTEST
 
 end subroutine mksubovl
+!!***
+
+subroutine update_cprj(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: icg,nband
+!arrays
+ type(pawcprj_type),intent(in),target :: cprj_cwavef_bands(:,:)
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ type(MPI_type),intent(in) :: mpi_enreg
+ real(dp),intent(inout),target :: cg(:,:)
+
+!Local variables-------------------------------
+ integer :: iband,wfsize
+ real(dp),pointer :: cwavef(:,:),cwavef_bands(:,:)
+ type(pawcprj_type),pointer :: cprj_cwavef(:,:)
+
+ cwavef_bands => cg(:,1+icg:nband*wfsize+icg)
+
+ wfsize=gs_hamk%npw_k*gs_hamk%nspinor
+
+ do iband=1,nband
+   cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
+   cprj_cwavef => cprj_cwavef_bands(:,iband:iband)
+
+   call getcprj(1,0,cwavef,cprj_cwavef,&
+&    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+&    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&    gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+ end do
+
+end subroutine
 !!***
 
 end module m_cgwf_paw
