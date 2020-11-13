@@ -1172,10 +1172,6 @@ CPPFLAGS=""
 
 # FIXME: Temporary options to remove
 case "${ABINIT_LEGACY_OPTION}" in
-  etsf_io)
-    AC_DEFINE([HAVE_ETSF_IO], 1,
-     [Define to 1 if you want to use ETSF_IO (obsolete, orphan project).])   
-    ;;
   mpi1)
     AC_DEFINE([HAVE_MPI1], 1,
       [Define to 1 if you have a MPI-1 implementation (obsolete, broken).])
