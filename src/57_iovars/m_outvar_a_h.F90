@@ -474,6 +474,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%chkprim
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkprim','INT',0)
 
+ intarr(1,:)=dtsets(:)%chkp_rdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chkp_rdm','INT',0)
+
  intarr(1,:)=dtsets(:)%chksymbreak
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chksymbreak','INT',0)
 

@@ -111,6 +111,7 @@ type, public :: dataset_type
  integer :: chkexit
  integer :: chneut = 1
  integer :: chkprim
+ integer :: chkp_rdm = 0
  integer :: chksymbreak
  integer :: chksymtnons
  integer :: cineb_start
@@ -242,7 +243,7 @@ type, public :: dataset_type
  integer :: gwmem = 11
  integer :: gwpara = 2
  integer :: gwrpacorr = 0
- integer :: gw1rdm = 0  ! MRM
+ integer :: gw1rdm = 0
 
  integer :: gw_customnfreqsp
  integer :: gw_frqim_inzgrid = 0
@@ -595,7 +596,7 @@ type, public :: dataset_type
  integer :: w90prtunk
 !X
  integer :: xclevel
- integer :: x1rdm  = 0 ! MRM
+ integer :: x1rdm  = 0
 
 !Integer arrays
  integer :: bdberry(4)
@@ -1314,6 +1315,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chkdilatmx         = dtin%chkdilatmx
  dtout%chkexit            = dtin%chkexit
  dtout%chkprim            = dtin%chkprim
+ dtout%chkp_rdm           = dtin%chkp_rdm
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%chksymtnons        = dtin%chksymtnons
  dtout%cineb_start        = dtin%cineb_start
@@ -1485,7 +1487,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
- dtout%gw1rdm             = dtin%gw1rdm ! MRM
+ dtout%gw1rdm             = dtin%gw1rdm
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
@@ -1852,7 +1854,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%w90prtunk          = dtin%w90prtunk
  dtout%xclevel            = dtin%xclevel
  dtout%xc_denpos          = dtin%xc_denpos
- dtout%x1rdm              = dtin%x1rdm ! MRM
+ dtout%x1rdm              = dtin%x1rdm
 
 !Copy allocated integer arrays from dtin to dtout
  dtout%bdberry(:)         = dtin%bdberry(:)
@@ -3075,7 +3077,7 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim'
+ list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim chkp_rdm'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
@@ -3138,7 +3140,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp gw1rdm'  ! MRM
+ list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_invalid_freq'
  list_vars=trim(list_vars)//' gw_icutcoul'

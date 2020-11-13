@@ -207,7 +207,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij !,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount
- integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus,pwx,ibz
+ integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus,pwx,ibz,iwrite,iwrite2,iread,ireadRE,istat
  integer :: isp,is_idx,istep,itypat,itypatcor,izero,jj,first_band,last_band
  integer :: ks_iv,lcor,lmn2_size_max,mband,my_nband
  integer :: mgfftf,mod10,moved_atm_inside,moved_rhor,n3xccc !,mgfft
@@ -219,7 +219,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,chkp_rdm,iread_chkp
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: etot,etot2,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -262,6 +262,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
+ real(dp),allocatable :: occ_eigv_tmp(:,:) 
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -335,9 +336,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wrtout(ab_out,msg,'COLL')
 
  gwcalctyp=Dtset%gwcalctyp
- gw1rdm=Dtset%gw1rdm ! MRM: input variable to decide whether updates to the 1-RDM must be performed
- x1rdm=Dtset%x1rdm   ! MRM: input variable to use pure exchange correction on the 1-RDM ( Sigma_x )
- wfknocheck=.true.   ! MRM: used for printing WFK file subroutine
+ gw1rdm=Dtset%gw1rdm     ! Input variable to decide whether updates to the 1-RDM must be performed
+ x1rdm=Dtset%x1rdm       ! Input variable to use pure exchange correction on the 1-RDM ( Sigma_x )
+ chkp_rdm=Dtset%chkp_rdm ! Input variable to use write and read a checkpoint file exchange correction on the 1-RDM ( 0 nth, 1 write, 2 read&write )
+ wfknocheck=.true.       ! Used for printing WFK file subroutine
+ iread_chkp=0
 
  mod10 =MOD(Dtset%gwcalctyp,10)
 
@@ -2413,11 +2416,10 @@ endif
      ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
      ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
      ABI_MALLOC(occs,(b1gw:b2gw,Sigp%nkptgw))
-     write(msg,'(a26,2i9)')' Bands used for the arrays',b1gw,b2gw
+     write(msg,'(a34,2i9)')' Bands used for the GW_1RDM arrays',b1gw,b2gw
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     dm1=czero
-     nateigv=czero
+     dm1=czero; occs=zero; nateigv=czero;
      do ikcalc=1,Sigp%nkptgw
        do ib=b1gw,b2gw
          dm1(ib,ib,ikcalc)=QP_BSt%occ(ib,ikcalc,1)
@@ -2428,8 +2430,94 @@ endif
          nateigv(ib,ib,ikcalc,1)=cone
        enddo  
      enddo
-     ! Initialize Galitskii-Migdal correlation energy accumulator
-     !ec_gm=0.0_dp 
+     if(chkp_rdm>1) then
+       gw1rdm_fname='GW1RDM_CHKP'
+!      Read the checkpoint file
+       write(msg,'(a29,a)')' Reading the checkpoint file ',gw1rdm_fname
+       call wrtout(std_out,msg,'COLL')
+       if(my_rank==0) then
+         ireadRE=Wfd%mband
+         ireadRE=ireadRE*(2*ireadRE)+b2gw-b1gw+1
+         ABI_MALLOC(occ_eigv_tmp,(ireadRE,Sigp%nkptgw))
+         occ_eigv_tmp=0.0_dp
+         open(unit=666,form='formatted',file=gw1rdm_fname,iostat=istat,status='old')
+         read(666,*,iostat=istat) iread_chkp
+         ikcalc=1;iread=1;iread_chkp=0;
+         if(istat==0) then
+           do
+             if(iread<=ireadRE) then
+               read(666,*,iostat=istat) occ_eigv_tmp(iread,ikcalc)
+               iread=iread+1
+             else
+               read(666,*,iostat=istat) iread_chkp
+               if(istat==0 .and. iread_chkp/=0) then
+                ikcalc=ikcalc+1
+                iread=1
+               end if
+             end if
+             if(istat/=0) then
+               exit
+             end if
+           end do
+         end if 
+         close(666)
+         if(iread_chkp==0 .and. ikcalc>1) then
+           write(msg,'(a27,i5,a37,a23,i5)')' The last k-point read was ',ikcalc,' but the integer label was not found.',&
+           ' Setting iread_chkp to ',ikcalc
+           MSG_WARNING(msg)
+           iread_chkp=ikcalc
+         end if
+!      Save the read data in occs and nateigv
+         do ikcalc=1,iread_chkp
+           ib=1
+           do ib1=b1gw,b2gw
+             occs(ib1,ikcalc)=occ_eigv_tmp(ib,ikcalc)
+             ib=ib+1
+           end do
+           do ib1=1,Wfd%mband
+             do ib2=1,Wfd%mband
+               nateigv(ib1,ib2,ikcalc,1)=cmplx(occ_eigv_tmp(ib,ikcalc),occ_eigv_tmp(ib+1,ikcalc))
+               ib=ib+2
+             end do
+           end do
+         end do
+         ABI_FREE(occ_eigv_tmp)
+       endif
+!      Broadcast from master the info stored in occs and nateigv (to all processes)
+       ierr=0
+       call xmpi_bcast(occs(:,:),master,Wfd%comm,ierr)
+       if(ierr/=0) then
+         MSG_ERROR("Error distributing the occs read from GW1RDM_CHKP")
+       endif
+       call xmpi_bcast(nateigv(:,:,:,:),master,Wfd%comm,ierr)
+       if(ierr/=0) then
+         MSG_ERROR("Error distributing the nat. eigenvectors read from GW1RDM_CHKP")
+       endif
+     end if
+!    Create/start the checkpoint file and write on it the information already produced in previous runs.
+     if(chkp_rdm>0) then
+       gw1rdm_fname='GW1RDM_CHKP'
+       write(msg,'(a29,a)')' Writing the checkpoint file ',gw1rdm_fname
+       call wrtout(std_out,msg,'COLL')
+       if(my_rank==0) then
+         open(unit=666,form='formatted',file=gw1rdm_fname)
+         write(666,*) Sigp%nkptgw
+         if(chkp_rdm>1) then
+           do ikcalc=1,iread_chkp
+             do iwrite=b1gw,b2gw 
+               write(666,*) occs(iwrite,ikcalc) 
+             end do
+             do iwrite=1,Wfd%mband 
+               do iwrite2=1,Wfd%mband
+                 write(666,*) real(nateigv(iwrite,iwrite2,ikcalc,1))
+                 write(666,*) aimag(nateigv(iwrite,iwrite2,ikcalc,1))
+               end do 
+             end do
+             write(666,*) ikcalc
+           end do
+         end if
+       end if
+     end if
      ! Prepare arrays for the imaginary freq. integration of Sigma_c(iw)
      order_int=Sigp%nomegasi 
      write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
@@ -2470,7 +2558,7 @@ endif
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
       ! MRM: compute 1-RDM analytic correction ( exchange contribution) 
-      if (gwcalctyp==21 .and. gw1rdm>0) then 
+      if (gwcalctyp==21 .and. gw1rdm>0 .and. ikcalc>iread_chkp) then 
 !       Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
@@ -2493,7 +2581,7 @@ endif
    ! ==== Correlation part using the coarse gwc_ngfft mesh ====
    ! ==========================================================
    if (mod10/=SIG_HF) then
-     do ikcalc=1,Sigp%nkptgw
+     do ikcalc=1+iread_chkp,Sigp%nkptgw
        ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
        ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
        ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
@@ -2533,6 +2621,21 @@ endif
          else
            call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0) ! Only restricted closed-shell calcs 
          endif
+!        Print the checkpoint file if required
+         if(chkp_rdm>0) then
+           if(my_rank==0) then
+             do iwrite=b1gw,b2gw 
+               write(666,*) occs(iwrite,ikcalc) 
+             end do
+             do iwrite=1,Wfd%mband 
+               do iwrite2=1,Wfd%mband
+                 write(666,*) real(nateigv(iwrite,iwrite2,ikcalc,1))
+                 write(666,*) aimag(nateigv(iwrite,iwrite2,ikcalc,1))
+               end do 
+             end do
+             write(666,*) ikcalc
+           end if
+         end if
        else
          sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
        end if
@@ -2541,6 +2644,11 @@ endif
    end if
 
    call xmpi_barrier(Wfd%comm)
+   if(chkp_rdm>1) then
+     write(msg,'(a29,a)')' Closing the checkpoint file ',gw1rdm_fname
+     call wrtout(std_out,msg,'COLL')
+     close(666)
+   end if
 
    ! MRM: first clean all non-req. arrays. Then, print WFK and DEN files, build band corrections, and compute new energies.
    if (gwcalctyp==21 .and. gw1rdm>0) then

@@ -448,11 +448,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_band_index',tread,'INT')
  if(tread==1) dtset%gwls_band_index=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw1rdm',tread,'INT') ! MRM real input gw1rdm
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw1rdm',tread,'INT')
  if(tread==1) dtset%gw1rdm=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'x1rdm',tread,'INT') ! MRM real input x1rdm
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'x1rdm',tread,'INT')
  if(tread==1) dtset%x1rdm=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkp_rdm',tread,'INT')
+ if(tread==1) dtset%chkp_rdm=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_first_seed',tread,'INT')
  if(tread==1) then
