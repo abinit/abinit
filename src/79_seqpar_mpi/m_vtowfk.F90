@@ -471,7 +471,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  =========================================================================
    do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
    if (use_rmm_diis) do_subdiago = .False.  ! subdiago is already performed before RMM-DIIS.
-   !do_subdiago = .True.
 
    if (do_subdiago) then
      if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
@@ -616,7 +615,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !This problem can be easily solved by removing MPI_enreg from meanvalue_g so that
 !the MPI call is done only once outside the OMP parallel region.
 
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
 
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
@@ -834,7 +833,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if ! iscf>0 or iscf=-3
 
  end do !  End of loop on blocks
- call cwtime_report(" Block loop", cpu, wall, gflops)
+ !call cwtime_report(" Block loop", cpu, wall, gflops)
 
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(enlout)

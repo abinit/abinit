@@ -1,4 +1,4 @@
-#i coding: utf-8
+# coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 executable = "abinit"
@@ -1599,7 +1599,7 @@ Variable(
     defaultval=1,
     mnemonics="CHecK SYMmetry of TNONS",
     characteristics=['[[INPUT_ONLY]]'],
-    added_in_version="v9.2",
+    added_in_version="9.2.0",
     text=r"""
 This variable governs the behaviour of the code when there is a potential
 symmetry breaking, related to the presence
@@ -3309,7 +3309,7 @@ Defines the linear grid resolution (energy increment) to be used for the
 computation of the Density-Of-States, when [[prtdos]] is non-zero.
 If [[dosdeltae]] is set to zero (the default value), the actual increment is
 0.001 Ha if [[prtdos]] = 1 or 4 (smearing technique), and the much smaller value 0.00005 Ha if
-[[prtdos]] = 2, 3 or 5 (tetrahedron technique). This different default value arises because the 
+[[prtdos]] = 2, 3 or 5 (tetrahedron technique). This different default value arises because the
 smearing technique gives a quite smooth DOS, while the DOS
 from the tetrahedron method is rapidly varying.
 """,
@@ -4152,7 +4152,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="EXPERTise of the USER",
-    added_in_version="v9.2.2",
+    added_in_version="9.2.2",
     text=r"""
 If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
 If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero).
@@ -5877,7 +5877,7 @@ Variable(
     defaultval=6,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
     requires="[[optdriver]] in [3,4]",
-    added_in_version="v9.1",
+    added_in_version="9.1",
     text=r"""
 Many-body calculations for fully periodic systems are problematic due to the
 presence of the integrable Coulomb singularity at $\mathbf{G}=0$ that hinders
@@ -14424,7 +14424,7 @@ Variable(
     defaultval=0,
     mnemonics="PREPAre LongWave calculation",
     characteristics=['[[DEVELOP]]'],
-    added_in_version="v9",
+    added_in_version="9.2.0",
     text=r"""
 The computation of spatial dispersion quantities from the longwave DFPT
 approach requires the first-order wavefunctions and densities obtained from
@@ -21093,7 +21093,7 @@ Possible values are [0, -1, 1].
 Setting this flag to 0 deactivates the treatment of the LR contribution (not recommended in polar materials).
 
 If *dvdb_add_lr* is set to 1, the LR part is removed when computing the real-space representation
-of the DFPT potentials so that the potential in real space is short-ranged and ameneable to Fourier interpolation.
+of the DFPT potentials so that the potential in real space is short-ranged and amenable to Fourier interpolation.
 The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
 
 If *dvdb_add_lr* is set to -1, the LR part is removed before computing the real-space representation
@@ -21127,7 +21127,7 @@ Preliminary considerations:
 
 EPH calculations require very dense samplings of the BZ to converge and the memory requirements
 increase quickly with the number of k-points, q-points and [[natom]].
-The EPH code can MPI-distribute the most important datastructures but non all the MPI-levels
+The EPH code can MPI-distribute the most important data structures but non all the MPI-levels
 present the same scalability and the same parallel efficiency.
 Besides the maximum number of MPI processes that can be used for the different MPI-levels is related
 to the basic dimensions of the calculation.
@@ -21474,7 +21474,7 @@ Variable(
     mnemonics="PseudoPotential DIRectory PATH",
     added_in_version="9.0.0",
     text=r"""
-This variable specifies the directory that will prependeded to the names of the pseudopotentials
+This variable specifies the directory that will prepended to the names of the pseudopotentials
 specified in [[pseudos]].
 This option is useful when all your pseudos are gathered in a single directory in your file system
 and you don not want to type the absolute path for each pseudopotential file.
@@ -21710,7 +21710,7 @@ Note the following important remarks:
 
 - Multidatasets are supported but mind that some variables such as
   [[ntypat]], [[typat]] and [[znucl]] are tagged as [[NO_MULTI]].
-  In other words, one can read different files via [[structure]] and the multidatset syntax
+  In other words, one can read different files via [[structure]] and the multi dataset syntax
   provided these quantities do not change.
   ABINIT syntax such as `xred+` are, obviously, not supported.
 
@@ -21751,7 +21751,7 @@ Possible values are:
 
     0 --> Use unit super cell for $\RR$ space. All weights set to 1.
     1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algorithm as for the dynamical matrix).
-          Note that this option leads to more $\RR$-points with a non-neglibigle increase of the memory allocated.
+          Note that this option leads to more $\RR$-points with a non-negligible increase of the memory allocated.
 
 !!! tip
 
@@ -21824,7 +21824,7 @@ Variable(
     text=r"""
 Gives the doping charge in units of |e_charge| / cm^3.
 Negative for n-doping, positive for p-doping.
-Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
+Alternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
 Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
 """,
 ),
@@ -21844,13 +21844,13 @@ in the computation of electron lifetimes ([[eph_task]] -4) and is used to predic
 the list of $\qq$-points in the BZ that will be needeed during the calculation.
 
 The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk$ but then this
-initial energy window must be increased a bit to accomodate for phonon absorption/emission (from $\kk$ to $\kq$).
-This is importat for $\nk$ states that are close to edge of the initial energy window as this states may be needed
+initial energy window must be increased a bit to accommodate for phonon absorption/emission (from $\kk$ to $\kq$).
+This is important for $\nk$ states that are close to edge of the initial energy window as this states may be needed
 for the linear interpolation used in tetrahedron method.
 
-In a nuthshell, the code increases the initial window using the max phonon frequency multiplied by [[eph_phwinfact]].
+In a nutshell, the code increases the initial window using the max phonon frequency multiplied by [[eph_phwinfact]].
 The default value is a compromise between numerical stability and efficiency.
-Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substancial decrease in the number of
+Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substantial decrease in the number of
 $\kq$ KS states that must be read from file with a subsequent decrease in the memory requirements for the wavefunctions.
 We recommended to perform initial tests to decide whether a value smaller than four can be used.
 """,
@@ -21866,84 +21866,97 @@ Variable(
     mnemonics="Radius of the Interatomic Force Constant SPHere",
     added_in_version="9.2.0",
     text=r"""
-Same meaning as [[rifcsph@anaddb]]
+Same meaning as [[rifcsph@anaddb]].
 """,
 ),
 
 Variable(
     abivarname="rmm_diis",
-    varset="dev",
+    varset="gstate",
     vartype="integer",
-    topics=['TuningSpeed_expert'],
+    topics=['TuningSpeed_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Activate the RMM-DIIS eigensolver for GS calculations.",
     added_in_version="9.3.0",
     text=r"""
 
-!!! warning
-
-    This variable is under active development so use it at your own risk!
-
-This variable activates the RMM-DIIS eigensolver to **accelerate**
-GS computations, structural relaxations and molecular-dynamics runs.
-The flag is compatible with NC and PAW as well as the [[paral_kgb]] distribution
-It has no meaning when [[optdriver]] > 0.
-
-The RMM-DIIS method is usually used in conjunction with another eigenvalue solvers (CG and LOBPC)
-that provide the initial guess for the KS eigenstates
-The accuracy and reliability of the RMM-DIIS method **strongly** depends on the quality of the input trial states
-as the algorithm find the closest eigenvector-eigevalue pair.
-The algorithm is inspired to XXX although the ABINIT implementation is not
+This variable activates the Residual Minimization Method, Direct Inversion in the Iterative Subspace (RMM-DIIS)
+eigensolver to **accelerate** GS computations, structural relaxations and molecular-dynamics simulations.
+The algorithm is inspired to [[cite:Kresse1996]] although the ABINIT implementation is not
 completely equivalent to the original formulation.
+RMM-DIIS can be used with NC pseudos as well as PAW and it is fully compatible with the [[paral_kgb]] distribution.
+This variable is ignored when [[optdriver]] > 0.
 
-RMM-DIIS can be used both with the conjugate-gradient and the LOBPCG solver although
-it is strongly suggested to use [[paral_kgb]] = 1 to take advantage of LOBPCG, its better efficiency
-and improved parallel MPI scalability.
-In a nutshell, to activate RMM-DIIS with LOBPCG it is sufficient to use:
+It is worth noting that RMM-DIIS is usually used in conjunction with another eigenvalue solver (e.g. CG or LOBPCG)
+that is employed to perform the initial SCF iterations.
+RMM-DIIS, indeed, is **not guaranteed** to converge to the ground state
+as the algorithm finds the eigenvector/eigenvalue pair that is closest to the input trial state.
+The reliability of RMM-DIIS thus **strongly** depends on the initialisation of the SCF cycle
+and on the quality of the input trial wavefunctions that are supposed to be reasonably close to the exact solution.
+
+Both the CG and the LOBPCG solver can be used in conjunction with RMM-DIIS although
+it is strongly suggested to use LOBPCG with [[paral_kgb]] = 1 to take advantage of
+its better efficiency and improved parallel scalability.
+To activate RMM-DIIS with LOBPCG, it is sufficient to use:
 
 ```
 paral_kgb 1
 rmm_diis  1
 ```
 
-and then select the value of [[npband]], [[npkpt]], [[npfft]], [[npspinor]] according to your system.
-Note also [[bandpp]]
+and select the value of [[npkpt]], [[npband]], [[npfft]], [[npspinor]] according to the system.
+Note also that [[use_gemm_nonlop]] = 1 with [[bandpp]] > 1 can lead to a significant speedup
+at the price of increased memory requirements.
 
-If we are running a standard GS calculation. Abinit activates the RMM-DIIS solver after 3 + [[rmm_diis]] SCF iterations
-In the case of structural relaxations, the first SCF cycle is performed with 3 + [[rmm_diis]] as usual while
-the subsequent relaxation steps activate RMM-DIIS after 1 + [[rmm_diis]] SCF iterations.
-
+In the case of standard SCF calculations, Abinit activates the RMM-DIIS solver
+after 3 + [[rmm_diis]] SCF iterations.
+When performing structural relaxations, RMM-DIIS is activated after 1 + [[rmm_diis]] SCF iterations
+once the first GS calculation has been completed.
 This means that using [[rmm_diis]] 1 for a structural relaxation leads to:
 
-    - 4 SCF iterations with the "standard" eigensolver followed by RMM-DIIS for the initial GS calculation.
-    - 2 SCF iterations with the "Standard" eigesolver followed by the RMM-DIIS when we start the relaxation process.
+    - 4 SCF iterations with the CG/LOBPCG eigensolver followed by RMM-DIIS for the first GS calculation.
+    - 2 SCF iterations with CG/LOBPCG followed by RMM-DIIS for the subsequent relaxation steps.
 
-The RMM-DIIS solver usually requires less wall-time per iteration when compared to other approches since the
-explicit orthogonalization of the trial states is avoided during the optimization step and
-a single full-band orthogonalization is performed only once per SCF cycle.
-On the other hand, RMM-DIIS usually leads to faster iterations especially for systems
-with relatively large [[mpw]], [[nband]]
-In some cases, RMM-DIIS can be twice as fast **per iteration** as other conventional methods.
+RMM-DIIS usually requires less wall-time per iteration when compared to other approaches since the
+explicit orthogonalization is avoided while optimizing the trial states.
+Only a single full-band orthogonalization is performed per SCF iteration before recomputing the new density.
+As a consequence, one RMM-DIIS iteration is usually faster
+(sometimes even by a factor two) than CG/LOBPCG, especially in systems
+with relatively large [[mpw]].
+Obviously the time-to-solution depends on the overall number of iterations required to reach a given accuracy.
+This is the reason why providing RMM-DIIS with reasonable initial trial wavefunctions and potential
+is also crucial for performance.
+
+In problematic systems, RMM-DIIS may find the same solution multiple times or miss some of the eigenvectors.
+This is usually leads to runtime error during the orthogonalization process or very slow convergence of the SCF cycle.
+In the worst case scenario,
+
 On the other hand, please keep in mind that RMM-DIIS is not guaranteed to find the correct ground-state.
-Moreover the algorith may have problems to converge and more iterations may be needed to reach a given precision.
+Moreover the algorithm may have problems to converge and more iterations may be needed to reach a given precision.
 Also, the present implementation is optimized for converging occupied states so we do not recommend
-[[rmm_diis]] for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
+RMM-DIIS for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
 Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
 then restart from the WFK file using e.g. the LOBPCG solver to reconverge the results with stricter tolerance.
 
-TIP:
+TIPS:
 
-Don't try to reach the same precision as the other eigenvalue solvers.
-RMM-DIIS usually takes more iterations than other eigensolvers to reach the same precision.
+For a given precision, RMM-DIIS usually requires more iterations than the other eigensolvers.
+For performance reasons, one should avoid using super accurate tolerances
 Use more permissive tolerances and then restart with tighter settings.
-Use [[tolwfr]] only if you are using RMM-DIIS for NSCF band structure calculations
+Use [[tolwfr]] only if you are using RMM-DIIS for NSCF band structure calculations (as this is the only converge criterion
+available for NSCF calculations).
+Do not expect RMM-DIIS to provide **high-energy** states of the same quality as the one obtain with other eigenvalue solvers.
+So, although RMM-DIIS can be used for computing band structures and electron DOS, we do not recommend
+using this solver to produce WFK files with many empty states as required by many-body calculations.
 
-If the RMM-DIIS has troubles to converge:
+If the RMM-DIIS has troubles to converge, you may try to:
 
-* Increase [[nband]] to enlarge the subspace used for the subspace rotation (Rayleigh-Ritz)
-* Increase [[rmm_diis]] so that more iterations are done with LOBPCG/CG
-* Play with the mixing algorithm
+* Increase [[nband]] to enlarge the subspace used for the subspace rotation (Rayleigh-Ritz).
+* Increase [[rmm_diis]] so that more initial iterations are done with LOBPCG/CG.
+* Play with the mixing algorithm.
+* Use pseudopotentials from the PseudoDojo so that ABINIT can initialize the density using the (pseudo) valence density
+  reported in the pseudopotential file.
 """,
 ),
 

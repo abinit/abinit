@@ -156,7 +156,8 @@ contains
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
-!!  resid(nband)=residuals for each states.
+!!  resid(nband)=residuals for each states. In input: previous residuals for this k-point, spin.
+!!   In output: new residuals.
 !!  rmm_diis_status(2): Status of the eigensolver.
 !!    The first entry gives the previous accuracy.
 !!    The second entry gives the number of iterations already performed with this level.
@@ -217,11 +218,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! =================
  ! Prepare DIIS loop
  ! =================
- ! accuracy_level is computed from the maxval of the previous residuals that are received in input.
+ ! accuracy_level is computed from the maxval of the previous residuals received in input.
+ ! The different levels are:
  !
  !  1: Used at the beginning of the SCF cycle. Use loosy convergence criteria in order
  !     to reduce the number of H|psi> applications as much as possible so that
  !     we can start to mix densities/potentials.
+ !     Allow for incosistent data in output rediduals and Vnl matrix elements.
  !     Move to the next level after Max 15 iterations.
  !
  !  2: Intermediate step. Decrease convergence criteria in order to perform more wavefuction iterations.
@@ -234,10 +237,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !  4: Ultimate precision. Try to reach the same accuracy as the other eigenvalue solvers.
  !     This implies: using similar convergence criteria as in the other solvers.
 
- ! NB: Accuracy_level is not allowed to increase during the SCF cycle
+ ! Note:
  !
- ! Since we operate on blocks of bands, all the states in the block will receive the same treatment.
- ! This means that one can observe different convergence behaviour depending on bsize.
+ ! * Accuracy_level is not allowed to increase during the SCF cycle
+ !
+ ! * Since we operate on blocks of bands, all the states in the block will receive the same treatment.
+ !   This means that one can observe different convergence behaviour depending on bsize.
  !
  if (all(rmm_diis_status == 0)) then
    ! This is the first time we call rmm_diis for this (k-point, spin)
@@ -310,6 +315,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  end if
 
  ! Select value of after_ortho:
+ !
  !   0: return with inconsistent eigenvalues, residuals and enlx_bk to avoid final H |Psi>.
  !   1: recompute enlx_bx after ortho. Return inconsistent eigens and residuals (last DIIS iteration).
  !   2: fully consistent mode: execute final H|Psi> after ortho step to update enlx_bx, eigens, residuals
@@ -358,8 +364,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! =========================
  ! === Subspace rotation ===
  ! =========================
+ !if (accuracy_level <= 2) then
  call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc, evec)
  ABI_FREE(evec)
+ !end if
 
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
@@ -1279,8 +1287,6 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, 
  real(dp) :: cpu, wall, gflops
 ! *************************************************************************
 
- ! FIXME: Temporarily disabled
- !return
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  take_iter = -1
  ilast = diis%last_iter
@@ -1290,7 +1296,7 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, 
  if (my_rank == master) then
    do idat=1,ndat
      iter = imin_loc(diis%hist_resid(0:ilast, idat)) - 1
-     ! Move stuff only if it's really worth it.
+     ! Move stuff only if it's really worth.
      if (iter /= ilast .and. &
          diis%hist_resid(iter, idat) < third * diis%hist_resid(ilast, idat)) take_iter(idat) = iter
    end do
@@ -1369,7 +1375,7 @@ end subroutine my_pack_matrix
 !!  This routine compute the <i|H|j> matrix elements and then performs the subspace rotation
 !!  of the orbitals (rayleigh-ritz procedure)
 !!  The main difference with respect to other similar routines is that this implementation does not require
-!!  the <i|H|j> matrix elements as input so it can be used before performing the wavefunction optimation
+!!  the <i|H|j> matrix elements as input so it can be used before starting the wavefunction optimation
 !!  as required e.g. by the RMM-DIIS method.
 !!
 !! INPUTS
@@ -1390,7 +1396,6 @@ end subroutine my_pack_matrix
 !!  cg(2,*)=updated wavefunctions
 !!
 !! PARENTS
-!!      m_vtowfk
 !!
 !! CHILDREN
 !!
@@ -1430,6 +1435,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k
  paral_kgb = mpi_enreg%paral_kgb; me_g0 = mpi_enreg%me_g0
+ !comm = mpi_enreg%comm_spinorfft; if (mpi_enreg%paral_kgb == 1) comm = mpi_enreg%comm_bandspinorfft
  comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  npwsp = npw * my_nspinor
 

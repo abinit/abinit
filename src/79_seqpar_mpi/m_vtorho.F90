@@ -509,27 +509,27 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
  end if
 
-!Set max number of non-self-consistent loops nnsclo_now for use in vtowfk
+ ! Here we set then max number of non-self-consistent loops nnsclo_now used in vtowfk
  if(iscf<0)then
-   ! ===== Non self-consistent =====
+   ! Non self-consistent case
    nnsclo_now=dtset%nstep
  else
-   ! ===== Self-consistent =====
+   ! Self-consistent case
    if(dtset%nnsclo>0) then
-   ! ===== Self-consistent + imposed =====
+     ! Use input variable if specified and > 0
      nnsclo_now=dtset%nnsclo
    else if (dtset%nnsclo<0) then
-   ! ===== Self-consistent + imposed during abs(nnsclo) steps =====
+     ! Self-consistent + imposed during abs(nnsclo) steps
      nnsclo_now=1
      if (istep<=abs(dtset%nnsclo)) nnsclo_now=merge(5,dtset%useria,dtset%useria==0)
    else
-   ! ===== Self-consistent + default =====
+       !  default branch for self-consistent case.
      nnsclo_now=1
      if (dtset%usewvl==0) then
-     ! ----- Plane waves -----
+        ! ----- Plane waves -----
        if (istep<=2.and.iscf/=0) nnsclo_now=2
      else
-     ! ----- Wavelets -----
+       ! ----- Wavelets -----
        if (iscf==0) then
          nnsclo_now=0
        else if (istep<=2) then
@@ -539,10 +539,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
      end if
    end if
-   ! ===== Double is required =====
-   if(dbl_nnsclo==1)then
-     nnsclo_now=nnsclo_now*2
-   end if
+   ! Double the value if required
+   if(dbl_nnsclo==1) nnsclo_now=nnsclo_now*2
  end if
  if(dtset%wfoptalg==2)nnsclo_now=40  ! UNDER DEVELOPMENT
 
