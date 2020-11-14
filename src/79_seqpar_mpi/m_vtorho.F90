@@ -113,6 +113,7 @@ contains
 !! The main part of it is a wf update over all k points.
 !!
 !! INPUTS
+!!  itime=Relaxation step.
 !!  afford=used to dimension susmat
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
@@ -278,7 +279,7 @@ contains
 !!
 !! SOURCE
 
-subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
+subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &           eigen,electronpositron,energies,etotal,gbound_diel,&
 &           gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&
@@ -293,7 +294,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           ylm,ylmgr,ylmdiel, rmm_diis_status)
 
 !Arguments -------------------------------
- integer, intent(in) :: afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
+ integer, intent(in) :: itime,afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
  integer, intent(in) :: my_natom,natom,nfftf,nfftdiel,nkxc,npwdiel
  integer, intent(in) :: ntypat,optforces,optres,pwind_alloc,usecprj,with_vectornd
  real(dp), intent(in) :: cpus,etotal,gsqcut,ucvol
@@ -366,7 +367,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp) :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
- character(len=500) :: message
+ character(len=500) :: msg
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
@@ -509,27 +510,33 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
  end if
 
- ! Here we set then max number of non-self-consistent loops nnsclo_now used in vtowfk
- if(iscf<0)then
+ ! Here we set the max number of non-self-consistent loops nnsclo_now used in vtowfk
+ if (iscf<0) then
    ! Non self-consistent case
    nnsclo_now=dtset%nstep
  else
    ! Self-consistent case
-   if(dtset%nnsclo>0) then
+   if (dtset%nnsclo>0) then
      ! Use input variable if specified and > 0
      nnsclo_now=dtset%nnsclo
-   else if (dtset%nnsclo<0) then
-     ! Self-consistent + imposed during abs(nnsclo) steps
+   else if (dtset%nnsclo < 0) then
+     ! imposed during abs(nnsclo) steps
      nnsclo_now=1
      if (istep<=abs(dtset%nnsclo)) nnsclo_now=merge(5,dtset%useria,dtset%useria==0)
    else
-       !  default branch for self-consistent case.
-     nnsclo_now=1
-     if (dtset%usewvl==0) then
-        ! ----- Plane waves -----
-       if (istep<=2.and.iscf/=0) nnsclo_now=2
+     ! Default branch for self-consistent case.
+     ! Perform 2 NSCF loops for the first two iterations. This is important especially wfs have
+     ! been initialized with random numbers.
+     nnsclo_now = 1
+     if (dtset%usewvl == 0) then
+       ! Plane waves
+       if (istep <= 2 .and. iscf /= 0) nnsclo_now = 2
+       ! MG: I don't understand why we need to perform 2 NSCF loops after the first SCF cycle
+       ! when we are relaxing the structure as the initial density and wavefunctions should be already good enough.
+       ! Here I change the default behavior to avoid the extra loop but only if RMM-DIIS is used.
+       if (itime > 1 .and. dtset%rmm_diis /= 0) nnsclo_now = 1
      else
-       ! ----- Wavelets -----
+       ! Wavelets
        if (iscf==0) then
          nnsclo_now=0
        else if (istep<=2) then
@@ -540,13 +547,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
    end if
    ! Double the value if required
-   if(dbl_nnsclo==1) nnsclo_now=nnsclo_now*2
+   if (dbl_nnsclo==1) nnsclo_now=nnsclo_now*2
  end if
+
  if(dtset%wfoptalg==2)nnsclo_now=40  ! UNDER DEVELOPMENT
 
- write(message, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now = ',nnsclo_now,&
+ write(msg, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now = ',nnsclo_now,&
    ', note that nnsclo, dbl_nnsclo, istep= ',dtset%nnsclo,dbl_nnsclo,istep
- call wrtout(std_out,message)
+ call wrtout(std_out,msg)
 
 !==== Initialize most of the Hamiltonian ====
 !Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -1145,8 +1153,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            end do
          end do
          if(nnn.ne.mb2dkpsp)  then
-           write(message,*)' BUG in vtorho2, buffer2',nnn,mb2dkpsp
-           MSG_BUG(message)
+           write(msg,*)' BUG in vtorho2, buffer2',nnn,mb2dkpsp
+           MSG_BUG(msg)
          end if
        end if
 !      Build sum of everything
@@ -1250,21 +1258,21 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          ! Test residm
          if (paw_dmft%use_dmft>0 .and. residm>tol4 .and. dtset%dmftcheck>=0) then
            if(dtset%dmft_entropy>0)  then
-             write(message,'(a,e12.3)')&
+             write(msg,'(a,e12.3)')&
                ' WARNING: Wavefunctions not converged: DFT+DMFT calculation cannot be carried out safely ',residm
-             call wrtout(std_out,message)
+             call wrtout(std_out,msg)
            else
-             write(message,'(a,e12.3)')&
+             write(msg,'(a,e12.3)')&
               ' ERROR: Wavefunctions not converged: DFT+DMFT calculation cannot be carried out safely ',residm
-             call wrtout(std_out,message)
-             write(message,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
-             MSG_ERROR(message)
+             call wrtout(std_out,msg)
+             write(msg,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
+             MSG_ERROR(msg)
            end if
 
          else if (paw_dmft%use_dmft>0 .and. residm>tol10.and. dtset%dmftcheck>=0) then
-           write(message,'(3a)')ch10,&
+           write(msg,'(3a)')ch10,&
             '  Wavefunctions not converged: DFT+DMFT calculation might not be carried out safely ',ch10
-           MSG_WARNING(message)
+           MSG_WARNING(msg)
          end if
 
 !        ==  allocate paw_dmft%psichi and paw_dmft%eigen_dft
@@ -1308,27 +1316,27 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !        call print_dmft(paw_dmft,dtset%pawprtvol)
 !         if(dtset%paral_kgb==1) then
-!           write(message,'(5a)')ch10,&
+!           write(msg,'(5a)')ch10,&
 !&           ' Parallelization over bands is not yet compatible with self-consistency in DMFT ',ch10,&
 !&           ' Calculation of density does not taken into account non diagonal occupations',ch10
-!           call wrtout(std_out,message)
-!           call wrtout(ab_out,message)
-!!          MSG_ERROR(message)
+!           call wrtout(std_out,msg)
+!           call wrtout(ab_out,msg)
+!!          MSG_ERROR(msg)
 !           if(dtset%nstep>1) then
-!             write(message,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
-!             MSG_ERROR(message)
+!             write(msg,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
+!             MSG_ERROR(msg)
 !           end if
 !           residm=zero
 !         end if
 !        if(dtset%nspinor==2) then
 !          call flush_unit(ab_out)
-!          write(message,'(3a)')&
+!          write(msg,'(3a)')&
 !          &         ' Self consistent DFT+DMFT with nspinor==2 is not possible yet ',ch10,&
 !          &         ' Calculation are restricted to nstep =1'
-!          !         MSG_ERROR(message)
+!          !         MSG_ERROR(msg)
 !          if(dtset%nstep>1) then
-!          write(message,'(a,i0)')' Action: use nstep=1 instead of nstep=',dtset%nstep
-!          !           MSG_ERROR(message)
+!          write(msg,'(a,i0)')' Action: use nstep=1 instead of nstep=',dtset%nstep
+!          !           MSG_ERROR(msg)
 !          endif
 !        end if
 
@@ -1346,12 +1354,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if ! usedmft
 
      if(dtset%nbandkss/=0) then
-       write(message,'(a,i3,2a,i3,4a)') &
+       write(msg,'(a,i3,2a,i3,4a)') &
         " dtset%nbandkss = ",dtset%nbandkss,ch10,&
         " and dtset%usedmft = ",dtset%usedmft,ch10,&
         " a DFT loop is carried out without DMFT.",ch10,&
         " Only psichi's will be written at convergence of the DFT loop."
-       call wrtout(std_out,message)
+       call wrtout(std_out,msg)
      end if
 !    !=========  DMFT call end   ============================================
 
@@ -1440,7 +1448,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(paw_dmft%use_dmft==1) then
        energies%e_kinetic = energies%e_kinetic -ekindmft+ekindmft2
        if(abs(dtset%pawprtvol)>=2) then
-         write(message,'(4a,7(2x,a,2x,e14.7,a),a)') &
+         write(msg,'(4a,7(2x,a,2x,e14.7,a),a)') &
            "-----------------------------------------------",ch10,&
            "--- Energy for DMFT and tests (in Ha)  ",ch10,&
            "--- Ebandldatot    (Ha.) = ",ebandldatot,ch10,&
@@ -1451,7 +1459,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            "--- Ekindmftnondiag(Ha.) = ",ekindmft2,ch10,&
            "--- Edmft=         (Ha.) = ",edmft,ch10,&
            "-----------------------------------------------"
-         call wrtout(std_out,message)
+         call wrtout(std_out,msg)
        end if
 !       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
      end if
@@ -1663,19 +1671,19 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end do
        if(min_occ>0.01_dp)then
          if(dtset%nsppol==1)then
-           write(message, '(a,i0,3a,f7.3,5a)' )&
-             'For k-point number ',ikpt,',',ch10,&
-             'The minimal occupation factor is',min_occ,'.',ch10,&
+           write(msg, '(a,i0,3a,f7.3,5a)' )&
+             'For k-point number: ',ikpt,',',ch10,&
+             'The minimal occupation factor is: ',min_occ,'.',ch10,&
              'An adequate monitoring of convergence requires it to be  at most 0.01_dp.',ch10,&
              'Action: increase slightly the number of bands.'
          else
-           write(message, '(a,i0,3a,i0,a,f7.3,5a)' )&
-             'For k-point number ',ikpt,', and',ch10,&
-             'for spin polarization ',isppol, ' the minimal occupation factor is',min_occ,'.',ch10,&
+           write(msg, '(a,i0,3a,i0,a,f7.3,5a)' )&
+             'For k-point number: ',ikpt,', and',ch10,&
+             'for spin polarization: ',isppol, ' the minimal occupation factor is: ',min_occ,'.',ch10,&
              'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
              'Action: increase slightly the number of bands.'
          end if
-         MSG_WARNING(message)
+         MSG_WARNING(msg)
          exit ! It is enough if one lack of adequate occupation is identified, so exit.
        end if
      end do

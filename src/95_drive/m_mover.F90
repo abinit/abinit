@@ -515,9 +515,12 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 #endif
 
    ! If RMM-DIIS is used, decrease the number of NSCF steps done with wfoptalg before activating RMM-DIIS.
-   ! Usually 4 for itime 1 and then 2.
+   ! In vtowfk we have the condition: istep > 3 + dtset%rmm_diis
+   ! so setting rmm_diis = 1 gives:
+   !    4 NSCF iterations for itime == 1
+   !    2 NSCF iterations for itime >= 2.
    if (scfcv_args%dtset%rmm_diis /= 0 .and. itime == 2) then
-     scfcv_args%dtset%rmm_diis = scfcv_args%dtset%rmm_diis -2
+     scfcv_args%dtset%rmm_diis = scfcv_args%dtset%rmm_diis - 3
      if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
      call wrtout(std_out, sjoin(" itime == 0 with RMM-DIIS --> setting rmm_diis to:", itoa(scfcv_args%dtset%rmm_diis)))
    end if
@@ -534,7 +537,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ### 10. Output for each icycle (and itime)
      if(need_verbose)then
        write(message,fmt)&
-&       ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
+        ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
         call wrtout([std_out, ab_out], message)
      end if
      if (useprtxfase) call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
@@ -546,7 +549,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ### 11. Symmetrize atomic coordinates over space group elements
 
      call symmetrize_xred(ab_mover%natom,&
-&     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred,indsym=scfcv_args%indsym)
+      scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred,indsym=scfcv_args%indsym)
 
      change=any(xred(:,:)/=xred_prev(:,:))
      if (change)then
@@ -611,7 +614,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
          if (need_scfcv_cycle) then
 
            call dtfil_init_time(dtfil,iapp)
-           call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+           call scfcv_run(scfcv_args, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
            if (conv_retcode == -1) then
                message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
                MSG_WARNING(message)

@@ -262,7 +262,7 @@ contains
 !!
 !! SOURCE
 
-subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
+subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
 &  dtset,ecore,eigen,electronpositron,fatvshift,hdr,indsym,&
 &  initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
@@ -271,7 +271,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mcg,my_natom,ndtpawuj,pwind_alloc
+ integer,intent(in) :: itime, mcg,my_natom,ndtpawuj,pwind_alloc
  integer,intent(inout) :: initialized,nfftf,mcprj
  integer,intent(out) :: conv_retcode
  real(dp),intent(in) :: cpus,ecore,fatvshift
@@ -427,7 +427,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  lmax_diel = 0
 
 !MPI communicators
- if ((xmpi_paral==1).and.(mpi_enreg%paral_hf==1)) then
+ if (xmpi_paral==1.and.mpi_enreg%paral_hf==1) then
    spaceComm=mpi_enreg%comm_kpt
  else
    spaceComm=mpi_enreg%comm_cell
@@ -529,8 +529,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    energies%e_corepsp   = ecore / ucvol
    energies%e_corepspdc = zero
  case(2)
-     ! No need to include the PspCore energy since it is already included in the
-     ! local pseudopotential  (vpsp)
+   ! No need to include the PspCore energy since it is already included in the
+   ! local pseudopotential  (vpsp)
    energies%e_corepsp   = zero
    energies%e_corepspdc = zero
  end select
@@ -814,7 +814,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    ABI_ALLOCATE(grhf,(0,0))
  end if ! iscf>0
 
-!Here initialize the datastructure constrained_dft, for constrained DFT calculations as well as penalty function constrained magnetization
+! Here initialize the datastructure constrained_dft, for constrained DFT calculations
+! as well as penalty function constrained magnetization
  if(any(dtset%constraint_kind(:)/=0).or.dtset%magconon/=0)then
    call constrained_dft_ini(dtset%chrgat,constrained_dft,dtset%constraint_kind,dtset%magconon,dtset%magcon_lambda,&
 &    mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,dtset%ntypat,&
@@ -1541,7 +1542,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    if (dtset%tfkinfunc==0) then
      if(VERBOSE) call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)',"COLL")
 
-     call vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
+     call vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &     eigen,electronpositron,energies,etotal,gbound_diel,&
 &     gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&

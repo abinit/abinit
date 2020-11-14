@@ -21771,7 +21771,7 @@ Variable(
     added_in_version="9.1.0",
     text=r"""
 This **advanced** variable defines the $\alpha$ parameter in the Gaussian filter $e^{-\frac{|\qG|^2}{4\alpha}}$
-that multiplies the Fourier components of the model potential in the long wavelength limit (Eq 24 of Brunin2020 PRB
+that multiplies the Fourier components of the model potential in the long wavelength limit (Eq 24 of [[cite:Brunin2020b]]
 see also [[cite:Sjakste2015]] and [[cite:Giustino2017]]).
 
 The $\alpha$ parameter determines the separation between the long-range and the short-range parts
