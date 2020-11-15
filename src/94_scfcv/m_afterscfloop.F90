@@ -58,7 +58,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : orbmag,orbmag_type,ndpw_energy
+ use m_orbmag,           only : orbmag,orbmag_type,ndpw_energy,ndpaw_energy
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -378,7 +378,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  logical :: test_gylmgr,test_nfgd,test_rfgd
  logical :: wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero
- real(dp) :: ndenergy,ucvol
+ real(dp) :: ndpwenergy,ucvol
+ complex(dpc) :: ndpawenergy
  character(len=500) :: message
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
@@ -549,9 +550,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
  if(with_vectornd .EQ. 1) then
-   call ndpw_energy(cg,dtset,ndenergy,gmet,mcg,mpi_enreg,dtset%mband,nfftf,npwarr,pawfgr,&
+   call ndpw_energy(cg,dtset,ndpwenergy,gmet,mcg,mpi_enreg,dtset%mband,nfftf,npwarr,pawfgr,&
     & ucvol,vectornd,with_vectornd)
-  write(std_out,'(a,es16.8)')'JWZ Debug ndpw_energy returned ',ndenergy
+   write(std_out,'(a,es16.8)')'JWZ Debug ndpw_energy returned ',ndpwenergy
+   call ndpaw_energy(atindx1,ndpawenergy,cprj,dtset,mcprj,mpi_enreg,nattyp,&
+     & dtset%mband,paw_ij,pawrad,pawtab,psps)
+   write(std_out,'(a,2es16.8)')'JWZ Debug ndpaw_energy returned ',real(ndpawenergy),aimag(ndpawenergy)
  end if
  
  if(dtset%orbmag.NE.0) then

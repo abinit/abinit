@@ -2495,6 +2495,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
 ! matrix element <S il im|L_idir|S jl jm>
          call slxyzs(il,im,idir,jl,jm,lms)
+         if(abs(lms)>tol8 .AND. abs(nucdipmom(idir)).GT.tol8) then
+           write(std_out,'(a,5i2,2es16.8)')'JWZ debug ',il,im,idir,jl,jm,dreal(lms),dimag(lms)
+         end if
 
          dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
               & intgr3*dreal(lms)*nucdipmom(idir)*FineStructureConstant2

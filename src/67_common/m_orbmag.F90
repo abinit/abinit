@@ -56,6 +56,7 @@ module m_orbmag
   use m_mpinfo,           only : proc_distrb_cycle
   use m_nonlop,           only : nonlop
   use m_pawang,           only : pawang_type
+  use m_pawdij,           only : pawdijnd
   use m_pawfgr,           only : pawfgr_type
   use m_paw_ij,           only : paw_ij_type
   use m_paw_overlap,      only : overlap_k1k2_paw
@@ -4084,25 +4085,31 @@ end subroutine make_onsite_bm
 !!
 !! SOURCE
 
-subroutine ndpaw_energy(atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,pawrad,pawtab)
+subroutine ndpaw_energy(atindx1,cenergy,cprj,dtset,mcprj,mpi_enreg,nattyp,&
+    & nband_occ,paw_ij,pawrad,pawtab,psps)
 
  !Arguments ------------------------------------
 
  !scalars
- integer,intent(in) :: mcprj 
+ integer,intent(in) :: mcprj,nband_occ
+ complex(dpc),intent(out) :: cenergy
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
+ type(pseudopotential_type),intent(in) :: psps
 
  !arrays
  integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+ type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
  !Local variables -------------------------
 
  !scalars
- integer :: me,my_nspinor,ncpgr,nproc,spaceComm
+ integer :: cplex_dij,iatom,icprj,ierr,ikpt,ilmn,isppol,itypat,jlmn,klmn
+ integer :: lmn_size,lmn2_size,me,my_nspinor,ncpgr,ndij,nn,nproc,spaceComm
+ complex(dpc) :: cbra,cbra_cdij_cket,cdij,cket
 
  !arrays
  integer,allocatable :: dimlmn(:)
@@ -4115,24 +4122,28 @@ subroutine ndpaw_energy(atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,pawrad,pawtab)
  nproc=xmpi_comm_size(spaceComm)
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  me = mpi_enreg%me_kpt
+ ! hard coded isppol, to be generalized eventually
+ isppol=1
  
  ncpgr = cprj(1,1)%ncpgr
  ABI_ALLOCATE(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'R')
 
- ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,nband_k))
+ ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,nband_occ))
  call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
 
+ cbra_cdij_cket = czero
  do iatom = 1, dtset%natom
 
-   if(.NOT. ANY(ABS(dtset%nucdipmom(:,iatom)>tol8))) cycle
+   if(.NOT. ANY(ABS(dtset%nucdipmom(:,iatom))>tol8)) cycle
 
    itypat = dtset%typat(iatom)
-   lmn2_size=pawtab(itypat)
-   cplex_dij=
-   ndij=
+   lmn2_size=paw_ij(iatom)%lmn2_size
+   lmn_size=pawtab(itypat)%lmn_size
+   cplex_dij=paw_ij(iatom)%cplex_dij
+   ndij=paw_ij(iatom)%ndij
     
-   ABI_ALLOCATE(dijnd,(lmn2_size,ndij))
+   ABI_ALLOCATE(dijnd,(cplex_dij*lmn2_size,ndij))
    call pawdijnd(dijnd,cplex_dij,ndij,dtset%nucdipmom(:,iatom),pawrad(itypat),pawtab(itypat))
 
    icprj = 0 
@@ -4142,33 +4153,41 @@ subroutine ndpaw_energy(atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,pawrad,pawtab)
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,dtset%nband(ikpt),-1,me)) cycle
 
      call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
-       &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
+       &       dtset%mkmem,dtset%natom,nband_occ,nband_occ,my_nspinor,dtset%nsppol,0)
 
-     cgdijcb = czero
-     do ilmn = 1, pawtab(itypat)%lmn_size
-       cpg=cmplx(cprj_kg(iatom,ng)%cp(1,ilmn),cprj_kg(iatom,ng)%cp(2,ilmn),KIND=dpc)
-       do jlmn = 1, pawtab(itypat)%lmn_size
-         cpb=cmplx(cprj_kb(iatom,nb)%cp(1,jlmn),cprj_kb(iatom,nb)%cp(2,jlmn),KIND=dpc)
-         if (jlmn .LE. ilmn) then
-           klmn = (ilmn-1)*ilmn/2 + jlmn
-         else
-           klmn = (jlmn-1)*jlmn/2 + ilmn
-         end if
-         if (cplex_dij .EQ. 2) then
-           cdij=cmplx(dijnd(2*klmn-1,1),dijnd(2*klmn,1),KIND=dpc)
-           if (jlmn .GT. ilmn) cdij=conjg(cdij)
-         else
-           cdij=cmplx(dijnd(klmn,1),zero,KIND=dpc)
-         end if
-         cgdijcb = cgdijcb + conjg(cpg)*cdij*cpb
-       end do ! end loop over jlmn
-     end do ! end loop over ilmn
+     do nn = 1, nband_occ
+       do ilmn = 1, lmn_size
+         cbra=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+         do jlmn = 1, lmn_size
+           cket=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
+           if (jlmn .LE. ilmn) then
+             klmn = (ilmn-1)*ilmn/2 + jlmn
+           else
+             klmn = (jlmn-1)*jlmn/2 + ilmn
+           end if
+           if (cplex_dij .EQ. 2) then
+             cdij=cmplx(dijnd(2*klmn-1,1),dijnd(2*klmn,1),KIND=dpc)
+             if (jlmn .GT. ilmn) cdij=conjg(cdij)
+           else
+             cdij=cmplx(dijnd(klmn,1),zero,KIND=dpc)
+           end if
+           cbra_cdij_cket = cbra_cdij_cket + conjg(cbra)*cdij*cket
+         end do ! end loop over jlmn
+       end do ! end loop over ilmn
+     end do ! end loop over nn bands
+     icprj = icprj + nband_occ
+
    end do ! end loop over ikpt
-   icprj = icprj + nband_k
 
    ABI_DEALLOCATE(dijnd)
 
  end do ! end loop over iatom
+
+ !  MPI communicate stuff between everyone
+ if (nproc>1) then
+   call xmpi_sum(cbra_cdij_cket,spaceComm,ierr)
+ end if
+ cenergy = cbra_cdij_cket
 
 
  ABI_DEALLOCATE(dimlmn)
