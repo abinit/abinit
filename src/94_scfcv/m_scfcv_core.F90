@@ -1015,7 +1015,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     call wrtout(std_out, sjoin(" scfcv_core: previous iteration took: ", sec2str(wtime_step)), " <<< TIME")
+     call wrtout(std_out, sjoin(" scfcv_core: previous iteration took: ", sec2str(wtime_step), " <<< TIME"))
 
      if (have_timelimit_in(MY_NAME)) then
        if (istep > 2) then
