@@ -28,8 +28,6 @@ module m_spmat_spvec
   use m_xmpi
   use m_errors
   use m_abicore
-  use m_spmat_base
-  use m_spmat_ndcoo, only: ndcoo_mat_t
   use m_dynamic_array, only: real_array_type, int_array_type
   implicit none
   private
@@ -45,9 +43,11 @@ module m_spmat_spvec
      procedure :: push
      procedure :: finalize
      procedure :: dot => vec_spvec_dot
+     procedure :: plus_Ax => spvec_plus_Ax
   end type sp_real_vec
 
   public :: vec_spvec_dot
+  public :: spvec_plus_Ax
 
 contains
 
@@ -77,7 +77,7 @@ contains
 
   function vec_spvec_dot(spvec, vec) result (ret)
     class(sp_real_vec), intent(in) :: spvec
-    real(dp), intent(in) :: vec(:)
+    real(dp), intent(in) :: vec(spvec%size)
     real(dp) :: ret
     integer :: i
     ret=0.0_dp
@@ -85,6 +85,17 @@ contains
        ret=ret+vec(spvec%ids%data(i)) * spvec%vals%data(i)
     end do
   end function vec_spvec_dot
+
+  subroutine spvec_plus_Ax(spvec, a, y)
+    class(sp_real_vec), intent(in) :: spvec
+    real(dp), intent(inout) :: y(spvec%size)
+    real(dp), intent(in) :: a
+    integer :: i, j
+    do i =1, spvec%nnz
+       j=spvec%ids%data(i)
+       y(j)=y(j) + a * spvec%vals%data(j)
+    end do
+  end subroutine spvec_plus_Ax
 
 
 

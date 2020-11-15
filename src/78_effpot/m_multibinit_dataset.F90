@@ -285,6 +285,13 @@ module m_multibinit_dataset
 
 ! characters
   character(len=fnlen) :: lwf_init_hist_fname
+  character(len=fnlen) :: spin_init_hist_fname
+  character(len=fnlen) :: latt_init_hist_fname
+  character(len=fnlen) :: latt_pot_fname
+  character(len=fnlen) :: spin_pot_fname
+  character(len=fnlen) :: lwf_pot_fname
+  character(len=fnlen) :: slc_pot_fname
+
 
  end type multibinit_dtset_type
 !!***
@@ -422,7 +429,13 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%lwf_nctime = 1
  multibinit_dtset%lwf_ntime = 0
  multibinit_dtset%lwf_init_state = 0
- multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
+ multibinit_dtset%lwf_init_hist_fname=""
+ multibinit_dtset%latt_init_hist_fname=""
+ multibinit_dtset%spin_init_hist_fname=""
+ multibinit_dtset%latt_pot_fname=""
+ multibinit_dtset%spin_pot_fname=""
+ multibinit_dtset%lwf_pot_fname=""
+ multibinit_dtset%slc_pot_fname=""
  multibinit_dtset%lwf_dt=0
  multibinit_dtset%lwf_self_bound_order=0
  multibinit_dtset%lwf_temperature=0.0_dp
@@ -1076,10 +1089,40 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
- multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
+ multibinit_dtset%lwf_init_hist_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_init_hist_fname',tread,'KEY',&
       & key_value=multibinit_dtset%lwf_init_hist_fname)
  if(.not. tread==1) multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
+
+ multibinit_dtset%spin_init_hist_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_init_hist_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%spin_init_hist_fname)
+ if(.not. tread==1) multibinit_dtset%spin_init_hist_fname="spin_init_hist.nc"
+
+ multibinit_dtset%latt_init_hist_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_init_hist_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_init_hist_fname)
+ if(.not. tread==1) multibinit_dtset%latt_init_hist_fname="latt_init_hist.nc"
+
+
+ multibinit_dtset%lwf_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%lwf_pot_fname)
+
+
+ multibinit_dtset%spin_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%spin_pot_fname)
+
+
+ multibinit_dtset%latt_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_pot_fname)
+
+ multibinit_dtset%slc_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%slc_pot_fname)
+
 
  multibinit_dtset%lwf_dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_dynamics',tread,'INT')

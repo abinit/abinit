@@ -27,16 +27,17 @@
 #endif
 #include "abi_common.h"
 
+#define HAVE_NETCDF 1
+
 module m_lwf_primitive_potential
   use iso_c_binding
-  !use m_dynamic_array, only: int_array_type, real_array_type, int2d_array_type
   use defs_basis
   use m_abicore
   use m_errors
   use m_nctk
-!#if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
   use netcdf
-!#endif
+#endif
   use m_xmpi
   use m_mathfuncs, only: eigensh
   use m_multibinit_dataset, only: multibinit_dtset_type
@@ -57,9 +58,17 @@ module m_lwf_primitive_potential
   ! IFC is written in a coefficient matrix M(R, i, j)=val
   !-------------------------------------------------------------------!
   type, public, extends(primitive_potential_t) :: lwf_primitive_potential_t
-     integer :: nlwf, natom ! number of LWF
+     integer :: nlwf=0, natom=0, nR=0 ! number of LWF
      type(ndcoo_mat_t) :: coeff  !  A N-dimensional COO matrix.
      !  The indices are (ind_R, i, j). Note that xyz is included in i and j.
+
+     integer :: onebody_nterm=0
+
+     real(dp), allocatable :: lattice_coeffs(:,:, :) ! (natom*3, nlwf, nR)
+
+     integer, allocatable :: onebody_i(:), onebody_order(:)
+     real(dp), allocatable :: onebody_val(:)
+
      type(ndcoo_mat_t) :: coeff_twobody ! Two body interaction parameters of higher order.
      ! The indices are (indR, i, j, orderi, orderj), H(R, i, j)= val A_i^(orderi) A_j^(orderj)
      integer, allocatable :: Rlist(:,:) ! The list of R points (3, number of R-points)
@@ -71,6 +80,7 @@ module m_lwf_primitive_potential
 
      !. Rlist(:, ind_R) is a R-vector.
      real(dp) :: ref_energy=0.0                  ! reference energy
+
    contains
      procedure:: initialize
      procedure:: finalize
@@ -116,6 +126,17 @@ contains
     self%nlwf=0
     self%label="Destroyed lwf_primitive_potential"
     call self%primitive_potential_t%finalize()
+
+    ABI_SFREE(self%lattice_coeffs)
+    self%natom=0
+    self%nR=0
+
+    if (self%onebody_nterm /= 0) then
+       ABI_SFREE(self%onebody_i)
+       ABI_SFREE(self%onebody_val)
+       ABI_SFREE(self%onebody_order)
+    end if
+    self%onebody_nterm=0
   end subroutine finalize
 
 
@@ -143,24 +164,23 @@ contains
     class(lwf_primitive_potential_t), intent(inout) :: self
     character(len=fnlen), intent(in) :: fname
     integer :: ncid, ierr
-    integer :: iR,  nR, nlwf, natom, twobody_nterm
+    integer :: iR,  nR, nlwf, natom, twobody_nterm, onebody_nterm
     real(dp) :: cell(3,3)
     real(dp), allocatable :: ifc(:, :, :), xcart(:,:), masses(:), zion(:)
     real(dp), allocatable ::  twobody_val(:)
-    integer, allocatable ::  twobody_iR(:), twobody_i(:), twobody_j(:), twobody_orderi(:), twobody_orderj(:)
+    integer, allocatable ::   twobody_iR(:), twobody_i(:), twobody_j(:), twobody_orderi(:), twobody_orderj(:)
     integer :: varid, i, j
-    logical :: has_twobody_term
     !#if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
     NCF_CHECK_MSG(ierr, "Open netcdf file")
 
     ! read primcell info
-    !ierr=nctk_get_dim(ncid, "natom", natom)
-    !NCF_CHECK_MSG(ierr, "getting natom in lwf potential file")
-    natom=0
+    ierr=nctk_get_dim(ncid, "wann_natom", natom)
+    NCF_CHECK_MSG(ierr, "getting natom in lwf potential file")
 
     ierr=nctk_get_dim(ncid, "nR" , nR)
     NCF_CHECK_MSG(ierr, "getting nR in lwf potential file")
+    self%nR=nR
 
     ierr=nctk_get_dim(ncid, "wann_nwann", nlwf)
     NCF_CHECK_MSG(ierr, "getting wann_nwann in lwf potential file")
@@ -176,12 +196,24 @@ contains
     ABI_ALLOCATE(masses, (natom))
     ABI_ALLOCATE(zion, (natom))
 
-    !ierr=nctk_get_dim(ncid, "wann_twobody_nterm", twobody_nterm)
-    !if (ierr/=0) then
-    !   NCF_CHECK_MSG(ierr, "getting wann_twobody_nterm in lwf potential file")
-    !   has_twobody_term=.True.
-    !end if
-    has_twobody_term=.False.
+
+    ierr=nf90_inq_dimid(ncid, "wann_onebody_nterm", onebody_nterm)
+    if (ierr/=nf90_noerr) then
+       onebody_nterm=0
+    else
+       ierr=nctk_get_dim(ncid, "wann_onebody_nterm", onebody_nterm)
+       NCF_CHECK_MSG(ierr, "getting wann_onebody_nterm in lwf potential file")
+    end if
+
+
+
+    ierr=nf90_inq_dimid(ncid, "wann_twobody_nterm", twobody_nterm)
+    if (ierr/=nf90_noerr) then
+       twobody_nterm=0
+    else
+       ierr=nctk_get_dim(ncid, "wann_twobody_nterm", twobody_nterm)
+       NCF_CHECK_MSG(ierr, "getting wann_twobody_nterm in lwf potential file")
+    end if
 
 
     ! TODO: read masses, zion
@@ -203,6 +235,15 @@ contains
     !NCF_CHECK_MSG(ierr, "ref_xcart")
 
     !xcart(:,:)=xcart(:,:)/ Bohr_Ang
+
+    ABI_MALLOC(self%lattice_coeffs, (nlwf, natom*3, nR))
+
+    ierr =nf90_inq_varid(ncid, "wann_wannier_function_real", varid)
+    NCF_CHECK_MSG(ierr, "wann_wannier_function_real")
+    ierr = nf90_get_var(ncid, varid, self%lattice_coeffs)
+    NCF_CHECK_MSG(ierr, "wann_wannier_function_real")
+    
+    self%lattice_coeffs=self%lattice_coeffs/Bohr_Ang
 
     !call self%primcell%set_lwf(natom, cell, xcart, masses, zion)
 
@@ -231,7 +272,34 @@ contains
        end do
     end do
 
-    if(has_twobody_term) then
+
+    if(self%onebody_nterm /= 0) then
+       ABI_MALLOC(self%onebody_i, (self%onebody_nterm))
+       ABI_MALLOC(self%onebody_order, (self%onebody_nterm))
+       ABI_MALLOC(self%onebody_val, (self%onebody_nterm))
+
+       ierr =nf90_inq_varid(ncid, "wann_onebody_i", varid)
+       NCF_CHECK_MSG(ierr, "wann_onebody_i")
+       ierr = nf90_get_var(ncid, varid, self%onebody_i)
+       NCF_CHECK_MSG(ierr, "wann_onebody_i")
+
+       ierr =nf90_inq_varid(ncid, "wann_onebody_val", varid)
+       NCF_CHECK_MSG(ierr, "wann_onebody_val")
+       ierr = nf90_get_var(ncid, varid, self%onebody_val)
+       NCF_CHECK_MSG(ierr, "wann_onebody_val")
+
+       ierr =nf90_inq_varid(ncid, "wann_onebody_order", varid)
+       NCF_CHECK_MSG(ierr, "wann_onebody_order")
+       ierr = nf90_get_var(ncid, varid, self%onebody_order)
+       NCF_CHECK_MSG(ierr, "wann_onebody_order")
+
+       do i =1, self%onebody_nterm
+          self%onebody_val(i)=self%onebody_val(i) * eV_Ha * (Bohr_Ang ** self%onebody_order(i))
+       end do
+    end if
+
+
+    if(twobody_nterm /= 0) then
        ABI_MALLOC(twobody_iR, (twobody_nterm))
        ABI_MALLOC(twobody_i, (twobody_nterm))
        ABI_MALLOC(twobody_j, (twobody_nterm))
@@ -275,6 +343,7 @@ contains
        do i=1, twobody_nterm
           call self%coeff_twobody%add_entry([twobody_iR(i), twobody_i(i), &
                & twobody_j(i), twobody_orderi(i), twobody_orderj(i)], twobody_val(i))
+          !TODO change to a.u.
        end do
     end if
 
@@ -283,7 +352,7 @@ contains
     ABI_SFREE(zion)
     ABI_SFREE(ifc)
 
-    if(has_twobody_term) then
+    if(twobody_nterm /=0) then
        ABI_SFREE(twobody_i)
        ABI_SFREE(twobody_j)
        ABI_SFREE(twobody_orderi)
@@ -326,7 +395,6 @@ contains
     nlwf=self%nlwf
     sc_nlwf= nlwf* scmaker%ncells
 
-    !! NOTE: the code below can be used as a pattern to build supercell from primitivecell.
     ! Step 1: allocate the scpot as a corresponding supercell potential
     ABI_DATATYPE_ALLOCATE_SCALAR(lwf_potential_t, scpot)
     ! Fortran does not know the functions specific to the derived class pointer.
@@ -359,12 +427,46 @@ contains
           do icell=1, scmaker%ncells
              call scpot%add_term(ilist_sc(icell), jlist_sc(icell), val )
           end do
+          ABI_SFREE(ilist_sc)
+          ABI_SFREE(jlist_sc)
+          ABI_SFREE(Rlist_sc)
        end do
+
+       ! coefficients of atomic displacements in supercell
+       do i=1, self%nlwf
+          call scmaker%trans_i(nbasis=nlwf, i=i, i_sc=ilist_sc)
+          do iR=1, self%nR
+             R(:) = self%Rlist(:, iR)
+             do j =1, self%natom*3
+                val=self%lattice_coeffs(i, j, iR) ! ilwf, iatom3, iR
+                if (abs(val) > 1e-4) then
+                   call scmaker%trans_j_and_Rj(nbasis=self%natom*3, j=j, Rj=R, j_sc=jlist_sc, Rj_sc=Rlist_sc)
+                   do icell =1, scmaker%ncells
+                      call scpot%lwf_latt_coeffs(ilist_sc(icell))%push(jlist_sc(icell), val)
+                   end do
+                   ABI_SFREE(jlist_sc)
+                   ABI_SFREE(Rlist_sc)
+                end if
+             end do
+          end do
+          ABI_SFREE(ilist_sc)
+       end do
+
 
        !call scpot%set_ref_energy(self%ref_energy * scmaker%ncells)
        if (self%has_self_bound_term) then
           call scpot%add_self_bound_term(self%self_bound_order, self%self_bound_coeff)
        end if
+
+       if (self%onebody_nterm/=0) then
+          do i=1, self%onebody_nterm
+             call scmaker%trans_i(nbasis=self%nlwf, i=i, i_sc=ilist_sc)
+             do icell=1, scmaker%ncells
+                call scpot%add_onebody_term(i=ilist_sc(icell), order=self%onebody_order(i), val=self%onebody_val(i))
+             end do
+             ABI_SFREE(ilist_sc)
+          end do
+       endif
 
        ! Test the phonon energy
        !call COO_to_dense(scpot%coeff, real_sc_evecs)
@@ -372,11 +474,6 @@ contains
        !call eigensh(sc_evals, sc_evecs)
 
     end select
-
-
-    ABI_SFREE(ilist_sc)
-    ABI_SFREE(jlist_sc)
-    ABI_SFREE(Rlist_sc)
 
     ABI_UNUSED_A(params)
 

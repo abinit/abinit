@@ -36,6 +36,7 @@ module m_lwf_potential
   use m_spmat_ndcoo, only: ndcoo_mat_t
   use m_spmat_coo, only: COO_mat_t
   use m_spmat_csr, only: CSR_mat_t
+  use m_spmat_spvec, only: sp_real_vec
   use m_spmat_convert, only: spmat_convert
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_hashtable_strval, only: hash_table_t
@@ -52,7 +53,10 @@ module m_lwf_potential
      logical :: csr_mat_ready=.False.
      type(COO_mat_t) :: coeff_coo  ! coefficient. A COO sparse matrix (3N*3N).
      type(CSR_mat_t) :: coeff
-     type(NDCOO_mat_t) :: coeff2
+     type(NDCOO_mat_t) :: coeff1 ! onebody anharmonic
+     type(NDCOO_mat_t) :: coeff2 ! twobody anharmonic
+
+     type(sp_real_vec), allocatable :: lwf_latt_coeffs(:) ! ( nlwf)
 
      logical :: has_self_bound_term = .False.
      integer :: self_bound_order=0
@@ -69,6 +73,7 @@ module m_lwf_potential
      procedure :: add_term
      procedure :: convert_coeff_to_csr
      procedure :: get_delta_E_lwf
+     procedure :: add_onebody_term
      procedure :: add_self_bound_term
   end type lwf_potential_t
 
@@ -89,10 +94,12 @@ contains
     self%nlwf=nlwf
     self%ref_energy=0.0_dp
     call self%coeff_coo%initialize(mshape= [self%nlwf, self%nlwf])
-    !call self%coeff%initialize(mshape= [self%nlwf, self%nlwf])
+    call self%coeff1%initialize(mshape= [self%nlwf, -1])
     call self%coeff2%initialize(mshape= [self%nlwf, self%nlwf])
     self%csr_mat_ready=.False.
     ABI_ALLOCATE(self%coeff_diag, (self%nlwf))
+
+    ABI_MALLOC(self%lwf_latt_coeffs, (self%nlwf))
   end subroutine initialize
 
   !-------------------------------------------------------------------!
@@ -100,14 +107,31 @@ contains
   !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(lwf_potential_t), intent(inout) :: self
+    integer :: ilwf
     self%has_displacement=.False.
     call self%coeff%finalize()
+    call self%coeff1%finalize()
     call self%coeff2%finalize()
     call self%abstract_potential_t%finalize()
-    self%is_null=.True.
-    self%nlwf=0
     ABI_SFREE(self%coeff_diag)
+    do ilwf=1, self%nlwf
+       call self%lwf_latt_coeffs(ilwf)%finalize()
+    end do
+    ABI_SFREE(self%lwf_latt_coeffs)
+    self%nlwf=0
+    self%is_null=.True.
   end subroutine finalize
+
+  !===============================================================
+  !
+  !> @
+  !===============================================================
+  subroutine add_lattice_coeffs(self, ilwf, ilatt, val)
+    class(lwf_potential_t), intent(inout) :: self
+    integer , intent(in) :: ilwf, ilatt
+    real(dp) , intent(in) :: val
+    call self%lwf_latt_coeffs(ilwf)%push(ilatt, val)
+  end subroutine add_lattice_coeffs
 
   !-------------------------------------------------------------------!
   ! Add a term to the potential
@@ -118,6 +142,13 @@ contains
     real(dp), intent(in) :: val
     call self%coeff_coo%add_entry([i,j], val)
   end subroutine add_term
+
+  subroutine add_onebody_term(self, i, order, val)
+    class(lwf_potential_t), intent(inout) :: self
+    integer, intent(in) :: i, order
+    real(dp), intent(in) :: val
+    call self%coeff1%add_entry([i, order], val)
+  end subroutine add_onebody_term
 
   subroutine add_higher_order_term(self, i, j, orderi, orderj, val)
     class(lwf_potential_t), intent(inout) :: self
