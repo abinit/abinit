@@ -1,6 +1,6 @@
 
-.Version 9.1.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 30 Apr 2020.
-- ( at 17h28 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h25 )
   
 
 ================================================================================
@@ -155,32 +155,32 @@
     atom        electric field
  displacement     direction
        1               1       -0.026268        0.000000
-       1               2       -0.000000        0.000000
-       1               3       -0.000000        0.000000
-       2               1       -0.000000        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
        2               2       -0.026268        0.000000
-       2               3        0.000000        0.000000
-       3               1        0.000000        0.000000
-       3               2        0.000000        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
        3               3       -0.026268        0.000000
 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.084017E+00    5.184047E-17    5.241423E-17
-         1         2    5.184047E-17    2.084017E+00   -5.126671E-17
-         1         3   -5.184047E-17   -5.184047E-17    2.084017E+00
-         2         1   -2.084017E+00   -5.184047E-17   -5.241423E-17
-         2         2   -5.184047E-17   -2.084017E+00    5.126671E-17
-         2         3    5.184047E-17    5.184047E-17   -2.084017E+00
+         1         1    2.084017E+00   -6.589306E-17   -6.598593E-17
+         1         2   -6.589306E-17    2.084017E+00    6.580019E-17
+         1         3    6.589306E-17    6.589306E-17    2.084017E+00
+         2         1   -2.084017E+00    6.589306E-17    6.598593E-17
+         2         2    6.589306E-17   -2.084017E+00   -6.580019E-17
+         2         3   -6.589306E-17   -6.589306E-17   -2.084017E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 
 ================================================================================
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.097  and twall      0.469 sec
+-begin at tcpu      0.081  and twall      0.082 sec
 
  Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians
  in ewald9 has been set to eta=    1.0453 1/bohr and the real-space sums have been neglected.
@@ -243,12 +243,12 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0  0.0  0.0 -0.0 -0.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0 -0.0 -0.0  0.0  0.0  1.0 -1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0  1.0  1.0 -1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
-  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0
- -0.0 -0.0  0.0  0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0
+  0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.03750  0.03750  0.07500
  Phonon energies in Hartree :
@@ -525,7 +525,7 @@
    in atomic units:     0.3121412213E-02
    in units km/s:              6.82869
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1922472885E-02
+   in atomic units:     0.1922472886E-02
    in SI units K  :            607.06820
 
 
@@ -635,14 +635,14 @@
    in atomic units:     0.1497994147E-02
    in units km/s:              3.27715
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9226122454E-03
+   in atomic units:     0.9226122455E-03
    in SI units K  :            291.33756
 
  Speed of sound for this q and mode:
    in atomic units:     0.1497994147E-02
    in units km/s:              3.27715
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9226122454E-03
+   in atomic units:     0.9226122455E-03
    in SI units K  :            291.33756
 
  Speed of sound for this q and mode:
@@ -971,10 +971,10 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.250512E+02  4.250512E+02
 -  4.556856E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.502  and wall time      1.398 sec
++Total cpu time      0.149  and wall time      0.152 sec
 
  anaddb : the run completed succesfully.

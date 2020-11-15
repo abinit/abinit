@@ -1,6 +1,6 @@
 
-.Version 9.3.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 25 Sep 2020.
-- ( at 10h50 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h28 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/v5_t64/t64.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v5_t64/t64.in
 - output file    -> t64.out
 - root for input  files -> t64i
 - root for output files -> t64o
@@ -502,8 +502,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -520,8 +520,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/08o_001023.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/08o_001023.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o_001023.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/08o_001023.pspfhi
 - O, fhi98PP: TM-type, LDA PerdewWang, l=2 local
 -  8.00000   6.00000      1023                znucl, zion, pspdat
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -548,7 +548,7 @@ tolerances: {tolwfr: 1.00E-10, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -97.678222768243    -9.768E+01 5.720E-03 5.476E+02
- ETOT  2  -98.998405180444    -1.320E+00 9.050E-05 1.329E+02
+ ETOT  2  -98.998405180443    -1.320E+00 9.050E-05 1.329E+02
  ETOT  3  -99.396381400162    -3.980E-01 4.525E-03 1.619E-01
  ETOT  4  -99.397020218298    -6.388E-04 4.381E-06 5.619E-03
  ETOT  5  -99.397029303318    -9.085E-06 1.918E-07 2.152E-04
@@ -594,9 +594,9 @@ xred      :
 - [  2.7200E-01,   4.1500E-01,   5.4667E-01,  O]
 - [ -4.1500E-01,  -1.4300E-01,   2.1333E-01,  O]
 cartesian_forces: # hartree/bohr
-- [  3.51817659E-04,  -6.09366060E-04,  -1.54197642E-18, ]
-- [  3.53897449E-04,   6.10877708E-04,   1.03327726E-10, ]
-- [ -7.05984339E-04,  -1.04532722E-06,  -1.03327729E-10, ]
+- [  3.51817659E-04,  -6.09366060E-04,  -0.00000000E+00, ]
+- [  3.53897449E-04,   6.10877708E-04,   1.03328374E-10, ]
+- [ -7.05984339E-04,  -1.04532722E-06,  -1.03328374E-10, ]
 - [ -5.13887957E-02,   7.23772318E-02,  -5.82198232E-02, ]
 - [  8.83766387E-02,   8.31205108E-03,  -5.82178823E-02, ]
 - [ -3.69918507E-02,  -8.06919075E-02,  -5.82167446E-02, ]
@@ -657,7 +657,7 @@ force_length_stats: {min:   7.03635317E-04, max:   1.06154803E-01, mean:   7.100
 
  cartesian forces (hartree/bohr) at end:
     1      0.00035181765870    -0.00060936605987    -0.00000000000000
-    2      0.00035389744926     0.00061087770835     0.00000000010333
+    2      0.00035389744926     0.00061087770834     0.00000000010333
     3     -0.00070598433866    -0.00000104532722    -0.00000000010333
     4     -0.05138879568157     0.07237723175354    -0.05821982318405
     5      0.08837663874840     0.00831205107729    -0.05821788230688
@@ -668,15 +668,15 @@ force_length_stats: {min:   7.03635317E-04, max:   1.06154803E-01, mean:   7.100
  frms,max,avg= 5.0042336E-02 8.8377167E-02  -4.852E-08  8.404E-08  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.01809118987779    -0.03133486003787    -0.00000000000000
-    2      0.01819813699948     0.03141259212126     0.00000000531332
-    3     -0.03630317127533    -0.00005375288255    -0.00000000531332
-    4     -2.64251789890997     3.72178658490895    -2.99378342681031
-    5      4.54450910243642     0.42742281575327    -2.99368362290210
-    6     -1.90219728504517    -4.14934436801642    -2.99362512042042
-    7     -1.90190278052377     4.14938092287732     2.99378342681031
-    8     -2.64241356781572    -3.72194892258310     2.99368362290210
-    9      4.54453627425627    -0.42732101214086     2.99362512042042
+    1      0.01809118987777    -0.03133486003784    -0.00000000000000
+    2      0.01819813699945     0.03141259212123     0.00000000531336
+    3     -0.03630317127528    -0.00005375288254    -0.00000000531336
+    4     -2.64251789890993     3.72178658490893    -2.99378342681031
+    5      4.54450910243649     0.42742281575330    -2.99368362290210
+    6     -1.90219728504513    -4.14934436801635    -2.99362512042044
+    7     -1.90190278052378     4.14938092287728     2.99378342681031
+    8     -2.64241356781578    -3.72194892258314     2.99368362290210
+    9      4.54453627425620    -0.42732101214086     2.99362512042044
  frms,max,avg= 2.5732802E+00 4.5445363E+00  -2.495E-06  4.321E-06  0.000E+00 e/A
  length scales=  9.284300079912  9.284300079912 10.213270549578 bohr
               =  4.913040000000  4.913040000000  5.404630000000 angstroms
@@ -698,11 +698,11 @@ force_length_stats: {min:   7.03635317E-04, max:   1.06154803E-01, mean:   7.100
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.87385765766423E+01
-hartree             :  2.62599299109140E+01
+hartree             :  2.62599299109141E+01
 xc                  : -2.40541569058701E+01
 Ewald energy        : -6.95068319280861E+01
 psp_core            :  1.25427829794248E+00
-local_psp           : -9.58252679900692E+01
+local_psp           : -9.58252679900693E+01
 non_local_psp       :  1.37364424074533E+01
 total_energy        : -9.93970296310732E+01
 total_energy_eV     : -2.70473072783493E+03
@@ -786,8 +786,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  yields    18 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
 
 - screening: taking advantage of time-reversal symmetry 
@@ -812,15 +812,15 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
-        0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -0.000 -30.807  -0.000   2.747   1.383   1.383   2.747  -2.767  -5.493
-        0.000   0.000   0.000  -4.757   2.396  -2.396   4.757  -0.000   0.000
+        0.000   0.000  -0.000  -4.757   2.396  -2.396   4.757  -0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
-        0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000
 
     2  -0.000  -7.355  -0.000   0.598   0.301   0.301   0.598  -0.602  -1.197
         0.000   0.000   0.000  -1.036   0.521  -0.521   1.036  -0.000   0.000
@@ -835,10 +835,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.189  -0.014   0.014   0.003   0.004  -0.003  -0.004   0.018  -0.018
-      0.000  -0.005  -0.005  -0.001   0.002  -0.001   0.002  -0.001  -0.001
+     -0.000  -0.005  -0.005  -0.001   0.002  -0.001   0.002  -0.001  -0.001
        1       2       3       4       5       6       7       8       9
       0.189  -0.014   0.014   0.003   0.004  -0.003  -0.004   0.018  -0.018
-      0.000   0.005   0.005   0.001  -0.002   0.001  -0.002   0.001   0.001
+     -0.000   0.005   0.005   0.001  -0.002   0.001  -0.002   0.001   0.001
 
 
    Upper and lower wings at the    2 th omega   0.0000  24.2036 [eV]
@@ -866,7 +866,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
     1  -2.662   0.000  -0.000   0.188   0.385   0.385   0.188   0.385   0.188
-        0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000   0.000   0.000
 
     2   0.000  -9.225  -0.000   1.110   0.609   0.609   1.110  -1.217  -2.220
        -0.000   0.000  -0.000  -1.922   1.054  -1.054   1.922  -0.000   0.000
@@ -968,7 +968,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -25.152  -0.879   0.082   2.556   3.052  -0.925   3.052   2.556  -0.925
-        0.000   0.413  -0.967   0.151  -0.248   0.000  -0.248   0.151  -0.000
+        0.000   0.413  -0.967   0.151  -0.248   0.000  -0.248   0.151   0.000
 
     2  -0.879 -33.269   0.336   3.538   1.872   0.237   3.502  -4.793  -3.151
        -0.413   0.000  -0.581  -7.200   3.246  -1.575   6.921   0.713  -0.394
@@ -1073,8 +1073,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  yields    18 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  15x 15x 15
-          total number of points  =     3375
+ setmesh: FFT mesh size selected  =    15x   15x   15
+          total number of points  =         3375
 
  Number of electrons calculated from density =   48.0000; Expected =   48.0000
  average of density, n =  0.062957
@@ -1177,7 +1177,7 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  1  -97.678523489170    -9.768E+01 5.720E-03 5.476E+02
  ETOT  2  -98.998519341421    -1.320E+00 9.034E-05 1.328E+02
  ETOT  3  -99.396400749238    -3.979E-01 4.524E-03 1.629E-01
- ETOT  4  -99.397020365163    -6.196E-04 4.378E-06 5.606E-03
+ ETOT  4  -99.397020365164    -6.196E-04 4.378E-06 5.606E-03
  ETOT  5  -99.397029306269    -8.941E-06 1.897E-07 2.145E-04
  ETOT  6  -99.397029628292    -3.220E-07 5.817E-09 3.063E-06
  ETOT  7  -99.397029630607    -2.315E-09 1.198E-10 2.226E-07
@@ -1221,9 +1221,9 @@ xred      :
 - [  2.7200E-01,   4.1500E-01,   5.4667E-01,  O]
 - [ -4.1500E-01,  -1.4300E-01,   2.1333E-01,  O]
 cartesian_forces: # hartree/bohr
-- [  3.50544788E-04,  -6.07161383E-04,   1.54197642E-18, ]
-- [  3.50544788E-04,   6.07161383E-04,   1.54197642E-18, ]
-- [ -7.01089576E-04,  -1.34844479E-18,   1.54197642E-18, ]
+- [  3.50544788E-04,  -6.07161383E-04,  -7.70988212E-19, ]
+- [  3.50544788E-04,   6.07161383E-04,  -7.70988212E-19, ]
+- [ -7.01089576E-04,   1.58777798E-18,  -7.70988212E-19, ]
 - [ -5.13967416E-02,   7.23732302E-02,  -5.82249570E-02, ]
 - [  8.83754267E-02,   8.32426879E-03,  -5.82249570E-02, ]
 - [ -3.69786851E-02,  -8.06974990E-02,  -5.82249570E-02, ]
@@ -1261,7 +1261,7 @@ force_length_stats: {min:   7.01089576E-04, max:   1.06158632E-01, mean:   7.100
        0.272000000000      0.415000000000      0.546666666667
       -0.415000000000     -0.143000000000      0.213333333333
  rms dE/dt=  4.7908E-01; max dE/dt=  8.2050E-01; dE/dt below (all hartree)
-    1      -0.006509126004      0.003254563002     -0.000000000000
+    1      -0.006509126004      0.003254563002      0.000000000000
     2       0.003254563002     -0.006509126004      0.000000000000
     3       0.003254563002      0.003254563002      0.000000000000
     4       0.820503980998     -0.343321209069      0.594667238450
@@ -1283,9 +1283,9 @@ force_length_stats: {min:   7.01089576E-04, max:   1.06158632E-01, mean:   7.100
     9     -1.37073816000000     1.15731034634214     1.15298773333333
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00035054478788    -0.00060716138294     0.00000000000000
-    2      0.00035054478788     0.00060716138294     0.00000000000000
-    3     -0.00070108957576    -0.00000000000000     0.00000000000000
+    1      0.00035054478788    -0.00060716138294    -0.00000000000000
+    2      0.00035054478788     0.00060716138294    -0.00000000000000
+    3     -0.00070108957576     0.00000000000000    -0.00000000000000
     4     -0.05139674157681     0.07237323018376    -0.05822495698739
     5      0.08837542668116     0.00832426878561    -0.05822495698739
     6     -0.03697868510435    -0.08069749896937    -0.05822495698739
@@ -1295,15 +1295,15 @@ force_length_stats: {min:   7.01089576E-04, max:   1.06158632E-01, mean:   7.100
  frms,max,avg= 5.0044205E-02 8.8375427E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.01802573623399    -0.03122149100127     0.00000000000000
-    2      0.01802573623399     0.03122149100127     0.00000000000000
-    3     -0.03605147246798    -0.00000000000000     0.00000000000000
-    4     -2.64292649323727     3.72158081593461    -2.99404741757035
-    5      4.54444677543831     0.42805107552282    -2.99404741757035
-    6     -1.90152028220104    -4.14963189145743    -2.99404741757035
-    7     -1.90152028220104     4.14963189145743     2.99404741757035
-    8     -2.64292649323727    -3.72158081593461     2.99404741757035
-    9      4.54444677543831    -0.42805107552282     2.99404741757035
+    1      0.01802573623402    -0.03122149100131    -0.00000000000000
+    2      0.01802573623402     0.03122149100131    -0.00000000000000
+    3     -0.03605147246803     0.00000000000000    -0.00000000000000
+    4     -2.64292649323727     3.72158081593460    -2.99404741757034
+    5      4.54444677543831     0.42805107552283    -2.99404741757034
+    6     -1.90152028220103    -4.14963189145743    -2.99404741757034
+    7     -1.90152028220103     4.14963189145743     2.99404741757034
+    8     -2.64292649323728    -3.72158081593460     2.99404741757034
+    9      4.54444677543830    -0.42805107552283     2.99404741757034
  frms,max,avg= 2.5733763E+00 4.5444468E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  9.284300079912  9.284300079912 10.213270549578 bohr
               =  4.913040000000  4.913040000000  5.404630000000 angstroms
@@ -1331,7 +1331,7 @@ Ewald energy        : -6.95068319280861E+01
 psp_core            :  1.25427829794248E+00
 local_psp           : -9.58252823757568E+01
 non_local_psp       :  1.37364420407938E+01
-total_energy        : -9.93970296308046E+01
+total_energy        : -9.93970296308047E+01
 total_energy_eV     : -2.70473072782762E+03
 band_energy         : -1.03145210099871E+01
 ...
@@ -1409,8 +1409,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  yields    18 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
 
 - screening: taking advantage of time-reversal symmetry 
@@ -1435,7 +1435,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
-        0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000
+       -0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000
 
     2  -0.000 -30.807   0.000   2.747   1.383  -5.493  -2.767   2.747   1.383
         0.000   0.000  -0.000  -4.757   2.396   0.000  -0.000   4.757  -2.396
@@ -1446,7 +1446,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
        -0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000
 
     2  -0.000  -7.355   0.000   0.598   0.301  -1.197  -0.602   0.598   0.301
-        0.000   0.000   0.000  -1.036   0.521   0.000  -0.000   1.036  -0.521
+        0.000   0.000  -0.000  -1.036   0.521   0.000  -0.000   1.036  -0.521
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   5.2836
@@ -1458,10 +1458,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.189  -0.014   0.014   0.003   0.004  -0.018   0.018  -0.004  -0.003
-      0.000  -0.005  -0.005  -0.001   0.002  -0.001  -0.001   0.002  -0.001
+     -0.000  -0.005  -0.005  -0.001   0.002  -0.001  -0.001   0.002  -0.001
        1       2       3       4       5       6       7       8       9
       0.189  -0.014   0.014   0.003   0.004  -0.018   0.018  -0.004  -0.003
-      0.000   0.005   0.005   0.001  -0.002   0.001   0.001  -0.002   0.001
+     -0.000   0.005   0.005   0.001  -0.002   0.001   0.001  -0.002   0.001
 
 
    Upper and lower wings at the    2 th omega   0.0000  24.2036 [eV]
@@ -1481,7 +1481,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.122   0.000   0.000   0.899   1.719   0.899   1.719   0.899   1.719
-        0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000  -0.000
+        0.000  -0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000
 
     2   0.000 -31.074   0.000   3.776   1.742  -7.552  -3.484   3.776   1.742
         0.000   0.000   0.000  -6.540   3.017   0.000   0.000   6.540  -3.017
@@ -1648,8 +1648,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  yields    18 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  15x 15x 15
-          total number of points  =     3375
+ setmesh: FFT mesh size selected  =    15x   15x   15
+          total number of points  =         3375
 
  Number of electrons calculated from density =   48.0000; Expected =   48.0000
  average of density, n =  0.062957
@@ -1749,9 +1749,9 @@ data: !SigmaeeData |
            etotal4    -9.9397029631E+01
            etotal5     0.0000000000E+00
            etotal6     0.0000000000E+00
-            fcart1     3.5181765870E-04 -6.0936605987E-04 -1.5419764231E-18
-                       3.5389744926E-04  6.1087770835E-04  1.0332772552E-10
-                      -7.0598433866E-04 -1.0453272236E-06 -1.0332772861E-10
+            fcart1     3.5181765870E-04 -6.0936605987E-04 -0.0000000000E+00
+                       3.5389744926E-04  6.1087770834E-04  1.0332837405E-10
+                      -7.0598433866E-04 -1.0453272234E-06 -1.0332837405E-10
                       -5.1388795682E-02  7.2377231754E-02 -5.8219823184E-02
                        8.8376638748E-02  8.3120510773E-03 -5.8217882307E-02
                       -3.6991850715E-02 -8.0691907528E-02 -5.8216744615E-02
@@ -1776,9 +1776,9 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            fcart4     3.5054478788E-04 -6.0716138294E-04  1.5419764231E-18
-                       3.5054478788E-04  6.0716138294E-04  1.5419764231E-18
-                      -7.0108957576E-04 -1.3484447931E-18  1.5419764231E-18
+            fcart4     3.5054478788E-04 -6.0716138294E-04 -7.7098821155E-19
+                       3.5054478788E-04  6.0716138294E-04 -7.7098821155E-19
+                      -7.0108957576E-04  1.5877779772E-18 -7.7098821155E-19
                       -5.1396741577E-02  7.2373230184E-02 -5.8224956987E-02
                        8.8375426681E-02  8.3242687856E-03 -5.8224956987E-02
                       -3.6978685104E-02 -8.0697498969E-02 -5.8224956987E-02
@@ -1996,7 +1996,7 @@ P           mkmem6          4
            shiftk      0.00000000E+00  0.00000000E+00  5.00000000E-01
           spgroup         154
            strten1     4.8483934558E-03  4.8483948568E-03  4.7019833538E-03
-                      -8.1496544412E-10 -1.4115615556E-09 -1.2132300062E-09
+                      -8.1496544415E-10 -1.4115615557E-09 -1.2132300070E-09
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2111,57 +2111,10 @@ P           mkmem6          4
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         37.9        0.63      0.011
-- Total wall clock time (s,m,h):         38.9        0.65      0.011
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           37.9, wall_time =           38.9
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   8.891  23.4      8.844  22.7          22991      -1.00        1.01       1.01
-- projbd                         6.995  18.4      7.108  18.3          34982      -1.00        0.98       0.98
-- ewald                          6.076  16.0      6.077  15.6              6      -1.00        1.00       1.00
-- sigma/=fourdp                  3.093   8.2      3.285   8.4              2      -1.00        0.94       0.94
-- nonlop(apply)                  1.952   5.1      1.998   5.1          22991      -1.00        0.98       0.98
-- vtowfk(ssdiag)                 1.475   3.9      1.485   3.8             -1      -1.00        0.99       0.99
-- stress                         1.033   2.7      1.033   2.7              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             1.023   2.7      1.024   2.6              2      -1.00        1.00       1.00
-- invars2                        0.606   1.6      0.606   1.6              6      -1.00        1.00       1.00
-- pspini                         0.589   1.6      0.593   1.5              6      -1.00        0.99       0.99
-- fourwf%(den)                   0.418   1.1      0.422   1.1           1920      -1.00        0.99       0.99
-- getghc-other                   0.353   0.9      0.316   0.8             -1      -1.00        1.12       1.12
-- others (115)                   0.599   1.6      0.591   1.5             -1      -1.00        1.01       1.01
--<END_TIMER>
--
-- subtotal                      33.105  87.3     33.382  85.7                                  0.99       0.99
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          37.9, wall_time =          38.9
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   8.891  23.4      8.844  22.7          22991      -1.00        1.01       1.01
-- projbd                         6.995  18.4      7.108  18.3          34982      -1.00        0.98       0.98
-- ewald                          6.076  16.0      6.077  15.6              6      -1.00        1.00       1.00
-- sigma/=fourdp                  3.093   8.2      3.285   8.4              2      -1.00        0.94       0.94
-- nonlop(apply)                  1.952   5.1      1.998   5.1          22991      -1.00        0.98       0.98
-- vtowfk(ssdiag)                 1.475   3.9      1.485   3.8             -1      -1.00        0.99       0.99
-- stress                         1.033   2.7      1.033   2.7              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             1.023   2.7      1.024   2.6              2      -1.00        1.00       1.00
-- invars2                        0.606   1.6      0.606   1.6              6      -1.00        1.00       1.00
-- pspini                         0.589   1.6      0.593   1.5              6      -1.00        0.99       0.99
-- fourwf%(den)                   0.418   1.1      0.422   1.1           1920      -1.00        0.99       0.99
-- getghc-other                   0.353   0.9      0.316   0.8             -1      -1.00        1.12       1.12
-- others (115)                   0.599   1.6      0.591   1.5             -1      -1.00        1.01       1.01
--<END_TIMER>
 
-- subtotal                      33.105  87.3     33.382  85.7                                  0.99       0.99
 
 ================================================================================
 
@@ -2201,7 +2154,24 @@ P           mkmem6          4
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
-- [3] Recent developments in the ABINIT software package.
+- [3] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -2219,7 +2189,9 @@ P           mkmem6          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -2232,25 +2204,10 @@ P           mkmem6          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=         37.9  wall=         38.9
+- Proc.   0 individual time (sec): cpu=         29.9  wall=         30.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.9  wall=         38.9
+.Delivered  11 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=         29.9  wall=         30.0

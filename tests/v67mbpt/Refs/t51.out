@@ -1,6 +1,6 @@
 
 .Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 15 Oct 2020.
-- ( at 12h22 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h30 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/TestBot_MPI1/v67mbpt_t51/t51.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v67mbpt_t51/t51.in
 - output file    -> t51.out
 - root for input  files -> t51i
 - root for output files -> t51o
@@ -343,8 +343,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__marm/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -380,10 +380,10 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  3  -8.8756561419827    -7.692E-05 3.172E-06 2.990E-03
  ETOT  4  -8.8756570364735    -8.945E-07 4.220E-08 1.086E-05
  ETOT  5  -8.8756570414101    -4.937E-09 1.945E-10 2.424E-08
- ETOT  6  -8.8756570414252    -1.503E-11 6.332E-13 1.671E-10
- ETOT  7  -8.8756570414253    -1.421E-13 2.197E-15 6.961E-13
- ETOT  8  -8.8756570414252     6.040E-14 1.502E-17 1.007E-15
- ETOT  9  -8.8756570414254    -1.226E-13 1.287E-20 1.653E-18
+ ETOT  6  -8.8756570414252    -1.502E-11 6.332E-13 1.671E-10
+ ETOT  7  -8.8756570414253    -1.457E-13 2.197E-15 6.961E-13
+ ETOT  8  -8.8756570414252     5.862E-14 1.502E-17 1.007E-15
+ ETOT  9  -8.8756570414254    -1.172E-13 1.287E-20 1.653E-18
 
  At SCF step    9       vres2   =  1.65E-18 < tolvrs=  1.00E-16 =>converged.
 
@@ -403,7 +403,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae: -1.226E-13, res2:  1.653E-18, residm:  1.287E-20, diffor: null, }
+convergence: {deltae: -1.172E-13, res2:  1.653E-18, residm:  1.287E-20, diffor: null, }
 etotal    :  -8.87565704E+00
 entropy   :   0.00000000E+00
 fermie    :   2.05995379E-01
@@ -466,7 +466,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.02587579971565E+00
-hartree             :  5.38306610799664E-01
+hartree             :  5.38306610799666E-01
 xc                  : -3.54190168818188E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  8.60437873155177E-02
@@ -474,7 +474,7 @@ local_psp           : -2.43141062809014E+00
 non_local_psp       :  1.88324866263482E+00
 total_energy        : -8.87565704142536E+00
 total_energy_eV     : -2.41518910763937E+02
-band_energy         :  2.28143225508711E-01
+band_energy         :  2.28143225508710E-01
 ...
 
 
@@ -523,14 +523,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file t51o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  5.72E-30  5.62E-29  1.90E-29  7.16E-29  9.79E-30  6.02E-29  6.52E-29  2.52E-29
-  6.88E-29  1.75E-29  4.36E-29  3.15E-29  7.73E-29  3.06E-29
+  7.06E-30  5.63E-29  1.89E-29  7.19E-29  1.05E-29  6.03E-29  6.56E-29  2.52E-29
+  7.10E-29  1.80E-29  4.35E-29  3.07E-29  7.76E-29  3.11E-29
  -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
   3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
   6.2852E-01  6.2852E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  500    2 max resid (incl. the buffer)=  1.81887E-28
+  prteigrs : nnsclo,ikpt=  500    2 max resid (incl. the buffer)=  1.83253E-28
 
 
 --- !ResultsGS
@@ -543,7 +543,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.859E-29, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.849E-29, diffor:  0.000E+00, }
 etotal    :  -8.87565704E+00
 entropy   :   0.00000000E+00
 fermie    :   2.05995379E-01
@@ -565,7 +565,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   37.346E-30; max=  98.590E-30
+ Mean square residual over all n,k,spin=   37.324E-30; max=  98.486E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -641,8 +641,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  yields     8 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  20x 20x 20
-          total number of points  =     8000
+ setmesh: FFT mesh size selected  =    20x   20x   20
+          total number of points  =         8000
 
 
  The inverse dielectric matrix will be calculated on zero frequency only
@@ -671,10 +671,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -15.823  -0.000   0.036   0.000   0.036  -0.000   0.036  -0.000
-       -0.000   0.000  -7.859   0.000  -0.254   0.000  -0.254   0.000  -0.254
+    2   0.000 -15.823  -0.000   0.036   0.000   0.036  -0.000   0.036   0.000
+       -0.000   0.000  -7.859  -0.000  -0.254   0.000  -0.254   0.000  -0.254
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  50.4238
@@ -702,7 +702,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
     1 -15.045  -2.219   4.391  -2.058  -3.587  -2.058  -3.587  -2.058  -3.587
         0.000  -2.219  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
 
-    2  -2.219 -12.123  -0.000   0.099   0.000   0.099  -0.000   0.099   0.000
+    2  -2.219 -12.123   0.000   0.099   0.000   0.099  -0.000   0.099   0.000
         2.219   0.000  -6.847  -0.000   0.447  -0.000   0.447  -0.000   0.447
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     53.67  [%]
@@ -717,7 +717,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
         0.000  -4.427   0.403  -0.403   4.427  -0.403   4.427  -4.427   0.403
 
     2  -4.427 -14.156  -0.000   0.260   0.000   0.260   0.000  -1.040   0.000
-        4.427   0.000  -4.841   0.000   1.479   0.000   1.479  -0.000  -0.988
+        4.427   0.000  -4.841   0.000   1.479   0.000   1.479   0.000  -0.988
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     49.10  [%]
 
@@ -784,8 +784,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  yields     8 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  20x 20x 20
-          total number of points  =     8000
+ setmesh: FFT mesh size selected  =    20x   20x   20
+          total number of points  =         8000
 
  ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
  Algorithm: Haydock technique.
@@ -837,7 +837,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.5335  -0.0000  46.9316  -0.0000  54.7732   0.0000
+   0.0000  59.5335   0.0000  46.9316   0.0000  54.7732   0.0000
    0.0100  59.5343   0.0043  46.9319   0.0021  54.7737   0.0034
    0.0200  59.5364   0.0087  46.9329   0.0042  54.7753   0.0068
    0.0300  59.5400   0.0130  46.9346   0.0063  54.7780   0.0102
@@ -860,7 +860,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.6192  -0.0000  46.9841  -0.0000  54.8418   0.0000
+   0.0000  59.6192   0.0000  46.9841   0.0000  54.8418   0.0000
    0.0100  59.6199   0.0048  46.9844   0.0023  54.8424   0.0038
    0.0200  59.6220   0.0096  46.9854   0.0046  54.8440   0.0076
    0.0300  59.6256   0.0143  46.9871   0.0070  54.8466   0.0114
@@ -883,7 +883,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.9145  -0.0000  47.1648  -0.0000  55.0763   0.0000
+   0.0000  59.9145   0.0000  47.1648   0.0000  55.0763   0.0000
    0.0100  59.9153   0.0064  47.1651   0.0031  55.0768   0.0051
    0.0200  59.9175   0.0127  47.1661   0.0061  55.0785   0.0102
    0.0300  59.9211   0.0191  47.1678   0.0092  55.0812   0.0154
@@ -906,7 +906,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  60.3076  -0.0000  47.4044  -0.0000  55.3857   0.0000
+   0.0000  60.3076   0.0000  47.4044   0.0000  55.3857   0.0000
    0.0100  60.3083   0.0086  47.4048   0.0041  55.3863   0.0070
    0.0200  60.3106   0.0171  47.4058   0.0083  55.3879   0.0139
    0.0300  60.3143   0.0257  47.4075   0.0124  55.3907   0.0209
@@ -929,7 +929,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  60.7448  -0.0000  47.6704  -0.0000  55.7279   0.0000
+   0.0000  60.7448   0.0000  47.6704   0.0000  55.7279   0.0000
    0.0100  60.7456   0.0112  47.6708   0.0054  55.7285   0.0091
    0.0200  60.7479   0.0224  47.6718   0.0107  55.7302   0.0182
    0.0300  60.7517   0.0335  47.6736   0.0161  55.7330   0.0274
@@ -952,7 +952,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  61.2043  -0.0000  47.9495  -0.0000  56.0858   0.0000
+   0.0000  61.2043   0.0000  47.9495   0.0000  56.0858   0.0000
    0.0100  61.2051   0.0141  47.9499   0.0067  56.0863   0.0115
    0.0200  61.2075   0.0281  47.9510   0.0134  56.0880   0.0230
    0.0300  61.2114   0.0422  47.9528   0.0201  56.0909   0.0344
@@ -975,7 +975,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  61.6763  -0.0000  48.2360  -0.0000  56.4515   0.0000
+   0.0000  61.6763   0.0000  48.2360   0.0000  56.4515   0.0000
    0.0100  61.6771   0.0172  48.2364   0.0081  56.4521   0.0140
    0.0200  61.6795   0.0344  48.2375   0.0163  56.4539   0.0280
    0.0300  61.6835   0.0516  48.2393   0.0244  56.4568   0.0420
@@ -998,7 +998,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  62.1557  -0.0000  48.5268  -0.0000  56.8214   0.0000
+   0.0000  62.1557   0.0000  48.5268   0.0000  56.8214   0.0000
    0.0100  62.1566   0.0206  48.5272   0.0097  56.8220   0.0167
    0.0200  62.1590   0.0412  48.5283   0.0194  56.8238   0.0334
    0.0300  62.1631   0.0617  48.5302   0.0290  56.8268   0.0501
@@ -1021,7 +1021,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  62.6396  -0.0000  48.8204  -0.0000  57.1930   0.0000
+   0.0000  62.6396   0.0000  48.8204   0.0000  57.1930   0.0000
    0.0100  62.6405   0.0242  48.8208   0.0113  57.1936   0.0195
    0.0200  62.6430   0.0483  48.8219   0.0226  57.1954   0.0390
    0.0300  62.6472   0.0725  48.8238   0.0339  57.1985   0.0586
@@ -1044,7 +1044,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  63.1260  -0.0000  49.1156  -0.0000  57.5648   0.0000
+   0.0000  63.1260   0.0000  49.1156   0.0000  57.5648   0.0000
    0.0100  63.1268   0.0280  49.1160   0.0130  57.5654   0.0225
    0.0200  63.1294   0.0559  49.1172   0.0260  57.5673   0.0450
    0.0300  63.1337   0.0839  49.1191   0.0389  57.5704   0.0675
@@ -1367,10 +1367,10 @@ P           mkmem4          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.7  wall=         26.1
+- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.7  wall=         26.1
++Overall time at end (sec) : cpu=          5.7  wall=          5.9

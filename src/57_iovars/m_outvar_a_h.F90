@@ -889,6 +889,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%extrapwf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extrapwf','INT',0)
 
+ intarr(1,:)=dtsets(:)%expert_user
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'expert_user','INT',0)
+
 !###########################################################
 !### 03. Print all the input variables (F)
 !##

@@ -1,6 +1,6 @@
 
-.Version 9.3.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 25 Sep 2020.
-- ( at 10h59 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h32 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/TestBot_MPI1/v7_t68/t68.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t68/t68.in
 - output file    -> t68.out
 - root for input  files -> t68i
 - root for output files -> t68o
@@ -812,8 +812,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -851,8 +851,8 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT  3  -11.729560116512    -1.175E-06 2.913E-05 5.009E-05
  ETOT  4  -11.729560133945    -1.743E-08 3.706E-06 1.033E-06
  ETOT  5  -11.729560134278    -3.327E-10 1.743E-07 7.567E-10
- ETOT  6  -11.729560134278    -2.398E-13 3.165E-08 6.238E-13
- ETOT  7  -11.729560134278     5.862E-14 1.644E-09 5.555E-16
+ ETOT  6  -11.729560134278    -2.380E-13 3.165E-08 6.238E-13
+ ETOT  7  -11.729560134278     5.151E-14 1.644E-09 5.555E-16
 
  At SCF step    7       vres2   =  5.56E-16 < tolvrs=  1.00E-15 =>converged.
 
@@ -872,7 +872,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567759E+01
-convergence: {deltae:  5.862E-14, res2:  5.555E-16, residm:  1.644E-09, diffor: null, }
+convergence: {deltae:  5.151E-14, res2:  5.555E-16, residm:  1.644E-09, diffor: null, }
 etotal    :  -1.17295601E+01
 entropy   :   0.00000000E+00
 fermie    :   3.96241984E-01
@@ -885,9 +885,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
 cartesian_forces: # hartree/bohr
-- [  3.27240542E-25,   1.63620271E-24,  -6.21757029E-24, ]
-- [ -3.27240542E-25,  -1.63620271E-24,   6.21757029E-24, ]
-force_length_stats: {min:   6.43757920E-24, max:   6.43757920E-24, mean:   6.43757920E-24, }
+- [ -3.27240542E-24,   2.61792433E-24,  -1.96344325E-24, ]
+- [  3.27240542E-24,  -2.61792433E-24,   1.96344325E-24, ]
+force_length_stats: {min:   4.62788012E-24, max:   4.62788012E-24, mean:   4.62788012E-24, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -921,8 +921,8 @@ force_length_stats: {min:   6.43757920E-24, max:   6.43757920E-24, mean:   6.437
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.7920E-23; max dE/dt=  3.0881E-23; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  1.0502E-23; max dE/dt=  1.7647E-23; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
@@ -930,14 +930,14 @@ force_length_stats: {min:   6.43757920E-24, max:   6.43757920E-24, mean:   6.437
     2      0.89174999627579     0.89174999627579     0.89174999627579
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 3.7167381E-24 6.2175703E-24   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 2.6719078E-24 3.2724054E-24   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.9112234E-22 3.1972029E-22   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 1.3739501E-22 1.6827384E-22   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653087852  6.740653087852  6.740653087852 bohr
               =  3.566999985103  3.566999985103  3.566999985103 angstroms
  prteigrs : about to open file t68o_DS1_EIG
@@ -977,10 +977,10 @@ xc                  : -4.27325480542850E+00
 Ewald energy        : -1.27864121744519E+01
 psp_core            :  1.36841387056176E+00
 local_psp           : -3.60688076094452E+00
-non_local_psp       : -7.12828627288616E-01
+non_local_psp       : -7.12828627288617E-01
 total_energy        : -1.17295601342781E+01
 total_energy_eV     : -3.19177563322795E+02
-band_energy         :  1.00056854390748E-01
+band_energy         :  1.00056854390747E-01
 ...
 
 
@@ -1067,8 +1067,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -1092,7 +1092,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] =  1.00056854390748E-01
+  QP Band energy    [Ha] =  1.00056854390747E-01
   QP Hartree energy [Ha] =  8.53940825218230E-01
 
 --------------------------------------------------------------------------------
@@ -1374,8 +1374,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -1399,7 +1399,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -6.36829966723856E-01
+  QP Band energy    [Ha] = -6.36829966723858E-01
   QP Hartree energy [Ha] =  8.56971318745001E-01
 
 --------------------------------------------------------------------------------
@@ -1606,7 +1606,7 @@ data: !SigmaeeData |
 .  kptgw no:  3; Maximum DeltaE = (   0.011  -0.000) for band index:  7
 .  kptgw no:  4; Maximum DeltaE = (   0.012   0.000) for band index:  4
 .  kptgw no:  5; Maximum DeltaE = (   0.015   0.000) for band index:  7
-.  kptgw no:  6; Maximum DeltaE = (   0.027  -0.000) for band index:  5
+.  kptgw no:  6; Maximum DeltaE = (   0.027   0.000) for band index:  5
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1681,8 +1681,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -1706,7 +1706,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -6.35380769124384E-01
+  QP Band energy    [Ha] = -6.35380769124382E-01
   QP Hartree energy [Ha] =  8.57408224462729E-01
 
 --------------------------------------------------------------------------------
@@ -1908,12 +1908,12 @@ data: !SigmaeeData |
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (   0.002  -0.000) for band index:  8
-.  kptgw no:  2; Maximum DeltaE = (   0.002   0.000) for band index:  6
-.  kptgw no:  3; Maximum DeltaE = (   0.002  -0.000) for band index:  7
+.  kptgw no:  1; Maximum DeltaE = (   0.002   0.000) for band index:  8
+.  kptgw no:  2; Maximum DeltaE = (   0.002  -0.000) for band index:  6
+.  kptgw no:  3; Maximum DeltaE = (   0.002   0.000) for band index:  7
 .  kptgw no:  4; Maximum DeltaE = (   0.002  -0.000) for band index:  4
 .  kptgw no:  5; Maximum DeltaE = (   0.002  -0.000) for band index:  7
-.  kptgw no:  6; Maximum DeltaE = (   0.003  -0.000) for band index:  5
+.  kptgw no:  6; Maximum DeltaE = (   0.003   0.000) for band index:  5
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1988,8 +1988,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -2013,7 +2013,7 @@ meta: {optdriver: 4, gwcalctyp: 25, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -6.35107283326585E-01
+  QP Band energy    [Ha] = -6.35107283326582E-01
   QP Hartree energy [Ha] =  8.57442635164084E-01
 
 --------------------------------------------------------------------------------
@@ -2217,7 +2217,7 @@ data: !SigmaeeData |
  >>>>> For spin  1 <<<<<
 .  kptgw no:  1; Maximum DeltaE = (   0.000  -0.000) for band index:  8
 .  kptgw no:  2; Maximum DeltaE = (   0.000   0.000) for band index:  6
-.  kptgw no:  3; Maximum DeltaE = (   0.000  -0.000) for band index:  7
+.  kptgw no:  3; Maximum DeltaE = (   0.000   0.000) for band index:  7
 .  kptgw no:  4; Maximum DeltaE = (   0.000  -0.000) for band index:  4
 .  kptgw no:  5; Maximum DeltaE = (   0.000  -0.000) for band index:  7
 .  kptgw no:  6; Maximum DeltaE = (   0.000   0.000) for band index:  5
@@ -2295,8 +2295,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -2524,10 +2524,10 @@ data: !SigmaeeData |
  >>>>> For spin  1 <<<<<
 .  kptgw no:  1; Maximum DeltaE = (   0.000   0.000) for band index:  8
 .  kptgw no:  2; Maximum DeltaE = (   0.000  -0.000) for band index:  6
-.  kptgw no:  3; Maximum DeltaE = (   0.000   0.000) for band index:  4
-.  kptgw no:  4; Maximum DeltaE = (   0.000   0.000) for band index:  4
+.  kptgw no:  3; Maximum DeltaE = (   0.000  -0.000) for band index:  4
+.  kptgw no:  4; Maximum DeltaE = (   0.000  -0.000) for band index:  4
 .  kptgw no:  5; Maximum DeltaE = (   0.000   0.000) for band index:  7
-.  kptgw no:  6; Maximum DeltaE = (   0.000   0.000) for band index:  5
+.  kptgw no:  6; Maximum DeltaE = (   0.000  -0.000) for band index:  5
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -2567,8 +2567,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2606,10 +2606,10 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT  3  -11.738804105678    -1.565E-06 5.751E-08 5.230E-06
  ETOT  4  -11.738804142771    -3.709E-08 5.708E-10 5.823E-08
  ETOT  5  -11.738804143013    -2.426E-10 8.199E-12 1.301E-09
- ETOT  6  -11.738804143017    -3.489E-12 1.288E-13 9.697E-11
- ETOT  7  -11.738804143017    -2.132E-14 1.532E-14 1.355E-12
- ETOT  8  -11.738804143017     4.796E-14 9.919E-16 6.741E-15
- ETOT  9  -11.738804143017    -1.066E-14 7.472E-17 2.488E-16
+ ETOT  6  -11.738804143017    -3.498E-12 1.288E-13 9.697E-11
+ ETOT  7  -11.738804143017    -1.954E-14 1.532E-14 1.355E-12
+ ETOT  8  -11.738804143017     5.151E-14 9.919E-16 6.741E-15
+ ETOT  9  -11.738804143017    -1.421E-14 7.472E-17 2.488E-16
 
  At SCF step    9       vres2   =  2.49E-16 < tolvrs=  1.00E-15 =>converged.
 
@@ -2629,7 +2629,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567759E+01
-convergence: {deltae: -1.066E-14, res2:  2.488E-16, residm:  7.472E-17, diffor: null, }
+convergence: {deltae: -1.421E-14, res2:  2.488E-16, residm:  7.472E-17, diffor: null, }
 etotal    :  -1.17388041E+01
 entropy   :   0.00000000E+00
 fermie    :   3.45851839E-01
@@ -2642,9 +2642,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
 cartesian_forces: # hartree/bohr
-- [ -6.54481083E-25,   0.00000000E+00,   6.54481083E-25, ]
-- [  6.54481083E-25,   0.00000000E+00,  -6.54481083E-25, ]
-force_length_stats: {min:   9.25576024E-25, max:   9.25576024E-25, mean:   9.25576024E-25, }
+- [ -1.30896217E-24,  -2.48926657E-41,   1.30896217E-24, ]
+- [  1.30896217E-24,   2.48926657E-41,  -1.30896217E-24, ]
+force_length_stats: {min:   1.85115205E-24, max:   1.85115205E-24, mean:   1.85115205E-24, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2657,7 +2657,7 @@ force_length_stats: {min:   9.25576024E-25, max:   9.25576024E-25, mean:   9.255
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   14.152E-19; max=  74.723E-18
-  -0.2500 -0.2500  0.0000    1  8.21341E-19 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500  0.0000    1  8.21340E-19 kpt; spin; max resid(k); each band:
    7.64E-20  2.35E-19  6.36E-20  6.36E-20  1.57E-19  8.21E-19  1.45E-20  1.45E-20
    6.28E-19  1.82E-19  1.02E-24  6.69E-20  6.69E-20  1.41E-19
   -0.2500  0.2500  0.0000    1  2.11609E-17 kpt; spin; max resid(k); each band:
@@ -2678,23 +2678,23 @@ force_length_stats: {min:   9.25576024E-25, max:   9.25576024E-25, mean:   9.255
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  5.6954E-24; max dE/dt=  4.4116E-24; dE/dt below (all hartree)
-    1      -0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000     -0.000000000000      0.000000000000
+ rms dE/dt=  5.0941E-24; max dE/dt=  8.8233E-24; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.89174999627579     0.89174999627579     0.89174999627579
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
     2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 5.3438157E-25 6.5448108E-25   0.000E+00  0.000E+00  0.000E+00 h/b
+ frms,max,avg= 1.0687631E-24 1.3089622E-24   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
     2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.7479003E-23 3.3654768E-23   0.000E+00  0.000E+00  0.000E+00 e/A
+ frms,max,avg= 5.4958005E-23 6.7309535E-23   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653087852  6.740653087852  6.740653087852 bohr
               =  3.566999985103  3.566999985103  3.566999985103 angstroms
  prteigrs : about to open file t68o_DS7_EIG
@@ -2729,7 +2729,7 @@ force_length_stats: {min:   9.25576024E-25, max:   9.25576024E-25, mean:   9.255
 iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.38765111605584E+00
-hartree             :  8.49487029069004E-01
+hartree             :  8.49487029069005E-01
 xc                  : -3.21280207546013E+00
 Ewald energy        : -1.27864121744519E+01
 psp_core            :  1.36841387056176E+00
@@ -2742,10 +2742,10 @@ total_energy        : -1.17388041430166E+01
 --- !EnergyTermsDC
 iteration_state     : {dtset: 7, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -6.51009459440127E-01
+band_energy         : -6.51009459440126E-01
 Ewald energy        : -1.27864121744519E+01
 psp_core            :  1.36841387056176E+00
-xc_dc               :  3.30203735014253E-01
+xc_dc               :  3.30203735014255E-01
 total_energy_dc     : -1.17388040283160E+01
 ...
 
@@ -2796,8 +2796,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2842,8 +2842,8 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  yields    32 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
 
 - screening: taking advantage of time-reversal symmetry 
@@ -2876,7 +2876,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -2.468   0.000  -0.295   0.000  -0.295   0.000  -0.295  -0.000
        -0.000   0.000  -0.611  -0.000  -0.180  -0.000  -0.180   0.000  -0.180
@@ -2900,10 +2900,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
       0.552   0.005  -0.005  -0.016   0.016   0.016  -0.016  -0.006   0.006
-      0.000   0.005   0.005  -0.016  -0.016   0.016   0.016  -0.006  -0.006
+     -0.000   0.005   0.005  -0.016  -0.016   0.016   0.016  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.552   0.005  -0.005  -0.016   0.016   0.016  -0.016  -0.006   0.006
-      0.000  -0.005  -0.005   0.016   0.016  -0.016  -0.016   0.006   0.006
+     -0.000  -0.005  -0.005   0.016   0.016  -0.016  -0.016   0.006   0.006
 
 
 
@@ -3092,8 +3092,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -3233,8 +3233,8 @@ meta: {optdriver: 3, gwcalctyp: 20, }
  yields    32 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
 
 - screening: taking advantage of time-reversal symmetry 
@@ -3272,7 +3272,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
   chi0(G,G') at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -2.494   0.000  -0.313   0.000  -0.313   0.000  -0.313   0.000
        -0.000   0.000  -0.672  -0.000  -0.192  -0.000  -0.192  -0.000  -0.192
@@ -3296,10 +3296,10 @@ meta: {optdriver: 3, gwcalctyp: 20, }
    Upper and lower wings at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
       0.631   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-     -0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
+      0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.631   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-     -0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
+      0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
 
@@ -3488,8 +3488,8 @@ meta: {optdriver: 4, gwcalctyp: 20, }
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -3513,7 +3513,7 @@ meta: {optdriver: 4, gwcalctyp: 20, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -6.35084227028632E-01
+  QP Band energy    [Ha] = -6.35084227028629E-01
   QP Hartree energy [Ha] =  8.57446147111784E-01
 
 --------------------------------------------------------------------------------
@@ -3796,8 +3796,8 @@ meta: {optdriver: 3, gwcalctyp: 20, }
  yields    32 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
 
 - screening: taking advantage of time-reversal symmetry 
@@ -3827,7 +3827,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -5.338   0.000  -0.905   0.000  -0.905   0.000  -0.905   0.000
        -0.000   0.000  -2.058   0.000  -0.645   0.000  -0.645   0.000  -0.645
@@ -3835,7 +3835,7 @@ meta: {optdriver: 3, gwcalctyp: 20, }
   chi0(G,G') at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -2.488   0.000  -0.305   0.000  -0.305   0.000  -0.305   0.000
        -0.000   0.000  -0.668  -0.000  -0.184   0.000  -0.184   0.000  -0.184
@@ -3850,19 +3850,19 @@ meta: {optdriver: 3, gwcalctyp: 20, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.228   0.007  -0.007  -0.020   0.020   0.020  -0.020  -0.007   0.007
-     -0.000   0.007   0.007  -0.020  -0.020   0.020   0.020  -0.007  -0.007
+      0.000   0.007   0.007  -0.020  -0.020   0.020   0.020  -0.007  -0.007
        1       2       3       4       5       6       7       8       9
       0.228   0.007  -0.007  -0.020   0.020   0.020  -0.020  -0.007   0.007
-     -0.000  -0.007  -0.007   0.020   0.020  -0.020  -0.020   0.007   0.007
+      0.000  -0.007  -0.007   0.020   0.020  -0.020  -0.020   0.007   0.007
 
 
    Upper and lower wings at the    2 th omega   0.0000  31.1801 [eV]
        1       2       3       4       5       6       7       8       9
       0.629   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-      0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
+     -0.000   0.006   0.006  -0.017  -0.017   0.017   0.017  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.629   0.006  -0.006  -0.017   0.017   0.017  -0.017  -0.006   0.006
-      0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
+     -0.000  -0.006  -0.006   0.017   0.017  -0.017  -0.017   0.006   0.006
 
 
 
@@ -4010,8 +4010,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/marm3.14_ecut/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4070,8 +4070,8 @@ meta: {optdriver: 4, gwcalctyp: 0, }
   Volume of the sphere ..    2450.17 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  12x 12x 12
-          total number of points  =     1728
+ setmesh: FFT mesh size selected  =    12x   12x   12
+          total number of points  =         1728
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.104483
@@ -4170,8 +4170,8 @@ data: !SigmaeeData |
            etotal11    0.0000000000E+00
            etotal12    0.0000000000E+00
            etotal13    0.0000000000E+00
-            fcart1     3.2724054154E-25  1.6362027077E-24 -6.2175702893E-24
-                      -3.2724054154E-25 -1.6362027077E-24  6.2175702893E-24
+            fcart1    -3.2724054154E-24  2.6179243323E-24 -1.9634432492E-24
+                       3.2724054154E-24 -2.6179243323E-24  1.9634432492E-24
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4182,8 +4182,8 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            fcart7    -6.5448108308E-25  0.0000000000E+00  6.5448108308E-25
-                       6.5448108308E-25  0.0000000000E+00 -6.5448108308E-25
+            fcart7    -1.3089621662E-24 -2.4892665724E-41  1.3089621662E-24
+                       1.3089621662E-24  2.4892665724E-41 -1.3089621662E-24
             fcart8     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4710,47 +4710,10 @@ P           mkmem           6
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         45.3        0.75      0.013
-- Total wall clock time (s,m,h):         48.2        0.80      0.013
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           45.3, wall_time =           48.2
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourdp                        16.971  37.5     17.223  35.7         294168      -1.00        0.99       0.99
-- sigma/=fourdp                  9.370  20.7     11.719  24.3              8      -1.00        0.80       0.80
-- HF_getghc_main                 8.815  19.5      8.850  18.3         350196      -1.00        1.00       1.00
-- ewald                          1.597   3.5      1.602   3.3             19      -1.00        1.00       1.00
-- pspini                         1.516   3.4      1.519   3.1             13      -1.00        1.00       1.00
-- invars2                        1.250   2.8      1.260   2.6             13      -1.00        0.99       0.99
-- fourwf%(pot)                   0.578   1.3      0.567   1.2           6987      -1.00        1.02       1.02
-- others (120)                   1.184   2.6      1.217   2.5             -1      -1.00        0.97       0.97
--<END_TIMER>
--
-- subtotal                      41.280  91.2     43.957  91.1                                  0.94       0.94
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          45.3, wall_time =          48.2
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourdp                        16.971  37.5     17.223  35.7         294168      -1.00        0.99       0.99
-- sigma/=fourdp                  9.370  20.7     11.719  24.3              8      -1.00        0.80       0.80
-- HF_getghc_main                 8.815  19.5      8.850  18.3         350196      -1.00        1.00       1.00
-- ewald                          1.597   3.5      1.602   3.3             19      -1.00        1.00       1.00
-- pspini                         1.516   3.4      1.519   3.1             13      -1.00        1.00       1.00
-- invars2                        1.250   2.8      1.260   2.6             13      -1.00        0.99       0.99
-- fourwf%(pot)                   0.578   1.3      0.567   1.2           6987      -1.00        1.02       1.02
-- others (120)                   1.184   2.6      1.217   2.5             -1      -1.00        0.97       0.97
--<END_TIMER>
 
-- subtotal                      41.280  91.2     43.957  91.1                                  0.94       0.94
 
 ================================================================================
 
@@ -4794,7 +4757,24 @@ P           mkmem           6
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [4] Recent developments in the ABINIT software package.
+- [4] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -4812,23 +4792,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- Proc.   0 individual time (sec): cpu=         45.3  wall=         48.2
+- Proc.   0 individual time (sec): cpu=         34.9  wall=         35.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  34 WARNINGs and 101 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         45.3  wall=         48.2
+.Delivered  34 WARNINGs and  32 COMMENTs to log file.
++Overall time at end (sec) : cpu=         34.9  wall=         35.1

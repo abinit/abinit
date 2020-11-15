@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h14 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h24 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t33/t33.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t33/t33.in
 - output file    -> t33.out
 - root for input  files -> t33i
 - root for output files -> t33o
@@ -112,8 +112,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     19.000   => boxcut(ratio)=   2.03853
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -143,27 +143,27 @@ tolerances: {tolwfr: 1.00E-16, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -5.6996954175465    -5.700E+00 5.211E-04 2.317E+01
  ETOT  2  -5.7004051302943    -7.097E-04 1.219E-08 2.507E+01
- ETOT  3  -5.7026808756011    -2.276E-03 1.917E-09 5.539E+00
- ETOT  4  -5.7030105653224    -3.297E-04 2.229E-09 1.947E+00
+ ETOT  3  -5.7026808756010    -2.276E-03 1.917E-09 5.539E+00
+ ETOT  4  -5.7030105653223    -3.297E-04 2.229E-09 1.947E+00
  ETOT  5  -5.7033091767809    -2.986E-04 1.647E-10 7.231E-01
  ETOT  6  -5.7033395421188    -3.037E-05 3.219E-11 4.741E-01
- ETOT  7  -5.7033744759394    -3.493E-05 1.939E-11 3.801E-01
- ETOT  8  -5.7033877337571    -1.326E-05 1.047E-11 3.429E-01
- ETOT  9  -5.7033270634276     6.067E-05 2.078E-10 4.765E-01
- ETOT 10  -5.7032734848804     5.358E-05 7.803E-09 1.579E+00
- ETOT 11  -5.7033644512923    -9.097E-05 1.026E-10 8.363E-01
- ETOT 12  -5.7033873107591    -2.286E-05 4.875E-12 6.521E-01
- ETOT 13  -5.7033975648284    -1.025E-05 1.463E-11 5.591E-01
- ETOT 14  -5.7034432083232    -4.564E-05 2.412E-11 1.915E-01
- ETOT 15  -5.7034649661642    -2.176E-05 7.890E-11 3.767E-02
+ ETOT  7  -5.7033744759393    -3.493E-05 1.939E-11 3.801E-01
+ ETOT  8  -5.7033877337570    -1.326E-05 1.047E-11 3.429E-01
+ ETOT  9  -5.7033270634278     6.067E-05 2.078E-10 4.765E-01
+ ETOT 10  -5.7032734848840     5.358E-05 7.803E-09 1.579E+00
+ ETOT 11  -5.7033644512956    -9.097E-05 1.026E-10 8.363E-01
+ ETOT 12  -5.7033873107593    -2.286E-05 4.875E-12 6.521E-01
+ ETOT 13  -5.7033975648318    -1.025E-05 1.463E-11 5.591E-01
+ ETOT 14  -5.7034432083262    -4.564E-05 2.412E-11 1.915E-01
+ ETOT 15  -5.7034649661648    -2.176E-05 7.890E-11 3.767E-02
  ETOT 16  -5.7034679888271    -3.023E-06 5.647E-12 1.770E-02
- ETOT 17  -5.7034709560053    -2.967E-06 2.390E-11 4.336E-04
+ ETOT 17  -5.7034709560057    -2.967E-06 2.390E-11 4.336E-04
  ETOT 18  -5.7034710030057    -4.700E-08 3.034E-12 1.815E-04
- ETOT 19  -5.7034710403436    -3.734E-08 4.801E-13 1.122E-06
- ETOT 20  -5.7034710404873    -1.437E-10 6.845E-15 6.800E-08
+ ETOT 19  -5.7034710403435    -3.734E-08 4.801E-13 1.122E-06
+ ETOT 20  -5.7034710404874    -1.439E-10 6.845E-15 6.800E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.96816165E-05  sigma(3 2)=  0.00000000E+00
+  sigma(1 1)=  3.96816166E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.29512203E-05  sigma(3 1)= -1.73622689E-05
   sigma(3 3)=  3.96946890E-05  sigma(2 1)=  0.00000000E+00
 
@@ -183,12 +183,12 @@ lattice_vectors:
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.2900000E+02
-convergence: {deltae: -1.437E-10, res2:  6.800E-08, residm:  6.845E-15, diffor: null, }
+convergence: {deltae: -1.439E-10, res2:  6.800E-08, residm:  6.845E-15, diffor: null, }
 etotal    :  -5.70347104E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.76421514E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.96816165E-05,   0.00000000E+00,  -1.73622689E-05, ]
+- [  3.96816166E-05,   0.00000000E+00,  -1.73622689E-05, ]
 - [  0.00000000E+00,   2.29512203E-05,   0.00000000E+00, ]
 - [ -1.73622689E-05,   0.00000000E+00,   3.96946890E-05, ]
 pressure_GPa:  -1.0035E+00
@@ -242,21 +242,21 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.25251639131753E+00
-hartree             :  2.08255259761559E+00
-xc                  : -1.84871495208435E+00
+kinetic             :  3.25251639131564E+00
+hartree             :  2.08255259761540E+00
+xc                  : -1.84871495208417E+00
 Ewald energy        : -2.52204220398277E+00
 psp_core            :  5.08040345480207E-03
-local_psp           : -7.62499013884252E+00
-non_local_psp       :  9.52126862034410E-01
-total_energy        : -5.70347104048730E+00
-total_energy_eV     : -1.55199339817094E+02
-band_energy         : -1.23607026094432E+00
+local_psp           : -7.62499013884075E+00
+non_local_psp       :  9.52126862034420E-01
+total_energy        : -5.70347104048743E+00
+total_energy_eV     : -1.55199339817097E+02
+band_energy         : -1.23607026094319E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.96816165E-05  sigma(3 2)=  0.00000000E+00
+  sigma(1 1)=  3.96816166E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.29512203E-05  sigma(3 1)= -1.73622689E-05
   sigma(3 3)=  3.96946890E-05  sigma(2 1)=  0.00000000E+00
 
@@ -295,8 +295,8 @@ P           mkmem           1
                        1.000000
            occopt           2
           spgroup           6
-           strten      3.9681616525E-05  2.2951220280E-05  3.9694689010E-05
-                       0.0000000000E+00 -1.7362268899E-05  0.0000000000E+00
+           strten      3.9681616564E-05  2.2951220281E-05  3.9694688973E-05
+                       0.0000000000E+00 -1.7362268910E-05  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1       1  0  0   0 -1  0   0  0  1
            tolwfr      1.00000000E-16
             typat      1
@@ -341,7 +341,24 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -359,7 +376,9 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -372,25 +391,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.5
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          1.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.5
++Overall time at end (sec) : cpu=          1.9  wall=          1.9
