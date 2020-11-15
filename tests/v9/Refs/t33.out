@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Nov 2020.
-- ( at 14h32 )
+.Starting date : Mon 16 Nov 2020.
+- ( at 00h11 )
   
-- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t23/t23.in
-- output file    -> t23.out
-- root for input  files -> t23i
-- root for output files -> t23o
+- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33/t33.in
+- output file    -> t33.out
+- root for input  files -> t33i
+- root for output files -> t33o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -372,7 +372,7 @@ force_length_stats: {min:   3.73943779E-25, max:   3.73943779E-25, mean:   3.739
  frms,max,avg= 1.1101846E-23 1.1101846E-23   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
- prteigrs : about to open file t23o_DS1_EIG
+ prteigrs : about to open file t33o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.16616   Average Vxc (hartree)=  -0.34226
  Eigenvalues (hartree) for nkpt=   6  k points:
  kpt#   1, nband=  8, wtk=  0.18750, kpt= -0.2500 -0.2500  0.0000 (reduced coord)
@@ -490,7 +490,7 @@ meta: {optdriver: 3, gwcalctyp: 21, }
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t23i_DS2_QPS
+        looking for file t33i_DS2_QPS
  file not found, 1st iteration initialized with KS eigenelements 
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
@@ -1760,7 +1760,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
 
 
  rdqps: reading QP wavefunctions of the previous step 
-        looking for file t23i_DS3_QPS
+        looking for file t33i_DS3_QPS
  file not found, 1st iteration initialized with KS eigenelements 
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
@@ -2233,10 +2233,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         22.8  wall=         23.3
+- Proc.   0 individual time (sec): cpu=         22.6  wall=         22.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.8  wall=         23.3
++Overall time at end (sec) : cpu=         22.6  wall=         22.7
