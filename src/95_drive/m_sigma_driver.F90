@@ -2440,16 +2440,16 @@ endif
          ireadRE=ireadRE*(2*ireadRE)+b2gw-b1gw+1
          ABI_MALLOC(occ_eigv_tmp,(ireadRE,Sigp%nkptgw))
          occ_eigv_tmp=0.0_dp
-         open(unit=666,form='formatted',file=gw1rdm_fname,iostat=istat,status='old')
-         read(666,*,iostat=istat) iread_chkp
+         open(unit=333,form='formatted',file=gw1rdm_fname,iostat=istat,status='old')
+         read(333,*,iostat=istat) iread_chkp
          ikcalc=1;iread=1;iread_chkp=0;
          if(istat==0) then
            do
              if(iread<=ireadRE) then
-               read(666,*,iostat=istat) occ_eigv_tmp(iread,ikcalc)
+               read(333,*,iostat=istat) occ_eigv_tmp(iread,ikcalc)
                iread=iread+1
              else
-               read(666,*,iostat=istat) iread_chkp
+               read(333,*,iostat=istat) iread_chkp
                if(istat==0 .and. iread_chkp/=0) then
                 ikcalc=ikcalc+1
                 iread=1
@@ -2460,7 +2460,7 @@ endif
              end if
            end do
          end if 
-         close(666)
+         close(333)
          if(iread_chkp==0 .and. ikcalc>1) then
            write(msg,'(a27,i5,a37,a23,i5)')' The last k-point read was ',ikcalc,' but the integer label was not found.',&
            ' Setting iread_chkp to ',ikcalc
@@ -2500,20 +2500,20 @@ endif
        write(msg,'(a29,a)')' Writing the checkpoint file ',gw1rdm_fname
        call wrtout(std_out,msg,'COLL')
        if(my_rank==0) then
-         open(unit=666,form='formatted',file=gw1rdm_fname)
-         write(666,*) Sigp%nkptgw
+         open(unit=333,form='formatted',file=gw1rdm_fname)
+         write(333,*) Sigp%nkptgw
          if(chkp_rdm>1) then
            do ikcalc=1,iread_chkp
              do iwrite=b1gw,b2gw 
-               write(666,*) occs(iwrite,ikcalc) 
+               write(333,*) occs(iwrite,ikcalc) 
              end do
              do iwrite=1,Wfd%mband 
                do iwrite2=1,Wfd%mband
-                 write(666,*) real(nateigv(iwrite,iwrite2,ikcalc,1))
-                 write(666,*) aimag(nateigv(iwrite,iwrite2,ikcalc,1))
+                 write(333,*) real(nateigv(iwrite,iwrite2,ikcalc,1))
+                 write(333,*) aimag(nateigv(iwrite,iwrite2,ikcalc,1))
                end do 
              end do
-             write(666,*) ikcalc
+             write(333,*) ikcalc
            end do
          end if
        end if
@@ -2625,15 +2625,15 @@ endif
          if(chkp_rdm>0) then
            if(my_rank==0) then
              do iwrite=b1gw,b2gw 
-               write(666,*) occs(iwrite,ikcalc) 
+               write(333,*) occs(iwrite,ikcalc) 
              end do
              do iwrite=1,Wfd%mband 
                do iwrite2=1,Wfd%mband
-                 write(666,*) real(nateigv(iwrite,iwrite2,ikcalc,1))
-                 write(666,*) aimag(nateigv(iwrite,iwrite2,ikcalc,1))
+                 write(333,*) real(nateigv(iwrite,iwrite2,ikcalc,1))
+                 write(333,*) aimag(nateigv(iwrite,iwrite2,ikcalc,1))
                end do 
              end do
-             write(666,*) ikcalc
+             write(333,*) ikcalc
            end if
          end if
        else
@@ -2647,7 +2647,7 @@ endif
    if(chkp_rdm>1) then
      write(msg,'(a29,a)')' Closing the checkpoint file ',gw1rdm_fname
      call wrtout(std_out,msg,'COLL')
-     close(666)
+     close(333)
    end if
 
    ! MRM: first clean all non-req. arrays. Then, print WFK and DEN files, build band corrections, and compute new energies.
