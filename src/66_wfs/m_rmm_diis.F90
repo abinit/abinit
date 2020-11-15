@@ -544,7 +544,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Orthogonalize states after DIIS
  ! ===============================
  call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
- ortalgo = mpi_enreg%paral_kgb !; ortalgo = 3
+ !ortalgo = mpi_enreg%paral_kgb
+ ortalgo = 3
  call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bandspinorfft)
  !call fxphas(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
  call timab(583,2,tsec)

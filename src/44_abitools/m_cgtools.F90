@@ -347,7 +347,7 @@ end subroutine cg_setaug_zero
 !!
 !! SOURCE
 
-subroutine cg_to_reim(npw,ndat,cg,factor,reim)
+subroutine cg_to_reim(npw, ndat, cg, factor, reim)
 
 !Arguments ------------------------------------
 !scalars
@@ -360,12 +360,12 @@ subroutine cg_to_reim(npw,ndat,cg,factor,reim)
 ! *************************************************************************
 
  ! Pack real and imaginary part of the wavefunctions.
- ! and multiply by scale factor if factor /= one. Could block but oh well
+ ! and multiply by scale factor if factor /= one.
  call dcopy(npw*ndat, cg(1), 2, reim(1), 1)
- if (factor /= one) call dscal(npw*ndat,factor,reim(1),1)
+ if (factor /= one) call dscal(npw*ndat, factor, reim(1), 1)
 
  call dcopy(npw*ndat, cg(2), 2, reim(npw*ndat+1), 1)
- if (factor /= one) call dscal(npw*ndat,factor,reim(npw*ndat+1),1)
+ if (factor /= one) call dscal(npw*ndat, factor, reim(npw*ndat+1), 1)
 
 end subroutine cg_to_reim
 !!***
@@ -619,7 +619,7 @@ function cg_real_zdotc(n,x,y) result(res)
 
 ! *************************************************************************
 
- res = ddot(2*n,x,1,y,1)
+ res = ddot(2*n, x, 1, y, 1)
 
 end function cg_real_zdotc
 !!***
@@ -2902,7 +2902,7 @@ subroutine cgpaw_normalize(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
 !$OMP PARALLEL DO PRIVATE(ptr) IF (nband > 1)
  do band=1,nband
    ptr = 1 + 2*npwsp*(band-1)
-   norm(band) = cg_real_zdotc(npwsp,gsc(ptr),cg(ptr))
+   norm(band) = cg_real_zdotc(npwsp, gsc(ptr), cg(ptr))
  end do
 
  if (istwfk>1) then
@@ -4689,12 +4689,12 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
    cg_idx = cgindex(1)
    if (useoverlap == 1) then
      gsc_idx = gscindex(1)
-     call cgpaw_cholesky(nelem,nvec,vecnm(1,cg_idx),ovl_vecnm(1,gsc_idx),istwf_k,me_g0,comm)
+     call cgpaw_cholesky(nelem, nvec, vecnm(1,cg_idx), ovl_vecnm(1,gsc_idx),i stwf_k, me_g0, comm)
    else
-     call cgnc_cholesky(nelem,nvec,vecnm(1,cg_idx),istwf_k,me_g0,comm,use_gemm=.FALSE.)
+     call cgnc_cholesky(nelem, nvec, vecnm(1,cg_idx), istwf_k, me_g0, comm, use_gemm=.FALSE.)
    end if
 
- else if(ortalgo==1) then
+ else if (ortalgo==1) then
     ! =======================
     ! Second (new) algorithm
     ! =======================
@@ -4721,7 +4721,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
      ABI_FREE(cblockvectorx)
      ABI_FREE(cblockvectorbx)
 
-   else if(istwf_k==2) then
+   else if (istwf_k==2) then
      ! Pack real and imaginary part of the wavefunctions.
      rvectsiz=nelem
      vectsize=2*nelem; if(me_g0==1) vectsize=vectsize-1
