@@ -416,8 +416,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    MSG_BUG('ffnl_k/ffnl_kp should be associated!')
  end if
 !if (hamk%istwf_k/=hamk%istwf_kp) then
-!  msg = 'istwf has to be the same for both k-points.'
-!  MSG_BUG(msg)
+!  MSG_BUG('istwf has to be the same for both k-points.')
 !end if
 
 !Select k-dependent objects according to select_k input parameter

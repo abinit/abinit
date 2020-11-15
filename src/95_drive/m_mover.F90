@@ -489,16 +489,16 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
+     write(message,*)sjoin("mover: previous time step took: ",sec2str(wtime_step), " <<< TIME")
      if(need_verbose)call wrtout(std_out, message)
      if (have_timelimit_in(MY_NAME)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
-           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
-&           ". Will exit itime loop in mover."
-           if(need_verbose)MSG_COMMENT(message)
-           if(need_verbose)call wrtout(ab_out, message)
+           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())), &
+             ". Will exit itime loop in mover."
+           if(need_verbose) MSG_COMMENT(message)
+           if(need_verbose) call wrtout(ab_out, message)
            timelimit_exit = 1
            exit
          end if
@@ -522,7 +522,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    if (scfcv_args%dtset%rmm_diis /= 0 .and. itime == 2) then
      scfcv_args%dtset%rmm_diis = scfcv_args%dtset%rmm_diis - 3
      if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
-     call wrtout(std_out, sjoin(" itime == 0 with RMM-DIIS --> setting rmm_diis to:", itoa(scfcv_args%dtset%rmm_diis)))
+     call wrtout(std_out, sjoin(" itime == 2 with RMM-DIIS --> setting rmm_diis to:", itoa(scfcv_args%dtset%rmm_diis)))
    end if
 
 !  ###########################################################

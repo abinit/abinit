@@ -130,7 +130,7 @@ contains
 !!   In input: previous residuals.
 !!  ==== if optforces>0 ====
 !!    grnl_k(3*natom,nband_k)=nonlocal gradients, at this k-point
-!!  ==== if (gs_hamk%usepaw==0) ====
+!!  ==== if gs_hamk%usepaw==0 ====
 !!    enlx_k(nband_k)=contribution from each band to
 !!                    nonlocal pseudopotential + Fock-type part of total energy, at this k-point
 !!  ==== if (gs_hamk%usepaw==1) ====
@@ -565,7 +565,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
- call wrtout(std_out, sjoin(" Number of Vnl applications:", itoa(nonlop_counter)))
+
+ if (dtset%prtvol > 0) call wrtout(std_out, sjoin(" Number of Vnl|Psi> applications:", itoa(nonlop_counter)))
 
 !###################################################################
 
@@ -856,10 +857,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ! Norm-conserving or FockACE: Compute nonlocal+FockACE part of total energy: rotate subvnlx elements
  ! Note the two calls. For (old) lobpcgwf we have a (nband_k, nband_k) matrix, whereas cgwf
  ! returns results in packed form.
- ! CHEBYSHEV, NEW LOBPCG and RMM-DIIS are smarter and return enlx_k directly
+ ! CHEBYSHEV, NEW LOBPCG and RMM-DIIS do not need this
  !
  rotate_subvnlx = gs_hamk%usepaw == 0 .and. wfopta10 /= 1 .and. .not. newlobpcg
- !if (dtset%rmm_diis /= 0) rotate_subvnlx = .False.
  if (use_rmm_diis) rotate_subvnlx = .False.
 
  if (rotate_subvnlx) then

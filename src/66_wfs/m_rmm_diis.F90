@@ -197,7 +197,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene, cpu, wall, gflops, max_res_pocc, tol_occupied
  !character(len=500) :: msg
- !character(len=6) :: tag
  type(rmm_diis_t) :: diis
 !arrays
  real(dp) :: tsec(2)
@@ -284,7 +283,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !print *, "rmm_diis_status:", rmm_diis_status
  !print *, "rmm_prev_acc:", prev_accuracy_level, "rmm_raise_acc:", raise_acc
  !print *, "accuracy_level:", accuracy_level, "rmm_raise_acc:", raise_acc
- !if (usepaw == 1) accuracy_level = 4
 
  ! Update rmm_diis_status. Reset number of calls if we've just moved to a new accuracy_level.
  rmm_diis_status(1) = accuracy_level
@@ -300,7 +298,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  end if
  ! FIXME: There's no real evidence that trial step is really needed
  end_with_trial_step = .False.
- !if (dtset%iscf < 0) max_niter = dtset%nline
+ if (dtset%iscf < 0) max_niter = dtset%nline + 1
 
  ! Define accuracy_ene for SCF.
  accuracy_ene = zero
@@ -330,10 +328,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  after_ortho = 0
  if (accuracy_level >= 2) after_ortho = 1
  if (accuracy_level >= 4) after_ortho = 2
- !after_ortho = 2
  if (usepaw == 1) after_ortho = 2 ! FIXME
+ !after_ortho = 2
 
- ! Use mixed precisions if requested by user but only at the beginning.
+ ! Use mixed precisions if requested by the user but only for low accuracy_level
  use_fft_mixprec = dtset%mixprec == 1 .and. accuracy_level < 2
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(1)
 
@@ -341,9 +339,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  optekin = 0; if (dtset%wfoptalg >= 10) optekin = 1
  optekin = 1 ! optekin = 0
 
- ! Will treat states in groups of bsize bands.
- bsize = 8  ! default value for paral_kgb = 0
- if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
+ ! Will treat states in groups of bsize bands even when paral_kgb = 0
+ bsize = 8; if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
 
  ! Build DIIS object.
@@ -397,8 +394,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Reduce number of niter iterations if block contains "empty" states.
    ! This should happen only if npband is small wrt nband and nband >> nbocc.
    ! TODO: Don't reduce niter if MD
-   !if dtset%
-   !if dtset%occopt == 2
    max_niter_block = max_niter
    if (dtset%iscf > 0) then
      if (all(occ(ib_start:ib_stop) < diis%tol_occupied)) max_niter_block = max(1 + max_niter / 2, 2)
@@ -509,7 +504,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
      ! Build |Psi_1> = |Phi_0> + lambda |K R_0>
      ! Reuse previous lambda.
-     !tag = "FIXLAM"
      !lambda_bk = limit_lambda(lambda_bk)
      call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
 
@@ -564,8 +558,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! NB: In principle, one can rotate Vnl(b,b') using the U^-1 from the Cholesky decomposition
    ! but the full Vnl matrix should be computed before the ortho step.
 
-   !if (prtvol > 0)
-   call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
+   if (prtvol > 0) call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
      ndat = (ige - igs + 1) / npwsp
@@ -607,13 +600,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
 
  else
-   !if (prtvol)
-   call wrtout(std_out, " Still far from convergence. Eigenvalues, residuals and NC enlx won't be recomputed.")
+   if (dtset%prtvol > 0) call wrtout(std_out, " Still far from convergence. Eigens, residuals and enlx won't be recomputed.")
  end if
 
  ! Revert mixprec to previous status before returning.
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
 
+ !if (dtset%prtvol > 0) then
  call yaml_write_dict('RMM-DIIS', "stats", diis%stats, std_out, with_iter_state=.False.)
 
  ! Final cleanup.
@@ -1419,7 +1412,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  integer,parameter :: type_calc0 = 0, tim_getghc = 0, use_subovl0 = 0
  integer :: ig, ig0, ib, ierr, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, paral_kgb
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw
- integer :: me_g0, cplex, comm_bandspinorfft
+ integer :: me_g0, cplex, comm
  real(dp) :: cpu, wall, gflops
  real(dp),parameter :: rdummy = zero
 !arrays
@@ -1435,8 +1428,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k
  paral_kgb = mpi_enreg%paral_kgb; me_g0 = mpi_enreg%me_g0
- !comm = mpi_enreg%comm_spinorfft; if (mpi_enreg%paral_kgb == 1) comm = mpi_enreg%comm_bandspinorfft
- comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
+ comm = mpi_enreg%comm_spinorfft; if (mpi_enreg%paral_kgb == 1) comm = mpi_enreg%comm_bandspinorfft
  npwsp = npw * my_nspinor
 
  ! =======================================
@@ -1449,9 +1441,8 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
    cpopt = -1  ! <p_lmn|in> (and derivatives) are computed here (and not saved)
  end if
 
- ! Treat states in groups of bsize bands.
- bsize = 8  ! default value for paral_kgb = 0
- if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
+ ! Treat states in groups of bsize bands even when paral_kgb = 0
+ bsize = 8; if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
 
  cplex = 2; if (istwf_k == 2) cplex = 1
@@ -1514,7 +1505,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  end if
 
  ABI_FREE(h_ij)
- call xmpi_sum(subham, comm_bandspinorfft, ierr)
+ call xmpi_sum(subham, comm, ierr)
  !do it=1,nband*(nband+1); write(std_out,*)"subham:", it, subham(it); end do
 
  ! ========================

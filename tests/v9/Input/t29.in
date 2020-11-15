@@ -1,11 +1,9 @@
 # GS calculation with the CG + RMM-DIIS eigensolver and NC pseudos
-ndtset 2
+ndtset 3
 
-rmm_diis1 -1       # Two CG steps followed by RMM-DIIS.
-rmm_diis2 -3       # RMM-DIIS only
 #paral_kgb 1
-
 boxcutmin 1.5
+nspden   1
 
 # TODO: Likely bug is use_gemm_nonlop is used in multidataset mode.
 #use_gemm_nonlop1 1 # test nonlop with BLAS, requires useylm 1
@@ -13,11 +11,29 @@ boxcutmin 1.5
 #useylm2 0
 #istwfk *1
 
+# Dataset 1
+rmm_diis1 -1       # Two CG steps followed by RMM-DIIS.
 nspinor1 1
+
+# Dataset 2
+# spinor wavefunctions, non-magnetic
+rmm_diis2 -3       # RMM-DIIS only
 nspinor2 2
-nspden2  1
 getwfk2 -1
 
+# Dataset 3
+# NSCF run with spinor wavefunctions, non-magnetic
+nspinor3 2         # RMM-DIIS only
+getwfk3 -1
+getden3 -1
+iscf3 -2
+rmm_diis3 -3
+tolwfr3 1e-20
+nbdbuf3 0
+
+##################
+# COMMON VARIABLES
+##################
 ecut   20    # This to overconverge results and make the test more stable.
 diemac 12.0
 

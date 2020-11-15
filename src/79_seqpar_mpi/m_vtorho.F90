@@ -552,9 +552,13 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 
  if(dtset%wfoptalg==2)nnsclo_now=40  ! UNDER DEVELOPMENT
 
- write(msg, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now = ',nnsclo_now,&
-   ', note that nnsclo, dbl_nnsclo, istep= ',dtset%nnsclo,dbl_nnsclo,istep
- call wrtout(std_out,msg)
+ if (dtset%prtvol > 0) then
+   write(msg, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now = ',nnsclo_now,&
+     ', note that nnsclo, dbl_nnsclo, istep= ',dtset%nnsclo,dbl_nnsclo,istep
+   call wrtout(std_out,msg)
+ else
+   if (nnsclo_now > 1) call wrtout(std_out, sjoin(" Max number of non-self-consistent loops:", itoa(nnsclo_now)))
+ end if
 
 !==== Initialize most of the Hamiltonian ====
 !Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -1562,7 +1566,6 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        call timab(989,2,tsec)
 
      end if ! nproc_kpt>1
-
 
 !    Compute the highest occupied eigenenergy
      if(iscf/=-1 .and. iscf/=-2)then
