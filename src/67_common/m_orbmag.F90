@@ -170,6 +170,7 @@ module m_orbmag
   ! Bound methods:
   public :: destroy_orbmag
   public :: initorbmag
+  public :: kinpw_energy
   public :: ndpw_energy
   public :: ndpaw_energy
   public :: orbmag
@@ -4358,6 +4359,131 @@ subroutine ndpw_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_occ,nfftf,npwarr
 
 end subroutine ndpw_energy
 !!***
+
+!!****f* ABINIT/kinpw_energy
+!! NAME
+!! kinpw_energy
+!!
+!! FUNCTION
+!! Compute the planewave energy due to the electron kinetic energy
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kinpw_energy(cg,dtset,kenergy,mcg,mpi_enreg,nband_occ,npwarr,rprimd)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: mcg,nband_occ
+ real(dp),intent(out) :: kenergy
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type), intent(inout) :: mpi_enreg
+ !arrays
+ integer,intent(in) :: npwarr(dtset%nkpt)
+ real(dp),intent(in) :: cg(2,mcg),rprimd(3,3)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: exchn2n3d
+ integer :: icg,ierr,ikg1,ikpt,istwf_k,me,my_nspinor,nn,nproc,npw_k,npw_k_,spaceComm
+ real(dp) :: ecut_eff,ucvol
+ !arrays
+ integer,allocatable :: kg_k(:,:)
+ real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),rmet(3,3)
+ real(dp),allocatable :: cwavef(:,:),gkc(:,:),kinpw(:)
+ !-----------------------------------------------------------------------
+
+ !Init MPI
+ spaceComm=mpi_enreg%comm_cell
+ nproc=xmpi_comm_size(spaceComm)
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ me = mpi_enreg%me_kpt
+
+ ecut_eff = dtset%ecut*(dtset%dilatmx)**2
+ exchn2n3d = 0 
+ istwf_k = 1
+ ikg1 = 0
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ ABI_ALLOCATE(kg_k,(3,dtset%mpw))
+ kenergy = zero
+ icg = 0
+ do ikpt = 1, dtset%nkpt
+
+    ! if the current kpt is not on the current processor, cycle
+    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,dtset%nband(ikpt),-1,me)) cycle
+
+    kpoint(:)=dtset%kptns(:,ikpt)
+    npw_k = npwarr(ikpt)
+    ABI_ALLOCATE(cwavef,(2,npw_k))
+    ABI_ALLOCATE(gkc,(2,npw_k))
+    ABI_ALLOCATE(kinpw,(npw_k))
+
+    ! Build basis sphere of plane waves for the k-point
+    kg_k(:,:) = 0
+    call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpoint,1,mpi_enreg,dtset%mpw,npw_k_)
+    if (npw_k .NE. npw_k_) then
+       write(std_out,'(a)')'JWZ debug nucdip_energy npw_k inconsistency'
+    end if
+  
+    ! Compute kinetic energy at kpt
+    kinpw(:) = zero
+    call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+
+    ! assume all occupied bands contain two electrons
+    ! could be generalized for metals
+    do nn = 1, nband_occ
+
+      cwavef(1:2,1:npw_k) = cg(1:2,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
+      gkc(1,1:npw_k)=kinpw(1:npw_k)*cwavef(1,1:npw_k)
+      gkc(2,1:npw_k)=kinpw(1:npw_k)*cwavef(2,1:npw_k)
+
+      kenergy = kenergy + (DOT_PRODUCT(cwavef(1,1:npw_k),gkc(1,1:npw_k)) &
+            &           + DOT_PRODUCT(cwavef(2,1:npw_k),gkc(2,1:npw_k)))*dtset%wtk(ikpt)*two
+    end do
+
+    icg = icg + npw_k*dtset%nband(ikpt)
+
+    ABI_DEALLOCATE(cwavef)
+    ABI_DEALLOCATE(gkc)
+    ABI_DEALLOCATE(kinpw)
+
+ end do ! end loop over kpts on current processor
+
+ !  MPI communicate stuff between everyone
+ if (nproc>1) then
+   call xmpi_sum(kenergy,spaceComm,ierr)
+ end if
+! energy = energy/(ucvol*dtset%nkpt)
+! energy = energy/dtset%nkpt
+
+ ABI_DEALLOCATE(kg_k)
+
+end subroutine kinpw_energy
+!!***
+
 
 
 !!****f* ABINIT/make_eeig

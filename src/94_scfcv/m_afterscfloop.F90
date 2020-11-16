@@ -378,7 +378,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  logical :: test_gylmgr,test_nfgd,test_rfgd
  logical :: wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero
- real(dp) :: ndpwenergy,ucvol
+ real(dp) :: kenergy,ndpwenergy,ucvol
  complex(dpc) :: ndpawenergy
  character(len=500) :: message
  type(paw_dmft_type) :: paw_dmft
@@ -549,6 +549,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !----------------------------------------------------------------------
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
+
+ ! following was added simply to my general coding of energy terms
+ ! works correctly
+ !call kinpw_energy(cg,dtset,kenergy,mcg,mpi_enreg,dtset%mband,npwarr,rprimd)
+ !write(std_out,'(a,es16.8)')'JWZ Debug kinpw_energy returned ',kenergy
+
  if(with_vectornd .EQ. 1) then
    call ndpw_energy(cg,dtset,ndpwenergy,gmet,mcg,mpi_enreg,dtset%mband,nfftf,npwarr,pawfgr,&
     & ucvol,vectornd,with_vectornd)
