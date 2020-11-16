@@ -195,7 +195,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy !, nspinor
  logical :: end_with_trial_step, first_call, use_fft_mixprec
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene, cpu, wall, gflops, max_res_pocc, tol_occupied
+ real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, cpu, wall, gflops, cpu_all, wall_all, gflops_all
  !character(len=500) :: msg
  type(rmm_diis_t) :: diis
 !arrays
@@ -213,6 +213,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  me_g0 = mpi_enreg%me_g0; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  npwsp = npw * my_nspinor; mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
  prtvol = dtset%prtvol !; prtvol = -level
+
+ if (timeit) then
+   call cwtime(cpu_all, wall_all, gflops_all, "start")
+   call cwtime(cpu, wall, gflops, "start")
+ end if
 
  ! =================
  ! Prepare DIIS loop
@@ -365,6 +370,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc, evec)
  ABI_FREE(evec)
  !end if
+ if (timeit) call cwtime_report(" subspace_rotation ", cpu, wall, gflops)
 
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
@@ -407,7 +413,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input phi_bk is already S-normalized.
    call diis%push_iter(0, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), phi_bk, residv_bk, gsc_bk, "SDIAG")
-   if (timeit) call cwtime_report(" first getghc_eigresid ", cpu, wall, gflops)
+   if (timeit) call cwtime_report(" push_iter ", cpu, wall, gflops)
 
    ! Line minimization with preconditioned steepest descent:
    !
@@ -423,7 +429,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Precondition |R_0>, output in kres_bk = |K R_0>
    call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
    call cg_precon_many(istwf_k, npw, my_nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
-   if (timeit) call cwtime_report(" first cg_precon ", cpu, wall, gflops)
 
    ! Compute H |K R_0>
    if (paral_kgb == 0) then
@@ -547,7 +552,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !ortalgo = mpi_enreg%paral_kgb
  ortalgo = 3
  call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bandspinorfft)
- !call fxphas(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
+ !if (usepaw == 1) call fxphas(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
@@ -597,7 +602,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      case default
        MSG_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
      end select
-   end do
+   end do ! iblock
    if (timeit) call cwtime_report(" recompute_eigens ", cpu, wall, gflops)
 
  else
@@ -609,6 +614,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  !if (dtset%prtvol > 0) then
  call yaml_write_dict('RMM-DIIS', "stats", diis%stats, std_out, with_iter_state=.False.)
+ if (timeit) call cwtime_report(" rmm_diis total: ", cpu_all, wall_all, gflops_all)
 
  ! Final cleanup.
  ABI_FREE(lambda_bk)
@@ -873,7 +879,7 @@ subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enr
  integer,parameter :: type_calc0 = 0, option1 = 1, option2 = 2, tim_getghc = 0
  integer :: istwf_k, usepaw, cpopt, sij_opt, npwsp, me_g0, comm
  real(dp),parameter :: rdummy = zero
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
  logical :: normalize_
 !arrays
  real(dp) :: dots(2, ndat)
@@ -881,7 +887,7 @@ subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enr
 
 ! *************************************************************************
 
- if (timeit) call cwtime(cpu, wall, gflops, "start")
+ !if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  normalize_ = .True.; if (present(normalize)) normalize_ = normalize
  npwsp = npw * my_nspinor
@@ -921,7 +927,7 @@ subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enr
    enlx = dots(1,:)
  end if
 
- if (timeit) call cwtime_report(" getghc_eigresid", cpu, wall, gflops)
+ !if (timeit) call cwtime_report(" getghc_eigresid", cpu, wall, gflops)
 
 end subroutine getghc_eigresid
 !!***
@@ -1034,7 +1040,7 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
 !local variables
  integer,parameter :: master = 0
  integer :: cplex, ierr, nprocs, my_rank, idat !, ii !, ibk, iek
- real(dp) :: noise, cpu, wall, gflops
+ real(dp) :: noise !, cpu, wall, gflops
  !integer :: failed(ndat)
  real(dp),allocatable :: diis_eig(:), wmat1(:,:,:), wmat2(:,:,:), wvec(:,:,:), alphas(:,:)
  character(len=500) :: msg
@@ -1045,7 +1051,7 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
  !failed = 0
  ABI_UNUSED(lambda_bk)
 
- if (timeit) call cwtime(cpu, wall, gflops, "start")
+ !if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  if (diis%use_smat == 1) then
    ! try_to_solve_eigproblem = .False. Numerically unstable.
@@ -1155,7 +1161,7 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
 
  ABI_FREE(wvec)
 
- if (timeit) call cwtime_report(" update_block", cpu, wall, gflops)
+ !if (timeit) call cwtime_report(" update_block", cpu, wall, gflops)
 
 end subroutine rmm_diis_update_block
 !!***
@@ -1185,13 +1191,13 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
 
 !local variables
  integer :: ii, ierr, idat, nprocs, option
- real(dp) :: dotr, doti, cpu, wall, gflops
+ real(dp) :: dotr, doti !, cpu, wall, gflops
 ! *************************************************************************
 
  nprocs = xmpi_comm_size(comm)
  option = 2; if (diis%cplex == 1) option = 1
 
- if (timeit) call cwtime(cpu, wall, gflops, "start")
+ !if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  do idat=1,ndat
 
@@ -1243,7 +1249,7 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
  !  call xmpi_sum(diis%smat(:,0:iter,iter, 1:ndat), comm, ierr)
  !endif
 
- if (timeit) call cwtime_report(" eval_mats", cpu, wall, gflops)
+ !if (timeit) call cwtime_report(" eval_mats", cpu, wall, gflops)
 
 end subroutine rmm_diis_eval_mats
 !!***
@@ -1278,14 +1284,14 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, 
 !local variables
  integer,parameter :: master = 0
  integer :: nprocs, my_rank, idat, iter, ierr, ilast, take_iter(ndat)
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  take_iter = -1
  ilast = diis%last_iter
 
- if (timeit) call cwtime(cpu, wall, gflops, "start")
+ !if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  if (my_rank == master) then
    do idat=1,ndat
@@ -1312,7 +1318,7 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, 
    end do
  end if
 
- if (timeit) call cwtime_report(" diis_rollback", cpu, wall, gflops)
+ !if (timeit) call cwtime_report(" diis_rollback", cpu, wall, gflops)
 
 end subroutine rmm_diis_rollback
 !!***
@@ -1511,7 +1517,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  ! ========================
  ! Subspace diagonalization
- ! ========================
+ ! =======================
  ABI_MALLOC(evec, (2, nband, nband))
  mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
  call subdiago(cg, eig, evec, gsc, 0, 0, istwf_k, mcg, mgsc, nband, npw, my_nspinor, paral_kgb, &

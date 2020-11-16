@@ -354,18 +354,21 @@ subroutine cg_to_reim(npw, ndat, cg, factor, reim)
  integer,intent(in) :: npw,ndat
  real(dp),intent(in) :: factor
 !arrays
- real(dp),intent(in) :: cg(2*npw*ndat)
- real(dp),intent(out) :: reim(npw*ndat*2)
+ real(dp),intent(in) :: cg(2*npw,ndat)
+ real(dp),intent(out) :: reim(npw*2,ndat)
+
+!Local variables-------------------------------
+ integer :: idat
 
 ! *************************************************************************
 
  ! Pack real and imaginary part of the wavefunctions.
  ! and multiply by scale factor if factor /= one.
- call dcopy(npw*ndat, cg(1), 2, reim(1), 1)
- if (factor /= one) call dscal(npw*ndat, factor, reim(1), 1)
-
- call dcopy(npw*ndat, cg(2), 2, reim(npw*ndat+1), 1)
- if (factor /= one) call dscal(npw*ndat, factor, reim(npw*ndat+1), 1)
+ do idat=1,ndat
+   call dcopy(npw, cg(1, idat), 2, reim(1, idat), 1)
+   call dcopy(npw, cg(2, idat), 2, reim(npw+1, idat), 1)
+   if (factor /= one) call dscal(2*npw, factor, reim(1, idat), 1)
+ end do
 
 end subroutine cg_to_reim
 !!***
@@ -386,24 +389,27 @@ end subroutine cg_to_reim
 !!
 !! SOURCE
 
-subroutine cg_from_reim(npw,ndat,reim,factor,cg)
+subroutine cg_from_reim(npw, ndat, reim, factor, cg)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,ndat
  real(dp),intent(in) :: factor
 !arrays
- real(dp),intent(in) :: reim(npw*ndat*2)
- real(dp),intent(out) :: cg(2*npw*ndat)
+ real(dp),intent(in) :: reim(npw*2, ndat)
+ real(dp),intent(out) :: cg(2*npw, ndat)
+
+!Local variables-------------------------------
+ integer :: idat
 
 ! *************************************************************************
 
  ! UnPack real and imaginary part and multiply by scale factor if /= one.
- ! Could use blocking but oh well
- call dcopy(npw*ndat, reim(1), 1, cg(1), 2)
- call dcopy(npw*ndat, reim(npw*ndat+1), 1, cg(2), 2)
-
- if (factor /= one) call dscal(2*npw*ndat,factor, cg(1), 1)
+ do idat=1,ndat
+   call dcopy(npw, reim(1, idat), 1, cg(1, idat), 2)
+   call dcopy(npw, reim(npw+1, idat), 1, cg(2, idat), 2)
+   if (factor /= one) call dscal(2*npw, factor, cg(1, idat), 1)
+ end do
 
 end subroutine cg_from_reim
 !!***
@@ -968,6 +974,7 @@ subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, alpha
  my_beta  = cg_czero; if (PRESENT(beta))  my_beta  = beta
 
  call ZGEMM(transa, transb, mm, nn, kk, my_alpha, cg_a, lda, cg_b, ldb, my_beta, cg_c, ldc)
+ !call ZGEMM3M(transa, transb, mm, nn, kk, my_alpha, cg_a, lda, cg_b, ldb, my_beta, cg_c, ldc)
 
 end subroutine cg_zgemm
 !!***
@@ -2426,6 +2433,7 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
 !Local variables ------------------------------
 !scalars
  integer :: ierr,b1,b2
+!#define DEBUG_MODE
 #ifdef DEBUG_MODE
  integer :: ptr
  character(len=500) :: msg
@@ -2433,13 +2441,13 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
  logical :: my_usegemm
 !arrays
  real(dp) :: rcg0(nband)
- real(dp),allocatable :: rovlp(:,:)
- complex(dpc),allocatable :: cf_ovlp(:,:)
+ real(dp),allocatable :: r_ovlp(:,:), reim(:)
+ complex(dpc),allocatable :: c_ovlp(:,:)
 
 ! *************************************************************************
 
 #ifdef DEBUG_MODE
- if (istwfk==2) then
+ if (istwfk == 2) then
    ierr = 0
    do b1=1,nband
      ptr = 2 + 2*(b1-1)*npwsp
@@ -2454,53 +2462,96 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
  end if
 #endif
 
- my_usegemm=.FALSE.; if (PRESENT(use_gemm)) my_usegemm = use_gemm
+#if 0
+! TODO: Activate this.
+! Version optimized for real wavefunctions.
+if (istwfk == 2) then
+ ABI_CALLOC(r_ovlp, (nband, nband))
 
- ABI_MALLOC(cf_ovlp,(nband, nband))
+ !ABI_MALLOC(reim, (npwsp*nband*2))
+ !call cg_to_reim(npwsp, nband, cgblock, one, reim)
+ !if (istwfk == 2 .and. me_g0 == 1) reim(npwsp+1::2*npwsp) = zero
+ !call DGEMM("T", "N", nband, nband, 2*npwsp, one, reim, 2*npwsp, reim, 2*npwsp, zero, r_ovlp, nband)
+
+ call DGEMM("T", "N", nband, nband, 2*npwsp, one, cgblock, 2*npwsp, cgblock, 2*npwsp, zero, r_ovlp, nband)
+
+ r_ovlp = two * r_ovlp
+ if (istwfk == 2 .and. me_g0 == 1) then
+   ! Extract the real part at G=0 and subtract its contribution to the overlap.
+   call dcopy(nband, cgblock, 2*npwsp, rcg0, 1)
+   do b2=1,nband
+     do b1=1,b2
+       r_ovlp(b1, b2) = r_ovlp(b1, b2) - rcg0(b1) * rcg0(b2)
+     end do
+   end do
+ end if
+
+ ! Sum the overlap if PW are distributed.
+ if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
+ !write(std_out, *)"rovlp:", r_ovlp
+
+ ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
+ call DPOTRF('U', nband, r_ovlp, nband, ierr)
+ ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info: ', itoa(ierr)))
+
+ ! 3) Solve X U = cgblock. On exit cgblock is orthonormalized.
+ call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, cgblock, 2*npwsp)
+ !call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, reim, 2*npwsp)
+ !call cg_from_reim(npwsp, nband, reim, one, cgblock)
+ !ABI_FREE(reim)
+
+ ABI_FREE(r_ovlp)
+ return
+end if
+#endif
+
+ my_usegemm = .FALSE.; if (PRESENT(use_gemm)) my_usegemm = use_gemm
+ ABI_MALLOC(c_ovlp, (nband, nband))
 
  ! 1) Calculate O_ij = <phi_i|phi_j>
  if (my_usegemm) then
-   call ABI_ZGEMM("Conjugate","Normal",nband,nband,npwsp,cone,cgblock,npwsp,cgblock,npwsp,czero,cf_ovlp,nband)
+   call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cgblock, npwsp, cgblock, npwsp, czero, c_ovlp, nband)
  else
-   call ZHERK("U","C",nband,npwsp,one,cgblock,npwsp,zero,cf_ovlp,nband)
+   call ZHERK("U", "C", nband, npwsp, one, cgblock, npwsp, zero, c_ovlp, nband)
  end if
 
  if (istwfk == 1) then
    ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) call xmpi_sum(cf_ovlp,comm_pw,ierr)
+   if (comm_pw /= xmpi_comm_self) call xmpi_sum(c_ovlp, comm_pw, ierr)
 
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
-   call ZPOTRF('U', nband, cf_ovlp, nband, ierr)
+   call ZPOTRF('U', nband, c_ovlp, nband, ierr)
    ABI_CHECK(ierr == 0, sjoin('ZPOTRF returned info: ', itoa(ierr)))
 
  else
-   ! overlap is real. Note that nspinor is always 1 in this case.
-   ABI_MALLOC(rovlp,(nband,nband))
-   rovlp = two * REAL(cf_ovlp)
+   ! Overlap matrix is real. Note that nspinor is always 1 in this case.
+   ABI_MALLOC(r_ovlp, (nband, nband))
+   r_ovlp = two * REAL(c_ovlp)
 
-   if (istwfk==2 .and. me_g0==1) then
+   if (istwfk == 2 .and. me_g0 == 1) then
      ! Extract the real part at G=0 and subtract its contribution to the overlap.
-     call dcopy(nband,cgblock, 2*npwsp, rcg0, 1)
+     call dcopy(nband, cgblock, 2*npwsp, rcg0, 1)
      do b2=1,nband
        do b1=1,b2
-         rovlp(b1,b2) = rovlp(b1,b2) - rcg0(b1)*rcg0(b2)
+         r_ovlp(b1, b2) = r_ovlp(b1, b2) - rcg0(b1) * rcg0(b2)
        end do
      end do
    end if
 
    ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) call xmpi_sum(rovlp,comm_pw,ierr)
+   if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
+   !write(std_out, *)" good rovlp:", r_ovlp
 
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
-   call DPOTRF('U', nband, rovlp, nband, ierr)
+   call DPOTRF('U', nband, r_ovlp, nband, ierr)
    ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info: ', itoa(ierr)))
 
-   cf_ovlp = DCMPLX(rovlp)
-   ABI_FREE(rovlp)
+   c_ovlp = DCMPLX(r_ovlp)
+   ABI_FREE(r_ovlp)
  end if
 
  ! 3) Solve X U = cgblock. On exit cgblock is orthonormalized.
- call ZTRSM('Right','Upper','Normal','Normal',npwsp,nband,cone,cf_ovlp,nband,cgblock,npwsp)
+ call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cgblock, npwsp)
 
 #ifdef DEBUG_MODE
  if (istwfk==2) then
@@ -2516,7 +2567,7 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
  end if
 #endif
 
- ABI_FREE(cf_ovlp)
+ ABI_FREE(c_ovlp)
 
 end subroutine cgnc_cholesky
 !!***
@@ -2563,33 +2614,29 @@ subroutine cgpaw_cholesky(npwsp, nband, cgblock, gsc, istwfk, me_g0, comm_pw)
  integer :: ierr,b1,b2
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: rovlp(:,:)
+ real(dp),allocatable :: r_ovlp(:,:)
  real(dp) :: rcg0(nband),rg0sc(nband)
- complex(dpc),allocatable :: cf_ovlp(:,:)
+ complex(dpc),allocatable :: c_ovlp(:,:)
 
 ! *************************************************************************
 
  ! 1) Calculate O_ij =  <phi_i|S|phi_j>
- ABI_MALLOC(cf_ovlp,(nband, nband))
+ ABI_MALLOC(c_ovlp, (nband, nband))
 
- call ABI_ZGEMM("C","N",nband,nband,npwsp,cone,cgblock,npwsp,gsc,npwsp,czero,cf_ovlp,nband)
+ call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cgblock, npwsp, gsc, npwsp, czero, c_ovlp, nband)
 
- if (istwfk==1) then
+ if (istwfk == 1) then
    ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) call xmpi_sum(cf_ovlp,comm_pw,ierr)
+   if (comm_pw /= xmpi_comm_self) call xmpi_sum(c_ovlp, comm_pw, ierr)
    !
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
-   call ZPOTRF('U',nband,cf_ovlp,nband,ierr)
-
-   if (ierr/=0)  then
-     write(msg,'(a,i0)')' ZPOTRF returned info= ',ierr
-     MSG_ERROR(msg)
-   end if
+   call ZPOTRF('U', nband, c_ovlp, nband, ierr)
+   ABI_CHECK(ierr == 0, sjoin('ZPOTRF returned info:', itoa(ierr)))
 
  else
    ! overlap is real. Note that nspinor is always 1 in this case.
-   ABI_MALLOC(rovlp,(nband,nband))
-   rovlp = two * REAL(cf_ovlp)
+   ABI_MALLOC(r_ovlp, (nband, nband))
+   r_ovlp = two * REAL(c_ovlp)
 
    if (istwfk==2 .and. me_g0==1) then
      ! Extract the real part at G=0 and subtract its contribution to the overlap.
@@ -2597,33 +2644,29 @@ subroutine cgpaw_cholesky(npwsp, nband, cgblock, gsc, istwfk, me_g0, comm_pw)
      call dcopy(nband, gsc, 2*npwsp, rg0sc, 1)
      do b2=1,nband
        do b1=1,b2
-        rovlp(b1,b2) = rovlp(b1,b2) - rcg0(b1)*rg0sc(b2)
+        r_ovlp(b1,b2) = r_ovlp(b1,b2) - rcg0(b1)*rg0sc(b2)
        end do
      end do
    end if
 
    ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) call xmpi_sum(rovlp,comm_pw,ierr)
-  !
+   if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
+
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
-   call DPOTRF('U',nband,rovlp,nband,ierr)
+   call DPOTRF('U', nband, r_ovlp, nband, ierr)
+   ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info:', itoa(ierr)))
 
-   if (ierr/=0)  then
-     write(msg,'(a,i0)')' DPOTRF returned info= ',ierr
-     MSG_ERROR(msg)
-   end if
-
-   cf_ovlp = DCMPLX(rovlp)
-   ABI_FREE(rovlp)
+   c_ovlp = DCMPLX(r_ovlp)
+   ABI_FREE(r_ovlp)
  end if
 
  ! 3) Solve X U = cgblock.
- call ZTRSM('Right','Upper','Normal','Normal',npwsp,nband,cone,cf_ovlp,nband,cgblock,npwsp)
+ call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cgblock, npwsp)
 
  ! 4) Solve Y U = gsc. On exit <cgblock|gsc> = 1
- call ZTRSM('Right','Upper','Normal','Normal',npwsp,nband,cone,cf_ovlp,nband,gsc,npwsp)
+ call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, gsc, npwsp)
 
- ABI_FREE(cf_ovlp)
+ ABI_FREE(c_ovlp)
 
 end subroutine cgpaw_cholesky
 !!***
@@ -4657,13 +4700,13 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
 
 #ifdef DEBUG_MODE
  !Make sure imaginary part at G=0 vanishes
- if (istwf_k==2) then
+ if (istwf_k == 2) then
    do ivec=1,nvec
      if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>zero)then
-       ! if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>tol16)then
+     ! if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>tol16)then
        write(msg,'(2a,3i0,2es16.6,a,a)')&
-       ' For istwf_k=2,observed the following element of vecnm :',ch10,&
-       nelem,ivec,icg,vecnm(1:2,1+nelem*(ivec-1)+icg),ch10,'  with a non-negligible imaginary part.'
+       ' For istwf_k = 2, observed the following element of vecnm :',ch10,&
+       nelem,ivec,icg,vecnm(1:2,1+nelem*(ivec-1)+icg), ch10,' with a non-negligible imaginary part.'
        MSG_BUG(msg)
      end if
    end do
@@ -4689,7 +4732,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
    cg_idx = cgindex(1)
    if (useoverlap == 1) then
      gsc_idx = gscindex(1)
-     call cgpaw_cholesky(nelem, nvec, vecnm(1,cg_idx), ovl_vecnm(1,gsc_idx),i stwf_k, me_g0, comm)
+     call cgpaw_cholesky(nelem, nvec, vecnm(1,cg_idx), ovl_vecnm(1,gsc_idx), istwf_k, me_g0, comm)
    else
      call cgnc_cholesky(nelem, nvec, vecnm(1,cg_idx), istwf_k, me_g0, comm, use_gemm=.FALSE.)
    end if
@@ -5245,9 +5288,6 @@ subroutine cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
 
 end subroutine cg_hrotate_and_get_diag
 !!***
-
-
-
 
 !!****f* m_cgtools/cg_get_eigens
 !! NAME
