@@ -50,6 +50,7 @@ MODULE m_cgtools
  use m_fstrings,   only : toupper
  use m_time,       only : timab
  use m_numeric_tools,   only : hermit
+ use m_pawcprj,    only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
 
  implicit none
 
@@ -4657,7 +4658,7 @@ end subroutine subdiago
 !!
 !! SOURCE
 
-subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,vecnm,me_g0,comm)
+subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,vecnm,me_g0,comm,cprj)
 
  use m_abi_linalg
 
@@ -4666,11 +4667,13 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,
  integer,intent(in) :: icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,useoverlap,me_g0,comm
 !arrays
  real(dp),intent(inout) :: ovl_mat(nvec*(nvec+1)*useoverlap),vecnm(2,mcg)
+ type(pawcprj_type),intent(inout),optional,target :: cprj(:,:)
 
 !Local variables-------------------------------
 !scalars
+ logical :: do_cprj
  integer :: ierr,ii,ii0,ii1,ii2,ivec,ivec2,ivec3,iv1,iv2,iv3,iv1l,iv2l,iv3l
- integer :: rvectsiz,vectsize,cg_idx!,gsc_idx
+ integer :: ncprj,rvectsiz,vectsize,cg_idx!,gsc_idx
  real(dp) :: doti,dotr,summ,xnorm
  character(len=500) :: msg
 !arrays
@@ -4702,6 +4705,15 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,
 #endif
  if (useoverlap==1.and.(ortalgo/=0)) then
    MSG_ERROR('useoverlap is implemented only for ortalgo==0')
+ end if
+
+ do_cprj=.false.
+ if (present(cprj)) then
+   do_cprj=.true.
+   ncprj = size(cprj,2)
+   if (ncprj/=nvec) then
+     MSG_ERROR('bad size for cprj')
+   end if
  end if
 
 !Nothing to do if ortalgo=-1
@@ -4898,6 +4910,8 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,
        vecnm(1,ii)=vecnm(1,ii)*summ
        vecnm(2,ii)=vecnm(2,ii)*summ
      end do
+     if (do_cprj) call pawcprj_axpby(zero,summ,cprj(:,ivec:ivec),cprj(:,ivec:ivec))
+
 !     if (useoverlap==1) then
 !!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,ovl_vecnm)
 !       do ii=1+nelem*(ivec-1)+igsc,nelem*ivec+igsc
@@ -4980,6 +4994,7 @@ subroutine pw_orthon(icg,igsc,istwf_k,mcg,nelem,nvec,ortalgo,ovl_mat,useoverlap,
                vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
                vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
              end do
+             if (do_cprj) call pawcprj_zaxpby((/-dotr,-doti/),(/one,zero/),cprj(:,ivec:ivec),cprj(:,ivec2:ivec2))
              !LTEST
              !if (ivec<=2) then
              !  write(std_out,'(a,es21.10e3)') '(pw_ortho) vecnm (re)',sum(abs(vecnm(1,ii2+1:ii2+nelem)))

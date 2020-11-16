@@ -37,7 +37,7 @@ module m_cgprj
  use m_mkffnl,   only : mkffnl
  use m_mpinfo,   only : proc_distrb_cycle
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, &
-                        pawcprj_set_zero, pawcprj_mpi_sum
+                        pawcprj_set_zero, pawcprj_mpi_sum, pawcprj_copy, pawcprj_lincom
  use m_opernla_ylm, only : opernla_ylm
  use m_opernla_ylm_blas, only : opernla_ylm_blas
  use m_time,             only : timab
@@ -1002,7 +1002,7 @@ contains
  integer :: cplex,ia,ia1,ia2,ia3,ia4,iatm,iby,ispinor,itypat
  integer :: mincat,nby_,nincat,nlmn
 !arrays
- real(dp) :: tsec(2)
+ real(dp) :: tsec(2),beta_re,beta_im
  real(dp), allocatable :: ax(:,:),by(:,:)
 
 ! *********************************************************************
@@ -1015,15 +1015,15 @@ contains
  mincat=min(NLO_MINCAT,maxval(nattyp))
  cplex=2;if (istwf_k>1) cplex=1
  alpha_zero = (alpha(1)**2 + alpha(2)**2) < tol12*tol12
- beta_zero  = ( beta(1)**2 +  beta(2)**2) < tol12*tol12
  alpha_im_zero = (abs(alpha(2)) < tol12) .or. cplex==1
- beta_im_zero  = (abs(beta(2))  < tol12) .or. cplex==1
 
  nby_ = nby
- ! If beta==0 : no loop on by
- if (beta_zero) nby_ = 1
 
  do iby=1,nby_
+   beta_re       = beta(2*iby-1)
+   beta_im       = beta(2*iby  )
+   beta_zero     = ( beta_re**2 +  beta_im**2) < tol12*tol12
+   beta_im_zero  = (abs(beta_im)  < tol12) .or. cplex==1
 !  Loop over atom types
    ia1=1;iatm=0
    do itypat=1,ntypat
@@ -1051,10 +1051,10 @@ contains
            end if
            ! If beta/=0 : compute 'by' (for data 'iby')
            if (.not.beta_zero) then
-             by(1:cplex,1:nlmn) =  beta(2*iby-1)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1:cplex,1:nlmn)
+             by(1:cplex,1:nlmn) =  beta_re*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1:cplex,1:nlmn)
              if (.not.beta_im_zero) then
-               by(1,1:nlmn) = by(1,1:nlmn) - beta(2*iby)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(2,1:nlmn)
-               by(2,1:nlmn) = by(2,1:nlmn) + beta(2*iby)*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1,1:nlmn)
+               by(1,1:nlmn) = by(1,1:nlmn) - beta_im*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(2,1:nlmn)
+               by(2,1:nlmn) = by(2,1:nlmn) + beta_im*cprj_y(iatm+ia,ispinor+(iby-1)*nspinor)%cp(1,1:nlmn)
              end if
            end if
            ! if first iteration on nby, initialize res with ax (can be zero)
@@ -1102,8 +1102,8 @@ contains
 !!!
 !!! SOURCE
 
- subroutine cprj_rotate(cprj_in,cprj_out,evec,&
-&                   indlmn,istwf_k,lmnmax,mpi_enreg,&
+ subroutine cprj_rotate(cprj_in,evec,&
+&                   dimcprj,indlmn,istwf_k,lmnmax,mpi_enreg,&
 &                   natom,nattyp,nband,nspinor,ntypat)
 
 !Arguments -------------------------------
@@ -1112,17 +1112,17 @@ contains
  integer,intent(in) :: natom,nband,nspinor,ntypat
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
+ integer,intent(in) :: indlmn(7,lmnmax,ntypat),nattyp(ntypat),dimcprj(:)
  real(dp) :: evec(:,:)
- type(pawcprj_type),intent(inout),target :: cprj_in(natom,nspinor*nband)
- type(pawcprj_type),intent(inout),target :: cprj_out(natom,nspinor*nband)
+ type(pawcprj_type),intent(inout) :: cprj_in(natom,nspinor*nband)
 
 !Local variables-------------------------------
 !scalars
  integer :: iband,cplex
 !arrays
- real(dp) :: tsec(2),z_tmp(2),z_tmp2(2)
+ real(dp) :: tsec(2),z_tmp(2,nband)!,z_tmp2(2)
  type(pawcprj_type),pointer :: cprj_iband(:,:)!,cprj_jband(:,:)
+ type(pawcprj_type),allocatable,target :: cprj_tmp(:,:)
 
 
 ! *********************************************************************
@@ -1134,18 +1134,26 @@ contains
 !Some other dims
  cplex=2;if (istwf_k>1) cplex=1
 
+ ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,nband))
+ call pawcprj_alloc(cprj_tmp,0,dimcprj)
+! call pawcprj_set_zero(cprj_tmp)
+
  do iband=1,nband
-   cprj_iband => cprj_out(:,iband:iband)
-   z_tmp  = (/zero,zero/)
-   z_tmp2 = (/zero,zero/)
+   cprj_iband => cprj_tmp(:,iband:iband)
+   z_tmp  = reshape(evec(:,iband),(/2,nband/))
+   call pawcprj_lincom(z_tmp,cprj_in,cprj_iband,nband)
+!   z_tmp2 = (/zero,zero/)
 !   call cprj_axpby(cprj_iband,cprj_iband,cprj_iband,z_tmp,z_tmp2,&
 !&                   indlmn,istwf_k,lmnmax,mpi_enreg,&
 !&                   natom,nattyp,1,nspinor,ntypat)
-   call cprj_axpby(cprj_iband,cprj_iband,cprj_in,z_tmp,evec(:,iband),&
-&                     indlmn,istwf_k,lmnmax,mpi_enreg,&
-&                     natom,nattyp,nband,nspinor,ntypat)
+!   call cprj_axpby(cprj_iband,cprj_iband,cprj_in,z_tmp,evec(:,iband),&
+!&                     indlmn,istwf_k,lmnmax,mpi_enreg,&
+!&                     natom,nattyp,nband,nspinor,ntypat)
  end do
 
+ call pawcprj_copy(cprj_tmp,cprj_in)
+ call pawcprj_free(cprj_tmp)
+ ABI_DATATYPE_DEALLOCATE(cprj_tmp)
 ! z_tmp  = (/one,zero/)
 ! z_tmp2 = (/zero,zero/)
 ! do iband=1,nband
