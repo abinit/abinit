@@ -3057,7 +3057,11 @@ endif
      if (ALL(Sigp%minbnd==1).and. ALL(Sigp%maxbnd>=ks_vbik) ) then  ! FIXME here the two arrays use a different indexing.
 
        ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
+       exc_mbb_energy = sigma_get_excene(Sr,Kmesh,QP_BSt)
        write(msg,'(a,2(es16.6,a))')' New Exchange energy : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a,2(es16.6,a))')' New Exc. MBB energy : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
      end if
