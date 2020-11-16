@@ -47,6 +47,7 @@ module m_rmm_diis
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_getghc,        only : getghc
  use m_nonlop,        only : nonlop
+ use m_cgtk,          only : cgtk_fixphase
  !use m_fock,         only : fock_set_ieigen, fock_set_getghc_call
 
  implicit none
@@ -166,8 +167,6 @@ contains
 !!      m_vtowfk
 !!
 !! CHILDREN
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -333,7 +332,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  after_ortho = 0
  if (accuracy_level >= 2) after_ortho = 1
  if (accuracy_level >= 4) after_ortho = 2
- if (usepaw == 1) after_ortho = 2 ! FIXME
+ ! IT seems that PAW is more sensitive to after_ortho. Perhaps I can avoid the final H|phi> if accuracy_level == 1
+ if (usepaw == 1) after_ortho = 2 ! FIXME ??
  !after_ortho = 2
 
  ! Use mixed precisions if requested by the user but only for low accuracy_level
@@ -494,9 +494,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end do iter_loop
    if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
 
+   !if (usepaw == 0) then
    call diis%rollback(npwsp, ndat, phi_bk, gsc_bk, residv_bk,  &
                       eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
-
+   !end if
    if (timeit) call cwtime_report(" rollback ", cpu, wall, gflops)
 
    if (end_with_trial_step) then
@@ -552,7 +553,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !ortalgo = mpi_enreg%paral_kgb
  ortalgo = 3
  call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bandspinorfft)
- !if (usepaw == 1) call fxphas(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
+ !if (usepaw == 1) call cgtk_fixphase(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
@@ -563,8 +564,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! but we try to avoid it at the beginning of the SCF cycle.
    ! NB: In principle, one can rotate Vnl(b,b') using the U^-1 from the Cholesky decomposition
    ! but the full Vnl matrix should be computed before the ortho step.
-
    if (prtvol > 0) call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
+
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
      ndat = (ige - igs + 1) / npwsp
@@ -572,10 +573,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
 
      select case (after_ortho)
+
      case (1)
-       ! recompute NC enlx_bx after ortho. eigens and residuals are inconsistent
-       ! as they have been computed before the ortho step
        if (usepaw == 0) then
+         ! recompute NC enlx_bx after ortho. eigens and residuals are inconsistent
+         ! as they have been computed before the ortho step
          if (paral_kgb == 0) then
            call nonlop(choice1, cpopt, cprj_dum, enlx(ib_start:), gs_hamk, 0, eig(ib_start), &
                        mpi_enreg, ndat, 1, paw_opt0, signs1, gsc_bk, tim_nonlop, phi_bk, gvnlxc_bk)
@@ -1399,8 +1401,6 @@ end subroutine my_pack_matrix
 !!
 !! CHILDREN
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc, evec)
@@ -1452,7 +1452,8 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  bsize = 8; if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
 
- cplex = 2; if (istwf_k == 2) cplex = 1
+ !cplex = 2; if (istwf_k == 2) cplex = 1
+ cplex = 2; if (istwf_k /= 1) cplex = 1
  ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
  ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
  ABI_CALLOC(h_ij, (cplex, nband, nband))
@@ -1505,6 +1506,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
      h_ij(2,iband,iband) = zero ! Force diagonal elements to be real
    end do
  end if
+
  if (cplex == 2) then
    call pack_matrix(h_ij, subham, nband, 2)
  else
@@ -1513,7 +1515,6 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  ABI_FREE(h_ij)
  call xmpi_sum(subham, comm, ierr)
- !do it=1,nband*(nband+1); write(std_out,*)"subham:", it, subham(it); end do
 
  ! ========================
  ! Subspace diagonalization
