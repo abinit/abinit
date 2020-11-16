@@ -1203,7 +1203,11 @@ pure function sigma_get_excene(sigma,kmesh,bands) result(exc_energy)
      do ib=sigma%b1gw,sigma%b2gw
        occ_bks = bands%occ(ib,ik,spin)
        if (sigma%nsig_ab==1) then
-         exc_energy = exc_energy + sqrt( abs( half * occ_bks ) ) * wtk * sigma%sigxcnofme(ib,ik,spin)   ! 2*sqrt(occ_i), occ in [0,1].
+         if (sigma%nsppol==1) then
+           exc_energy = exc_energy + sqrt( abs( half * occ_bks ) ) * wtk * sigma%sigxcnofme(ib,ik,spin)   ! 2*sqrt(occ_i), occ in [0,2] -> [0,1].
+         else
+           exc_energy = exc_energy + half * sqrt( abs( occ_bks ) ) * wtk * sigma%sigxcnofme(ib,ik,spin)   ! 2*sqrt(occ_i), occ in [0,1] -> [0,1].
+         end if
        else
          exc_energy = exc_energy + half * sqrt( abs( occ_bks ) ) * wtk * SUM(sigma%sigxcnofme(ib,ik,:)) ! 2*sqrt(occ_i), occ in [0,1].
        end if
