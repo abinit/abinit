@@ -200,9 +200,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 !arrays
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
- real(dp),allocatable :: ghc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), residv_bk(:,:), kres_bk(:,:), dots_bk(:,:)
- real(dp),allocatable :: residvecs(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), phi_bk(:,:)
+ real(dp),allocatable :: ghc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), kres_bk(:,:), dots_bk(:,:)
+ real(dp),target,allocatable :: residvecs(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), phi_bk(:,:), residv_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
 
 ! *************************************************************************
@@ -370,19 +370,18 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! === Subspace rotation ===
  ! =========================
  ! Here I allocate a big array to store the residual vectors after the subspace_rotation
- ! It requires more memory but we avoid one call to H|Psi>
+ ! This approach requires more memory but we avoid one call to H|Psi> per band.
  ! Alternatively, one can compute the residuals and ghc by applying H|psi> for all the states in the block.
- ! This approach requires less memory but it's slower.
+ ! for each state in the block. It requires less memory but it's slower.
  ABI_MALLOC_OR_DIE(residvecs, (2, npwsp*nband), ierr)
  call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, enlx, eig, resid, residvecs, cg, gsc)
  if (timeit) call cwtime_report(" subspace_rotation ", cpu, wall, gflops)
- ABI_FREE(residvecs)
 
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
  ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
  ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
- ABI_MALLOC(residv_bk, (2, npwsp*bsize))
+ !ABI_MALLOC(residv_bk, (2, npwsp*bsize))
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
 
  gsc_bk => fake_gsc_bk
@@ -414,6 +413,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Compute H |phi_0> with cg block after subdiago.
    phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
 
+#if 0
+   residv_bk => residvecs(:,igs:ige)
    !write(std_out,*)"resid_subdiago:", resid(ib_start:ib_stop)
    !write(std_out,*)"eig_subdiago:", eig(ib_start:ib_stop)
    !write(std_out,*)"enlx_subdiago:", enlx(ib_start:ib_stop)
@@ -424,10 +425,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    !write(std_out,*)"resid_after:", resid(ib_start:ib_stop)
    !write(std_out,*)"eig_after:", eig(ib_start:ib_stop)
    !write(std_out,*)"enlx_after:", enlx(ib_start:ib_stop)
-
-   !resid_bk => residvecs(:,igs:ige)
-   !gvnlxc_bk => gvnlxc(:,igs:ige)
-   !
+#else
+   residv_bk => residvecs(:,igs:ige)
+#endif
    !if (all(resid(ib_start:ib_stop) < tol24)) cycle ! iblock
 
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input phi_bk is already S-normalized.
@@ -549,6 +549,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ndat = (ige - igs + 1) / npwsp
      ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
      phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
+     residv_bk => residvecs(:,igs:ige)
 
      select case (after_ortho)
 
@@ -603,9 +604,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ABI_FREE(lambda_bk)
  ABI_FREE(dots_bk)
  ABI_FREE(ghc_bk)
- ABI_FREE(residv_bk)
+ !ABI_FREE(residv_bk)
  ABI_FREE(kres_bk)
  ABI_FREE(gvnlxc_bk)
+ ABI_FREE(residvecs)
  call diis%free()
 
 end subroutine rmm_diis
