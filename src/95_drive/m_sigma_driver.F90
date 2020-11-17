@@ -2494,6 +2494,10 @@ endif
 !      Broadcast from master the info stored in occs and nateigv (to all processes)
        call xmpi_barrier(Wfd%comm)
        ierr=0
+       call xmpi_bcast(iread_chkp,master,Wfd%comm,ierr)
+       if(ierr/=0) then
+         MSG_ERROR("Error distributing the iread_chkp")
+       endif
        call xmpi_bcast(occs(:,:),master,Wfd%comm,ierr)
        if(ierr/=0) then
          MSG_ERROR("Error distributing the occs read from GW1RDM_CHKP")
@@ -2592,11 +2596,9 @@ endif
       end if 
    end do
 
-write(*,*) 'MAU0'
    ! for the time being, do not remove this barrier!
    call xmpi_barrier(Wfd%comm)
    call timab(421,2,tsec) ! calc_sigx_me
-write(*,*) 'MAU1'
    ! ==========================================================
    ! ==== Correlation part using the coarse gwc_ngfft mesh ====
    ! ==========================================================
