@@ -2507,9 +2507,11 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
     hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
 !    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
     call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
-    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
+    if(iam_master)then
+       call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
 &                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
 &                    real(100,dp),(/real(100,dp),real(100,dp)/))
+    endif 
    endif!(need_prt_ph)
 
    mse  = mse  + ((hist%etot(ii) - energy))**2/(sqomega(ii)**(1.0/2.0)) !+abs(hist$etot(ii) - energy)
