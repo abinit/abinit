@@ -331,7 +331,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  after_ortho = 0
  if (accuracy_level >= 2) after_ortho = 1
  if (accuracy_level >= 4) after_ortho = 2
- ! IT seems that PAW is more sensitive to after_ortho. Perhaps I can avoid the final H|phi> if accuracy_level == 1
+ ! It seems that PAW is more sensitive to after_ortho. Perhaps I can avoid the final H|phi> if accuracy_level == 1
  if (usepaw == 1) after_ortho = 2 ! FIXME ??
  !after_ortho = 2
 
@@ -438,12 +438,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    !
    !    |phi_1> = |phi_0> + lambda |K R_0>
    !
-   ! where lambda minimizes the residual (not the Rayleigh quotient as in Kresse's paper).
+   ! where lambda minimizes the residual (we don't try to find the stationary
+   ! point of the Rayleigh quotient as in Kresse's paper).
    !
    !    lambda = - Re{<R_0|(H - e_0 S)} |K R_0>} / |(H - e_0 S) |K R_0>|**2
    !
-   ! more expensive than finding the stationary point of the Rayleigh quotient as it requires an extra H application
-   ! but it should be more stable and more consistent with the RMM approach.
+   ! more expensive than finding the stationary point of the Rayleigh quotient as it requires
+   ! an extra H application but it should be more stable and more consistent with the RMM approach.
    !
    ! Precondition |R_0>, output in kres_bk = |K R_0>
    call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
@@ -532,6 +533,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !ortalgo = mpi_enreg%paral_kgb
  ortalgo = 3
  call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bandspinorfft)
+
+ !if (usepaw == 1) then
+ !  call cgpaw_cholesky(npwsp, nband, cg, gsc, istwf_k, me_g0, comm)
+ !else
+ !  call cgnc_cholesky(npwsp, nband, cg, istwf_k, me_g0, comm, use_gemm=.False.)
+ !end if
+
  !if (usepaw == 1) call cgtk_fixphase(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
@@ -552,7 +560,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      residv_bk => residvecs(:,igs:ige)
 
      select case (after_ortho)
-
      case (1)
        if (usepaw == 0) then
          ! recompute NC enlx_bx after ortho.
@@ -1410,7 +1417,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 !arrays
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
- real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), gtempc(:,:)
+ real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), evec_re(:,:), gtempc(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:)
  real(dp),target,allocatable :: ghc(:,:), gvnlxc(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:)
@@ -1441,14 +1448,14 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  bsize = 8; if (paral_kgb == 1) bsize = mpi_enreg%nproc_band * mpi_enreg%bandpp
  nblocks = nband / bsize; if (mod(nband, bsize) /= 0) nblocks = nblocks + 1
 
- !cplex = 2; if (istwf_k == 2) cplex = 1
  cplex = 2; if (istwf_k /= 1) cplex = 1
+ !cplex = 2; if (istwf_k == 2) cplex = 1
 
- !ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
- !ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
  ABI_CALLOC(h_ij, (cplex, nband, nband))
  ABI_MALLOC_OR_DIE(ghc, (2, npwsp*nband), ierr)
  ABI_MALLOC_OR_DIE(gvnlxc, (2, npwsp*nband), ierr)
+ !ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
+ !ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
@@ -1520,17 +1527,38 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  ABI_FREE(subham)
 
- ! Rotate matrix elements to get <G|H|psi> in the new subspace.
- ! new_{g,b} = old_{g,i} evec_{i,b}
+ ! Rotate matrix elements to get <G|H|psi> in the new subspace:
+ !
+ !      new_{g,b} = old_{g,i} evec_{i,b}
+ !
+ ! cg and PAW gsc have been already rotated in subdiago
+ !
  ABI_MALLOC_OR_DIE(gtempc, (2, npwsp*nband), ierr)
+
+ if (cplex == 1) then
+   ABI_MALLOC(evec_re, (nband, nband))
+   evec_re = evec(1,:,:)
+ end if
+
  !call cg_zgemm("N", "N", npwsp, nband, nband, ghc, evec, gtempc)
- call ZGEMM("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gtempc, npwsp)
+ if (cplex == 1) then
+ !if (istwf_k == 2) then
+   call DGEMM("N", "N", 2*npwsp, nband, nband, one, ghc, 2*npwsp, evec_re, nband, zero, gtempc, 2*npwsp)
+ else
+   call ZGEMM("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gtempc, npwsp)
+ end if
+
  ! TODO: dgemm if cplex == 1
  !call abi_xgemm('N','N', vectsize, nband, nband, cone, ghc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
  ghc = gtempc
  if (usepaw == 0 .or. has_fock) then
    !call cg_zgemm("N", "N", npwsp, nband, nband, gvnlxc, evec, gtempc)
-   call ZGEMM("N", "N", npwsp, nband, nband, cone, gvnlxc, npwsp, evec, nband, czero, gtempc, npwsp)
+   if (cplex == 1) then
+   !if (istwf_k == 2) then
+     call DGEMM("N", "N", 2*npwsp, nband, nband, one, gvnlxc, 2*npwsp, evec_re, nband, zero, gtempc, 2*npwsp)
+   else
+     call ZGEMM("N", "N", npwsp, nband, nband, cone, gvnlxc, npwsp, evec, nband, czero, gtempc, npwsp)
+   end if
    !call abi_xgemm('N','N', vectsize, nband, nband, cone, gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gvnlxc = gtempc
  end if
@@ -1551,6 +1579,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  !ABI_FREE(ghc_bk)
  !ABI_FREE(gvnlxc_bk)
  ABI_FREE(evec)
+ ABI_SFREE(evec_re)
 
  if (timeit) call cwtime_report(" subspace rotation", cpu, wall, gflops)
 
