@@ -371,14 +371,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
- real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
+ real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:)
  real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vlocal_tmp(:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
- complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
  type(oper_type) :: dft_occup
@@ -449,6 +448,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  if(.not. wvlbigdft) then
    energies%e_eigenvalues = zero
    energies%e_kinetic     = zero
+   energies%e_nucdip      = zero
    energies%e_nlpsp_vfock = zero
    if (usefock) then
      energies%e_fock=zero
@@ -832,6 +832,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ABI_ALLOCATE(eig_k,(nband_k))
        ABI_ALLOCATE(ek_k,(nband_k))
+       ABI_ALLOCATE(end_k,(nband_k))
        ABI_ALLOCATE(enlx_k,(nband_k))
        ABI_ALLOCATE(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_ALLOCATE(occ_k,(nband_k))
@@ -841,6 +842,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        eig_k(:)=zero
        ek_k(:)=zero
+       end_k(:)=zero
        enlx_k(:)=zero
        if(paw_dmft%use_dmft==1) ek_k_nd(:,:,:)=zero
        if (optforces>0) grnl_k(:,:)=zero
@@ -951,10 +953,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 !      Compute the eigenvalues, wavefunction, residuals,
-!      contributions to kinetic energy, nonlocal energy, forces,
+!      contributions to kinetic energy, nuclear dipole energy, 
+!      nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
-&       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
+&       dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
@@ -969,9 +972,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DEALLOCATE(kinpw)
        ABI_DEALLOCATE(kg_k)
        ABI_DEALLOCATE(kpg_k)
-       if(allocated(nucdipmom_k)) then
-         ABI_DEALLOCATE(nucdipmom_k)
-       end if
        ABI_DEALLOCATE(ylm_k)
        ABI_DEALLOCATE(ph3d)
        ABI_DEALLOCATE(cgq)
@@ -1010,6 +1010,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          do iband=1,nband_k
            if (abs(occ_k(iband))>tol8) then
              energies%e_kinetic     = energies%e_kinetic     + dtset%wtk(ikpt)*occ_k(iband)*ek_k(iband)
+             energies%e_nucdip     = energies%e_nucdip     + dtset%wtk(ikpt)*occ_k(iband)*end_k(iband)
              energies%e_eigenvalues = energies%e_eigenvalues + dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
              energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + dtset%wtk(ikpt)*occ_k(iband)*enlx_k(iband)
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ_k(iband)*grnl_k(:,iband)
@@ -1036,6 +1037,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DEALLOCATE(eig_k)
        ABI_DEALLOCATE(ek_k)
        ABI_DEALLOCATE(ek_k_nd)
+       ABI_DEALLOCATE(end_k)
        ABI_DEALLOCATE(grnl_k)
        ABI_DEALLOCATE(occ_k)
        ABI_DEALLOCATE(resid_k)

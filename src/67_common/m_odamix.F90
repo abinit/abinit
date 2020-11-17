@@ -146,6 +146,7 @@ contains
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
 !!   | e_corepsp(IN)=psp core-core energy
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
+!!   | e_nucdip(IN)=energy of nuclear dipole array
 !!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
@@ -500,7 +501,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  etotal = energies%e_kinetic+ energies%e_hartree + energies%e_xc + &
 & energies%e_localpsp + energies%e_nlpsp_vfock - energies%e_fock0 + energies%e_corepsp + &
-& energies%e_entropy + energies%e_elecfield + energies%e_magfield
+& energies%e_entropy + energies%e_elecfield + energies%e_magfield + &
+& energies%e_nucdip
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
 !& energies%e_entropy + energies%e_elecfield
