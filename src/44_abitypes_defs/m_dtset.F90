@@ -3117,7 +3117,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
  list_vars=trim(list_vars)//' fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_fixcoeff'
- list_vars=trim(list_vars)//' fit_EFS'
+ list_vars=trim(list_vars)//' fit_EFS fit_factors'
  list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_ncoeff_per_iatom' 
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS'
  list_vars=trim(list_vars)//' fit_tolMSDS fit_tolGF'

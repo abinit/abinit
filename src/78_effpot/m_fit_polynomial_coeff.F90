@@ -127,7 +127,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,fit_tolGF,&
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_anh,& 
-&                                   fit_iatom,prt_files,fit_on,sel_on)
+&                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors)
 
  implicit none
 
@@ -147,6 +147,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical,optional,intent(in) :: only_odd_power,only_even_power
  logical,optional,intent(in) :: initialize_data,prt_files
  logical,optional,intent(in) :: fit_on(3), sel_on(3)
+ real(dp),optional,intent(in) :: fit_factors(3)
 !Local variables-------------------------------
 !scalar
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
@@ -736,7 +737,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
 &                                      list_coeffs_tmp(1:icycle),natom_sc,icycle,ncycle_max,ntime,&
 &                                      strten_coeffs_tmp,fit_data%strten_diff,&
-&                                      fit_data%training_set%sqomega,fit_on)
+&                                      fit_data%training_set%sqomega,fit_on,fit_factors)
      
        if(info==0)then
          if (need_positive.and.any(coeff_values(ncoeff_fix+1:icycle) < zero)) then
@@ -1005,7 +1006,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
 &                                      list_coeffs_tmp(1:icycle_tmp),natom_sc,icycle_tmp,ncycle_max,&
 &                                      ntime,strten_coeffs_tmp,fit_data%strten_diff,&
-&                                      fit_data%training_set%sqomega,fit_on)
+&                                      fit_data%training_set%sqomega,fit_on,fit_factors)
        if(info==0)then
          call fit_polynomial_coeff_computeGF(coeff_values(1:icycle_tmp),energy_coeffs_tmp,&
 &                                            fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
@@ -1099,7 +1100,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                  energy_coeffs_tmp,fit_data%energy_diff,info,&
 &                                  list_coeffs_tmp(1:ncycle_tot),natom_sc,&
 &                                  ncycle_tot,ncycle_max,ntime,strten_coeffs_tmp,&
-&                                  fit_data%strten_diff,fit_data%training_set%sqomega,fit_on)
+&                                  fit_data%strten_diff,fit_data%training_set%sqomega,fit_on,fit_factors)
 
    if(need_verbose) then
      write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
@@ -1300,6 +1301,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  type(fit_data_type) :: fit_data
  character(len=500) :: message
  logical :: fit_on(3)
+ real(dp) :: fit_factors(3) 
 ! *************************************************************************
 
 !MPI variables
@@ -1314,6 +1316,8 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  fit_on(1) = .FALSE. 
  fit_on(2) = .TRUE.
  fit_on(3) = .TRUE. 
+
+ fit_factors = (/1,1,1/)
 
 !Get the list of coefficients from the eff_pot
  if(eff_pot%anharmonics_terms%ncoeff > 0)then
@@ -1417,7 +1421,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 &                                  energy_coeffs,fit_data%energy_diff,info,&
 &                                  list_coeff(imodel,1:ncoeff),natom_sc,ncoeff,&
 &                                  ncoeff_tot,ntime,strten_coeffs,fit_data%strten_diff,&
-&                                  fit_data%training_set%sqomega,fit_on)
+&                                  fit_data%training_set%sqomega,fit_on,fit_factors)
 
    if(info==0)then
 
@@ -1744,7 +1748,7 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 
 subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energy_coeffs,energy_diff,&
 &                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
-&                                     strten_coeffs,strten_diff,sqomega,fit_on)
+&                                     strten_coeffs,strten_diff,sqomega,fit_on,fit_factors)
 
  implicit none
 
@@ -1761,6 +1765,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
  real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime)
  real(dp),intent(out):: coefficients(ncoeff_fit)
+ real(dp),intent(in)  :: fit_factors(3)
  logical,intent(in)  :: fit_on(3)
 !Local variables-------------------------------
 !scalar
@@ -1782,9 +1787,9 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  LDAF = ncoeff_fit;  RCOND = zero; INFO  = 0; TRANS='N'; EQUED='N'; FACT='N'
 
 !Set the factors
- ffact = one/(3*natom*ntime)
- sfact = one/(6*ntime)
- efact = one/(ntime)
+ efact = fit_factors(1)*one/(ntime)
+ ffact = fit_factors(2)*one/(3*natom*ntime)
+ sfact = fit_factors(3)*one/(6*ntime)
 
 !0-Allocation
  ABI_ALLOCATE(A,(LDA,N))

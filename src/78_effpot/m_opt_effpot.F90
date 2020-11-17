@@ -87,7 +87,7 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh) 
+subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,print_anh) 
 
  implicit none  
 
@@ -98,7 +98,9 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  type(abihist),intent(inout) :: hist
 !arrays 
  integer,intent(in) :: opt_coeff(opt_ncoeff)
+ real(dp),intent(in) :: opt_factors(3)
 !Logicals
+ logical,intent(in) :: opt_on(3)
  logical,optional,intent(in) :: print_anh 
 !Strings 
 !Local variables ------------------------------
@@ -117,7 +119,6 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  real(dp), allocatable :: strten_coeffs(:,:,:)
 !Logicals
  logical :: need_print_anh,file_opened,iam_master
- logical :: fit_on(3)
 !Strings 
  character(len=1000) :: message
  character(len=1000) :: frmt
@@ -127,11 +128,6 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  master = 0
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
-
- !fit_on !TODO set up keyword opt_on
-  fit_on(1) = .TRUE. 
-  fit_on(2) = .TRUE. 
-  fit_on(3) = .FALSE. 
 
  !Setting/Initializing Variables
   ntime = hist%mxhist
@@ -259,7 +255,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
 &                                  energy_coeffs,fit_data%energy_diff,info,&
 &                                  coeff_inds,natom_sc,opt_ncoeff,opt_ncoeff,ntime,&
 &                                  strten_coeffs,fit_data%strten_diff,&
-&                                  fit_data%training_set%sqomega,fit_on)
+&                                  fit_data%training_set%sqomega,opt_on,opt_factors)
 
   if (info /= 0 .and. all(coeff_values < tol16))then
     write(frmt,*) opt_ncoeff  

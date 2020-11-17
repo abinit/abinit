@@ -432,7 +432,8 @@ elec_eval = .FALSE.
                     &         verbose=.true.,positive=.false.,&
                     &         anharmstr=inp%fit_anhaStrain==1,&
                     &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
-                    &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on)
+                    &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
+                    &         fit_factors=inp%fit_factors)
              else 
                 if (inp%fit_ncoeff_per_iatom/=0)then 
                    if (mod(inp%fit_ncoeff,inp%fit_ncoeff_per_iatom) /= 0)then 
@@ -492,7 +493,8 @@ elec_eval = .FALSE.
                           &         anharmstr=inp%fit_anhaStrain==1,&
                           &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
                           &         fit_iatom=reference_effective_potential%crystal%irredatindx(ii),&
-                          &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on)
+                          &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on,& 
+                          &         fit_factors=inp%fit_factors)
                   enddo
                 enddo 
              endif 
@@ -536,8 +538,8 @@ elec_eval = .FALSE.
      need_analyze_anh_pot = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE. 
 
-    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,comm,& 
-&        print_anh=need_analyze_anh_pot)
+    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,inp%opt_on,& 
+&                   inp%opt_factors,comm,print_anh=need_analyze_anh_pot)
  end if 
 
  
