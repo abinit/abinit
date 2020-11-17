@@ -2468,11 +2468,6 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
 if (istwfk == 2) then
  ABI_CALLOC(r_ovlp, (nband, nband))
 
- !ABI_MALLOC(reim, (npwsp*nband*2))
- !call cg_to_reim(npwsp, nband, cgblock, one, reim)
- !if (istwfk == 2 .and. me_g0 == 1) reim(npwsp+1::2*npwsp) = zero
- !call DGEMM("T", "N", nband, nband, 2*npwsp, one, reim, 2*npwsp, reim, 2*npwsp, zero, r_ovlp, nband)
-
  call DGEMM("T", "N", nband, nband, 2*npwsp, one, cgblock, 2*npwsp, cgblock, 2*npwsp, zero, r_ovlp, nband)
 
  r_ovlp = two * r_ovlp
@@ -2492,14 +2487,10 @@ if (istwfk == 2) then
 
  ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
  call DPOTRF('U', nband, r_ovlp, nband, ierr)
- ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info: ', itoa(ierr)))
+ ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info:', itoa(ierr)))
 
  ! 3) Solve X U = cgblock. On exit cgblock is orthonormalized.
  call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, cgblock, 2*npwsp)
- !call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, reim, 2*npwsp)
- !call cg_from_reim(npwsp, nband, reim, one, cgblock)
- !ABI_FREE(reim)
-
  ABI_FREE(r_ovlp)
  return
 end if
@@ -2540,11 +2531,10 @@ end if
 
    ! Sum the overlap if PW are distributed.
    if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
-   !write(std_out, *)" good rovlp:", r_ovlp
 
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
    call DPOTRF('U', nband, r_ovlp, nband, ierr)
-   ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info: ', itoa(ierr)))
+   ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info:', itoa(ierr)))
 
    c_ovlp = DCMPLX(r_ovlp)
    ABI_FREE(r_ovlp)
@@ -2800,11 +2790,11 @@ subroutine cgnc_gsortho(npwsp, nband1, icg1, nband2, iocg2, istwfk, normalize, m
 
 ! *************************************************************************
 
- ABI_MALLOC(proj,(2,nband1,nband2))
+ ABI_MALLOC(proj, (2, nband1, nband2))
  !proj = zero
 
  ! 1) Calculate <cg1|cg2>
- call cg_zgemm("C","N",npwsp,nband1,nband2,icg1,iocg2,proj)
+ call cg_zgemm("C", "N", npwsp, nband1, nband2, icg1, iocg2, proj)
 
  if (istwfk>1) then
    ! nspinor is always 1 in this case.
@@ -3430,7 +3420,7 @@ end subroutine cg_envlop
 !!
 !! SOURCE
 
-subroutine cg_normev(cg,npw,nband)
+subroutine cg_normev(cg, npw, nband)
 
 !Arguments ------------------------------------
 !scalars
@@ -4083,7 +4073,7 @@ end subroutine cg_zprecon_block
 !! Also fix the sign of real part by setting the first non-zero element to be positive.
 !!
 !! This version has been stripped of all the mpi_enreg junk by MJV
-!! MG: Many thanks to MJV
+!! Use cgtk_fixphase if you need a routine that works with mpi_enreg and paral_kgb
 !!
 !! INPUTS
 !!  cg(2,mcg)= contains the wavefunction |c> coefficients.
@@ -4447,7 +4437,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
  end if
 
  ! 1 if Scalapack version is used.
- ! MG_TODO: This should not be bound to paral_kgb
+ ! MG TODO: This should not be bound to paral_kgb
  use_slk = paral_kgb
 
  rvectsize=npw_k*nspinor
@@ -4487,8 +4477,13 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
  end if
  !call cwtime_report(" hdiago", cpu, wall, gflops)
 
- !Normalize each eigenvector and set phase:
- !The problem with minus/plus signs might be present also if .not. use_subovl
+ ! Normalize each eigenvector and set phase:
+ ! this is because of the simultaneous diagonalisation of this
+ ! matrix by different processors, allowing to get different unitary transforms, thus breaking the
+ ! coherency of parts of cg stored on different processors).
+ !
+ ! The problem with minus/plus signs might be present also if .not. use_subovl
+ !
  !if(use_subovl == 0) then
  call cg_normev(evec, nband_k, nband_k)
  !end if
@@ -4853,6 +4848,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
    !  =======================
    !  Third (old) algorithm
    !  =======================
+   ! TODO: This algo should be removed. Ref files should be updated though.
 
    do ivec=1,nvec
      ! Normalize each vecnm(n,m) in turn:
@@ -5162,7 +5158,7 @@ end subroutine pw_orthon
 !!
 !! FUNCTION
 !!  Compute the diagonal elements of E^H VNLX E
-!!  where VNLX is an Hermitean matrixin packed form.
+!!  where VNLX is an Hermitean matrixin packed form and E is the matrix with eigenvectors as column vectors.
 !!  Mainly used to rotate the matrix elements of an operator after the subspace diagonalization.
 !!
 !! INPUTS
@@ -5255,8 +5251,8 @@ subroutine cg_hrotate_and_get_diag(istwf_k, nband_k, totvnlx, evec, enlx_k)
 
 ! *************************************************************************
 
- ABI_MALLOC(matvnl,(2,nband_k,nband_k))
- ABI_MALLOC(mat1,(2,nband_k,nband_k))
+ ABI_MALLOC(matvnl, (2,nband_k, nband_k))
+ ABI_MALLOC(mat1, (2, nband_k, nband_k))
  mat1=zero
 
  enlx_k(1:nband_k)=zero
@@ -5343,7 +5339,7 @@ end subroutine cg_get_eigens
 !!  cg_get_residvecs
 !!
 !! FUNCTION
-!!  Compute (H - eS) |psi> for ndat states.
+!!  Compute redidual vectors (H - eS) |psi> for ndat states.
 !!
 !! INPUTS
 !!

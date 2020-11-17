@@ -190,8 +190,6 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
  call fxphas_seq(evec,edummy,0,0,1,nband*nband,nband*nband,nband,nband,0)
  ABI_DEALLOCATE(edummy)
 
-
-
  ! Rotate
  call abi_xgemm('n','n',vectsize,nband, nband,cone,cg , vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
  cg = gtempc

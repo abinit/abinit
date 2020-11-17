@@ -61,7 +61,7 @@ contains
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !! Result is put in array ghc.
 !! <G|Vnonlocal + VfockACE|C> is also returned in gvnlxc if either NLoc NCPP or FockACE.
-!! if required, <G|S|C> is returned in gsc (S=overlap - PAW only)
+!! If required, <G|S|C> is returned in gsc (S=overlap - PAW only)
 !! Note that left and right k points can be different, i.e. ghc=<k^prime+G|H|C_k>.
 !!
 !! INPUTS
