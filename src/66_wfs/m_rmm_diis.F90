@@ -201,6 +201,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp),allocatable :: ghc_bk(:,:), gvnlxc_bk(:,:), lambda_bk(:), residv_bk(:,:), kres_bk(:,:), dots_bk(:,:)
+ real(dp),allocatable :: residvecs(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), phi_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
 
@@ -368,14 +369,17 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! =========================
  ! === Subspace rotation ===
  ! =========================
- !if (accuracy_level <= 2) then
- call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc)
- !end if
+ ! Here I allocate a big array to store the residual vectors after the subspace_rotation
+ ! It requires more memory but we avoid one call to H|Psi>
+ ! Alternatively, one can compute the residuals and ghc by applying H|psi> for all the states in the block.
+ ! This approach requires less memory but it's slower.
+ ABI_MALLOC_OR_DIE(residvecs, (2, npwsp*nband), ierr)
+ call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, enlx, eig, resid, residvecs, cg, gsc)
  if (timeit) call cwtime_report(" subspace_rotation ", cpu, wall, gflops)
+ ABI_FREE(residvecs)
 
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
-
  ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
  ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
  ABI_MALLOC(residv_bk, (2, npwsp*bsize))
@@ -410,10 +414,18 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Compute H |phi_0> with cg block after subdiago.
    phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
 
+   !write(std_out,*)"resid_subdiago:", resid(ib_start:ib_stop)
+   !write(std_out,*)"eig_subdiago:", eig(ib_start:ib_stop)
+   !write(std_out,*)"enlx_subdiago:", enlx(ib_start:ib_stop)
+
    call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                         eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
 
-   !resid_bk => residvec(:,igs:ige)
+   !write(std_out,*)"resid_after:", resid(ib_start:ib_stop)
+   !write(std_out,*)"eig_after:", eig(ib_start:ib_stop)
+   !write(std_out,*)"enlx_after:", enlx(ib_start:ib_stop)
+
+   !resid_bk => residvecs(:,igs:ige)
    !gvnlxc_bk => gvnlxc(:,igs:ige)
    !
    !if (all(resid(ib_start:ib_stop) < tol24)) cycle ! iblock
@@ -842,8 +854,7 @@ subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enr
  real(dp),intent(out) :: ghc(2,npw*my_nspinor*ndat), gsc(2,npw*my_nspinor*ndat*gs_hamk%usepaw)
  type(mpi_type),intent(inout) :: mpi_enreg
  real(dp),intent(out) :: eig(ndat), resid(ndat), enlx(ndat)
- real(dp),intent(out) :: residvecs(2, npw*my_nspinor*ndat)
- real(dp),intent(out) :: gvnlxc(2, npw*my_nspinor*ndat)
+ real(dp),intent(out) :: residvecs(2, npw*my_nspinor*ndat), gvnlxc(2, npw*my_nspinor*ndat)
  logical,optional,intent(in) :: normalize
 
 !Local variables-------------------------------
@@ -1362,9 +1373,12 @@ end subroutine my_pack_matrix
 !!  eig(nband): New eigvalues from subspace rotation.
 !!  If usepaw==1:
 !!    gsc(2,*)=<g|S|c> matrix elements (S=overlap)
+!!  enlx(nband)=contribution from each band to nonlocal psp + potential Fock ACE part of total energy, at this k-point
+!!  resid(nband)=residuals for each states.
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
+!!  gsc(2,*)=update <G|S|C>
 !!
 !! PARENTS
 !!
@@ -1372,7 +1386,7 @@ end subroutine my_pack_matrix
 !!
 !! SOURCE
 
-subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, eig, cg, gsc)
+subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, enlx, eig, resid, residvecs, cg, gsc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband, npw, my_nspinor
@@ -1381,10 +1395,11 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  type(mpi_type),intent(inout) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
  real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*dtset%usepaw)
- real(dp),intent(out) :: eig(nband)
+ real(dp),intent(out) :: residvecs(2,npw*my_nspinor*nband)
+ real(dp),intent(out) :: eig(nband), enlx(nband), resid(nband)
 
 !Local variables-------------------------------
- integer,parameter :: type_calc0 = 0, tim_getghc = 0, use_subovl0 = 0
+ integer,parameter :: type_calc0 = 0, tim_getghc = 0, use_subovl0 = 0, option1 = 1
  integer :: ig, ig0, ib, ierr, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, paral_kgb
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw, me_g0, cplex, comm
  logical :: has_fock
@@ -1393,11 +1408,11 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 !arrays
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
- real(dp),allocatable :: subham(:), h_ij(:,:,:), ghc_bk(:,:), gvnlxc_bk(:,:)
- real(dp),allocatable :: evec(:,:,:),gtempc(:,:)
+ real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), gtempc(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:)
  real(dp),target,allocatable :: ghc(:,:), gvnlxc(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:)
- !real(dp) :: dots(2, nband)
+ real(dp) :: dots(2, nband)
  type(pawcprj_type) :: cprj_dum(1,1)
 
 ! *************************************************************************
@@ -1426,20 +1441,20 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  !cplex = 2; if (istwf_k == 2) cplex = 1
  cplex = 2; if (istwf_k /= 1) cplex = 1
- ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
- ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
- ABI_CALLOC(h_ij, (cplex, nband, nband))
 
- !ABI_MALLOC(ghc, (2, npwsp*nband))
- !ABI_MALLOC(gvnlxc, (2, npwsp*nband))
+ !ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
+ !ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
+ ABI_CALLOC(h_ij, (cplex, nband, nband))
+ ABI_MALLOC_OR_DIE(ghc, (2, npwsp*nband), ierr)
+ ABI_MALLOC_OR_DIE(gvnlxc, (2, npwsp*nband), ierr)
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
    ndat = (ige - igs + 1) / npwsp
    ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
    if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
-   !ghc_bk => ghc(:, igs:ige)
-   !gvnlxc_bk => gvnlxc(:, igs:ige)
+   ghc_bk => ghc(:, igs:ige)
+   gvnlxc_bk => gvnlxc(:, igs:ige)
 
    if (paral_kgb == 0) then
      call getghc(cpopt, cg(:,igs:ige), cprj_dum, ghc_bk, gsc_bk, gs_hamk, gvnlxc_bk, &
@@ -1503,31 +1518,36 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  ABI_FREE(subham)
 
- ! Rotate <G|H|C>
- !ABI_MALLOC(gtempc, (2, npwsp))
+ ! Rotate matrix elements to get <G|H|psi> in the new subspace.
+ ! new_{g,b} = old_{g,i} evec_{i,b}
+ ABI_MALLOC_OR_DIE(gtempc, (2, npwsp*nband), ierr)
+ !call cg_zgemm("N", "N", npwsp, nband, nband, ghc, evec, gtempc)
+ call ZGEMM("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gtempc, npwsp)
+ ! TODO: dgemm if cplex == 1
  !call abi_xgemm('N','N', vectsize, nband, nband, cone, ghc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
- !ghc = gtempc
- !if (usepaw == 0 .or. has_fock) then
- !  call abi_xgemm('N','N', vectsize, nband, nband,cone, gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
- !  gvnlxc = gtempc
- !end if
- !ABI_FREE(gtempc)
+ ghc = gtempc
+ if (usepaw == 0 .or. has_fock) then
+   !call cg_zgemm("N", "N", npwsp, nband, nband, gvnlxc, evec, gtempc)
+   call ZGEMM("N", "N", npwsp, nband, nband, cone, gvnlxc, npwsp, evec, nband, czero, gtempc, npwsp)
+   !call abi_xgemm('N','N', vectsize, nband, nband, cone, gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
+   gvnlxc = gtempc
+ end if
+ ABI_FREE(gtempc)
 
  ! Compute residual vectors with rotated matrix elements.
- !call cg_get_residvecs(usepaw, npwsp, nband, eig, cg, ghc, gsc, residvecs)
- !call cg_norm2g(istwf_k, npwsp, ndat, residvecs, resid, me_g0, comm)
+ call cg_get_residvecs(usepaw, npwsp, nband, eig, cg, ghc, gsc, residvecs)
+ call cg_norm2g(istwf_k, npwsp, nband, residvecs, resid, me_g0, comm)
 
- !if (usepaw == 0 .or. has_fock) then
- !  ! Evaluate new enlx for NC.
- !  call cg_zdotg_zip(istwf_k, npwsp, nband, option1, cg, gvnlxc, dots, me_g0, comm)
- !  enlx = dots(1,:)
- !end if
+ if (usepaw == 0 .or. has_fock) then
+   ! Evaluate new enlx for NC.
+   call cg_zdotg_zip(istwf_k, npwsp, nband, option1, cg, gvnlxc, dots, me_g0, comm)
+   enlx = dots(1,:)
+ end if
 
- !ABI_FREE(ghc)
- !ABI_FREE(gvnlxc)
-
- ABI_FREE(ghc_bk)
- ABI_FREE(gvnlxc_bk)
+ ABI_FREE(ghc)
+ ABI_FREE(gvnlxc)
+ !ABI_FREE(ghc_bk)
+ !ABI_FREE(gvnlxc_bk)
  ABI_FREE(evec)
 
  if (timeit) call cwtime_report(" subspace rotation", cpu, wall, gflops)

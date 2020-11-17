@@ -942,8 +942,8 @@ subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, alpha
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwsp,ncola,ncolb
- real(dp),optional,intent(in) :: alpha(2),beta(2)
- character(len=1),intent(in) :: transa,transb
+ real(dp),optional,intent(in) :: alpha(2), beta(2)
+ character(len=1),intent(in) :: transa, transb
 !arrays
  real(dp),intent(in) :: cg_a(2,npwsp*ncola), cg_b(2,npwsp*ncolb)
  real(dp),intent(inout) :: cg_c(2,*)
