@@ -1,6 +1,6 @@
 
 .Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 12 Oct 2020.
-- ( at 16h34 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h18 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/TestBot_MPI1/paral_t75_MPI1/t75.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/paral_t75_MPI1/t75.in
 - output file    -> t75_MPI1.out
 - root for input  files -> t75_MPI1i
 - root for output files -> t75_MPI1o
@@ -384,8 +384,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/marm3.14_ecut/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
 -  Troullier-Martins psp for element  Na        Mon Oct 31 11:14:49 EST 1994
 - 11.00000   1.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -458,8 +458,8 @@ xred      :
 - [ -1.0000E-01,   1.0000E-01,   1.0000E-01, Na]
 - [  1.0000E-01,  -1.0000E-01,  -1.0000E-01, Na]
 cartesian_forces: # hartree/bohr
-- [ -8.80177975E-04,   2.49345434E-21,  -2.49345434E-21, ]
-- [  8.80177975E-04,  -2.49345434E-21,   2.49345434E-21, ]
+- [ -8.80177975E-04,  -8.06287122E-20,   8.06287122E-20, ]
+- [  8.80177975E-04,   8.06287122E-20,  -8.06287122E-20, ]
 force_length_stats: {min:   8.80177975E-04, max:   8.80177975E-04, mean:   8.80177975E-04, }
 ...
 
@@ -485,13 +485,13 @@ force_length_stats: {min:   8.80177975E-04, max:   8.80177975E-04, mean:   8.801
     2     -1.58753162577000    -0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00088017797459     0.00000000000000    -0.00000000000000
-    2      0.00088017797459    -0.00000000000000     0.00000000000000
+    1     -0.00088017797459    -0.00000000000000     0.00000000000000
+    2      0.00088017797459     0.00000000000000    -0.00000000000000
  frms,max,avg= 5.0817099E-04 8.8017797E-04   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.04526056742959     0.00000000000000    -0.00000000000000
-    2      0.04526056742959    -0.00000000000000     0.00000000000000
+    1     -0.04526056742959    -0.00000000000000     0.00000000000000
+    2      0.04526056742959     0.00000000000000    -0.00000000000000
  frms,max,avg= 2.6131201E-02 4.5260567E-02   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 30.000000000000 30.000000000000 30.000000000000 bohr
               = 15.875316257700 15.875316257700 15.875316257700 angstroms
@@ -513,7 +513,7 @@ local_psp           : -3.21634924609093E-01
 non_local_psp       :  1.22144781758522E-01
 total_energy        : -1.32776954740096E+01
 total_energy_eV     : -3.61304468319460E+02
-band_energy         : -2.28850290887547E-01
+band_energy         : -2.28850290887548E-01
 ...
 
 
@@ -704,8 +704,8 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  yields     1 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  27x 27x 27
-          total number of points  =    19683
+ setmesh: FFT mesh size selected  =    27x   27x   27
+          total number of points  =        19683
 
 
  === Spherical cutoff === 
@@ -750,7 +750,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    2 th omega   0.0000  13.6057 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+       -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
 
     2   0.000  -0.989   0.146   0.074  -0.198   0.124  -0.124   0.074  -0.198
         0.000   0.000   0.000  -0.000   0.000   0.000   0.000  -0.000   0.000
@@ -774,10 +774,10 @@ meta: {optdriver: 3, gwcalctyp: 28, }
    Upper and lower wings at the    2 th omega   0.0000  13.6057 [eV]
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-      0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+     -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-      0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+     -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
 
 
@@ -844,8 +844,8 @@ meta: {optdriver: 4, gwcalctyp: 28, }
   Volume of the sphere ..    4849.05 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  48x 48x 48
-          total number of points  =   110592
+ setmesh: FFT mesh size selected  =    48x   48x   48
+          total number of points  =       110592
 
  Number of electrons calculated from density =    2.0000; Expected =    2.0000
  average of density, n =  0.000296
@@ -1005,8 +1005,8 @@ meta: {optdriver: 3, gwcalctyp: 18, }
  yields     1 points in the full Brillouin Zone.
 
 
- setmesh: FFT mesh size selected  =  27x 27x 27
-          total number of points  =    19683
+ setmesh: FFT mesh size selected  =    27x   27x   27
+          total number of points  =        19683
 
 
  === Spherical cutoff === 
@@ -1043,7 +1043,7 @@ meta: {optdriver: 3, gwcalctyp: 18, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+        0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000 -14.523   4.762   3.283  -6.051  -1.080   1.123   3.283  -6.051
        -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
@@ -1051,7 +1051,7 @@ meta: {optdriver: 3, gwcalctyp: 18, }
   chi0(G,G') at the    2 th omega   0.0000  13.6057 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+        0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
 
     2   0.000  -1.869   0.472   0.294  -0.602   0.036  -0.003   0.294  -0.602
        -0.000   0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000
@@ -1066,19 +1066,19 @@ meta: {optdriver: 3, gwcalctyp: 18, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+      0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+      0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
 
    Upper and lower wings at the    2 th omega   0.0000  13.6057 [eV]
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+      0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       1.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-     -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
+      0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
 
 
@@ -1147,8 +1147,8 @@ meta: {optdriver: 4, gwcalctyp: 18, }
   Volume of the sphere ..    4849.05 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
- setmesh: FFT mesh size selected  =  48x 48x 48
-          total number of points  =   110592
+ setmesh: FFT mesh size selected  =    48x   48x   48
+          total number of points  =       110592
 
  Number of electrons calculated from density =    2.0000; Expected =    2.0000
  average of density, n =  0.000296
@@ -1286,8 +1286,8 @@ data: !SigmaeeData |
            etotal4     0.0000000000E+00
            etotal5     0.0000000000E+00
            etotal6     0.0000000000E+00
-            fcart1    -8.8017797459E-04  2.4934543406E-21 -2.4934543406E-21
-                       8.8017797459E-04 -2.4934543406E-21  2.4934543406E-21
+            fcart1    -8.8017797459E-04 -8.0628712217E-20  8.0628712217E-20
+                       8.8017797459E-04  8.0628712217E-20 -8.0628712217E-20
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1572,10 +1572,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.7  wall=         10.5
+- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  11 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.7  wall=         10.5
++Overall time at end (sec) : cpu=          4.6  wall=          4.7

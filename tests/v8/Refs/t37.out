@@ -1,4 +1,4 @@
--Succesfully open /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t37_HIST.nc for reading
+-Succesfully open /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t37_HIST.nc for reading
  Extracting information from NetCDF file...
   
 .Version    2.0 of PHONONS
@@ -15,7 +15,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 25 Nov 2019.
+.Starting date : 10 Nov 2020.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
