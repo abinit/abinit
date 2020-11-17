@@ -2468,9 +2468,6 @@ endif
            MSG_WARNING(msg)
            iread_chkp=ikcalc
          end if
-         write(msg,'(a20,i5,a18,2f17.8)')' Last k-point read: ',iread_chkp,', last term read: ',&
-         occ_eigv_tmp(ireadRE-1,iread_chkp),occ_eigv_tmp(ireadRE,iread_chkp)
-         call wrtout(std_out,msg,'COLL')
 !      Save the read data in occs and nateigv
          do ikcalc=1,iread_chkp
            ib=1
@@ -2486,7 +2483,7 @@ endif
              end do
            end do
          end do
-         write(msg,'(a20,i5,a23,2f17.8)')' Last k-point read: ',iread_chkp,', last reshaped term : ',&
+         write(msg,'(a23,i5,a23,2f17.8)')' Last k-point read:    ',iread_chkp,', last read term     : ',&
          real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
          call wrtout(std_out,msg,'COLL')
          ABI_FREE(occ_eigv_tmp)
@@ -2534,7 +2531,7 @@ endif
              ikcalc_tmp=ikcalc_tmp+1
            end do
            close(333)
-           write(msg,'(a23,i5,a21,2f17.8)')' Last k-point written: ',ikcalc_tmp,', last term written: ',&
+           write(msg,'(a23,i5,a23,2f17.8)')' Last k-point written: ',iread_chkp,', last term written  : ',&
            real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
            call wrtout(std_out,msg,'COLL')
          end if
