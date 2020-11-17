@@ -84,6 +84,7 @@ module m_multibinit_dataset
   integer :: fit_coeff
   integer :: fit_option
   integer :: fit_ncoeff
+  integer :: fit_ncoeff_per_iatom
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
   integer :: fit_EFS(3)
@@ -347,6 +348,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_cutoff=0
  multibinit_dtset%fit_nbancoeff=0
  multibinit_dtset%fit_ncoeff=0
+ multibinit_dtset%fit_ncoeff_per_iatom=0
  multibinit_dtset%fit_iatom=0
  multibinit_dtset%ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
@@ -828,6 +830,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_ncoeff is',multibinit_dtset%fit_ncoeff,', but the only allowed values',ch10,&
 &   'are positives for multibinit.',ch10,&
 &   'Action: correct fit_ncoeff in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_ncoeff_per_iatom=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ncoeff_per_iatom',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_ncoeff_per_iatom=intarr(1)
+ if(multibinit_dtset%fit_ncoeff_per_iatom<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_ncoeff_per_iatom is',multibinit_dtset%fit_ncoeff_per_iatom,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_ncoeff_per_iatom in your input file.'
    MSG_ERROR(message)
  end if
 

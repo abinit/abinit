@@ -325,7 +325,7 @@ elec_eval = .FALSE.
     ! If needed, fit the anharmonic part and compute the confinement potential
     !****************************************************************************************
    if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0 .or. inp%opt_effpot/=0) then
-
+        
        if(iam_master) then
           !    Read the MD file
           write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
