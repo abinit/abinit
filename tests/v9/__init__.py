@@ -54,6 +54,10 @@ inp_files = [
 "t59.in",
 "t60.in",
 "t61.in",
+"t62.in",
+"t63.in",
+"t64.in",
+"t65.in",
 # Spin dynamics in multibinit
 "t81.in", # set initial spin using rotation q-modulation
 "t82.in", # damping
