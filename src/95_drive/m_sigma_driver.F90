@@ -2518,6 +2518,7 @@ endif
          end if
        end if
      end if
+     call xmpi_barrier(Wfd%comm)
      ! Prepare arrays for the imaginary freq. integration of Sigma_c(iw)
      order_int=Sigp%nomegasi 
      write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
