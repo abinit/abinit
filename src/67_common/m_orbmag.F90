@@ -4330,7 +4330,7 @@ subroutine ndpw_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_occ,nfftf,npwarr
 
       call getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpoint,&
 &       dtset%mgfft,mpi_enreg,ndat,dtset%ngfft,npw_k,nvloc,&
-&       ngfft4,ngfft5,ngfft6,my_nspinor,vectornd,0)
+&       ngfft4,ngfft5,ngfft6,my_nspinor,vectornd_pac,0)
 
       energy = energy + (DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k)) &
             &           + DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k)))*dtset%wtk(ikpt)*two
