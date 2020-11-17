@@ -538,7 +538,8 @@ end subroutine energies_to_array
 !&  +two*energies%e_fock-energies%e_fock0+&  ! The Fock energy is already included in the non_local part ...
 !&  energies%e_nlpsp_vfock - energies%e_fock0+&
 &   energies%e_hybcomp_E0 -energies%e_hybcomp_v0 + energies%e_hybcomp_v+&
-&   energies%e_localpsp + energies%e_corepsp + energies%e_constrained_dft
+&   energies%e_localpsp + energies%e_corepsp + energies%e_constrained_dft+&
+&   energies%e_nucdip
 
 !  See similar section in m_scfcv_core.F90
 !  XG 20181025 This gives a variational energy in case of NCPP with all bands occupied - not yet for metals.
