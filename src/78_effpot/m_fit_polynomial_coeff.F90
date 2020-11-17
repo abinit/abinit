@@ -242,7 +242,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(fit_tolGF))      tolGF = fit_tolGF
 
  if(need_verbose) then
-   write(message,'(a,(80a))') ch10,('=',ii=1,80)
+   write(message,'(a,(80a))') ch10,('-',ii=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
    write(message,'(2a)') ch10,' Starting Fit process'

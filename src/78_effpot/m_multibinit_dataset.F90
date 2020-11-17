@@ -176,6 +176,7 @@ module m_multibinit_dataset
   real(dp) :: rifcsph
   real(dp) :: conf
   real(dp) :: tolmxf
+  real(dp) :: fit_factors(3)
   real(dp) :: acell(3)
   real(dp) :: strten_reference(6)
   real(dp) :: strtarget(6)
@@ -878,6 +879,16 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_EFS is',multibinit_dtset%fit_EFS,', but the only allowed values are 0 and 1',ch10,&
 &   'Action: correct fit_EFS in your input file.'
    MSG_ERROR(message)
+
+ multibinit_dtset%fit_factors=(/1,1,1/)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_factors',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_factors(1:3)=dprarr(1:3)
+ if(any(multibinit_dtset%fit_factors<0))then
+   write(message, '(a,i8,a,a,a)' )&
+&   'fit_factors is',multibinit_dtset%fit_factors,', but the only allowed values are positive',ch10,&
+&   'Action: correct fit_EFS in your input file.'
+   MSG_ERROR(message)
+ end if
  end if
  
  multibinit_dtset%sel_EFS=(/0,1,1/)
