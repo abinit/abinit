@@ -219,7 +219,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,chkp_rdm,iread_chkp
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,chkp_rdm,iread_chkp,ikcalc_tmp
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: etot,etot2,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -229,10 +229,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  real(dp):: gwalpha,gwbeta,wmin,wmax,eik_new,gsqcut,boxcut,ecutf  
  complex(dpc) :: max_degw,cdummy,delta_band_ibik          
- logical :: wfknocheck                                    
+ logical :: wfknocheck,itexists                               
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
- character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname 
+ character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname
  type(kmesh_t) :: Kmesh,Qmesh
  type(ebands_t) :: KS_BSt,QP_BSt
  type(vcoul_t) :: Vcp
@@ -341,6 +341,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  chkp_rdm=Dtset%chkp_rdm ! Input variable to use write and read a checkpoint file exchange correction on the 1-RDM ( 0 nth, 1 write, 2 read&write )
  wfknocheck=.true.       ! Used for printing WFK file subroutine
  iread_chkp=0
+ ikcalc_tmp=0
 
  mod10 =MOD(Dtset%gwcalctyp,10)
 
@@ -2467,13 +2468,17 @@ endif
            MSG_WARNING(msg)
            iread_chkp=ikcalc
          end if
+         write(msg,'(a20,i5,a18,2f17.8)')' Last k-point read: ',iread_chkp,', last term read: ',&
+         occ_eigv_tmp(ireadRE-1,iread_chkp),occ_eigv_tmp(ireadRE,iread_chkp)
+         call wrtout(std_out,msg,'COLL')
 !      Save the read data in occs and nateigv
          do ikcalc=1,iread_chkp
            ib=1
-           do ib1=b1gw,b2gw
-             occs(ib1,ikcalc)=occ_eigv_tmp(ib,ikcalc)
+           do ib1=1,b2gw-b1gw+1
+             occs(ib1,ikcalc)=occ_eigv_tmp(b1gw+(ib-1),ikcalc)
              ib=ib+1
            end do
+           ib=(b2gw-b1gw+1)+1
            do ib1=1,Wfd%mband
              do ib2=1,Wfd%mband
                nateigv(ib1,ib2,ikcalc,1)=cmplx(occ_eigv_tmp(ib,ikcalc),occ_eigv_tmp(ib+1,ikcalc))
@@ -2481,9 +2486,13 @@ endif
              end do
            end do
          end do
+         write(msg,'(a20,i5,a23,2f17.8)')' Last k-point read: ',iread_chkp,', last reshaped term : ',&
+         real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
+         call wrtout(std_out,msg,'COLL')
          ABI_FREE(occ_eigv_tmp)
        endif
 !      Broadcast from master the info stored in occs and nateigv (to all processes)
+       call xmpi_barrier(Wfd%comm)
        ierr=0
        call xmpi_bcast(occs(:,:),master,Wfd%comm,ierr)
        if(ierr/=0) then
@@ -2500,9 +2509,13 @@ endif
        write(msg,'(a29,a)')' Writing the checkpoint file ',gw1rdm_fname
        call wrtout(std_out,msg,'COLL')
        if(my_rank==0) then
-         open(unit=333,form='formatted',file=gw1rdm_fname)
-         write(333,*) Sigp%nkptgw
-         if(chkp_rdm>1) then
+         if(chkp_rdm==1) then
+           open(unit=333,form='formatted',file=gw1rdm_fname)
+           write(333,*) Sigp%nkptgw
+           close(333)
+         else
+           open(unit=333,form='formatted',file=gw1rdm_fname)
+           write(333,*) Sigp%nkptgw
            do ikcalc=1,iread_chkp
              do iwrite=b1gw,b2gw 
                write(333,*) occs(iwrite,ikcalc) 
@@ -2514,7 +2527,12 @@ endif
                end do 
              end do
              write(333,*) ikcalc
+             ikcalc_tmp=ikcalc_tmp+1
            end do
+           close(333)
+           write(msg,'(a23,i5,a21,2f17.8)')' Last k-point written: ',ikcalc_tmp,', last term written: ',&
+           real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
+           call wrtout(std_out,msg,'COLL')
          end if
        end if
      end if
@@ -2574,10 +2592,11 @@ endif
       end if 
    end do
 
+write(*,*) 'MAU0'
    ! for the time being, do not remove this barrier!
    call xmpi_barrier(Wfd%comm)
    call timab(421,2,tsec) ! calc_sigx_me
-
+write(*,*) 'MAU1'
    ! ==========================================================
    ! ==== Correlation part using the coarse gwc_ngfft mesh ====
    ! ==========================================================
@@ -2625,6 +2644,8 @@ endif
 !        Print the checkpoint file if required
          if(chkp_rdm>0) then
            if(my_rank==0) then
+             gw1rdm_fname='GW1RDM_CHKP'
+             open(unit=333,form='formatted',file=gw1rdm_fname,position='append',action='write')
              do iwrite=b1gw,b2gw 
                write(333,*) occs(iwrite,ikcalc) 
              end do
@@ -2635,6 +2656,7 @@ endif
                end do 
              end do
              write(333,*) ikcalc
+             close(333)
            end if
          end if
        else
@@ -2645,11 +2667,6 @@ endif
    end if
 
    call xmpi_barrier(Wfd%comm)
-   if(chkp_rdm>1) then
-     write(msg,'(a29,a)')' Closing the checkpoint file ',gw1rdm_fname
-     call wrtout(std_out,msg,'COLL')
-     close(333)
-   end if
 
    ! MRM: first clean all non-req. arrays. Then, print WFK and DEN files, build band corrections, and compute new energies.
    if (gwcalctyp==21 .and. gw1rdm>0) then
