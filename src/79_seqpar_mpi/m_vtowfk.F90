@@ -473,17 +473,21 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &       mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
 &       subham,subovl,use_subovl,0,mpi_enreg%me_g0)
+       call timab(585,2,tsec)
        !LTEST
        !call cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,'after subdiago',mpi_enreg)
        !LTEST
+       call timab(578,1,tsec)
        call cprj_rotate(cprj_cwavef_bands,evec,&
          &   gs_hamk%dimcprj,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%lmnmax,mpi_enreg,&
          &   natom,gs_hamk%nattyp,nband_k,gs_hamk%nspinor,gs_hamk%ntypat)
        !LTEST
        !call cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,'before mksubovl',mpi_enreg)
        !LTEST
-       call timab(585,2,tsec)
+       call timab(578,2,tsec)
+       call timab(579,1,tsec)
        call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
+       call timab(579,2,tsec)
      end if
    end if
 
