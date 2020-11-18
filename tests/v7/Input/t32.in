@@ -11,7 +11,7 @@ nucdipmom1
 # nuclear dipoles are input in cartesian coords, atomic units
 # note that in atomic units, 1 unit of mag dipole = 2 bohr magnetons
 nucdipmom2
-0.0 0.0  10.0
+0.0 0.0  1000.0
 0.0 0.0  0.0
 
 # nuclear dipole moments break time reversal symmetry so do not use kptopt 1 or 2
