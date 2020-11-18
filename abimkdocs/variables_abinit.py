@@ -4917,9 +4917,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This variable is typically used to chain the calculations, in the multi-
-dataset mode ([[ndtset]] > 0), since it describes from which dataset [[acell]]
-and [[rprim]] are to be taken, as input of the present dataset. The cell
-parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
+dataset mode ([[ndtset]] > 0), since it describes from which dataset the output [[acell]]
+and [[rprim]] are to be taken (implicitly also [[scalecart]]), as input of the present dataset. 
+The cell parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
 If 0, no previously computed values are used.
 If >0, the value must be the index of the dataset from which the
 cell data is to be used as input data. It must be the index of a dataset already
