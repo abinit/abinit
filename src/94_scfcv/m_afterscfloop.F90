@@ -555,14 +555,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  !call kinpw_energy(cg,dtset,kenergy,mcg,mpi_enreg,dtset%mband,npwarr,rprimd)
  !write(std_out,'(a,es16.8)')'JWZ Debug kinpw_energy returned ',kenergy
 
- if(with_vectornd .EQ. 1) then
-   call ndpw_energy(cg,dtset,ndpwenergy,gmet,mcg,mpi_enreg,dtset%mband,nfftf,npwarr,pawfgr,&
-    & ucvol,vectornd,with_vectornd)
-   write(std_out,'(a,es16.8)')'JWZ Debug ndpw_energy returned ',ndpwenergy
-   call ndpaw_energy(atindx1,ndpawenergy,cprj,dtset,mcprj,mpi_enreg,nattyp,&
-     & dtset%mband,paw_ij,pawrad,pawtab,psps)
-   write(std_out,'(a,2es16.8)')'JWZ Debug ndpaw_energy returned ',real(ndpawenergy),aimag(ndpawenergy)
- end if
+! if(with_vectornd .EQ. 1) then
+!   call ndpw_energy(cg,dtset,ndpwenergy,gmet,mcg,mpi_enreg,dtset%mband,nfftf,npwarr,pawfgr,&
+!    & ucvol,vectornd,with_vectornd)
+!   write(std_out,'(a,es16.8)')'JWZ Debug ndpw_energy returned ',ndpwenergy
+!   call ndpaw_energy(atindx1,ndpawenergy,cprj,dtset,mcprj,mpi_enreg,nattyp,&
+!     & dtset%mband,paw_ij,pawrad,pawtab,psps)
+!   write(std_out,'(a,2es16.8)')'JWZ Debug ndpaw_energy returned ',real(ndpawenergy),aimag(ndpawenergy)
+! end if
  
  if(dtset%orbmag.NE.0) then
     call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,&
