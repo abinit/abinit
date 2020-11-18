@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h44 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h21 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tbase1_2/tbase1_2.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tbase1_2/tbase1_2.in
 - output file    -> tbase1_2.out
 - root for input  files -> tbase1_2i
 - root for output files -> tbase1_2o
@@ -623,8 +623,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -723,13 +723,13 @@ force_length_stats: {min:   3.80144124E-01, max:   3.80144124E-01, mean:   3.801
     2      0.26458860429500     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.38014412428620    -0.00000000000000    -0.00000000000000
-    2      0.38014412428620    -0.00000000000000    -0.00000000000000
+    1     -0.38014412428621    -0.00000000000000    -0.00000000000000
+    2      0.38014412428621    -0.00000000000000    -0.00000000000000
  frms,max,avg= 2.1947631E-01 3.8014412E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -19.54779518119797    -0.00000000000000    -0.00000000000000
-    2     19.54779518119797    -0.00000000000000    -0.00000000000000
+    1    -19.54779518119813    -0.00000000000000    -0.00000000000000
+    2     19.54779518119813    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.1285925E+01 1.9547795E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -742,16 +742,16 @@ force_length_stats: {min:   3.80144124E-01, max:   3.80144124E-01, mean:   3.801
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.24898287445820E+00
-hartree             :  8.73762249266623E-01
-xc                  : -7.06146492390552E-01
+kinetic             :  1.24898287445817E+00
+hartree             :  8.73762249266608E-01
+xc                  : -7.06146492390544E-01
 Ewald energy        :  4.34666042075695E-01
 psp_core            : -1.92143215271889E-05
-local_psp           : -2.88806784819109E+00
+local_psp           : -2.88806784819104E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.03682238910265E+00
-total_energy_eV     : -2.82133720245144E+01
-band_energy         : -8.14530024621633E-01
+total_energy        : -1.03682238910264E+00
+total_energy_eV     : -2.82133720245142E+01
+band_energy         : -8.14530024621783E-01
 ...
 
 
@@ -865,21 +865,21 @@ force_length_stats: {min:   3.04031703E-01, max:   3.04031703E-01, mean:   3.040
       -0.052500000000      0.000000000000      0.000000000000
        0.052500000000      0.000000000000      0.000000000000
  rms dE/dt=  1.7553E+00; max dE/dt=  3.0403E+00; dE/dt below (all hartree)
-    1       3.040317029168      0.000000000000      0.000000000000
-    2      -3.040317029168      0.000000000000      0.000000000000
+    1       3.040317029167      0.000000000000      0.000000000000
+    2      -3.040317029167      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.27781803450975     0.00000000000000     0.00000000000000
     2      0.27781803450975     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.30403170291676    -0.00000000000000    -0.00000000000000
-    2      0.30403170291676    -0.00000000000000    -0.00000000000000
+    1     -0.30403170291675    -0.00000000000000    -0.00000000000000
+    2      0.30403170291675    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.7553279E-01 3.0403170E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -15.63393743982525    -0.00000000000000    -0.00000000000000
-    2     15.63393743982525    -0.00000000000000    -0.00000000000000
+    1    -15.63393743982461    -0.00000000000000    -0.00000000000000
+    2     15.63393743982461    -0.00000000000000    -0.00000000000000
  frms,max,avg= 9.0262580E+00 1.5633937E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -892,16 +892,16 @@ force_length_stats: {min:   3.04031703E-01, max:   3.04031703E-01, mean:   3.040
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.21196812596419E+00
-hartree             :  8.52371283098169E-01
-xc                  : -6.96263057611820E-01
+kinetic             :  1.21196812596424E+00
+hartree             :  8.52371283098201E-01
+xc                  : -6.96263057611835E-01
 Ewald energy        :  3.87268389438835E-01
 psp_core            : -1.92143215271889E-05
-local_psp           : -2.80919006984486E+00
+local_psp           : -2.80919006984493E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.05386454327701E+00
-total_energy_eV     : -2.86771126235543E+01
-band_energy         : -8.02428163690364E-01
+total_energy        : -1.05386454327702E+00
+total_energy_eV     : -2.86771126235545E+01
+band_energy         : -8.02428163690485E-01
 ...
 
 
@@ -962,10 +962,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -1.0674477169487    -7.411E-05 1.190E-11 1.488E-03
  ETOT  3  -1.0674504521613    -2.735E-06 1.431E-08 1.558E-04
  ETOT  4  -1.0674504850312    -3.287E-08 1.519E-10 3.828E-06
- ETOT  5  -1.0674504850817    -5.050E-11 2.940E-13 1.005E-07
+ ETOT  5  -1.0674504850816    -5.047E-11 2.940E-13 1.005E-07
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  5.050E-11 < toldfe=  1.000E-06
+  for the second time, diff in etot=  5.047E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.48147683E-04  sigma(3 2)=  0.00000000E+00
@@ -983,7 +983,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -5.050E-11, res2:  1.005E-07, residm:  2.940E-13, diffor: null, }
+convergence: {deltae: -5.047E-11, res2:  1.005E-07, residm:  2.940E-13, diffor: null, }
 etotal    :  -1.06745049E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.95388375E-01
@@ -1015,21 +1015,21 @@ force_length_stats: {min:   2.41429509E-01, max:   2.41429509E-01, mean:   2.414
       -0.055000000000      0.000000000000      0.000000000000
        0.055000000000      0.000000000000      0.000000000000
  rms dE/dt=  1.3939E+00; max dE/dt=  2.4143E+00; dE/dt below (all hartree)
-    1       2.414295088274      0.000000000000      0.000000000000
-    2      -2.414295088274      0.000000000000      0.000000000000
+    1       2.414295088258      0.000000000000      0.000000000000
+    2      -2.414295088258      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1     -0.29104746472450     0.00000000000000     0.00000000000000
     2      0.29104746472450     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.24142950882743    -0.00000000000000    -0.00000000000000
-    2      0.24142950882743    -0.00000000000000    -0.00000000000000
+    1     -0.24142950882582    -0.00000000000000    -0.00000000000000
+    2      0.24142950882582    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.3938939E-01 2.4142951E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -12.41480345939203    -0.00000000000000    -0.00000000000000
-    2     12.41480345939203    -0.00000000000000    -0.00000000000000
+    1    -12.41480345930892    -0.00000000000000    -0.00000000000000
+    2     12.41480345930892    -0.00000000000000    -0.00000000000000
  frms,max,avg= 7.1676901E+00 1.2414803E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -1042,16 +1042,16 @@ force_length_stats: {min:   2.41429509E-01, max:   2.41429509E-01, mean:   2.414
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.17676824999474E+00
-hartree             :  8.31486162943450E-01
-xc                  : -6.86622172901860E-01
+kinetic             :  1.17676824999979E+00
+hartree             :  8.31486162946743E-01
+xc                  : -6.86622172903399E-01
 Ewald energy        :  3.44211247397988E-01
 psp_core            : -1.92143215271889E-05
-local_psp           : -2.73327475819448E+00
+local_psp           : -2.73327475820124E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.06745048508169E+00
-total_energy_eV     : -2.90468049011010E+01
-band_energy         : -7.90776750818257E-01
+total_energy        : -1.06745048508165E+00
+total_energy_eV     : -2.90468049010999E+01
+band_energy         : -7.90776750827526E-01
 ...
 
 
@@ -1112,10 +1112,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -1.0781878815225    -7.224E-05 1.334E-11 1.411E-03
  ETOT  3  -1.0781904583757    -2.577E-06 1.349E-08 1.443E-04
  ETOT  4  -1.0781904895325    -3.116E-08 1.397E-10 3.742E-06
- ETOT  5  -1.0781904896234    -9.089E-11 4.470E-13 8.270E-08
+ ETOT  5  -1.0781904896234    -9.090E-11 4.470E-13 8.270E-08
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  9.089E-11 < toldfe=  1.000E-06
+  for the second time, diff in etot=  9.090E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.98328720E-04  sigma(3 2)=  0.00000000E+00
@@ -1133,7 +1133,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -9.089E-11, res2:  8.270E-08, residm:  4.470E-13, diffor: null, }
+convergence: {deltae: -9.090E-11, res2:  8.270E-08, residm:  4.470E-13, diffor: null, }
 etotal    :  -1.07819049E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.89797251E-01
@@ -1173,13 +1173,13 @@ force_length_stats: {min:   1.89818578E-01, max:   1.89818578E-01, mean:   1.898
     2      0.30427689493925     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.18981857799142    -0.00000000000000    -0.00000000000000
-    2      0.18981857799142    -0.00000000000000    -0.00000000000000
+    1     -0.18981857799141    -0.00000000000000    -0.00000000000000
+    2      0.18981857799141    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.0959181E-01 1.8981858E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -9.76086291253297    -0.00000000000000    -0.00000000000000
-    2      9.76086291253297    -0.00000000000000    -0.00000000000000
+    1     -9.76086291253226    -0.00000000000000    -0.00000000000000
+    2      9.76086291253226    -0.00000000000000    -0.00000000000000
  frms,max,avg= 5.6354368E+00 9.7608629E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -1192,16 +1192,16 @@ force_length_stats: {min:   1.89818578E-01, max:   1.89818578E-01, mean:   1.898
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.14340951964018E+00
-hartree             :  8.11147992393097E-01
-xc                  : -6.77244049718676E-01
+kinetic             :  1.14340951964022E+00
+hartree             :  8.11147992393120E-01
+xc                  : -6.77244049718688E-01
 Ewald energy        :  3.04930064724214E-01
 psp_core            : -1.92143215271889E-05
-local_psp           : -2.66041480234065E+00
+local_psp           : -2.66041480234070E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.07819048962336E+00
 total_energy_eV     : -2.93390552873427E+01
-band_energy         : -7.79594502637855E-01
+band_energy         : -7.79594502637794E-01
 ...
 
 
@@ -1323,13 +1323,13 @@ force_length_stats: {min:   1.47165214E-01, max:   1.47165214E-01, mean:   1.471
     2      0.31750632515400     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.14716521385991    -0.00000000000000    -0.00000000000000
-    2      0.14716521385991    -0.00000000000000    -0.00000000000000
+    1     -0.14716521385992    -0.00000000000000    -0.00000000000000
+    2      0.14716521385992    -0.00000000000000    -0.00000000000000
  frms,max,avg= 8.4965876E-02 1.4716521E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -7.56753892680158    -0.00000000000000    -0.00000000000000
-    2      7.56753892680158    -0.00000000000000    -0.00000000000000
+    1     -7.56753892680199    -0.00000000000000    -0.00000000000000
+    2      7.56753892680199    -0.00000000000000    -0.00000000000000
  frms,max,avg= 4.3691206E+00 7.5675389E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -1342,16 +1342,16 @@ force_length_stats: {min:   1.47165214E-01, max:   1.47165214E-01, mean:   1.471
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.11189454312742E+00
-hartree             :  7.91388653909975E-01
-xc                  : -6.68144515452931E-01
+kinetic             :  1.11189454312738E+00
+hartree             :  7.91388653909951E-01
+xc                  : -6.68144515452920E-01
 Ewald energy        :  2.68954403847803E-01
 psp_core            : -1.92143215271889E-05
-local_psp           : -2.59065534960425E+00
+local_psp           : -2.59065534960421E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.08658147849352E+00
 total_energy_eV     : -2.95673857064534E+01
-band_energy         : -7.68877687989154E-01
+band_energy         : -7.68877687989033E-01
 ...
 
 
@@ -1412,10 +1412,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -1.0930264253078    -6.755E-05 1.525E-11 1.229E-03
  ETOT  3  -1.0930286513998    -2.226E-06 1.168E-08 1.369E-04
  ETOT  4  -1.0930286803531    -2.895E-08 1.301E-10 3.338E-06
- ETOT  5  -1.0930286804164    -6.332E-11 3.766E-13 7.663E-08
+ ETOT  5  -1.0930286804164    -6.333E-11 3.766E-13 7.663E-08
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  6.332E-11 < toldfe=  1.000E-06
+  for the second time, diff in etot=  6.333E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.13575662E-04  sigma(3 2)=  0.00000000E+00
@@ -1433,7 +1433,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -6.332E-11, res2:  7.663E-08, residm:  3.766E-13, diffor: null, }
+convergence: {deltae: -6.333E-11, res2:  7.663E-08, residm:  3.766E-13, diffor: null, }
 etotal    :  -1.09302868E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.79313954E-01
@@ -1478,8 +1478,8 @@ force_length_stats: {min:   1.11819975E-01, max:   1.11819975E-01, mean:   1.118
  frms,max,avg= 6.4559293E-02 1.1181998E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -5.75001382223522    -0.00000000000000    -0.00000000000000
-    2      5.75001382223522    -0.00000000000000    -0.00000000000000
+    1     -5.75001382223523    -0.00000000000000    -0.00000000000000
+    2      5.75001382223523    -0.00000000000000    -0.00000000000000
  frms,max,avg= 3.3197720E+00 5.7500138E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -1499,9 +1499,9 @@ Ewald energy        :  2.35889119124748E-01
 psp_core            : -1.92143215271889E-05
 local_psp           : -2.52399318675520E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.09302868041637E+00
-total_energy_eV     : -2.97428229927992E+01
-band_energy         : -7.58627908518062E-01
+total_energy        : -1.09302868041638E+00
+total_energy_eV     : -2.97428229927993E+01
+band_energy         : -7.58627908518064E-01
 ...
 
 
@@ -1628,8 +1628,8 @@ force_length_stats: {min:   8.24411449E-02, max:   8.24411449E-02, mean:   8.244
  frms,max,avg= 4.7597417E-02 8.2441145E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -4.23929376472752    -0.00000000000000    -0.00000000000000
-    2      4.23929376472752    -0.00000000000000    -0.00000000000000
+    1     -4.23929376472759    -0.00000000000000    -0.00000000000000
+    2      4.23929376472759    -0.00000000000000    -0.00000000000000
  frms,max,avg= 2.4475574E+00 4.2392938E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -1643,15 +1643,15 @@ force_length_stats: {min:   8.24411449E-02, max:   8.24411449E-02, mean:   8.244
 iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.05427709622619E+00
-hartree             :  7.53673838443660E-01
-xc                  : -6.50815722010631E-01
+hartree             :  7.53673838443657E-01
+xc                  : -6.50815722010630E-01
 Ewald energy        :  2.05399878588035E-01
 psp_core            : -1.92143215271889E-05
 local_psp           : -2.46037869765069E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.09786282072496E+00
 total_energy_eV     : -2.98743666403693E+01
-band_energy         : -7.48826170627004E-01
+band_energy         : -7.48826170626997E-01
 ...
 
 
@@ -1778,8 +1778,8 @@ force_length_stats: {min:   5.79334883E-02, max:   5.79334883E-02, mean:   5.793
  frms,max,avg= 3.3447915E-02 5.7933488E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -2.97905949405054    -0.00000000000000    -0.00000000000000
-    2      2.97905949405054    -0.00000000000000    -0.00000000000000
+    1     -2.97905949405056    -0.00000000000000    -0.00000000000000
+    2      2.97905949405056    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.7199608E+00 2.9790595E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -1792,8 +1792,8 @@ force_length_stats: {min:   5.79334883E-02, max:   5.79334883E-02, mean:   5.793
 --- !EnergyTerms
 iteration_state     : {dtset: 8, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.02806364990251E+00
-hartree             :  7.35726110679773E-01
+kinetic             :  1.02806364990250E+00
+hartree             :  7.35726110679772E-01
 xc                  : -6.42591144802905E-01
 Ewald energy        :  1.77201903095425E-01
 psp_core            : -1.92143215271889E-05
@@ -1801,7 +1801,7 @@ local_psp           : -2.39973521695919E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.10135391240592E+00
 total_energy_eV     : -2.99693640761903E+01
-band_energy         : -7.39461541347962E-01
+band_energy         : -7.39461541347959E-01
 ...
 
 
@@ -1862,10 +1862,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -1.1037206906865    -5.952E-05 1.556E-11 9.936E-04
  ETOT  3  -1.1037223968484    -1.706E-06 8.912E-09 1.231E-04
  ETOT  4  -1.1037224212841    -2.444E-08 1.027E-10 2.885E-06
- ETOT  5  -1.1037224213374    -5.332E-11 3.526E-14 6.072E-08
+ ETOT  5  -1.1037224213374    -5.331E-11 3.526E-14 6.072E-08
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  5.332E-11 < toldfe=  1.000E-06
+  for the second time, diff in etot=  5.331E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.64358069E-05  sigma(3 2)=  0.00000000E+00
@@ -1883,7 +1883,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -5.332E-11, res2:  6.072E-08, residm:  3.526E-14, diffor: null, }
+convergence: {deltae: -5.331E-11, res2:  6.072E-08, residm:  3.526E-14, diffor: null, }
 etotal    :  -1.10372242E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.65258242E-01
@@ -1923,13 +1923,13 @@ force_length_stats: {min:   3.74035293E-02, max:   3.74035293E-02, mean:   3.740
     2      0.37042404601300     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.03740352932906    -0.00000000000000    -0.00000000000000
-    2      0.03740352932906    -0.00000000000000    -0.00000000000000
+    1     -0.03740352932905    -0.00000000000000    -0.00000000000000
+    2      0.03740352932905    -0.00000000000000    -0.00000000000000
  frms,max,avg= 2.1594938E-02 3.7403529E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -1.92336664877109    -0.00000000000000    -0.00000000000000
-    2      1.92336664877109    -0.00000000000000    -0.00000000000000
+    1     -1.92336664877078    -0.00000000000000    -0.00000000000000
+    2      1.92336664877078    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.1104563E+00 1.9233666E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -1942,16 +1942,16 @@ force_length_stats: {min:   3.74035293E-02, max:   3.74035293E-02, mean:   3.740
 --- !EnergyTerms
 iteration_state     : {dtset: 9, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.00348120214354E+00
-hartree             :  7.18376476186927E-01
-xc                  : -6.34656227855035E-01
+kinetic             :  1.00348120214356E+00
+hartree             :  7.18376476186945E-01
+xc                  : -6.34656227855046E-01
 Ewald energy        :  1.51051118525613E-01
 psp_core            : -1.92143215271889E-05
-local_psp           : -2.34195577601693E+00
+local_psp           : -2.34195577601696E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.10372242133741E+00
-total_energy_eV     : -3.00338144819010E+01
-band_energy         : -7.30516484847377E-01
+total_energy_eV     : -3.00338144819009E+01
+band_energy         : -7.30516484847398E-01
 ...
 
 
@@ -2092,15 +2092,15 @@ force_length_stats: {min:   2.01218587E-02, max:   2.01218587E-02, mean:   2.012
 --- !EnergyTerms
 iteration_state     : {dtset: 10, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.80443771135099E-01
-hartree             :  7.01611939873820E-01
-xc                  : -6.27004892353935E-01
+kinetic             :  9.80443771135100E-01
+hartree             :  7.01611939873821E-01
+xc                  : -6.27004892353936E-01
 Ewald energy        :  1.26737138563291E-01
 psp_core            : -1.92143215271889E-05
 local_psp           : -2.28691711588259E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.10514837298584E+00
-total_energy_eV     : -3.00726165995721E+01
+total_energy_eV     : -3.00726165995722E+01
 band_energy         : -7.21970707772216E-01
 ...
 
@@ -2242,7 +2242,7 @@ force_length_stats: {min:   5.49450713E-03, max:   5.49450713E-03, mean:   5.494
 --- !EnergyTerms
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.58858680731534E-01
+kinetic             :  9.58858680731535E-01
 hartree             :  6.85414914959550E-01
 xc                  : -6.19628691874956E-01
 Ewald energy        :  1.04077650936584E-01
@@ -2251,7 +2251,7 @@ local_psp           : -2.23448216511231E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.10577882468112E+00
 total_energy_eV     : -3.00897720626577E+01
-band_energy         : -7.13806231211212E-01
+band_energy         : -7.13806231211215E-01
 ...
 
 
@@ -2312,10 +2312,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -1.1057327420457    -5.176E-05 1.351E-11 7.830E-04
  ETOT  3  -1.1057340050258    -1.263E-06 6.615E-09 1.103E-04
  ETOT  4  -1.1057340253951    -2.037E-08 8.056E-11 2.090E-06
- ETOT  5  -1.1057340254229    -2.788E-11 2.138E-14 4.241E-08
+ ETOT  5  -1.1057340254229    -2.787E-11 2.138E-14 4.241E-08
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  2.788E-11 < toldfe=  1.000E-06
+  for the second time, diff in etot=  2.787E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.39997005E-05  sigma(3 2)=  0.00000000E+00
@@ -2333,7 +2333,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -2.788E-11, res2:  4.241E-08, residm:  2.138E-14, diffor: null, }
+convergence: {deltae: -2.787E-11, res2:  4.241E-08, residm:  2.138E-14, diffor: null, }
 etotal    :  -1.10573403E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.53000534E-01
@@ -2373,13 +2373,13 @@ force_length_stats: {min:   6.96030678E-03, max:   6.96030678E-03, mean:   6.960
     2      0.41011233665725     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00696030678384    -0.00000000000000    -0.00000000000000
-    2     -0.00696030678384    -0.00000000000000    -0.00000000000000
+    1      0.00696030678383    -0.00000000000000    -0.00000000000000
+    2     -0.00696030678383    -0.00000000000000    -0.00000000000000
  frms,max,avg= 4.0185350E-03 6.9603068E-03   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.35791333527565    -0.00000000000000    -0.00000000000000
-    2     -0.35791333527565    -0.00000000000000    -0.00000000000000
+    1      0.35791333527555    -0.00000000000000    -0.00000000000000
+    2     -0.35791333527555    -0.00000000000000    -0.00000000000000
  frms,max,avg= 2.0664136E-01 3.5791334E-01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -2392,16 +2392,16 @@ force_length_stats: {min:   6.96030678E-03, max:   6.96030678E-03, mean:   6.960
 --- !EnergyTerms
 iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.38627943808721E-01
-hartree             :  6.69763416455226E-01
-xc                  : -6.12516898478680E-01
+kinetic             :  9.38627943808717E-01
+hartree             :  6.69763416455225E-01
+xc                  : -6.12516898478679E-01
 Ewald energy        :  8.29138901988734E-02
 psp_core            : -1.92143215271889E-05
-local_psp           : -2.18450316308555E+00
+local_psp           : -2.18450316308554E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.10573402542293E+00
 total_energy_eV     : -3.00885530128465E+01
-band_energy         : -7.06001068517480E-01
+band_energy         : -7.06001068517499E-01
 ...
 
 
@@ -2551,7 +2551,7 @@ local_psp           : -2.13683010269618E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.10511251080482E+00
 total_energy_eV     : -3.00716407399983E+01
-band_energy         : -6.98534012763891E-01
+band_energy         : -6.98534012763889E-01
 ...
 
 
@@ -2678,8 +2678,8 @@ force_length_stats: {min:   2.68335106E-02, max:   2.68335106E-02, mean:   2.683
  frms,max,avg= 1.5492335E-02 2.6833511E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      1.37983447989826    -0.00000000000000    -0.00000000000000
-    2     -1.37983447989826    -0.00000000000000    -0.00000000000000
+    1      1.37983447989827    -0.00000000000000    -0.00000000000000
+    2     -1.37983447989827    -0.00000000000000    -0.00000000000000
  frms,max,avg= 7.9664781E-01 1.3798345E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -2693,15 +2693,15 @@ force_length_stats: {min:   2.68335106E-02, max:   2.68335106E-02, mean:   2.683
 iteration_state     : {dtset: 14, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.01838216066199E-01
-hartree             :  6.40002541690939E-01
+hartree             :  6.40002541690940E-01
 xc                  : -5.99039678016891E-01
 Ewald energy        :  4.45348204057015E-02
 psp_core            : -1.92143215271889E-05
 local_psp           : -2.09131201114512E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.10399532532069E+00
+total_energy        : -1.10399532532070E+00
 total_energy_eV     : -3.00412405769470E+01
-band_energy         : -6.91386386483348E-01
+band_energy         : -6.91386386483349E-01
 ...
 
 
@@ -2841,8 +2841,8 @@ force_length_stats: {min:   3.48127731E-02, max:   3.48127731E-02, mean:   3.481
 --- !EnergyTerms
 iteration_state     : {dtset: 15, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.85084965582137E-01
-hartree             :  6.25842162301217E-01
+kinetic             :  8.85084965582138E-01
+hartree             :  6.25842162301218E-01
 xc                  : -5.92648642660608E-01
 Ewald energy        :  2.70898157112294E-02
 psp_core            : -1.92143215271889E-05
@@ -2850,7 +2850,7 @@ local_psp           : -2.04779860909886E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.10244952248641E+00
 total_energy_eV     : -2.99991771426514E+01
-band_energy         : -6.84566524089373E-01
+band_energy         : -6.84566524089375E-01
 ...
 
 
@@ -2992,14 +2992,14 @@ iteration_state     : {dtset: 16, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.69306563266539E-01
 hartree             :  6.12130212187887E-01
-xc                  : -5.86473261495479E-01
+xc                  : -5.86473261495478E-01
 Ewald energy        :  1.06766146286162E-02
 psp_core            : -1.92143215271889E-05
 local_psp           : -2.00615197572456E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.10053106145852E+00
 total_energy_eV     : -2.99469731632010E+01
-band_energy         : -6.77999931577642E-01
+band_energy         : -6.77999931577643E-01
 ...
 
 
@@ -3125,8 +3125,8 @@ force_length_stats: {min:   4.78517664E-02, max:   4.78517664E-02, mean:   4.785
  frms,max,avg= 2.7627230E-02 4.7851766E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      2.46063655384026    -0.00000000000000    -0.00000000000000
-    2     -2.46063655384026    -0.00000000000000    -0.00000000000000
+    1      2.46063655384023    -0.00000000000000    -0.00000000000000
+    2     -2.46063655384023    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.4206492E+00 2.4606366E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -3147,7 +3147,7 @@ psp_core            : -1.92143215271889E-05
 local_psp           : -1.96623363578059E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.09828719410211E+00
-total_energy_eV     : -2.98859144272349E+01
+total_energy_eV     : -2.98859144272350E+01
 band_energy         : -6.71697169559908E-01
 ...
 
@@ -3290,12 +3290,12 @@ iteration_state     : {dtset: 18, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.40329718014540E-01
 hartree             :  5.85950578051343E-01
-xc                  : -5.74717788431006E-01
+xc                  : -5.74717788431007E-01
 Ewald energy        : -1.93840549378140E-02
 psp_core            : -1.92143215271889E-05
 local_psp           : -1.92791765654996E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.09575841817443E+00
+total_energy        : -1.09575841817442E+00
 total_energy_eV     : -2.98171029347707E+01
 band_energy         : -6.65642569970156E-01
 ...
@@ -3423,8 +3423,8 @@ force_length_stats: {min:   5.78482545E-02, max:   5.78482545E-02, mean:   5.784
  frms,max,avg= 3.3398705E-02 5.7848254E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      2.97467659597587    -0.00000000000000    -0.00000000000000
-    2     -2.97467659597587    -0.00000000000000    -0.00000000000000
+    1      2.97467659597586    -0.00000000000000    -0.00000000000000
+    2     -2.97467659597586    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.7174303E+00 2.9746766E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -3437,15 +3437,15 @@ force_length_stats: {min:   5.78482545E-02, max:   5.78482545E-02, mean:   5.784
 --- !EnergyTerms
 iteration_state     : {dtset: 19, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.26979169009683E-01
-hartree             :  5.73438103773369E-01
+kinetic             :  8.26979169009682E-01
+hartree             :  5.73438103773368E-01
 xc                  : -5.69114616125198E-01
 Ewald energy        : -3.31746152334626E-02
 psp_core            : -1.92143215271889E-05
-local_psp           : -1.89108888492251E+00
+local_psp           : -1.89108888492252E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.09298005781965E+00
-total_energy_eV     : -2.97414999046555E+01
+total_energy_eV     : -2.97414999046556E+01
 band_energy         : -6.59822113730872E-01
 ...
 
@@ -3572,8 +3572,8 @@ force_length_stats: {min:   6.19186475E-02, max:   6.19186475E-02, mean:   6.191
  frms,max,avg= 3.5748748E-02 6.1918648E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      3.18398460611341    -0.00000000000000    -0.00000000000000
-    2     -3.18398460611341    -0.00000000000000    -0.00000000000000
+    1      3.18398460611342    -0.00000000000000    -0.00000000000000
+    2     -3.18398460611342    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.8382744E+00 3.1839846E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -3587,7 +3587,7 @@ force_length_stats: {min:   6.19186475E-02, max:   6.19186475E-02, mean:   6.191
 iteration_state     : {dtset: 20, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.14297924826547E-01
-hartree             :  5.61283466106056E-01
+hartree             :  5.61283466106057E-01
 xc                  : -5.63680507949180E-01
 Ewald energy        : -4.62217845141600E-02
 psp_core            : -1.92143215271889E-05
@@ -3737,7 +3737,7 @@ iteration_state     : {dtset: 21, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.02228792278582E-01
 hartree             :  5.49468863069181E-01
-xc                  : -5.58406278139959E-01
+xc                  : -5.58406278139960E-01
 Ewald energy        : -5.85800839913710E-02
 psp_core            : -1.92143215271889E-05
 local_psp           : -1.82148936569379E+00
@@ -3849,9 +3849,9 @@ P           mkmem           1
           spgroup         123
            strten1    -3.6564446295E-04  5.4689925033E-05  5.4689925033E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2    -3.0369756306E-04  5.0637360751E-05  5.0637360751E-05
+           strten2    -3.0369756306E-04  5.0637360750E-05  5.0637360750E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3    -2.4814768285E-04  4.7170073266E-05  4.7170073266E-05
+           strten3    -2.4814768285E-04  4.7170073264E-05  4.7170073264E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4    -1.9832871988E-04  4.4246867950E-05  4.4246867950E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4066,7 +4066,24 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -4084,7 +4101,9 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -4097,25 +4116,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          6.8  wall=          8.0
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          5.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and  85 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.8  wall=          8.0
+.Delivered  27 WARNINGs and  89 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.8  wall=          5.0

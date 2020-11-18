@@ -68,6 +68,7 @@ program abitk
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, intmeth, lenr !occopt,
  integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp, use_symmetries
  real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb !, tolsym, tsmear
+ logical :: is_metal
  character(len=500) :: command, arg, msg, ptgroup
  character(len=fnlen) :: path, other_path !, prefix
  type(hdr_type) :: hdr
@@ -293,8 +294,12 @@ program abitk
    ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, skw_params, [1, ebands%mband], comm)
 
    ! Compare gaps
-   call ebands_print_gaps(other_ebands, std_out, header="Ab-initio gaps")
-   call ebands_print_gaps(ebands_kpath, std_out, header="SKW interpolated gaps")
+   ABI_CHECK(get_arg("is-metal", is_metal, msg, default=.False.) == 0, msg)
+   if (.not. is_metal) then
+     write(std_out, "(2a)")" Will try to compare gaps. Use --is-metal option to skip this check.",ch10
+     call ebands_print_gaps(other_ebands, std_out, header="Ab-initio gaps")
+     call ebands_print_gaps(ebands_kpath, std_out, header="SKW interpolated gaps")
+   end if
 
    !ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
    !call ebands_write(ebands_kpath, prtebands, path)
@@ -497,7 +502,7 @@ subroutine abitk_show_help()
   !write(std_out,"(a)")"ebands_mu_t FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
   write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
   !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
-  !write(std_out,"(a)")"skw_path FILE                       Interpolate band structure along a k-path."
+  write(std_out,"(a)")"skw_kpath FILE                       Interpolate band structure along a (hardcoded) k-path."
   write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK        Use e_nk from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
 
   write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="

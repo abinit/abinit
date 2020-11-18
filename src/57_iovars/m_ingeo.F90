@@ -174,8 +174,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
- integer :: ipsp,irreducible,isym,itypat,jsym,marr,multiplicity,natom_uc,natfix,natrd
+ integer :: bckbrvltt,brvltt,chkprim,expert_user,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
+ integer :: ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
@@ -190,7 +190,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
- real(dp),allocatable :: tnons_cart(:,:)
+ real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
@@ -500,11 +500,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    MSG_ERROR(msg)
  end if
 
- ! If there are objects, chkprim will not be used immediately
- ! But, if there are no objects, but a space group, it will be used directly.
- chkprim=1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
- if(tread==1) chkprim=intarr(1)
+!If there are objects, chkprim will not be used immediately
+!But, if there are no objects, but a space group, it will be used directly.
+!Need first to check the value of expert_user
+ expert_user=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'expert_user',tread,'INT')
+ if(tread==1) expert_user=intarr(1)
+ if(expert_user==0)then
+   chkprim=1
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
+   if(tread==1) chkprim=intarr(1)
+ else
+   chkprim=0
+ endif
 
  if(nobj/=0)then
 
@@ -865,7 +873,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
            call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
          end do
          call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
-         call symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
+         call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
          ABI_DEALLOCATE(indsym)
          ABI_DEALLOCATE(symrec)
 
@@ -881,6 +889,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
            nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
            chrgat=chrgat,nucdipmom=nucdipmom)
+
+         !Needs one more resymmetrization, for the tnons
+         ABI_ALLOCATE(tnons_new,(3,nsym))
+
+         call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
+&          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
+         tnons(:,1:nsym)=tnons_new(:,:)
+         ABI_DEALLOCATE(tnons_new)
 
        end if
      end if
@@ -960,6 +976,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
      call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tol8)
      call mkradim(acell,rprim,rprimd)
+
+     !Needs one more resymmetrization, for the tnons
+     ABI_ALLOCATE(tnons_new,(3,nsym))
+     call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
+&          fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
+     tnons(:,1:nsym)=tnons_new(:,:)
+     ABI_DEALLOCATE(tnons_new)
+
    end if
 
  end if

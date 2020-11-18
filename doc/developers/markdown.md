@@ -177,12 +177,12 @@ For figures with a caption use the [markdown-figures extension](https://github.c
 
 ```md
 ![](../tutorial/bse_assets/tbs5.png)
-:   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
+:   Convergence of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 ```
 
 ![](../tutorial/bse_assets/tbs5.png)
-:   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
+:   Convergence of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 
 The caption can contain Latex equations as well as [Abinit wikilinks](#wikilinks).
@@ -363,10 +363,6 @@ To specify the name of the anchor in a bibliographic citation use the syntax wit
     Please consult [[cite:Gonze2016 | the last generic ABINIT article]].
 
 that is rendered in HTML as: Please consult [[cite:Gonze2016 | the last generic ABINIT article]].
-
-!!! warning
-
-    Please use the `cite` namespace. The syntax **without** namespace is deprecated and will be removed.
 
 The script does a bit of formatting in these examples: it keeps one pair of square brackets
 in the case of a bibliographic reference, and addd *~abinit/* in the case of a path.
