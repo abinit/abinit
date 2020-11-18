@@ -1490,7 +1490,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        call timab(989,1,tsec)
 
-       nbuf=2*mbdkpsp+dtset%nfft*dtset%nspden+3+3*natom*optforces
+       nbuf=2*mbdkpsp+dtset%nfft*dtset%nspden+4+3*natom*optforces
        ! If Hartree-Fock calculation, the exact exchange energy is k-dependent.
        if(dtset%usefock==1) then
          nbuf=nbuf+1
@@ -1512,7 +1512,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          buffer1(index1+1) = energies%e_kinetic
          buffer1(index1+2) = energies%e_eigenvalues
          buffer1(index1+3) = energies%e_nlpsp_vfock
-         index1=index1+3
+         buffer1(index1+4) = energies%e_nucdip
+         index1=index1+4
          ! If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            buffer1(index1+1) = energies%e_fock
@@ -1556,7 +1557,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          energies%e_kinetic = buffer1(index1+1)
          energies%e_eigenvalues = buffer1(index1+2)
          energies%e_nlpsp_vfock = buffer1(index1+3)
-         index1=index1+3
+         energies%e_nucdip = buffer1(index1+4)
+         index1=index1+4
          ! If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
            energies%e_fock = buffer1(index1+1)
