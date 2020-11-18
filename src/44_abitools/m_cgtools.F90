@@ -2458,7 +2458,7 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm)
        !cg(ptr) = zero
      end if
    end do
-   ABI_CHECK(ierr==0, "Non zero imag part")
+   ABI_CHECK(ierr == 0, "Non zero imag part")
  end if
 #endif
 
@@ -2550,7 +2550,7 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm)
  call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cg, npwsp)
 
 #ifdef DEBUG_MODE
- if (istwfk==2) then
+ if (istwfk == 2) then
    ierr = 0
    do b1=1,nband
      ptr = 2 + 2*(b1-1)*npwsp
