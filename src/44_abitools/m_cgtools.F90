@@ -2400,17 +2400,17 @@ end subroutine cg_vlocpsi
 !!  cgnc_cholesky
 !!
 !! FUNCTION
-!!  Cholesky orthonormalization of the vectors stored in cgblock (version optimized for NC wavefunctions).
+!!  Cholesky orthonormalization of the vectors stored in cg (version optimized for NC wavefunctions).
 !!
 !! INPUTS
 !!  npwsp=Size of each vector (usually npw*nspinor)
-!!  nband=Number of band in cgblock
+!!  nband=Number of band in cg
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
 !!  me_g0=1 if this node has G=0.
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.
 !!
 !! SIDE EFFECTS
-!!  cgblock(2*npwsp*nband)
+!!  cg(2*npwsp*nband)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
@@ -2421,14 +2421,14 @@ end subroutine cg_vlocpsi
 !!
 !! SOURCE
 
-subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm)
+subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwsp, nband, istwfk, comm_pw, me_g0
  logical,optional,intent(in) :: use_gemm
 !arrays
- real(dp),intent(inout) :: cgblock(2*npwsp*nband)
+ real(dp),intent(inout) :: cg(2*npwsp*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -2441,7 +2441,7 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
  logical :: my_usegemm
 !arrays
  real(dp) :: rcg0(nband)
- real(dp),allocatable :: r_ovlp(:,:), reim(:)
+ real(dp),allocatable :: r_ovlp(:,:)
  complex(dpc),allocatable :: c_ovlp(:,:)
 
 ! *************************************************************************
@@ -2451,59 +2451,65 @@ subroutine cgnc_cholesky(npwsp, nband, cgblock, istwfk, me_g0, comm_pw, use_gemm
    ierr = 0
    do b1=1,nband
      ptr = 2 + 2*(b1-1)*npwsp
-     if (ABS(cgblock(ptr)) > zero) then
+     if (ABS(cg(ptr)) > zero) then
        ierr = ierr + 1
-       write(msg,'(a,i0,es13.6)')" Input b1, Im u(g=0) should be zero ",b1,cgblock(ptr)
-       call wrtout(std_out,msg,"COLL")
-       !cgblock(ptr) = zero
+       write(msg,'(a,i0,es13.6)')" Input b1, Im u(g=0) should be zero ",b1,cg(ptr)
+       call wrtout(std_out, msg)
+       !cg(ptr) = zero
      end if
    end do
-   ABI_CHECK(ierr==0,"Non zero imag part")
+   ABI_CHECK(ierr==0, "Non zero imag part")
  end if
 #endif
+
+ my_usegemm = .FALSE.; if (PRESENT(use_gemm)) my_usegemm = use_gemm
 
 #if 0
 ! TODO: Activate this.
 ! Version optimized for real wavefunctions.
-if (istwfk == 2) then
- ABI_CALLOC(r_ovlp, (nband, nband))
+ if (istwfk /= 1) then
+   ABI_CALLOC(r_ovlp, (nband, nband))
 
- call DGEMM("T", "N", nband, nband, 2*npwsp, one, cgblock, 2*npwsp, cgblock, 2*npwsp, zero, r_ovlp, nband)
+   ! 1) Calculate O_ij = <phi_i|phi_j>
+   if (my_usegemm) then
+     call DGEMM("T", "N", nband, nband, 2*npwsp, one, cg, 2*npwsp, cg, 2*npwsp, zero, r_ovlp, nband)
+   else
+     call DSYRK("U", "T", nband, 2*npwsp, one, cg, 2*npwsp, zero, r_ovlp, nband)
+   end if
 
- r_ovlp = two * r_ovlp
- if (istwfk == 2 .and. me_g0 == 1) then
-   ! Extract the real part at G=0 and subtract its contribution to the overlap.
-   call dcopy(nband, cgblock, 2*npwsp, rcg0, 1)
-   do b2=1,nband
-     do b1=1,b2
-       r_ovlp(b1, b2) = r_ovlp(b1, b2) - rcg0(b1) * rcg0(b2)
+   r_ovlp = two * r_ovlp
+   if (istwfk == 2 .and. me_g0 == 1) then
+     ! Extract the real part at G=0 and subtract its contribution to the overlap.
+     call dcopy(nband, cg, 2*npwsp, rcg0, 1)
+     do b2=1,nband
+       do b1=1,b2
+         r_ovlp(b1, b2) = r_ovlp(b1, b2) - rcg0(b1) * rcg0(b2)
+       end do
      end do
-   end do
+   end if
+
+   ! Sum the overlap if PW are distributed.
+   if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
+   !write(std_out, *)"rovlp:", r_ovlp
+
+   ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
+   call DPOTRF('U', nband, r_ovlp, nband, ierr)
+   ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info:', itoa(ierr)))
+
+   ! 3) Solve X U = cg. On exit cg is orthonormalized.
+   call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, cg, 2*npwsp)
+   ABI_FREE(r_ovlp)
+   return
  end if
-
- ! Sum the overlap if PW are distributed.
- if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
- !write(std_out, *)"rovlp:", r_ovlp
-
- ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
- call DPOTRF('U', nband, r_ovlp, nband, ierr)
- ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info:', itoa(ierr)))
-
- ! 3) Solve X U = cgblock. On exit cgblock is orthonormalized.
- call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, cgblock, 2*npwsp)
- ABI_FREE(r_ovlp)
- return
-end if
 #endif
 
- my_usegemm = .FALSE.; if (PRESENT(use_gemm)) my_usegemm = use_gemm
  ABI_MALLOC(c_ovlp, (nband, nband))
 
  ! 1) Calculate O_ij = <phi_i|phi_j>
  if (my_usegemm) then
-   call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cgblock, npwsp, cgblock, npwsp, czero, c_ovlp, nband)
+   call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, cg, npwsp, czero, c_ovlp, nband)
  else
-   call ZHERK("U", "C", nband, npwsp, one, cgblock, npwsp, zero, c_ovlp, nband)
+   call ZHERK("U", "C", nband, npwsp, one, cg, npwsp, zero, c_ovlp, nband)
  end if
 
  if (istwfk == 1) then
@@ -2512,7 +2518,7 @@ end if
 
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
    call ZPOTRF('U', nband, c_ovlp, nband, ierr)
-   ABI_CHECK(ierr == 0, sjoin('ZPOTRF returned info: ', itoa(ierr)))
+   ABI_CHECK(ierr == 0, sjoin('ZPOTRF returned info:', itoa(ierr)))
 
  else
    ! Overlap matrix is real. Note that nspinor is always 1 in this case.
@@ -2521,7 +2527,7 @@ end if
 
    if (istwfk == 2 .and. me_g0 == 1) then
      ! Extract the real part at G=0 and subtract its contribution to the overlap.
-     call dcopy(nband, cgblock, 2*npwsp, rcg0, 1)
+     call dcopy(nband, cg, 2*npwsp, rcg0, 1)
      do b2=1,nband
        do b1=1,b2
          r_ovlp(b1, b2) = r_ovlp(b1, b2) - rcg0(b1) * rcg0(b2)
@@ -2540,17 +2546,17 @@ end if
    ABI_FREE(r_ovlp)
  end if
 
- ! 3) Solve X U = cgblock. On exit cgblock is orthonormalized.
- call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cgblock, npwsp)
+ ! 3) Solve X U = cg. On exit cg is orthonormalized.
+ call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cg, npwsp)
 
 #ifdef DEBUG_MODE
  if (istwfk==2) then
    ierr = 0
    do b1=1,nband
      ptr = 2 + 2*(b1-1)*npwsp
-     if (ABS(cgblock(ptr)) > zero) then
+     if (ABS(cg(ptr)) > zero) then
        ierr = ierr + 1
-       write(msg,'(a,i0,es13.6)')" Output b1, Im u(g=0) should be zero ",b1,cgblock(ptr)
+       write(msg,'(a,i0,es13.6)')" Output b1, Im u(g=0) should be zero ",b1,cg(ptr)
      end if
    end do
    ABI_CHECK(ierr == 0, "Non zero imag part")
@@ -2569,17 +2575,17 @@ end subroutine cgnc_cholesky
 !!  cgpaw_cholesky
 !!
 !! FUNCTION
-!!  Cholesky orthonormalization of the vectors stored in cgblock. (version for PAW wavefunctions).
+!!  Cholesky orthonormalization of the vectors stored in cg. (version for PAW wavefunctions).
 !!
 !! INPUTS
 !!  npwsp=Size of each vector (usually npw*nspinor)
-!!  nband=Number of band in cgblock and gsc
+!!  nband=Number of band in cg and gsc
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
 !!  me_g0=1 if this node has G=0.
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.
 !!
 !! SIDE EFFECTS
-!!  cgblock(2*npwsp*nband)
+!!  cg(2*npwsp*nband)
 !!    input: Input set of vectors |C>, S|C>
 !!    output: Orthonormalized set such as  <C|S|C> = 1
 !!  gsc(2*npwsp*nband): destroyed in output.
@@ -2591,13 +2597,13 @@ end subroutine cgnc_cholesky
 !!
 !! SOURCE
 
-subroutine cgpaw_cholesky(npwsp, nband, cgblock, gsc, istwfk, me_g0, comm_pw)
+subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwsp, nband, istwfk, me_g0, comm_pw
 !arrays
- real(dp),intent(inout) :: cgblock(2*npwsp*nband), gsc(2*npwsp*nband)
+ real(dp),intent(inout) :: cg(2*npwsp*nband), gsc(2*npwsp*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -2605,15 +2611,14 @@ subroutine cgpaw_cholesky(npwsp, nband, cgblock, gsc, istwfk, me_g0, comm_pw)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: r_ovlp(:,:)
- real(dp) :: rcg0(nband),rg0sc(nband)
+ real(dp) :: rcg0(nband), rg0sc(nband)
  complex(dpc),allocatable :: c_ovlp(:,:)
 
 ! *************************************************************************
 
  ! 1) Calculate O_ij =  <phi_i|S|phi_j>
  ABI_MALLOC(c_ovlp, (nband, nband))
-
- call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cgblock, npwsp, gsc, npwsp, czero, c_ovlp, nband)
+ call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, gsc, npwsp, czero, c_ovlp, nband)
 
  if (istwfk == 1) then
    ! Sum the overlap if PW are distributed.
@@ -2626,15 +2631,16 @@ subroutine cgpaw_cholesky(npwsp, nband, cgblock, gsc, istwfk, me_g0, comm_pw)
  else
    ! overlap is real. Note that nspinor is always 1 in this case.
    ABI_MALLOC(r_ovlp, (nband, nband))
+   !call DGEMM("T", "N", nband, nband, 2*npwsp, one, cg, 2*npwsp, gsc, 2*npwsp, zero, r_ovlp, nband)
    r_ovlp = two * REAL(c_ovlp)
 
    if (istwfk==2 .and. me_g0==1) then
      ! Extract the real part at G=0 and subtract its contribution to the overlap.
-     call dcopy(nband, cgblock, 2*npwsp, rcg0, 1)
+     call dcopy(nband, cg, 2*npwsp, rcg0, 1)
      call dcopy(nband, gsc, 2*npwsp, rg0sc, 1)
      do b2=1,nband
        do b1=1,b2
-        r_ovlp(b1,b2) = r_ovlp(b1,b2) - rcg0(b1)*rg0sc(b2)
+        r_ovlp(b1,b2) = r_ovlp(b1,b2) - rcg0(b1) * rg0sc(b2)
        end do
      end do
    end if
@@ -2650,10 +2656,10 @@ subroutine cgpaw_cholesky(npwsp, nband, cgblock, gsc, istwfk, me_g0, comm_pw)
    ABI_FREE(r_ovlp)
  end if
 
- ! 3) Solve X U = cgblock.
- call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cgblock, npwsp)
+ ! 3) Solve X U = cg.
+ call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cg, npwsp)
 
- ! 4) Solve Y U = gsc. On exit <cgblock|gsc> = 1
+ ! 4) Solve Y U = gsc. On exit <cg|gsc> = 1
  call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, gsc, npwsp)
 
  ABI_FREE(c_ovlp)
@@ -2836,17 +2842,17 @@ end subroutine cgnc_gsortho
 !!  cgnc_grortho
 !!
 !! FUNCTION
-!!  Gram-Schmidt orthonormalization of the vectors stored in cgblock
+!!  Gram-Schmidt orthonormalization of the vectors stored in cg
 !!
 !! INPUTS
 !!  npwsp=Size of each vector (usually npw*nspinor)
-!!  nband=Number of band in cgblock
+!!  nband=Number of band in cg
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
 !!  me_g0=1 if this node has G=0.
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.
 !!
 !! SIDE EFFECTS
-!!  cgblock(2*npwsp*nband)
+!!  cg(2*npwsp*nband)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
@@ -2854,13 +2860,13 @@ end subroutine cgnc_gsortho
 !!
 !! SOURCE
 
-subroutine cgnc_gramschmidt(npwsp, nband, cgblock, istwfk, me_g0, comm_pw)
+subroutine cgnc_gramschmidt(npwsp, nband, cg, istwfk, me_g0, comm_pw)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwsp, nband, istwfk, comm_pw, me_g0
 !arrays
- real(dp),intent(inout) :: cgblock(2*npwsp*nband)
+ real(dp),intent(inout) :: cg(2*npwsp*nband)
 
 !Local variables ------------------------------
 !scalars
@@ -2870,7 +2876,7 @@ subroutine cgnc_gramschmidt(npwsp, nband, cgblock, istwfk, me_g0, comm_pw)
 ! *************************************************************************
 
  ! Normalize the first vector.
- call cgnc_normalize(npwsp,1,cgblock(1),istwfk,me_g0,comm_pw)
+ call cgnc_normalize(npwsp,1,cg(1),istwfk,me_g0,comm_pw)
  if (nband == 1) RETURN
 
  ! Orthogonaluze b1 wrt to the bands in [1,b1-1].
@@ -2878,7 +2884,7 @@ subroutine cgnc_gramschmidt(npwsp, nband, cgblock, istwfk, me_g0, comm_pw)
  do b1=2,nband
    opt = 1 + 2*npwsp*(b1-1)
    nb2=b1-1
-   call cgnc_gsortho(npwsp,nb2,cgblock(1),1,cgblock(opt),istwfk,normalize,me_g0,comm_pw)
+   call cgnc_gsortho(npwsp,nb2,cg(1),1,cg(opt),istwfk,normalize,me_g0,comm_pw)
  end do
 
 end subroutine cgnc_gramschmidt
@@ -2895,7 +2901,7 @@ end subroutine cgnc_gramschmidt
 !!
 !! INPUTS
 !!  npwsp=Size of each vector (usually npw*nspinor)
-!!  nband=Number of band in cgblock and gsc
+!!  nband=Number of band in cg and gsc
 !!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
 !!  me_g0=1 if this node has G=0.
 !!  comm_pw=MPI communicator for the planewave group. Set to xmpi_comm_self for sequential mode.

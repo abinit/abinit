@@ -41,6 +41,7 @@ program lapackprof
  use m_hide_blas
  use m_cgtools
  use m_hide_lapack
+ use m_yaml
 
  use defs_abitypes,   only : MPI_type
  use m_fstrings,      only : lower, itoa, sjoin !, strcat
@@ -50,6 +51,7 @@ program lapackprof
  use m_io_tools,      only : prompt
  use m_numeric_tools, only : arth
  use m_mpinfo,        only : init_mpi_enreg, destroy_mpi_enreg
+ !use m_pair_list,     only : pair_list
 
  implicit none
 
@@ -62,6 +64,8 @@ program lapackprof
  !logical :: do_check
  character(len=500) :: method, command, arg, msg !header,
  type(MPI_type) :: MPI_enreg
+ !type(pair_list) :: meta
+ type(yamldoc_t) :: ydoc
 !arrays
  integer,allocatable :: sizes(:)
  real(dp) :: alpha(2), beta(2) ,dot(2)
@@ -130,6 +134,11 @@ program lapackprof
  call xomp_show_info(std_out)
 
  ! Write metadata i.e parameters that do not change during the benchmark.
+ ydoc = yamldoc_open('LapackProfMetadata') !, info=info, width=width)
+ call ydoc%add_ints("istwfk, usepaw, ncalls, nband, nspinor, nthreads", &
+                     [istwfk, usepaw, ncalls, nband, nspinor, nthreads] &
+                    ) !, int_fmt, width, dict_key, multiline_trig, ignore)
+ call ydoc%write_and_free(std_out)
 
  nsizes = npw_start_step_num(3)
  ABI_MALLOC(sizes, (nsizes))
@@ -163,10 +172,10 @@ program lapackprof
      ABI_FREE(gsc)
    end do
 
-   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ", command))
+   write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ", command))
 
  case ("pw_orthon")
-   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ",command))
+   write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ",command))
    write(std_out, "(a1,a8,1x,a6,1x,a7,2(1x,a12))")"#", "npw", "nband", "ortalgo", "cpu_time", "wall_time"
 
    do ortalgo=0,4,1
@@ -174,14 +183,16 @@ program lapackprof
        npw = sizes(isz)
        mcg  = npw * nband
        mgsc = mcg * usepaw
-       ABI_MALLOC(cg,(2, mcg))
+       ABI_MALLOC(cg, (2, mcg))
        call random_number(cg)
-       ABI_MALLOC(gsc,(2, mgsc))
+       ABI_MALLOC(gsc, (2, mgsc))
+       gsc = cg
 
        if (istwfk /= 1) then
          do band=1,nband
            g0 = 1 + (band-1)*npw
-           cg(2,g0) = zero
+           cg(2, g0) = zero
+           gsc(2, g0) = zero
          end do
        end if
 
@@ -199,14 +210,11 @@ program lapackprof
              cg(:,g0) = half * cg(:,g0)
            end do
          end if
-
          call cg_zgemm("C","N", npw, nband, nband, cg, cg, ortho_check)
          if (istwfk/=1) ortho_check = two * ortho_check
-
          do band=1,nband
            ortho_check(1,band,band) = ortho_check(1,band,band) - one
          end do
-
          write(std_out,*)"DEBUG: Max Abs error:",MAXVAL( ABS(RESHAPE(ortho_check, [2*nband*nband])))
          ABI_FREE(ortho_check)
        end if
@@ -560,7 +568,7 @@ program lapackprof
  ABI_FREE(sizes)
  call destroy_mpi_enreg(MPI_enreg)
 
- call wrtout(std_out,ch10//" Analysis completed.")
+ call wrtout(std_out, ch10//" Analysis completed.")
  call abinit_doctor("__lapackprof")
 
 100 call xmpi_end()

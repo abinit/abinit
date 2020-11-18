@@ -361,7 +361,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !ABI_MALLOC(ghc, (2, npwsp*nband))
  !ABI_MALLOC(gvnlxc, (2, npwsp*nband))
  !ABI_MALLOC(residv, (2, npwsp*nband))
-
  !ABI_FREE(ghc)
  !ABI_FREE(gvnlxc)
  !ABI_FREE(residv)
@@ -413,26 +412,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Compute H |phi_0> with cg block after subdiago.
    phi_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
 
-#if 0
    residv_bk => residvecs(:,igs:ige)
-   !write(std_out,*)"resid_subdiago:", resid(ib_start:ib_stop)
-   !write(std_out,*)"eig_subdiago:", eig(ib_start:ib_stop)
-   !write(std_out,*)"enlx_subdiago:", enlx(ib_start:ib_stop)
+   !call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+   !                     eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
 
-   call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
-                        eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
-
-   !write(std_out,*)"resid_after:", resid(ib_start:ib_stop)
-   !write(std_out,*)"eig_after:", eig(ib_start:ib_stop)
-   !write(std_out,*)"enlx_after:", enlx(ib_start:ib_stop)
-#else
-   residv_bk => residvecs(:,igs:ige)
-#endif
    !if (all(resid(ib_start:ib_stop) < tol24)) cycle ! iblock
 
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input phi_bk is already S-normalized.
    call diis%push_iter(0, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), phi_bk, residv_bk, gsc_bk, "SDIAG")
-   if (timeit) call cwtime_report(" push_iter ", cpu, wall, gflops)
+   !if (timeit) call cwtime_report(" push_iter ", cpu, wall, gflops)
 
    ! Line minimization with preconditioned steepest descent:
    !
@@ -462,7 +450,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Compute (H - e_0 S) |K R_0>
    call cg_get_residvecs(usepaw, npwsp, ndat, eig(ib_start), kres_bk, ghc_bk, gsc_bk, residv_bk)
    call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_bandspinorfft)
-   if (timeit) call cwtime_report(" cg_norm2g ", cpu, wall, gflops)
+   !if (timeit) call cwtime_report(" cg_norm2g ", cpu, wall, gflops)
 
    ! Compute lambda
    dots_bk = zero
@@ -479,7 +467,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
    end do
-   if (timeit) call cwtime_report(" trial_step ", cpu, wall, gflops)
+   !if (timeit) call cwtime_report(" trial_step ", cpu, wall, gflops)
 
    ! ===============
    ! DIIS iterations
@@ -502,7 +490,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
 
-     ! Store new residuals.
+     ! Store new wavevefunction and residuals.
      call diis%push_iter(iter, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), phi_bk, residv_bk, gsc_bk, "DIIS")
 
      ! CHECK FOR CONVERGENCE
@@ -512,13 +500,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ! Compute <R_i|R_j> and <i|S|j> for j=iter
      if (iter /= max_niter_block) call diis%eval_mats(iter, ndat, me_g0, comm_bandspinorfft)
    end do iter_loop
-   if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
+   !if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
 
    !if (usepaw == 0) then
    call diis%rollback(npwsp, ndat, phi_bk, gsc_bk, residv_bk,  &
                       eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
    !end if
-   if (timeit) call cwtime_report(" rollback ", cpu, wall, gflops)
+   !if (timeit) call cwtime_report(" rollback ", cpu, wall, gflops)
 
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
  end do ! iblock
@@ -1136,12 +1124,6 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
      call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wvec(:,:,idat), phi_bk(:,:,idat))
      call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wvec(:,:,idat), residv_bk(:,:,idat))
    else
-     !ABI_CALLOC(alphas, (2, 0:iter))
-     !alphas(1,:) = wvec(1,:,idat)
-     !call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), alphas, phi_bk(:,:,idat))
-     !call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), alphas, residv_bk(:,:,idat))
-     !ABI_FREE(alphas)
-
      ! Use DGEMV
      ABI_MALLOC(alphas, (1, 0:iter))
      alphas(1,:) = wvec(1,:,idat)
@@ -1152,7 +1134,6 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
  end do
 
  ABI_FREE(wvec)
-
  !if (timeit) call cwtime_report(" update_block", cpu, wall, gflops)
 
 end subroutine rmm_diis_update_block
@@ -1282,7 +1263,6 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  take_iter = -1
  ilast = diis%last_iter
-
  !if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  if (my_rank == master) then
@@ -1516,6 +1496,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  ABI_FREE(h_ij)
  call xmpi_sum(subham, comm, ierr)
+ if (timeit) call cwtime_report(" subspace build Hij", cpu, wall, gflops)
 
  ! ========================
  ! Subspace diagonalization
@@ -1526,6 +1507,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
                subham, subovl, use_subovl0, usepaw, me_g0)
 
  ABI_FREE(subham)
+ if (timeit) call cwtime_report(" subspace subdiago", cpu, wall, gflops)
 
  ! Rotate matrix elements to get <G|H|psi> in the new subspace:
  !
@@ -1540,6 +1522,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
    evec_re = evec(1,:,:)
  end if
 
+ ! TODO: dgemm if cplex == 1
  !call cg_zgemm("N", "N", npwsp, nband, nband, ghc, evec, gtempc)
  if (cplex == 1) then
  !if (istwf_k == 2) then
@@ -1547,10 +1530,10 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  else
    call ZGEMM("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gtempc, npwsp)
  end if
-
- ! TODO: dgemm if cplex == 1
  !call abi_xgemm('N','N', vectsize, nband, nband, cone, ghc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
  ghc = gtempc
+ !call cg_zcopy(npwsp*nband, gtempc, ghc)
+
  if (usepaw == 0 .or. has_fock) then
    !call cg_zgemm("N", "N", npwsp, nband, nband, gvnlxc, evec, gtempc)
    if (cplex == 1) then
@@ -1561,6 +1544,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
    end if
    !call abi_xgemm('N','N', vectsize, nband, nband, cone, gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gvnlxc = gtempc
+   !call cg_zcopy(npwsp*nband, gtempc, gvnlxc)
  end if
  ABI_FREE(gtempc)
 
@@ -1580,8 +1564,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  !ABI_FREE(gvnlxc_bk)
  ABI_FREE(evec)
  ABI_SFREE(evec_re)
-
- if (timeit) call cwtime_report(" subspace rotation", cpu, wall, gflops)
+ if (timeit) call cwtime_report(" subspace final rotation", cpu, wall, gflops)
 
 end subroutine subspace_rotation
 !!***
