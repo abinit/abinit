@@ -67,7 +67,6 @@ contains
     self%mxhist=mxhist
     ABI_MALLOC(self%hist, (nlwf, mxhist))
     ABI_MALLOC(self%energy, (mxhist))
-    self%hist(:, :)=0.0_dp
   end subroutine initialize
 
   subroutine finalize(self)

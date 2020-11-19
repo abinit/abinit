@@ -62,15 +62,18 @@ module m_lwf_mover
      type(multibinit_dtset_type), pointer :: params
      real(dp) :: lwf_temperature, energy
      integer :: nlwf
-     real(dp), allocatable :: lwf(:), lwf_force(:)
+     real(dp), allocatable :: lwf(:), lwf_force(:), vcart(:), lwf_masses(:)
      type(lwf_ncfile_t) :: ncfile
      type(lwf_hist_t) :: hist
+     real(dp) :: Ek=0.0_dp     ! kinetic energy
+     real(dp) :: T_ob=0.0_dp    ! observed temperature
    contains
      procedure :: initialize
      procedure :: finalize
      procedure :: set_temperature
      procedure :: set_params
      procedure :: set_initial_state
+     procedure :: get_T_and_Ek
      procedure :: run_one_step
      procedure :: run_time
      procedure :: run_varT
@@ -93,9 +96,12 @@ contains
     call self%set_rng(rng)
     self%nlwf=self%supercell%lwf%nlwf
     ABI_ALLOCATE(self%lwf, (self%nlwf))
-    self%lwf(:) = 0.0_dp
+    ABI_ALLOCATE(self%vcart, (self%nlwf))
     ABI_ALLOCATE(self%lwf_force, (self%nlwf))
+    ABI_ALLOCATE(self%lwf_masses, (self%nlwf))
+    self%lwf(:) = 0.0_dp
     self%lwf_force(:) = 0.0_dp
+    self%vcart(:) = 0.0_dp
     self%energy=0.0_dp
     call self%hist%initialize(nlwf=self%nlwf, mxhist=1)
   end subroutine initialize
@@ -106,7 +112,9 @@ contains
     nullify(self%supercell)
     nullify(self%params)
     ABI_SFREE(self%lwf)
+    ABI_SFREE(self%vcart)
     ABI_SFREE(self%lwf_force)
+    ABI_SFREE(self%lwf_masses)
     call self%hist%finalize()
     !call self%ncfile%finalize()
   end subroutine finalize
@@ -125,8 +133,21 @@ contains
     self%lwf_temperature=temperature
   end subroutine set_temperature
 
+  !-------------------------------------------------------------------!
+  !get_temperature_and_kinetic_energy
+  ! Ek = 1/2 \sum m_i vi^2
+  ! T = 2 Ek/nlwf (in a.u.)
+  !-------------------------------------------------------------------!
+  subroutine get_T_and_Ek(self)
+    class(lwf_mover_t), intent(inout) :: self
+    integer :: i
+    self%Ek= sum(self%lwf_masses * (self%vcart * self%vcart))
+    self%T_ob = 2.0*self%Ek/self%nlwf
+  end subroutine get_T_and_Ek
+
+
+
   subroutine run_one_step(self, effpot, displacement, strain, spin, lwf,  energy_table)
-    ! run one step. (For MC also?)
     class(lwf_mover_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     class(abstract_potential_t), intent(inout) :: effpot

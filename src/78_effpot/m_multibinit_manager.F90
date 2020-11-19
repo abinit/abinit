@@ -89,7 +89,11 @@ module m_multibinit_manager
   use m_lwf_potential, only: lwf_potential_t
   use m_lwf_mover, only: lwf_mover_t
   use m_lwf_mc_mover, only: lwf_mc_t
+  use m_lwf_dummy_mover, only: lwf_dummy_mover_t
   use m_lwf_ncfile, only: lwf_ncfile_t
+
+  ! lattice-lwf hybrid
+  use m_lattice_lwf_mover, only: lattice_lwf_mover_t
 
   implicit none
   private
@@ -157,6 +161,7 @@ module m_multibinit_manager
      procedure :: run_coupled_spin_latt_dynamics
      procedure :: run_lwf_dynamics
      procedure :: run_lwf_varT
+     procedure :: run_lattice_lwf_dynamics
      procedure :: run
      procedure :: run_all
   end type mb_manager_t
@@ -381,6 +386,7 @@ contains
     ! latt : TODO (replace this with full lattice)
     ! only toy harmonic part 
     if(self%params%dynamics>100) then
+       print *, "Dynamics:", self%params%dynamics, "Init latt potential"
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
        select type(lat_ham_pot)
        type is (lattice_harmonic_primitive_potential_t)
@@ -410,12 +416,16 @@ contains
     end if
 
     !LWF 
-    if(self%params%lwf_dynamics>0) then
+    if(self%params%lwf_dynamics>0 .or. self%params%latt_lwf_anharmonic==1) then
        ABI_DATATYPE_ALLOCATE_SCALAR(lwf_primitive_potential_t, lwf_pot)
        select type(lwf_pot)
        type is (lwf_primitive_potential_t)
           call lwf_pot%initialize(self%unitcell)
-          call lwf_pot%load_from_files(self%params, self%filenames)
+          if ( trim(self%params%lwf_pot_fname) /='') then
+             call lwf_pot%load_from_files(self%params, [self%params%lwf_pot_fname])
+          else
+             call lwf_pot%load_from_files(self%params, [self%filenames(3)])
+          end if
           call self%prim_pots%append(lwf_pot)
        end select
     end if
@@ -483,7 +493,7 @@ contains
 
     end if
 
-    if (self%params%lwf_dynamics>0) then
+    if (self%params%lwf_dynamics>0 .or. self%params%latt_lwf_anharmonic==1) then
        call self%set_lwf_mover()
     end if
 
@@ -519,9 +529,16 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_lwf_mover(self)
     class(mb_manager_t), intent(inout) :: self
+    if(self%params%latt_lwf_anharmonic==1) then
+       self%params%lwf_dynamics=2
+    end if
     select case(self%params%lwf_dynamics)
     case (1)  ! Metropolis Monte Carlo
        ABI_DATATYPE_ALLOCATE_SCALAR(lwf_mc_t, self%lwf_mover)
+    case (2) ! dummy 
+       ABI_DATATYPE_ALLOCATE_SCALAR(lwf_dummy_mover_t, self%lwf_mover)
+    case (3)
+       ABI_DATATYPE_ALLOCATE_SCALAR(lwf_berendsen_mover_t, self%lwf_mover)
     end select
     call self%lwf_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
     call self%lwf_mover%set_initial_state(mode=self%params%lwf_init_state, &
@@ -566,11 +583,33 @@ contains
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
     call self%set_movers()
-
     call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%lattice_mover%run_time(self%pots, energy_table=self%energy_table)
     call self%lattice_mover%ncfile%finalize()
   end subroutine run_lattice_dynamics
+
+
+  !-------------------------------------------------------------------!
+  ! Run lattice only dynamics
+  !-------------------------------------------------------------------!
+  subroutine run_lattice_lwf_dynamics(self)
+    class(mb_manager_t), intent(inout) :: self
+    type(lattice_lwf_mover_t) :: mover
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%fill_supercell()
+    call self%set_movers()
+    call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
+    call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
+    call mover%initialize(self%lattice_mover, self%lwf_mover)
+    call mover%run_time(self%pots, energy_table=self%energy_table)
+    call self%lattice_mover%ncfile%finalize()
+    call self%lwf_mover%ncfile%finalize()
+    call mover%finalize()
+  end subroutine run_lattice_lwf_dynamics
+
+
 
   !-------------------------------------------------------------------!
   ! Run coupled lattice spin dynamics
@@ -589,7 +628,7 @@ contains
 
     call self%prim_pots%initialize()
     call self%read_potentials()
-    
+
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
 
@@ -689,16 +728,23 @@ contains
     ! if ... fit lwf model
     ! if ... run dynamics...
     ! spin dynamics
+    if(self%params%latt_lwf_anharmonic==1)then    
+        self%params%lwf_dynamics=2
+    end if
+
     if(self%params%spin_dynamics>0 .and. self%params%dynamics<=0 .and. self%params%lwf_dynamics<=0) then
-       if (self%params%spin_var_temperature==0) then
+       if(self%params%spin_var_temperature==0) then
           call self%run_spin_dynamics()
        elseif (self%params%spin_var_temperature==1) then
           call self%run_spin_varT()
        end if
     ! lattice
-    else if (self%params%dynamics>0 .and. self%params%spin_dynamics<=0 .and. self%params%lwf_dynamics<=0) then
+    else if(self%params%dynamics>0 .and. self%params%spin_dynamics<=0 .and. self%params%lwf_dynamics<=0)then
        call self%run_lattice_dynamics()
 
+    ! lattice + dummy lwf
+    else if(self%params%dynamics>0 .and. self%params%spin_dynamics<=0 .and. self%params%latt_lwf_anharmonic==1) then
+       call self%run_lattice_lwf_dynamics()
     ! spin+lattice
     else if (self%params%dynamics>0 .and. self%params%spin_dynamics>0 .and. self%params%lwf_dynamics<=0) then
        !call self%run_spin_latt_dynamics()

@@ -62,6 +62,9 @@ contains
     class(sp_real_vec), intent(inout) :: self
     integer, intent(in) :: id
     real(dp), intent(in) :: val
+    if(id>self%size) then
+        MSG_BUG("id out of range in spvec push")
+    end if
     call self%ids%push(id)
     call self%vals%push(val)
     self%nnz=self%nnz+1
@@ -86,15 +89,18 @@ contains
     end do
   end function vec_spvec_dot
 
+  ! y= y+a*spvec
   subroutine spvec_plus_Ax(spvec, a, y)
     class(sp_real_vec), intent(in) :: spvec
     real(dp), intent(inout) :: y(spvec%size)
     real(dp), intent(in) :: a
-    integer :: i, j
+    integer :: i
     do i =1, spvec%nnz
-       j=spvec%ids%data(i)
-       y(j)=y(j) + a * spvec%vals%data(j)
+       associate ( j => spvec%ids%data(i) )
+       y(j)=y(j) + a * spvec%vals%data(i)
+       end associate
     end do
+    !y(spvec%ids%data(1:spvec%nnz))=y(spvec%ids%data(1:spvec%nnz)) + a* spvec%vals%data(1:spvec%nnz)
   end subroutine spvec_plus_Ax
 
 

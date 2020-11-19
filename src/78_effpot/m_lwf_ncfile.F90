@@ -55,7 +55,7 @@ module m_lwf_ncfile
      ! file id
      integer :: ncerr, ncid
      ! variable id
-     integer :: lwf_id, time_id, itime_id, etotal_id, entropy_id
+     integer :: lwf_id, time_id, itime_id, etotal_id, entropy_id, displacement_id
      integer :: ilwf_prim_id, rvec_id
      integer :: itime, ntime,ncell
      ! itime: time index
@@ -138,6 +138,7 @@ contains
          &      start=[1,1], count=[3, supercell%lwf%nlwf])
     NCF_CHECK_MSG(ncerr, "Error when writting ilwf_prim in lwf history file.")
 
+
 #endif
 
   end subroutine write_cell
@@ -203,6 +204,10 @@ contains
     ncerr=nf90_put_var(self%ncid, self%itime_id, [self%itime], &
          &      start=[itime], count=[1])
     NCF_CHECK_MSG(ncerr, "Error when writting energy in lwf history file.")
+
+    !ncerr=nf90_put_var(self%ncid, self%displacement_id, [displacement], &
+    !     &      start=[1,itime], count=[3, hist%natom, 1])
+    !NCF_CHECK_MSG(ncerr, "Error when writting energy in lwf history file.")
 
 #endif
 

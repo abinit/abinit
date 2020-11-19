@@ -81,6 +81,8 @@ module m_lwf_primitive_potential
      !. Rlist(:, ind_R) is a R-vector.
      real(dp) :: ref_energy=0.0                  ! reference energy
 
+     logical :: as_lattice_anharmonic=.False.
+
    contains
      procedure:: initialize
      procedure:: finalize
@@ -149,9 +151,10 @@ contains
     class(lwf_primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
-    call self%load_from_netcdf( fnames(3))
+    call self%load_from_netcdf(fnames(1))
     call self%add_self_bound_term(params%lwf_self_bound_order, &
          & params%lwf_self_bound_coeff)
+    self%as_lattice_anharmonic= (params%latt_lwf_anharmonic==1)
   end subroutine load_from_files
 
   !-------------------------------------------------------------------!
@@ -204,7 +207,7 @@ contains
        ierr=nctk_get_dim(ncid, "wann_onebody_nterm", onebody_nterm)
        NCF_CHECK_MSG(ierr, "getting wann_onebody_nterm in lwf potential file")
     end if
-
+    self%onebody_nterm=onebody_nterm
 
 
     ierr=nf90_inq_dimid(ncid, "wann_twobody_nterm", twobody_nterm)
@@ -243,7 +246,7 @@ contains
     ierr = nf90_get_var(ncid, varid, self%lattice_coeffs)
     NCF_CHECK_MSG(ierr, "wann_wannier_function_real")
     
-    self%lattice_coeffs=self%lattice_coeffs/Bohr_Ang
+    !self%lattice_coeffs=self%lattice_coeffs/Bohr_Ang
 
     !call self%primcell%set_lwf(natom, cell, xcart, masses, zion)
 
@@ -283,6 +286,8 @@ contains
        ierr = nf90_get_var(ncid, varid, self%onebody_i)
        NCF_CHECK_MSG(ierr, "wann_onebody_i")
 
+       self%onebody_i=self%onebody_i +1
+
        ierr =nf90_inq_varid(ncid, "wann_onebody_val", varid)
        NCF_CHECK_MSG(ierr, "wann_onebody_val")
        ierr = nf90_get_var(ncid, varid, self%onebody_val)
@@ -297,7 +302,6 @@ contains
           self%onebody_val(i)=self%onebody_val(i) * eV_Ha * (Bohr_Ang ** self%onebody_order(i))
        end do
     end if
-
 
     if(twobody_nterm /= 0) then
        ABI_MALLOC(twobody_iR, (twobody_nterm))
@@ -365,7 +369,6 @@ contains
 
   end subroutine load_from_netcdf
 
-
   !-------------------------------------------------------------------!
   !Fill supercell
   ! Inputs:
@@ -408,33 +411,41 @@ contains
        ! list of i: coeff%ind%data(2, 1:coeff%nnz)
        ! list of j: coeff%ind%data(3, 1:coeff%nnz)
        ! IFC: (ind) = val
-       do inz =1 , self%coeff%nnz
-          ! For each non-zero entry in the coeff matrix
-          ! get the R, i, and j, val
-          iR=self%coeff%ind%data(1,inz)
-          R(:) = self%Rlist(:, iR)
-          i=self%coeff%ind%data(2, inz)
-          j=self%coeff%ind%data(3, inz)
-          val=self%coeff%val%data(inz)
-          ! translate i to i in supercell.
-          ! No need to allocate, it is done by trans_i . but remember to deallocate!
-          ! nbasis is the number in one primitive cell.
-          ! e.g. there are 3*natom possible i (3: x, y, z) in each primitive cell.
-          call scmaker%trans_i(nbasis=self%nlwf, i=i, i_sc=ilist_sc )
-          ! translate j, Rj to supercell.
-          call scmaker%trans_j_and_Rj(nbasis=self%nlwf, j=j, Rj=R, j_sc=jlist_sc, Rj_sc=Rlist_sc)
-          ! values are repeated in cells
-          do icell=1, scmaker%ncells
-             call scpot%add_term(ilist_sc(icell), jlist_sc(icell), val )
+       if(self%as_lattice_anharmonic) then
+          call scpot%use_as_lattice_anharmonic()
+       else
+          ! harmonic terms
+          do inz =1 , self%coeff%nnz
+             ! For each non-zero entry in the coeff matrix
+             ! get the R, i, and j, val
+             iR=self%coeff%ind%data(1,inz)
+             R(:) = self%Rlist(:, iR)
+             i=self%coeff%ind%data(2, inz)
+             j=self%coeff%ind%data(3, inz)
+             val=self%coeff%val%data(inz)
+             ! translate i to i in supercell.
+             ! No need to allocate, it is done by trans_i . but remember to deallocate!
+             ! nbasis is the number in one primitive cell.
+             ! e.g. there are 3*natom possible i (3: x, y, z) in each primitive cell.
+             call scmaker%trans_i(nbasis=self%nlwf, i=i, i_sc=ilist_sc )
+             ! translate j, Rj to supercell.
+             call scmaker%trans_j_and_Rj(nbasis=self%nlwf, j=j, Rj=R, j_sc=jlist_sc, Rj_sc=Rlist_sc)
+             ! values are repeated in cells
+             do icell=1, scmaker%ncells
+                call scpot%add_term(ilist_sc(icell), jlist_sc(icell), val )
+             end do
+             ABI_SFREE(ilist_sc)
+             ABI_SFREE(jlist_sc)
+             ABI_SFREE(Rlist_sc)
           end do
-          ABI_SFREE(ilist_sc)
-          ABI_SFREE(jlist_sc)
-          ABI_SFREE(Rlist_sc)
-       end do
+       end if
 
        ! coefficients of atomic displacements in supercell
        do i=1, self%nlwf
           call scmaker%trans_i(nbasis=nlwf, i=i, i_sc=ilist_sc)
+          do icell =1, scmaker%ncells
+              call scpot%lwf_latt_coeffs(ilist_sc(icell))%initialize(scmaker%ncells*self%natom*3)
+          end do
           do iR=1, self%nR
              R(:) = self%Rlist(:, iR)
              do j =1, self%natom*3
@@ -453,6 +464,7 @@ contains
        end do
 
 
+       ! anharmonic terms
        !call scpot%set_ref_energy(self%ref_energy * scmaker%ncells)
        if (self%has_self_bound_term) then
           call scpot%add_self_bound_term(self%self_bound_order, self%self_bound_coeff)
@@ -460,7 +472,7 @@ contains
 
        if (self%onebody_nterm/=0) then
           do i=1, self%onebody_nterm
-             call scmaker%trans_i(nbasis=self%nlwf, i=i, i_sc=ilist_sc)
+             call scmaker%trans_i(nbasis=self%nlwf, i=self%onebody_i(i), i_sc=ilist_sc)
              do icell=1, scmaker%ncells
                 call scpot%add_onebody_term(i=ilist_sc(icell), order=self%onebody_order(i), val=self%onebody_val(i))
              end do

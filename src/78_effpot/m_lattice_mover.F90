@@ -53,7 +53,7 @@ module m_lattice_mover
      !> This is the abstract lattice mover
 
      type(multibinit_dtset_type), pointer :: params=>null() ! input parameters
-     integer :: natom     ! number of atoms
+     integer :: natom=0     ! number of atoms
      real(dp) :: stress(3,3), strain(3,3)  ! stress and strain
      real(dp), allocatable :: masses(:)  ! masses
      integer :: latt_dynamics=0 ! type of lattice dynamics
@@ -334,7 +334,6 @@ contains
   ! run from begining to end.
   !-------------------------------------------------------------------!
   subroutine run_time(self, effpot, displacement, strain, spin, lwf, energy_table)
-    ! run one step. (For MC also?)
     class(lattice_mover_t), intent(inout) :: self
     ! array of effective potentials so that there can be multiple of them.
     class(abstract_potential_t), intent(inout) :: effpot

@@ -117,8 +117,11 @@ contains
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
-    call self%load_from_netcdf( fnames(3))
-    ABI_UNUSED_A(params)
+    if(trim(params%latt_pot_fname)=='') then
+       call self%load_from_netcdf(fnames(3))
+    else
+        call self%load_from_netcdf(params%latt_pot_fname)
+    end if
   end subroutine load_from_files
 
   !-------------------------------------------------------------------!
@@ -140,7 +143,7 @@ contains
     integer :: varid, i, j
 #if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
-    NCF_CHECK_MSG(ierr, "Open netcdf file")
+    NCF_CHECK_MSG(ierr, "Open netcdf file "//trim(fname))
 
     ierr=nctk_get_dim(ncid, "ifc_nR" , nR)
     ierr=nctk_get_dim(ncid, "natom", natom)

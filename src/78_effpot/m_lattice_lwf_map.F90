@@ -42,7 +42,11 @@ module m_lattice_lwf_map
      !! for each lwf, map to the 
      type(sp_real_vec), allocatable :: coeffs(:)
   end type lwf_latt_coeff_t
+
+  public :: lattice_to_lwf_projection
+  public :: lwf_force_to_lattice
 contains
+
 
 
 !===============================================================
@@ -64,9 +68,9 @@ contains
   ! Map force on lwf to force on lattice
   !> @
   !===============================================================
-  subroutine lwf_force_to_lattice(lwf_force, coeffs, latt_force)
-    real(dp), intent(in) :: lwf_force(:)
+  subroutine lwf_force_to_lattice(coeffs, lwf_force, latt_force)
     type(sp_real_vec) , intent(in) :: coeffs(:)
+    real(dp), intent(in) :: lwf_force(:)
     real(dp), intent(out) :: latt_force(:,:)
     integer :: ilwf, nlwf
     nlwf=size(coeffs)
@@ -75,6 +79,20 @@ contains
     end do
   end subroutine lwf_force_to_lattice
 
+  !===============================================================
+  ! Map lwf amplitudes to lattice amplitudes
+  !> @
+  !===============================================================
+  subroutine lwf_amp_to_displacements(coeffs, lwf, displacement)
+    type(sp_real_vec) , intent(in) :: coeffs(:)
+    real(dp), intent(in) :: lwf(:)
+    real(dp), intent(inout) :: displacement(:,:)
+    integer :: ilwf, nlwf
+    nlwf=size(coeffs)
+    do ilwf=1, nlwf
+       call coeffs(ilwf)%plus_Ax(lwf(ilwf), displacement)
+    end do
+  end subroutine lwf_amp_to_displacements
 
 end module m_lattice_lwf_map
 
