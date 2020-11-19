@@ -139,7 +139,7 @@ module m_pair_list
 !! pair_list_length
 !!
 !! FUNCTION
-!!  get the number of pair stored in pl
+!!  REturn the number of items stored in pl
 !!
 !! INPUTS
 !!  pl <class(pair_list)>=

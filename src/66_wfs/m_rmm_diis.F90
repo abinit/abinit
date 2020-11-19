@@ -61,7 +61,7 @@ module m_rmm_diis
  type,private :: rmm_diis_t
 
    integer :: accuracy_level
-   ! Defines tolerances, activates/deactivates tricks
+   ! Defines tolerances, activates/deactivates tricks.
 
    integer :: usepaw
    ! 1 if we are running PAW.
@@ -70,7 +70,7 @@ module m_rmm_diis
    ! wavefunction storage mode.
 
    integer :: cplex
-   ! 1 if matrices are real (Gamma-point), 2 for complex
+   ! 1 if matrices are real (e.g. Gamma-point), 2 for complex
 
    integer :: bsize
    ! (Max) block size for bands
@@ -79,6 +79,7 @@ module m_rmm_diis
    ! Maximum number of iterations
 
    integer :: npwsp
+   ! Total number of planewaves treated by this proc
    ! npw * my_nspinor
 
    integer :: prtvol
@@ -194,7 +195,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, cpu, wall, gflops, cpu_all, wall_all, gflops_all, lock_tolwfr
  character(len=500) :: msg
  type(rmm_diis_t) :: diis
- type(stats_t) :: res_stats
 !arrays
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
@@ -266,7 +266,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  raise_acc = max(raise_acc, prev_accuracy_level)
 
  ! Define tolerance for occupied states on the basis of prev_accuracy_level
- ! and compute max of residuals for this bands.
+ ! and compute max of residuals for these bands.
  tol_occupied = zero
  if (dtset%iscf > 0) then
    tol_occupied = tol3; if (any(prev_accuracy_level == [1])) tol_occupied = tol2
@@ -293,7 +293,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  rmm_diis_status(2) = rmm_diis_status(2) + 1
 
  ! Will perform max_niter DIIS steps. Usually 3 as nline by default is 4.
- ! Note that, unlike Vasp's recipe, here we don't end with a trial step.
+ ! Note that, unlike in Vasp's recipe, here we don't end with a trial step after DIIS.
  max_niter = max(dtset%nline - 1, 1)
  if (accuracy_level >= 4) max_niter = dtset%nline
  if (dtset%iscf < 0) max_niter = dtset%nline + 1
@@ -319,7 +319,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Total number of H |Psi> applications:
  !
  !   1 for subdiago.
- !   2 for preconditioned steepest descent.
+ !   1 for preconditioned steepest descent.
  !   (nline - 1) for DIIS or nline if ultimate accuracy is reached.
  !   1 if after_ortho > 0
  !
@@ -330,7 +330,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (usepaw == 1) after_ortho = 2 ! FIXME ??
  !after_ortho = 2
 
- ! Tolerance on residuals used for band locking.
+ ! Tolerance on residuals used for band locking after subdiago.
  if (dtset%tolwfr > zero) then
    lock_tolwfr = dtset%tolwfr
  else
@@ -363,14 +363,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ", accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
- res_stats = stats_eval(resid(1:nb_pocc))
- write(msg, "(4(a, es14.6))")"residuals for partial-occ states. mean:", &
-                   res_stats%mean, ", min", res_stats%min, ", max", res_stats%max, ", stdev:", res_stats%stdev
- call wrtout(std_out, msg)
- res_stats = stats_eval(resid)
- write(msg, "(4(a, es14.6))")"residuals for all nband states. mean:", &
-                   res_stats%mean, ", min", res_stats%min, ", max", res_stats%max, ", stdev:", res_stats%stdev
- call wrtout(std_out, msg)
+ call print_resids("input")
 
  !ABI_MALLOC(ghc, (2, npwsp*nband))
  !ABI_MALLOC(gvnlxc, (2, npwsp*nband))
@@ -389,6 +382,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ABI_MALLOC_OR_DIE(residvecs, (2, npwsp*nband), ierr)
  call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, enlx, eig, resid, residvecs, cg, gsc)
  if (timeit) call cwtime_report(" subspace_rotation ", cpu, wall, gflops)
+ call print_resids("after subdiago")
 
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
@@ -438,7 +432,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    ! Save <R0|R0> and <phi_0|S|phi_0>, |phi_0>, |S phi_0>. Assume input phi_bk is already S-normalized.
    call diis%push_iter(0, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), phi_bk, residv_bk, gsc_bk, "SDIAG")
-   !if (timeit) call cwtime_report(" push_iter ", cpu, wall, gflops)
 
    ! Line minimization with preconditioned steepest descent:
    !
@@ -468,7 +461,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ! Compute (H - e_0 S) |K R_0>
    call cg_get_residvecs(usepaw, npwsp, ndat, eig(ib_start), kres_bk, ghc_bk, gsc_bk, residv_bk)
    call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, lambda_bk, me_g0, comm_bandspinorfft)
-   !if (timeit) call cwtime_report(" cg_norm2g ", cpu, wall, gflops)
 
    ! Compute lambda
    dots_bk = zero
@@ -485,7 +477,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      jj = 1 + (idat - 1) * npwsp; kk = idat * npwsp
      phi_bk(:,jj:kk) = diis%chain_phi(:,:,0,idat) + lambda_bk(idat) * kres_bk(:,jj:kk)
    end do
-   !if (timeit) call cwtime_report(" trial_step ", cpu, wall, gflops)
 
    ! ===============
    ! DIIS iterations
@@ -508,7 +499,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, phi_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                           eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.True.)
 
-     ! Store new wavevefunction and residuals.
+     ! Store new wavevefunctions and residuals.
      call diis%push_iter(iter, ndat, eig(ib_start), resid(ib_start), enlx(ib_start), phi_bk, residv_bk, gsc_bk, "DIIS")
 
      ! CHECK FOR CONVERGENCE
@@ -518,13 +509,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ! Compute <R_i|R_j> and <i|S|j> for j=iter
      if (iter /= max_niter_block) call diis%eval_mats(iter, ndat, me_g0, comm_bandspinorfft)
    end do iter_loop
-   !if (timeit) call cwtime_report(" iterloop ", cpu, wall, gflops)
 
    !if (usepaw == 0) then
    call diis%rollback(npwsp, ndat, phi_bk, gsc_bk, residv_bk,  &
                       eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
    !end if
-   !if (timeit) call cwtime_report(" rollback ", cpu, wall, gflops)
 
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
  end do ! iblock
@@ -539,12 +528,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !ortalgo = mpi_enreg%paral_kgb
  ortalgo = 3
  call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bandspinorfft)
-
- !if (usepaw == 1) then
- !  call cgpaw_cholesky(npwsp, nband, cg, gsc, istwf_k, me_g0, comm)
- !else
- !  call cgnc_cholesky(npwsp, nband, cg, istwf_k, me_g0, comm, use_gemm=.False.)
- !end if
 
  !if (usepaw == 1) call cgtk_fixphase(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
  call timab(583,2,tsec)
@@ -609,8 +592,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
 
  !if (dtset%prtvol > 0) then
- call yaml_write_dict('RMM-DIIS', "stats", diis%stats, std_out, with_iter_state=.False.)
- !end if
+ call print_resids("output")
+ if (diis%stats%length() > 0) then
+   call yaml_write_dict('RMM-DIIS', "stats", diis%stats, std_out, with_iter_state=.False.)
+ end if
  if (timeit) call cwtime_report(" rmm_diis total: ", cpu_all, wall_all, gflops_all)
 
  ! Final cleanup.
@@ -622,6 +607,24 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ABI_FREE(gvnlxc_bk)
  ABI_FREE(residvecs)
  call diis%free()
+
+contains
+
+subroutine print_resids(what)
+ character(len=*),intent(in) :: what
+ type(stats_t) :: res_stats
+ res_stats = stats_eval(resid(1:nb_pocc))
+ write(msg, "(1x,a,4(a, 1x, es9.3))") &
+     trim(what)," resids for partial-occ states. mean:", &
+     res_stats%mean, ", min:", res_stats%min, ", max:", res_stats%max, ", stdev:", res_stats%stdev
+ call wrtout(std_out, msg)
+ !res_stats = stats_eval(resid)
+ !write(msg, "(1x,a,4(a, 1x, es9.3))") &
+ !    trim(what), " resids for all nband states. mean:", &
+ !    res_stats%mean, ", min:", res_stats%min, ", max:", res_stats%max, ", stdev:", res_stats%stdev
+ !call wrtout(std_out, msg)
+
+end subroutine print_resids
 
 end subroutine rmm_diis
 !!***
@@ -883,7 +886,6 @@ subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enr
 ! *************************************************************************
 
  !if (timeit) call cwtime(cpu, wall, gflops, "start")
-
  normalize_ = .True.; if (present(normalize)) normalize_ = normalize
  npwsp = npw * my_nspinor
  usepaw = gs_hamk%usepaw; istwf_k = gs_hamk%istwf_k; me_g0 = mpi_enreg%me_g0
@@ -1145,7 +1147,6 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
 
  nprocs = xmpi_comm_size(comm)
  option = 2; if (diis%cplex == 1) option = 1
-
  !if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  do idat=1,ndat
