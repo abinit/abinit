@@ -38,7 +38,7 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.3.1],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[9.3.2],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -1172,10 +1172,6 @@ CPPFLAGS=""
 
 # FIXME: Temporary options to remove
 case "${ABINIT_LEGACY_OPTION}" in
-  etsf_io)
-    AC_DEFINE([HAVE_ETSF_IO], 1,
-     [Define to 1 if you want to use ETSF_IO (obsolete, orphan project).])   
-    ;;
   mpi1)
     AC_DEFINE([HAVE_MPI1], 1,
       [Define to 1 if you have a MPI-1 implementation (obsolete, broken).])
