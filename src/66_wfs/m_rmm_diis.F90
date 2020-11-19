@@ -1299,11 +1299,14 @@ end subroutine my_pack_matrix
 !! subspace_rotation
 !!
 !! FUNCTION
-!!  This routine compute the <i|H|j> matrix elements and then performs the subspace rotation
+!!  This routine computes the <i|H|j> matrix elements and then performs the subspace rotation
 !!  of the orbitals (rayleigh-ritz procedure)
 !!  The main difference with respect to other similar routines is that this implementation does not require
 !!  the <i|H|j> matrix elements as input so it can be used before starting the wavefunction optimation
 !!  as required e.g. by the RMM-DIIS method.
+!!  Moreover, the routine computes the new rediduals after the subspace rotation by rotating the
+!!  matrix elements of the Hamiltonian in the new basis (requires more memory but client code
+!!  can avoid calling getghc after subspace_rotation.
 !!
 !! INPUTS
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
@@ -1488,9 +1491,9 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
    call ZGEMM("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gtempc, npwsp)
  end if
  !call abi_xgemm('N','N', vectsize, nband, nband, cone, ghc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
- !ghc = gtempc
  call cg_zcopy(npwsp * nband, gtempc, ghc)
 
+ ! Rotate <G|Vnlx|Psi_n>
  if (usepaw == 0 .or. has_fock) then
    !call cg_zgemm("N", "N", npwsp, nband, nband, gvnlxc, evec, gtempc)
    if (cplex == 1) then
@@ -1500,7 +1503,6 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
      call ZGEMM("N", "N", npwsp, nband, nband, cone, gvnlxc, npwsp, evec, nband, czero, gtempc, npwsp)
    end if
    !call abi_xgemm('N','N', vectsize, nband, nband, cone, gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
-   !gvnlxc = gtempc
    call cg_zcopy(npwsp * nband, gtempc, gvnlxc)
  end if
  ABI_FREE(gtempc)
