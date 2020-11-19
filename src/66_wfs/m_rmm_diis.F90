@@ -334,7 +334,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (dtset%tolwfr > zero) then
    lock_tolwfr = dtset%tolwfr
  else
-   lock_tolwfr = tol8
+   lock_tolwfr = tol10
    if (accuracy_level >= 2) lock_tolwfr = tol12
    if (accuracy_level >= 3) lock_tolwfr = tol16
    if (accuracy_level >= 4) lock_tolwfr = tol20
@@ -365,11 +365,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  res_stats = stats_eval(resid(1:nb_pocc))
  write(msg, "(4(a, es14.6))")"residuals for partial-occ states. mean:", &
-                   res_stats%mean, "min", res_stats%min, "max", res_stats%max, "stdev:", res_stats%stdev
+                   res_stats%mean, ", min", res_stats%min, ", max", res_stats%max, ", stdev:", res_stats%stdev
  call wrtout(std_out, msg)
  res_stats = stats_eval(resid)
  write(msg, "(4(a, es14.6))")"residuals for all nband states. mean:", &
-                   res_stats%mean, "min", res_stats%min, "max", res_stats%max, "stdev:", res_stats%stdev
+                   res_stats%mean, ", min", res_stats%min, ", max", res_stats%max, ", stdev:", res_stats%stdev
  call wrtout(std_out, msg)
 
  !ABI_MALLOC(ghc, (2, npwsp*nband))
