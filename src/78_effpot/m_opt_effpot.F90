@@ -362,7 +362,7 @@ end subroutine opt_effpot
 !!
 !! SOURCE
 
-subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
+subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,comm,print_anh)
 
  implicit none 
          
@@ -372,7 +372,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
 !arrays 
- integer,intent(in) :: order_ran(2)
+ integer,intent(in) :: order_ran(2),bound_EFS(3)
+ real(dp),intent(in) :: bound_factors(3)
 !Logicals
  logical,optional,intent(in) :: print_anh 
 !Strings 
@@ -392,7 +393,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  integer,allocatable :: terms(:)
  logical,allocatable :: exists(:) 
  type(fit_data_type) :: fit_data
- real(dp) :: msefs_arr(2),coeff_opt(2)
+ real(dp) :: GF_arr(2),coeff_opt(2)
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
  !1406 strain_temrs_tmp
@@ -665,30 +666,25 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
             else 
             !Optimizing coefficient precisely ?
               coeff_opt = 0 
-              msefs_arr = 0 
+              GF_arr = 0 
                 i = 1 
                 do while(i<=2)
-                  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = &
-&                 eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient/ 2**(i-1)
-                  call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
+                 eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = &
+&                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient/ 2**(i-1)
+                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
 &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
 &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
-! ENERGY + FORCES + STRESSES output 
-!                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (mse+msef+mses)/(mse_ini+msef_ini+mses_ini): ",(mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
-!                  call wrtout(std_out,message,'COLL')
-!                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (mse+msef+mses): ", (mse+msef+mses)
-!                  call wrtout(std_out,message,'COLL')
-! FORCES + STRESSES output 
-                 write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
+                 GF_arr(i) =  (bound_factors(1)*bound_EFS(1)*mse+bound_factors(2)*bound_EFS(2)*msef& 
+&                             +bound_factors(3)*bound_EFS(3)*mses) / & 
+&                             (bound_factors(1)*bound_EFS(1)*mse_ini+bound_factors(2)*bound_EFS(2)*msef_ini& 
+&                             +bound_factors(3)*bound_EFS(3)*mses_ini)  
+                 write(message,'(a,I2,a,ES24.16)') "cycle ",i," GF/GF_ini: ",GF_arr(i)
                  call wrtout(std_out,message,'COLL')
-                 write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
-                 call wrtout(std_out,message,'COLL')
-                  coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
-!Store ENERGY + FORCES + STRESSES
-!                 msefs_arr(i) =  (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
-!STORE FORCES + STRESSES
-                 msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
-                  if(i==2 .and. abs(msefs_arr(1)-msefs_arr(2)) < tol8)then 
+                 write(message,'(a,I2,a,ES24.16)') "cycle ", i ," GF: ",(bound_factors(1)*bound_EFS(1)*mse+bound_factors(2)*bound_EFS(2)*msef& 
+&                                                                       +bound_factors(3)*bound_EFS(3)*mses)
+                 call wrtout(std_out,message,'COLL')                   
+                 coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
+                 if(i==2 .and. abs(GF_arr(1)-GF_arr(2)) < tol8)then 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient =& 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d5 
                      write(message,'(5a)') ch10,"Differences between test-cycles to small increase",ch10, & 
@@ -699,7 +695,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                      i=i+1
                   end if 
                 enddo ! while mse/mse_ini>10
-                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = opt_boundcoeff(msefs_arr,coeff_opt)
+                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = opt_boundcoeff(GF_arr,coeff_opt)
                 write(message,'(a,ES24.16)') "coeff after opt1:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
                 call wrtout(std_out,message,'COLL')
                 coeff_tmp = ANINT(eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d10)
@@ -709,12 +705,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
-! ENERGY + FORCES + STRESESS OUTPUT
-!                write(message,'(a,ES24.16)') "(mse+msef+mses)/(mse_ini+msef_ini+mses_ini) after_opt: ", (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
-!                call wrtout(std_out,message,'COLL')
-! FORCES + STRESESS OUTPUT
-               write(message,'(a,ES24.16)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
-               call wrtout(std_out,message,'COLL')
+                write(message,'(a,ES24.16)') "GF/GF_ini after_opt: ", (bound_factors(1)*bound_EFS(1)*mse+bound_factors(2)*bound_EFS(2)*msef& 
+&                                                                     +bound_factors(3)*bound_EFS(3)*mses) / & 
+&                                                                     (bound_factors(1)*bound_EFS(1)*mse_ini+bound_factors(2)*bound_EFS(2)*msef_ini& 
+&                                                                     +bound_factors(3)*bound_EFS(3)*mses_ini)  
+                call wrtout(std_out,message,'COLL')
                 mse_ini  = mse
                 msef_ini = msef
                 mses_ini = mses

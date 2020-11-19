@@ -90,6 +90,7 @@ module m_multibinit_dataset
   integer :: fit_EFS(3)
   integer :: sel_EFS(3) 
   integer :: opt_EFS(3) 
+  integer :: bound_EFS(3) 
   integer :: opt_effpot 
   integer :: opt_ncoeff 
   integer :: ts_option
@@ -180,6 +181,7 @@ module m_multibinit_dataset
   real(dp) :: acell(3)
   real(dp) :: fit_factors(3)
   real(dp) :: opt_factors(3)
+  real(dp) :: bound_factors(3)
   real(dp) :: strten_reference(6)
   real(dp) :: strtarget(6)
   real(dp) :: conf_cutoff_strain(6)
@@ -235,7 +237,7 @@ module m_multibinit_dataset
   ! sel_on(1) == TRUE, select on energy, sel_on(2,3)=TRUE select on forces stresses, sel_on(1,2,3)=TRUE select on EFS 
   
   logical :: opt_on(3)
-  ! sel_on(1) == TRUE, optimize on energy, sel_on(2,3)=TRUE optimize on forces stresses, fit_on(1,2,3)=TRUE optimize on EFS 
+  ! opt_on(1) == TRUE, optimize on energy, sel_on(2,3)=TRUE optimize on forces stresses, opt_on(1,2,3)=TRUE optimize on EFS 
 
   real(dp), allocatable :: qmass(:)
   ! qmass(nnos)
@@ -361,6 +363,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_EFS = (/ 0, 1, 1 /)
  multibinit_dtset%sel_EFS = (/ 0, 1, 1 /)
  multibinit_dtset%opt_EFS = (/ 0, 1, 1 /)
+ multibinit_dtset%bound_EFS = (/ 0, 1, 1 /)
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
  multibinit_dtset%fit_SPC_maxS=1
@@ -686,6 +689,26 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'bmass is',multibinit_dtset%bmass,', but the only allowed values',ch10,&
 &   'is superior to 0.',ch10,&
 &   'Action: correct bmass in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%bound_EFS=(/0,1,1/)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'bound_EFS',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_EFS(1:3)=intarr(1:3)
+ if(any(multibinit_dtset%bound_EFS<0) .or. any(multibinit_dtset%bound_EFS>1))then
+   write(message, '(a,i8,a,a,a)' )&
+&   'bound_EFS is',multibinit_dtset%bound_EFS,', but the only allowed values are 0 and 1',ch10,&
+&   'Action: correct bound_EFS in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%bound_factors=(/1,1,1/)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'bound_factors',tread,'DPR')
+ if(tread==1) multibinit_dtset%bound_factors(1:3)=dprarr(1:3)
+ if(any(multibinit_dtset%bound_factors<0))then
+   write(message, '(a,i8,a,a,a)' )&
+&   'bound_factors is',multibinit_dtset%bound_factors,', but the only allowed values are positive',ch10,&
+&   'Action: correct bound_factors in your input file.'
    MSG_ERROR(message)
  end if
 
