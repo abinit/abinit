@@ -840,55 +840,54 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    Call to nonlocal operator:
 !    - Compute nonlocal forces from most recent wfs
 !    - PAW: compute projections of WF onto NL projectors (cprj)
-!LTEST
-!   if(iscf>0.or.gs_hamk%usecprj==1)then
-!     if (gs_hamk%usepaw==1.or.optforces/=0) then
-!!      Treat all wavefunctions in case of varying occupation numbers or PAW
-!!      Only treat occupied bands in case of fixed occupation numbers and NCPP
-!       if(fixed_occ.and.abs(occblock)<=tol8.and.gs_hamk%usepaw==0) then
-!         if (optforces>0) grnl_k(:,(iblock-1)*blocksize+1:iblock*blocksize)=zero
-!       else
-!         if(gs_hamk%usepaw==1) then
-!           call timab(554,1,tsec)  ! "vtowfk:rhoij"
-!         end if
-!         if(cpopt>=1) then
-!           iband=1+(iblock-1)*bandpp_cprj
-!           call pawcprj_copy(cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg),cwaveprj)
-!         end if
-!         if (mpi_enreg%paral_kgb==1) then
-!           call timab(572,1,tsec) ! 'prep_nonlop%vtowfk'
-!           call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir, &
-!&           eig_k(1+(iblock-1)*blocksize:iblock*blocksize),blocksize,&
-!&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
-!           call timab(572,2,tsec)
-!         else
-!           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k(1+(iblock-1)*blocksize:iblock*blocksize),&
-!&           mpi_enreg,blocksize,nnlout,&
-!&           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
-!         end if
-!         if(gs_hamk%usepaw==1) then
-!           call timab(554,2,tsec)
-!         end if
-!!        Acccumulate forces
-!         if (optforces>0) then
-!           iband=(iblock-1)*blocksize
-!           do iblocksize=1,blocksize
-!             ii=0
-!             if (nnlout>3*natom) ii=6
-!             iband=iband+1;ibs=ii+nnlout*(iblocksize-1)
-!             grnl_k(1:nnlout,iband)=enlout(ibs+1:ibs+nnlout)
-!           end do
-!         end if
-!!        Store cprj (<Pnl|Psi>)
-!         if (gs_hamk%usepaw==1.and.gs_hamk%usecprj==1) then
-!           iband=1+(iblock-1)*bandpp_cprj
-!           call pawcprj_put(gs_hamk%atindx,cwaveprj,cprj,natom,iband,ibg,ikpt,iorder_cprj,isppol,&
-!&           mband_cprj,dtset%mkmem,natom,bandpp_cprj,nband_k_cprj,gs_hamk%dimcprj,my_nspinor,&
-!&           dtset%nsppol,dtfil%unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-!         end if
-!       end if
-!     end if ! PAW or forces
-!   end if ! iscf>0 or iscf=-3
+   if(iscf>0.or.gs_hamk%usecprj==1)then
+     if (gs_hamk%usepaw==1.or.optforces/=0) then
+!      Treat all wavefunctions in case of varying occupation numbers or PAW
+!      Only treat occupied bands in case of fixed occupation numbers and NCPP
+       if(fixed_occ.and.abs(occblock)<=tol8.and.gs_hamk%usepaw==0) then
+         if (optforces>0) grnl_k(:,(iblock-1)*blocksize+1:iblock*blocksize)=zero
+       else
+         if(gs_hamk%usepaw==1) then
+           call timab(554,1,tsec)  ! "vtowfk:rhoij"
+         end if
+         if(cpopt>=1) then
+           iband=1+(iblock-1)*bandpp_cprj
+           call pawcprj_copy(cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg),cwaveprj)
+         end if
+         if (mpi_enreg%paral_kgb==1) then
+           call timab(572,1,tsec) ! 'prep_nonlop%vtowfk'
+           call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir, &
+&           eig_k(1+(iblock-1)*blocksize:iblock*blocksize),blocksize,&
+&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
+           call timab(572,2,tsec)
+         else
+           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k(1+(iblock-1)*blocksize:iblock*blocksize),&
+&           mpi_enreg,blocksize,nnlout,&
+&           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
+         end if
+         if(gs_hamk%usepaw==1) then
+           call timab(554,2,tsec)
+         end if
+!        Acccumulate forces
+         if (optforces>0) then
+           iband=(iblock-1)*blocksize
+           do iblocksize=1,blocksize
+             ii=0
+             if (nnlout>3*natom) ii=6
+             iband=iband+1;ibs=ii+nnlout*(iblocksize-1)
+             grnl_k(1:nnlout,iband)=enlout(ibs+1:ibs+nnlout)
+           end do
+         end if
+!        Store cprj (<Pnl|Psi>)
+         if (gs_hamk%usepaw==1.and.gs_hamk%usecprj==1) then
+           iband=1+(iblock-1)*bandpp_cprj
+           call pawcprj_put(gs_hamk%atindx,cwaveprj,cprj,natom,iband,ibg,ikpt,iorder_cprj,isppol,&
+&           mband_cprj,dtset%mkmem,natom,bandpp_cprj,nband_k_cprj,gs_hamk%dimcprj,my_nspinor,&
+&           dtset%nsppol,dtfil%unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+         end if
+       end if
+     end if ! PAW or forces
+   end if ! iscf>0 or iscf=-3
 
  end do !  End of loop on blocks
 

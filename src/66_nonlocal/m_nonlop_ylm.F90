@@ -855,7 +855,7 @@ contains
        end if
 
 !      Computation or <p_lmn|c> (and derivatives) for this block of atoms
-       if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
+       if ((cpopt<4.and.choice_a/=-1.and.choice_a/=0).or.choice==8.or.choice==81) then
          if (abs(choice_a)>1) then
            call timab(1101,1,tsec)
            call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
