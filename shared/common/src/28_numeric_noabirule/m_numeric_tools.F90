@@ -4817,13 +4817,12 @@ end function isordered_rdp
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_numeric_tools/stats_eval
 !! NAME
 !!  stats_eval
 !!
 !! FUNCTION
-!!  Helper function used to calculate the statistical parameters of a data set.
+!!  Helper function used to calculate the statistical parameters of a dataset.
 !!
 !! INPUT
 !!  arr(:)=Array with the values.
@@ -4853,13 +4852,11 @@ pure function stats_eval(arr) result(stats)
 
 ! *************************************************************************
 
- !@stats_t
  stats%min   = +HUGE(one)
  stats%max   = -HUGE(one)
  stats%mean  = zero
 
  nn = SIZE(arr)
-
  do ii=1,nn
    xx = arr(ii)
    stats%max  = MAX(stats%max, xx)

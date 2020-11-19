@@ -39,7 +39,7 @@ module m_rmm_diis
  use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : sjoin, itoa, ftoa
  use m_time,          only : timab, cwtime, cwtime_report
- use m_numeric_tools, only : pack_matrix, imin_loc
+ use m_numeric_tools, only : pack_matrix, imin_loc, stats_t, stats_eval
  use m_hide_lapack,   only : xhegv_cplex, xhesv_cplex
  use m_pair_list,     only : pair_list
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free
@@ -191,9 +191,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy !, nspinor
  logical :: first_call, use_fft_mixprec, has_fock
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, cpu, wall, gflops, cpu_all, wall_all, gflops_all, my_tolwfr
- !character(len=500) :: msg
+ real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, cpu, wall, gflops, cpu_all, wall_all, gflops_all, lock_tolwfr
+ character(len=500) :: msg
  type(rmm_diis_t) :: diis
+ type(stats_t) :: res_stats
 !arrays
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
@@ -329,12 +330,14 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (usepaw == 1) after_ortho = 2 ! FIXME ??
  !after_ortho = 2
 
+ ! Tolerance on residuals used for band locking.
  if (dtset%tolwfr > zero) then
-   my_tolwfr = dtset%tolwfr
+   lock_tolwfr = dtset%tolwfr
  else
-   my_tolwfr = tol12
-   if (accuracy_level >= 2) my_tolwfr = tol16
-   if (accuracy_level >= 4) my_tolwfr = tol20
+   lock_tolwfr = tol8
+   if (accuracy_level >= 2) lock_tolwfr = tol12
+   if (accuracy_level >= 3) lock_tolwfr = tol16
+   if (accuracy_level >= 4) lock_tolwfr = tol20
  end if
 
  ! Use mixed precisions if requested by the user but only for low accuracy_level
@@ -353,12 +356,21 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  diis = rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
  diis%tol_occupied = tol_occupied
  call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations"))
- call wrtout(std_out, sjoin( &
-   " Number of blocks:", itoa(nblocks), ", nb_pocc:", itoa(nb_pocc)))
+ !call wrtout(std_out, sjoin( &
+ !  " Number of blocks:", itoa(nblocks), ", nb_pocc:", itoa(nb_pocc)))
  call wrtout(std_out, sjoin( &
    " Max_input_resid_pocc", ftoa(max_res_pocc), "accuracy_level:", itoa(accuracy_level), &
    ", accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
+
+ res_stats = stats_eval(resid(1:nb_pocc))
+ write(msg, "(4(a, es14.6))")"residuals for partial-occ states. mean:", &
+                   res_stats%mean, "min", res_stats%min, "max", res_stats%max, "stdev:", res_stats%stdev
+ call wrtout(std_out, msg)
+ res_stats = stats_eval(resid)
+ write(msg, "(4(a, es14.6))")"residuals for all nband states. mean:", &
+                   res_stats%mean, "min", res_stats%min, "max", res_stats%max, "stdev:", res_stats%stdev
+ call wrtout(std_out, msg)
 
  !ABI_MALLOC(ghc, (2, npwsp*nband))
  !ABI_MALLOC(gvnlxc, (2, npwsp*nband))
@@ -419,7 +431,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    !                     eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
 
    ! Band locking.
-   if (all(resid(ib_start:ib_stop) < my_tolwfr)) then
+   if (all(resid(ib_start:ib_stop) < lock_tolwfr)) then
      call diis%stats%increment("locked", ndat)
      cycle ! iblock
    end if
@@ -751,8 +763,8 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
  !ans = nbocc_ok == nbocc
 
  nok = count(checks /= 0)
- if (diis%accuracy_level == 1) ans = nok >= 0.70_dp * ndat
- if (diis%accuracy_level == 2) ans = nok >= 0.80_dp * ndat
+ if (diis%accuracy_level == 1) ans = nok >= 0.65_dp * ndat
+ if (diis%accuracy_level == 2) ans = nok >= 0.75_dp * ndat
  if (diis%accuracy_level == 3) ans = nok >= 0.90_dp * ndat
  if (diis%accuracy_level == 4) ans = nok == ndat
 

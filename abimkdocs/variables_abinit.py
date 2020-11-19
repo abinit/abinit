@@ -412,32 +412,37 @@ Variable(
     requires="[[paral_kgb]] == 1",
     added_in_version="before_v9",
     text=r"""
-Control the size of the block in the LOBPCG algorithm. This keyword works only
-with [[paral_kgb]] = 1 and has to be either 1 or a multiple of 2.
+Control the size of the block in the LOBPCG algorithm.
+
+!!! important
+
+    This keyword works only with [[paral_kgb]] = 1 and has to be either 1 or a multiple of 2.
+    Moreover [[nband]] / ([[npband]]  $\times$ n) has to be integer.
 
 With [[npband]] = 1:
 
 * 1 --> band-per-band algorithm
 * n --> The minimization is performed using [[nband]] blocks of n bands.
 
-!!! warning
-
-    [[nband]] has to be an integer.
-
-With [[npband]] $\ne$ 1:
+With [[npband]] > 1:
 
 * 1 --> The minimization is performed using [[nband]] / [[npband]] blocks of [[npband]] bands.
 * n --> The minimization is performed using [[nband]] / ([[npband]] $\times$ n) blocks of [[npband]]  $\times$ n bands.
 
-!!! warning
-
-    [[nband]] / ([[npband]]  $\times$ n) has to be an integer.
-
 By minimizing a larger number of bands together in LOBPCG, we increase the
-convergence of the residual. The better minimization procedure (as concerns
+convergence of the residuals. The better minimization procedure (as concerns
 the convergence, but not as concerns the speed) is generally performed by
-using *bandpp*  $\times$ [[npband]] = [[nband]]. Put *bandpp* = 2 when [[istwfk]] = 2
-(the time spent in FFTs is divided by two).
+using *bandpp*  $\times$ [[npband]] = [[nband]].
+
+When performing Gamma-only calculations ([[istwfk]] = 2), it is recommended to set *bandpp* = 2
+(or a multiple of 2) as the time spent in FFTs is divided by two.
+Also, the time required to apply the non-local part of the KS Hamiltonian can be significantly
+reduced if [[bandpp]] > 1 is used in conjunction with [[use_gemm_nonlop]] = 1.
+
+Note that increasing the value of [[bandpp] can have a significant impact on the computing time
+(especially if [[use_gemm_nonlop]] is used)
+but keep in mind that the size of the workspace arrays will also increase so the calculation may go out-of-memory
+if a too large [[bandpp] is used in systems if many atoms.
 """,
 ),
 
