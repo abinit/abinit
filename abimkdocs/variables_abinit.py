@@ -21891,7 +21891,7 @@ eigensolver to **accelerate** GS computations, structural relaxations and molecu
 The algorithm is inspired to [[cite:Kresse1996]] although the ABINIT implementation is not
 completely equivalent to the original formulation.
 RMM-DIIS can be used with NC pseudos as well as PAW and it is fully compatible with the [[paral_kgb]] distribution.
-This variable is ignored when [[optdriver]] > 0.
+This variable has no effect when [[optdriver]] > 0.
 
 It is worth noting that RMM-DIIS is usually used in conjunction with another eigenvalue solver (e.g. CG or LOBPCG)
 that is employed to perform the initial SCF iterations.
@@ -21926,9 +21926,8 @@ This means that using [[rmm_diis]] 1 for a structural relaxation leads to:
 RMM-DIIS usually requires less wall-time per iteration when compared to other approaches since the
 explicit orthogonalization is avoided while optimizing the trial states.
 Only a single full-band orthogonalization is performed per SCF iteration before recomputing the new density.
-As a consequence, one RMM-DIIS iteration is usually faster
-(sometimes even by a factor two) than CG/LOBPCG, especially in systems
-with relatively large [[mpw]].
+As a consequence, one RMM-DIIS iteration is usually faster (sometimes even by a factor two) than CG/LOBPCG,
+especially in systems with relatively large [[mpw]].
 Obviously the time-to-solution depends on the overall number of iterations required to reach a given accuracy.
 This is the reason why providing RMM-DIIS with reasonable initial trial wavefunctions and potential
 is also crucial for performance.

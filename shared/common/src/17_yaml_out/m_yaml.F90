@@ -541,12 +541,12 @@ end subroutine yamldoc_add_int
 !!  Add a list of integer numbers to the document
 !!
 !! INPUTS
-!!  keylist = List of comma-separated keywords
-!!  values = List of values
+!!  keylist = List of comma-separated keywords e.g. "foo, bar"
+!!  values = List of integer values
 !!  [int_fmt] = override the default formatting
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [dict_key]=If present, a dictionary with key `dict_key` is created instead of a list.
-!!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
+!!  [multiline_trig] = minimum number of elements before switching to multiline representation
 !!  [ignore]= If present, ignore entrie if values is equal to ignore.
 !!
 !! PARENTS

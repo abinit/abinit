@@ -188,13 +188,15 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer,parameter :: choice1 = 1, signs1 = 1, signs2 = 2, tim_nonlop = 0, paw_opt0 = 0, paw_opt3 = 3
  integer :: ierr, prtvol, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, idat, paral_kgb, ortalgo
  integer :: cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, optekin, usepaw, iter, max_niter, max_niter_block
- integer :: me_g0, nb_pocc, jj, kk, accuracy_level, raise_acc, prev_mixprec, after_ortho
+ integer :: me_g0, nb_pocc, jj, kk, accuracy_level, raise_acc, prev_mixprec, after_ortho, me_cell
  integer :: comm_bandspinorfft, prev_accuracy_level, ncalls_with_prev_accuracy !, nspinor
  logical :: first_call, use_fft_mixprec, has_fock
  real(dp),parameter :: rdummy = zero
  real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, cpu, wall, gflops, cpu_all, wall_all, gflops_all, lock_tolwfr
  character(len=500) :: msg
+ type(yamldoc_t) :: rmm_ydoc
  type(rmm_diis_t) :: diis
+ type(stats_t) :: res_stats
 !arrays
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
@@ -209,7 +211,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  usepaw = dtset%usepaw; istwf_k = gs_hamk%istwf_k; paral_kgb = mpi_enreg%paral_kgb
  me_g0 = mpi_enreg%me_g0; comm_bandspinorfft = mpi_enreg%comm_bandspinorfft
  npwsp = npw * my_nspinor; mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
- prtvol = dtset%prtvol !; prtvol = -level
+ me_cell = mpi_enreg%me_cell; prtvol = dtset%prtvol !; prtvol = -level
  has_fock = associated(gs_hamk%fockcommon)
 
  if (timeit) then
@@ -261,7 +263,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (prev_accuracy_level == 2 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 3
  if (prev_accuracy_level == 3 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 4
  if (raise_acc > 0) then
-   call wrtout(std_out, " Accuracy_level is automatically increased as we reached the max number of NSCF iterations.")
+   MSG_COMMENT("Accuracy_level is automatically increased as we reached the max number of NSCF iterations.")
  end if
  raise_acc = max(raise_acc, prev_accuracy_level)
 
@@ -332,7 +334,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  ! Tolerance on residuals used for band locking after subdiago.
  if (dtset%tolwfr > zero) then
-   lock_tolwfr = dtset%tolwfr
+   lock_tolwfr = tol2 * dtset%tolwfr
  else
    lock_tolwfr = tol10
    if (accuracy_level >= 2) lock_tolwfr = tol12
@@ -355,15 +357,18 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Build DIIS object.
  diis = rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol)
  diis%tol_occupied = tol_occupied
- call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations"))
+ !call wrtout(std_out, sjoin(" Using Max", itoa(max_niter), "RMM-DIIS iterations"))
  !call wrtout(std_out, sjoin( &
- !  " Number of blocks:", itoa(nblocks), ", nb_pocc:", itoa(nb_pocc)))
- call wrtout(std_out, sjoin( &
-   " Max_input_resid_pocc", ftoa(max_res_pocc), "accuracy_level:", itoa(accuracy_level), &
-   ", accuracy_ene: ", ftoa(accuracy_ene)))
+ !  " Max_input_resid_pocc", ftoa(max_res_pocc), "accuracy_level:", itoa(accuracy_level), &
+ !  ", accuracy_ene: ", ftoa(accuracy_ene)))
  call timab(1634, 1, tsec) ! "rmm_diis:band_opt"
 
- call print_resids("input")
+ rmm_ydoc = yamldoc_open("RMM-DIIS", with_iter_state=.False.)
+ call rmm_ydoc%add_ints("ikpt, isppol, istep, accuracy_level", [ikpt, isppol, istep, accuracy_level])
+ call rmm_ydoc%open_tabular("RESIDS_POCC") !, tag, indent, newline, comment)
+ write(msg, "(1x, a10, 4(a10))")"level", "mean", "min", "max", "stdev"
+ call rmm_ydoc%add_tabular_line(msg, indent=0)
+ call rmm_ydoc%add_tabular_line(resids2str("input"), indent=0)
 
  !ABI_MALLOC(ghc, (2, npwsp*nband))
  !ABI_MALLOC(gvnlxc, (2, npwsp*nband))
@@ -381,8 +386,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! for each state in the block. It requires less memory but it's slower.
  ABI_MALLOC_OR_DIE(residvecs, (2, npwsp*nband), ierr)
  call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, enlx, eig, resid, residvecs, cg, gsc)
+
  if (timeit) call cwtime_report(" subspace_rotation ", cpu, wall, gflops)
- call print_resids("after subdiago")
+ call rmm_ydoc%add_tabular_line(resids2str("subspace"), indent=0)
 
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
@@ -520,6 +526,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  call timab(1634, 2, tsec) !"rmm_diis:band_opt"
  if (timeit) call cwtime_report(" rmm_diis:band_opt", cpu, wall, gflops)
+ call rmm_ydoc%add_tabular_line(resids2str("rmm-diis"), indent=0)
 
  ! ===============================
  ! Orthogonalize states after DIIS
@@ -592,10 +599,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
 
  !if (dtset%prtvol > 0) then
- call print_resids("output")
- if (diis%stats%length() > 0) then
-   call yaml_write_dict('RMM-DIIS', "stats", diis%stats, std_out, with_iter_state=.False.)
- end if
+ call rmm_ydoc%add_tabular_line(resids2str("ortho"), indent=0)
+ if (diis%stats%length() > 0) call rmm_ydoc%add_dict("skip_stats", diis%stats)
+ call rmm_ydoc%write_and_free(std_out)
+
  if (timeit) call cwtime_report(" rmm_diis total: ", cpu_all, wall_all, gflops_all)
 
  ! Final cleanup.
@@ -610,21 +617,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
 contains
 
-subroutine print_resids(what)
- character(len=*),intent(in) :: what
- type(stats_t) :: res_stats
- res_stats = stats_eval(resid(1:nb_pocc))
- write(msg, "(1x,a,4(a, 1x, es9.3))") &
-     trim(what)," resids for partial-occ states. mean:", &
-     res_stats%mean, ", min:", res_stats%min, ", max:", res_stats%max, ", stdev:", res_stats%stdev
- call wrtout(std_out, msg)
- !res_stats = stats_eval(resid)
- !write(msg, "(1x,a,4(a, 1x, es9.3))") &
- !    trim(what), " resids for all nband states. mean:", &
- !    res_stats%mean, ", min:", res_stats%min, ", max:", res_stats%max, ", stdev:", res_stats%stdev
- !call wrtout(std_out, msg)
-
-end subroutine print_resids
+function resids2str(level) result(str)
+  character(len=*),intent(in) :: level
+  character(len=500) :: str
+  res_stats = stats_eval(resid(1:nb_pocc))
+  write(str, "(1x, a10, 4(es10.3))") trim(level), res_stats%mean, res_stats%min, res_stats%max, res_stats%stdev
+end function resids2str
 
 end subroutine rmm_diis
 !!***
@@ -1062,14 +1060,6 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
      wmat1(1,iter,iter) = zero
      wmat1(:,0:iter-1, 0:iter-1) = diis%resmat(:, 0:iter-1, 0:iter-1, idat)
 
-     !if (ierr /= 0) then
-     !  write(std_out, *)"iter:", iter, "cplex:", cplex
-     !  do ii=0,iter
-     !    !write(std_out, sjoin("(", itoa(2*iter), ", (es14.6)")) "wmat1:", wmat1(:, ii, :)
-     !    write(std_out, "(a, *(es14.6))") " wmat1:", wmat1(:, ii, :)
-     !  end do
-     !end if
-
      call xhesv_cplex("U", cplex, iter+1, 1, wmat1, wvec(:,:,idat), msg, ierr)
      ABI_CHECK(ierr == 0, msg)
      !failed(idat) = ierr
@@ -1101,7 +1091,7 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
      call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wvec(:,:,idat), phi_bk(:,:,idat))
      call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wvec(:,:,idat), residv_bk(:,:,idat))
    else
-     ! Use DGEMV
+     ! coefficients are reall --> use DGEMV
      ABI_MALLOC(alphas, (1, 0:iter))
      alphas(1,:) = wvec(1,:,idat)
      call dgemv("N", 2*npwsp, iter, one, diis%chain_phi(:,:,:,idat), 2*npwsp, alphas, 1, zero, phi_bk(:,:,idat), 1)
@@ -1241,7 +1231,7 @@ subroutine rmm_diis_rollback(diis, npwsp, ndat, phi_bk, gsc_bk, residv_bk, eig, 
      call cg_zcopy(npwsp, diis%chain_phi(:,:,iter,idat), phi_bk(:,:,idat))
      call cg_zcopy(npwsp, diis%chain_resv(:,:,iter,idat), residv_bk(:,:,idat))
      if (diis%usepaw == 1) call cg_zcopy(npwsp, diis%chain_sphi(:,:,iter,idat), gsc_bk(:,:,idat))
-     call diis%stats%increment("rollback", 1)
+     call diis%stats%increment("rollbacks", 1)
    end do
  end if
 
@@ -1350,8 +1340,8 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  integer :: ig, ig0, ib, ierr, bsize, nblocks, iblock, npwsp, ndat, ib_start, ib_stop, paral_kgb
  integer :: iband, cpopt, sij_opt, igs, ige, mcg, mgsc, istwf_k, usepaw, me_g0, cplex, comm
  logical :: has_fock
- real(dp) :: cpu, wall, gflops
  real(dp),parameter :: rdummy = zero
+ real(dp) :: cpu, wall, gflops
 !arrays
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
@@ -1485,7 +1475,6 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  !call cg_zgemm("N", "N", npwsp, nband, nband, ghc, evec, gtempc)
  if (cplex == 1) then
- !if (istwf_k == 2) then
    call DGEMM("N", "N", 2*npwsp, nband, nband, one, ghc, 2*npwsp, evec_re, nband, zero, gtempc, 2*npwsp)
  else
    call ZGEMM("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gtempc, npwsp)
@@ -1497,7 +1486,6 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  if (usepaw == 0 .or. has_fock) then
    !call cg_zgemm("N", "N", npwsp, nband, nband, gvnlxc, evec, gtempc)
    if (cplex == 1) then
-   !if (istwf_k == 2) then
      call DGEMM("N", "N", 2*npwsp, nband, nband, one, gvnlxc, 2*npwsp, evec_re, nband, zero, gtempc, 2*npwsp)
    else
      call ZGEMM("N", "N", npwsp, nband, nband, cone, gvnlxc, npwsp, evec, nband, czero, gtempc, npwsp)

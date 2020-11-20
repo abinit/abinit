@@ -210,7 +210,7 @@ program lapackprof
              cg(:,g0) = half * cg(:,g0)
            end do
          end if
-         call cg_zgemm("C","N", npw, nband, nband, cg, cg, ortho_check)
+         call cg_zgemm("C", "N", npw, nband, nband, cg, cg, ortho_check)
          if (istwfk/=1) ortho_check = two * ortho_check
          do band=1,nband
            ortho_check(1,band,band) = ortho_check(1,band,band) - one
