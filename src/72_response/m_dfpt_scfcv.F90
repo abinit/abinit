@@ -674,6 +674,19 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_ALLOCATE(qmat,(0,0,0,0,0,0))
  end if
 
+! in case of DDK and nuclear dipoles, need nuclear dipole vector potential.
+! nuclear dipoles not available in any other perturbation as of 19 Nov 2020 (JWZ)
+! with_vectornd = 0
+! if ( ANY(ABS(dtset%nucdipmom)>tol8) .AND. (ipert .EQ. dtset%natom+1) ) then
+!   with_vectornd = 1
+!   if(allocated(vectornd)) then
+!     ABI_DEALLOCATE(vectornd)
+!   end if
+!   ABI_ALLOCATE(vectornd,(with_vectornd*nfftf,3))
+!   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,&
+!     & dtset%nucdipmom,rprimd,vectornd,xred)
+! end if
+
  call timab(154,2,tsec)
 
 !######################################################################
@@ -1519,6 +1532,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_DATATYPE_DEALLOCATE(paw_an1)
  ABI_DATATYPE_DEALLOCATE(paw_ij1)
  ABI_DEALLOCATE(nhat1)
+
+! if(allocated(vectornd)) then
+!   ABI_DEALLOCATE(vectornd)
+! end if
 
  call timab(160,2,tsec)
  call timab(120,2,tsec)
