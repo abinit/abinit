@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h25 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h25 )
   
-- input  file    -> t96.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t96/t96.in
 - output file    -> t96.out
 - root for input  files -> t96i
 - root for output files -> t96o
@@ -106,6 +106,10 @@ _ WF disk file :      0.240 Mbytes ; DEN or POT disk file :      0.071 Mbytes.
             acell3     8.9856470757E+00  8.9856470757E+00  2.4549430318E+01 Bohr
             acell4     8.9856470757E+00  8.9856470757E+00  2.4549430318E+01 Bohr
               amu      2.69815390E+01  1.59994000E+01
+          chkprim1          1
+          chkprim2          1
+          chkprim3          0
+          chkprim4          0
              ecut1     2.00000000E+00 Hartree
              ecut2     2.00000000E+00 Hartree
              ecut3     3.00000000E+00 Hartree
@@ -576,10 +580,10 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.7  wall=          0.7
++Overall time at end (sec) : cpu=          1.2  wall=          1.2

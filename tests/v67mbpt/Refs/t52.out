@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h22 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h30 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t52-t53/t52.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v67mbpt_t52-t53/t52.in
 - output file    -> t52.out
 - root for input  files -> t52i
 - root for output files -> t52o
@@ -452,8 +452,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -489,15 +489,15 @@ tolerances: {tolwfr: 1.00E-28, }
  ETOT  3  -8.8756561419827    -7.692E-05 3.172E-06 2.990E-03
  ETOT  4  -8.8756570364735    -8.945E-07 4.220E-08 1.086E-05
  ETOT  5  -8.8756570414101    -4.937E-09 1.945E-10 2.424E-08
- ETOT  6  -8.8756570414252    -1.503E-11 6.332E-13 1.671E-10
- ETOT  7  -8.8756570414253    -1.421E-13 2.197E-15 6.961E-13
- ETOT  8  -8.8756570414252     6.040E-14 1.502E-17 1.007E-15
- ETOT  9  -8.8756570414254    -1.226E-13 1.287E-20 1.653E-18
- ETOT 10  -8.8756570414253     5.507E-14 1.724E-23 1.721E-21
- ETOT 11  -8.8756570414252     6.750E-14 3.656E-27 9.549E-25
- ETOT 12  -8.8756570414253    -1.599E-14 9.990E-29 7.930E-28
+ ETOT  6  -8.8756570414252    -1.502E-11 6.332E-13 1.671E-10
+ ETOT  7  -8.8756570414253    -1.457E-13 2.197E-15 6.961E-13
+ ETOT  8  -8.8756570414252     5.862E-14 1.502E-17 1.007E-15
+ ETOT  9  -8.8756570414254    -1.172E-13 1.287E-20 1.653E-18
+ ETOT 10  -8.8756570414253     5.329E-14 1.723E-23 1.721E-21
+ ETOT 11  -8.8756570414252     6.395E-14 3.653E-27 9.694E-25
+ ETOT 12  -8.8756570414253    -1.421E-14 9.936E-29 1.009E-27
 
- At SCF step   12   max residual=  9.99E-29 < tolwfr=  1.00E-28 =>converged.
+ At SCF step   12   max residual=  9.94E-29 < tolwfr=  1.00E-28 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.38568145E-05  sigma(3 2)=  0.00000000E+00
@@ -515,7 +515,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae: -1.599E-14, res2:  7.930E-28, residm:  9.990E-29, diffor: null, }
+convergence: {deltae: -1.421E-14, res2:  1.009E-27, residm:  9.936E-29, diffor: null, }
 etotal    :  -8.87565704E+00
 entropy   :   0.00000000E+00
 fermie    :   2.05995379E-01
@@ -542,7 +542,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   39.477E-30; max=  99.905E-30
+ Mean square residual over all n,k,spin=   38.911E-30; max=  99.359E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -635,16 +635,16 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file t52o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  7.37E-30  6.69E-29  6.27E-30  3.17E-29  8.06E-29  2.29E-29  3.94E-30  7.05E-29
-  1.11E-29  8.75E-29  5.19E-30  7.86E-27  1.58E-25  2.04E-29
+  7.46E-30  6.73E-29  6.12E-30  3.12E-29  8.03E-29  2.28E-29  4.12E-30  7.12E-29
+  1.11E-29  8.75E-29  4.93E-30  7.86E-27  1.58E-25  2.08E-29
  -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
   3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
   6.2852E-01  6.2852E-01
-  prteigrs : nnsclo,ikpt=    9    1 max resid (incl. the buffer)=  1.57898E-25
+  prteigrs : nnsclo,ikpt=    9    1 max resid (incl. the buffer)=  1.57802E-25
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=    9    2 max resid (incl. the buffer)=  1.89403E-26
-  prteigrs : nnsclo,ikpt=    9    3 max resid (incl. the buffer)=  3.69303E-24
+  prteigrs : nnsclo,ikpt=    9    2 max resid (incl. the buffer)=  1.89299E-26
+  prteigrs : nnsclo,ikpt=    9    3 max resid (incl. the buffer)=  3.69290E-24
 
 
  scprqt:  WARNING -
@@ -684,7 +684,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   10.550E-26; max=  36.930E-25
+ Mean square residual over all n,k,spin=   10.550E-26; max=  36.929E-25
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -740,8 +740,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file t52o_DS3_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  7.21E-30  6.71E-29  6.41E-30  3.08E-29  7.94E-29  2.29E-29  3.91E-30  7.10E-29
-  1.12E-29  8.85E-29  5.41E-30  2.84E-28  4.92E-28  2.03E-29
+  7.94E-30  6.67E-29  6.19E-30  3.08E-29  7.99E-29  2.29E-29  4.13E-30  7.02E-29
+  1.18E-29  8.82E-29  4.85E-30  2.83E-28  4.90E-28  2.07E-29
  -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
   3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
   6.2852E-01  6.2852E-01
@@ -759,7 +759,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  8.944E-28, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.038E-28, diffor:  0.000E+00, }
 etotal    :  -8.87565704E+00
 entropy   :   0.00000000E+00
 fermie    :   2.05995379E-01
@@ -781,7 +781,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   23.471E-29; max=  89.442E-29
+ Mean square residual over all n,k,spin=   24.745E-29; max=  90.380E-29
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -875,8 +875,8 @@ tolerances: {tolwfr: 1.00E-28, }
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000   -0.00000
-   0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000
+   0.00000    0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000   -0.00000
+   0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -993,7 +993,7 @@ tolerances: {tolwfr: 1.00E-28, }
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000   -0.00000
+  -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000
   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
@@ -1111,7 +1111,7 @@ tolerances: {tolwfr: 1.00E-28, }
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000    0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000    0.00000
+  -0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
@@ -1486,7 +1486,24 @@ P          mk1mem6          8
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] Recent developments in the ABINIT software package.
+- [4] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1504,23 +1521,10 @@ P          mk1mem6          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.6
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and  66 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.3  wall=          3.6
+.Delivered  16 WARNINGs and  66 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.8  wall=          2.9

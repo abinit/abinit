@@ -73,6 +73,7 @@ prtwf 0      # Don't output the wave-functions
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = alps_gnu_9.3_openmpi
 #%% [files]
 #%% files_to_test = 
 #%%   t14.out, tolnlines = 2, tolabs = 1.0e-4, tolrel = 1.0e-4
