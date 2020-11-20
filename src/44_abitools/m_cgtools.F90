@@ -40,7 +40,7 @@
 #define ABI_ZGEMM ZGEMM
 #endif
 
-MODULE m_cgtools
+module m_cgtools
 
  use defs_basis
  use m_abicore
@@ -2464,13 +2464,11 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm)
 
  my_usegemm = .FALSE.; if (PRESENT(use_gemm)) my_usegemm = use_gemm
 
-#if 0
-! TODO: Activate this.
-! Version optimized for real wavefunctions.
  if (istwfk /= 1) then
-   ABI_CALLOC(r_ovlp, (nband, nband))
+   ! Version optimized for real wavefunctions.
+   ABI_MALLOC(r_ovlp, (nband, nband))
 
-   ! 1) Calculate O_ij = <phi_i|phi_j>
+   ! 1) Calculate O_ij = <phi_i|phi_j> (real symmetric matrix)
    if (my_usegemm) then
      call DGEMM("T", "N", nband, nband, 2*npwsp, one, cg, 2*npwsp, cg, 2*npwsp, zero, r_ovlp, nband)
    else
@@ -2490,7 +2488,6 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm)
 
    ! Sum the overlap if PW are distributed.
    if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
-   !write(std_out, *)"rovlp:", r_ovlp
 
    ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
    call DPOTRF('U', nband, r_ovlp, nband, ierr)
@@ -2499,55 +2496,58 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm)
    ! 3) Solve X U = cg. On exit cg is orthonormalized.
    call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, cg, 2*npwsp)
    ABI_FREE(r_ovlp)
-   return
- end if
-#endif
-
- ABI_MALLOC(c_ovlp, (nband, nband))
-
- ! 1) Calculate O_ij = <phi_i|phi_j>
- if (my_usegemm) then
-   call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, cg, npwsp, czero, c_ovlp, nband)
- else
-   call ZHERK("U", "C", nband, npwsp, one, cg, npwsp, zero, c_ovlp, nband)
- end if
-
- if (istwfk == 1) then
-   ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) call xmpi_sum(c_ovlp, comm_pw, ierr)
-
-   ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
-   call ZPOTRF('U', nband, c_ovlp, nband, ierr)
-   ABI_CHECK(ierr == 0, sjoin('ZPOTRF returned info:', itoa(ierr)))
 
  else
-   ! Overlap matrix is real. Note that nspinor is always 1 in this case.
-   ABI_MALLOC(r_ovlp, (nband, nband))
-   r_ovlp = two * REAL(c_ovlp)
+   ! Version for complex wavefunctions.
+   ABI_MALLOC(c_ovlp, (nband, nband))
 
-   if (istwfk == 2 .and. me_g0 == 1) then
-     ! Extract the real part at G=0 and subtract its contribution to the overlap.
-     call dcopy(nband, cg, 2*npwsp, rcg0, 1)
-     do b2=1,nband
-       do b1=1,b2
-         r_ovlp(b1, b2) = r_ovlp(b1, b2) - rcg0(b1) * rcg0(b2)
-       end do
-     end do
+   ! 1) Calculate O_ij = <phi_i|phi_j> (complex Hermitean)
+   if (my_usegemm) then
+     call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, cg, npwsp, czero, c_ovlp, nband)
+   else
+     call ZHERK("U", "C", nband, npwsp, one, cg, npwsp, zero, c_ovlp, nband)
    end if
 
-   ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
+   if (istwfk == 1) then
+     ! Sum the overlap if PW are distributed.
+     if (comm_pw /= xmpi_comm_self) call xmpi_sum(c_ovlp, comm_pw, ierr)
 
-   ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
-   call DPOTRF('U', nband, r_ovlp, nband, ierr)
-   ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info:', itoa(ierr)))
+     ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
+     call ZPOTRF('U', nband, c_ovlp, nband, ierr)
+     ABI_CHECK(ierr == 0, sjoin('ZPOTRF returned info:', itoa(ierr)))
 
-   c_ovlp = DCMPLX(r_ovlp)
-   ABI_FREE(r_ovlp)
+   else
+     ! NB: This branch is never executed. It's here just for reference.
+     ! Overlap matrix is real. Note that nspinor is always 1 in this case.
+     ABI_MALLOC(r_ovlp, (nband, nband))
+     r_ovlp = two * REAL(c_ovlp)
+
+     if (istwfk == 2 .and. me_g0 == 1) then
+       ! Extract the real part at G=0 and subtract its contribution to the overlap.
+       call dcopy(nband, cg, 2*npwsp, rcg0, 1)
+       do b2=1,nband
+         do b1=1,b2
+           r_ovlp(b1, b2) = r_ovlp(b1, b2) - rcg0(b1) * rcg0(b2)
+         end do
+       end do
+     end if
+
+     ! Sum the overlap if PW are distributed.
+     if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
+
+     ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
+     call DPOTRF('U', nband, r_ovlp, nband, ierr)
+     ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info:', itoa(ierr)))
+
+     c_ovlp = DCMPLX(r_ovlp)
+     ABI_FREE(r_ovlp)
+   end if
+
+   ! 3) Solve X U = cg. On exit cg is orthonormalized.
+   call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cg, npwsp)
+
+   ABI_FREE(c_ovlp)
  end if
-
- ! 3) Solve X U = cg. On exit cg is orthonormalized.
- call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cg, npwsp)
 
 #ifdef DEBUG_MODE
  if (istwfk == 2) then
@@ -2562,8 +2562,6 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm)
    ABI_CHECK(ierr == 0, "Non zero imag part")
  end if
 #endif
-
- ABI_FREE(c_ovlp)
 
 end subroutine cgnc_cholesky
 !!***
@@ -2608,39 +2606,27 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
 !Local variables ------------------------------
 !scalars
  integer :: ierr,b1,b2
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
- real(dp),allocatable :: r_ovlp(:,:)
  real(dp) :: rcg0(nband), rg0sc(nband)
+ real(dp),allocatable :: r_ovlp(:,:)
  complex(dpc),allocatable :: c_ovlp(:,:)
 
 ! *************************************************************************
 
- ! 1) Calculate O_ij =  <phi_i|S|phi_j>
- ABI_MALLOC(c_ovlp, (nband, nband))
- call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, gsc, npwsp, czero, c_ovlp, nband)
-
- if (istwfk == 1) then
-   ! Sum the overlap if PW are distributed.
-   if (comm_pw /= xmpi_comm_self) call xmpi_sum(c_ovlp, comm_pw, ierr)
-   !
-   ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
-   call ZPOTRF('U', nband, c_ovlp, nband, ierr)
-   ABI_CHECK(ierr == 0, sjoin('ZPOTRF returned info:', itoa(ierr)))
-
- else
-   ! overlap is real. Note that nspinor is always 1 in this case.
+ if (istwfk /= 1) then
+   ! Version optimized for real wavefunctions.
    ABI_MALLOC(r_ovlp, (nband, nband))
-   !call DGEMM("T", "N", nband, nband, 2*npwsp, one, cg, 2*npwsp, gsc, 2*npwsp, zero, r_ovlp, nband)
-   r_ovlp = two * REAL(c_ovlp)
+   call DGEMM("T", "N", nband, nband, 2*npwsp, one, cg, 2*npwsp, gsc, 2*npwsp, zero, r_ovlp, nband)
+   r_ovlp = two * r_ovlp
 
-   if (istwfk==2 .and. me_g0==1) then
+   if (istwfk == 2 .and. me_g0 == 1) then
      ! Extract the real part at G=0 and subtract its contribution to the overlap.
      call dcopy(nband, cg, 2*npwsp, rcg0, 1)
      call dcopy(nband, gsc, 2*npwsp, rg0sc, 1)
      do b2=1,nband
        do b1=1,b2
-        r_ovlp(b1,b2) = r_ovlp(b1,b2) - rcg0(b1) * rg0sc(b2)
+         r_ovlp(b1,b2) = r_ovlp(b1,b2) - rcg0(b1) * rg0sc(b2)
        end do
      end do
    end if
@@ -2652,17 +2638,64 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
    call DPOTRF('U', nband, r_ovlp, nband, ierr)
    ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info:', itoa(ierr)))
 
-   c_ovlp = DCMPLX(r_ovlp)
+   ! 3) Solve X U = cg.
+   call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, cg, 2*npwsp)
+
+   ! 4) Solve Y U = gsc. On exit <cg|gsc> = 1
+   call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, gsc, 2*npwsp)
    ABI_FREE(r_ovlp)
+
+ else
+
+   ! 1) Calculate O_ij =  <phi_i|S|phi_j> (complex Hermitean)
+   ABI_MALLOC(c_ovlp, (nband, nband))
+   call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, gsc, npwsp, czero, c_ovlp, nband)
+
+   if (istwfk == 1) then
+     ! Sum the overlap if PW are distributed.
+     if (comm_pw /= xmpi_comm_self) call xmpi_sum(c_ovlp, comm_pw, ierr)
+     !
+     ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
+     call ZPOTRF('U', nband, c_ovlp, nband, ierr)
+     ABI_CHECK(ierr == 0, sjoin('ZPOTRF returned info:', itoa(ierr)))
+
+   else
+     ! NB: This branch is never executed. It's here just for reference.
+     ! overlap is real. Note that nspinor is always 1 in this case.
+     ABI_MALLOC(r_ovlp, (nband, nband))
+     !call DGEMM("T", "N", nband, nband, 2*npwsp, one, cg, 2*npwsp, gsc, 2*npwsp, zero, r_ovlp, nband)
+     r_ovlp = two * REAL(c_ovlp)
+
+     if (istwfk == 2 .and. me_g0 == 1) then
+       ! Extract the real part at G=0 and subtract its contribution to the overlap.
+       call dcopy(nband, cg, 2*npwsp, rcg0, 1)
+       call dcopy(nband, gsc, 2*npwsp, rg0sc, 1)
+       do b2=1,nband
+         do b1=1,b2
+           r_ovlp(b1,b2) = r_ovlp(b1,b2) - rcg0(b1) * rg0sc(b2)
+         end do
+       end do
+     end if
+
+     ! Sum the overlap if PW are distributed.
+     if (comm_pw /= xmpi_comm_self) call xmpi_sum(r_ovlp, comm_pw, ierr)
+
+     ! 2) Cholesky factorization: O = U^H U with U upper triangle matrix.
+     call DPOTRF('U', nband, r_ovlp, nband, ierr)
+     ABI_CHECK(ierr == 0, sjoin('DPOTRF returned info:', itoa(ierr)))
+
+     c_ovlp = DCMPLX(r_ovlp)
+     ABI_FREE(r_ovlp)
+   end if
+
+   ! 3) Solve X U = cg.
+   call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cg, npwsp)
+
+   ! 4) Solve Y U = gsc. On exit <cg|gsc> = 1
+   call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, gsc, npwsp)
+
+   ABI_FREE(c_ovlp)
  end if
-
- ! 3) Solve X U = cg.
- call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, cg, npwsp)
-
- ! 4) Solve Y U = gsc. On exit <cg|gsc> = 1
- call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, c_ovlp, nband, gsc, npwsp)
-
- ABI_FREE(c_ovlp)
 
 end subroutine cgpaw_cholesky
 !!***

@@ -380,7 +380,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! =========================
  ! === Subspace rotation ===
  ! =========================
- ! Here I allocate a big array to store the residual vectors after the subspace_rotation
+ ! Here I allocate a big array to store the residual vectors after the subspace_rotation for all nband states.
  ! This approach requires more memory but we avoid one call to H|Psi> per band.
  ! Alternatively, one can compute the residuals and ghc by applying H|psi> for all the states in the block.
  ! for each state in the block. It requires less memory but it's slower.
@@ -497,7 +497,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
        call cg_zcopy(npwsp * ndat, residv_bk, kres_bk)
        call cg_precon_many(istwf_k, npw, my_nspinor, ndat, phi_bk, optekin, kinpw, kres_bk, me_g0, comm_bandspinorfft)
 
-       ! Compute phi_bk with the lambda(ndat) obtained at iteration #1
+       ! Compute phi_bk with the same lambda(ndat) obtained at iteration #0
        call cg_zaxpy_many_areal(npwsp, ndat, lambda_bk, kres_bk, phi_bk)
      end if
 
@@ -1034,7 +1034,7 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, lambda_bk, phi_bk, res
  integer :: cplex, ierr, nprocs, my_rank, idat !, ii !, ibk, iek
  real(dp) :: noise !, cpu, wall, gflops
  !integer :: failed(ndat)
- real(dp),allocatable :: diis_eig(:), wmat1(:,:,:), wmat2(:,:,:), wvec(:,:,:), alphas(:,:)
+ real(dp),allocatable :: wmat1(:,:,:), wvec(:,:,:), alphas(:,:)
  character(len=500) :: msg
  ! *************************************************************************
 
