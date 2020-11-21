@@ -1425,7 +1425,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !write final electric field components HONG
 
  if (dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt ==7 .or.  &
-& dtset%berryopt == 14 .or. dtset%berryopt == 16 .or. dtset%berryopt ==17 ) then ! output final elctric field data    !!HONG
+& dtset%berryopt == 14 .or. dtset%berryopt == 16 .or. dtset%berryopt ==17 ) then ! output final electric field data    !!HONG
    if (dtset%berryopt == 4) then
      write(msg,'(a,a)')   ch10, 'Constant unreduced E calculation  - final values:'
    else if (dtset%berryopt == 6 ) then

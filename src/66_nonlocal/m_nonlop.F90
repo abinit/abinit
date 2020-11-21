@@ -67,7 +67,7 @@ contains
 !!   - Application of the overlap matrix in reciprocal space
 !!     (<in|S|in> or (I+S)|in>).
 !!   - Application of (Vnl-lambda.S) in reciprocal space
-!! According to user s choice, the routine calls a subroutine, computing all quantities:
+!! According to user's choice, the routine calls a subroutine, computing all quantities:
 !!   - using Legendre Polynomials Pl (Norm-conserving psps only)
 !!   - using Spherical Harmonics Ylm (N-conserving or PAW ; compulsory for PAW)
 !!   - using GPUs (N-conserving or PAW)
