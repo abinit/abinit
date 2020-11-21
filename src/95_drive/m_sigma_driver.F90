@@ -229,7 +229,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  real(dp):: gwalpha,gwbeta,wmin,wmax,eik_new,gsqcut,boxcut,ecutf  
  complex(dpc) :: max_degw,cdummy,delta_band_ibik          
- logical :: wfknocheck,itexists                               
+ logical :: wfknocheck
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname
