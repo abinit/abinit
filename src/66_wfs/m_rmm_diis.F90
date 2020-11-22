@@ -200,10 +200,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 !arrays
  real(dp) :: tsec(2)
  real(dp),target :: fake_gsc_bk(0,0)
- real(dp),allocatable :: gvnlxc_bk(:,:), lambda_bk(:), kres_bk(:,:), dots_bk(:,:), residv_bk(:,:)
- real(dp),allocatable :: umat(:,:,:), gwork(:,:)
- real(dp),target,allocatable :: ghc(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), cg_bk(:,:), ghc_bk(:,:)
+ real(dp),allocatable :: lambda_bk(:), kres_bk(:,:), dots_bk(:,:), residv_bk(:,:)
+ real(dp),allocatable :: umat(:,:,:), gwork(:,:), dots(:, :)
+ real(dp),target,allocatable :: ghc(:,:), gvnlxc(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:), cg_bk(:,:), ghc_bk(:,:), gvnlxc_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
 
 ! *************************************************************************
@@ -381,10 +381,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Alternatively, one can compute ghc and the residuals by applying H|psi>
  ! inside the loop over blocks (less memory but slower).
  ABI_MALLOC_OR_DIE(ghc, (2, npwsp*nband), ierr)
- !ABI_MALLOC_OR_DIE(gvnlxc, (2, npwsp*nband), ierr)
- !ABI_FREE(gvnlxc)
+ ABI_MALLOC_OR_DIE(gvnlxc, (2, npwsp*nband), ierr)
 
- call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, enlx, eig, cg, gsc, ghc)
+ call subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, enlx, eig, cg, gsc, ghc, gvnlxc)
 
  if (timeit) call cwtime_report(" subspace_rotation ", cpu, wall, gflops)
  !call rmm_ydoc%add_tabular_line(resids2str("subspace"), indent=0)
@@ -392,7 +391,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ABI_MALLOC(lambda_bk, (bsize))
  ABI_MALLOC(dots_bk, (2, bsize))
  !ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
- ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
+ !ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
  ABI_MALLOC(residv_bk, (2, npwsp*bsize))
  ABI_MALLOC(kres_bk, (2, npwsp*bsize))
 
@@ -424,8 +423,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    ! Compute H |phi_0> with cg block after subdiago.
    cg_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
-   ghc_bk => ghc(:,igs:ige)
-   !gvnlxc_bk => gvnlxc(:,igs:ige)
+   ghc_bk => ghc(:,igs:ige); gvnlxc_bk => gvnlxc(:,igs:ige)
 
    !call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
    !                     eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
@@ -521,8 +519,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end do iter_loop
 
    !if (usepaw == 0) then
-   call diis%rollback(npwsp, ndat, cg_bk, gsc_bk, ghc_bk,  &
-                      eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
+   !call diis%rollback(npwsp, ndat, cg_bk, gsc_bk, ghc_bk,  &
+   !                   eig(ib_start), resid(ib_start), enlx(ib_start), comm_bandspinorfft)
    !end if
 
    if (prtvol == -level) call diis%print_block(ib_start, ndat, istep, ikpt, isppol)
@@ -551,16 +549,19 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  end if
 
 #if 1
- ! Rotate ghc
+ ! Rotate ghc and gvnlxc. Solve X U = Y_old for X
  if (istwf_k == 1) then
-   ! 3) Solve X U = cg. On exit cg is orthonormalized.
    call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, ghc, npwsp)
-   !call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, gvnlxc, npwsp)
+   call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, gvnlxc, npwsp)
  else
-   ! 3) Solve X U = cg. On exit cg is orthonormalized.
    call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, ghc, 2*npwsp)
-   !call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, gvnlxc, 2*npwsp)
+   call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, gvnlxc, 2*npwsp)
  end if
+
+ ABI_MALLOC(dots, (2, nband))
+ call cg_zdotg_zip(istwf_k, npwsp, nband, option1, cg, gvnlxc, dots, me_g0, comm_bandspinorfft)
+ enlx = dots(1,:)
+ ABI_FREE(dots)
 
  ! Compute new approximated eigenvalues, residual vectors and norms
  !call cg_zcopy(npwsp * nband, gwork, ghc)
@@ -577,6 +578,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
+#if 0
  if (after_ortho > 0) then
    ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
    ! This step is important to improve the convergence of the NC total energy
@@ -590,8 +592,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      ndat = (ige - igs + 1) / npwsp
      ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
      cg_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
-     ghc_bk => ghc(:,igs:ige)
-     !gvnlxc_bk => gvnlxc(:,igs:ige)
+     ghc_bk => ghc(:,igs:ige); gvnlxc_bk => gvnlxc(:,igs:ige)
 
      select case (after_ortho)
      case (1)
@@ -635,7 +636,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  else
    if (dtset%prtvol > 0) call wrtout(std_out, " Still far from convergence. Eigens, residuals and enlx won't be recomputed.")
  end if
- !enlx = zero
+#endif
 
  ! Revert mixprec to previous status before returning.
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
@@ -652,8 +653,9 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  !ABI_FREE(ghc_bk)
  ABI_FREE(residv_bk)
  ABI_FREE(kres_bk)
- ABI_FREE(gvnlxc_bk)
+ !ABI_FREE(gvnlxc_bk)
  ABI_FREE(ghc)
+ ABI_FREE(gvnlxc)
  call diis%free()
 
 contains
@@ -1356,7 +1358,7 @@ end subroutine my_pack_matrix
 !!
 !! SOURCE
 
-subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, enlx, eig, cg, gsc, ghc)
+subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, enlx, eig, cg, gsc, ghc, gvnlxc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband, npw, my_nspinor
@@ -1366,6 +1368,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
  real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*dtset%usepaw)
  real(dp),target,intent(out) :: ghc(2,npw*my_nspinor*nband)
+ real(dp),target,intent(out) :: gvnlxc(2,npw*my_nspinor*nband)
  real(dp),intent(out) :: eig(nband), enlx(nband)
 
 !Local variables-------------------------------
@@ -1380,7 +1383,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), evec_re(:,:), gwork(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:)
- real(dp),target,allocatable :: gvnlxc(:,:)
+ !real(dp),target,allocatable :: gvnlxc(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:)
  real(dp) :: dots(2, nband)
  type(pawcprj_type) :: cprj_dum(1,1)
@@ -1415,7 +1418,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
  ! Allocate full ghc and gvnlxc to be able to rotate residuals and Vnlx matrix elements
  ! after subdiago. More memory but we can save a call to H|psi>.
  ABI_CALLOC(h_ij, (cplex, nband, nband))
- ABI_MALLOC_OR_DIE(gvnlxc, (2, npwsp*nband), ierr)
+ !ABI_MALLOC_OR_DIE(gvnlxc, (2, npwsp*nband), ierr)
  !ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
  !ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
 
@@ -1528,7 +1531,7 @@ subroutine subspace_rotation(gs_hamk, dtset, mpi_enreg, nband, npw, my_nspinor, 
 
  ABI_FREE(evec)
  ABI_SFREE(evec_re)
- ABI_FREE(gvnlxc)
+ !ABI_FREE(gvnlxc)
  !ABI_FREE(ghc_bk)
  !ABI_FREE(gvnlxc_bk)
  if (timeit) call cwtime_report(" subspace final rotation", cpu, wall, gflops)
