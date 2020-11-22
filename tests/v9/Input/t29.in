@@ -17,7 +17,8 @@ nspinor1 1
 
 # Dataset 2
 # spinor wavefunctions, non-magnetic
-rmm_diis2 -3       # RMM-DIIS only
+rmm_diis2 -3          # RMM-DIIS only
+rmm_diis_savemem2  1  # Allocates less memory for RMM-DIIS
 nspinor2 2
 getwfk2 -1
 

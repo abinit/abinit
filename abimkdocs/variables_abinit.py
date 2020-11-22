@@ -21961,6 +21961,28 @@ If the RMM-DIIS has troubles to converge, you may try to:
 * Play with the mixing algorithm.
 * Use pseudopotentials from the PseudoDojo so that ABINIT can initialize the density using the (pseudo) valence density
   reported in the pseudopotential file.
+
+See also [[rmm_diis_savemem]].
+""",
+),
+
+Variable(
+    abivarname="rmm_diis_savemem",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeed_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Save memory in the RMM-DIIS eigensolver.",
+    added_in_version="9.3.0",
+    text=r"""
+This variable allows one to save memory in the RMM-DIIS eigensolver ([[rmm_diis]] /= 0).
+By default, the RMM-DIIS allocates two extra arrays to reduce the number of applications of the Hamiltonian.
+The size of these arrays depends on the number of plane-waves treated by each processor and [[nband]].
+The amount of memory scales with [[npband]] and [[npfft] still this extra memory is not negligible and the code
+may go out of memory for large systems.
+In this case, one can use [[rmm_diis_savemem]] = 1 to avoid these extra allocations.
+
 """,
 ),
 

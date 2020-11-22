@@ -49,7 +49,7 @@ module m_scfcv_core
  use m_berryphase_new,   only : update_e_field_vars
  use m_dens,             only : constrained_dft_t, constrained_dft_ini, constrained_dft_free
  use m_time,             only : timab
- use m_fstrings,         only : int2char4, sjoin
+ use m_fstrings,         only : int2char4, sjoin, itoa
  use m_symtk,            only : symmetrize_xred
  use m_geometry,         only : metric
  use m_fftcore,          only : getng, sphereboundary
@@ -1015,7 +1015,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     call wrtout(std_out, sjoin(" scfcv_core: previous iteration took: ", sec2str(wtime_step), " <<< TIME"))
+     call wrtout(std_out, sjoin(" scfcv_core: SCF iteration", itoa(istep-1)," took:", sec2str(wtime_step), "<<< TIME"))
 
      if (have_timelimit_in(MY_NAME)) then
        if (istep > 2) then

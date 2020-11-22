@@ -132,6 +132,9 @@ P           mkmem           8
          rmm_diis1      -1
          rmm_diis2      -3
          rmm_diis3      -3
+ rmm_diis_savemem1       0
+ rmm_diis_savemem2       1
+ rmm_diis_savemem3       0
             rprim      0.0000000000E+00  5.0838808732E+00  5.0838808732E+00
                        5.0838808732E+00  0.0000000000E+00  5.0838808732E+00
                        5.0838808732E+00  5.0838808732E+00  0.0000000000E+00
@@ -709,6 +712,9 @@ P           mkmem           8
          rmm_diis1      -1
          rmm_diis2      -3
          rmm_diis3      -3
+ rmm_diis_savemem1       0
+ rmm_diis_savemem2       1
+ rmm_diis_savemem3       0
             rprim      0.0000000000E+00  5.0838808732E+00  5.0838808732E+00
                        5.0838808732E+00  0.0000000000E+00  5.0838808732E+00
                        5.0838808732E+00  5.0838808732E+00  0.0000000000E+00

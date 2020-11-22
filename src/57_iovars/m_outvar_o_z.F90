@@ -841,6 +841,8 @@ contains
 
  intarr(1,:)=dtsets(:)%rmm_diis
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis','INT',0)
+ intarr(1,:)=dtsets(:)%rmm_diis_savemem
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rmm_diis_savemem','INT',0)
 
 !rprim
  prtimg(:,:)=1

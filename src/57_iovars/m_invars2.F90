@@ -631,6 +631,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rmm_diis',tread,'INT')
  if(tread==1) dtset%rmm_diis=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rmm_diis_savemem',tread,'INT')
+ if(tread==1) dtset%rmm_diis_savemem=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlinear_info',tread,'INT')
  if(tread==1) dtset%nonlinear_info=intarr(1)
@@ -1230,13 +1232,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkdilatmx',tread,'INT')
    if(tread==1) dtset%chkdilatmx=intarr(1)
-  
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
    if(tread==1) dtset%chkprim=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
    if(tread==1) dtset%chksymbreak=intarr(1)
-  
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymtnons',tread,'INT')
    if(tread==1) dtset%chksymtnons=intarr(1)
 
