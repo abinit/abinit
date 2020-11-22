@@ -2612,7 +2612,13 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
  if (istwfk /= 1) then
    ! Version optimized for real wavefunctions.
    ABI_MALLOC(r_ovlp, (nband, nband))
+
+#ifdef HAVE_LINALG_GEMMT
+   r_ovlp = zero
+   call DGEMMT("U", "T", "N", nband, 2*npwsp, one, cg, 2*npwsp, gsc, 2*npwsp, zero, r_ovlp, nband)
+#else
    call DGEMM("T", "N", nband, nband, 2*npwsp, one, cg, 2*npwsp, gsc, 2*npwsp, zero, r_ovlp, nband)
+#endif
    r_ovlp = two * r_ovlp
 
    if (istwfk == 2 .and. me_g0 == 1) then
@@ -2649,7 +2655,13 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
  else
    ! 1) Calculate O_ij =  <phi_i|S|phi_j> (complex Hermitean)
    ABI_MALLOC(c_ovlp, (2, nband, nband))
+
+#ifdef HAVE_LINALG_GEMMT
+   c_ovlp = zero
+   call ZGEMMT("U", "C", "N", nband, npwsp, cone, cg, npwsp, gsc, npwsp, czero, c_ovlp, nband)
+#else
    call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, gsc, npwsp, czero, c_ovlp, nband)
+#endif
 
    ! Sum the overlap if PW are distributed.
    if (comm_pw /= xmpi_comm_self) call xmpi_sum(c_ovlp, comm_pw, ierr)
