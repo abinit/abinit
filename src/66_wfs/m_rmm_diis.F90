@@ -534,8 +534,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Orthogonalize states after DIIS
  ! ===============================
  call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
- !ortalgo = mpi_enreg%paral_kgb
- ortalgo = 3
+
+ ortalgo = 3 !; ortalgo = mpi_enreg%paral_kgb
  !call pw_orthon(0, 0, istwf_k, mcg, mgsc, npwsp, nband, ortalgo, gsc, usepaw, cg, me_g0, comm_bandspinorfft)
 
  ! TODO: Merge the two routines.
@@ -548,95 +548,98 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    call cgnc_cholesky(npwsp, nband, cg, istwf_k, me_g0, comm_bandspinorfft, use_gemm=.False., umat=umat)
  end if
 
-#if 1
- ! Rotate ghc and gvnlxc. Solve X U = Y_old for X
- if (istwf_k == 1) then
-   call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, ghc, npwsp)
-   call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, gvnlxc, npwsp)
- else
-   call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, ghc, 2*npwsp)
-   call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, gvnlxc, 2*npwsp)
- end if
-
- ABI_MALLOC(dots, (2, nband))
- call cg_zdotg_zip(istwf_k, npwsp, nband, option1, cg, gvnlxc, dots, me_g0, comm_bandspinorfft)
- enlx = dots(1,:)
- ABI_FREE(dots)
-
- ! Compute new approximated eigenvalues, residual vectors and norms
- !call cg_zcopy(npwsp * nband, gwork, ghc)
- ABI_MALLOC_OR_DIE(gwork, (2, npwsp*nband), ierr)
- call cg_get_eigens(usepaw, istwf_k, npwsp, nband, cg, ghc, gsc, eig, me_g0, comm_bandspinorfft)
- call cg_get_residvecs(usepaw, npwsp, nband, eig, cg, ghc, gsc, gwork)
- call cg_norm2g(istwf_k, npwsp, nband, gwork, resid, me_g0, comm_bandspinorfft)
- call rmm_ydoc%add_tabular_line(resids2str("ortho_rot"), indent=0)
- ABI_FREE(gwork)
-#endif
-
- ABI_FREE(umat)
-
  call timab(583,2,tsec)
  if (timeit) call cwtime_report(" pw_orthon ", cpu, wall, gflops)
 
-#if 0
- if (after_ortho > 0) then
+ if (after_ortho == 0) then
+   if (dtset%prtvol > 0) call wrtout(std_out, " Far from convergence. Eigens, residuals and enlx won't be recomputed.")
+
+ else
    ! Recompute eigenvalues, residuals, and enlx after orthogonalization.
    ! This step is important to improve the convergence of the NC total energy
    ! and it guarantees that eigenvalues and residuals are consistent with the output wavefunctions.
    ! but we try to avoid it at the beginning of the SCF cycle.
+   if (prtvol > 0) call wrtout(std_out, " Recomputing eigens and residues after orthogonalization.")
 
-   if (prtvol > 0) call wrtout(std_out, " Recomputing eigenvalues and residues after orthogonalization.")
+   if (after_ortho == 1) then
+     ! Rotate ghc and gvnlxc by solving X U = Y_old for X with U upper triangle.
+     if (istwf_k == 1) then
+       call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, ghc, npwsp)
+       if (usepaw == 0 .or. has_fock) then
+         call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, gvnlxc, npwsp)
+       end if
+     else
+       call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, ghc, 2*npwsp)
+       if (usepaw == 0 .or. has_fock) then
+         call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, gvnlxc, 2*npwsp)
+       end if
+     end if
 
-   do iblock=1,nblocks
-     igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
-     ndat = (ige - igs + 1) / npwsp
-     ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
-     cg_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
-     ghc_bk => ghc(:,igs:ige); gvnlxc_bk => gvnlxc(:,igs:ige)
+     if (usepaw == 0 .or. has_fock) then
+       ! Compute enlx with rotated cg and gvnlxc.
+       ABI_MALLOC(dots, (2, nband))
+       call cg_zdotg_zip(istwf_k, npwsp, nband, option1, cg, gvnlxc, dots, me_g0, comm_bandspinorfft)
+       enlx = dots(1,:)
+       ABI_FREE(dots)
+     end if
 
-     select case (after_ortho)
-     case (1)
-       !if (usepaw == 0) then
-       !if (usepaw == 0 .or. has_fock) then
-         ! recompute NC enlx_bx after ortho.
-         ! eigens and residuals are inconsistent as they have been computed before pw_orthon.
-         ! NB: In principle, one can rotate Vnl(b,b') using U^-1 from the Cholesky decomposition
-         ! but the full Vnl matrix should be computed before the ortho step.
-         signs = 1; paw_opt = 0
-         if (usepaw == 1) then
-           signs = 2; paw_opt = 3
-         end if
-         if (paral_kgb == 0) then
-           call nonlop(choice1, cpopt, cprj_dum, enlx(ib_start:), gs_hamk, 0, eig(ib_start), &
-                       mpi_enreg, ndat, 1, paw_opt, signs, gsc_bk, tim_nonlop, cg_bk, gvnlxc_bk)
-         else
-           call prep_nonlop(choice1, cpopt, cprj_dum, enlx(ib_start), gs_hamk, 0, eig(ib_start), &
-                            ndat, mpi_enreg, 1, paw_opt, signs, gsc_bk, tim_nonlop, &
-                            cg_bk, gvnlxc_bk, already_transposed=.False.)
-         end if
-       !end if
+     ! Compute new eigenvalues, residual vectors and norms.
+     !call cg_zcopy(npwsp * nband, gwork, ghc)
+     ABI_MALLOC_OR_DIE(gwork, (2, npwsp*nband), ierr)
+     call cg_get_eigens(usepaw, istwf_k, npwsp, nband, cg, ghc, gsc, eig, me_g0, comm_bandspinorfft)
+     call cg_get_residvecs(usepaw, npwsp, nband, eig, cg, ghc, gsc, gwork)
+     call cg_norm2g(istwf_k, npwsp, nband, gwork, resid, me_g0, comm_bandspinorfft)
+     call rmm_ydoc%add_tabular_line(resids2str("ortho_rot"), indent=0)
+     ABI_FREE(gwork)
 
-     case (2)
-       ! Consistent mode: update enlx_bx, eigens, residuals after orthogonalizalization.
-       !if (usepaw == 10) then
-       call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
-                            eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
-                            normalize=.False.)
-                            !normalize=.True.)
-       !else
-       !end if
-     case default
-       MSG_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
-     end select
-   end do ! iblock
+   else
+     do iblock=1,nblocks
+       igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
+       ndat = (ige - igs + 1) / npwsp
+       ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
+       cg_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
+       ghc_bk => ghc(:,igs:ige); gvnlxc_bk => gvnlxc(:,igs:ige)
+
+       select case (after_ortho)
+       case (1)
+         !if (usepaw == 0) then
+         !if (usepaw == 0 .or. has_fock) then
+           ! recompute NC enlx_bx after ortho.
+           ! eigens and residuals are inconsistent as they have been computed before pw_orthon.
+           ! NB: In principle, one can rotate Vnl(b,b') using U^-1 from the Cholesky decomposition
+           ! but the full Vnl matrix should be computed before the ortho step.
+           signs = 1; paw_opt = 0
+           if (usepaw == 1) then
+             signs = 2; paw_opt = 3
+           end if
+           if (paral_kgb == 0) then
+             call nonlop(choice1, cpopt, cprj_dum, enlx(ib_start:), gs_hamk, 0, eig(ib_start), &
+                         mpi_enreg, ndat, 1, paw_opt, signs, gsc_bk, tim_nonlop, cg_bk, gvnlxc_bk)
+           else
+             call prep_nonlop(choice1, cpopt, cprj_dum, enlx(ib_start), gs_hamk, 0, eig(ib_start), &
+                              ndat, mpi_enreg, 1, paw_opt, signs, gsc_bk, tim_nonlop, &
+                              cg_bk, gvnlxc_bk, already_transposed=.False.)
+           end if
+         !end if
+
+       case (2)
+         ! Consistent mode: update enlx_bx, eigens, residuals after orthogonalizalization.
+         !if (usepaw == 10) then
+         call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+                              eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
+                              normalize=.False.)
+                              !normalize=.True.)
+         !else
+         !end if
+       case default
+         MSG_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
+       end select
+     end do ! iblock
+   end if
+
    if (timeit) call cwtime_report(" recompute_resids ", cpu, wall, gflops)
-
-   if (after_ortho >= 2) call rmm_ydoc%add_tabular_line(resids2str("after_ortho"), indent=0)
-
- else
-   if (dtset%prtvol > 0) call wrtout(std_out, " Still far from convergence. Eigens, residuals and enlx won't be recomputed.")
+   call rmm_ydoc%add_tabular_line(resids2str("after_ortho"), indent=0)
  end if
-#endif
 
  ! Revert mixprec to previous status before returning.
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
@@ -650,12 +653,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Final cleanup.
  ABI_FREE(lambda_bk)
  ABI_FREE(dots_bk)
- !ABI_FREE(ghc_bk)
  ABI_FREE(residv_bk)
  ABI_FREE(kres_bk)
+ !ABI_FREE(ghc_bk)
  !ABI_FREE(gvnlxc_bk)
  ABI_FREE(ghc)
  ABI_FREE(gvnlxc)
+ ABI_FREE(umat)
  call diis%free()
 
 contains
