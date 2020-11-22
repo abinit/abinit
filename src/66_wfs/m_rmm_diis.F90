@@ -312,28 +312,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end if
  end if
 
- ! Select value of after_ortho:
- !
- !   0: return with inconsistent eigenvalues, residuals and enlx_bk to avoid final H |Psi>.
- !   1: recompute enlx_bx after ortho. Return inconsistent eigens and residuals (last DIIS iteration).
- !   2: fully consistent mode: execute final H|Psi> after ortho step to update enlx_bx, eigens, residuals
- !
- ! Total number of H |Psi> applications:
- !
- !   1 for subdiago.
- !   1 for preconditioned steepest descent.
- !   (nline - 1) for DIIS or nline if ultimate accuracy is reached.
- !   1 if after_ortho > 0
- !
- after_ortho = 0
- if (accuracy_level >= 2) after_ortho = 1
- !if (accuracy_level >= 3) after_ortho = 1 ! TRY this ?
- if (accuracy_level >= 4) after_ortho = 2
- ! It seems that PAW is more sensitive to after_ortho. Perhaps I can avoid the final H|phi> if accuracy_level == 1
- if (usepaw == 1) after_ortho = 2 ! FIXME ??
- !if (usepaw == 1) after_ortho = 1 ! FIXME ??
- !after_ortho = 2
-
  ! Tolerance on residuals used for band locking after subdiago.
  if (dtset%tolwfr > zero) then
    lock_tolwfr = tol2 * dtset%tolwfr
@@ -380,7 +358,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! Alternatively, one can compute ghc and the residuals by applying H|psi>
  ! inside the loop over blocks (less memory but slower).
  savemem = dtset%rmm_diis_savemem
- savemem = 1
+ !savemem = 1
  !if (savemem == 0) then
  !  ABI_MALLOC_OR_DIE(ghc, (2, npwsp*nband), ierr)
  !  ABI_MALLOC_OR_DIE(gvnlxc, (2, npwsp*nband), ierr)
@@ -542,8 +520,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (usepaw == 1) then
    !call cgpaw_normalize(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
    call cgpaw_cholesky(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf, umat=umat)
-   !call cgpaw_normalize(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
    !call cgtk_fixphase(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
+   !call cgpaw_normalize(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
  else
    call cgnc_cholesky(npwsp, nband, cg, istwf_k, me_g0, comm_bsf, use_gemm=.False., umat=umat)
  end if
@@ -555,94 +533,119 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! This step is important to improve the convergence of the NC total energy
  ! and it guarantees that eigenvalues and residuals are consistent with the output wavefunctions.
  ! but we try to avoid it at the beginning of the SCF cycle.
+ ! NB: In principle, one can rotate Vnl(b,b') using U^-1 from the Cholesky decomposition
+ ! but the full Vnl matrix should be computed before the ortho step.
 
- if (after_ortho > 0) then
-   if (prtvol > 0) call wrtout(std_out, " Recomputing eigens and residues after orthogonalization.")
+ ! Select value of after_ortho:
+ !
+ !   0: return with inconsistent eigenvalues, residuals and enlx_bk to avoid final H |Psi>.
+ !   1: recompute enlx_bx after ortho. Return inconsistent eigens and residuals (last DIIS iteration).
+ !   2: fully consistent mode: execute final H|Psi> after ortho step to update enlx_bx, eigens, residuals
+ !
+ ! Total number of H |Psi> applications:
+ !
+ !   1 for subdiago.
+ !   1 for preconditioned steepest descent.
+ !   (nline - 1) for DIIS or nline if ultimate accuracy is reached.
+ !   1 if after_ortho > 0
+ !
+ after_ortho = 0
+ if (accuracy_level >= 2) after_ortho = 1
+ if (accuracy_level >= 4) after_ortho = 2
+ if (after_ortho >= 1 .and. savemem == 0) after_ortho = 1
+ ! It seems that PAW is more sensitive to after_ortho. Perhaps I can avoid the final H|phi> if accuracy_level == 1
+ if (usepaw == 1) after_ortho = 2 ! FIXME ??
 
-   if (after_ortho == 1 .and. savemem == 0) then
+ if (after_ortho == 0) then
+   !if (prtvol == -level)
+   call wrtout(std_out, " VERYFAST: Won't recompute data after orthogonalization.")
 
-     if (usepaw == 0 .or. has_fock) then
-       ! Rotate gvnlxc by solving X_new U = Y_old for X with U upper triangle.
-       ! Compute enlx with rotated cg and gvnlxc.
-       if (istwf_k == 1) then
-         call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, gvnlxc, npwsp)
-       else
-         call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, gvnlxc, 2*npwsp)
-       end if
-       ABI_MALLOC(dots, (2, nband))
-       call cg_zdotg_zip(istwf_k, npwsp, nband, option1, cg, gvnlxc, dots, me_g0, comm_bsf)
-       enlx = dots(1,:)
-       ABI_FREE(dots)
+ else if (after_ortho == 1 .and. savemem == 0) then
+   !if (prtvol == -level)
+   call wrtout(std_out, " FAST: Recomputing data by rotating matrix elements.")
+
+   if (usepaw == 0 .or. has_fock) then
+     ! Rotate gvnlxc by solving X_new U = Y_old for X with U upper triangle.
+     ! Compute enlx with rotated cg and gvnlxc.
+     if (istwf_k == 1) then
+       call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, gvnlxc, npwsp)
+     else
+       call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, gvnlxc, 2*npwsp)
      end if
-
-     if (.False.) then
-       ! Compute new eigenvalues, residual vectors and norms.
-       ! Rotate ghc by solving X_new U = Y_old for X with U upper triangle.
-       if (istwf_k == 1) then
-         call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, ghc, npwsp)
-       else
-         call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, ghc, 2*npwsp)
-       end if
-       ABI_MALLOC_OR_DIE(gwork, (2, npwsp*nband), ierr)
-       call cg_get_eigens(usepaw, istwf_k, npwsp, nband, cg, ghc, gsc, eig, me_g0, comm_bsf)
-       call cg_get_residvecs(usepaw, npwsp, nband, eig, cg, ghc, gsc, gwork)
-       call cg_norm2g(istwf_k, npwsp, nband, gwork, resid, me_g0, comm_bsf)
-       call rmm_ydoc%add_tabular_line(resids2str("ortho_rot"), indent=0)
-       ABI_FREE(gwork)
-     end if
-
-   else
-     do iblock=1,nblocks
-       igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
-       ndat = (ige - igs + 1) / npwsp
-       ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
-       cg_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
-
-       if (savemem == 0) then
-         ghc_bk => ghc(:,igs:ige); gvnlxc_bk => gvnlxc(:,igs:ige)
-       end if
-
-       select case (after_ortho)
-       case (1)
-         !if (usepaw == 0) then
-         !if (usepaw == 0 .or. has_fock) then
-           ! recompute NC enlx_bx after ortho.
-           ! eigens and residuals are inconsistent as they have been computed before pw_orthon.
-           ! NB: In principle, one can rotate Vnl(b,b') using U^-1 from the Cholesky decomposition
-           ! but the full Vnl matrix should be computed before the ortho step.
-           signs = 1; paw_opt = 0
-           if (usepaw == 1) then
-             signs = 2; paw_opt = 3
-           end if
-           if (paral_kgb == 0) then
-             call nonlop(choice1, cpopt, cprj_dum, enlx(ib_start:), gs_hamk, 0, eig(ib_start), &
-                         mpi_enreg, ndat, 1, paw_opt, signs, gsc_bk, tim_nonlop, cg_bk, gvnlxc_bk)
-           else
-             call prep_nonlop(choice1, cpopt, cprj_dum, enlx(ib_start), gs_hamk, 0, eig(ib_start), &
-                              ndat, mpi_enreg, 1, paw_opt, signs, gsc_bk, tim_nonlop, &
-                              cg_bk, gvnlxc_bk, already_transposed=.False.)
-           end if
-         !end if
-
-       case (2)
-         ! Consistent mode: update enlx_bx, eigens, residuals after orthogonalizalization.
-         !if (usepaw == 10) then
-         call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
-                              eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
-                              normalize=.False.)
-                              !normalize=.True.)
-         !else
-         !end if
-       case default
-         MSG_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
-       end select
-     end do ! iblock
-
+     ABI_MALLOC(dots, (2, nband))
+     call cg_zdotg_zip(istwf_k, npwsp, nband, option1, cg, gvnlxc, dots, me_g0, comm_bsf)
+     enlx = dots(1,:)
+     ABI_FREE(dots)
    end if
 
-   if (timeit) call cwtime_report(" recompute_resids ", cpu, wall, gflops)
+   if (.False.) then
+     ! Compute new eigenvalues, residual vectors and norms.
+     ! Rotate ghc by solving X_new U = Y_old for X with U upper triangle.
+     if (istwf_k == 1) then
+       call ZTRSM('R', 'U', 'N', 'N', npwsp, nband, cone, umat, nband, ghc, npwsp)
+     else
+       call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, umat, nband, ghc, 2*npwsp)
+     end if
+     ABI_MALLOC_OR_DIE(gwork, (2, npwsp*nband), ierr)
+     call cg_get_eigens(usepaw, istwf_k, npwsp, nband, cg, ghc, gsc, eig, me_g0, comm_bsf)
+     call cg_get_residvecs(usepaw, npwsp, nband, eig, cg, ghc, gsc, gwork)
+     call cg_norm2g(istwf_k, npwsp, nband, gwork, resid, me_g0, comm_bsf)
+     call rmm_ydoc%add_tabular_line(resids2str("ortho_rot"), indent=0)
+     ABI_FREE(gwork)
+   end if
+
+ else
+   !if (prtvol == -level)
+   if (after_ortho == 1) call wrtout(std_out, " SLOW: Recomputing enlx gvnlx by calling nonlop.")
+   if (after_ortho == 2) call wrtout(std_out, " VERYSLOW: Recomputing eigens and residues by calling getghc.")
+
+   do iblock=1,nblocks
+     igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
+     ndat = (ige - igs + 1) / npwsp
+     ib_start = 1 + (iblock - 1) * bsize; ib_stop = min(iblock * bsize, nband)
+     cg_bk => cg(:,igs:ige); if (usepaw == 1) gsc_bk => gsc(1:2,igs:ige)
+     if (savemem == 0) then
+       ghc_bk => ghc(:,igs:ige); gvnlxc_bk => gvnlxc(:,igs:ige)
+     end if
+
+     select case (after_ortho)
+     case (1)
+       !if (usepaw == 0) then
+       !if (usepaw == 0 .or. has_fock) then
+       ! recompute NC enlx_bx after ortho.
+       ! eigens and residuals are inconsistent as they have been computed before pw_orthon.
+       signs = 1; paw_opt = 0
+       if (usepaw == 1) then
+         signs = 2; paw_opt = 3
+       end if
+       if (paral_kgb == 0) then
+         call nonlop(choice1, cpopt, cprj_dum, enlx(ib_start:), gs_hamk, 0, eig(ib_start), &
+                     mpi_enreg, ndat, 1, paw_opt, signs, gsc_bk, tim_nonlop, cg_bk, gvnlxc_bk)
+       else
+         call prep_nonlop(choice1, cpopt, cprj_dum, enlx(ib_start), gs_hamk, 0, eig(ib_start), &
+                          ndat, mpi_enreg, 1, paw_opt, signs, gsc_bk, tim_nonlop, &
+                          cg_bk, gvnlxc_bk, already_transposed=.False.)
+       end if
+       !end if
+
+     case (2)
+       ! Consistent mode: update enlx_bx, eigens, residuals after orthogonalizalization.
+       !if (usepaw == 10) then
+       call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
+                            eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
+                            normalize=.False.)
+                            !normalize=.True.)
+       !else
+       !end if
+     case default
+       MSG_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
+     end select
+   end do ! iblock
+
    call rmm_ydoc%add_tabular_line(resids2str("after_ortho"), indent=0)
  end if ! after_ortho > 0
+
+ if (timeit) call cwtime_report(" after_ortho ", cpu, wall, gflops)
 
  ! Revert mixprec to previous status before returning.
  if (use_fft_mixprec) prev_mixprec = fftcore_set_mixprec(prev_mixprec)
