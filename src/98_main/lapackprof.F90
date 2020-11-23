@@ -51,7 +51,6 @@ program lapackprof
  use m_io_tools,      only : prompt
  use m_numeric_tools, only : arth
  use m_mpinfo,        only : init_mpi_enreg, destroy_mpi_enreg
- !use m_pair_list,     only : pair_list
 
  implicit none
 
@@ -64,7 +63,6 @@ program lapackprof
  !logical :: do_check
  character(len=500) :: method, command, arg, msg !header,
  type(MPI_type) :: MPI_enreg
- !type(pair_list) :: meta
  type(yamldoc_t) :: ydoc
 !arrays
  integer,allocatable :: sizes(:)
@@ -103,7 +101,7 @@ program lapackprof
      write(std_out,"(a)") trim(abinit_version); goto 100
 
    else if (arg == "-h" .or. arg == "--help") then
-     ! Document the options.
+     ! TODO: Document the different options.
      write(std_out,*)"-v, --version              Show version number and exit."
      write(std_out,*)"-h, --help                 Show this help and exit."
      write(std_out,*)" "
