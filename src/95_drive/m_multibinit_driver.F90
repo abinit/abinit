@@ -480,7 +480,7 @@ elec_eval = .FALSE.
                   call wrtout(std_out,message,'COLL')
                   call wrtout(ab_out,message,'COLL')
                   do ii=1,reference_effective_potential%crystal%nirredat
-                    if(ii == natom .and. iiter==niter)need_prt_files=.TRUE.
+                    if(ii == reference_effective_potential%crystal%nirredat .and. iiter==niter)need_prt_files=.TRUE.
                     if(ii > 1 .or. iiter > 1)inp%fit_nfixcoeff = -1 
                        call fit_polynomial_coeff_fit(reference_effective_potential,&
                           &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
