@@ -191,7 +191,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: comm_bsf, prev_accuracy_level, ncalls_with_prev_accuracy, signs, paw_opt, savemem
  logical :: first_call, use_fft_mixprec, has_fock
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, cpu, wall, gflops, cpu_all, wall_all, gflops_all, lock_tolwfr
+ real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, cpu, wall, gflops, cpu_all, wall_all, gflops_all, lock_tolwfr, max_absimag
  character(len=500) :: msg
  type(yamldoc_t) :: rmm_ydoc
  type(rmm_diis_t) :: diis
@@ -518,8 +518,11 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  ! TODO: Merge the two routines.
  if (usepaw == 1) then
+   !call cgtk_fixphase(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
    !call cgpaw_normalize(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
+
    call cgpaw_cholesky(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf, umat=umat)
+
    !call cgtk_fixphase(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
    !call cgpaw_normalize(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
  else
@@ -554,13 +557,16 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (accuracy_level >= 4) after_ortho = 2
  if (after_ortho >= 1 .and. savemem == 0) after_ortho = 1
  ! It seems that PAW is more sensitive to after_ortho. Perhaps I can avoid the final H|phi> if accuracy_level == 1
+ !if (usepaw == 1) after_ortho = 1
+ !if (usepaw == 1) after_ortho = 0
  if (usepaw == 1) after_ortho = 2 ! FIXME ??
 
  if (after_ortho == 0) then
    !if (prtvol == -level)
-   call wrtout(std_out, " VERYFAST: Won't recompute data after orthogonalization.")
+   call wrtout(std_out, " VERY-FAST: Won't recompute data after orthogonalization.")
 
- else if (after_ortho == 1 .and. savemem == 0) then
+ !else if (after_ortho == 1 .and. savemem == 0) then
+ else if (after_ortho == 1 .and. savemem == 0 .and. usepaw == 0) then
    !if (prtvol == -level)
    call wrtout(std_out, " FAST: Recomputing data by rotating matrix elements.")
 
@@ -579,6 +585,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end if
 
    if (.False.) then
+   !if (usepaw == 1) then
      ! Compute new eigenvalues, residual vectors and norms.
      ! Rotate ghc by solving X_new U = Y_old for X with U upper triangle.
      if (istwf_k == 1) then
@@ -597,7 +604,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  else
    !if (prtvol == -level)
    if (after_ortho == 1) call wrtout(std_out, " SLOW: Recomputing enlx gvnlx by calling nonlop.")
-   if (after_ortho == 2) call wrtout(std_out, " VERYSLOW: Recomputing eigens and residues by calling getghc.")
+   if (after_ortho == 2) call wrtout(std_out, " VERY-SLOW: Recomputing eigens and residues by calling getghc.")
 
    do iblock=1,nblocks
      igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
@@ -610,8 +617,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
      select case (after_ortho)
      case (1)
-       !if (usepaw == 0) then
-       !if (usepaw == 0 .or. has_fock) then
        ! recompute NC enlx_bx after ortho.
        ! eigens and residuals are inconsistent as they have been computed before pw_orthon.
        signs = 1; paw_opt = 0
@@ -626,17 +631,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
                           ndat, mpi_enreg, 1, paw_opt, signs, gsc_bk, tim_nonlop, &
                           cg_bk, gvnlxc_bk, already_transposed=.False.)
        end if
-       !end if
 
      case (2)
        ! Consistent mode: update enlx_bx, eigens, residuals after orthogonalizalization.
-       !if (usepaw == 10) then
        call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
-                            normalize=.False.)
-                            !normalize=.True.)
-       !else
-       !end if
+                            normalize=usepaw == 1)
      case default
        MSG_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
      end select
@@ -644,6 +644,13 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
    call rmm_ydoc%add_tabular_line(resids2str("after_ortho"), indent=0)
  end if ! after_ortho > 0
+
+ if (usepaw == 1) then
+   !call cgtk_fixphase(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
+   call cg_set_imag0_to_zero(istwf_k, me_g0, npwsp, nband, cg, max_absimag)
+   call cg_set_imag0_to_zero(istwf_k, me_g0, npwsp, nband, gsc, max_absimag)
+   call cgpaw_normalize(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
+ end if
 
  if (timeit) call cwtime_report(" after_ortho ", cpu, wall, gflops)
 
@@ -676,7 +683,8 @@ contains
 function resids2str(level) result(str)
   character(len=*),intent(in) :: level
   character(len=500) :: str
-  res_stats = stats_eval(resid(1:nb_pocc))
+  !res_stats = stats_eval(resid(1:nb_pocc))
+  res_stats = stats_eval(resid(1:nband))
   write(str, "(1x, a12, 4(es10.3))") trim(level), res_stats%mean, res_stats%min, res_stats%max, res_stats%stdev
 end function resids2str
 

@@ -21953,6 +21953,7 @@ available for NSCF calculations).
 Do not expect RMM-DIIS to provide **high-energy** states of the same quality as the one obtain with other eigenvalue solvers.
 So, although RMM-DIIS can be used for computing band structures and electron DOS, we do not recommend
 using this solver to produce WFK files with many empty states as required by many-body calculations.
+Mention [[bandpp]] and band locking.
 
 If the RMM-DIIS has troubles to converge, you may try to:
 

@@ -59,8 +59,8 @@ program lapackprof
 !scalars
  integer,parameter :: master = 0
  integer :: comm, npw, my_rank, ii, isz, jj, it, step, icall, nfound, nspinor !ierr,
- integer :: istwfk, mcg, mgsc, band, g0, idx, ortalgo, abimem_level, prtvol, usepaw, debug
- real(dp) ::  ctime, wtime, gflops, abimem_limit_mb
+ integer :: istwfk, mcg, mgsc, band, g0, idx, ortalgo, abimem_level, prtvol, usepaw, debug, me_g0
+ real(dp) ::  ctime, wtime, gflops, abimem_limit_mb, max_absimag
  !logical :: do_check
  character(len=500) :: method, command, arg, msg !header,
  type(MPI_type) :: MPI_enreg
@@ -129,9 +129,10 @@ program lapackprof
    write(std_out,'(a)')" Tool for profiling and testing Linear Algebra routines used in ABINIT."
  end if
 
- call init_mpi_enreg(mpi_enreg)
  call xomp_set_num_threads(nthreads)
  call xomp_show_info(std_out)
+ call init_mpi_enreg(mpi_enreg)
+ me_g0 = mpi_enreg%me_g0
 
  ! Write metadata i.e parameters that do not change during the benchmark.
  ydoc = yamldoc_open('LapackProfMetadata') !, info=info, width=width)
@@ -151,18 +152,16 @@ program lapackprof
 
    do isz=1,nsizes
      npw = sizes(isz)
-     mcg  = npw * nband
-     mgsc = mcg * usepaw
-     ABI_MALLOC(cg, (2, mcg))
-     call random_number(cg)
-
+     mcg = npw * nband; mgsc = mcg * usepaw
+     ABI_MALLOC_RAND(cg, (2, mcg))
      ABI_MALLOC(gsc, (2, mgsc))
+     gsc = cg
      ABI_CALLOC(direc, (2, npw*nspinor))
      ABI_MALLOC(scprod, (2,nband))
 
      call cwtime(ctime,wtime,gflops,"start")
      call projbd(cg, direc, 0, 0, 0, istwfk, mcg, mgsc, nband, npw, nspinor, gsc, scprod, 0, 0, usepaw, &
-                 mpi_enreg%me_g0, mpi_enreg%comm_fft)
+                 me_g0, mpi_enreg%comm_fft)
      call cwtime(ctime,wtime,gflops,"stop")
      write(std_out,'(1x,i8,1x,i6,2(1x,f12.6))') npw, nband, ctime, wtime
 
@@ -183,22 +182,14 @@ program lapackprof
        npw = sizes(isz)
        mcg  = npw * nband
        mgsc = mcg * usepaw
-       ABI_MALLOC(cg, (2, mcg))
-       call random_number(cg)
+       ABI_MALLOC_RAND(cg, (2, mcg))
+       call cg_set_imag0_to_zero(istwfk, me_g0, npw, nband, cg, max_absimag)
        ABI_MALLOC(gsc, (2, mgsc))
        gsc = cg
 
-       if (istwfk /= 1) then
-         do band=1,nband
-           g0 = 1 + (band-1)*npw
-           cg(2, g0) = zero
-           gsc(2, g0) = zero
-         end do
-       end if
-
        call cwtime(ctime, wtime, gflops, "start")
        call pw_orthon(0,0, istwfk, mcg, mgsc, npw, nband, ortalgo, gsc, usepaw, cg,&
-                      mpi_enreg%me_g0, mpi_enreg%comm_bandspinorfft)
+                      me_g0, mpi_enreg%comm_bandspinorfft)
        call cwtime(ctime,wtime,gflops,"stop")
        write(std_out,'(1x,i8,1x,i6,1x,i7,2(1x,f12.6))') npw, nband, ortalgo, ctime, wtime
 
@@ -269,10 +260,8 @@ program lapackprof
      if (step == 2) method = " BLAS"
      do isz=1,nsizes
        npw  = sizes(isz)
-       ABI_MALLOC(cg1,(2, npw))
-       ABI_MALLOC(cg2,(2, npw))
-       call random_number(cg1)
-       call random_number(cg2)
+       ABI_MALLOC_RAND(cg1,(2, npw))
+       ABI_MALLOC_RAND(cg2,(2, npw))
 
        call cwtime(ctime, wtime, gflops, "start")
        if (step == 1) then
@@ -440,6 +429,68 @@ program lapackprof
    end do
    write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",command))
 
+  case ("zgemm3m")
+    write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+    write(std_out, "(a1,2(a8,1x),a6,2(1x,a12))")"#", "npw", "nband", "type", "cpu_time", "wall_time"
+    do step=1,2
+      if (step == 1) method = "ZGEMM"
+      if (step == 2) method = "ZGEMM3m"
+      do isz=1,nsizes
+        npw  = sizes(isz)
+        ABI_MALLOC_RAND(cg1, (2, npw*nband))
+        ABI_MALLOC_RAND(cg2, (2, npw*nband))
+        ABI_MALLOC_RAND(cg3, (2, nband*nband))
+
+        call cwtime(ctime, wtime, gflops, "start")
+        if (step == 1) then
+          call ZGEMM("C", "N", nband, nband, npw, cone, cg1, npw, cg2, npw, czero, cg3, nband)
+        else
+#ifdef HAVE_LINALG_GEMM3M
+          call ZGEMM3M("C", "N", nband, nband, npw, cone, cg1, npw, cg2, npw, czero, cg3, nband)
+#else
+          MSG_ERROR("ZGEMM3M is not available")
+#endif
+        end if
+        call cwtime(ctime, wtime, gflops, "stop")
+        write(std_out,'(1x,2(i8,1x),a6,2(1x,f12.6))')npw, nband, trim(method), ctime, wtime
+
+       ABI_FREE(cg1)
+       ABI_FREE(cg2)
+       ABI_FREE(cg3)
+      end do
+    end do
+
+  case ("zgemmt")
+    write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+    write(std_out, "(a1,2(a8,1x),a6,2(1x,a12))")"#", "npw", "nband", "type", "cpu_time", "wall_time"
+    do step=1,2
+      if (step == 1) method = "ZGEMM"
+      if (step == 2) method = "ZGEMM3T"
+      do isz=1,nsizes
+        npw  = sizes(isz)
+        ABI_MALLOC_RAND(cg1, (2, npw*nband))
+        ABI_MALLOC_RAND(cg2, (2, npw*nband))
+        ABI_MALLOC_RAND(cg3, (2, nband*nband))
+
+        call cwtime(ctime, wtime, gflops, "start")
+        if (step == 1) then
+          call ZGEMM("C", "N", nband, nband, npw, cone, cg1, npw, cg2, npw, czero, cg3, nband)
+        else
+#ifdef HAVE_LINALG_GEMMT
+          call ZGEMMT("U", "C", "N", nband, npw, cone, cg1, npw, cg2, npw, czero, cg3, nband)
+#else
+          MSG_ERROR("ZGEMMT is not available")
+#endif
+        end if
+        call cwtime(ctime, wtime, gflops, "stop")
+        write(std_out,'(1x,2(i8,1x),a6,2(1x,f12.6))')npw, nband, trim(method), ctime, wtime
+
+       ABI_FREE(cg1)
+       ABI_FREE(cg2)
+       ABI_FREE(cg3)
+      end do
+    end do
+
   case ("zgerc")
     write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
     write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
@@ -453,7 +504,7 @@ program lapackprof
         zvec = cone; zmat = czero
 
         call cwtime(ctime, wtime, gflops, "start")
-        if (step==1) then ! Home made zgerc
+        if (step == 1) then ! Home made zgerc
           do it=1,ncalls
             zmat = czero
 !$OMP PARALLEL DO

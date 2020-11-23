@@ -126,6 +126,7 @@ module m_cgtools
  public :: cg_zdotg_zip             ! Compute <cg1|cg2> for ndat states
  public :: cg_precon_many
  public :: cg_zaxpy_many_areal
+ public :: cg_set_imag0_to_zero
 !***
 
 CONTAINS  !========================================================================================
@@ -2437,11 +2438,11 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm, uma
 !Local variables ------------------------------
 !scalars
  integer :: ierr,b1,b2
-!#define DEBUG_MODE
 #ifdef DEBUG_MODE
  integer :: ptr
  character(len=500) :: msg
 #endif
+ real(dp) :: max_absimag
  logical :: my_usegemm
 !arrays
  real(dp) :: rcg0(nband)
@@ -2450,11 +2451,11 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm, uma
 ! *************************************************************************
 
 #ifdef DEBUG_MODE
- if (istwfk == 2) then
+ if (istwfk == 2 .and. me_g0 == 1) then
    ierr = 0
    do b1=1,nband
      ptr = 2 + 2*(b1-1)*npwsp
-     if (ABS(cg(ptr)) > zero) then
+     if (abs(cg(ptr)) > zero) then
        ierr = ierr + 1
        write(msg,'(a,i0,es13.6)')" Input b1, Im u(g=0) should be zero ",b1,cg(ptr)
        call wrtout(std_out, msg)
@@ -2473,6 +2474,8 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm, uma
  if (istwfk /= 1) then
    ! Version optimized for real wavefunctions.
    ABI_MALLOC(r_ovlp, (nband, nband))
+
+   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
 
    ! 1) Calculate O_ij = <phi_i|phi_j> (real symmetric matrix)
    if (my_usegemm) then
@@ -2598,7 +2601,8 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
 
 !Local variables ------------------------------
 !scalars
- integer :: ierr,b1,b2
+ integer :: ierr, b1, b2
+ real(dp) :: max_absimag
  !character(len=500) :: msg
 !arrays
  real(dp) :: rcg0(nband), rg0sc(nband)
@@ -2606,14 +2610,15 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
 
 ! *************************************************************************
 
- !TODO: Use zgemmt extension provided by MKL
- ! https://software.intel.com/content/www/us/en/develop/documentation/mkl-developer-reference-fortran/top/blas-and-sparse-blas-routines/blas-like-extensions/gemmt.html
-
  if (istwfk /= 1) then
    ! Version optimized for real wavefunctions.
    ABI_MALLOC(r_ovlp, (nband, nband))
 
+   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
+   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, gsc, max_absimag)
+
 #ifdef HAVE_LINALG_GEMMT
+   ! Use zgemmt extension BLAS3 provided by e.g. MKL
    r_ovlp = zero
    call DGEMMT("U", "T", "N", nband, 2*npwsp, one, cg, 2*npwsp, gsc, 2*npwsp, zero, r_ovlp, nband)
 #else
@@ -2644,6 +2649,9 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
 
    ! 4) Solve Y U = gsc. On exit <cg|gsc> = 1
    call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, gsc, 2*npwsp)
+
+   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
+   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, gsc, max_absimag)
 
    if (present(umat)) then
      ABI_REMALLOC(umat, (1, nband, nband))
@@ -2683,6 +2691,8 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
 
    ABI_FREE(c_ovlp)
  end if
+
+ !call cgpaw_normalize(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
 
 end subroutine cgpaw_cholesky
 !!***
@@ -4720,7 +4730,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
 
 #ifdef DEBUG_MODE
  !Make sure imaginary part at G=0 vanishes
- if (istwf_k == 2) then
+ if (istwf_k == 2 .and. me_g0 == 1) then
    do ivec=1,nvec
      if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>zero)then
      ! if(abs(vecnm(2,1+nelem*(ivec-1)+icg))>tol16)then
@@ -5580,6 +5590,58 @@ subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
  end do
 
 end subroutine cg_zaxpy_many_areal
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/cg_set_imag0_to_zero
+!! NAME
+!!  cg_set_imag0_to_zero
+!!
+!! FUNCTION
+!!  Set the imaginary part at G=0 to zero if istwfk == 2 and this proc has the gamma point
+!!
+!! INPUTS
+!!  npwsp=Size of each vector (usually npw*nspinor)
+!!  istwfk=Storage mode for the wavefunctions. 1 for standard full mode
+!!  me_g0=1 if this node has G=0.
+!!
+!! SIDE EFFECTS
+!!  cg(2*npwsp*nband)
+!!    input: Input set of vectors.
+!!    output: Orthonormalized set.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure subroutine cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: istwfk, me_g0, npwsp, nband
+!arrays
+ real(dp),intent(inout) :: cg(2,npwsp*nband)
+ real(dp),intent(out) :: max_absimag
+
+!Local variables ------------------------------
+ integer :: ib, ii
+
+! *************************************************************************
+
+ max_absimag = zero
+ if (istwfk == 2 .and. me_g0 == 1) then
+   do ib=1,nband
+     ii = 1 + (ib - 1) * npwsp
+     max_absimag = max(max_absimag, abs(cg(2, ii)))
+     !cg(1, ii) = one
+     cg(2, ii) = zero
+   end do
+ end if
+
+end subroutine cg_set_imag0_to_zero
 !!***
 
 end module m_cgtools

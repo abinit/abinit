@@ -258,6 +258,9 @@
 #define ABI_REMALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_MALLOC(ARR, SIZE)
 #define ABI_RECALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_CALLOC(ARR, SIZE)
 
+/* Allocate and file fill with random numbers */
+#define ABI_MALLOC_RAND(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE call random_number(ARR)
+
 /* Macros used in debug mode */
 #ifdef DEBUG_MODE
 
