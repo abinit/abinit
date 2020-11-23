@@ -2475,7 +2475,7 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm, uma
    ! Version optimized for real wavefunctions.
    ABI_MALLOC(r_ovlp, (nband, nband))
 
-   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
+   !call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
 
    ! 1) Calculate O_ij = <phi_i|phi_j> (real symmetric matrix)
    if (my_usegemm) then
@@ -2520,7 +2520,7 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm, uma
    if (my_usegemm) then
      call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, cg, npwsp, czero, c_ovlp, nband)
    else
-     call ZHERK("U", "C", nband, npwsp, one, cg, npwsp, zero, c_ovlp, nband)
+     call ZHERK("U", "C", nband, npwsp, cone, cg, npwsp, czero, c_ovlp, nband)
    end if
 
    ! Sum the overlap if PW are distributed.
@@ -2614,8 +2614,8 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
    ! Version optimized for real wavefunctions.
    ABI_MALLOC(r_ovlp, (nband, nband))
 
-   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
-   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, gsc, max_absimag)
+   !call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
+   !call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, gsc, max_absimag)
 
 #ifdef HAVE_LINALG_GEMMT
    ! Use zgemmt extension BLAS3 provided by e.g. MKL
@@ -2650,8 +2650,8 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
    ! 4) Solve Y U = gsc. On exit <cg|gsc> = 1
    call DTRSM('R', 'U', 'N', 'N', 2*npwsp, nband, one, r_ovlp, nband, gsc, 2*npwsp)
 
-   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
-   call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, gsc, max_absimag)
+   !call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absimag)
+   !call cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, gsc, max_absimag)
 
    if (present(umat)) then
      ABI_REMALLOC(umat, (1, nband, nband))
@@ -5636,7 +5636,6 @@ pure subroutine cg_set_imag0_to_zero(istwfk, me_g0, npwsp, nband, cg, max_absima
    do ib=1,nband
      ii = 1 + (ib - 1) * npwsp
      max_absimag = max(max_absimag, abs(cg(2, ii)))
-     !cg(1, ii) = one
      cg(2, ii) = zero
    end do
  end if

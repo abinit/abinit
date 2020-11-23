@@ -191,7 +191,8 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: comm_bsf, prev_accuracy_level, ncalls_with_prev_accuracy, signs, paw_opt, savemem
  logical :: first_call, use_fft_mixprec, has_fock
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, cpu, wall, gflops, cpu_all, wall_all, gflops_all, lock_tolwfr, max_absimag
+ real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, lock_tolwfr, max_absimag
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
  type(yamldoc_t) :: rmm_ydoc
  type(rmm_diis_t) :: diis
@@ -645,12 +646,12 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    call rmm_ydoc%add_tabular_line(resids2str("after_ortho"), indent=0)
  end if ! after_ortho > 0
 
- if (usepaw == 1) then
-   !call cgtk_fixphase(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
-   call cg_set_imag0_to_zero(istwf_k, me_g0, npwsp, nband, cg, max_absimag)
-   call cg_set_imag0_to_zero(istwf_k, me_g0, npwsp, nband, gsc, max_absimag)
-   call cgpaw_normalize(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
- end if
+ !if (usepaw == 1) then
+ !  !call cgtk_fixphase(cg, gsc, 0, 0, istwf_k, mcg, mgsc, mpi_enreg, nband, npwsp, usepaw)
+ !  call cg_set_imag0_to_zero(istwf_k, me_g0, npwsp, nband, cg, max_absimag)
+ !  call cg_set_imag0_to_zero(istwf_k, me_g0, npwsp, nband, gsc, max_absimag)
+ !  call cgpaw_normalize(npwsp, nband, cg, gsc, istwf_k, me_g0, comm_bsf)
+ !end if
 
  if (timeit) call cwtime_report(" after_ortho ", cpu, wall, gflops)
 

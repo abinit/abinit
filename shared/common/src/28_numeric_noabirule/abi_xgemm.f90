@@ -41,8 +41,6 @@
 
  subroutine abi_zgemm_2d(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
 
- implicit none
-
  !Arguments------------------------------------
  character(len=1),intent(in) :: TRANSA
  character(len=1),intent(in) :: TRANSB
@@ -97,18 +95,14 @@ end subroutine abi_zgemm_2d
 !!
 !! INPUTS
 !!
-!!
 !! PARENTS
-!!
 !!
 !! CHILDREN
 !!
 !! SOURCE
 !!
 subroutine abi_d2zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
-&       x_cplx)
-
- implicit none
+                       x_cplx)
 
 !Arguments ------------------------------------
  character(len=1), intent(in) :: transa

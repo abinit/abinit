@@ -87,8 +87,6 @@ module m_yaml
  contains
 
    procedure :: write_and_free => yamldoc_write_unit_and_free
-    !, yamldoc_write_units_and_free ! ifort13-16 does not generic interfaces
-    !
     ! Write Yaml document to unit and free memory.
 
    procedure :: write_units_and_free => yamldoc_write_units_and_free

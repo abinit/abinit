@@ -118,23 +118,21 @@ program lapackprof
  ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
  ABI_CHECK(get_arg("istwfk", istwfk, msg, default=1) == 0, msg)
  ABI_CHECK(get_arg("usepaw", usepaw, msg, default=0) == 0, msg)
- ABI_CHECK(get_arg("ncalls", ncalls, msg, default=20) == 0, msg)
+ ABI_CHECK(get_arg("ncalls", ncalls, msg, default=5) == 0, msg)
  ABI_CHECK(get_arg("nband", nband, msg, default=50) == 0, msg)
  ABI_CHECK(get_arg("nspinor", nspinor, msg, default=1) == 0, msg)
  ABI_CHECK(get_arg("nthreads", nthreads, msg, default=1) == 0, msg)
  ABI_CHECK(get_arg("debug", nthreads, msg, default=0) == 0, msg)
  ABI_CHECK(get_start_step_num("npw", npw_start_step_num, msg, default=[1000, 2000, 20]) == 0, msg)
 
- if (my_rank == master) then
-   write(std_out,'(a)')" Tool for profiling and testing Linear Algebra routines used in ABINIT."
- end if
+ if (my_rank == master) write(std_out,'(a)')" Tool for profiling and testing Linear Algebra routines used in ABINIT."
 
  call xomp_set_num_threads(nthreads)
  call xomp_show_info(std_out)
  call init_mpi_enreg(mpi_enreg)
  me_g0 = mpi_enreg%me_g0
 
- ! Write metadata i.e parameters that do not change during the benchmark.
+ ! Output metadata i.e parameters that do not change during the benchmark.
  ydoc = yamldoc_open('LapackProfMetadata') !, info=info, width=width)
  call ydoc%add_ints("istwfk, usepaw, ncalls, nband, nspinor, nthreads", &
                      [istwfk, usepaw, ncalls, nband, nspinor, nthreads] &
@@ -213,21 +211,20 @@ program lapackprof
        ABI_FREE(cg)
        ABI_FREE(gsc)
      end do ! isz
-     write(std_out,'(a)')TRIM(sjoin("# end ortalgo: ", itoa(ortalgo)))
+     write(std_out,'(a)')trim(sjoin("# end ortalgo: ", itoa(ortalgo)))
    end do ! ortalgo
-   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ", command))
+   write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ", command))
 
  case ("copy")
-   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
    write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
    do step=1,2
      if (step == 1) method = "F90"
      if (step == 2) method = "BLAS"
      do isz=1,nsizes
        npw  = sizes(isz)
-       ABI_MALLOC(cg1, (2, npw))
+       ABI_CALLOC(cg1, (2, npw))
        ABI_MALLOC(cg2, (2, npw))
-       cg1 = zero
 
        call cwtime(ctime, wtime, gflops, "start")
        if (step==1) then
@@ -248,12 +245,12 @@ program lapackprof
        ABI_FREE(cg2)
      end do
 
-     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
+     write(std_out,'(a)')trim(sjoin("# end method: ", method))
    end do
-   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ", command))
+   write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ", command))
 
  case ("zdotc")
-   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
    write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
    do step=1,2
      if (step == 1) method = " F90"
@@ -283,12 +280,12 @@ program lapackprof
        ABI_FREE(cg1)
        ABI_FREE(cg2)
      end do
-     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
+     write(std_out,'(a)')trim(sjoin("# end method: ", method))
    end do
-   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",method))
+   write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ",method))
 
  case ("axpy")
-   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
    write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
    alpha = [one, two]
    do step=1,2
@@ -331,19 +328,19 @@ program lapackprof
        ABI_FREE(cg1)
        ABI_FREE(cg2)
      end do
-     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
+     write(std_out,'(a)')trim(sjoin("# end method: ", method))
    end do
-   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",command))
+   write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ",command))
 
  case ("zgemv")
-   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
    write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
    alpha = [one, two]
    beta = [zero, zero]
    do step=1,2
      if (step == 1) method = "F90"
      if (step == 2) method = "BLAS"
-     !write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ",method))
+     !write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ",method))
 
      do isz=1,nsizes
        npw = sizes(isz)
@@ -386,12 +383,12 @@ program lapackprof
        ABI_FREE(cg2)
        ABI_FREE(cg3)
      end do
-     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
+     write(std_out,'(a)')trim(sjoin("# end method: ", method))
    end do
-   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",command))
+   write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ",command))
 
- case ("transpose")
-   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ",command))
+ case ("itranspose", "otranspose")
+   write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ",command))
    write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
 
    do step=1,2
@@ -399,24 +396,22 @@ program lapackprof
      if (step == 2) method = "MKL"
      do isz=1,nsizes
        npw = sizes(isz)
-       ABI_MALLOC(zmat, (npw, npw))
-       ABI_MALLOC(wmat, (npw, npw))
-       do jj=1,npw
-         do ii=1,npw
-           zmat(ii,jj) = DCMPLX(ii,jj)
-         end do
-       end do
+       ABI_CALLOC(zmat, (npw, npw))
+       ABI_CALLOC(wmat, (npw, npw))
 
        call cwtime(ctime, wtime, gflops, "start")
-       if (step==1) then
+       if (step == 1) then
          do icall=1,ncalls
-           !wmat = TRANSPOSE(zmat)
-           zmat = TRANSPOSE(zmat)
+           zmat = transpose(zmat)
          end do
        else
          do icall=1,ncalls
-           !call sqmat_otranspose(npw,zmat,wmat)
-           call sqmat_itranspose(npw, zmat)
+           select case (command)
+           case ("otranspose")
+             call sqmat_otranspose(npw, zmat, wmat)
+           case ("itranspose")
+             call sqmat_itranspose(npw, zmat)
+           end select
          end do
        end if
        call cwtime(ctime, wtime, gflops, "stop")
@@ -425,12 +420,12 @@ program lapackprof
        ABI_FREE(zmat)
        ABI_FREE(wmat)
      end do
-     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
+     write(std_out,'(a)')trim(sjoin("# end method: ", method))
    end do
-   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",command))
+   write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ",command))
 
   case ("zgemm3m")
-    write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+    write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
     write(std_out, "(a1,2(a8,1x),a6,2(1x,a12))")"#", "npw", "nband", "type", "cpu_time", "wall_time"
     do step=1,2
       if (step == 1) method = "ZGEMM"
@@ -461,11 +456,11 @@ program lapackprof
     end do
 
   case ("zgemmt")
-    write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+    write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
     write(std_out, "(a1,2(a8,1x),a6,2(1x,a12))")"#", "npw", "nband", "type", "cpu_time", "wall_time"
     do step=1,2
       if (step == 1) method = "ZGEMM"
-      if (step == 2) method = "ZGEMM3T"
+      if (step == 2) method = "ZGEMMT"
       do isz=1,nsizes
         npw  = sizes(isz)
         ABI_MALLOC_RAND(cg1, (2, npw*nband))
@@ -491,8 +486,33 @@ program lapackprof
       end do
     end do
 
+  case ("zherk_vs_zgemm")
+    write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
+    write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
+    do step=1,2
+      if (step == 1) method = "ZGEMM"
+      if (step == 2) method = "ZHERK"
+      do isz=1,nsizes
+        npw  = sizes(isz)
+        ABI_MALLOC_RAND(cg1, (2, npw*nband))
+        ABI_MALLOC_RAND(cg3, (2, nband*nband))
+
+        call cwtime(ctime, wtime, gflops, "start")
+        if (step == 1) then
+          call ZGEMM("C", "N", nband, nband, npw, cone, cg1, npw, cg1, npw, czero, cg3, nband)
+        else
+          call ZHERK("U", "C", nband, npw, cone, cg1, npw, czero, cg3, nband)
+        end if
+        call cwtime(ctime, wtime, gflops, "stop")
+        write(std_out,'(1x,2(i8,1x),a6,2(1x,f12.6))')npw, nband, trim(method), ctime, wtime
+
+       ABI_FREE(cg1)
+       ABI_FREE(cg3)
+      end do
+    end do
+
   case ("zgerc")
-    write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+    write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
     write(std_out, "(a1,a8,1x,a6,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
     do step=1,2
       if (step == 1) method = "F90"
@@ -527,9 +547,9 @@ program lapackprof
         ABI_FREE(zmat)
       end do
 
-      write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
+      write(std_out,'(a)')trim(sjoin("# end method: ", method))
     end do
-    write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ", command))
+    write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ", command))
 
     !do isz=1,nsizes
     !npw  = sizes(isz)
@@ -565,7 +585,7 @@ program lapackprof
  !  end do
 
  case ("xhpev_vs_xheev")
-   write(std_out,'(a)')TRIM(sjoin("BEGIN_BENCHMARK: ", command))
+   write(std_out,'(a)')trim(sjoin("BEGIN_BENCHMARK: ", command))
    write(std_out, "(a1,a8,1x,a9,2(1x,a12))")"#", "npw", "type", "cpu_time", "wall_time"
 
    do step=1,2
@@ -608,9 +628,9 @@ program lapackprof
      ABI_FREE(ene)
      ABI_FREE(evec)
      ABI_FREE(zpmat)
-     write(std_out,'(a)')TRIM(sjoin("# end method: ", method))
+     write(std_out,'(a)')trim(sjoin("# end method: ", method))
    end do
-   write(std_out,'(a)')TRIM(sjoin("END_BENCHMARK: ",command))
+   write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ",command))
 
  case default
    MSG_ERROR(sjoin("Wrong command:", command))
