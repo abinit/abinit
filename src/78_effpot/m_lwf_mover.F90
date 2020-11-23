@@ -60,11 +60,12 @@ module m_lwf_mover
 
   type, public, extends(abstract_mover_t) :: lwf_mover_t
      type(multibinit_dtset_type), pointer :: params
-     real(dp) :: lwf_temperature, energy
+     real(dp) ::  energy
      integer :: nlwf
-     real(dp), allocatable :: lwf(:), lwf_force(:), vcart(:), lwf_masses(:)
+     real(dp), allocatable :: lwf(:), lwf_force(:), vcart(:)
      type(lwf_ncfile_t) :: ncfile
      type(lwf_hist_t) :: hist
+     real(dp), pointer :: lwf_masses(:) => null()
      real(dp) :: Ek=0.0_dp     ! kinetic energy
      real(dp) :: T_ob=0.0_dp    ! observed temperature
    contains
@@ -98,11 +99,11 @@ contains
     ABI_ALLOCATE(self%lwf, (self%nlwf))
     ABI_ALLOCATE(self%vcart, (self%nlwf))
     ABI_ALLOCATE(self%lwf_force, (self%nlwf))
-    ABI_ALLOCATE(self%lwf_masses, (self%nlwf))
     self%lwf(:) = 0.0_dp
     self%lwf_force(:) = 0.0_dp
     self%vcart(:) = 0.0_dp
     self%energy=0.0_dp
+    self%lwf_masses=>self%supercell%lwf%lwf_masses
     call self%hist%initialize(nlwf=self%nlwf, mxhist=1)
   end subroutine initialize
 
@@ -114,7 +115,7 @@ contains
     ABI_SFREE(self%lwf)
     ABI_SFREE(self%vcart)
     ABI_SFREE(self%lwf_force)
-    ABI_SFREE(self%lwf_masses)
+    nullify(self%lwf_masses)
     call self%hist%finalize()
     !call self%ncfile%finalize()
   end subroutine finalize
@@ -124,13 +125,13 @@ contains
     type(multibinit_dtset_type) :: params
     self%dt=params%lwf_dt
     self%total_time=params%lwf_ntime*params%lwf_dt
-    self%lwf_temperature=params%lwf_temperature
+    self%temperature=params%lwf_temperature
   end subroutine set_params
 
   subroutine set_temperature(self, temperature)
     class(lwf_mover_t), intent(inout) :: self
     real(dp), intent(in) :: temperature
-    self%lwf_temperature=temperature
+    self%temperature=temperature
   end subroutine set_temperature
 
   !-------------------------------------------------------------------!
@@ -209,20 +210,18 @@ contains
        !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
        call self%run_one_step(effpot=effpot, spin=spin, lwf=self%lwf, energy_table=energy_table)
 
-       call self%hist%set_hist(lwf=self%lwf, energy=self%energy )
+       call self%hist%set_hist(lwf=self%lwf, vcart=self%vcart, energy=self%energy )
        if(modulo(i, self%params%lwf_nctime)==0) then
           call self%ncfile%write_one_step(self%hist)
        !print *, "Step: ", i,   "Ev", self%energy, "Etot"
 
-!       write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
-!            & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &
-!            & (self%Ek+self%energy)/self%supercell%ncell
-!       call wrtout(std_out,msg,'COLL')
-!       call wrtout(ab_out, msg, 'COLL')
-       write(msg, "(I13, 4X,  ES15.5)")  i, self%energy/self%supercell%ncell
-       !            & (self%Ek+self%energy)/self%supercell%ncell
+       write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
+            & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &
+            & (self%Ek+self%energy)/self%supercell%ncell
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
+       !write(msg, "(I13, 4X,  ES15.5)")  i, self%energy/self%supercell%ncell
+       !            & (self%Ek+self%energy)/self%supercell%ncell
 
        end if
        !TODO: output, observables
@@ -271,7 +270,13 @@ contains
          call self%read_hist_lwf_state(restart_hist_fname)
       end select
 
-      call self%hist%set_hist(lwf=self%lwf, energy=0.0_dp)
+      call self%rng%rand_normal_array(self%vcart(:), self%nlwf)
+      do i=1, self%nlwf
+         self%vcart(i) = self%vcart(i) *sqrt(self%temperature/self%lwf_masses(i))
+      end do
+
+      call self%hist%set_hist(lwf=self%lwf, vcart=self%vcart, energy=0.0_dp)
+
     end subroutine set_initial_state
 
   !-------------------------------------------------------------------!
@@ -331,7 +336,7 @@ contains
       ABI_UNUSED_A(params)
       call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
       if(iam_master) then
-         call self%ncfile%initialize( trim(fname), 1)
+         call self%ncfile%initialize(fname, 1)
          call self%ncfile%write_cell(self%supercell)
          call self%ncfile%def_lwf_var(self%hist)
       end if
@@ -451,7 +456,6 @@ contains
           call self%ncfile%write_one_step(self%hist)
        endif
 
-       ! run in parallel
        call self%run_time(pot, displacement=displacement, strain=strain, spin=spin, &
             & lwf=lwf, energy_table=energy_table)
 

@@ -90,7 +90,7 @@ module m_multibinit_manager
   use m_lwf_mover, only: lwf_mover_t
   use m_lwf_mc_mover, only: lwf_mc_t
   use m_lwf_dummy_mover, only: lwf_dummy_mover_t
-  use m_lwf_ncfile, only: lwf_ncfile_t
+  use m_lwf_berendsen_mover, only: lwf_berendsen_mover_t
 
   ! lattice-lwf hybrid
   use m_lattice_lwf_mover, only: lattice_lwf_mover_t
@@ -115,7 +115,7 @@ module m_multibinit_manager
      ! a polymorphic lattice mover so multiple mover could be used.
      class(lattice_mover_t), pointer :: lattice_mover => null()
      ! as for the spin, there is only one mover which has several methods
-     type(spin_mover_t) :: spin_mover  
+     type(spin_mover_t), pointer :: spin_mover => null() 
      ! type(lwf_mover_t) :: lwf_mover
 
      type(slc_mover_t) :: slc_mover
@@ -153,6 +153,7 @@ module m_multibinit_manager
      procedure :: read_potentials ! read primitve cell and potential
      procedure :: fill_supercell
      procedure :: set_movers
+     procedure :: set_spin_mover
      procedure :: set_lattice_mover
      procedure :: set_lwf_mover
      procedure :: run_spin_dynamics
@@ -234,7 +235,11 @@ contains
     call self%supercell%finalize()
     call self%prim_pots%finalize()
     call self%pots%finalize()
-    call self%spin_mover%finalize()
+    if (associated(self%spin_mover)) then
+       call self%spin_mover%finalize()
+       ABI_FREE_SCALAR(self%lattice_mover)
+       nullify(self%spin_mover)
+    end if
     ! Note that lattice mover is a pointer.
     ! It might be null if there is no lattice part.
     if (associated(self%lattice_mover)) then
@@ -386,7 +391,6 @@ contains
     ! latt : TODO (replace this with full lattice)
     ! only toy harmonic part 
     if(self%params%dynamics>100) then
-       print *, "Dynamics:", self%params%dynamics, "Init latt potential"
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
        select type(lat_ham_pot)
        type is (lattice_harmonic_primitive_potential_t)
@@ -459,7 +463,7 @@ contains
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
     call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots)
-    ! why do this twice.
+    ! why do this twice, because each pot in the supercell is not yet linked to the supercell.
     call self%pots%set_supercell(self%supercell)
     call self%pots%set_params(self%params)
   end subroutine fill_supercell
@@ -480,12 +484,8 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
-    character(len=fnlen) :: fname
     if (self%params%spin_dynamics>0) then
-       fname=trim(self%filenames(2))//"_spinhist_input.nc"
-       call self%spin_mover%initialize(params=self%params,&
-            & supercell=self%supercell, rng=self%rng, &
-            & restart_hist_fname=fname)
+        call self%set_spin_mover()
     end if
 
     if (self%params%dynamics>0) then
@@ -498,6 +498,23 @@ contains
     end if
 
   end subroutine set_movers
+
+  !-------------------------------------------------------------------!
+  !Set_spin_mover
+  !-------------------------------------------------------------------!
+  subroutine set_spin_mover(self)
+    class(mb_manager_t), intent(inout) :: self
+    character(len=fnlen) :: fname
+    select case(self%params%spin_dynamics)
+        case (1)
+          ABI_DATATYPE_ALLOCATE_SCALAR(spin_mover_t, self%spin_mover)
+    end select
+    fname=trim(self%filenames(2))//"_spinhist_input.nc"
+    call self%spin_mover%initialize(params=self%params,&
+            & supercell=self%supercell, rng=self%rng, &
+            & restart_hist_fname=fname)
+   end subroutine set_spin_mover
+
 
 
   !-------------------------------------------------------------------!
@@ -518,9 +535,6 @@ contains
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_dummy_mover_t, self%lattice_mover)
     end select
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
-    ! FIXME: should be able to set to different mode using input.
-    ! Mode=1: Using Boltzman's distribution to initialize the velocities.
-    ! Mode=2
     call self%lattice_mover%set_initial_state(mode=1)
   end subroutine set_lattice_mover
 

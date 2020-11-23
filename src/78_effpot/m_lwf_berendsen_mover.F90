@@ -88,12 +88,16 @@ module m_lwf_berendsen_mover
       call effpot%calculate( displacement=displacement, strain=strain, &
            & spin=spin, lwf=self%lwf, lwf_force=self%lwf_force, &
            & energy=self%energy, energy_table=energy_table)
+      !print *, "lwf_force", self%lwf_force
+      !print *, "lwf_masses", self%lwf_masses
       do i=1, self%nlwf
          self%vcart(i) = self%vcart(i) + &
               & (0.5_dp * self%dt) * self%lwf_force(i)/self%lwf_masses(i)
       end do
+      !print *, "vcart", self%vcart
       !call self%force_stationary()
       self%lwf= self%lwf+self%vcart * self%dt
+      !print *, "lwf", self%lwf
 
 
       self%energy=0.0
@@ -130,6 +134,9 @@ module m_lwf_berendsen_mover
     real(dp) :: tautscl, old_temperature, scale_temperature, tmp
     tautscl = self%dt / self%taut
     old_temperature=self%T_ob
+    if (old_temperature< 1e-19) then
+       old_temperature=1e-19
+    end if
     tmp=1.0 +(self%temperature / old_temperature - 1.0) *    tautscl
     if(tmp< 0.0) then
        MSG_ERROR("The time scale for the Berendsen algorithm should be at least larger than dtion")

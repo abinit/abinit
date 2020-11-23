@@ -56,7 +56,7 @@ module m_lwf_ncfile
      integer :: ncerr, ncid
      ! variable id
      integer :: lwf_id, time_id, itime_id, etotal_id, entropy_id, displacement_id
-     integer :: ilwf_prim_id, rvec_id
+     integer :: ilwf_prim_id, rvec_id, lwf_masses_id
      integer :: itime, ntime,ncell
      ! itime: time index
      integer :: write_traj=1
@@ -84,7 +84,7 @@ contains
 #if defined HAVE_NETCDF
     write(std_out,*) "Write iteration in lwf history file "//trim(self%filename)//"."
     !  Create netCDF file
-    ncerr = nf90_create(path=trim(filename), cmode=NF90_CLOBBER, ncid=self%ncid)
+    ncerr = nf90_create(path=trim(self%filename), cmode=NF90_CLOBBER, ncid=self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when creating netcdf history file")
     self%isopen=.True.
     ncerr =nf90_enddef(self%ncid)
@@ -128,6 +128,9 @@ contains
          &         self%ilwf_prim_id, NF90_INT, "ilwf_prim", &
          & "index of lwf in primitive cell", "dimensionless")
 
+    call ab_define_var(self%ncid, [self%nlwf], &
+         &         self%lwf_masses_id, NF90_DOUBLE, "lwf_masses", "LWF MASSES", "dimensionless")
+
     ncerr=nf90_enddef(self%ncid)
 
     ncerr=nf90_put_var(self%ncid, self%ilwf_prim_id, [supercell%lwf%ilwf_prim], &
@@ -136,7 +139,12 @@ contains
 
     ncerr=nf90_put_var(self%ncid, self%rvec_id, [supercell%lwf%rvec], &
          &      start=[1,1], count=[3, supercell%lwf%nlwf])
-    NCF_CHECK_MSG(ncerr, "Error when writting ilwf_prim in lwf history file.")
+    NCF_CHECK_MSG(ncerr, "Error when writting lwf rvec in lwf history file.")
+
+    ncerr=nf90_put_var(self%ncid, self%lwf_masses_id, [supercell%lwf%lwf_masses], &
+         &      start=[1], count=[supercell%lwf%nlwf])
+    NCF_CHECK_MSG(ncerr, "Error when writting lwf_masses in lwf history file.")
+
 
 
 #endif
@@ -176,6 +184,8 @@ contains
     ncerr=nf90_enddef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when finishing defining variables in lwf history file.")
 #endif
+
+
 
 
   end subroutine def_lwf_var

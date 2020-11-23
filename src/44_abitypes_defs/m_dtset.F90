@@ -3175,6 +3175,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' lwf_mc_avg_amp lwf_nctime lwf_ntime'
  list_vars=trim(list_vars)//' lwf_pot_fname'
  list_vars=trim(list_vars)//' lwf_self_bound_coeff lwf_self_bound_order'
+ list_vars=trim(list_vars)//' lwf_taut'
  list_vars=trim(list_vars)//' lwf_temperature lwf_temperature_start lwf_temperature_end'
  list_vars=trim(list_vars)//' lwf_temperature_nstep lwf_var_temperature'
 !M

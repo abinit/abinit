@@ -103,7 +103,7 @@ contains
     call self%onebody_coeff%initialize(mshape= [self%nlwf, -1])
     call self%coeff2%initialize(mshape= [self%nlwf, self%nlwf])
     self%csr_mat_ready=.False.
-    ABI_ALLOCATE(self%coeff_diag, (self%nlwf))
+    ABI_MALLOC(self%coeff_diag, (self%nlwf))
     ABI_MALLOC(self%lwf_latt_coeffs, (self%nlwf))
 
     ABI_MALLOC(self%lwf_force, (self%nlwf))
@@ -118,13 +118,14 @@ contains
     class(lwf_potential_t), intent(inout) :: self
     integer :: ilwf
     self%has_displacement=.False.
-    call self%coeff%finalize()
     call self%onebody_coeff%finalize()
     call self%coeff2%finalize()
     call self%abstract_potential_t%finalize()
 
     if (.not. self%csr_mat_ready) then
        call self%coeff_coo%finalize()
+    else
+       call self%coeff%finalize()
     end if
     ABI_SFREE(self%coeff_diag)
     do ilwf=1, self%nlwf
@@ -188,10 +189,12 @@ contains
 
   subroutine convert_coeff_to_csr(self)
     class(lwf_potential_t), intent(inout) :: self
+    integer :: i
 
     if (.not. self%csr_mat_ready) then
        !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
        !if(iam_master) then
+       call self%coeff_coo%sort_indices()
        call spmat_convert(self%coeff_coo, self%coeff)
        call self%coeff_coo%finalize()
        !endif
@@ -255,11 +258,10 @@ contains
     !    MSG_BUG("lwf not exist")
     !end if
 
+
     if(self%as_lattice_anharmonic) then
        call lattice_to_lwf_projection(self%lwf_latt_coeffs, displacement, lwf)
     end if
-    print *,"Disp", sum(abs(displacement(:,:)))/self%supercell%ncell/18
-    print *,"LWFs", sum(abs(lwf(:)))/self%supercell%ncell/2
 
 
     self%lwf_force(:) =0.0_dp
@@ -271,7 +273,6 @@ contains
        call self%coeff%mv(lwf, self%lwf_force)
        etmp=etmp+0.5_dp * sum(self%lwf_force*lwf)
        self%lwf_force(:) = -self%lwf_force(:)
-       !print *, "e_harmonic:", etmp
     end if
 
     ! self_bound_term as from the input parameters
@@ -287,11 +288,9 @@ contains
           ilwf= self%onebody_coeff%ind%data(1, i)
           order= self%onebody_coeff%ind%data(2, i)
           val=self%onebody_coeff%val%data(i)
-          !print *, ilwf, order, val, val*lwf(ilwf)**order
           etmp= etmp + val*lwf(ilwf)**order
           self%lwf_force(ilwf) =self%lwf_force(ilwf) - val*order*lwf(ilwf)**(order-1)
        end do
-       !print *, "e_anharmonic:", etmp
     end if
 
     !TODO: remove. For testing only

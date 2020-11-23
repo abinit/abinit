@@ -61,6 +61,7 @@ module m_lwf_primitive_potential
      integer :: nlwf=0, natom=0, nR=0 ! number of LWF
      type(ndcoo_mat_t) :: coeff  !  A N-dimensional COO matrix.
      !  The indices are (ind_R, i, j). Note that xyz is included in i and j.
+     real(dp), allocatable :: lwf_masses(:)
 
      integer :: onebody_nterm=0
 
@@ -130,6 +131,7 @@ contains
     call self%primitive_potential_t%finalize()
 
     ABI_SFREE(self%lattice_coeffs)
+    ABI_SFREE(self%lwf_masses)
     self%natom=0
     self%nR=0
 
@@ -199,6 +201,13 @@ contains
     ABI_ALLOCATE(masses, (natom))
     ABI_ALLOCATE(zion, (natom))
 
+    ABI_ALLOCATE(self%lwf_masses, (nlwf))
+
+    ierr =nf90_inq_varid(ncid, "wann_lwf_masses", varid)
+    NCF_CHECK_MSG(ierr, "lwf_masses")
+    ierr = nf90_get_var(ncid, varid, self%lwf_masses)
+    NCF_CHECK_MSG(ierr, "lwf_masses")
+    self%primcell%lwf%lwf_masses=self%lwf_masses
 
     ierr=nf90_inq_dimid(ncid, "wann_onebody_nterm", onebody_nterm)
     if (ierr/=nf90_noerr) then
@@ -217,9 +226,6 @@ contains
        ierr=nctk_get_dim(ncid, "wann_twobody_nterm", twobody_nterm)
        NCF_CHECK_MSG(ierr, "getting wann_twobody_nterm in lwf potential file")
     end if
-
-
-    ! TODO: read masses, zion
 
     self%natom=natom
 
@@ -245,11 +251,6 @@ contains
     NCF_CHECK_MSG(ierr, "wann_wannier_function_real")
     ierr = nf90_get_var(ncid, varid, self%lattice_coeffs)
     NCF_CHECK_MSG(ierr, "wann_wannier_function_real")
-    
-    !self%lattice_coeffs=self%lattice_coeffs/Bohr_Ang
-
-    !call self%primcell%set_lwf(natom, cell, xcart, masses, zion)
-
 
     ierr =nf90_inq_varid(ncid, "wann_Rlist", varid)
     NCF_CHECK_MSG(ierr, "wann_Rlist")
@@ -423,7 +424,7 @@ contains
              i=self%coeff%ind%data(2, inz)
              j=self%coeff%ind%data(3, inz)
              val=self%coeff%val%data(inz)
-             ! translate i to i in supercell.
+             ! translate i to i in supercell. 
              ! No need to allocate, it is done by trans_i . but remember to deallocate!
              ! nbasis is the number in one primitive cell.
              ! e.g. there are 3*natom possible i (3: x, y, z) in each primitive cell.
@@ -438,7 +439,7 @@ contains
              ABI_SFREE(jlist_sc)
              ABI_SFREE(Rlist_sc)
           end do
-       end if
+          end if
 
        ! coefficients of atomic displacements in supercell
        do i=1, self%nlwf
@@ -463,7 +464,6 @@ contains
           ABI_SFREE(ilist_sc)
        end do
 
-
        ! anharmonic terms
        !call scpot%set_ref_energy(self%ref_energy * scmaker%ncells)
        if (self%has_self_bound_term) then
@@ -479,7 +479,6 @@ contains
              ABI_SFREE(ilist_sc)
           end do
        endif
-
        ! Test the phonon energy
        !call COO_to_dense(scpot%coeff, real_sc_evecs)
        !sc_evecs(:,:) = real_sc_evecs(:,:)
@@ -487,10 +486,8 @@ contains
 
     end select
 
-    ABI_UNUSED_A(params)
 
   end subroutine fill_supercell
-
 
   !-------------------------------------------------------------------!
   ! calculate hamiltonian at k point (or more precisely, q point)

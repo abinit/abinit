@@ -1147,10 +1147,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%lwf_dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%lwf_dynamics=intarr(1)
- if( .not. (multibinit_dtset%lwf_dynamics <= 2) ) then
+ if( .not. (multibinit_dtset%lwf_dynamics <= 3) ) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'lwf_dynamics is ',multibinit_dtset%lwf_dynamics,', but the only allowed values',ch10,&
-         &   'are 0, 1 and negative values.',ch10,&
+         &   'are 0, 1, 2, 3 and negative values.',ch10,&
          &   'Action: correct lwf_dynamics in your input file.'
     MSG_ERROR(message)
  end if
