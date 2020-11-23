@@ -898,9 +898,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !    Check the stopping criterion
      converge = .false.
      if(tolGF > zero)then 
-       check_value =  (sum(gf_values(2:4,icycle),MASK=sel_on) - sum(gf_values(2:4,icycle+1),MASK=sel_on)) & 
-&                   /(sum(gf_values(2:4,1),MASK=sel_on) - sum(gf_values(2:4,icycle+1),MASK=sel_on))
-       if(tolGF > check_value)then
+       check_value =  (sum(gf_values_iter(2:4,icycle_tmp+1),MASK=sel_on) - sum(gf_values_iter(2:4,icycle_tmp),MASK=sel_on)) & 
+&                   /(sum(gf_values_iter(2:4,icycle_tmp+1),MASK=sel_on) - sum(gf_values_iter(2:4,1),MASK=sel_on))
+       if(check_value < tolGF)then
          write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
 &                                                check_value ," < ",tolGF,&
 &                                              ' Goal Function is converged'
