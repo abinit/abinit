@@ -155,7 +155,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    if(already_transposed) do_transpose = .false.
  end if
 
- flag_inv_sym = (gs_hamk%istwf_k==2 .and. any(gs_hamk%ngfft(7) == [401,402,312]))
+ flag_inv_sym = (gs_hamk%istwf_k==2 .and. any(gs_hamk%ngfft(7) == [401,402,312,512]))
  if (flag_inv_sym) then
    gs_hamk%istwf_k = 1
    if (modulo(bandpp,2)==0) bandpp_sym = bandpp/2
@@ -963,7 +963,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  end if
 
  istwf_k_=istwf_k
- flag_inv_sym = (istwf_k_==2 .and. any(ngfft(7) == [401,402,312]))
+ flag_inv_sym = (istwf_k_==2 .and. any(ngfft(7) == [401,402,312,512]))
  if (option_fourwf==0) flag_inv_sym=((flag_inv_sym).and.(use_gpu_cuda_==0))
 
  if (flag_inv_sym) then
