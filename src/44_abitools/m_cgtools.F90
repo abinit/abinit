@@ -34,12 +34,6 @@
 
 #include "abi_common.h"
 
-#if defined HAVE_LINALG_GEMM3M
-#define ABI_ZGEMM ZGEMM3M
-#else
-#define ABI_ZGEMM ZGEMM
-#endif
-
 module m_cgtools
 
  use defs_basis
@@ -50,6 +44,7 @@ module m_cgtools
  use m_fstrings,      only : toupper, itoa, sjoin
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit
+ use m_abi_linalg,    only : abi_zgemm_2r, abi_xgemm
 
  implicit none
 
@@ -848,69 +843,6 @@ end subroutine cg_zgemv
 
 !----------------------------------------------------------------------
 
-!!****f* m_cgtools/cg_dgemv
-!! NAME
-!!  cg_dgemv
-!!
-!! FUNCTION
-!! The cg_dgemv routines perform a **complex** matrix-vector operation defined as:
-!!
-!!      y := alpha*A*x + beta*y,
-!! or
-!!      y := alpha*A'*x + beta*y,
-!! or
-!!      y := alpha*conjg(A')*x + beta*y,
-!!
-!! where: alpha and beta are REAL scalars, x and y are COMPLEX vectors, A is an m-by-n COMPLEX matrix.
-!! Default is: alpha = 1 and beta = 0.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-!subroutine cg_dgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
-!
-!!Arguments ------------------------------------
-!!scalars
-! integer,intent(in) :: nrows,ncols
-! real(dp),optional,intent(in) :: alpha(2),beta(2)
-! character(len=1),intent(in) :: trans
-!!arrays
-! real(dp),intent(in) :: cgmat(2,nrows*ncols), vec(2,*)
-! real(dp),intent(inout) :: matvec(2,*)
-!
-!!Local variables-------------------------------
-!!scalars
-! integer :: mm, nn, kk, lda, ldb,l dc
-! real(dp) :: my_alpha, my_beta
-!
-!! *************************************************************************
-!
-! my_alpha = one;  if (present(alpha)) my_alpha = alpha
-! my_beta  = zero; if (present(beta))  my_beta  = beta
-!
-! lda = nrows; mm = nrows; nn = 1; kk = ncols
-! if (toupper(trans) /= 'N') then
-!   mm = ncols; kk = nrows
-! end if
-! ldb = kk; ldc = mm
-!
-! call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
-! ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
-!
-! !call ZGEMV(trans,mm,nn,my_alpha,cgmat,lda,vec,1,my_beta,matvec,1)
-!
-!end subroutine cg_dgemv
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_cgtools/cg_zgemm
 !! NAME
 !!  cg_zgemm
@@ -952,7 +884,8 @@ subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, alpha
 !Local variables-------------------------------
 !scalars
  integer :: mm,nn,kk,lda,ldb,ldc
- real(dp) :: my_alpha(2),my_beta(2)
+ !real(dp) :: my_alpha(2),my_beta(2)
+ complex(dpc) :: my_calpha, my_cbeta
 
 ! *************************************************************************
 
@@ -971,11 +904,15 @@ subroutine cg_zgemm(transa, transb, npwsp, ncola, ncolb, cg_a, cg_b, cg_c, alpha
 
  ldc = mm
 
- my_alpha = cg_cone;  if (PRESENT(alpha)) my_alpha = alpha
- my_beta  = cg_czero; if (PRESENT(beta))  my_beta  = beta
-
- call ZGEMM(transa, transb, mm, nn, kk, my_alpha, cg_a, lda, cg_b, ldb, my_beta, cg_c, ldc)
+ !my_alpha = cg_cone;  if (PRESENT(alpha)) my_alpha = alpha
+ !my_beta  = cg_czero; if (PRESENT(beta))  my_beta  = beta
+ !call ZGEMM(transa, transb, mm, nn, kk, my_alpha, cg_a, lda, cg_b, ldb, my_beta, cg_c, ldc)
  !call ZGEMM3M(transa, transb, mm, nn, kk, my_alpha, cg_a, lda, cg_b, ldb, my_beta, cg_c, ldc)
+
+ my_calpha = cone;  if (PRESENT(alpha)) my_calpha = DCMPLX(alpha(1), alpha(2))
+ my_cbeta  = czero; if (PRESENT(beta))  my_cbeta  = DCMPLX(beta(1), beta(2))
+
+ call abi_zgemm_2r(transa, transb, mm, nn, kk, my_calpha, cg_a, lda, cg_b, ldb, my_cbeta, cg_c, ldc)
 
 end subroutine cg_zgemm
 !!***
@@ -2518,7 +2455,7 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm, uma
 
    ! 1) Calculate O_ij = <phi_i|phi_j> (complex Hermitean)
    if (my_usegemm) then
-     call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, cg, npwsp, czero, c_ovlp, nband)
+     call abi_zgemm_2r("C", "N", nband, nband, npwsp, cone, cg, npwsp, cg, npwsp, czero, c_ovlp, nband)
    else
      call ZHERK("U", "C", nband, npwsp, cone, cg, npwsp, czero, c_ovlp, nband)
    end if
@@ -2668,7 +2605,7 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
    c_ovlp = zero
    call ZGEMMT("U", "C", "N", nband, npwsp, cone, cg, npwsp, gsc, npwsp, czero, c_ovlp, nband)
 #else
-   call ABI_ZGEMM("C", "N", nband, nband, npwsp, cone, cg, npwsp, gsc, npwsp, czero, c_ovlp, nband)
+   call abi_zgemm_2r("C", "N", nband, nband, npwsp, cone, cg, npwsp, gsc, npwsp, czero, c_ovlp, nband)
 #endif
 
    ! Sum the overlap if PW are distributed.

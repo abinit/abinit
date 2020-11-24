@@ -35,26 +35,22 @@
 
 #include "abi_common.h"
 
-! Commented for now because it causes bugs on Shiva's OpenBLAS (?!)
-! #if defined HAVE_LINALG_GEMM3M
-! #define ZGEMM ZGEMM3M
-! #endif
-
 module m_gemm_nonlop
 
  use defs_basis
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_abi_linalg
 
  use defs_abitypes, only : MPI_type
- use m_opernlc_ylm,    only :  opernlc_ylm
+ use m_opernlc_ylm, only : opernlc_ylm
 
  implicit none
 
  private
 
- ! Use these routines in order : first call init, then call make_gemm_nonlop for each k point,
+ ! Use these routines in order: first call init, then call make_gemm_nonlop for each k point,
  ! then call gemm_nonlop to do the actual computation, and call destroy when done. See gstate and vtorho.
  public :: init_gemm_nonlop
  public :: make_gemm_nonlop
@@ -184,8 +180,6 @@ contains
 !!
 !! SOURCE
  subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k,ph3d_k)
-
-  use m_abi_linalg
 
   integer, intent(in) :: ikpt
   integer, intent(in) :: npw, lmnmax,ntypat
@@ -408,7 +402,7 @@ contains
   else
     ! opernla
     if(cplex == 2) then
-      call ZGEMM('C', 'N', nprojs, ndat*nspinor, npwin, cone, &
+      call abi_zgemm_2r('C', 'N', nprojs, ndat*nspinor, npwin, cone, &
 &                gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwin,&
 &                vectin, npwin, czero, projections, nprojs)
     else
@@ -502,9 +496,9 @@ contains
     if(paw_opt == 3 .or. paw_opt == 4) then
       ! Get svectout from s_projections
       if(cplex == 2) then
-        call ZGEMM('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-&                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, &
-&                  s_projections, nprojs, czero, svectout, npwout)
+        call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+&                      gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, &
+&                      s_projections, nprojs, czero, svectout, npwout)
       else
          ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
         call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &
@@ -522,9 +516,9 @@ contains
     if(paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4) then
       ! Get vectout from vnl_projections
       if(cplex_fac == 2) then
-        call ZGEMM('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-&                 gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, &
-&                 vnl_projections, nprojs, czero, vectout, npwout)
+        call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+&                      gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, &
+&                      vnl_projections, nprojs, czero, vectout, npwout)
       else
          ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
         call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &

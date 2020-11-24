@@ -48,6 +48,7 @@ module m_rmm_diis
  use m_getghc,        only : getghc
  use m_nonlop,        only : nonlop
  use m_cgtk,          only : cgtk_fixphase
+ use m_abi_linalg,    only : abi_zgemm_2r
  !use m_fock,         only : fock_set_ieigen, fock_set_getghc_call
 
  implicit none
@@ -1471,7 +1472,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
    if (cplex == 1) then
      call DGEMM("N", "N", 2*npwsp, nband, nband, one, ghc, 2*npwsp, evec_re, nband, zero, gwork, 2*npwsp)
    else
-     call ZGEMM("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gwork, npwsp)
+     call abi_zgemm_2r("N", "N", npwsp, nband, nband, cone, ghc, npwsp, evec, nband, czero, gwork, npwsp)
    end if
    call cg_zcopy(npwsp * nband, gwork, ghc)
 
@@ -1480,7 +1481,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
      if (cplex == 1) then
        call DGEMM("N", "N", 2*npwsp, nband, nband, one, gvnlxc, 2*npwsp, evec_re, nband, zero, gwork, 2*npwsp)
      else
-       call ZGEMM("N", "N", npwsp, nband, nband, cone, gvnlxc, npwsp, evec, nband, czero, gwork, npwsp)
+       call abi_zgemm_2r("N", "N", npwsp, nband, nband, cone, gvnlxc, npwsp, evec, nband, czero, gwork, npwsp)
      end if
      !call abi_xgemm('N','N', vectsize, nband, nband, cone, gvnlxc, vectsize, evec, nband, czero, gwork, vectsize, x_cplx=cplx)
      call cg_zcopy(npwsp * nband, gwork, gvnlxc)

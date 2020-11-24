@@ -109,11 +109,22 @@ module m_abi_linalg
  !----------------------------------------------------------------------
 
 !BLAS INTERFACE
+ !public :: abi_zgemm
  public :: abi_xgemm
+
  interface abi_xgemm
     module procedure abi_zgemm_2d
     module procedure abi_d2zgemm
- end interface
+ end interface abi_xgemm
+
+ public :: abi_zgemm
+ public :: abi_zgemm_2d
+ public :: abi_zgemm_2r
+ interface abi_zgemm  ! No x_cplx stuff here!
+    module procedure abi_zgemm_2d
+    module procedure abi_zgemm_2r
+ end interface abi_zgemm
+
  !----------------------------------------------------------------------
  public :: abi_xcopy
  interface abi_xcopy
@@ -126,7 +137,8 @@ module m_abi_linalg
     module procedure abi_dcopy_1d_0d
     module procedure abi_d2zcopy_2d  ! FIXME To be removed. One can pass the base adress of the array!
     module procedure abi_z2dcopy_2d  ! FIXME To be removed. One can pass the base adress of the array!
- end interface
+ end interface abi_xcopy
+
  !----------------------------------------------------------------------
  public :: abi_xtrsm
  interface abi_xtrsm
@@ -134,7 +146,7 @@ module m_abi_linalg
     module procedure abi_dtrsm
     module procedure abi_d2ztrsm
     !module procedure abi_d2ztrsm_3d
- end interface
+ end interface abi_xtrsm
 
  public :: abi_d2ztrsm_3d ! Used in bestwfk TODO to be Removed
  !----------------------------------------------------------------------
@@ -217,14 +229,15 @@ module m_abi_linalg
 #define DEV_LINALG_TIMING 1
 
 ! Support for [Z,C]GEMM3M routines
- logical,save,private :: XGEMM3M_ISON=.False.
+ !logical,save,private :: XGEMM3M_ISON = .False.
+ logical,save,private :: XGEMM3M_ISON = .True.
  ! True if [Z,C]GEMM3M can be used (can be set with linalg_allow_gemm3m)
 
  public :: linalg_allow_gemm3m
 
  ! Thresholds for the activation of [Z,C]GEMM3M
- integer,parameter,private :: ZGEMM3M_LIMIT=325000
- integer,parameter,private :: CGEMM3M_LIMIT=200000
+ integer,parameter,private :: ZGEMM3M_LIMIT = 325000
+ integer,parameter,private :: CGEMM3M_LIMIT = 200000
 
 ! Handy macros
 #ifdef HAVE_LINALG_GEMM3M
@@ -465,9 +478,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_s_work)) then
-   ABI_DEALLOCATE(eigen_s_work)
- end if
+ ABI_SFREE(eigen_s_work)
  ABI_ALLOCATE(eigen_s_work,(eigen_s_lwork))
 
 !Double precision WORK
@@ -498,9 +509,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_d_work)) then
-   ABI_DEALLOCATE(eigen_d_work)
- end if
+ ABI_SFREE(eigen_d_work)
  ABI_ALLOCATE(eigen_d_work,(eigen_d_lwork))
 
 !Single complex WORK
@@ -531,9 +540,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_c_work)) then
-   ABI_DEALLOCATE(eigen_c_work)
- end if
+ ABI_SFREE(eigen_c_work)
  ABI_ALLOCATE(eigen_c_work,(eigen_c_lwork))
 
 !Double complex WORK
@@ -564,9 +571,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_z_work)) then
-   ABI_DEALLOCATE(eigen_z_work)
- end if
+ ABI_SFREE(eigen_z_work)
  ABI_ALLOCATE(eigen_z_work,(eigen_z_lwork))
 
 !Single precision RWORK
@@ -581,9 +586,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_c_rwork)) then
-   ABI_DEALLOCATE(eigen_c_rwork)
- end if
+ ABI_SFREE(eigen_c_rwork)
  ABI_ALLOCATE(eigen_c_rwork,(eigen_c_lrwork))
 
 !Double precision RWORK
@@ -598,9 +601,7 @@ CONTAINS  !===========================================================
      end if
    end if
  end if
- if(allocated(eigen_z_rwork)) then
-   ABI_DEALLOCATE(eigen_z_rwork)
- end if
+ ABI_SFREE(eigen_z_rwork)
  ABI_ALLOCATE(eigen_z_rwork,(eigen_z_lrwork))
 
 !Integer IWORK
@@ -615,9 +616,7 @@ CONTAINS  !===========================================================
      if (eigen_z_maxsize>0) eigen_liwork = max(eigen_liwork,3+5*eigen_z_maxsize)
    end if
  end if
- if(allocated(eigen_iwork)) then
-   ABI_DEALLOCATE(eigen_iwork)
- end if
+ ABI_SFREE(eigen_iwork)
  ABI_ALLOCATE(eigen_iwork,(eigen_liwork))
 
  end subroutine abi_linalg_work_allocate
@@ -703,27 +702,13 @@ CONTAINS  !===========================================================
 #endif
 
 !Memory freeing
- if(allocated(eigen_s_work)) then
-   ABI_DEALLOCATE(eigen_s_work)
- end if
- if(allocated(eigen_d_work)) then
-   ABI_DEALLOCATE(eigen_d_work)
- end if
- if(allocated(eigen_c_work)) then
-   ABI_DEALLOCATE(eigen_c_work)
- end if
- if(allocated(eigen_z_work)) then
-   ABI_DEALLOCATE(eigen_z_work)
- end if
-  if(allocated(eigen_c_rwork)) then
-   ABI_DEALLOCATE(eigen_c_rwork)
- end if
- if(allocated(eigen_z_rwork)) then
-   ABI_DEALLOCATE(eigen_z_rwork)
- end if
- if(allocated(eigen_iwork)) then
-   ABI_DEALLOCATE(eigen_iwork)
- end if
+ ABI_SFREE(eigen_s_work)
+ ABI_SFREE(eigen_d_work)
+ ABI_SFREE(eigen_c_work)
+ ABI_SFREE(eigen_z_work)
+ ABI_SFREE(eigen_c_rwork)
+ ABI_SFREE(eigen_z_rwork)
+ ABI_SFREE(eigen_iwork)
 
  end subroutine abi_linalg_finalize
 !!***
@@ -747,6 +732,17 @@ subroutine linalg_allow_gemm3m(bool)
 ! *************************************************************************
 
  XGEMM3M_ISON = bool
+#ifdef HAVE_LINALG_GEMM3M
+ if (bool) then
+   MSG_COMMENT("Activating ZGEMM3M version instead of ZGEMM")
+ else
+   MSG_COMMENT("Using ZGEMM instead of ZGEMM3M")
+ end if
+#else
+ if (bool) then
+   MSG_WARNING("Cannot activate ZGEMM3M as HAVE_LINALG_GEMM3M is not defined!")
+ end if
+#endif
 
 end subroutine linalg_allow_gemm3m
 !!***
