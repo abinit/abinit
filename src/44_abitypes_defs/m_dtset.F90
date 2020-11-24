@@ -112,6 +112,7 @@ type, public :: dataset_type
  integer :: chneut = 1
  integer :: chkprim
  integer :: chkp_rdm = 0
+ integer :: chkp_rdm_lo = 0
  integer :: chksymbreak
  integer :: chksymtnons
  integer :: cineb_start
@@ -245,6 +246,7 @@ type, public :: dataset_type
  integer :: gwpara = 2
  integer :: gwrpacorr = 0
  integer :: gw1rdm = 0
+ integer :: gw1rdm_energies = 0
 
  integer :: gw_customnfreqsp
  integer :: gw_frqim_inzgrid = 0
@@ -1317,6 +1319,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chkexit            = dtin%chkexit
  dtout%chkprim            = dtin%chkprim
  dtout%chkp_rdm           = dtin%chkp_rdm
+ dtout%chkp_rdm_lo        = dtin%chkp_rdm_lo
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%chksymtnons        = dtin%chksymtnons
  dtout%cineb_start        = dtin%cineb_start
@@ -1490,6 +1493,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
  dtout%gw1rdm             = dtin%gw1rdm
+ dtout%gw1rdm_energies    = dtin%gw1rdm_energies
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
@@ -3079,7 +3083,7 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim chkp_rdm'
+ list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim chkp_rdm chkp_rdm_lo'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
@@ -3142,7 +3146,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp gw1rdm'
+ list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp gw1rdm gw1rdm_energies'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_invalid_freq'
  list_vars=trim(list_vars)//' gw_icutcoul'
