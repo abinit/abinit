@@ -4856,7 +4856,7 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
     Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
  end if
  ABI_FREE(qlwl)
- ! Now compute the "residual" Coulomb interactions. 
+ ! Now compute the "residual" Coulomb interactions 
  MSG_COMMENT("From now on, Vcp_ks%vc_sqrt_resid contains the amount of exact exchange present on the GS.")
  Vcp_ks%vc_sqrt_resid=sqrt(coef_hyb*Vcp_ks%vc_sqrt**2)
  Vcp_ks%i_sz_resid=coef_hyb*Vcp_ks%i_sz
