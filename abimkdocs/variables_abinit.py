@@ -21890,80 +21890,100 @@ This variable activates the Residual Minimization Method, Direct Inversion in th
 eigensolver to **accelerate** GS computations, structural relaxations and molecular-dynamics simulations.
 The algorithm is inspired to [[cite:Kresse1996]] although the ABINIT implementation is not
 completely equivalent to the original formulation.
-RMM-DIIS can be used with NC pseudos as well as PAW and it is fully compatible with the [[paral_kgb]] distribution.
+RMM-DIIS can be used both with NC and PAW pseudos and is fully compatible with the [[paral_kgb]] distribution.
 This variable has no effect when [[optdriver]] > 0.
 
-It is worth noting that RMM-DIIS is usually used in conjunction with another eigenvalue solver (e.g. CG or LOBPCG)
-that is employed to perform the initial SCF iterations.
-RMM-DIIS, indeed, is **not guaranteed** to converge to the ground state
-as the algorithm finds the eigenvector/eigenvalue pair that is closest to the input trial state.
+It is worth noting that RMM-DIIS is usually employed **in conjunction with another eigenvalue solver**
+that is used to perform the initial SCF iterations.
+RMM-DIIS, indeed, **is not guaranteed to converge to the ground state**
+as the algorithm will find the eigenvector/eigenvalue pair closest to the input trial state.
 The reliability of RMM-DIIS thus **strongly** depends on the initialisation of the SCF cycle
-and on the quality of the input trial wavefunctions that are supposed to be reasonably close to the exact solution.
+and on the quality of the input wavefunctions that are supposed to be reasonably close to the final solution.
 
 Both the CG and the LOBPCG solver can be used in conjunction with RMM-DIIS although
 it is strongly suggested to use LOBPCG with [[paral_kgb]] = 1 to take advantage of
 its better efficiency and improved parallel scalability.
-To activate RMM-DIIS with LOBPCG, it is sufficient to use:
+To activate RMM-DIIS with e.g. LOBPCG, it is sufficient to use:
 
 ```
 paral_kgb 1
 rmm_diis  1
 ```
 
-and select the value of [[npkpt]], [[npband]], [[npfft]], [[npspinor]] according to the system.
-Note also that [[use_gemm_nonlop]] = 1 with [[bandpp]] > 1 can lead to a significant speedup
-at the price of increased memory requirements.
+in the input file and then select the value of [[npkpt]], [[npband]], [[npfft]], [[npspinor]] according to the system.
 
-In the case of standard SCF calculations, Abinit activates the RMM-DIIS solver
-after 3 + [[rmm_diis]] SCF iterations.
-When performing structural relaxations, RMM-DIIS is activated after 1 + [[rmm_diis]] SCF iterations
-once the first GS calculation has been completed.
-This means that using [[rmm_diis]] 1 for a structural relaxation leads to:
+!!! tip
 
-    - 4 SCF iterations with the CG/LOBPCG eigensolver followed by RMM-DIIS for the first GS calculation.
-    - 2 SCF iterations with CG/LOBPCG followed by RMM-DIIS for the subsequent relaxation steps.
+    Using [[use_gemm_nonlop]] = 1 with [[bandpp]] > 1 can lead to a significant speedup
+    at the price of increased memory requirements.
 
-RMM-DIIS usually requires less wall-time per iteration when compared to other approaches since the
-explicit orthogonalization is avoided while optimizing the trial states.
-Only a single full-band orthogonalization is performed per SCF iteration before recomputing the new density.
-As a consequence, one RMM-DIIS iteration is usually faster (sometimes even by a factor two) than CG/LOBPCG,
+In the case of standard SCF calculations, Abinit activates the RMM-DIIS solver after 3 + [[rmm_diis]] SCF iterations.
+When performing structural relaxations, RMM-DIIS is activated after [[rmm_diis]] SCF iterations
+once the first GS calculation is completed.
+This means that using [[rmm_diis]] = 1 for a structural relaxation leads to:
+
+    - 4 SCF iterations with the CG/LOBPCG eigensolver followed by RMM-DIIS when are performing the **first GS calculation**.
+    - 1 SCF iterations with CG/LOBPCG followed by RMM-DIIS for all the subsequent relaxation steps.
+
+A negative value [[rmm_diis]] (e.g. -3) can be used to bypass the initial CG/LOBPCG iterations
+but this option should be used with extreme care and it is not recommended in general.
+
+RMM-DIIS usually requires less wall-time per iteration when compared to other approaches since
+there is no explicit orthogonalization while optimizing the trial states.
+Only a single full-band Cholesky orthogonalization is performed per SCF iteration before recomputing the new density.
+As a consequence, one RMM-DIIS iteration is usually faster (sometimes even by a factor > two) than one CG/LOBPCG iteration,
 especially in systems with relatively large [[mpw]].
-Obviously the time-to-solution depends on the overall number of iterations required to reach a given accuracy.
-This is the reason why providing RMM-DIIS with reasonable initial trial wavefunctions and potential
-is also crucial for performance.
+However, the additional steps of the algorithm (subspace rotation and Cholesky orthogonalization)
+present poor MPI-scalability hence this part will start to dominate the wall-time in systems with large [[nband]].
 
-In problematic systems, RMM-DIIS may find the same solution multiple times or miss some of the eigenvectors.
-This is usually leads to runtime error during the orthogonalization process or very slow convergence of the SCF cycle.
-In the worst case scenario,
+The algorithm can also be used for NSCF band structure calculations although one should not expect RMM-DIIS
+to provide **high-energy** states of the same quality as the one obtain with other eigenvalue solvers.
+Although RMM-DIIS can be used for computing band structures and electron DOS with [[iscf]] = -2, we do not recommend
+using this solver to produce WFK files with many empty states as required by many-body calculations.
 
-On the other hand, please keep in mind that RMM-DIIS is not guaranteed to find the correct ground-state.
-Moreover the algorithm may have problems to converge and more iterations may be needed to reach a given precision.
-Also, the present implementation is optimized for converging occupied states so we do not recommend
-RMM-DIIS for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
-Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
-then restart from the WFK file using e.g. the LOBPCG solver to reconverge the results with stricter tolerance.
+From the above discussion, it should be clear that RMM-DIIS is **less stable** than the other eigenvalue solvers
+and you should be aware (and accept) that RMM-DIIS calculations **may fail**.
+In the best case scenario, one clearly sees the problem as the SCF cycle does not convergence and/or
+the code aborts with a non-zero exit status returned by one of the LAPACK routines.
+In the worst case scenario, RMM-DIIS may seamlessly **converge to the wrong solution**.
+This is especially true if the first LOBPCG/CG iterations fail to provide a reasonably-good initial starting point.
+
+In problematic cases, you may want to increase the value of [[rmm_diis]] so that more SCF iterations are done
+with LOBPCG/CG before activating RMM-DIIS.
+RMM-DIIS is indeed very sensitive to density mixing and increasing [[rmm_diis]] is a possible solution if you don't want
+to play with the variables defining the mixing algorithm.
+
+As a general rule, we **strongly suggest** to include in the calculation more [[nband]] bands that what is strictly
+needed to accommodate all the valence electrons (let's say > 10% of the occupied bands).
+Increasing [[nband]], indeed, increases the number of vectors used
+for the Rayleigh-Ritz subspace rotation and this step is crucial for finding the most accurate variational approximation
+to the eigenvectors before starting the DIIS optimization.
+
+For a given precision, RMM-DIIS usually requires more iterations than the other eigensolvers.
+For performance reasons, one should avoid using tight tolerances, .
+Something of the order of [[tolvrs] = 1e-8 or [[toldfe]] = 1e-10 to stop the SCF cycle should be fine.
+Avoid using ([[tolwfr]]) (criterion on the residuals) as converge criterion for SCF cycles
+Use [[tolwfr]] only if you are using RMM-DIIS for NSCF band structure calculations (as this is the only converge criterion
+available for NSCF calculations).
+
+Last but not least, note that the default implementation is quite aggressive at the level of memory allocations.
+A less memory-intensive version of the algorithm can be activated via [[rmm_diis_savemem]] = 1.
 
 TIPS:
 
-For a given precision, RMM-DIIS usually requires more iterations than the other eigensolvers.
-For performance reasons, one should avoid using super accurate tolerances
-Use more permissive tolerances and then restart with tighter settings.
-Use [[tolwfr]] only if you are using RMM-DIIS for NSCF band structure calculations (as this is the only converge criterion
-available for NSCF calculations).
-Do not expect RMM-DIIS to provide **high-energy** states of the same quality as the one obtain with other eigenvalue solvers.
-So, although RMM-DIIS can be used for computing band structures and electron DOS, we do not recommend
-using this solver to produce WFK files with many empty states as required by many-body calculations.
 Mention [[bandpp]] and band locking.
+Use more permissive tolerances and then restart with tighter settings.
 
-If the RMM-DIIS has troubles to converge, you may try to:
+On the other hand, please keep in mind that **RMM-DIIS is not guaranteed to find the correct ground-state**.
+Moreover the algorithm may have problems to converge and more iterations may be needed to reach a given precision.
+Also, the present implementation is optimized for converging occupied states so we do not recommend
+RMM-DIIS for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
 
-* Increase [[nband]] to enlarge the subspace used for the subspace rotation (Rayleigh-Ritz).
-* Increase [[rmm_diis]] so that more initial iterations are done with LOBPCG/CG.
-* Play with the mixing algorithm.
-* Use pseudopotentials from the PseudoDojo so that ABINIT can initialize the density using the (pseudo) valence density
-  reported in the pseudopotential file.
-
-See also [[rmm_diis_savemem]].
+Obviously the time-to-solution depends on the overall number of SCF iterations required to reach convergence.
+This is the reason why providing RMM-DIIS with reasonable initial trial wavefunctions and potential
+is crucial both for performance and the reliability of the results.
+Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
+then restart from the WFK file using e.g. the LOBPCG solver to reconverge the results with stricter tolerance.
 """,
 ),
 
@@ -21977,12 +21997,12 @@ Variable(
     mnemonics="Save memory in the RMM-DIIS eigensolver.",
     added_in_version="9.3.0",
     text=r"""
-This variable allows one to save memory in the RMM-DIIS eigensolver ([[rmm_diis]] /= 0).
+This variable allows one to save memory in the RMM-DIIS eigensolver when [[rmm_diis]] /= 0.
 By default, the RMM-DIIS routine allocates two extra arrays to reduce the number of applications of the Hamiltonian.
 The size of these arrays depends on the number of plane-waves treated by each processor and [[nband]].
 The amount of memory scales with [[npband]] and [[npfft] yet this extra memory is not negligible and the code
 may go out of memory for large systems.
-In this case, one can use [[rmm_diis_savemem]] = 1 to avoid these extra allocations.
+In this case, one can use [[rmm_diis_savemem]] = 1 to activate a version of RMM-DIIS that avoids these extra allocations.
 """,
 ),
 

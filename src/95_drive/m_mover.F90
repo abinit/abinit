@@ -518,7 +518,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    ! In vtowfk we have the condition: istep > 3 + dtset%rmm_diis
    ! so setting rmm_diis = 1 gives:
    !    4 NSCF iterations for itime == 1
-   !    2 NSCF iterations for itime >= 2.
+   !    1 NSCF iterations for itime >= 2.
    if (scfcv_args%dtset%rmm_diis /= 0 .and. itime == 2) then
      scfcv_args%dtset%rmm_diis = scfcv_args%dtset%rmm_diis - 3
      if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1

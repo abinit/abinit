@@ -191,7 +191,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer :: comm_bsf, prev_accuracy_level, ncalls_with_prev_accuracy, signs, paw_opt, savemem
  logical :: first_call, use_fft_mixprec, has_fock
  real(dp),parameter :: rdummy = zero
- real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, lock_tolwfr, max_absimag
+ real(dp) :: accuracy_ene,  max_res_pocc, tol_occupied, lock_tolwfr !, max_absimag
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
  type(yamldoc_t) :: rmm_ydoc
@@ -384,6 +384,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
    ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
  end if
+ !write(msg, "(a,f8.1,a)") &
+ !  " Memory required: ", 2 * natom3**2 * (my_q2 - my_q1 + 1) * dp * b2Mb, " [Mb] <<< MEM"
+ !call wrtout(std_out, msg)
+
 
  ! We loop over nblocks, each block contains ndat states.
  !
@@ -821,11 +825,6 @@ logical function rmm_diis_exit_iter(diis, iter, ndat, niter_block, occ_bk, accur
  end do ! idat
 
  ! Depending on the accuracy_level either full block or a fraction of it must pass the test in order to exit.
- !nbocc = count(abs(occ_bk) < diis%tol_occupied)
- !nbocc_ok = count(checks /= 0 .and. abs(occ_bk) < diis%tol_occupied)
- !nbempty = ndat - nbocc
- !ans = nbocc_ok == nbocc
-
  nok = count(checks /= 0)
  if (diis%accuracy_level == 1) ans = nok >= 0.65_dp * ndat
  if (diis%accuracy_level == 2) ans = nok >= 0.75_dp * ndat

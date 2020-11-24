@@ -2442,7 +2442,7 @@ subroutine cgnc_cholesky(npwsp, nband, cg, istwfk, me_g0, comm_pw, use_gemm, uma
  integer :: ptr
  character(len=500) :: msg
 #endif
- real(dp) :: max_absimag
+ !real(dp) :: max_absimag
  logical :: my_usegemm
 !arrays
  real(dp) :: rcg0(nband)
@@ -2602,7 +2602,7 @@ subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
 !Local variables ------------------------------
 !scalars
  integer :: ierr, b1, b2
- real(dp) :: max_absimag
+ !real(dp) :: max_absimag
  !character(len=500) :: msg
 !arrays
  real(dp) :: rcg0(nband), rg0sc(nband)
