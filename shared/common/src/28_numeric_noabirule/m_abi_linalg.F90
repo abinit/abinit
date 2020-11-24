@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !!  management of Linear Algebra wrappers routines
-!! with support of different external library (scalapack, elpa, plasma, magma, ... )
+!!  with support of different external library (scalapack, elpa, plasma, magma, ... )
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2012-2020 ABINIT group (LNguyen,FDahm,MT)
@@ -226,7 +226,8 @@ module m_abi_linalg
  integer,parameter,private :: TIMAB_WFCOPY=584
  integer,parameter,private :: TIMAB_XTRSM=535
 
-#define DEV_LINALG_TIMING 1
+! Define this variable to activate timing routines
+!#define DEV_LINALG_TIMING 1
 
 ! Support for [Z,C]GEMM3M routines
  !logical,save,private :: XGEMM3M_ISON = .False.
@@ -723,26 +724,28 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine linalg_allow_gemm3m(bool)
+subroutine linalg_allow_gemm3m(bool, write_msg)
 
 !Arguments ------------------------------------
 !scalars
- logical,intent(in) :: bool
+ logical,intent(in) :: bool, write_msg
 
 ! *************************************************************************
 
  XGEMM3M_ISON = bool
+ if (write_msg) then
 #ifdef HAVE_LINALG_GEMM3M
- if (bool) then
-   MSG_COMMENT("Activating ZGEMM3M version instead of ZGEMM")
- else
-   MSG_COMMENT("Using ZGEMM instead of ZGEMM3M")
- end if
+   if (bool) then
+     MSG_COMMENT("Activating ZGEMM3M version instead of ZGEMM")
+   else
+     MSG_COMMENT("Using ZGEMM instead of ZGEMM3M")
+   end if
 #else
- if (bool) then
-   MSG_WARNING("Cannot activate ZGEMM3M as HAVE_LINALG_GEMM3M is not defined!")
- end if
+   if (bool) then
+     MSG_WARNING("Cannot activate ZGEMM3M as HAVE_LINALG_GEMM3M is not defined!")
+   end if
 #endif
+ endif
 
 end subroutine linalg_allow_gemm3m
 !!***

@@ -1194,7 +1194,7 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
 !local variables
  integer :: ii, ierr, idat, nprocs, option
  real(dp) :: dotr, doti !, cpu, wall, gflops
- integer :: requests(ndat)
+ !integer :: requests(ndat)
 ! *************************************************************************
 
  !if (timeit) call cwtime(cpu, wall, gflops, "start")
@@ -1215,15 +1215,15 @@ subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
      end if
    end do ! ii
 
-   if (nprocs > 1) then
-     !call xmpi_sum(diis%resmat(:,0:iter,iter,idat), comm, ierr)
-     call xmpi_isum_ip(diis%resmat(:,0:iter,iter,idat), comm, requests(idat), ierr)
-   endif
+   !if (nprocs > 1) then
+   !  call xmpi_sum(diis%resmat(:,0:iter,iter,idat), comm, ierr)
+   !  !call xmpi_isum_ip(diis%resmat(:,0:iter,iter,idat), comm, requests(idat), ierr)
+   !endif
    !if (diis%prtvol == -level) write(std_out,*)"iter, idat, resmat:", iter, idat, diis%resmat(:,0:iter,iter,idat)
  end do ! idat
 
- !if (nprocs > 1) call xmpi_sum(diis%resmat(:,0:iter,iter,1:ndat), comm, ierr)
- if (nprocs > 1) call xmpi_waitall(requests, ierr)
+ if (nprocs > 1) call xmpi_sum(diis%resmat(:,0:iter,iter,1:ndat), comm, ierr)
+ !if (nprocs > 1) call xmpi_waitall(requests, ierr)
  !if (timeit) call cwtime_report(" eval_mats", cpu, wall, gflops)
 
 end subroutine rmm_diis_eval_mats

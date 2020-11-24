@@ -520,7 +520,7 @@ contains
 &                      gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, &
 &                      vnl_projections, nprojs, czero, vectout, npwout)
       else
-         ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+        ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
         call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &
 &                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout, &
 &                  vnl_projections, nprojs, zero, temp_realvec, npwout)

@@ -144,7 +144,7 @@ type(args_t) function args_parser() result(args)
 
  if (command_argument_count() == 0) return
 
- iam_master = (xmpi_comm_rank(xmpi_world) == 0)
+ iam_master = xmpi_comm_rank(xmpi_world) == 0
 
  ! Store full command line for future reference.
  call get_command(args%cmdline)
@@ -213,7 +213,7 @@ type(args_t) function args_parser() result(args)
 
     ! Enable/disable [Z,C]GEMM3
     else if (begins_with(arg, "--xgemm3m")) then
-      call linalg_allow_gemm3m(parse_yesno(arg, "--xgemm3m"))
+      call linalg_allow_gemm3m(parse_yesno(arg, "--xgemm3m"), write_msg=iam_master)
 
     ! Enable/disable PLASMA
     else if (begins_with(arg, "--plasma")) then
