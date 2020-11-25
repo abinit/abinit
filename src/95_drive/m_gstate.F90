@@ -1018,22 +1018,23 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
    ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
    ncpgr=0
-   if (dtset%usefock==1) then
-     if (dtset%optforces == 1) then
-       ncpgr = 3
-     end if
+   if (dtset%optforces == 1) then
+     ncpgr = 3
+   end if
 !       if (dtset%optstress /= 0) then
 !         ncpgr = 6 ; ctocprj_choice = 3
 !       end if
-   end if
    ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
    call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
-
-   choice      =1 ! no derivative
-   idir        =0 ! so no direction
-   iatom       =0 ! and no iatom
-   iorder_cprj =0 ! ordered by atom types
+   if (dtset%optforces/=1) then
+     choice=1 ! no derivative
+   else
+     choice=2 ! forces
+   end if
+   idir        = 0 ! all directions
+   iatom       = 0 ! all atoms
+   iorder_cprj = 0 ! ordered by atom types
    ncprj       = dtset%natom
 !  Compute structure factor phases and large sphere cut-off (gsqcut):
    ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
@@ -1043,7 +1044,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 & dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
    ABI_DEALLOCATE(ph1d)
-
  end if
 
 

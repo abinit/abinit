@@ -1118,7 +1118,7 @@ contains
 
 !Local variables-------------------------------
 !scalars
- integer :: iband,cplex
+ integer :: iband,cplex,ncpgr
 !arrays
  real(dp) :: tsec(2),z_tmp(2,nband)!,z_tmp2(2)
  type(pawcprj_type),pointer :: cprj_iband(:,:)!,cprj_jband(:,:)
@@ -1134,8 +1134,9 @@ contains
 !Some other dims
  cplex=2;if (istwf_k>1) cplex=1
 
+ ncpgr=cprj_in(1,1)%ncpgr
  ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,nband))
- call pawcprj_alloc(cprj_tmp,0,dimcprj)
+ call pawcprj_alloc(cprj_tmp,ncpgr,dimcprj)
 ! call pawcprj_set_zero(cprj_tmp)
 
  do iband=1,nband

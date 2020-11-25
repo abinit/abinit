@@ -36,7 +36,7 @@ module m_cgwf_paw
  use m_numeric_tools, only : rhophi
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_copy, &
                              pawcprj_get, pawcprj_mpi_allgather, pawcprj_free, pawcprj_symkn,&
-                             pawcprj_axpby,pawcprj_zaxpby
+                             pawcprj_axpby,pawcprj_zaxpby,pawcprj_projbd
  use m_hamiltonian,   only : gs_hamiltonian_type
  use m_getchc,        only : getchc,getcsc
  use m_getghc,        only : getghc
@@ -126,12 +126,12 @@ subroutine cgwf_paw(cg,chkexit,cprj_cwavef_bands,cpus,eig,&
 &                filnam_ds1,gs_hamk,icg,inonsc,&
 &                mcg,mpi_enreg,&
 &                nband,nbdblock,nline,npw,&
-&                nspinor,ortalg,prtvol,quit,resid,subham,&
+&                nspinor,optforces,ortalg,prtvol,quit,resid,subham,&
 &                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
  integer,intent(in) :: chkexit,icg,inonsc
  integer,intent(in) :: mcg,nband,nbdblock,nline
- integer,intent(in) :: npw,nspinor,ortalg,prtvol
+ integer,intent(in) :: npw,nspinor,optforces,ortalg,prtvol
  integer,intent(in) :: wfoptalg
  integer,intent(in) :: quit
  real(dp),intent(in) :: cpus,tolrde,tolwfr
@@ -148,7 +148,7 @@ subroutine cgwf_paw(cg,chkexit,cprj_cwavef_bands,cpus,eig,&
 integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
 integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  integer,save :: nskip=0
- integer :: counter,cpopt
+ integer :: choice,counter,cpopt
  integer :: i1,i2,i3,iband,ibandmin,ibandmax,isubh,isubh0,jband,me_g0
  integer :: ibdblock,iblock,igs
  integer :: iline,ipw,ispinor,istwf_k
@@ -237,7 +237,13 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
  ABI_ALLOCATE(denpot_dum, (0,0,0))
  ABI_ALLOCATE(fofgout_dum, (0,0))
 
- ncpgr = 0 ! no need of gradients here
+ ncpgr  = 0 ! no need of gradients here...
+ choice = 1
+ if (optforces==1) then
+   choice = 2
+   ncpgr  = 3 ! ...unless forces are computed at every step
+ end if
+
 !Dimensioning and allocation of <p_i|Cnk>
 ! ABI_ALLOCATE(dimlmn,(natom))
 ! dimlmn=0  ! Type-sorted cprj
@@ -323,6 +329,9 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 !&             gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 !&             natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
 !     cwavef_r=cwavef_r*xnorm
+     !LTEST
+     !call cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,'after xnorm',mpi_enreg)
+     !LTEST
 
      ! Compute wavefunction in real space
      call fourwf(0,denpot_dum,cwavef,fofgout_dum,cwavef_r,gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,&
@@ -417,7 +426,7 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          ! Project the steepest descent direction:
          ! direc(2,npw)=<G|H|Cnk> - \sum_{(i<=n)} <G|H|Cik> , normalized.
          if(ortalg>=0)then
-           call getcprj(1,0,direc,cprj_direc,&
+           call getcprj(choice,0,direc,cprj_direc,&
 &           gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &           gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
 &           gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
@@ -455,13 +464,16 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
 
          ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
          ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
-         call getcprj(1,0,direc,cprj_direc,&
+         call getcprj(choice,0,direc,cprj_direc,&
 &         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &         gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,natom,gs_hamk%nattyp,&
 &         gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &         gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &         gs_hamk,mpi_enreg,nband,prtvol,tim_getcsc_band)
+         !LTEST
+         !call cprj_check_oneband(direc,cprj_direc,gs_hamk,'direc',mpi_enreg)
+         !LTEST
          if (iline==1) then
            scprod_csc(2*iband-1:2*iband) = scprod_csc(2*iband-1:2*iband) / xnorm
          end if
@@ -484,18 +496,25 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          !LTEST
          ! Apply projbd to cprj_direc
          z_tmp = (/one,zero/)
-         scprod_csc = -scprod_csc
-         call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef_bands,z_tmp,scprod_csc,&
-&                 gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-&                 natom,gs_hamk%nattyp,nband,nspinor,gs_hamk%ntypat)
+         !scprod_csc = -scprod_csc
+         scprod=-scprod
+         call pawcprj_projbd(scprod,cprj_cwavef_bands,cprj_direc)
+         !LTEST
+!         call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef_bands,z_tmp,scprod_csc,&
+!&                 gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!&                 natom,gs_hamk%nattyp,nband,nspinor,gs_hamk%ntypat)
+         !LTEST
          if (iline==1) then
-           z_tmp2 = scprod_csc(2*iband-1:2*iband)*(1.0_dp/xnorm-1.0_dp)
+           z_tmp2 = scprod(:,iband)*(1.0_dp/xnorm-1.0_dp)
            ! cprj = z_tmp2*cprjx + z_tmp*cprj
            call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
 !           call cprj_axpby(cprj_direc,cprj_direc,cprj_cwavef,z_tmp,z_tmp2,&
 !&                   gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
 !&                   natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
          end if
+         !LTEST
+         !call cprj_check_oneband(direc,cprj_direc,gs_hamk,'direc (after projbd)',mpi_enreg)
+         !LTEST
          !LTEST
 !         call getcprj(1,0,direc,cprj_conjgr,&
 !&         gs_hamk%ffnl_k,0,gs_hamk%indlmn,istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
@@ -593,11 +612,15 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
          !write(std_out,'(a,es21.10e3)') 'conjgr',sum(abs(conjgr))
          !write(std_out,'(a,es21.10e3)') 'direc ',sum(abs(direc))
          !LTEST
+         call pawcprj_copy(cprj_conjgr,cprj_direc)
          z_tmp   = (/one,zero/)
          z_tmp2  = (/-dotr,-doti/)
-         call cprj_axpby(cprj_direc,cprj_conjgr,cprj_cwavef,z_tmp,z_tmp2,&
-&         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
-&         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+         call pawcprj_zaxpby(z_tmp2,z_tmp,cprj_cwavef,cprj_direc)
+         !LTEST
+!         call pawcprj_zaxpby(cprj_direc,cprj_conjgr,cprj_cwavef,z_tmp,z_tmp2,&
+!&         gs_hamk%indlmn,istwf_k,gs_hamk%lmnmax,mpi_enreg,&
+!&         natom,gs_hamk%nattyp,1,nspinor,gs_hamk%ntypat)
+         !LTEST
 
          ! ======================================================================
          ! ===== COMPUTE CONTRIBUTIONS TO 1ST AND 2ND DERIVATIVES OF ENERGY =====
@@ -684,6 +707,9 @@ integer,parameter :: tim_getcsc=3,tim_getcsc_band=4,tim_fourwf=40
            cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
          end do
          call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
+         !LTEST
+         !call cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,'after update',mpi_enreg)
+         !LTEST
 !         z_tmp  = (/costh,zero/)
 !         z_tmp2 = (/sintn,zero/)
 !         call cprj_axpby(cprj_cwavef,cprj_cwavef,cprj_direc,z_tmp,z_tmp2,&
@@ -959,24 +985,32 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
  character(len=*),intent(in) :: message
 
 !Local variables-------------------------------
- integer :: iband,wfsize
+ integer :: choice,iband,ncpgr,wfsize
  real(dp),pointer :: cwavef(:,:),cwavef_bands(:,:)
  integer :: iatom
  real(dp) :: re
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
 
+ write(std_out,'(a)') ''
+ write(std_out,'(2a)') 'cprj_check : ',message
+
+ choice = 1
+ ncpgr  = 0
+ if (cprj_cwavef_bands(1,1)%ncpgr==3) then
+   choice = 2
+   ncpgr  = 3
+ end if
+ write(std_out,'(a,i3)') 'ncpgr : ',ncpgr
+
  ABI_DATATYPE_ALLOCATE(cprj_tmp,(gs_hamk%natom,1))
- call pawcprj_alloc(cprj_tmp,0,gs_hamk%dimcprj)
+ call pawcprj_alloc(cprj_tmp,ncpgr,gs_hamk%dimcprj)
 
  wfsize=gs_hamk%npw_k*gs_hamk%nspinor
  cwavef_bands => cg(:,1+icg:nband*wfsize+icg)
 
- write(std_out,'(a)') ''
- write(std_out,'(2a)') 'cprj_check : ',message
-
  do iband=1,nband
    cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
-   call getcprj(1,0,cwavef,cprj_tmp,&
+   call getcprj(choice,0,cwavef,cprj_tmp,&
 &    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
 &    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
@@ -990,6 +1024,16 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
        flush(std_out)
        MSG_ERROR('dif too large')
      end if
+     if (ncpgr>0) then
+       re = sum(abs(cprj_tmp(iatom,1)%dcp-cprj_cwavef_bands(iatom,iband)%dcp))
+       if (re>tol6) then
+         write(std_out,'(a)') 'cprj_check:'
+         write(std_out,'(a,2i5,es11.3e3)') 'iband,iatom:',iband,iatom,re
+         write(std_out,'(a)') ''
+         flush(std_out)
+         MSG_ERROR('dif too large (dcp)')
+       end if
+     end if
    end do
  end do
 
@@ -1000,6 +1044,72 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
  ABI_DATATYPE_DEALLOCATE(cprj_tmp)
 
 end subroutine cprj_check
+
+subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
+
+!Arguments ------------------------------------
+!arrays
+ type(pawcprj_type),intent(in),target :: cprj_cwavef(:,:)
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ type(MPI_type),intent(in) :: mpi_enreg
+ real(dp),intent(inout) :: cwavef(:,:)
+ character(len=*),intent(in) :: message
+
+!Local variables-------------------------------
+ integer :: choice,ncpgr,wfsize
+ integer :: iatom
+ real(dp) :: re
+ type(pawcprj_type),allocatable :: cprj_tmp(:,:)
+
+ write(std_out,'(a)') ''
+ write(std_out,'(2a)') 'cprj_check (oneband): ',message
+
+ choice = 1
+ ncpgr  = 0
+ if (cprj_cwavef(1,1)%ncpgr==3) then
+   choice = 2
+   ncpgr  = 3
+ end if
+ write(std_out,'(a,i3)') 'ncpgr : ',ncpgr
+
+ ABI_DATATYPE_ALLOCATE(cprj_tmp,(gs_hamk%natom,1))
+ call pawcprj_alloc(cprj_tmp,ncpgr,gs_hamk%dimcprj)
+
+ wfsize=gs_hamk%npw_k*gs_hamk%nspinor
+
+ call getcprj(choice,0,cwavef,cprj_tmp,&
+&  gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
+&  gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+&  gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
+&  gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+ do iatom=1,gs_hamk%natom
+   re = sum(abs(cprj_tmp(iatom,1)%cp-cprj_cwavef(iatom,1)%cp))
+   if (re>tol6) then
+     write(std_out,'(a)') 'cprj_check (oneband):'
+     write(std_out,'(a,i5,es11.3e3)') 'iatom:',iatom,re
+     write(std_out,'(a)') ''
+     flush(std_out)
+     MSG_ERROR('dif too large')
+   end if
+   if (ncpgr>0) then
+     re = sum(abs(cprj_tmp(iatom,1)%dcp-cprj_cwavef(iatom,1)%dcp))
+     if (re>tol6) then
+       write(std_out,'(a)') 'cprj_check (oneband):'
+       write(std_out,'(a,i5,es11.3e3)') 'iatom:',iatom,re
+       write(std_out,'(a)') ''
+       flush(std_out)
+       MSG_ERROR('dif too large (dcp)')
+     end if
+   end if
+ end do
+
+ write(std_out,'(a)') 'cprj_check : ok'
+ flush(std_out)
+
+ call pawcprj_free(cprj_tmp)
+ ABI_DATATYPE_DEALLOCATE(cprj_tmp)
+
+end subroutine cprj_check_oneband
 !!***
 
 end module m_cgwf_paw
