@@ -45,6 +45,7 @@ module m_gemm_nonlop
 
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm, only : opernlc_ylm
+ use m_pawcprj, only : pawcprj_type
 
  implicit none
 
@@ -179,6 +180,7 @@ contains
 !!      dgemm,opernlc_ylm,xmpi_sum,zgemm
 !!
 !! SOURCE
+
  subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k,ph3d_k)
 
   integer, intent(in) :: ikpt
@@ -192,9 +194,7 @@ contains
 
   integer :: nprojs
 
-  real(dp) :: atom_projs(2, npw, lmnmax)
-  real(dp) :: temp(npw)
-
+  real(dp),allocatable :: atom_projs(:,:,:), temp(:)
   integer :: itypat, ilmn, nlmn, ia, iaph3d, shift
   integer :: il, ipw
   logical :: parity
@@ -202,6 +202,9 @@ contains
 ! *************************************************************************
 
   iaph3d = 1
+
+  ABI_MALLOC(atom_projs, (2, npw, lmnmax))
+  ABI_MALLOC(temp, (npw))
 
   if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
     ! We have been here before, cleanup before remaking
@@ -241,7 +244,7 @@ contains
 
       !! build atom_projs, from opernlb
       !! P = 4pi/sqrt(ucvol)* conj(diag(ph3d)) * ffnl * diag(parity), with parity = (-i)^l
-      atom_projs(:,:,:) = 0
+      atom_projs(:,:,:) = zero
 
       ! start from 4pi/sqrt(ucvol)*ffnl
       ! atom_projs(1, :, 1:nlmn) = four_pi/sqrt(ham%ucvol) * ham%ffnl_k(:, 1, 1:nlmn)
@@ -286,6 +289,9 @@ contains
     end do
   end do
 
+  ABI_FREE(atom_projs)
+  ABI_FREE(temp)
+
  end subroutine make_gemm_nonlop
 !!***
 
@@ -294,9 +300,7 @@ contains
 !! gemm_nonlop
 !!
 !! FUNCTION
-!! Replacement of nonlop
-!!
-!! same prototype as nonlop
+!! Replacement of nonlop. same prototype as nonlop although not all options are implemented.
 !!
 !! INPUTS
 !!
@@ -315,9 +319,6 @@ contains
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
 &                 tim_nonlop,ucvol,useylm,vectin,vectout,&
 &                 use_gpu_cuda)
-
-  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
-  use m_time,    only : cwtime
 
   !Arguments ------------------------------------
   !scalars
@@ -427,7 +428,7 @@ contains
 &                gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwin, &
 &                temp_realvec, npwin, one , projections, nprojs)
       projections = projections * 2
-       ABI_DEALLOCATE(temp_realvec)
+      ABI_DEALLOCATE(temp_realvec)
     end if
     call xmpi_sum(projections,mpi_enreg%comm_fft,ierr)
 
@@ -500,7 +501,7 @@ contains
 &                      gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, &
 &                      s_projections, nprojs, czero, svectout, npwout)
       else
-         ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+        ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
         call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &
 &                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout, &
 &                  s_projections, nprojs, zero, temp_realvec, npwout)
@@ -509,7 +510,7 @@ contains
 &                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout,&
 &                  s_projections, nprojs, zero, temp_realvec, npwout)
         svectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-         ABI_DEALLOCATE(temp_realvec)
+        ABI_DEALLOCATE(temp_realvec)
       end if
       if(choice /= 7) svectout = svectout + vectin ! TODO understand this
     end if
@@ -529,7 +530,7 @@ contains
 &                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout, &
 &                  vnl_projections, nprojs, zero, temp_realvec, npwout)
         vectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-         ABI_DEALLOCATE(temp_realvec)
+        ABI_DEALLOCATE(temp_realvec)
       end if
     end if
   end if
@@ -539,5 +540,6 @@ contains
   ABI_DEALLOCATE(vnl_projections)
  end subroutine gemm_nonlop
 !***
+
 end module m_gemm_nonlop
 !!***

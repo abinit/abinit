@@ -4358,7 +4358,7 @@ end subroutine overlap_g
 !!  mgsc=second dimension of the gsc array
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  npw_k=number of plane waves at this k point
-!!  nspinor=number of spinorial components of the wavefunctions (on current proc)
+!!  my_nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  me_g0=1 if this processor has G=0, 0 otherwise.
@@ -4381,7 +4381,7 @@ end subroutine overlap_g
 !!
 !! SOURCE
 
-subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k, npw_k, nspinor, paral_kgb, &
+subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k, npw_k, my_nspinor, paral_kgb, &
                     subham, subovl, use_subovl, usepaw, me_g0)
 
  use m_linalg_interfaces
@@ -4389,7 +4389,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
 !Arguments ------------------------------------
  integer,intent(in) :: icg,igsc,istwf_k,mcg,mgsc,nband_k,npw_k,me_g0
- integer,intent(in) :: nspinor,paral_kgb,use_subovl,usepaw
+ integer,intent(in) :: my_nspinor,paral_kgb,use_subovl,usepaw
  real(dp),intent(inout) :: subham(nband_k*(nband_k+1)),subovl(nband_k*(nband_k+1)*use_subovl)
  real(dp),intent(out) :: eig_k(nband_k),evec(2*nband_k,nband_k)
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc)
@@ -4399,8 +4399,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
  !real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  ! real(dp) :: tsec(2)
- real(dp),allocatable :: evec_tmp(:,:),subovl_tmp(:),subham_tmp(:)
- real(dp),allocatable :: work(:,:)
+ real(dp),allocatable :: evec_re(:,:),subovl_re(:),subham_tmp(:), work(:,:)
  real(dp),allocatable :: blockvectora(:,:),blockvectorb(:,:),blockvectorc(:,:)
 
 ! *********************************************************************
@@ -4413,7 +4412,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
  ! MG TODO: This should not be bound to paral_kgb
  use_slk = paral_kgb
 
- rvectsize=npw_k*nspinor
+ rvectsize=npw_k*my_nspinor
  vectsize=2*rvectsize;if (me_g0==1) vectsize=vectsize-1
  !call cwtime(cpu, wall, gflops, "start")
 
@@ -4424,22 +4423,21 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
  !call cwtime_report(" hermit", cpu, wall, gflops)
 
  ! Diagonalize the Hamitonian matrix
- if(istwf_k==2) then
-   ABI_MALLOC(evec_tmp,(nband_k,nband_k))
-   ABI_MALLOC(subham_tmp,(nband_k*(nband_k+1)/2))
+ if (istwf_k==2) then
+   ABI_CALLOC(evec_re, (nband_k,nband_k))
+   ABI_MALLOC(subham_tmp, (nband_k*(nband_k+1)/2))
    subham_tmp=subham(1:nband_k*(nband_k+1):2)
-   evec_tmp=zero
    if (use_subovl==1) then
-     ABI_MALLOC(subovl_tmp,(nband_k*(nband_k+1)/2))
-     subovl_tmp=subovl(1:nband_k*(nband_k+1):2)
+     ABI_MALLOC(subovl_re, (nband_k*(nband_k+1)/2))
+     subovl_re=subovl(1:nband_k*(nband_k+1):2)
      ! TODO: Not sure this one has been fully tested
-     call abi_xhpgv(1,'V','U',nband_k,subham_tmp,subovl_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
-     ABI_FREE(subovl_tmp)
+     call abi_xhpgv(1,'V','U',nband_k,subham_tmp,subovl_re,eig_k,evec_re,nband_k,istwf_k=istwf_k,use_slk=use_slk)
+     ABI_FREE(subovl_re)
    else
-     call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_re,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
-   evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
-   ABI_FREE(evec_tmp)
+   evec(:,:)=zero; evec(1:2*nband_k:2,:) = evec_re
+   ABI_FREE(evec_re)
    ABI_FREE(subham_tmp)
  else
    if (use_subovl==1) then
@@ -4481,9 +4479,9 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
  !=====================================================
  if (istwf_k==2) then
 
-   ABI_MALLOC_OR_DIE(blockvectora,(vectsize,nband_k), ierr)
-   ABI_MALLOC_OR_DIE(blockvectorb,(nband_k,nband_k), ierr)
-   ABI_MALLOC_OR_DIE(blockvectorc,(vectsize,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectora, (vectsize, nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorb, (nband_k, nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorc, (vectsize, nband_k), ierr)
 
    do iband=1,nband_k
      if (me_g0 == 1) then
@@ -4497,6 +4495,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
      call abi_xcopy(nband_k,evec(2*iband-1,1),2*nband_k,blockvectorb(iband,1),nband_k)
    end do
 
+   !MG TODO: This one is a DGEMM.
    call abi_xgemm('N','N',vectsize,nband_k,nband_k,&
      cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
 
@@ -4547,25 +4546,25 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
    ABI_FREE(blockvectorc)
 
  else
-
-   ABI_MALLOC_OR_DIE(work,(2,npw_k*nspinor*nband_k), ierr)
+   ! istwf_k /= 2
+   ABI_MALLOC_OR_DIE(work, (2,npw_k*my_nspinor*nband_k), ierr)
 
    ! MG: Do not remove this initialization.
    ! telast_06 stops in fxphase on inca_debug and little_buda (very very strange, due to atlas?)
    work=zero
 
-   call abi_xgemm('N','N',npw_k*nspinor,nband_k,nband_k,cone, &
-     cg(:,icg+1:npw_k*nspinor*nband_k+icg),npw_k*nspinor, &
-     evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
+   call abi_xgemm('N','N',npw_k*my_nspinor,nband_k,nband_k,cone, &
+     cg(:,icg+1:npw_k*my_nspinor*nband_k+icg),npw_k*my_nspinor, &
+     evec,nband_k,czero,work,npw_k*my_nspinor,x_cplx=2)
 
-   call abi_xcopy(npw_k*nspinor*nband_k,work(1,1),1,cg(1,1+icg),1,x_cplx=2)
+   call abi_xcopy(npw_k*my_nspinor*nband_k,work(1,1),1,cg(1,1+icg),1,x_cplx=2)
 
    if (usepaw==1) then
      ! If paw, must also rotate S.C(G,n):
-     call abi_xgemm('N','N',npw_k*nspinor,nband_k,nband_k,cone, &
-       gsc(:,1+igsc:npw_k*nspinor*nband_k+igsc),npw_k*nspinor, &
-       evec,nband_k,czero,work,npw_k*nspinor,x_cplx=2)
-     call abi_xcopy(npw_k*nspinor*nband_k, work(1,1),1,gsc(1,1+igsc),1,x_cplx=2)
+     call abi_xgemm('N','N',npw_k*my_nspinor,nband_k,nband_k,cone, &
+       gsc(:,1+igsc:npw_k*my_nspinor*nband_k+igsc),npw_k*my_nspinor, &
+       evec,nband_k,czero,work,npw_k*my_nspinor,x_cplx=2)
+     call abi_xcopy(npw_k*my_nspinor*nband_k, work(1,1),1,gsc(1,1+igsc),1,x_cplx=2)
    end if
 
    ABI_FREE(work)
@@ -4576,12 +4575,12 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
    function cgindex_subd(iband)
      integer :: iband,cgindex_subd
-     cgindex_subd=npw_k*nspinor*(iband-1)+icg+1
+     cgindex_subd=npw_k*my_nspinor*(iband-1)+icg+1
    end function cgindex_subd
 
    function gscindex_subd(iband)
      integer :: iband,gscindex_subd
-     gscindex_subd=npw_k*nspinor*(iband-1)+igsc+1
+     gscindex_subd=npw_k*my_nspinor*(iband-1)+igsc+1
  end function gscindex_subd
 
 end subroutine subdiago

@@ -4,15 +4,16 @@
 !!  abi_xgemm
 !!
 !! FUNCTION
-!!  abi_xgemm is the generic function that solve :
-!! *     C := alpha*op( A )*op( B ) + beta*C,
-!! *
-!! *  where  op( X ) is one of
-!! *
-!! *     op( X ) = X   or   op( X ) = X**T,
-!! *
-!! *  alpha and beta are scalars, and A, B and C are matrices, with op( A )
-!! *  an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
+!!  abi_xgemm is the generic function that solves:
+!!
+!!    C := alpha*op( A )*op( B ) + beta*C,
+!!
+!!  where  op( X ) is one of
+!!
+!!    op( X ) = X   or   op( X ) = X**T,
+!!
+!! alpha and beta are scalars, and A, B and C are matrices, with op( A )
+!! an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2001-2020 ABINIT group (LNguyen,FDahm (CS))
@@ -33,7 +34,6 @@
 !! FUNCTION
 !!
 !! INPUTS
-!!
 !!
 !! PARENTS
 !!
@@ -115,7 +115,7 @@ end subroutine abi_zgemm_2d
  complex(dpc),intent(in) :: BETA
  real(dp),target,intent(in) :: A(*)
  real(dp),target,intent(in) :: B(*)
- real(dp),target,intent(in) :: C(*)
+ real(dp),target,intent(inout) :: C(*)
 
  integer :: info
 #ifdef DEV_LINALG_TIMING

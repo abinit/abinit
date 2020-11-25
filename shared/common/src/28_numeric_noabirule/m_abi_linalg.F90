@@ -40,6 +40,14 @@ module m_abi_linalg
  use m_gpu_toolbox
 #endif
 
+#if defined HAVE_MPI1
+ include 'mpif.h'
+#endif
+
+#if defined HAVE_MPI2
+ use mpi
+#endif
+
  use m_time,  only : timab
 
  implicit none
@@ -100,7 +108,6 @@ module m_abi_linalg
 
 !----------------------------------------------------------------------
 !!***
-
 
  !Procedures ------------------------------------
  public :: abi_linalg_init          ! Initialization routine
@@ -230,8 +237,8 @@ module m_abi_linalg
 !#define DEV_LINALG_TIMING 1
 
 ! Support for [Z,C]GEMM3M routines
- !logical,save,private :: XGEMM3M_ISON = .False.
- logical,save,private :: XGEMM3M_ISON = .True.
+ logical,save,private :: XGEMM3M_ISON = .False.
+ !logical,save,private :: XGEMM3M_ISON = .True.
  ! True if [Z,C]GEMM3M can be used (can be set with linalg_allow_gemm3m)
 
  public :: linalg_allow_gemm3m
@@ -280,14 +287,6 @@ CONTAINS  !===========================================================
 
  subroutine abi_linalg_init(max_eigen_pb_size,optdriver,wfoptalg,paral_kgb,&
 &                           use_gpu_cuda,use_slk,np_slk,comm_scalapack)
-
-#if defined HAVE_MPI2
-  use mpi
-#endif
-
-#if defined HAVE_MPI1
- include 'mpif.h'
-#endif
 
 !Arguments ------------------------------------
  integer,intent(in) :: max_eigen_pb_size
@@ -778,7 +777,7 @@ end subroutine linalg_allow_gemm3m
 !!
 !! SOURCE
 
-pure logical function use_zgemm3m(m,n,k)
+pure logical function use_zgemm3m(m, n, k)
 
 !Arguments ------------------------------------
 !scalars
@@ -788,6 +787,7 @@ pure logical function use_zgemm3m(m,n,k)
 
  use_zgemm3m = .False.
  if (XGEMM3M_ISON) use_zgemm3m = ((m * n * k) > ZGEMM3M_LIMIT)
+ !if (XGEMM3M_ISON) use_zgemm3m = .True.
 
 #ifndef HAVE_LINALG_GEMM3M
  use_zgemm3m = .False.
@@ -812,7 +812,7 @@ end function use_zgemm3m
 !!
 !! SOURCE
 
-pure logical function use_cgemm3m(m,n,k)
+pure logical function use_cgemm3m(m, n, k)
 
 !Arguments ------------------------------------
 !scalars

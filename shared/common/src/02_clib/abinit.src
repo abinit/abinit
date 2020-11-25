@@ -21,6 +21,8 @@ sources = [
  "calling_levmar.c",
  "cclock.c",
  "etime.c",
+ "sockets.c",
+ "fsockets.f90",
  #"filelock.c",
  "fsi_posix.c",
  "gnu_tools.c",

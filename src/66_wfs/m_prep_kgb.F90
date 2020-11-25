@@ -3,7 +3,8 @@
 !!  m_prep_kgb
 !!
 !! FUNCTION
-!!
+!!  This module provides wrappers that used to apply the full Hamiltonian or just the Vnl part
+!!  or to perform the FFT of the wavefunctions when the orbitals are distributed in linalg mode (paral_kgb = 1).
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2020 ABINIT group (FBottin,MT,GZ,MD,FDahm)
