@@ -207,7 +207,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij !,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount
- integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus,pwx,ibz,iwrite,iwrite2,iread,ireadRE,istat
+ integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus,pwx,ibz,iwrite,iwrite2,istat
  integer :: isp,is_idx,istep,itypat,itypatcor,izero,jj,first_band,last_band
  integer :: ks_iv,lcor,lmn2_size_max,mband,my_nband
  integer :: mgfftf,mod10,moved_atm_inside,moved_rhor,n3xccc !,mgfft
@@ -219,7 +219,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,gw1rdm_energies,x1rdm,chkp_rdm,iread_chkp
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,gw1rdm_energies,x1rdm,chkp_rdm
  integer :: chkp_rdm_li,chkp_rdm_lo
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
@@ -264,7 +264,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
- real(dp),allocatable :: occ_eigv_tmp(:,:) 
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -345,7 +344,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  chkp_rdm_li=Dtset%chkp_rdm_li             ! Checkpoint last-label IN. The upper limit of max[0,chkp_rdm_li]
  chkp_rdm_lo=Dtset%chkp_rdm_lo             ! Checkpoint label OUT
  wfknocheck=.true.                         ! Used for printing WFK file subroutine
- iread_chkp=0
 
  mod10 =MOD(Dtset%gwcalctyp,10)
 
@@ -2412,7 +2410,7 @@ endif
 
  else
    ABI_MALLOC(sigma_todo,(Sigp%nkptgw))
-   sigma_todo=0
+   sigma_todo(:)=0
    if (gwcalctyp==21 .and. gw1rdm>0) then  ! MRM: allocate the 1-RDM correction arrays if gwcalctyp=21 and gw1rdm>0
      if (Sigp%nsppol/=1) then
        MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
@@ -2437,29 +2435,46 @@ endif
        end do
      enddo
      if(chkp_rdm>1) then
-       gw1rdm_fname='GW1RDM_CHKP'
-       MSG_ERROR("READ CHECKPOINT TODO") !TODO
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      Read the checkpoint file
+       block
+       integer :: ik_ibz_read,iread,iread_eigv,iread_99999
+       real(dp) :: auxl_read
+       real(dp),allocatable :: occ_tmp(:),eigvect_tmp(:) 
+       ik_ibz_read=0
+       gw1rdm_fname='GW1RDM_CHKP'
        write(msg,'(a29,a)')' Reading the checkpoint file ',gw1rdm_fname
        call wrtout(std_out,msg,'COLL')
-       if(my_rank==0) then
-         ireadRE=Wfd%mband
-         ireadRE=ireadRE*(2*ireadRE)+ireadRE
-         ABI_MALLOC(occ_eigv_tmp,(ireadRE,Sigp%nkptgw))
-         occ_eigv_tmp=0.0_dp
+       if (my_rank==0) then
+         iread_eigv=Wfd%mband
+         iread_eigv=iread_eigv*(2*iread_eigv)
+         ABI_MALLOC(occ_tmp,(Wfd%mband))
+         ABI_MALLOC(eigvect_tmp,(iread_eigv))
+         occ_tmp=0.0_dp; eigvect_tmp=0.0_dp
          open(unit=333,form='formatted',file=gw1rdm_fname,iostat=istat,status='old')
-         ikcalc=1;iread=1;iread_chkp=0;
-         if(istat==0) then
-           read(333,*,iostat=istat) iread_chkp ! read the 99999
+         iread=0;ik_ibz_read=0;
+         if (istat==0) then
+           read(333,*,iostat=istat) iread_99999 ! read the 99999
            do
-             if(iread<=ireadRE) then
-               read(333,*,iostat=istat) occ_eigv_tmp(iread,ikcalc)
+             if(iread<Wfd%mband) then
                iread=iread+1
+               read(333,*,iostat=istat) auxl_read
+               if(istat==0)occ_tmp(iread)=auxl_read
+             else if(iread<(iread_eigv+Wfd%mband)) then 
+               iread=iread+1
+               read(333,*,iostat=istat) auxl_read
+               if(istat==0)eigvect_tmp(iread-Wfd%mband)=auxl_read
              else
-               read(333,*,iostat=istat) iread_chkp
-               if(istat==0 .and. iread_chkp/=0) then
-                ikcalc=ikcalc+1
-                iread=1
+               read(333,*,iostat=istat) ik_ibz_read
+               if(istat==0 .and. ik_ibz_read/=0) then
+                iread=0
+
+                ! We must save on occs and nateigv the data read at this stage
+
+                ik_ibz_read=0
                end if
              end if
              if(istat/=0) then
@@ -2468,46 +2483,51 @@ endif
            end do
          end if 
          close(333)
-         if(iread_chkp==0 .and. ikcalc>1) then
-           write(msg,'(a27,i5,a37,a23,i5)')' The last k-point read was ',ikcalc,' but the integer label was not found.',&
-           ' Setting iread_chkp to ',ikcalc
-           MSG_WARNING(msg)
-           iread_chkp=ikcalc
-         end if
+       !  if(iread_chkp==0 .and. ikcalc>1) then
+       !    write(msg,'(a27,i5,a37,a23,i5)')' The last k-point read was ',ikcalc,' but the integer label was not found.',&
+       !    ' Setting iread_chkp to ',ikcalc
+       !    MSG_WARNING(msg)
+       !    iread_chkp=ikcalc
+       !  end if
 !      Save the read data in occs and nateigv
-         do ikcalc=1,iread_chkp
-           ib=1
-           do ib1=1,Wfd%mband
-             occs(ib1,ikcalc)=occ_eigv_tmp(ib,ikcalc)
-             ib=ib+1
-           end do
-           ib=Wfd%mband+1
-           do ib1=1,Wfd%mband
-             do ib2=1,Wfd%mband
-               nateigv(ib1,ib2,ik_ibz,1)=cmplx(occ_eigv_tmp(ib,ikcalc),occ_eigv_tmp(ib+1,ikcalc))
-               ib=ib+2
-             end do
-           end do
-         end do
-         write(msg,'(a23,i5,a23,2f17.8)')' Last k-point read:    ',iread_chkp,', last read term     : ',&
-&        real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
-         call wrtout(std_out,msg,'COLL')
-         ABI_FREE(occ_eigv_tmp)
+       !  do ikcalc=1,iread_chkp
+       !    ib=1
+       !    do ib1=1,Wfd%mband
+       !      occs(ib1,ik_ibz)=occ_eigv_tmp(ib)
+       !      ib=ib+1
+       !    end do
+       !    ib=Wfd%mband+1
+       !    do ib1=1,Wfd%mband
+       !      do ib2=1,Wfd%mband
+       !        nateigv(ib1,ib2,ik_ibz,1)=cmplx(occ_eigv_tmp(ib),occ_eigv_tmp(ib+1))
+       !        ib=ib+2
+       !      end do
+       !    end do
+       !  end do
+       !  write(msg,'(a23,i5,a23,2f17.8)')' Last k-point read:    ',iread_chkp,', last read term     : ',&
+!&        real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
+       !  call wrtout(std_out,msg,'COLL')
+       !  ABI_FREE(occ_eigv_tmp)
        endif
-!      Broadcast from master the info stored in occs and nateigv (to all processes)
+       end block
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!      Broadcast from master the information stored in occs and nateigv to all processes.
        call xmpi_barrier(Wfd%comm)
        ierr=0
        call xmpi_bcast(sigma_todo(:),master,Wfd%comm,ierr)
        if(ierr/=0) then
-         MSG_ERROR("Error distributing the sigma_todo")
+         MSG_ERROR("Error distributing the sigma_todo table.")
        endif
        call xmpi_bcast(occs(:,:),master,Wfd%comm,ierr)
        if(ierr/=0) then
-         MSG_ERROR("Error distributing the occs read from GW1RDM_CHKP")
+         MSG_ERROR("Error distributing the occs read from the checkpoint file.")
        endif
        call xmpi_bcast(nateigv(:,:,:,:),master,Wfd%comm,ierr)
        if(ierr/=0) then
-         MSG_ERROR("Error distributing the nat. eigenvectors read from GW1RDM_CHKP")
+         MSG_ERROR("Error distributing the natural orbital eigenvectors read from the checkpoint file.")
        endif
      end if
 !    Create/start the checkpoint file and write on it the information already produced in previous runs.
