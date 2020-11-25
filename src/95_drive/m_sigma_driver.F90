@@ -2722,8 +2722,8 @@ endif
      ABI_FREE(bdm_mask) ! The master already used bdm_mask
      ABI_FREE(occs)     ! Occs were already placed in QP_BSt
      call em1results_free(Er) ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory 
-     if (gw1rdm_energies==0) then 
-       ABI_MALLOC(old_purex,(b1gw:b2gw,Sigp%nkptgw))
+     if (gw1rdm_energies==0 .and. Sigp%nkptgw==Wfd%nkibz) then  ! Compute energies only if all k-points are available
+       ABI_MALLOC(old_purex,(b1gw:b2gw,Sigp%nkptgw))            ! We need the hole 1-RDM to build Fock[GW.1RDM]!
        ABI_MALLOC(new_hartr,(b1gw:b2gw,Sigp%nkptgw))
        ABI_MALLOC(gw_rhog,(2,nfftf))
        ABI_MALLOC(gw_vhartr,(nfftf))
@@ -2783,7 +2783,7 @@ endif
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
          do ib=b1gw,b2gw
-           new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)  ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
+           new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ik_ibz,1)  ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
          end do
        end do
        !
@@ -2802,7 +2802,7 @@ endif
            ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
            call xmpi_barrier(Wfd%comm)
            do ib=b1gw,b2gw
-             old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ikcalc,1)              ! Save old alpha*<i|K[KS]|i> from the GS calc. for Delta eik
+             old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ik_ibz,1)              ! Save old alpha*<i|K[KS]|i> from the GS calc. for Delta eik
            enddo
          end do
        endif
@@ -2853,6 +2853,7 @@ endif
        ! and              <KS_i|T|KS_j>   ->   <NO_i|T|NO_j>
        !
        do ikcalc=1,Sigp%nkptgw                                                 
+         ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
          ABI_MALLOC(mat2rot,(ib2-ib1+1,ib2-ib1+1))
@@ -2860,38 +2861,38 @@ endif
          ! <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>
          do ib1dm=1,ib2-ib1+1
            do ib2dm=1,ib2-ib1+1
-             Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)
-             mat2rot(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)
+             Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)
+             mat2rot(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)
            end do
          end do
          call rotate_ks_no(ib1,ib2,mat2rot,Umat,0)   
          do ib1dm=1,ib2-ib1+1
            do ib2dm=1,ib2-ib1+1
-             Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)=mat2rot(ib1dm,ib2dm)
+             Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=mat2rot(ib1dm,ib2dm)
            end do
          end do
          ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>
          do ib1dm=1,ib2-ib1+1
            do ib2dm=1,ib2-ib1+1
-             mat2rot(ib1dm,ib2dm)=GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)
+             mat2rot(ib1dm,ib2dm)=GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)
            end do
          end do
          call rotate_ks_no(ib1,ib2,mat2rot,Umat,1)   
          do ib1dm=1,ib2-ib1+1
            do ib2dm=1,ib2-ib1+1
-             GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)=mat2rot(ib1dm,ib2dm)
+             GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=mat2rot(ib1dm,ib2dm)
            end do
          end do
          ! <KS_i|T|KS_j> -> <NO_i|T|NO_j>
          do ib1dm=1,ib2-ib1+1
            do ib2dm=1,ib2-ib1+1
-             mat2rot(ib1dm,ib2dm)=GW1RDM_me%kinetic(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)
+             mat2rot(ib1dm,ib2dm)=GW1RDM_me%kinetic(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)
            end do
          end do
          call rotate_ks_no(ib1,ib2,mat2rot,Umat,1)   
          do ib1dm=1,ib2-ib1+1
            do ib2dm=1,ib2-ib1+1
-             GW1RDM_me%kinetic(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)=mat2rot(ib1dm,ib2dm)
+             GW1RDM_me%kinetic(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=mat2rot(ib1dm,ib2dm)
            end do
          end do
          ABI_FREE(Umat)
@@ -2912,6 +2913,7 @@ endif
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        do ikcalc=1,Sigp%nkptgw
+         ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          write(msg,'(a127)')'---------------------------------------------------------&
                  &--------------------------------------------------------------------'
          call wrtout(std_out,msg,'COLL')
@@ -2921,14 +2923,14 @@ endif
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
          do ib=b1gw,b2gw
-           delta_band_ibik=(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ikcalc,1))&
-           &+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)-old_purex(ib,ikcalc)
-           eik_new=real(KS_BSt%eig(ib,ikcalc,1))+real(delta_band_ibik)
+           delta_band_ibik=(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ik_ibz,1))&
+           &+Sr%x_mat(ib,ib,ik_ibz,1)-KS_me%vxcval(ib,ib,ik_ibz,1)-old_purex(ib,ikcalc)
+           eik_new=real(KS_BSt%eig(ib,ik_ibz,1))+real(delta_band_ibik)
            write(msg,'(i5,4x,i5,8(4x,f10.5))') &
-           & ikcalc,ib,real(KS_BSt%eig(ib,ikcalc,1))*Ha_eV,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
-           & real(Sr%x_mat(ib,ib,ikcalc,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,&
-           & real(KS_me%vxcval(ib,ib,ikcalc,1))*Ha_eV,&
-           & real(new_hartr(ib,ikcalc))*Ha_eV,real(KS_me%vhartree(ib,ib,ikcalc,1))*Ha_eV
+           & ik_ibz,ib,real(KS_BSt%eig(ib,ik_ibz,1))*Ha_eV,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
+           & real(Sr%x_mat(ib,ib,ik_ibz,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,&
+           & real(KS_me%vxcval(ib,ib,ik_ibz,1))*Ha_eV,&
+           & real(new_hartr(ib,ikcalc))*Ha_eV,real(KS_me%vhartree(ib,ib,ik_ibz,1))*Ha_eV
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
          enddo
