@@ -460,6 +460,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkp_rdm',tread,'INT')
  if(tread==1) dtset%chkp_rdm=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkp_rdm_li',tread,'INT')
+ if(tread==1) dtset%chkp_rdm_li=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkp_rdm_lo',tread,'INT')
  if(tread==1) dtset%chkp_rdm_lo=intarr(1)
 

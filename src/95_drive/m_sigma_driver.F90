@@ -219,8 +219,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,gw1rdm_energies,x1rdm,chkp_rdm,iread_chkp,ikcalc_tmp
- integer :: chkp_rdm_lo
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,gw1rdm_energies,x1rdm,chkp_rdm,iread_chkp
+ integer :: chkp_rdm_li,chkp_rdm_lo
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: etot,etot2,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -341,10 +341,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  gw1rdm_energies=Dtset%gw1rdm_energies     ! Input variable to decide whether energies using the GW_1-RDM must be performed
  x1rdm=Dtset%x1rdm                         ! Input variable to use pure exchange correction on the 1-RDM ( Sigma_x )
  chkp_rdm=Dtset%chkp_rdm                   ! Input variable to use write and read a checkpoint file exchange correction on the 1-RDM ( 0 nth, 1 write, 2 read&write )
+ chkp_rdm_li=Dtset%chkp_rdm_li             ! Checkpoint last-label in [0,chkp_rdm_li]
  chkp_rdm_lo=Dtset%chkp_rdm_lo             ! Checkpoint labelout
  wfknocheck=.true.                         ! Used for printing WFK file subroutine
  iread_chkp=0
- ikcalc_tmp=0
 
  mod10 =MOD(Dtset%gwcalctyp,10)
 
@@ -2415,27 +2415,27 @@ endif
        MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
        ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented assuming Sigp%nsppol==1
      end if
-     ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
+     ABI_MALLOC(occs,(Wfd%mband,Wfd%nkibz))
+     ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Wfd%nkibz))
      ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
      ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
-     ABI_MALLOC(occs,(b1gw:b2gw,Sigp%nkptgw))
      write(msg,'(a34,2i9)')' Bands used for the GW_1RDM arrays',b1gw,b2gw
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      dm1=czero; occs=zero; nateigv=czero;
-     do ikcalc=1,Sigp%nkptgw
+     do ikcalc=1,Wfd%nkibz
        do ib=b1gw,b2gw
          dm1(ib,ib,ikcalc)=QP_BSt%occ(ib,ikcalc,1)
        enddo
-     enddo
-     do ikcalc=1,Wfd%nkibz
-       do ib=1,Wfd%mband 
-         nateigv(ib,ib,ikcalc,1)=cone
-       enddo  
+       do ib=1,Wfd%mband
+         occs(ib,ikcalc)=QP_BSt%occ(ib,ikcalc,1)   ! Copy initial occ numbers (in principle 2 or 0 from KS-DFT)
+         nateigv(ib,ib,ikcalc,1)=cone              ! Set to identity matrix
+       end do
      enddo
      if(chkp_rdm>1) then
        gw1rdm_fname='GW1RDM_CHKP'
+       MSG_ERROR("READ CHECKPOINT TO DO")
 !      Read the checkpoint file
        write(msg,'(a29,a)')' Reading the checkpoint file ',gw1rdm_fname
        call wrtout(std_out,msg,'COLL')
@@ -2445,9 +2445,9 @@ endif
          ABI_MALLOC(occ_eigv_tmp,(ireadRE,Sigp%nkptgw))
          occ_eigv_tmp=0.0_dp
          open(unit=333,form='formatted',file=gw1rdm_fname,iostat=istat,status='old')
-         read(333,*,iostat=istat) iread_chkp
          ikcalc=1;iread=1;iread_chkp=0;
          if(istat==0) then
+           read(333,*,iostat=istat) iread_chkp ! read the 99999
            do
              if(iread<=ireadRE) then
                read(333,*,iostat=istat) occ_eigv_tmp(iread,ikcalc)
@@ -2487,7 +2487,7 @@ endif
            end do
          end do
          write(msg,'(a23,i5,a23,2f17.8)')' Last k-point read:    ',iread_chkp,', last read term     : ',&
-         real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
+&        real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
          call wrtout(std_out,msg,'COLL')
          ABI_FREE(occ_eigv_tmp)
        endif
@@ -2511,10 +2511,12 @@ endif
      if(chkp_rdm>0) then
        if(chkp_rdm_lo<10) then
          write(gw1rdm_fname,"(a12,i1)") "GW1RDM_CHKP_",chkp_rdm_lo
-       else if(chkp_rdm_lo<100 .and. chkp_rdm_lo>10) then
+       else if(chkp_rdm_lo<100 .and. chkp_rdm_lo>=10) then
          write(gw1rdm_fname,"(a12,i2)") "GW1RDM_CHKP_",chkp_rdm_lo
+       else if(chkp_rdm_lo<1000 .and. chkp_rdm_lo>=100) then
+         write(gw1rdm_fname,"(a12,i3)") "GW1RDM_CHKP_",chkp_rdm_lo
        else
-         MSG_WARNING("The maximum value for chkp_rdm_lo is 99. Setting chkp_rdm_lo to 0.")
+         MSG_WARNING("The maximum value for chkp_rdm_lo is 999. Setting chkp_rdm_lo to 0.")
          chkp_rdm_lo=0
          write(gw1rdm_fname,"(a12,i1)") "GW1RDM_CHKP_",chkp_rdm_lo
        end if
@@ -2524,13 +2526,13 @@ endif
        if(my_rank==0) then
          if(chkp_rdm==1) then
            open(unit=333,form='formatted',file=gw1rdm_fname)
-           write(333,*) Sigp%nkptgw
+           write(333,*) 99999
            close(333)
          else
            open(unit=333,form='formatted',file=gw1rdm_fname)
-           write(333,*) Sigp%nkptgw
+           write(333,*) 99999
            do ikcalc=1,iread_chkp
-             do iwrite=b1gw,b2gw 
+             do iwrite=1,Wfd%mband 
                write(333,*) occs(iwrite,ikcalc) 
              end do
              do iwrite=1,Wfd%mband 
@@ -2539,12 +2541,11 @@ endif
                  write(333,*) aimag(nateigv(iwrite,iwrite2,ikcalc,1))
                end do 
              end do
-             write(333,*) ikcalc
-             ikcalc_tmp=ikcalc_tmp+1
+             write(333,*) Kmesh%tab(Sigp%kptgw2bz(ikcalc))
            end do
            close(333)
            write(msg,'(a23,i5,a23,2f17.8)')' Last k-point written: ',iread_chkp,', last term written  : ',&
-           real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
+&          real(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1)),aimag(nateigv(Wfd%mband,Wfd%mband,iread_chkp,1))  
            call wrtout(std_out,msg,'COLL')
          end if
        end if
@@ -2590,18 +2591,18 @@ endif
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
       ! MRM: compute 1-RDM analytic correction ( exchange contribution) 
-      if (gwcalctyp==21 .and. gw1rdm>0 .and. ikcalc>iread_chkp) then 
+      if (gwcalctyp==21 .and. gw1rdm>0) then
 !       Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
-        potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
+        potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs 
         dm1k=czero
-        call calc_rdmx(ib1,ib2,ikcalc,potk,dm1k,QP_BSt)          ! Only restricted closed-shell calcs 
+        call calc_rdmx(ib1,ib2,ik_ibz,potk,dm1k,QP_BSt)          ! Only restricted closed-shell calcs 
 !       Update the full 1RDM with the exchange corrected one for this k-point
-        dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
+        dm1(ib1:ib2,ib1:ib2,ik_ibz)=dm1(ib1:ib2,ib1:ib2,ik_ibz)+dm1k(ib1:ib2,ib1:ib2)
 !       Compute NAT ORBS for exchange corrected 1-RDM
         do ib1dm=ib1,ib2
-          dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ikcalc,1) ! Only restricted closed-shell calcs 
+          dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ik_ibz,1) ! Only restricted closed-shell calcs 
         enddo
-        call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0)          ! Only restricted closed-shell calcs 
+        call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ik_ibz,0)          ! Only restricted closed-shell calcs 
       end if 
    end do
 
@@ -2612,7 +2613,8 @@ endif
    ! ==== Correlation part using the coarse gwc_ngfft mesh ====
    ! ==========================================================
    if (mod10/=SIG_HF) then
-     do ikcalc=1+iread_chkp,Sigp%nkptgw
+     !do ikcalc=1+iread_chkp,Sigp%nkptgw TODO solve checkpoint reading problem
+     do ikcalc=1,Sigp%nkptgw
        ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
        ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
        ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
@@ -2631,7 +2633,7 @@ endif
 &           Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &           gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
          else
-           write(msg,'(a44,i5)')  ' Skipping the calc. of Sigma_c for k-point: ',ikcalc
+           write(msg,'(a44,i5)')  ' Skipping the calc. of Sigma_c for k-point: ',ik_ibz
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
          end if
@@ -2641,31 +2643,31 @@ endif
          dm1k=czero 
          ! Update the dm1 with the corr. contribution?
          if (x1rdm/=1) then
-           call calc_rdmc(ib1,ib2,ikcalc,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs
+           call calc_rdmc(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,QP_BSt,dm1k)    ! Only restricted closed-shell calcs
          end if
 !        Update the full 1RDM with the GW corrected one for this k-point
-         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
-         dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
-!        Compute nat orbs and occ numbers at k-point ikcalc
+         dm1(ib1:ib2,ib1:ib2,ik_ibz)=dm1(ib1:ib2,ib1:ib2,ik_ibz)+dm1k(ib1:ib2,ib1:ib2)
+         dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ik_ibz) 
+!        Compute nat orbs and occ numbers at k-point ik_ibz
          if (x1rdm/=1) then
-           call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,1) ! Only restricted closed-shell calcs 
+           call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ik_ibz,1) ! Only restricted closed-shell calcs 
          else
-           call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0) ! Only restricted closed-shell calcs 
+           call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ik_ibz,0) ! Only restricted closed-shell calcs 
          endif
 !        Print the checkpoint file if required
          if(chkp_rdm>0) then
            if(my_rank==0) then
              open(unit=333,form='formatted',file=gw1rdm_fname,position='append',action='write')
-             do iwrite=b1gw,b2gw 
-               write(333,*) occs(iwrite,ikcalc) 
+             do iwrite=1,Wfd%mband 
+               write(333,*) occs(iwrite,ik_ibz) 
              end do
              do iwrite=1,Wfd%mband 
                do iwrite2=1,Wfd%mband
-                 write(333,*) real(nateigv(iwrite,iwrite2,ikcalc,1))
-                 write(333,*) aimag(nateigv(iwrite,iwrite2,ikcalc,1))
+                 write(333,*) real(nateigv(iwrite,iwrite2,ik_ibz,1))
+                 write(333,*) aimag(nateigv(iwrite,iwrite2,ik_ibz,1))
                end do 
              end do
-             write(333,*) ikcalc
+             write(333,*) ik_ibz
              close(333)
            end if
          end if

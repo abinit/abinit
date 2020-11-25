@@ -56,7 +56,7 @@ contains
 !! INPUTS
 !! ib1=min band for given k
 !! ib2=max band for given k.
-!! kpoint=k-point where the Galitskii-Migdal contribution is used.
+!! ik_ibz= the label of k-point in the IBZ whose Galitskii-Migdal contribution is accounted.
 !! weights=array containing the weights used in the quadrature.
 !! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin)
 !! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details).
@@ -75,12 +75,12 @@ contains
 !! CHILDREN
 !! SOURCE
 
-function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
+function calc_Ec_GM_k(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
 
 !Arguments ------------------------------------
 !scalars
  real(dp) :: Ec_GM_k
- integer,intent(in) :: ib1,ib2,kpoint
+ integer,intent(in) :: ib1,ib2,ik_ibz
  type(ebands_t),target,intent(in) :: BSt
  type(sigma_t),intent(in) :: Sr
 !arrays
@@ -109,7 +109,7 @@ function calc_Ec_GM_k(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
    ! If a better way to produce more stable Sigma_c(iv) values is found, this subroutine can be use to evaluate GM Ecorr in the future. TODO
    do ibdm=1,ib2
      ! Sigma_pp(iv)/[(iv - e_ibdm,k)] + [Sigma_pp(iv)/[(iv - e_ibdm,k)]]^* = 2 Re [Sigma_pp(iv)/(iv - e_ibdm,k)]
-     ec_integrated=ec_integrated+2.0_dp*real( sum(weights(:)*sigcme_k(:,ibdm,ibdm,1)/(Sr%omega_i(:)-BSt%eig(ibdm,kpoint,1)) ) )
+     ec_integrated=ec_integrated+2.0_dp*real( sum(weights(:)*sigcme_k(:,ibdm,ibdm,1)/(Sr%omega_i(:)-BSt%eig(ibdm,ik_ibz,1)) ) )
    end do
  endif
  
@@ -130,7 +130,7 @@ end function calc_Ec_GM_k
 !! INPUTS
 !! ib1=min band for given k
 !! ib2=max band for given k.
-!! kpoint=k-point where the density matrix is updated. 
+!! ik_ibz= the label of k-point in the IBZ.
 !! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
 !! pot=Self-energy-Potential difference, matrix size (i,j), where i and j belong to k.
 !! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
@@ -144,11 +144,11 @@ end function calc_Ec_GM_k
 !! CHILDREN
 !! SOURCE
 
-subroutine calc_rdmx(ib1,ib2,kpoint,pot,dm1,BSt)
+subroutine calc_rdmx(ib1,ib2,ik_ibz,pot,dm1,BSt)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ib1,ib2,kpoint
+ integer,intent(in) :: ib1,ib2,ik_ibz
  type(ebands_t),target,intent(in) :: BSt
 !arrays
  complex(dpc),intent(in) :: pot(:,:)
@@ -165,7 +165,7 @@ subroutine calc_rdmx(ib1,ib2,kpoint,pot,dm1,BSt)
  tol8=1.0e-8
  spin_fact=2.0_dp
 
- write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sx-Vxc  and k-point: ',BSt%kptns(1:,kpoint)
+ write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sx-Vxc  and k-point: ',BSt%kptns(1:,ik_ibz)
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  write(msg,'(a11,i5,a8,i5)')'from band ',ib1,' to band',ib2
@@ -174,8 +174,8 @@ subroutine calc_rdmx(ib1,ib2,kpoint,pot,dm1,BSt)
 
  do ib1dm=ib1,ib2-1  
    do ib2dm=ib1dm+1,ib2
-     if ((BSt%occ(ib1dm,kpoint,1)>tol8) .and. (BSt%occ(ib2dm,kpoint,1)<tol8)) then
-       dm1(ib1dm,ib2dm)=spin_fact*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,kpoint,1)-BSt%eig(ib2dm,kpoint,1)+tol8)
+     if ((BSt%occ(ib1dm,ik_ibz,1)>tol8) .and. (BSt%occ(ib2dm,ik_ibz,1)<tol8)) then
+       dm1(ib1dm,ib2dm)=spin_fact*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,ik_ibz,1)-BSt%eig(ib2dm,ik_ibz,1)+tol8)
        ! Dji = Dij^*
        dm1(ib2dm,ib1dm)=conjg(dm1(ib1dm,ib2dm))
      end if
@@ -197,7 +197,7 @@ end subroutine calc_rdmx
 !! INPUTS
 !! ib1=min band for given k
 !! ib2=max band for given k.
-!! kpoint=k-point where the density matrix is updated. 
+!! ik_ibz= the label of k-point in the IBZ.
 !! weights=array containing the weights used in the quadrature.
 !! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin) 
 !! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
@@ -213,11 +213,11 @@ end subroutine calc_rdmx
 !! CHILDREN
 !! SOURCE
 
-subroutine calc_rdmc(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt,dm1)
+subroutine calc_rdmc(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt,dm1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ib1,ib2,kpoint
+ integer,intent(in) :: ib1,ib2,ik_ibz
  type(ebands_t),target,intent(in) :: BSt
  type(sigma_t) :: Sr
 !arrays
@@ -237,7 +237,7 @@ subroutine calc_rdmc(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt,dm1)
  spin_fact=2.0_dp
  fact=spin_fact*(1.0_dp/two_pi)
 
- write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sc(iw)  and k-point: ',BSt%kptns(1:,kpoint)
+ write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sc(iw)  and k-point: ',BSt%kptns(1:,ik_ibz)
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  write(msg,'(a11,i5,a8,i5)')'from band ',ib1,' to band',ib2
@@ -249,9 +249,9 @@ subroutine calc_rdmc(ib1,ib2,kpoint,Sr,weights,sigcme_k,BSt,dm1)
    do ib2dm=ib1dm,ib2 
      ! Sigma_pq/[(denominator)] + [Sigma_qp/[(denominator)]]^*
      dm1(ib1dm,ib2dm)=fact*sum(weights(:)*( sigcme_k(:,ib1dm,ib2dm,1)/&
-                 &( (Sr%omega_i(:)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(:)-BSt%eig(ib2dm,kpoint,1)) )&
+                 &( (Sr%omega_i(:)-BSt%eig(ib1dm,ik_ibz,1))*(Sr%omega_i(:)-BSt%eig(ib2dm,ik_ibz,1)) )&
                                     +conjg( sigcme_k(:,ib2dm,ib1dm,1)/& 
-                 &( (Sr%omega_i(:)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(:)-BSt%eig(ib2dm,kpoint,1)) ) ) ) ) 
+                 &( (Sr%omega_i(:)-BSt%eig(ib1dm,ik_ibz,1))*(Sr%omega_i(:)-BSt%eig(ib2dm,ik_ibz,1)) ) ) ) ) 
      ! Dji = Dij^*
      dm1(ib2dm,ib1dm)=conjg(dm1(ib1dm,ib2dm))
    end do  
@@ -272,12 +272,12 @@ end subroutine calc_rdmc
 !! INPUTS
 !! ib1=min band for given k
 !! ib2=max band for given k.
-!! kpoint=k-point where the density matrix is updated.
+!! ik_ibz= the label of k-point in the IBZ.
 !! iinfo=use Sigma_x or Sigma_c phaser
 !! weights=array containing the weights used in the quadrature.
 !! nateigv=array containing the natural eigenvectors in columns (nbands,nband,k-point,nspin)
 !! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details).
-!! occs_ks= array containing the occ numbers for a given k-point occs_ks(nband,k-point).
+!! occs = array containing the occ numbers for a given k-point occs(nband,k-point).
 !! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
@@ -290,14 +290,14 @@ end subroutine calc_rdmc
 !! CHILDREN
 !! SOURCE
 
-subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
+subroutine natoccs(ib1,ib2,dm1,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ib1,ib2,kpoint,iinfo
+ integer,intent(in) :: ib1,ib2,ik_ibz,iinfo
  integer,intent(in),optional::checksij
  type(ebands_t),target,intent(in) :: BSt
 !arrays
- real(dp),intent(inout) :: occs_ks(:,:)
+ real(dp),intent(inout) :: occs(:,:)
  complex(dpc),intent(inout) :: dm1(:,:),nateigv(:,:,:,:)
 !Local variables ------------------------------
 !scalars
@@ -307,7 +307,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
  real(dp) :: toccs_k,tol10
  complex(dp) :: Sib1k_ib2k
 !arrays
- real(dp),allocatable :: occs(:),rwork(:),occs_tmp(:)
+ real(dp),allocatable :: occs_tmp(:),occs_tmp2(:),rwork(:)
  complex(dpc),allocatable :: work(:),dm1_tmp(:,:),eigenvect(:,:)
 !************************************************************************
 
@@ -321,8 +321,8 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
 
  ndim=ib2-ib1+1
  lwork=2*ndim-1
- ABI_MALLOC(occs,(ndim))
  ABI_MALLOC(occs_tmp,(ndim))
+ ABI_MALLOC(occs_tmp2,(ndim))
  ABI_MALLOC(work,(lwork))
  ABI_MALLOC(dm1_tmp,(ndim,ndim))
  ABI_MALLOC(eigenvect,(ndim,ndim))
@@ -338,9 +338,9 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
  end do
 
  work=0.0_dp
- occs=0.0_dp
+ occs_tmp=0.0_dp
  info=0
- call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
+ call zheev('v','u',ndim,dm1_tmp,ndim,occs_tmp,work,lwork,rwork,info)
  if (info/=0) then
    MSG_WARNING("Failed the diagonalization of the updated GW 1-RDM")
  end if
@@ -350,15 +350,15 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
  !call wrtout(std_out,msg,'COLL')
  !call printdm1(1,10,dm1_tmp) 
  !eigenvect=dm1_tmp
- !occs_tmp=occs
+ !occs_tmp2=occs_tmp
  !Order from highest occ to lowest occ
  do ib1dm=1,ndim
-  occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
+  occs_tmp2(ib1dm)=occs_tmp(ndim-(ib1dm-1))
   do ib2dm=1,ndim
    eigenvect(ib2dm,ib1dm)=dm1_tmp(ib2dm,(ndim-(ib1dm-1)))
   end do
-  if (abs(occs_tmp(ib1dm))<tol10) then
-    occs_tmp(ib1dm)=0.0_dp
+  if (abs(occs_tmp2(ib1dm))<tol10) then
+    occs_tmp2(ib1dm)=0.0_dp
   end if
  end do
 
@@ -386,24 +386,24 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
 
  if (info==0) then
    if (iinfo==0) then       
-     write(msg,'(a51,3f10.5)') 'Occs. after updating with Sx-Vxc corr. at k-point:',BSt%kptns(1:,kpoint)
+     write(msg,'(a51,3f10.5)') 'Occs. after updating with Sx-Vxc corr. at k-point:',BSt%kptns(1:,ik_ibz)
    else
-     write(msg,'(a51,3f10.5)') 'Occs. after updating with S_c correct. at k-point:',BSt%kptns(1:,kpoint)
+     write(msg,'(a51,3f10.5)') 'Occs. after updating with S_c correct. at k-point:',BSt%kptns(1:,ik_ibz)
    endif 
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    ib1dm=ndim-(ndim/10)*10
    do ib2dm=1,(ndim/10)*10,10
-     write(msg,'(f11.5,9f10.5)') occs_tmp(ib2dm:ib2dm+9)
+     write(msg,'(f11.5,9f10.5)') occs_tmp2(ib2dm:ib2dm+9)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
    end do  
    ib1dm=(ndim/10)*10+1
-   write(msg,'(f11.5,*(f10.5))') occs_tmp(ib1dm:)
+   write(msg,'(f11.5,*(f10.5))') occs_tmp2(ib1dm:)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  else
-   write(msg,'(a36,3f10.5)') 'Error computing occs. for k-point: ',BSt%kptns(1:,kpoint)
+   write(msg,'(a36,3f10.5)') 'Error computing occs. for k-point: ',BSt%kptns(1:,ik_ibz)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
@@ -412,10 +412,10 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
  toccs_k=0.0_dp
  do ib1dm=1,ndim
    do ib2dm=1,ndim
-     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint,1)=eigenvect(ib1dm,ib2dm)
+     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=eigenvect(ib1dm,ib2dm)
    end do
-   occs_ks(ib1+(ib1dm-1),kpoint)=occs_tmp(ib1dm)
-   toccs_k=toccs_k+occs_tmp(ib1dm)
+   occs(ib1+(ib1dm-1),ik_ibz)=occs_tmp2(ib1dm)  ! Overwrite the initial KS-DFT occs from ib1 to ib2
+   toccs_k=toccs_k+occs_tmp2(ib1dm)
  end do
 
  write(msg,'(a22,i5,a3,i5,a21,f10.5)') ' Total occ. from band ',ib1,' to', ib2,' at current k-point: ',toccs_k
@@ -426,11 +426,11 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo,checksij)
  call wrtout(ab_out,msg,'COLL')
 
  ABI_FREE(rwork)
- ABI_FREE(occs)
  ABI_FREE(work)
  ABI_FREE(dm1_tmp)
  ABI_FREE(eigenvect)
  ABI_FREE(occs_tmp)
+ ABI_FREE(occs_tmp2)
 
  DBG_EXIT("COLL")
 
@@ -473,14 +473,14 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  real(dp),intent(in) :: occs(:,:)
 !Local variables ------------------------------
 !scalars
- integer :: ib1dm,ib2dm,dim_bands,kpoint
+ integer :: ib1dm,ib2dm,dim_bands,ikpoint
 !arrays
 !************************************************************************
  DBG_ENTER("COLL")
 
- ! BSt occ are changed and never recoverd
- do kpoint=1,BSt%nkpt
-   BSt%occ(b1gw:b2gw,kpoint,1) = occs(b1gw:b2gw,kpoint) ! Spins summed occ in [0:2] 
+ ! BSt occ (QP_BSt ones) are changed and never recoverd
+ do ikpoint=1,BSt%nkpt
+   BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! Spins summed, occ in [0:2] 
  enddo
  MSG_COMMENT("QP_BSt: occupancies were updated with nat. orb. ones")
  if ((size(Hdr%occ(:))/BSt%nkpt) < (b2gw-b1gw+1)) then
@@ -490,10 +490,10 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  
  ! Update occ in Hdr before printing
  ib1dm=1
- do kpoint=1,BSt%nkpt
-   dim_bands=size(BSt%occ(:,kpoint,1))
+ do ikpoint=1,BSt%nkpt
+   dim_bands=size(BSt%occ(:,ikpoint,1))
    do ib2dm=1,dim_bands   
-     Hdr%occ(ib1dm)=BSt%occ(ib2dm,kpoint,1)
+     Hdr%occ(ib1dm)=BSt%occ(ib2dm,ikpoint,1) ! Because Hdr%occ is a 1-D array
      ib1dm=ib1dm+1
    end do
  end do
@@ -515,7 +515,7 @@ end subroutine update_hdr_bst
 !! INPUTS
 !! Kmesh <kmesh_t>=Structure describing the k-point sampling.
 !! Sr=sigma_t (see the definition of this structured datatype)
-!! bands=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
+!! BSt=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
 !!
@@ -527,13 +527,13 @@ end subroutine update_hdr_bst
 !! CHILDREN
 !! SOURCE
 
-subroutine print_tot_occ(sigma,kmesh,bands)
+subroutine print_tot_occ(sigma,kmesh,BSt)
 
 !Arguments ------------------------------------
 !scalars
  type(sigma_t),intent(in) :: sigma
  type(kmesh_t),intent(in) :: kmesh
- type(ebands_t),intent(in) :: bands
+ type(ebands_t),intent(in) :: BSt
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
@@ -548,7 +548,7 @@ subroutine print_tot_occ(sigma,kmesh,bands)
    do ik=1,sigma%nkibz
      wtk = kmesh%wt(ik)
      do ib=sigma%b1gw,sigma%b2gw
-       occ_bks = bands%occ(ib,ik,spin)
+       occ_bks = BSt%occ(ib,ik,spin)
        if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
          tot_occ=tot_occ+occ_bks*wtk
        end if

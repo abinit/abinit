@@ -112,6 +112,7 @@ type, public :: dataset_type
  integer :: chneut = 1
  integer :: chkprim
  integer :: chkp_rdm = 0
+ integer :: chkp_rdm_li = 0
  integer :: chkp_rdm_lo = 0
  integer :: chksymbreak
  integer :: chksymtnons
@@ -1319,6 +1320,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chkexit            = dtin%chkexit
  dtout%chkprim            = dtin%chkprim
  dtout%chkp_rdm           = dtin%chkp_rdm
+ dtout%chkp_rdm_li        = dtin%chkp_rdm_li
  dtout%chkp_rdm_lo        = dtin%chkp_rdm_lo
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%chksymtnons        = dtin%chksymtnons
@@ -3083,7 +3085,7 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim chkp_rdm chkp_rdm_lo'
+ list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim chkp_rdm chkp_rdm_li chkp_rdm_lo'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
