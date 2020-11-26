@@ -2469,7 +2469,11 @@ endif
          write(gw1rdm_fname,"(a12,i3)") "GW1RDM_CHKP_",chkp_rdm_lo
        end if
        gw1rdm_fname=trim(gw1rdm_fname)
-       write(msg,'(a29,a)')' Writing checkpoint file ',gw1rdm_fname
+       write(msg,'(a1)')' '
+       call wrtout(std_out,msg,'COLL')
+       write(msg,'(a26,a)')' Starting checkpoint file ',gw1rdm_fname
+       call wrtout(std_out,msg,'COLL')
+       write(msg,'(a1)')' '
        call wrtout(std_out,msg,'COLL')
        if(my_rank==0) then
          if(chkp_rdm==1) then
@@ -2582,9 +2586,12 @@ endif
 &            Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &            gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
           else
+            write(msg,'(a1)')  ' '
+            call wrtout(std_out,msg,'COLL')
             write(msg,'(a44,i5)')  ' Skipping the calc. of Sigma_c for k-point: ',ik_ibz
             call wrtout(std_out,msg,'COLL')
-            call wrtout(ab_out,msg,'COLL')
+            write(msg,'(a1)')  ' '
+            call wrtout(std_out,msg,'COLL')
           end if
        end if
        ! MRM: compute 1-RDM numerical correction (freq. integration G0 Sigma_c G0).
@@ -4903,7 +4910,11 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigma_todo,chkp_rdm_li)
      MSG_WARNING("The maximum value for chkp_rdm_li is 999. Setting chkp_rdm_li to 0.")
      write(gw1rdm_fname_in,"(a12,i1)") "GW1RDM_CHKP_",0
    end if
-   write(msg,'(a29,a)')' Reading checkpoint file ',gw1rdm_fname_in
+   write(msg,'(a1)')' '
+   call wrtout(std_out,msg,'COLL')
+   write(msg,'(a25,a)')' Reading checkpoint file ',gw1rdm_fname_in
+   call wrtout(std_out,msg,'COLL')
+   write(msg,'(a1)')' '
    call wrtout(std_out,msg,'COLL')
    occ_tmp(:)=0.0_dp;eigvect_tmp(:)=0.0_dp;sigma_todo_tmp(:)=0;
    open(unit=333,form='formatted',file=gw1rdm_fname_in,iostat=istat,status='old')
@@ -4959,6 +4970,8 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigma_todo,chkp_rdm_li)
      end if 
    enddo 
  end do
+ write(msg,'(a1)')' '
+ call wrtout(std_out,msg,'COLL')
  write(msg,'(a49)')' List of k-points read from all checkpoint files '
  call wrtout(std_out,msg,'COLL')
  do ikcalc=1,Sigp%nkptgw
