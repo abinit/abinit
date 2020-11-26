@@ -2488,8 +2488,8 @@ endif
            open(unit=333,form='formatted',file=gw1rdm_fname)
            write(333,*) 99999
            do ikcalc=1,Sigp%nkptgw
+             ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
              if (sigma_todo(ik_ibz)==1) then ! Only write the points that do not need updates
-               ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
                do iwrite=1,Wfd%mband 
                  write(333,*) occs(iwrite,ik_ibz) 
                end do
