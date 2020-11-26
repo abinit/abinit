@@ -2477,7 +2477,7 @@ endif
          write(gw1rdm_fname,"(a12,i3)") "GW1RDM_CHKP_",chkp_rdm_lo
        end if
        gw1rdm_fname=trim(gw1rdm_fname)
-       write(msg,'(a29,a)')' Writing the checkpoint file ',gw1rdm_fname
+       write(msg,'(a29,a)')' Writing checkpoint file ',gw1rdm_fname
        call wrtout(std_out,msg,'COLL')
        if(my_rank==0) then
          if(chkp_rdm==1) then
@@ -4855,7 +4855,7 @@ end subroutine setup_vcp
 !! Wfd<wfd_t>=Wave function descriptor see file 69_wfd/m_wfd.F90
 !! occs = occ. numbers array occs(Wfd%mband,Wfd%nkibz) 
 !! nateigv = natural orbital eigenvectors nateigv(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
-!! sigma_todo = integer array initialized to 0 and its components are set to 1 if the kpoint is read from the checkpoint sigma_todo(Wfd%nkpt)
+!! sigma_todo = integer array initialized to 0 and its components are set to 1 if the kpoint is read from the checkpoint sigma_todo(Wfd%nkibz)
 !! chkp_rdm_li = number of chekpoints to read (also labels of the files)
 !!
 !! OUTPUT
@@ -4899,7 +4899,7 @@ subroutine read_chkp_rdm(Wfd,occs,nateigv,sigma_todo,chkp_rdm_li)
      write(gw1rdm_fname_in,"(a12,i3)") "GW1RDM_CHKP_",chkp_rdm_li
    else
    end if
-   write(msg,'(a29,a)')' Reading the checkpoint file ',gw1rdm_fname_in
+   write(msg,'(a29,a)')' Reading checkpoint file ',gw1rdm_fname_in
    call wrtout(std_out,msg,'COLL')
    occ_tmp=0.0_dp;eigvect_tmp=0.0_dp;
    open(unit=333,form='formatted',file=gw1rdm_fname_in,iostat=istat,status='old')
