@@ -1210,9 +1210,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gw1rdm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw1rdm','INT',0)
 
- intarr(1,:)=dtsets(:)%gw1rdm_energies
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw1rdm_energies','INT',0)
-
  intarr(1,:)=dtsets(:)%gwcomp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcomp','INT',0)
 

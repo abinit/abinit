@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
  use m_spacepar,      only : hartre
- use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,rotate_ks_no,print_tot_occ!,calc_Ec_GM_k
+ use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,rotate_ks_no,print_tot_occ,read_chkp_rdm!,calc_Ec_GM_k
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -219,7 +219,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,gw1rdm_energies,x1rdm,chkp_rdm
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,chkp_rdm
  integer :: chkp_rdm_li,chkp_rdm_lo
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
@@ -257,7 +257,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(wvl_data) :: Wvl
 !arrays
  integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18)  
- integer,allocatable :: sigma_todo(:)
+ integer,allocatable :: sigmak_todo(:)
  integer,allocatable :: nq_spl(:),nlmn_atm(:),my_spins(:)
  integer,allocatable :: tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),l_size_atm(:),qp_vbik(:,:)
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
@@ -337,8 +337,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wrtout(ab_out,msg,'COLL')
 
  gwcalctyp=Dtset%gwcalctyp
- gw1rdm=Dtset%gw1rdm                       ! Input variable to decide whether updates to the 1-RDM must be performed
- gw1rdm_energies=Dtset%gw1rdm_energies     ! Input variable to decide whether energies using the GW_1-RDM must be performed
+ gw1rdm=Dtset%gw1rdm                       ! Input variable to decide if updates to the 1-RDM must be performed
  x1rdm=Dtset%x1rdm                         ! Input variable to use pure exchange correction on the 1-RDM ( Sigma_x - Vxc )
  chkp_rdm=Dtset%chkp_rdm                   ! Input variable to use write and read a checkpoint file exchange correction on the 1-RDM ( 0 nth, 1 write, 2 read&write )
  chkp_rdm_li=Dtset%chkp_rdm_li             ! Checkpoint last-label IN. The upper limit of max[0,chkp_rdm_li]
@@ -2414,8 +2413,8 @@ endif
    ABI_FREE(M1_q_m)
 
  else
-   ABI_MALLOC(sigma_todo,(Wfd%nkibz))
-   sigma_todo(:)=1
+   ABI_MALLOC(sigmak_todo,(Wfd%nkibz))
+   sigmak_todo(:)=1
    if (rdm_update) then  ! Allocate the 1-RDM correction arrays
      if (Sigp%nsppol/=1) then
        MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
@@ -2424,8 +2423,6 @@ endif
      ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
      ABI_MALLOC(occs,(Wfd%mband,Wfd%nkibz))
      ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Wfd%nkibz))
-     ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
-     ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
      write(msg,'(a34,2i9)')' Bands used for the GW_1RDM arrays',b1gw,b2gw
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2442,14 +2439,14 @@ endif
      if(chkp_rdm>1) then
 !      Read the checkpoint file
        if (my_rank==0) then
-          call read_chkp_rdm(Wfd,Kmesh,Sigp,QP_BSt,occs,nateigv,sigma_todo,chkp_rdm_li)
+          call read_chkp_rdm(Wfd,Kmesh,Sigp,QP_BSt,occs,nateigv,sigmak_todo,chkp_rdm_li)
        end if
 !      Broadcast from master the information stored in occs and nateigv to all processes.
        call xmpi_barrier(Wfd%comm)
        ierr=0
-       call xmpi_bcast(sigma_todo(:),master,Wfd%comm,ierr)
+       call xmpi_bcast(sigmak_todo(:),master,Wfd%comm,ierr)
        if(ierr/=0) then
-         MSG_ERROR("Error distributing the sigma_todo table.")
+         MSG_ERROR("Error distributing the sigmak_todo table.")
        endif
        call xmpi_bcast(occs(:,:),master,Wfd%comm,ierr)
        if(ierr/=0) then
@@ -2490,7 +2487,7 @@ endif
            write(333,*) 99999
            do ikcalc=1,Sigp%nkptgw
              ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
-             if (sigma_todo(ik_ibz)==0) then ! Only write the points that do not need updates
+             if (sigmak_todo(ik_ibz)==0) then ! Only write the points that do not need updates
                do iwrite=1,Wfd%mband 
                  write(333,*) occs(iwrite,ik_ibz) 
                end do
@@ -2547,22 +2544,24 @@ endif
      call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
-     if (sigma_todo(ik_ibz)==1) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed  
-        ! MRM: compute 1-RDM analytic correction (exchange contribution) 
-        if (rdm_update) then 
-!         Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
-          potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs 
-          dm1k=czero
-          call calc_rdmx(ib1,ib2,ik_ibz,potk,dm1k,QP_BSt)          ! Only restricted closed-shell calcs 
-!         Update the full 1RDM with the exchange corrected one for this k-point
-          dm1(ib1:ib2,ib1:ib2,ik_ibz)=dm1(ib1:ib2,ib1:ib2,ik_ibz)+dm1k(ib1:ib2,ib1:ib2)
-!         Compute NAT ORBS for exchange corrected 1-RDM
-          do ib1dm=ib1,ib2
-            dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ik_ibz,1) ! Only restricted closed-shell calcs 
-          enddo
-          call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ik_ibz,0)          ! Only restricted closed-shell calcs 
-        end if 
-      end if
+     if (rdm_update .and. sigmak_todo(ik_ibz)==1) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed  
+       ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
+       ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
+       dm1k=czero
+       ! MRM: compute 1-RDM analytic correction (exchange contribution) 
+!      Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
+       potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs 
+       call calc_rdmx(ib1,ib2,ik_ibz,potk,dm1k,QP_BSt)          ! Only restricted closed-shell calcs 
+!      Update the full 1RDM with the exchange corrected one for this k-point
+       dm1(ib1:ib2,ib1:ib2,ik_ibz)=dm1(ib1:ib2,ib1:ib2,ik_ibz)+dm1k(ib1:ib2,ib1:ib2)
+!      Compute NAT ORBS for exchange corrected 1-RDM
+       do ib1dm=ib1,ib2
+         dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ik_ibz,1) ! Only restricted closed-shell calcs 
+       enddo
+       call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ik_ibz,0)          ! Only restricted closed-shell calcs 
+       ABI_FREE(potk)     
+       ABI_FREE(dm1k)     
+     end if
    end do
 
    ! for the time being, do not remove this barrier!
@@ -2586,7 +2585,7 @@ endif
 &         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
           ! Compute correlated part using the coarse gwc_ngfft mesh.
-          if (x1rdm/=1 .and. sigma_todo(ik_ibz)==1) then ! Only recompute correlation MELS if the point read was broken or not precomputed  
+          if (x1rdm/=1 .and. sigmak_todo(ik_ibz)==1) then ! Only recompute correlation MELS if the point read was broken or not precomputed  
             call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
 &            Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &            gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
@@ -2601,7 +2600,8 @@ endif
        end if
        ! MRM: compute 1-RDM numerical correction (freq. integration G0 Sigma_c G0).
        if (rdm_update) then
-         if (sigma_todo(ik_ibz)==1) then ! Only recompute correlation update to the 1-RDM if the point read was broken or not precomputed  
+         if (sigmak_todo(ik_ibz)==1) then ! Only recompute correlation update to the 1-RDM if the point read was broken or not precomputed  
+           ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
            dm1k=czero 
            ! Update the dm1 with the corr. contribution?
            if (x1rdm/=1) then
@@ -2633,6 +2633,7 @@ endif
                close(333)
              end if
            end if
+           ABI_FREE(dm1k)     
          end if
        else
          sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
@@ -2642,13 +2643,11 @@ endif
    end if
 
    call xmpi_barrier(Wfd%comm)
-   ABI_FREE(sigma_todo) 
+   ABI_FREE(sigmak_todo) 
 
    ! MRM: first clean all non-req. arrays. Then, print WFK and DEN files, build band corrections, and compute new energies.
    if (rdm_update) then
      ABI_FREE(dm1) 
-     ABI_FREE(potk)     
-     ABI_FREE(dm1k) 
      ABI_FREE(freqs)
      ABI_FREE(weights)
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
@@ -2686,8 +2685,8 @@ endif
      ABI_FREE(bdm_mask) ! The master already used bdm_mask
      ABI_FREE(occs)     ! Occs were already placed in QP_BSt
      call em1results_free(Er) ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory 
-     if (gw1rdm_energies==0 .and. Sigp%nkptgw==Wfd%nkibz) then  ! Compute energies only if all k-points are available
-       ABI_MALLOC(old_purex,(b1gw:b2gw,Sigp%nkptgw))            ! We need the hole 1-RDM to build Fock[GW.1RDM]!
+     if (gw1rdm==2 .and. Sigp%nkptgw==Wfd%nkibz) then  ! Compute energies only if all k-points are available
+       ABI_MALLOC(old_purex,(b1gw:b2gw,Sigp%nkptgw))   ! We need the hole 1-RDM to build Fock[GW.1RDM]!
        ABI_MALLOC(new_hartr,(b1gw:b2gw,Sigp%nkptgw))
        ABI_MALLOC(gw_rhog,(2,nfftf))
        ABI_MALLOC(gw_vhartr,(nfftf))

@@ -247,7 +247,6 @@ type, public :: dataset_type
  integer :: gwpara = 2
  integer :: gwrpacorr = 0
  integer :: gw1rdm = 0
- integer :: gw1rdm_energies = 0
 
  integer :: gw_customnfreqsp
  integer :: gw_frqim_inzgrid = 0
@@ -1495,7 +1494,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
  dtout%gw1rdm             = dtin%gw1rdm
- dtout%gw1rdm_energies    = dtin%gw1rdm_energies
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
@@ -3148,7 +3146,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp gw1rdm gw1rdm_energies'
+ list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_invalid_freq'
  list_vars=trim(list_vars)//' gw_icutcoul'
