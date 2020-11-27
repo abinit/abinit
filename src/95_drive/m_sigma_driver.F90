@@ -230,7 +230,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  real(dp):: gwalpha,gwbeta,wmin,wmax,eik_new,gsqcut,boxcut,ecutf  
  complex(dpc) :: max_degw,cdummy,delta_band_ibik          
- logical :: wfknocheck
+ logical :: wfknocheck,rdm_update
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname
@@ -339,11 +339,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  gwcalctyp=Dtset%gwcalctyp
  gw1rdm=Dtset%gw1rdm                       ! Input variable to decide whether updates to the 1-RDM must be performed
  gw1rdm_energies=Dtset%gw1rdm_energies     ! Input variable to decide whether energies using the GW_1-RDM must be performed
- x1rdm=Dtset%x1rdm                         ! Input variable to use pure exchange correction on the 1-RDM ( Sigma_x )
+ x1rdm=Dtset%x1rdm                         ! Input variable to use pure exchange correction on the 1-RDM ( Sigma_x - Vxc )
  chkp_rdm=Dtset%chkp_rdm                   ! Input variable to use write and read a checkpoint file exchange correction on the 1-RDM ( 0 nth, 1 write, 2 read&write )
  chkp_rdm_li=Dtset%chkp_rdm_li             ! Checkpoint last-label IN. The upper limit of max[0,chkp_rdm_li]
  chkp_rdm_lo=Dtset%chkp_rdm_lo             ! Checkpoint label OUT
  wfknocheck=.true.                         ! Used for printing WFK file subroutine
+ if (gwcalctyp==21 .and. gw1rdm>0) then
+   rdm_update=.true.
+ else
+   rdm_update=.false.
+ end if
 
  mod10 =MOD(Dtset%gwcalctyp,10)
 
@@ -644,7 +649,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(keep_ur ,(mband,Kmesh%nibz,Sigp%nsppol))
  keep_ur=.FALSE.; bks_mask=.FALSE.
 
- if (gwcalctyp==21 .and. gw1rdm>0) then
+ if (rdm_update) then
    ABI_MALLOC(bdm_mask  ,(mband,Kmesh%nibz,Sigp%nsppol))
    bdm_mask=.FALSE.
    if (my_rank==0) then
@@ -749,7 +754,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ! MRM: also initialize the Wfd_nato_master for GW 1-RDM if required.
  ! Warning, this should be replaced by copy but copy fails due to bands being allocated in different manners. Do it in the future! FIXME 
- if (gwcalctyp==21 .and. gw1rdm>0) then
+ if (rdm_update) then
    bdm2_mask=bks_mask ! As bks_mask is going to be removed, save it in bdm2_mask to use it in Evext_nl
    call wfd_init(Wfd_nato_master,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bdm_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
@@ -854,7 +859,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(ks_taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
  call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
- if (Dtset%gwcalctyp==21 .and. gw1rdm>0) then ! MRM: print initial (KS) density file (useful to compare DEN files or cubes)
+ if (rdm_update) then ! MRM: print initial (KS) density file (useful to compare DEN files or cubes)
    gw1rdm_fname='KS_sigma_DEN'
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
    Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=KS_BSt)
@@ -1024,7 +1029,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call timab(407,1,tsec) ! vHxc_me
 
  call melflags_reset(KS_mflags)
- if (Dtset%gwcalctyp==21 .and. gw1rdm>0) then
+ if (rdm_update) then
    KS_mflags%has_hbare=1
    KS_mflags%has_kinetic=1
  end if
@@ -2123,8 +2128,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  endif
 endif
 
- ! Do not store it for gw1rdm because it might be too large!
- if(gw1rdm==0) then
+ ! Do not store it for  rdm_update because it might be too large!
+ if(.not.rdm_update) then
    ABI_MALLOC(sigcme,(nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
    sigcme=czero
  endif
@@ -2410,8 +2415,8 @@ endif
 
  else
    ABI_MALLOC(sigma_todo,(Wfd%nkibz))
-   sigma_todo(:)=0
-   if (gwcalctyp==21 .and. gw1rdm>0) then  ! MRM: allocate the 1-RDM correction arrays if gwcalctyp=21 and gw1rdm>0
+   sigma_todo(:)=1
+   if (rdm_update) then  ! Allocate the 1-RDM correction arrays
      if (Sigp%nsppol/=1) then
        MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
        ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented assuming Sigp%nsppol==1
@@ -2485,7 +2490,7 @@ endif
            write(333,*) 99999
            do ikcalc=1,Sigp%nkptgw
              ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
-             if (sigma_todo(ik_ibz)==1) then ! Only write the points that do not need updates
+             if (sigma_todo(ik_ibz)==0) then ! Only write the points that do not need updates
                do iwrite=1,Wfd%mband 
                  write(333,*) occs(iwrite,ik_ibz) 
                end do
@@ -2542,9 +2547,9 @@ endif
      call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
-     if (sigma_todo(ik_ibz)==0) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed  
-        ! MRM: compute 1-RDM analytic correction ( exchange contribution) 
-        if (gwcalctyp==21 .and. gw1rdm>0) then 
+     if (sigma_todo(ik_ibz)==1) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed  
+        ! MRM: compute 1-RDM analytic correction (exchange contribution) 
+        if (rdm_update) then 
 !         Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
           potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs 
           dm1k=czero
@@ -2581,7 +2586,7 @@ endif
 &         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
           ! Compute correlated part using the coarse gwc_ngfft mesh.
-          if (x1rdm/=1 .and. sigma_todo(ik_ibz)==0) then ! Only recompute correlation MELS if the point read was broken or not precomputed  
+          if (x1rdm/=1 .and. sigma_todo(ik_ibz)==1) then ! Only recompute correlation MELS if the point read was broken or not precomputed  
             call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
 &            Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &            gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
@@ -2595,8 +2600,8 @@ endif
           end if
        end if
        ! MRM: compute 1-RDM numerical correction (freq. integration G0 Sigma_c G0).
-       if (gwcalctyp==21 .and. gw1rdm>0) then
-         if (sigma_todo(ik_ibz)==0) then ! Only recompute correlation update to the 1-RDM if the point read was broken or not precomputed  
+       if (rdm_update) then
+         if (sigma_todo(ik_ibz)==1) then ! Only recompute correlation update to the 1-RDM if the point read was broken or not precomputed  
            dm1k=czero 
            ! Update the dm1 with the corr. contribution?
            if (x1rdm/=1) then
@@ -2640,7 +2645,7 @@ endif
    ABI_FREE(sigma_todo) 
 
    ! MRM: first clean all non-req. arrays. Then, print WFK and DEN files, build band corrections, and compute new energies.
-   if (gwcalctyp==21 .and. gw1rdm>0) then
+   if (rdm_update) then
      ABI_FREE(dm1) 
      ABI_FREE(potk)     
      ABI_FREE(dm1k) 
@@ -2978,8 +2983,8 @@ endif
  
    call xmpi_barrier(Wfd%comm)
 
-  ! MRM: skip the rest for gw1rdm>0 and gwcalctyp/=21 
-  if (gw1rdm==0 .and. gwcalctyp/=21) then 
+  ! MRM: skip the rest for rdm_update=true 
+  if (.not.rdm_update) then 
    !  =====================================================
    !  ==== Solve Dyson equation storing results in Sr% ====
    !  =====================================================
@@ -3154,7 +3159,7 @@ endif
  ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
  ABI_FREE(grvdw)
- if(gw1rdm==0) then
+ if(.not.rdm_update) then
    ABI_FREE(sigcme)
  end if
 
@@ -3213,7 +3218,7 @@ endif
  call vcoul_free(Vcp)
  call cryst%free()
  call sigma_free(Sr)
- if(gw1rdm==0) then
+ if(.not.rdm_update) then
    call em1results_free(Er)
  end if
  call ppm_free(PPm)
@@ -4859,7 +4864,7 @@ end subroutine setup_vcp
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
 !! occs = occ. numbers array occs(Wfd%mband,Wfd%nkibz) 
 !! nateigv = natural orbital eigenvectors nateigv(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
-!! sigma_todo = integer array initialized to 0 and its components are set to 1 if the kpoint is read from the checkpoint sigma_todo(Wfd%nkibz)
+!! sigma_todo = integer array initialized to 1 and its components are set to 0 if the kpoint is read from the checkpoint sigma_todo(Wfd%nkibz)
 !! chkp_rdm_li = number of chekpoints to read (also labels of the files)
 !!
 !! OUTPUT
@@ -4916,7 +4921,7 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigma_todo,chkp_rdm_li)
    call wrtout(std_out,msg,'COLL')
    write(msg,'(a1)')' '
    call wrtout(std_out,msg,'COLL')
-   occ_tmp(:)=0.0_dp;eigvect_tmp(:)=0.0_dp;sigma_todo_tmp(:)=0;
+   occ_tmp(:)=0.0_dp;eigvect_tmp(:)=0.0_dp;sigma_todo_tmp(:)=1;
    open(unit=333,form='formatted',file=gw1rdm_fname_in,iostat=istat,status='old')
    iread=0;ik_ibz_read=0;
    if (istat==0) then
@@ -4938,7 +4943,7 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigma_todo,chkp_rdm_li)
          read(333,*,iostat=istat) ik_ibz_read
          if (istat==0 .and. ik_ibz_read/=0) then
           iread=0
-          sigma_todo_tmp(ik_ibz_read)=1
+          sigma_todo_tmp(ik_ibz_read)=0
           ib3=1
           do ib1=1,Wfd%mband
             occs(ib1,ik_ibz_read)=occ_tmp(ib1)
@@ -4961,9 +4966,9 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigma_todo,chkp_rdm_li)
    call wrtout(std_out,msg,'COLL')
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Irred k-point for GW
-     if (sigma_todo_tmp(ik_ibz)==1) then
-       if (sigma_todo(ik_ibz)==0) then
-         sigma_todo(ik_ibz)=1
+     if (sigma_todo_tmp(ik_ibz)==0) then
+       if (sigma_todo(ik_ibz)==1) then
+         sigma_todo(ik_ibz)=0
        end if
        write(msg,'(3f10.5)') BSt%kptns(1:,ik_ibz)
        call wrtout(std_out,msg,'COLL')
@@ -4976,7 +4981,7 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigma_todo,chkp_rdm_li)
  call wrtout(std_out,msg,'COLL')
  do ikcalc=1,Sigp%nkptgw
    ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Irred k-point for GW
-   if (sigma_todo(ik_ibz)==1) then
+   if (sigma_todo(ik_ibz)==0) then
      write(msg,'(3f10.5)') BSt%kptns(1:,ik_ibz)
      call wrtout(std_out,msg,'COLL')
    end if
