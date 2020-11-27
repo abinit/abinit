@@ -60,7 +60,7 @@ module m_abihist
 !! FUNCTION
 !! This type has several vectors, and index scalars to store
 !! a proper history of previous evaluations of forces and
-!! stresses,velocities,positions and energies
+!! stresses, velocities, positions and energies.
 !!
 !! It contains:
 !! * mxhist                  : Maximum size of history
@@ -148,15 +148,16 @@ module m_abihist
    module procedure abihist_init_0D
    module procedure abihist_init_1D
  end interface abihist_init
+
  interface abihist_free
    module procedure abihist_free_0D
    module procedure abihist_free_1D
  end interface abihist_free
+
  interface abihist_bcast
    module procedure abihist_bcast_0D
    module procedure abihist_bcast_1D
  end interface abihist_bcast
-
 !!***
 
 !----------------------------------------------------------------------
@@ -891,14 +892,13 @@ type(abihist),intent(inout) :: hist_out
 
 !Local variables-------------------------------
 !scalars
- character(len=500) :: msg
+! character(len=500) :: msg
 
 ! ***************************************************************
 
 !Check
  if (size(hist_in%xred,2)/=size(hist_out%xred,2)) then
-   msg='Incompatible sizes for hist_in and hist_out!'
-   MSG_BUG(msg)
+   MSG_BUG('Incompatible sizes for hist_in and hist_out!')
  end if
 
 !Copy scalars (except ihist and mxhist)
@@ -1241,7 +1241,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  integer :: acell_id,rprimd_id,strten_id
  integer :: ekin_id,entropy_id,mdtime_id
  logical :: has_nimage, has_imgmov
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(abihist),pointer :: hist_
 !arrays
  integer,allocatable :: my_imgtab(:)
@@ -1263,8 +1263,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
  ABI_ALLOCATE(my_imgtab,(my_nimage))
  if (present(imgtab)) then
   if (size(my_imgtab)/=my_nimage) then
-    msg='Inconsistency between hist and imgtab!'
-    MSG_BUG(msg)
+    MSG_BUG('Inconsistency between hist and imgtab!')
   end if
   my_imgtab(:)=imgtab(:)
  else
@@ -1468,7 +1467,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  logical :: has_nimage
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(abihist),pointer :: hist_
  integer,allocatable :: my_imgtab(:)
 #endif
@@ -1495,8 +1494,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
  ABI_ALLOCATE(my_imgtab,(my_nimage))
  if (present(imgtab)) then
   if (size(my_imgtab)/=my_nimage) then
-    msg='Inconsistency between hist and imgtab!'
-    MSG_BUG(msg)
+    MSG_BUG('Inconsistency between hist and imgtab!')
   end if
   my_imgtab(:)=imgtab(:)
  else
@@ -1508,8 +1506,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
 &     natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
  if (nimage<maxval(my_imgtab)) then
-   msg='Not enough images in the HIST file!'
-   MSG_ERROR(msg)
+   MSG_ERROR('Not enough images in the HIST file!')
  end if
 
 !Loop over images

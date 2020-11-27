@@ -23,7 +23,7 @@
 !!     Recognized messages are:
 !!
 !!  "NEEDINIT": if the client code needs any initialising data, it can be sent here.
-!!  The server code will then send a header string “INIT”, followed by an integer
+!!  The server code will then send a header string "INIT", followed by an integer
 !!  corresponding to the bead index, another integer giving the number of bits
 !!  in the initialization string, and finally the initialization string itself.
 !!
@@ -69,10 +69,10 @@ module m_ipi
  use m_abihist
  use m_xmpi
  use m_errors
+ use m_fsockets !, only : socket_from_string
 
  use m_fstrings,  only : sjoin, itoa
- use m_fsockets !, only : socket_from_string
- use m_geometry,  only : xcart2xred, det3r !fcart2fred, xred2xcart
+ use m_geometry,  only : xcart2xred, det3r, stress_voigt_to_mat
 
  implicit none
 
@@ -88,7 +88,7 @@ module m_ipi
 ! private stuff
 ! =============
 
- INTEGER, PARAMETER :: HDRLEN=12
+ INTEGER, PARAMETER :: HDRLEN = 12
  integer, save :: socket !, socket_initialized = 0
  integer, save :: origin_natom = 0
  real(dp), save :: origin_rprimd(3, 3) = zero
@@ -127,7 +127,7 @@ subroutine ipi_setup(string, comm)
 
  my_rank = xmpi_comm_rank(comm)
 
- call wrtout(std_out, "Initializing i-pi protocol")
+ call wrtout(std_out, "Initializing i-pi protocol...")
  if (my_rank == master) then
    call socket_from_string(string, socket)
    call readbuffer(socket, header, HDRLEN)
@@ -295,11 +295,8 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
  natom = ab_mover%natom
  ! Obtain the present values from the history
  call hist2var(acell, hist, natom, rprimd, xred, zDEBUG)
- strten(:) = hist%strten(:,hist%ihist)
  etotal = hist%etot(hist%ihist)
- !call fcart2fred(hist%fcart(:,:,hist%ihist), residual, rprimd, natom)
-
- !call metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
+ strten = hist%strten(:,hist%ihist)
  ucvol = det3r(rprimd)
 
  if (my_rank == master) then
@@ -310,23 +307,14 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
    ABI_CHECK(trim(header) == "GETFORCE", sjoin("Expecting GETFORCE header, got:", trim(header)))
 
    ! Communicate energy info back to i-pi
-   !WRITE(*,*) " @ DRIVER MODE: Returning etotal, forces, stress tensor "
+   !write(*,*) " i-pi mode: Returning etotal, forces, and stress tensor "
    call writebuffer(socket, "FORCEREADY  ", HDRLEN)
    call writebuffer(socket, etotal)
    call writebuffer(socket, natom)
    call writebuffer_dv(socket, hist%fcart(:,:,hist%ihist), 3 * natom)
-   sigma(1,1) = strten(1)
-   sigma(2,2) = strten(2)
-   sigma(3,3) = strten(3)
-   sigma(3,2) = strten(4)
-   sigma(2,3) = strten(4)
-   sigma(3,1) = strten(5)
-   sigma(1,3) = strten(5)
-   sigma(2,1) = strten(6)
-   sigma(1,2) = strten(6)
-   !call stress_voigt_to_mat(strten, sigma)
+   call stress_voigt_to_mat(strten, sigma)
    !sigma = sigma * ucvol
-   ! No need to tranpose as it's symmetric
+   ! No need to tranpose as it's a symmetric tensor.
    ! TODO: Check volume
    call writebuffer_dv(socket, sigma, 9)
    !call writebuffer(socket, combuf, 3 * nat)
@@ -340,9 +328,9 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
    !
    call writebuffer(socket, 0)
 
-   ! ================================================
-   ! Here master waits for new lattice and positions
-   ! ================================================
+   ! ===============================================================
+   ! Here master waits for new lattice and positions from the server
+   ! ===============================================================
    call readbuffer(socket, header, HDRLEN)
    ABI_CHECK(trim(header) == "STATUS", sjoin("Expecting STATUS header, got:", trim(header)))
    call writebuffer(socket, "READY       ", HDRLEN)
@@ -375,18 +363,8 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
  acell = one
  call var2hist(acell, hist, ab_mover%natom, new_rprimd, new_xred, zDEBUG)
  ihist_prev = abihist_findIndex(hist,-1)
+ ! FIXME: I don't know how to handle vel if MD run!
  hist%vel(:,:,hist%ihist) = hist%vel(:,:,ihist_prev)
-
- !if(zDEBUG)then
- !  write (std_out,*) 'residual:'
- !  do kk=1,ab_mover%natom
- !    write (std_out,*) residual(:,kk)
- !  end do
- !  write (std_out,*) 'strten:'
- !  write (std_out,*) strten(1:3),ch10,strten(4:6)
- !  write (std_out,*) 'etotal:'
- !  write (std_out,*) etotal
- !end if
 
 end subroutine ipi_pred
 !!***

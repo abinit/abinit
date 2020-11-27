@@ -67,6 +67,7 @@ MODULE m_geometry
  public :: symredcart         ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
  public :: strainsym          ! Symmetrize the strain tensor.
  public :: stresssym          ! Symmetrize the stress tensor.
+ public :: stress_voigt_to_mat! Build 3x3 symmetric stress tensor from stress vector in Voigt notation.
  public :: strconv            ! Convert from symmetric storage mode in reduced coords to cart coords.
  public :: littlegroup_pert   ! Determines the set of symmetries that leaves a perturbation invariant.
  public :: irreducible_set_pert  ! Determines a set of perturbations that form a basis
@@ -3129,13 +3130,10 @@ end subroutine strainsym
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space (bohr**-1)
 !! nsym=order of group.
 !! sym(3,3,nsym)=symmetry operators (usually symrec=expressed in terms
-!!               of action on reciprocal lattice primitive translations);
-!!               integers.
-!!
-!! OUTPUT
-!! stress(6)=stress tensor, in cartesian coordinates, in symmetric storage mode
+!!               of action on reciprocal lattice primitive translations); integers.
 !!
 !! SIDE EFFECTS
+!! stress(6)=stress tensor, in cartesian coordinates, in symmetric storage mode
 !!
 !! PARENTS
 !!      m_dfpt_nstwf,m_dfpt_scfcv,m_forstr,m_geometry,m_paw_dfpt,m_stress
@@ -3225,6 +3223,41 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  call strconv(strfrac,gprimd,stress)
 
 end subroutine stresssym
+!!***
+
+!!****f* m_geometry/stress_voigt_to_mat
+!! NAME
+!!  stress_voigt_to_mat
+!!
+!! FUNCTION
+!!  Build 3x3 symmetric stress tensor from stress vector in Voigt notation.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine stress_voigt_to_mat(stress6, stress_mat)
+
+ real(dp),intent(in) :: stress6(6)
+ real(dp),intent(out) :: stress_mat(3,3)
+
+ stress_mat(1,1) = stress6(1)
+ stress_mat(2,2) = stress6(2)
+ stress_mat(3,3) = stress6(3)
+ stress_mat(2,3) = stress6(4)
+ stress_mat(3,2) = stress6(4)
+ stress_mat(1,3) = stress6(5)
+ stress_mat(3,1) = stress6(5)
+ stress_mat(1,2) = stress6(6)
+ stress_mat(2,1) = stress6(6)
+
+end subroutine stress_voigt_to_mat
 !!***
 
 !!****f* m_geometry/strconv
