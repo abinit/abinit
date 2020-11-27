@@ -111,9 +111,6 @@ type, public :: dataset_type
  integer :: chkexit
  integer :: chneut = 1
  integer :: chkprim
- integer :: chkp_rdm = 0
- integer :: chkp_rdm_li = 0
- integer :: chkp_rdm_lo = 0
  integer :: chksymbreak
  integer :: chksymtnons
  integer :: cineb_start
@@ -464,6 +461,7 @@ type, public :: dataset_type
  integer :: prepgkk = 0
  integer :: prtbbb = 0
  integer :: prtbltztrp = 0
+ integer :: prtchkprdm = 0
  integer :: prtcif = 0
  integer :: prtden
  integer :: prtdensph = 1
@@ -759,6 +757,7 @@ type, public :: dataset_type
  real(dp) :: pw_unbal_thresh
  real(dp) :: ratsm
  real(dp) :: ratsph_extra
+ real(dp) :: readchkprdm = 0
  real(dp) :: recrcut
  real(dp) :: recefermi
  real(dp) :: rectolden
@@ -1318,9 +1317,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chkdilatmx         = dtin%chkdilatmx
  dtout%chkexit            = dtin%chkexit
  dtout%chkprim            = dtin%chkprim
- dtout%chkp_rdm           = dtin%chkp_rdm
- dtout%chkp_rdm_li        = dtin%chkp_rdm_li
- dtout%chkp_rdm_lo        = dtin%chkp_rdm_lo
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%chksymtnons        = dtin%chksymtnons
  dtout%cineb_start        = dtin%cineb_start
@@ -1717,6 +1713,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prepgkk            = dtin%prepgkk
  dtout%prtbbb             = dtin%prtbbb
  dtout%prtbltztrp         = dtin%prtbltztrp
+ dtout%prtchkprdm         = dtin%prtchkprdm
  dtout%prtcif             = dtin%prtcif
  dtout%prtden             = dtin%prtden
  dtout%prtdensph          = dtin%prtdensph
@@ -1949,6 +1946,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%pw_unbal_thresh    = dtin%pw_unbal_thresh
  dtout%ratsm              = dtin%ratsm
  dtout%ratsph_extra       = dtin%ratsph_extra
+ dtout%readchkprdm        = dtin%readchkprdm
  dtout%recrcut            = dtin%recrcut
  dtout%recefermi          = dtin%recefermi
  dtout%rectolden          = dtin%rectolden
@@ -3083,7 +3081,7 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim chkp_rdm chkp_rdm_li chkp_rdm_lo'
+ list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
@@ -3221,7 +3219,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
- list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
+ list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
  list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
@@ -3234,7 +3232,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
 !R
- list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut'
+ list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut readchkprdm'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
