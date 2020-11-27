@@ -741,6 +741,8 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
        call wrtout(std_out,msg,'COLL')
      end if
    enddo 
+   write(msg,'(a1)')' '
+   call wrtout(std_out,msg,'COLL')
    ABI_FREE(occ_tmp)
    ABI_FREE(eigvect_tmp)
  end if
