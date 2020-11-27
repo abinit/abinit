@@ -290,8 +290,10 @@ module m_dtfil
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
+  character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read     
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
+  character(len=fnlen) :: fnameabo_chkp_rdm       ! Checkpoint for GW@DFA to write
   character(len=fnlen) :: fnameabo_dos
   character(len=fnlen) :: fnameabo_dvdb
   character(len=fnlen) :: fnameabo_eelf
@@ -764,6 +766,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_hes=trim(dtfil%filnam_ds(3))//'_HES'
  dtfil%fnameabi_phfrq=trim(dtfil%filnam_ds(3))//'_PHFRQ'
  dtfil%fnameabi_phvec=trim(dtfil%filnam_ds(3))//'_PHVEC'
+ dtfil%fnameabi_chkp_rdm =trim(dtfil%filnam_ds(3))//'_CHKP_RDM_'
 
 !-------------------------------------------------------------------------------------------
  ! Build name of files from dtfil%filnam_ds(4)
@@ -793,6 +796,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_qp_eig=trim(dtfil%filnam_ds(4))//'_QP_DB.nc' ! TODO change name
  dtfil%fnameabo_rpa=trim(dtfil%filnam_ds(4))//'_RPA'
  dtfil%fnameabo_scr=trim(dtfil%filnam_ds(4))//'_SCR'
+ dtfil%fnameabo_chkp_rdm=trim(dtfil%filnam_ds(4))//'_CHKP_RDM_'
  dtfil%fnameabo_sgm=trim(dtfil%filnam_ds(4))//'_SGM'
  dtfil%fnameabo_sgr=trim(dtfil%filnam_ds(4))//'_SGR'
  dtfil%fnameabo_sig=trim(dtfil%filnam_ds(4))//'_SIG'

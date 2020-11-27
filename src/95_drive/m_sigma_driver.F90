@@ -345,6 +345,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  wfknocheck=.true.                         ! Used for printing WFK file subroutine
  if (gwcalctyp==21 .and. gw1rdm>0) then
    rdm_update=.true.
+   write(*,*) 'MAU'
+   write(*,*) trim(dtfil%fnameabi_chkp_rdm)
+   write(*,*) trim(dtfil%fnameabo_chkp_rdm)
  else
    rdm_update=.false.
  end if
