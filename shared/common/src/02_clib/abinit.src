@@ -22,7 +22,7 @@ sources = [
  "cclock.c",
  "etime.c",
  "sockets.c",
- "fsockets.f90",
+ "m_fsockets.F90",
  #"filelock.c",
  "fsi_posix.c",
  "gnu_tools.c",

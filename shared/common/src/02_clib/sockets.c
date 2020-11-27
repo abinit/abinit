@@ -38,6 +38,18 @@ Functions:
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#define HAVE_SOCKETS 
+/* 
+#undef HAVE_SOCKETS 
+*/
+
+#ifdef HAVE_SOCKETS
+
 #include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
@@ -154,4 +166,10 @@ Args:
    if (n == 0) { perror("Error reading from socket: server has quit or connection broke"); exit(-1); }
 }
 
+#else
 
+void open_socket(int *psockfd, int* inet, int* port, const char* host){;}
+void readbuffer(int *psockfd, char *data, int* plen){;}
+void writebuffer(int *psockfd, const char *data, int* plen){;}
+
+#endif

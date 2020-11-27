@@ -865,6 +865,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
  strten(3,1) = results%strten(5)
  strten(1,2) = results%strten(6)
  strten(2,1) = results%strten(6)
+ !call stress_voigt_to_mat(results%strten, strten)
 
  if (strten(1,1) /= MAGIC_UNDEF) then
    call ydoc%add_real2d('cartesian_stress_tensor', strten, comment="hartree/bohr^3")

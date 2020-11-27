@@ -32,7 +32,7 @@
 !   write_buffer: Writes a string to the socket.
 !   read_buffer: Reads data from the socket.
 
-   MODULE F90SOCKETS
+MODULE m_fsockets
    USE ISO_C_BINDING
 
    IMPLICIT NONE
@@ -42,14 +42,14 @@
                        writebuffer_d, writebuffer_dv, &
                        writebuffer_i
 
-  END INTERFACE
+  END INTERFACE writebuffer
 
   INTERFACE readbuffer
       MODULE PROCEDURE readbuffer_s, &
                        readbuffer_dv, readbuffer_d, &
                        readbuffer_i
 
-  END INTERFACE
+  END INTERFACE readbuffer
 
   INTERFACE
     SUBROUTINE open_csocket(psockfd, inet, port, host) BIND(C, name="open_socket")
@@ -88,7 +88,7 @@
 
       CALL fstr2cstr(host, chost)
       CALL open_csocket(psockfd, inet, port, host)
-   END SUBROUTINE
+   END SUBROUTINE open_socket
 
    SUBROUTINE fstr2cstr(fstr, cstr, plen)
       IMPLICIT NONE
@@ -109,7 +109,7 @@
          ENDDO
          cstr(n+1) = C_NULL_CHAR
       END IF
-   END SUBROUTINE
+   END SUBROUTINE fstr2cstr
 
   SUBROUTINE writebuffer_d (psockfd, fdata)
       USE ISO_C_BINDING
@@ -120,7 +120,7 @@
 
       cdata = fdata
       CALL writebuffer_csocket(psockfd, c_loc(cdata), 8)
-  END SUBROUTINE
+  END SUBROUTINE writebuffer_d
 
   SUBROUTINE writebuffer_i (psockfd, fdata)
       USE ISO_C_BINDING
@@ -130,7 +130,7 @@
 
       cdata = fdata
       CALL writebuffer_csocket(psockfd, c_loc(cdata), 4)
-  END SUBROUTINE
+  END SUBROUTINE writebuffer_i
 
   SUBROUTINE writebuffer_s (psockfd, fstring, plen)
       USE ISO_C_BINDING
@@ -145,7 +145,7 @@
          cstring(i) = fstring(i:i)
       ENDDO
       CALL writebuffer_csocket(psockfd, c_loc(cstring(1)), plen)
-  END SUBROUTINE
+  END SUBROUTINE writebuffer_s
 
   SUBROUTINE writebuffer_dv(psockfd, fdata, plen)
       USE ISO_C_BINDING
@@ -153,7 +153,7 @@
     REAL(KIND=8), INTENT(IN), TARGET        :: fdata(plen)
 
       CALL writebuffer_csocket(psockfd, c_loc(fdata(1)), 8*plen)
-  END SUBROUTINE
+  END SUBROUTINE writebuffer_dv
 
   SUBROUTINE readbuffer_d (psockfd, fdata)
       USE ISO_C_BINDING
@@ -164,7 +164,7 @@
 
       CALL readbuffer_csocket(psockfd, c_loc(cdata), 8)
       fdata=cdata
-  END SUBROUTINE
+  END SUBROUTINE readbuffer_d
 
   SUBROUTINE readbuffer_i (psockfd, fdata)
       USE ISO_C_BINDING
@@ -175,7 +175,7 @@
 
       CALL readbuffer_csocket(psockfd, c_loc(cdata), 4)
       fdata = cdata
-  END SUBROUTINE
+  END SUBROUTINE readbuffer_i
 
   SUBROUTINE readbuffer_s (psockfd, fstring, plen)
       USE ISO_C_BINDING
@@ -191,7 +191,7 @@
       DO i = 1,plen
          fstring(i:i) = cstring(i)
       ENDDO
-  END SUBROUTINE
+  END SUBROUTINE readbuffer_s
 
   SUBROUTINE readbuffer_dv(psockfd, fdata, plen)
       USE ISO_C_BINDING
@@ -199,5 +199,31 @@
     REAL(KIND=8), INTENT(OUT), TARGET       :: fdata(plen)
 
       CALL readbuffer_csocket(psockfd, c_loc(fdata(1)), 8*plen)
-  END SUBROUTINE
-  END MODULE
+  END SUBROUTINE readbuffer_dv
+
+  SUBROUTINE socket_from_string (srvaddress, socket)
+    CHARACTER(*), INTENT(IN)  :: srvaddress
+    integer, INTENT(out)  :: socket
+    CHARACTER(256) :: address
+    INTEGER :: port, inet, field_sep_pos
+
+    ! Parses host name, port and socket type
+    field_sep_pos = INDEX(srvaddress, ':', back=.true.)
+    address = srvaddress(1:field_sep_pos-1)
+
+    ! Check if UNIX type socket
+    IF (trim(srvaddress(field_sep_pos+1 :)) == 'UNIX') then
+       port = 1234 ! place-holder
+       inet = 0
+       write(*,*) " Connecting to `", trim(address), "` using UNIX socket"
+    ELSE
+       read ( srvaddress ( field_sep_pos+1 : ), * ) port
+       inet = 1
+       write(*,*) " Connecting to `", trim(address), ":", srvaddress (field_sep_pos+1:), " using INET socket"
+    END IF
+    ! Create the socket
+    CALL open_socket (socket, inet, port, trim(address)//achar(0))
+
+  END SUBROUTINE socket_from_string
+
+END MODULE m_fsockets

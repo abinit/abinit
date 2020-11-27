@@ -687,7 +687,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  ecut
 !  With planewaves, one must use positive ecut
    if(usewvl==0)then
-     if (abs(dt%ecut+1._dp)<tol8) then
+     !if (abs(dt%ecut+1._dp)<tol2) then
+     if (dt%ecut < tol2) then
        write(msg, '(3a)' )&
         'The input keyword "ecut" is compulsory !',ch10,&
         'Action: add a value for "ecut" in the input file.'
@@ -1222,13 +1223,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! ionmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ionmov',&
-     dt%ionmov,23,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26/),iout)
+     dt%ionmov,24, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,28],iout)
 
-   ! When optcell/=0, ionmov must be 2, 3, 13, 22 or 25 (except if imgmov>0)
+   ! When optcell/=0, ionmov must be 2, 3, 13, 22 or 25, 28 (except if imgmov>0)
    if(dt%optcell/=0)then
      if (dt%imgmov==0) then
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,6,(/2,3,13,15,22,25/),iout)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,7,[2,3,13,15,22,25,28],iout)
      else
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
        call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,1,(/0/),iout)
