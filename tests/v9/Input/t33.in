@@ -21,7 +21,7 @@ gwrpacorr2     1
 ############
 # Calculation of the Self-Energy matrix elements (GW corrections)
 optdriver3     4       # Self-Energy calculation
-gw1rdm         1       # Update 1-RDM with GW and use it to print DEN and WFK files, and for new FOCK matrix elements
+gw1rdm         2       # Update 1-RDM with GW and use it to print DEN and WFK files, and for new FOCK matrix elements
 x1rdm          0       # Use only exchange correction x1rdm=1 OR use also Sigma_c x1rdm=0
 symsigma       0       # Sym. switched off for sigma
 gwcalctyp     21       # Compute the linearized density as when doing self-consistent AC_GW
