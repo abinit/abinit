@@ -664,7 +664,6 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
  character(len=fnlen) :: gw1rdm_fname
  character(len=500) :: msg
 !arrays
- integer,allocatable :: sigmak_todo_tmp(:)
  real(dp),allocatable :: occ_tmp(:),eigvect_tmp(:) 
 
  if (my_rank==0) then
@@ -672,7 +671,6 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
    iread_eigv=iread_eigv*(2*iread_eigv)
    ABI_MALLOC(occ_tmp,(Wfd%mband))
    ABI_MALLOC(eigvect_tmp,(iread_eigv))
-   ABI_MALLOC(sigmak_todo_tmp,(Wfd%nkibz))
 
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Irred k-point for GW
@@ -691,7 +689,7 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
      call wrtout(std_out,msg,'COLL')
      write(msg,'(a1)')' '
      call wrtout(std_out,msg,'COLL')
-     occ_tmp(:)=0.0_dp;eigvect_tmp(:)=0.0_dp;sigmak_todo_tmp(:)=1;
+     occ_tmp(:)=0.0_dp;eigvect_tmp(:)=0.0_dp;
      open(newunit=iunit,form='formatted',file=gw1rdm_fname,iostat=istat,status='old')
      iread=0;ik_ibz_read=0;
      if (istat==0) then
@@ -712,7 +710,7 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
            read(iunit,*,iostat=istat) ik_ibz_read
            if (istat==0 .and. ik_ibz_read/=0) then
             iread=0
-            sigmak_todo_tmp(ik_ibz_read)=0
+            sigmak_todo(ik_ibz_read)=0
             ib3=1
             do ib1=1,Wfd%mband
               occs(ib1,ik_ibz_read)=occ_tmp(ib1)
@@ -745,7 +743,6 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
    enddo 
    ABI_FREE(occ_tmp)
    ABI_FREE(eigvect_tmp)
-   ABI_FREE(sigmak_todo_tmp)
  end if
 
 ! Broadcast from master the information stored in occs and nateigv to all processes.
