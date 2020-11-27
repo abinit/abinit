@@ -208,7 +208,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij !,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount
- integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus,pwx,ibz,iwrite,iwrite2
+ integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus,pwx,ibz
  integer :: isp,is_idx,istep,itypat,itypatcor,izero,jj,first_band,last_band
  integer :: ks_iv,lcor,lmn2_size_max,mband,my_nband
  integer :: mgfftf,mod10,moved_atm_inside,moved_rhor,n3xccc !,mgfft
