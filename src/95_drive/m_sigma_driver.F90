@@ -865,8 +865,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(ks_taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
  call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
- if (rdm_update) then ! MRM: print initial (KS) density file (useful to compare DEN files or cubes)
-   gw1rdm_fname=trim(dtfil%fnameabo_ks_den)
+ if (rdm_update .and. dtset%prtwf == 1) then ! Print initial (KS) density file (useful to compare DEN files, cubes, etc.) as read 
+   gw1rdm_fname=trim(dtfil%fnameabo_ks_den)  ! and used on Sigma grids
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
    Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=KS_BSt)
  end if
