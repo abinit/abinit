@@ -28,6 +28,7 @@ module m_gwrdm
  use m_time
  use m_wfd           
  use m_hdr
+ use m_melemts,       only : melements_t
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
                              get_bz_item, has_IBZ_item, find_qmesh
@@ -41,8 +42,8 @@ module m_gwrdm
  private :: no2ks,ks2no,printdm1 
 !!***
  
- public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,rotate_ks_no,print_tot_occ,read_chkp_rdm,&
-           &prt_chkp_rdm
+ public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
+           &prt_chkp_rdm,rot_integrals
 !!***
 
 contains
@@ -296,7 +297,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ib1,ib2,ik_ibz,iinfo
- integer,intent(in),optional::checksij
+ integer,intent(in),optional :: checksij
  type(ebands_t),target,intent(in) :: BSt
 !arrays
  real(dp),intent(inout) :: occs(:,:)
@@ -516,7 +517,7 @@ end subroutine update_hdr_bst
 !!
 !! INPUTS
 !! Kmesh <kmesh_t>=Structure describing the k-point sampling.
-!! Sr=sigma_t (see the definition of this structured datatype)
+!! sigma=sigma_t (see the definition of this structured datatype)
 !! BSt=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
@@ -836,6 +837,98 @@ subroutine prt_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
  call xmpi_barrier(Wfd%comm)
  
 end subroutine prt_chkp_rdm
+!!***
+
+!!****f* ABINIT/rot_integrals
+!! NAME
+!! rot_integrals
+!!
+!! FUNCTION
+!!  Transform integrals from KS -> NO and NO -> KS orbitals
+!!
+!!   Transform <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>,
+!!             <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>,
+!!   and         <KS_i|T|KS_j>   ->   <NO_i|T|NO_j>
+!!
+!!
+!! INPUTS
+!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
+!! Sigp<sigparams_t>=Parameters governing the self-energy calculation.
+!! nateigv = natural orbital eigenvectors nateigv(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
+!!
+!! OUTPUT
+!!  Mels
+!!   %kinetic=matrix elements of $t$.
+!!   %vhartr =matrix elements of $v_H$.
+!! Sr=sigma_t (see the definition of this structured datatype)
+!!
+!! PARENTS
+!!      m_sigma_driver
+!!
+!! CHILDREN
+subroutine rot_integrals(Sigp,Sr,Mels,Kmesh,nateigv)
+!Arguments ------------------------------------
+!scalars
+ type(kmesh_t),intent(in) :: Kmesh
+ type(sigparams_t),intent(in) :: Sigp
+ type(sigma_t),intent(inout) :: Sr
+ type(melements_t),intent(inout) :: Mels
+!arrays
+ complex(dpc),intent(in) :: nateigv(:,:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikcalc,ik_ibz,ib1,ib2,ib1dm,ib2dm
+!arrays
+ complex(dpc),allocatable :: mat2rot(:,:),Umat(:,:)
+
+  do ikcalc=1,Sigp%nkptgw                                                 
+    ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
+    ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
+    ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+    ABI_MALLOC(mat2rot,(ib2-ib1+1,ib2-ib1+1))
+    ABI_MALLOC(Umat,(ib2-ib1+1,ib2-ib1+1))
+    ! <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>
+    do ib1dm=1,ib2-ib1+1
+      do ib2dm=1,ib2-ib1+1
+        Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)
+        mat2rot(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)
+      end do
+    end do
+    call rotate_ks_no(ib1,ib2,mat2rot,Umat,0)   
+    do ib1dm=1,ib2-ib1+1
+      do ib2dm=1,ib2-ib1+1
+        Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=mat2rot(ib1dm,ib2dm)
+      end do
+    end do
+    ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>
+    do ib1dm=1,ib2-ib1+1
+      do ib2dm=1,ib2-ib1+1
+        mat2rot(ib1dm,ib2dm)=Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)
+      end do
+    end do
+    call rotate_ks_no(ib1,ib2,mat2rot,Umat,1)   
+    do ib1dm=1,ib2-ib1+1
+      do ib2dm=1,ib2-ib1+1
+        Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=mat2rot(ib1dm,ib2dm)
+      end do
+    end do
+    ! <KS_i|T|KS_j> -> <NO_i|T|NO_j>
+    do ib1dm=1,ib2-ib1+1
+      do ib2dm=1,ib2-ib1+1
+        mat2rot(ib1dm,ib2dm)=Mels%kinetic(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)
+      end do
+    end do
+    call rotate_ks_no(ib1,ib2,mat2rot,Umat,1)   
+    do ib1dm=1,ib2-ib1+1
+      do ib2dm=1,ib2-ib1+1
+        Mels%kinetic(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=mat2rot(ib1dm,ib2dm)
+      end do
+    end do
+    ABI_FREE(Umat)
+    ABI_FREE(mat2rot)
+  end do
+end subroutine rot_integrals
 !!***
 
 !!****f* ABINIT/ks2no
