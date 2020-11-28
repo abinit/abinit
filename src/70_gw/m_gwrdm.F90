@@ -43,7 +43,7 @@ module m_gwrdm
 !!***
  
  public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
-           &prt_chkp_rdm,rot_integrals,print_total_energy
+           &prt_chkp_rdm,rot_integrals,print_total_energy,print_band_energies
 !!***
 
 contains
@@ -1022,6 +1022,102 @@ subroutine print_total_energy(ekin_energy,evext_energy,evextnl_energy,e_corepsp,
   call wrtout(ab_out,msg,'COLL')
 
 end subroutine print_total_energy       
+
+!!****f* ABINIT/print_band_energies
+!! NAME
+!! print_band_energies
+!!
+!! FUNCTION
+!!  Print updated band energies
+!!
+!!
+!! INPUTS
+!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
+!! Sigp<sigparams_t>=Parameters governing the self-energy calculation.
+!!  Mels
+!!   %kinetic=matrix elements of $t$.
+!!   %vhartr =matrix elements of $v_H$.
+!! Sr=sigma_t (see the definition of this structured datatype)
+!! BSt=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
+!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
+!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_sigma_driver
+!!
+subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,BSt,new_hartr,old_purex)
+!Arguments ------------------------------------
+!scalars
+ type(kmesh_t),intent(in) :: Kmesh
+ type(sigparams_t),intent(in) :: Sigp
+ type(sigma_t),intent(in) :: Sr
+ type(ebands_t),intent(in) :: BSt
+ type(melements_t),intent(in) :: Mels
+ integer,intent(in) :: b1gw,b2gw
+!arrays
+ complex(dpc),intent(in) :: old_purex(:,:),new_hartr(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ib,ikcalc,ik_ibz
+ real(dp) :: eik_new
+ complex(dpc) :: delta_band_ibik
+ character(len=500) :: msg
+!arrays
+
+  write(msg,'(a1)')  ' '
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a42)')  ' Computing band corrections Delta eik (eV)'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a42)')  ' -----------------------------------------'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a1)')  ' '
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a1)')  ' '
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a110)') ' Band corrections Delta eik = <KS_i|K[NO]-a*K[KS]+vH[NO]&
+        &-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a1)')  ' '
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  do ikcalc=1,Sigp%nkptgw
+    ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
+    write(msg,'(a127)')'---------------------------------------------------------&
+            &--------------------------------------------------------------------'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    write(msg,'(a126)')' k-point  band      eik^GS        eik^new     Delta eik  &
+      &      K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    do ib=b1gw,b2gw
+      delta_band_ibik=(new_hartr(ib,ikcalc)-Mels%vhartree(ib,ib,ik_ibz,1))&
+      &+Sr%x_mat(ib,ib,ik_ibz,1)-Mels%vxcval(ib,ib,ik_ibz,1)-old_purex(ib,ikcalc)
+      eik_new=real(BSt%eig(ib,ik_ibz,1))+real(delta_band_ibik)
+      write(msg,'(i5,4x,i5,8(4x,f10.5))') &
+      & ik_ibz,ib,real(BSt%eig(ib,ik_ibz,1))*Ha_eV,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
+      & real(Sr%x_mat(ib,ib,ik_ibz,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,&
+      & real(Mels%vxcval(ib,ib,ik_ibz,1))*Ha_eV,&
+      & real(new_hartr(ib,ikcalc))*Ha_eV,real(Mels%vhartree(ib,ib,ik_ibz,1))*Ha_eV
+      call wrtout(std_out,msg,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+    enddo
+  enddo
+  write(msg,'(a127)')'---------------------------------------------------------&
+          &--------------------------------------------------------------------'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+
+end subroutine print_band_energies
 
 !!****f* ABINIT/ks2no
 !! NAME

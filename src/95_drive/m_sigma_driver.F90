@@ -115,7 +115,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
  use m_spacepar,      only : hartre
  use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
-                         &prt_chkp_rdm,rot_integrals,print_total_energy
+                         &prt_chkp_rdm,rot_integrals,print_total_energy,print_band_energies
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -228,8 +228,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: ucvol,ucvol_local,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- real(dp):: gwalpha,gwbeta,wmin,wmax,eik_new,gsqcut,boxcut,ecutf  
- complex(dpc) :: max_degw,cdummy,delta_band_ibik          
+ real(dp):: gwalpha,gwbeta,wmin,wmax,gsqcut,boxcut,ecutf  
+ complex(dpc) :: max_degw,cdummy
  logical :: wfknocheck,rdm_update,readchkprdm,prtchkprdm  
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
@@ -283,7 +283,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
  complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
  complex(dpc),allocatable :: rdm_k_full(:,:,:),rdm_k(:,:),potk(:,:),nateigv(:,:,:,:)
- complex(dpc),allocatable :: old_purex(:,:),new_hartr(:,:),mat2rot(:,:),Umat(:,:)
+ complex(dpc),allocatable :: old_purex(:,:),new_hartr(:,:)
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
  complex(dpc),allocatable :: sigcme_k(:,:,:,:)
@@ -2631,12 +2631,12 @@ endif
        old_purex(:,:)=czero
        new_hartr(:,:)=czero
        !
-       ! Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
+       ! A) Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
        !
        den_int=sum(gw_rhor(:,1))*ucvol_local/nfftf               ! Only restricted closed-shell calcs
        evext_energy=sum(gw_rhor(:,1)*vpsp(:))*ucvol_local/nfftf  ! Only restricted closed-shell calcs
        !
-       ! Coulomb <KS_i|Vh[NO]|KS_j>
+       ! B) Coulomb <KS_i|Vh[NO]|KS_j>
        !
        call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog
        ecutf=dtset%ecut
@@ -2673,7 +2673,7 @@ endif
          end do
        end do
        !
-       ! Exchange a*<KS_i|K^RANGE-SEP?[KS]|KS_j> and save old K 
+       ! C) Exchange a*<KS_i|K^RANGE-SEP?[KS]|KS_j> and save old K 
        !
        call setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,ngfftf,comm) ! Build Vcp_ks and Vcp_full  
        call xmpi_barrier(Wfd%comm)
@@ -2702,8 +2702,7 @@ endif
        call Wfd_nato_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_nato_all (KS->NO)
        call xmpi_barrier(Wfd%comm)
        !
-       ! Build all <NO_i|Vnl|NO_i> terms and save them on nl_bks(band,k,spin)
-       !      Then, compute the non-local energy as e_nlpsp_vfock 
+       ! D) Non-local <NO_i|Vnl|NO_i> terms [saved on nl_bks(band,k,spin)]
        !
        call Wfd_nato_all%get_nl_me(Cryst,Psps,Pawtab,bdm2_mask,nl_bks)
        evextnl_energy=zero
@@ -2718,7 +2717,7 @@ endif
        ABI_FREE(nl_bks)
        ABI_FREE(bdm2_mask)
        !
-       ! Exchange <NO_i|K[NO]|NO_j> 
+       ! E) Exchange <NO_i|K[NO]|NO_j> 
        !
        ! Get the matrix elements and save them on Sr%x_mat 
        do ikcalc=1,Sigp%nkptgw                                                 
@@ -2739,62 +2738,13 @@ endif
        call rot_integrals(Sigp,Sr,GW1RDM_me,Kmesh,nateigv)
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
        !
-       ! Compute and print Delta eik
+       ! Print Delta eik and band (state) energies
        !
-       ! Proceed to compute the Fock matrix elements.  
-       write(msg,'(a1)')  ' '
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a42)')  ' Computing band corrections Delta eik (eV)'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a42)')  ' -----------------------------------------'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a1)')  ' '
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a1)')  ' '
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a110)') ' Band corrections Delta eik = <KS_i|K[NO]-a*K[KS]+vH[NO]&
-             &-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a1)')  ' '
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       do ikcalc=1,Sigp%nkptgw
-         ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
-         write(msg,'(a127)')'---------------------------------------------------------&
-                 &--------------------------------------------------------------------'
-         call wrtout(std_out,msg,'COLL')
-         call wrtout(ab_out,msg,'COLL')
-         write(msg,'(a126)')' k-point  band      eik^GS        eik^new     Delta eik  &
-           &      K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]'
-         call wrtout(std_out,msg,'COLL')
-         call wrtout(ab_out,msg,'COLL')
-         do ib=b1gw,b2gw
-           delta_band_ibik=(new_hartr(ib,ikcalc)-KS_me%vhartree(ib,ib,ik_ibz,1))&
-           &+Sr%x_mat(ib,ib,ik_ibz,1)-KS_me%vxcval(ib,ib,ik_ibz,1)-old_purex(ib,ikcalc)
-           eik_new=real(KS_BSt%eig(ib,ik_ibz,1))+real(delta_band_ibik)
-           write(msg,'(i5,4x,i5,8(4x,f10.5))') &
-           & ik_ibz,ib,real(KS_BSt%eig(ib,ik_ibz,1))*Ha_eV,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
-           & real(Sr%x_mat(ib,ib,ik_ibz,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,&
-           & real(KS_me%vxcval(ib,ib,ik_ibz,1))*Ha_eV,&
-           & real(new_hartr(ib,ikcalc))*Ha_eV,real(KS_me%vhartree(ib,ib,ik_ibz,1))*Ha_eV
-           call wrtout(std_out,msg,'COLL')
-           call wrtout(ab_out,msg,'COLL')
-         enddo
-       enddo
-       write(msg,'(a127)')'---------------------------------------------------------&
-               &--------------------------------------------------------------------'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
+       call print_band_energies(b1gw,b2gw,Sr,Sigp,KS_me,Kmesh,KS_BSt,new_hartr,old_purex)
+       call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
        !
        ! Print the updated total energy and all energy components
        !
-       call xmpi_barrier(Wfd%comm)
        eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
        ekin_energy=mels_get_kiene(Sr,GW1RDM_me,Kmesh,QP_BSt)
        etot=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy       ! SD 2-RDM
@@ -2804,6 +2754,7 @@ endif
        !
        ! Clean GW1RDM_me
        !
+       call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
        call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
        ABI_FREE(old_purex)
        ABI_FREE(new_hartr)
