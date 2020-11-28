@@ -757,11 +757,11 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
  endif
  call xmpi_bcast(occs(:,:),master,Wfd%comm,ierr)
  if(ierr/=0) then
-   MSG_ERROR("Error distributing the occs read from the checkpoint file.")
+   MSG_ERROR("Error distributing the occs read from checkpoint file(s).")
  endif
  call xmpi_bcast(nateigv(:,:,:,:),master,Wfd%comm,ierr)
  if(ierr/=0) then
-   MSG_ERROR("Error distributing the natural orbital eigenvectors read from the checkpoint file.")
+   MSG_ERROR("Error distributing the natural orbital eigenvectors read from checkpoint file(s).")
  endif
 
 end subroutine read_chkp_rdm

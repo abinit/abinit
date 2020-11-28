@@ -2582,7 +2582,9 @@ endif
    call xmpi_barrier(Wfd%comm)
    ABI_FREE(sigmak_todo) 
 
-   ! MRM: first clean all non-req. arrays. Then, print WFK and DEN files, build band corrections, and compute new energies.
+   !
+   ! MRM: Print WFK and DEN files. Then build band corrections and compute new energies.
+   !
    if (rdm_update) then
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
      gw_rhor=0.0_dp
@@ -2821,7 +2823,7 @@ endif
        write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Ex         = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+       write(msg,'(a,2(es16.6,a))')' Ex[SD]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        write(msg,'(a,2(es16.6,a))')' Exc[MBB]   = : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
@@ -2849,7 +2851,10 @@ endif
        write(msg,'(a,1(es16.6))')  ' Density    = : ',den_int
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a)')' Vee[SD] (= Ehartree + Efock) energy obtained using GW 1-RDM:'
+       write(msg,'(a)')' Vee[SD] (= Ehartree + Ex[SD]) energy obtained using GW 1-RDM:'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a)')' Vee[MBB] (= Ehartree + Exc[MBB]) energy obtained using GW 1-RDM:'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        write(msg,'(a98)')'-------------------------------------------------------------------&
