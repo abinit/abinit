@@ -114,9 +114,9 @@ subroutine quadrature_sigma_cw(Sigp,Sr,weights)
   enddo
   ABI_FREE(freqs)
 
-end subroutine 
-
+end subroutine quadrature_sigma_cw 
 !!***
+
 !!****f* ABINIT/Calc_Ec_GM_k
 !! NAME
 !! calc_Ec_GM_k
