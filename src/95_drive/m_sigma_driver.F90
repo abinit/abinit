@@ -115,8 +115,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
  use m_spacepar,      only : hartre
  use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
-                         &prt_chkp_rdm,rot_integrals,print_total_energy,print_band_energies
- use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
+                         &prt_chkp_rdm,rot_integrals,print_total_energy,print_band_energies,quadrature_sigma_cw
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
                          destroy_operwan_realspace,destroy_plowannier,zero_operwan_realspace
@@ -220,15 +219,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm
+ integer :: ib1dm,ib2dm,gw1rdm,x1rdm
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: etot,etot2,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
+ real(dp) :: etot_sd,etot_mbb,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
  real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy 
  real(dp) :: ucvol,ucvol_local,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- real(dp):: gwalpha,gwbeta,wmin,wmax,gsqcut,boxcut,ecutf  
+ real(dp):: gsqcut,boxcut,ecutf  
  complex(dpc) :: max_degw,cdummy
  logical :: wfknocheck,rdm_update,readchkprdm,prtchkprdm  
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
@@ -263,7 +262,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
+ real(dp),allocatable :: weights(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -2449,37 +2448,9 @@ endif
        call read_chkp_rdm(Wfd,Kmesh,Sigp,QP_BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname)
      end if
      call xmpi_barrier(Wfd%comm)
-     ! Prepare arrays for the imaginary freq. integration of Sigma_c(iw)
-     order_int=Sigp%nomegasi 
-     write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a1)')' '
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     order_int=Sigp%nomegasi 
-     ABI_MALLOC(freqs,(order_int))
-     ABI_MALLOC(weights,(order_int))
-     gaussian_kind=1
-     gwalpha=zero
-     gwbeta=zero
-     wmin=zero
-     wmax=one
-     call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
-     ! From  0 to 1  -> 0 to infinity
-     weights(:)=weights(:)/(one-freqs(:))**two      ! Same freqs and weights as in
-     freqs(:)=freqs(:)/(one-freqs(:))               ! m_screening_driver.F90
-     ! Form complex frequencies from 0 to iInf and print them in the log file
-     write(msg,'(a52)')'           Re(iw)           Im(iw)           Weight  '
-     call wrtout(std_out,msg,'COLL')
-     write(msg,'(a52)')'          --------         --------         -------- '
-     call wrtout(std_out,msg,'COLL')
-     do ifreqs=1,order_int
-       Sigp%omegasi(ifreqs)=cmplx(zero,freqs(ifreqs))
-       Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
-       write(msg,'(3f17.5)') Sr%omega_i(ifreqs),weights(ifreqs)
-       call wrtout(std_out,msg,'COLL')
-     enddo
+     ! Prepare arrays for the imaginary freq. integration (quadrature) of Sigma_c(iw)
+     ABI_MALLOC(weights,(Sigp%nomegasi))
+     call quadrature_sigma_cw(Sigp,Sr,weights) 
    end if  
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
@@ -2574,7 +2545,6 @@ endif
      call xmpi_barrier(Wfd%comm)
      if (rdm_update) then
        ABI_FREE(rdm_k_full) 
-       ABI_FREE(freqs)
        ABI_FREE(weights)
      end if
    end if
@@ -2583,7 +2553,7 @@ endif
    ABI_FREE(sigmak_todo) 
 
    !
-   ! MRM: Print WFK and DEN files. Then build band corrections and compute new energies.
+   ! 1) Print WFK and DEN files. 2) Build band corrections and compute new energies.
    !
    if (rdm_update) then
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
@@ -2695,7 +2665,7 @@ endif
        call xmpi_barrier(Wfd%comm)
        call vcoul_free(Vcp_ks)
        !
-       ! Use the Wfd with new name (Wfd_nato_all) because it will contain the GW 1RDM nat. orbs. (bands)
+       ! Use the Wfd with 'new name' (Wfd_nato_all) because it will contain the GW 1RDM nat. orbs. (bands)
        !
        MSG_COMMENT("From now on, the Wfd bands will contain the nat. orbs. ones")
        Wfd_nato_all => Wfd
@@ -2747,10 +2717,10 @@ endif
        !
        eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
        ekin_energy=mels_get_kiene(Sr,GW1RDM_me,Kmesh,QP_BSt)
-       etot=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy       ! SD 2-RDM
-       etot2=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+exc_mbb_energy ! MBB 2-RDM
+       etot_sd=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy       ! SD 2-RDM
+       etot_mbb=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+exc_mbb_energy ! MBB 2-RDM
        call print_total_energy(ekin_energy,evext_energy,evextnl_energy,QP_energies%e_corepsp,eh_energy,ex_energy,&
-       &exc_mbb_energy,QP_energies%e_ewald,etot,etot2,den_int)
+       &exc_mbb_energy,QP_energies%e_ewald,etot_sd,etot_mbb,den_int)
        !
        ! Clean GW1RDM_me
        !
