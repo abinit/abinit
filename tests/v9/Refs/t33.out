@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 28 Nov 2020.
-- ( at 00h51 )
+- ( at 14h44 )
   
 - input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33/t33.in
 - output file    -> t33.out
@@ -1974,7 +1974,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  Evext_nl   = :     1.139732E+00 Ha ,    3.101367E+01 eV
  Epsp_core  = :     5.612462E-01 Ha ,    1.527229E+01 eV
  Ehartree   = :     5.559652E-01 Ha ,    1.512858E+01 eV
- Ex         = :    -2.100173E+00 Ha ,   -5.714862E+01 eV
+ Ex[SD]     = :    -2.100173E+00 Ha ,   -5.714862E+01 eV
  Exc[MBB]   = :    -2.365523E+00 Ha ,   -6.436915E+01 eV
  Enn        = :    -8.435820E+00 Ha ,   -2.295503E+02 eV
  -------------------------------------------------------------------------------------------------
@@ -1983,7 +1983,8 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  Vee[SD]    = :    -1.544208E+00 Ha ,   -4.202003E+01 eV
  Vee[MBB]   = :    -1.809558E+00 Ha ,   -4.924057E+01 eV
  Density    = :     7.963172E+00
- Vee[SD] (= Ehartree + Efock) energy obtained using GW 1-RDM:
+ Vee[SD] (= Ehartree + Ex[SD]) energy obtained using GW 1-RDM:
+ Vee[MBB] (= Ehartree + Exc[MBB]) energy obtained using GW 1-RDM:
  -------------------------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -2233,10 +2234,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         22.6  wall=         22.7
+- Proc.   0 individual time (sec): cpu=         23.2  wall=         23.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.6  wall=         22.7
++Overall time at end (sec) : cpu=         23.2  wall=         23.3
