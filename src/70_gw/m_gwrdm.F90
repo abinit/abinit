@@ -43,7 +43,7 @@ module m_gwrdm
 !!***
  
  public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
-           &prt_chkp_rdm,rot_integrals
+           &prt_chkp_rdm,rot_integrals,print_total_energy
 !!***
 
 contains
@@ -930,6 +930,98 @@ subroutine rot_integrals(Sigp,Sr,Mels,Kmesh,nateigv)
   end do
 end subroutine rot_integrals
 !!***
+
+!!****f* ABINIT/print_total_energ
+!! NAME
+!!  print_total_energ
+!!
+!! FUNCTION
+!!  Print total energy and energy components
+!!
+!!
+!! INPUTS
+!! all energy terms are self-explanatory
+!! 
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_sigma_driver
+!!
+!! CHILDREN
+subroutine print_total_energy(ekin_energy,evext_energy,evextnl_energy,e_corepsp,eh_energy,ex_energy,&
+       &exc_mbb_energy,e_ewald,etot,etot2,den_int)
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: ekin_energy,evext_energy,evextnl_energy,e_corepsp,eh_energy,ex_energy,&
+                        &exc_mbb_energy,e_ewald,etot,etot2,den_int
+!arrays
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+!arrays
+       
+  write(msg,'(a1)')' '
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a98)')'---------------------------------------------------------------&
+          &----------------------------------'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Ekinetic   = : ',ekin_energy,' Ha ,',ekin_energy*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Evext_l    = : ',evext_energy,' Ha ,',evext_energy*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Evext_nl   = : ',evextnl_energy,' Ha ,',evextnl_energy*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Epsp_core  = : ',e_corepsp,' Ha ,',e_corepsp*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Ex[SD]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Exc[MBB]   = : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Enn        = : ',e_ewald,' Ha ,',e_ewald*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a98)')'-----------------------------------------------------------------&
+          &--------------------------------'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Etot[SD]   = : ',etot,' Ha ,',etot*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Etot[MBB]  = : ',etot2,' Ha ,',etot2*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,2(es16.6,a))')' Vee[MBB]   = : ',(exc_mbb_energy+eh_energy),' Ha ,',(exc_mbb_energy+eh_energy)*Ha_eV,' eV'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a,1(es16.6))')  ' Density    = : ',den_int
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a)')' Vee[SD] (= Ehartree + Ex[SD]) energy obtained using GW 1-RDM:'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a)')' Vee[MBB] (= Ehartree + Exc[MBB]) energy obtained using GW 1-RDM:'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a98)')'-------------------------------------------------------------------&
+          &------------------------------'
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+
+end subroutine print_total_energy       
 
 !!****f* ABINIT/ks2no
 !! NAME

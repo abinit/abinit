@@ -115,7 +115,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
  use m_spacepar,      only : hartre
  use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
-                         &prt_chkp_rdm,rot_integrals
+                         &prt_chkp_rdm,rot_integrals,print_total_energy
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -2635,19 +2635,6 @@ endif
        !
        den_int=sum(gw_rhor(:,1))*ucvol_local/nfftf               ! Only restricted closed-shell calcs
        evext_energy=sum(gw_rhor(:,1)*vpsp(:))*ucvol_local/nfftf  ! Only restricted closed-shell calcs
-       ! Proceed to compute the Fock matrix elements.  
-       write(msg,'(a1)')  ' '
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a42)')  ' Computing band corrections Delta eik (eV)'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a42)')  ' -----------------------------------------'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a1)')  ' '
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
        !
        ! Coulomb <KS_i|Vh[NO]|KS_j>
        !
@@ -2686,7 +2673,7 @@ endif
          end do
        end do
        !
-       ! Exchange a*<KS_i|K[KS]|KS_j> and save old K 
+       ! Exchange a*<KS_i|K^RANGE-SEP?[KS]|KS_j> and save old K 
        !
        call setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,ngfftf,comm) ! Build Vcp_ks and Vcp_full  
        call xmpi_barrier(Wfd%comm)
@@ -2747,15 +2734,26 @@ endif
        ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)         ! Save the new total exchange energy Ex = Ex[GW.1RDM] 
        exc_mbb_energy=sigma_get_excene(Sr,Kmesh,QP_BSt)   ! Save the new total exchange-correlation MBB energy Exc = Exc^MBB[GW.1RDM] 
        !
-       ! Transform      <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>,
-       !                <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>,
-       ! and              <KS_i|T|KS_j>   ->   <NO_i|T|NO_j>
+       ! Transform <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>, <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>, & <KS_i|T|KS_j> -> <NO_i|T|NO_j>
        !
        call rot_integrals(Sigp,Sr,GW1RDM_me,Kmesh,nateigv)
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
        !
        ! Compute and print Delta eik
        !
+       ! Proceed to compute the Fock matrix elements.  
+       write(msg,'(a1)')  ' '
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a42)')  ' Computing band corrections Delta eik (eV)'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a42)')  ' -----------------------------------------'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a1)')  ' '
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
        write(msg,'(a1)')  ' '
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
@@ -2799,68 +2797,10 @@ endif
        call xmpi_barrier(Wfd%comm)
        eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
        ekin_energy=mels_get_kiene(Sr,GW1RDM_me,Kmesh,QP_BSt)
-       etot=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy
-       etot2=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+exc_mbb_energy
-       write(msg,'(a1)')' '
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a98)')'---------------------------------------------------------------&
-               &----------------------------------'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Ekinetic   = : ',ekin_energy,' Ha ,',ekin_energy*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Evext_l    = : ',evext_energy,' Ha ,',evext_energy*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Evext_nl   = : ',evextnl_energy,' Ha ,',evextnl_energy*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Epsp_core  = : ',QP_energies%e_corepsp,' Ha ,',QP_energies%e_corepsp*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Ex[SD]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Exc[MBB]   = : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Enn        = : ',QP_energies%e_ewald,' Ha ,',QP_energies%e_ewald*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a98)')'-----------------------------------------------------------------&
-               &--------------------------------'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Etot[SD]   = : ',etot,' Ha ,',etot*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Etot[MBB]  = : ',etot2,' Ha ,',etot2*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Vee[MBB]   = : ',(exc_mbb_energy+eh_energy),' Ha ,',(exc_mbb_energy+eh_energy)*Ha_eV,' eV'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,1(es16.6))')  ' Density    = : ',den_int
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a)')' Vee[SD] (= Ehartree + Ex[SD]) energy obtained using GW 1-RDM:'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a)')' Vee[MBB] (= Ehartree + Exc[MBB]) energy obtained using GW 1-RDM:'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a98)')'-------------------------------------------------------------------&
-               &------------------------------'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
+       etot=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy       ! SD 2-RDM
+       etot2=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+exc_mbb_energy ! MBB 2-RDM
+       call print_total_energy(ekin_energy,evext_energy,evextnl_energy,QP_energies%e_corepsp,eh_energy,ex_energy,&
+       &exc_mbb_energy,QP_energies%e_ewald,etot,etot2,den_int)
        !
        ! Clean GW1RDM_me
        !
