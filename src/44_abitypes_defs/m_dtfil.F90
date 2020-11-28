@@ -293,6 +293,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read     
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
+  character(len=fnlen) :: fnameabo_ks_den         ! KS DEN file at Sigma level
   character(len=fnlen) :: fnameabo_chkp_rdm       ! Checkpoint for GW@DFA to write
   character(len=fnlen) :: fnameabo_dos
   character(len=fnlen) :: fnameabo_dvdb
@@ -796,6 +797,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_qp_eig=trim(dtfil%filnam_ds(4))//'_QP_DB.nc' ! TODO change name
  dtfil%fnameabo_rpa=trim(dtfil%filnam_ds(4))//'_RPA'
  dtfil%fnameabo_scr=trim(dtfil%filnam_ds(4))//'_SCR'
+ dtfil%fnameabo_ks_den=trim(dtfil%filnam_ds(4))//'_KS_DEN'
  dtfil%fnameabo_chkp_rdm=trim(dtfil%filnam_ds(4))//'_CHKP_RDM_'
  dtfil%fnameabo_sgm=trim(dtfil%filnam_ds(4))//'_SGM'
  dtfil%fnameabo_sgr=trim(dtfil%filnam_ds(4))//'_SGR'

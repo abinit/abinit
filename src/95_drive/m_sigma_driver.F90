@@ -867,7 +867,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
  if (rdm_update) then ! MRM: print initial (KS) density file (useful to compare DEN files or cubes)
-   gw1rdm_fname='KS_sigma_DEN'
+   gw1rdm_fname=trim(dtfil%fnameabo_ks_den)
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
    Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=KS_BSt)
  end if
