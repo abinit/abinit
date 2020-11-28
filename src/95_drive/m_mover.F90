@@ -45,7 +45,7 @@ module m_mover
 #endif
 
  use defs_abitypes,        only : MPI_type
- use m_fstrings,           only : strcat, sjoin, indent
+ use m_fstrings,           only : strcat, sjoin, indent, itoa
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
  use m_time,               only : abi_wtime, sec2str
@@ -79,6 +79,7 @@ module m_mover
  use scup_global, only : global_set_parent_iter,global_set_print_parameters
 #endif
  use m_scup_dataset
+
  implicit none
 
  private
@@ -349,11 +350,11 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      call abihist_free(hist_prev)
    end if
 !  If restarxf specifies to start to the last iteration
-   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then 
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
      if(present(effective_potential))then
        call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
        xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
-       hist%ihist = 1 
+       hist%ihist = 1
      end if
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
@@ -488,16 +489,16 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
+     write(message,*)sjoin("mover: time step:", itoa(itime - 1), "took:",sec2str(wtime_step), "<<< TIME")
      if(need_verbose)call wrtout(std_out, message)
      if (have_timelimit_in(MY_NAME)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
-           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
-&           ". Will exit itime loop in mover."
-           if(need_verbose)MSG_COMMENT(message)
-           if(need_verbose)call wrtout(ab_out, message)
+           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())), &
+             ". Will exit itime loop in mover."
+           if(need_verbose) MSG_COMMENT(message)
+           if(need_verbose) call wrtout(ab_out, message)
            timelimit_exit = 1
            exit
          end if
@@ -513,6 +514,17 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    if(ab_mover%ionmov==23 .and. .not. lotf_extrapolation(itime)) skipcycle=.True.
 #endif
 
+   ! If RMM-DIIS is used, decrease the number of NSCF steps done with wfoptalg before activating RMM-DIIS.
+   ! In vtowfk we have the condition: istep > 3 + dtset%rmm_diis
+   ! so setting rmm_diis = 1 gives:
+   !    4 NSCF iterations for itime == 1
+   !    1 NSCF iterations for itime >= 2.
+   if (scfcv_args%dtset%rmm_diis /= 0 .and. itime == 2) then
+     scfcv_args%dtset%rmm_diis = scfcv_args%dtset%rmm_diis - 3
+     if (scfcv_args%dtset%rmm_diis == 0) scfcv_args%dtset%rmm_diis = 1
+     call wrtout(std_out, sjoin(" itime == 2 with RMM-DIIS --> setting rmm_diis to:", itoa(scfcv_args%dtset%rmm_diis)))
+   end if
+
 !  ###########################################################
 !  ### 09. Loop for icycle (From 1 to ncycle)
    do icycle=1,ncycle
@@ -525,21 +537,19 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ### 10. Output for each icycle (and itime)
      if(need_verbose)then
        write(message,fmt)&
-&       ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
+        ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
         call wrtout([std_out, ab_out], message)
      end if
-     if (useprtxfase) then
-       call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
-     end if
+     if (useprtxfase) call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
 
      xred_prev(:,:)=xred(:,:)
      rprimd_prev(:,:)=rprimd(:,:)
 
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
-     
+
      call symmetrize_xred(ab_mover%natom,&
-&     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred,indsym=scfcv_args%indsym)
+      scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred,indsym=scfcv_args%indsym)
 
      change=any(xred(:,:)/=xred_prev(:,:))
      if (change)then
@@ -604,7 +614,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
          if (need_scfcv_cycle) then
 
            call dtfil_init_time(dtfil,iapp)
-           call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+           call scfcv_run(scfcv_args, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
            if (conv_retcode == -1) then
                message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
                MSG_WARNING(message)
@@ -972,7 +982,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  call abihist_free(hist)
  call abihist_free(hist_prev)
-
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 

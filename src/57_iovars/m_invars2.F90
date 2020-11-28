@@ -641,6 +641,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rmm_diis',tread,'INT')
+ if(tread==1) dtset%rmm_diis=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rmm_diis_savemem',tread,'INT')
+ if(tread==1) dtset%rmm_diis_savemem=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlinear_info',tread,'INT')
  if(tread==1) dtset%nonlinear_info=intarr(1)
 
@@ -737,9 +742,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nonscf_gkk',tread,'INT')
  if(tread==1) dtset%use_nonscf_gkk=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
- if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_yaml',tread,'INT')
  if(tread==1) dtset%use_yaml=intarr(1)
@@ -1242,13 +1244,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkdilatmx',tread,'INT')
    if(tread==1) dtset%chkdilatmx=intarr(1)
-  
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
    if(tread==1) dtset%chkprim=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
    if(tread==1) dtset%chksymbreak=intarr(1)
-  
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymtnons',tread,'INT')
    if(tread==1) dtset%chksymtnons=intarr(1)
 
@@ -2289,38 +2291,42 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usexcnhat',tread,'INT')
  if(tread==1) dtset%usexcnhat_orig=intarr(1)
 
+ ! Read use_gemm_nonlop before useylm
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
+ if(tread==1) dtset%use_gemm_nonlop=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useylm',tread,'INT')
  if(tread==1) then
    dtset%useylm=intarr(1)
-   if ((usepaw==1).and.(dtset%useylm==0)) then
+   if (usepaw==1.and.dtset%useylm==0) then
      write(msg, '(5a)' )&
       'Pseudopotential file is PAW format (pspcod=7 or 17) while',ch10,&
       'input variable "useylm" has the incompatible value 0 !',ch10,&
       'Action: change psp format or "useylm" value in your input file.'
      MSG_ERROR(msg)
    end if
-   if ((dtset%tfkinfunc==2).and.(dtset%useylm==0)) then
+   if (dtset%tfkinfunc==2.and.dtset%useylm==0) then
      write(msg, '(a,a,a,a,a)' )&
       'You are using recursion method (tfkinfunc=2)  while',ch10,&
       'input variable "useylm" has the incompatible value 0 !',ch10,&
       'Action: change  "useylm" value in your input file.'
      MSG_ERROR(msg)
    end if
-   if ((dtset%efmas==1).and.(dtset%useylm==0)) then
+   if (dtset%efmas==1.and.dtset%useylm==0) then
      write(msg, '(a,a,a,a,a)' )&
       'The calculation of effective masses requires the input variable, ',ch10,&
       '"useylm" to be 1, while in your input file, useylm=0',ch10,&
       'Action: change "useylm" value in your input file.'
      MSG_ERROR(msg)
    end if
-   if ((dtset%rf2_dkdk/=0).and.(dtset%useylm==0)) then
+   if (dtset%rf2_dkdk/=0.and.dtset%useylm==0) then
      write(msg, '(a,a,a,a,a)' )&
       'The calculation of 2nd order k perturbation requires the input variable, ',ch10,&
       '"useylm" to be 1, while in your input file, useylm=0',ch10,&
       'Action: change "useylm" value in your input file.'
      MSG_ERROR(msg)
    end if
-   if ((dtset%rf2_dkde/=0).and.(dtset%useylm==0)) then
+   if (dtset%rf2_dkde/=0.and.dtset%useylm==0) then
      write(msg, '(a,a,a,a,a)' )&
       'The calculation of the 2nd order k/Efield perturbation requires the input variable, ',ch10,&
       '"useylm" to be 1, while in your input file, useylm=0',ch10,&
@@ -2328,12 +2334,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      MSG_ERROR(msg)
    end if
  end if
- if (usepaw==1) dtset%useylm=1
- if (usepaw==1 .and. dtset%usewvl==1) then
-   dtset%useylm=0
- end if
- if (dtset%efmas==1.or.dtset%use_gpu_cuda==1.or.dtset%rf2_dkdk/=0.or.dtset%rf2_dkde/=0) dtset%useylm=1
 
+ ! Here we set useylm automatically to 1
+ if (dtset%use_gemm_nonlop == 1) dtset%useylm = 1
+ if (usepaw==1) dtset%useylm=1
+ if (usepaw==1 .and. dtset%usewvl==1) dtset%useylm=0
+ if (dtset%efmas==1.or.dtset%use_gpu_cuda==1.or.dtset%rf2_dkdk/=0.or.dtset%rf2_dkde/=0) dtset%useylm=1
  if(dtset%tfkinfunc==2 .and. dtset%usewvl==0 ) then
    dtset%useylm=1
    dtset%userec=1
