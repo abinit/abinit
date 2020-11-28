@@ -461,7 +461,7 @@ type, public :: dataset_type
  integer :: prepgkk = 0
  integer :: prtbbb = 0
  integer :: prtbltztrp = 0
- integer :: prtchkprdm = 0
+ integer :: prtchkprdm = 1
  integer :: prtcif = 0
  integer :: prtden
  integer :: prtdensph = 1
