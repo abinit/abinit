@@ -33,7 +33,7 @@ module m_gwrdm
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
                              get_bz_item, has_IBZ_item, find_qmesh
  use m_dtset
-
+ use m_gaussian_quadrature, only: cgqf
  use defs_datatypes,   only : ebands_t
  use m_sigma,          only : sigma_t
  use m_xctk,           only : xcden  
@@ -42,11 +42,79 @@ module m_gwrdm
  private :: no2ks,ks2no,printdm1 
 !!***
  
- public :: calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
+ public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
            &prt_chkp_rdm,rot_integrals,print_total_energy,print_band_energies
 !!***
 
 contains
+
+!!****f* ABINIT/quadrature_sigma_cw
+!! NAME
+!! quadrature_sigma_cw
+!!
+!! FUNCTION
+!!  Quadrature frequencies used for Sigma_c(iw) integration
+!!
+!! INPUTS
+!! Sigp<sigparams_t>=Parameters governing the self-energy calculation.
+!! Sr=sigma_t (see the definition of this structured datatype)
+!! weights=real quadrature weights.
+!!
+!! OUTPUT
+!! Updtae Sigp and Sr imaginary frequencies with iw, and weights with the quadrature weights 
+!!
+!! PARENTS
+!!      m_sigma_driver
+!!
+!! CHILDREN
+subroutine quadrature_sigma_cw(Sigp,Sr,weights)
+!Arguments ------------------------------------
+!scalars
+ type(sigparams_t),intent(inout) :: Sigp
+ type(sigma_t),intent(inout) :: Sr
+!arrays
+ real(dp),intent(inout) :: weights(:)
+!Local variables ------------------------------
+!scalars
+ integer :: ifreqs,order_int,gaussian_kind
+ real(dp) :: gwalpha,gwbeta,wmin,wmax
+ character(len=500) :: msg
+!arrays
+ real(dp),allocatable :: freqs(:)
+!************************************************************************
+
+  order_int=Sigp%nomegasi
+  write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  write(msg,'(a1)')' '
+  call wrtout(std_out,msg,'COLL')
+  call wrtout(ab_out,msg,'COLL')
+  order_int=Sigp%nomegasi
+  ABI_MALLOC(freqs,(order_int))
+  gaussian_kind=1
+  gwalpha=zero
+  gwbeta=zero
+  wmin=zero
+  wmax=one
+  call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
+  ! From  0 to 1 -> 0 to infinity
+  weights(:)=weights(:)/(one-freqs(:))**two      
+  freqs(:)=freqs(:)/(one-freqs(:))               
+  ! Form complex frequencies from 0 to iInf and print them in the log file
+  write(msg,'(a52)')'           Re(iw)           Im(iw)           Weight  '
+  call wrtout(std_out,msg,'COLL')
+  write(msg,'(a52)')'          --------         --------         -------- '
+  call wrtout(std_out,msg,'COLL')
+  do ifreqs=1,order_int
+    Sigp%omegasi(ifreqs)=cmplx(zero,freqs(ifreqs))
+    Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
+    write(msg,'(3f17.5)') Sr%omega_i(ifreqs),weights(ifreqs)
+    call wrtout(std_out,msg,'COLL')
+  enddo
+  ABI_FREE(freqs)
+
+end subroutine 
 
 !!***
 !!****f* ABINIT/Calc_Ec_GM_k
@@ -136,7 +204,7 @@ end function calc_Ec_GM_k
 !! ik_ibz= the label of k-point in the IBZ.
 !! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
 !! pot=Self-energy-Potential difference, matrix size (i,j), where i and j belong to k.
-!! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
+!! BSt=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
 !!
@@ -570,50 +638,6 @@ subroutine print_tot_occ(sigma,kmesh,BSt)
  call wrtout(ab_out,msg,'COLL')
 
 end subroutine print_tot_occ
-!!***
-
-!!****f* ABINIT/rotate_ks_no
-!! NAME
-!! rotate_ks_no
-!!
-!! FUNCTION
-!! Rotate a matrix from KS to NO basis and vicerversa.
-!!
-!! INPUTS
-!! ib1=min band for given k
-!! ib2=max band for given k.
-!! Umat=array containing the eigenvectors in Columns (a unitary matrix)
-!! Mat=initially an array containing the matrix elements in KS or NO basis
-!! option=0 rotate from NO -> KS | 1 rotate from KS -> NO
-!!
-!! OUTPUT
-!! Rotate a matrix from KS to NO basis and vicerversa and save the new matrix on Mat.
-!! Mat=at the end an array containing the matrix elements in NO or KS basis
-!!
-!! PARENTS
-!!  m_sigma_driver.f90
-!! CHILDREN
-!! SOURCE
-
-subroutine rotate_ks_no(ib1,ib2,Mat,Umat,option)
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: ib1,ib2,option
-!arrays
- complex(dpc),intent(in) :: Umat(:,:)
- complex(dpc),intent(inout) :: Mat(:,:)
-!Local variables ------------------------------
-!scalars
- integer:: ndim
-!arrays
-!************************************************************************
- ndim=ib2-ib1+1
- if (option==0) then
-   call no2ks(ndim,Mat,Umat)
- else
-   call ks2no(ndim,Mat,Umat)
- end if
-end subroutine rotate_ks_no
 !!***
 
 !!****f* ABINIT/read_chkp_rdm
@@ -1118,6 +1142,50 @@ subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,BSt,new_hartr,old_pu
   call wrtout(ab_out,msg,'COLL')
 
 end subroutine print_band_energies
+
+!!****f* ABINIT/rotate_ks_no
+!! NAME
+!! rotate_ks_no
+!!
+!! FUNCTION
+!! Rotate a matrix from KS to NO basis and vicerversa.
+!!
+!! INPUTS
+!! ib1=min band for given k
+!! ib2=max band for given k.
+!! Umat=array containing the eigenvectors in Columns (a unitary matrix)
+!! Mat=initially an array containing the matrix elements in KS or NO basis
+!! option=0 rotate from NO -> KS | 1 rotate from KS -> NO
+!!
+!! OUTPUT
+!! Rotate a matrix from KS to NO basis and vicerversa and save the new matrix on Mat.
+!! Mat=at the end an array containing the matrix elements in NO or KS basis
+!!
+!! PARENTS
+!!  m_sigma_driver.f90
+!! CHILDREN
+!! SOURCE
+
+subroutine rotate_ks_no(ib1,ib2,Mat,Umat,option)
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ib1,ib2,option
+!arrays
+ complex(dpc),intent(in) :: Umat(:,:)
+ complex(dpc),intent(inout) :: Mat(:,:)
+!Local variables ------------------------------
+!scalars
+ integer:: ndim
+!arrays
+!************************************************************************
+ ndim=ib2-ib1+1
+ if (option==0) then
+   call no2ks(ndim,Mat,Umat)
+ else
+   call ks2no(ndim,Mat,Umat)
+ end if
+end subroutine rotate_ks_no
+!!***
 
 !!****f* ABINIT/ks2no
 !! NAME
