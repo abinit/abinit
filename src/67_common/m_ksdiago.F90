@@ -398,8 +398,8 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  !nvloc=1; if (nspden==4) nvloc=4
  ABI_MALLOC(vlocal, (n4,n5,n6,gs_hamk%nvloc))
 
- !call gspot_transgrid_and_pack(spin, nspden, psps%usepaw, nfftf, nfft, ngfft, gs_hamkq%nvloc, &
- !          pawfgr, mpi_enreg, vtrial, v1scf(:,:,:,imyp), vlocal, vlocal1(:,:,:,:,imyp))
+ !call gspot_transgrid_and_pack(isppol, nspden, psps%usepaw, nfftf, nfft, ngfft, gs_hamkq%nvloc, &
+ !          pawfgr, mpi_enreg, vtrial, vlocal)
 
  if (nspden/=4)then
    if (Psps%usepaw==0.or.Pawfgr%usefinegrid==0) then

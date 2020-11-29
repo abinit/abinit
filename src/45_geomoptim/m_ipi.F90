@@ -225,7 +225,7 @@ subroutine ipi_check_initial_consistency(in_natom, in_rprimd, in_xred, ierr)
 end subroutine ipi_check_initial_consistency
 !!***
 
-!!****f* m_ipi/ipi_check_initial_consistency
+!!****f* m_ipi/handle_posdata
 !! NAME
 !! handle_posdata
 !!
@@ -325,9 +325,10 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
 
 !local variables
  integer,parameter :: master = 0
- integer :: my_rank, natom, new_natom, ierr, ihist_prev
+ integer :: my_rank, natom, new_natom, ierr !, ihist_prev
  real(dp) :: etotal, ucvol
  character(len=HDRLEN) :: header
+ character(len=500) :: msg
 !arrays
  real(dp) :: acell(3), rprimd(3,3), xred(3,ab_mover%natom), strten(6), sigma(3,3)
  real(dp) :: new_rprimd(3, 3)
@@ -335,7 +336,8 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
 
 ! *************************************************************************
 
- !print *, "in ipi_pred"
+ write(msg, "(3(a,i0))")" ipi_pred: itime: ", itime, ", ntime: ", ntime, ", iexit:", iexit
+ call wrtout(std_out, msg)
 
  natom = ab_mover%natom
  ! Obtain the present values from the history

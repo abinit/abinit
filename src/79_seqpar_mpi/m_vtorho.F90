@@ -696,6 +696,16 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 
 !    Set up local potential vlocal with proper dimensioning, from vtrial
 !    Also take into account the spin.
+
+#if 1
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                   dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
+     if (with_vxctau) then
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                     dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+     end if
+#else
+
      if(dtset%nspden/=4)then
        if (psps%usepaw==0.or.pawfgr%usefinegrid==0) then
          call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal,2)
@@ -739,6 +749,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
        end if
        ABI_DEALLOCATE(vlocal_tmp)
      end if ! nspden
+#endif
 
      rhoaug(:,:,:,:)=zero
 
@@ -2494,6 +2505,126 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
  ABI_DEALLOCATE(flag_receive)
 
 end subroutine cgq_builder
+!!***
+
+!!****f* ABINIT/gspot_transgrid_and_pack
+!! NAME
+!! gspot_transgrid_and_pack
+!!
+!! FUNCTION
+!!  Set up local potential vlocal on the coarse FFT mesh with proper dimensioning from vtrial given on the fine mesh.
+!!  Also take into account the spin.
+!!
+!! INPUTS
+!!  isppol=Spin polarization.
+!!  usepaw=1 if PAW
+!!  paral_kgb: 1 if paral_kgb
+!!  nfft=(effective) number of FFT grid points on the coarse mesh (for this processor)
+!!  ngfft(18)contain all needed information about 3D FFT, for the coarse FFT mesh. see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nfftf=(effective) number of FFT grid points on the fine mesh (for this processor)
+!!  nvloc==1 if nspden <=2, nvloc==4 for nspden==4,
+!!  nspden=Number of spin density components.
+!!  ncomp=Number of extra components in vtrial and vlocal (e.g. 1 if LDA/GGA pot, 4 for Meta-GGA, etc).
+!!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! OUTPUT
+!!  vlocal(n4,n5,n6,nvloc,ncomp))
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nfftf, &
+                                    nspden, nvloc, ncomp, pawfgr, mpi_enreg, vtrial, vlocal)
+
+!Arguments -------------------------------
+ integer,intent(in) :: isppol, nspden, ncomp, usepaw, paral_kgb, nfft, nfftf, nvloc
+ type(pawfgr_type), intent(in) :: pawfgr
+ type(MPI_type), intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(inout) :: vtrial(nfftf, nspden, ncomp)
+ real(dp),intent(out) :: vlocal(ngfft(4), ngfft(5), ngfft(6), nvloc, ncomp)
+
+
+!Local variables-------------------------------
+!scalars
+ integer :: n1,n2,n3,n4,n5,n6,ispden,ic
+ real(dp) :: rhodum(1)
+ real(dp),allocatable :: cgrvtrial(:,:), vlocal_tmp(:,:,:)
+
+! *************************************************************************
+
+ ! Coarse mesh.
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
+
+ ! Set up local potential vlocal with proper dimensioning, from vtrial
+ ! Also take into account the spin.
+ if (nspden /= 4) then
+   if (usepaw == 0 .or. pawfgr%usefinegrid == 0) then
+     ! Fine mesh == Coarse mesh.
+     do ic=1,ncomp
+       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial(:,:,ic),vlocal(:,:,:,:,ic),2)
+     end do
+     !if(with_vxctau) then
+     !  do ii=1,4
+     !    call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,&
+     !                vxctau(:,:,ii),vxctaulocal(:,:,:,:,ii),2)
+     !  end do
+     !end if
+   else
+     ! Transfer from fine mesh to coarse and then pack data
+     ABI_ALLOCATE(cgrvtrial,(nfft,nspden))
+     do ic=1,ncomp
+       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,&
+                      rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
+       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,&
+                   cgrvtrial,vlocal(:,:,:,:,ic),2)
+     end do
+     !if(with_vxctau) then
+     !  do ii=1,4
+     !    call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,&
+     !                  rhodum,rhodum,cgrvtrial,vxctau(:,:,ii))
+     !    call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,&
+     !                cgrvtrial,vxctaulocal(:,:,:,:,ii),2)
+     !  end do
+     !end if
+     ABI_DEALLOCATE(cgrvtrial)
+   end if
+ else
+   ! nspden == 4. replace isppol by loop over ispden.
+   ABI_ALLOCATE(vlocal_tmp, (n4,n5,n6))
+   if (usepaw == 0 .or. pawfgr%usefinegrid == 0) then
+     ! Fine mesh == Coarse mesh.
+     do ic=1,ncomp
+       do ispden=1,nspden
+         call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial(:,:,ic),vlocal_tmp,2)
+         vlocal(:,:,:,ispden,ic) = vlocal_tmp(:,:,:)
+       end do
+     end do
+   else
+     ! Transfer from fine mesh to coarse and then pack data
+     ABI_ALLOCATE(cgrvtrial,(nfft,nspden))
+     do ic=1,ncomp
+       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
+       do ispden=1,nspden
+         call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,cgrvtrial,vlocal_tmp,2)
+         vlocal(:,:,:,ispden,ic) = vlocal_tmp(:,:,:)
+       end do
+     end do
+     ABI_DEALLOCATE(cgrvtrial)
+   end if
+   ABI_DEALLOCATE(vlocal_tmp)
+ end if ! nspden
+
+end subroutine gspot_transgrid_and_pack
 !!***
 
 end module m_vtorho

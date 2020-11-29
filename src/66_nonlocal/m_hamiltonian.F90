@@ -1139,7 +1139,7 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
  integer :: iat,iatom
  logical :: compute_gbound_
  real(dp) :: arg
- character(len=100) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -1194,8 +1194,7 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
      ham%gbound_kp(:,:)=gbound_kp(:,:)
    else
      if (.not.associated(ham%kg_kp)) then
-       msg='Something is missing for gbound_kp computation!'
-       MSG_BUG(msg)
+       MSG_BUG('Something is missing for gbound_kp computation!')
      end if
      ABI_ALLOCATE(ham%gbound_kp,(2*ham%mgfft+8,2))
      call sphereboundary(ham%gbound_kp,ham%istwf_kp,ham%kg_kp,ham%mgfft,ham%npw_kp)
