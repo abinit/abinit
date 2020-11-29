@@ -564,54 +564,17 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  do isppol=1,dtset%nsppol
    ikg=0
 
-!  Set up local potential vlocal with proper dimensioning, from vtrial
-!  Also take into account the spin.
-   if(dtset%nspden/=4)then
-     if (psps%usepaw==0.or.pawfgr%usefinegrid==0) then
-       call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal,2)
-       if(with_vxctau) then
-         do ispden=1,4
-           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-&           vxctau(:,:,ispden),vxctaulocal(:,:,:,:,ispden),2)
-         end do
-       end if
-     else
-       ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-       call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal,2)
-       if(with_vxctau) then
-         do ispden=1,4
-           call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-&                         rhodum,rhodum,cgrvtrial,vxctau(:,:,ispden))
-           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-&                      cgrvtrial,vxctaulocal(:,:,:,:,ispden),2)
-         end do
-       end if
-       ABI_DEALLOCATE(cgrvtrial)
-     end if
-   else
-     ABI_ALLOCATE(vlocal_tmp,(n4,n5,n6))
-     if (psps%usepaw==0) then
-       do ispden=1,dtset%nspden
-         call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal_tmp,2)
-         vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-       end do
-     else
-       ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-       call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-       do ispden=1,dtset%nspden
-         call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal_tmp,2)
-         vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-       end do
-       ABI_DEALLOCATE(cgrvtrial)
-     end if
-     ABI_DEALLOCATE(vlocal_tmp)
-   end if
+   ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
+   ! Also take into account the spin.
 
-!  Continue Hamiltonian initialization
+   call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                 dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
    call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+
    if (with_vxctau) then
-     call gs_hamk%load_spin(isppol,vxctaulocal=vxctaulocal)
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                   dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+     call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
    end if
 
 !  Loop over k points

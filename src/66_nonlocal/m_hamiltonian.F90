@@ -39,10 +39,14 @@ module m_hamiltonian
  use m_xmpi
 
  use defs_datatypes,      only : pseudopotential_type
+ use defs_abitypes,       only : MPI_type
  use m_copy,              only : addr_copy
  use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type
+ use m_pawfgr,            only : pawfgr_type
  use m_fftcore,           only : sphereboundary
+ use m_fft,               only : fftpac
+ use m_fourier_interpol,  only : transgrid
  use m_pawcprj,           only : pawcprj_getdim
  use m_paw_ij,            only : paw_ij_type
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
@@ -62,8 +66,9 @@ module m_hamiltonian
 
  private
 
- public ::  pawdij2ekb
- public ::  pawdij2e1kb
+ public :: pawdij2ekb
+ public :: pawdij2e1kb
+ public :: gspot_transgrid_and_pack  ! Set up local potential vlocal on the coarse FFT mesh from vtrial on the fine mesh.
 
  ! These constants select how H is applied in reciprocal space
  integer,parameter,public :: KPRIME_H_K=1, K_H_KPRIME=2, K_H_K=3, KPRIME_H_KPRIME=4
@@ -580,9 +585,7 @@ subroutine destroy_hamiltonian(Ham)
  else if (associated(Ham%phkpxred)) then
    ABI_DEALLOCATE(Ham%phkpxred)
  end if
- if (allocated(Ham%phkxred)) then
-   ABI_DEALLOCATE(Ham%phkxred)
- end if
+ ABI_SFREE(Ham%phkxred)
  if (associated(Ham%ekb)) nullify(Ham%ekb)
  if (associated(Ham%vectornd)) nullify(Ham%vectornd)
  if (associated(Ham%vlocal)) nullify(Ham%vlocal)
@@ -1021,9 +1024,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    if (associated(Ham%phkpxred).and.(.not.associated(Ham%phkpxred,Ham%phkxred))) then
      ABI_DEALLOCATE(Ham%phkpxred)
    end if
-   if (allocated(ham%phkxred)) then
-     ABI_DEALLOCATE(ham%phkxred)
-   end if
+   ABI_SFREE(ham%phkxred)
    ABI_ALLOCATE(ham%phkxred,(2,ham%natom))
    do iat=1,ham%natom
      iatom=ham%atindx(iat)
@@ -1043,9 +1044,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    else if (associated(Ham%gbound_kp)) then
      ABI_DEALLOCATE(Ham%gbound_kp)
    end if
-   if (allocated(ham%gbound_k)) then
-     ABI_DEALLOCATE(ham%gbound_k)
-   end if
+   ABI_SFREE(ham%gbound_k)
  end if
  if (.not.allocated(ham%gbound_k)) then
    ABI_ALLOCATE(ham%gbound_k,(2*ham%mgfft+8,2))
@@ -1206,8 +1205,7 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
    if (compute_ph3d.and.ham%nloalg(2)>0) then
      if ((.not.associated(ham%phkpxred)).or.(.not.associated(ham%kg_kp)).or.&
 &        (.not.associated(ham%ph3d_kp))) then
-       msg='Something is missing for ph3d_kp computation!'
-       MSG_BUG(msg)
+       MSG_BUG('Something is missing for ph3d_kp computation!')
      end if
      call ph1d3d(1,ham%natom,ham%kg_kp,ham%matblk,ham%natom,ham%npw_kp,ham%ngfft(1),&
 &                ham%ngfft(2),ham%ngfft(3),ham%phkpxred,ham%ph1d,ham%ph3d_kp)
@@ -2009,12 +2007,8 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
 
  ! Communication in case of distribution over atomic sites
  if (paral_atom) then
-   if (present(e1kbfr)) then
-     call xmpi_sum(e1kbfr,comm_atom,ierr)
-   end if
-   if (present(e1kbsc)) then
-     call xmpi_sum(e1kbsc,comm_atom,ierr)
-   end if
+   if (present(e1kbfr)) call xmpi_sum(e1kbfr,comm_atom,ierr)
+   if (present(e1kbsc)) call xmpi_sum(e1kbsc,comm_atom,ierr)
  end if
 
 !Destroy atom table used for parallelism
@@ -2025,5 +2019,111 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
 end subroutine pawdij2e1kb
 !!***
 
-END MODULE m_hamiltonian
+!!****f* ABINIT/gspot_transgrid_and_pack
+!! NAME
+!! gspot_transgrid_and_pack
+!!
+!! FUNCTION
+!!  Set up local potential vlocal on the coarse FFT mesh with proper dimensioning from vtrial given on the fine mesh.
+!!  Also take into account the spin.
+!!
+!! INPUTS
+!!  isppol=Spin polarization.
+!!  usepaw=1 if PAW
+!!  paral_kgb: 1 if paral_kgb
+!!  nfft=(effective) number of FFT grid points on the coarse mesh (for this processor)
+!!  ngfft(18)contain all needed information about 3D FFT, for the coarse FFT mesh. see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nfftf=(effective) number of FFT grid points on the fine mesh (for this processor)
+!!  nvloc==1 if nspden <=2, nvloc==4 for nspden==4,
+!!  nspden=Number of spin density components.
+!!  ncomp=Number of extra components in vtrial and vlocal (e.g. 1 if LDA/GGA pot, 4 for Meta-GGA, etc).
+!!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
+!!  mpi_enreg=information about MPI parallelization
+!!
+!! OUTPUT
+!!  vlocal(n4,n5,n6,nvloc,ncomp): Potential on the coarse grid.
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nfftf, &
+                                    nspden, nvloc, ncomp, pawfgr, mpi_enreg, vtrial, vlocal)
+
+!Arguments -------------------------------
+ integer,intent(in) :: isppol, nspden, ncomp, usepaw, paral_kgb, nfft, nfftf, nvloc
+ type(pawfgr_type), intent(in) :: pawfgr
+ type(MPI_type), intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(inout) :: vtrial(nfftf, nspden, ncomp)
+ real(dp),intent(out) :: vlocal(ngfft(4), ngfft(5), ngfft(6), nvloc, ncomp)
+
+
+!Local variables-------------------------------
+!scalars
+ integer :: n1,n2,n3,n4,n5,n6,ispden,ic
+ real(dp) :: rhodum(1)
+ real(dp),allocatable :: cgrvtrial(:,:), vlocal_tmp(:,:,:)
+
+! *************************************************************************
+
+ ! Coarse mesh.
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
+
+ ! Set up local potential vlocal with proper dimensioning, from vtrial
+ ! Also take into account the spin.
+ if (nspden /= 4) then
+   if (usepaw == 0 .or. pawfgr%usefinegrid == 0) then
+     ! Fine mesh == Coarse mesh.
+     do ic=1,ncomp
+       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial(:,:,ic),vlocal(:,:,:,:,ic),2)
+     end do
+   else
+     ! Transfer from fine mesh to coarse and then pack data
+     ABI_MALLOC(cgrvtrial,(nfft,nspden))
+     do ic=1,ncomp
+       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,&
+                      rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
+       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,&
+                   cgrvtrial,vlocal(:,:,:,:,ic),2)
+     end do
+     ABI_FREE(cgrvtrial)
+   end if
+ else
+   ! nspden == 4. replace isppol by loop over ispden.
+   ABI_MALLOC(vlocal_tmp, (n4,n5,n6))
+   if (usepaw == 0 .or. pawfgr%usefinegrid == 0) then
+     ! Fine mesh == Coarse mesh.
+     do ic=1,ncomp
+       do ispden=1,nspden
+         call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial(:,:,ic),vlocal_tmp,2)
+         vlocal(:,:,:,ispden,ic) = vlocal_tmp(:,:,:)
+       end do
+     end do
+   else
+     ! Transfer from fine mesh to coarse and then pack data
+     ABI_MALLOC(cgrvtrial,(nfft,nspden))
+     do ic=1,ncomp
+       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
+       do ispden=1,nspden
+         call fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,cgrvtrial,vlocal_tmp,2)
+         vlocal(:,:,:,ispden,ic) = vlocal_tmp(:,:,:)
+       end do
+     end do
+     ABI_FREE(cgrvtrial)
+   end if
+   ABI_FREE(vlocal_tmp)
+ end if ! nspden
+
+end subroutine gspot_transgrid_and_pack
+!!***
+
+end module m_hamiltonian
 !!***

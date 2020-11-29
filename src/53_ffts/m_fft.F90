@@ -4409,7 +4409,6 @@ end subroutine fourdp_6d
 
 subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,option)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ispden,n1,n2,n3,nd1,nd2,nd3,nspden,option

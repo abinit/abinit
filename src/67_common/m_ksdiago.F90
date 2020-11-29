@@ -291,8 +291,8 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),kptns_(3,1),kpoint(3),ylmgr_dum(1,1,1),rhodum(1)
  real(dp),allocatable :: ph3d(:,:,:),pwave(:,:),ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:),vlocal_tmp(:,:,:)
- real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gsg_mat(:,:,:),cgrvtrial(:,:)
+ real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:)
+ real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gsg_mat(:,:,:)
  real(dp),pointer :: cwavef(:,:)
  type(pawcprj_type),allocatable :: Cwaveprj(:,:)
 
@@ -398,41 +398,18 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  !nvloc=1; if (nspden==4) nvloc=4
  ABI_MALLOC(vlocal, (n4,n5,n6,gs_hamk%nvloc))
 
- !call gspot_transgrid_and_pack(isppol, nspden, psps%usepaw, nfftf, nfft, ngfft, gs_hamkq%nvloc, &
- !          pawfgr, mpi_enreg, vtrial, vlocal)
+ ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
+ ! Also take into account the spin.
 
- if (nspden/=4)then
-   if (Psps%usepaw==0.or.Pawfgr%usefinegrid==0) then
-     call fftpac(isppol,MPI_enreg_seq,nspden,n1,n2,n3,n4,n5,n6,ngfftc,vtrial,vlocal,2)
-   else
-     ! Move from fine to coarse FFT mesh (PAW)
-     ABI_MALLOC(cgrvtrial, (nfftc,nspden))
-     call transgrid(1,MPI_enreg_seq,nspden,-1,0,0,paral_kgb,Pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-     call fftpac(isppol,MPI_enreg_seq,nspden,n1,n2,n3,n4,n5,n6,ngfftc,cgrvtrial,vlocal,2)
-     ABI_FREE(cgrvtrial)
-   end if
- else
-   ABI_MALLOC(vlocal_tmp, (n4,n5,n6))
-   if (Psps%usepaw==0.or.Pawfgr%usefinegrid==0) then
-     do ispden=1,nspden
-       call fftpac(ispden,MPI_enreg_seq,nspden,n1,n2,n3,n4,n5,n6,ngfftc,vtrial,vlocal_tmp,2)
-       vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-     end do
-   else
-     ! Move from fine to coarse FFT mesh (PAW)
-     ABI_MALLOC(cgrvtrial, (nfftc,nspden))
-     call transgrid(1,MPI_enreg_seq,nspden,-1,0,0,paral_kgb,Pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-     do ispden=1,nspden
-       call fftpac(ispden,MPI_enreg_seq,nspden,n1,n2,n3,n4,n5,n6,ngfftc,cgrvtrial,vlocal_tmp,2)
-       vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-     end do
-     ABI_FREE(cgrvtrial)
-   end if
-   ABI_FREE(vlocal_tmp)
- end if
-
- ! Continue to initialize the Hamiltonian (spin-dependent part)
+ call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb, nfftc, ngfftc, nfftf, &
+                               nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg_seq, vtrial, vlocal)
  call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
+
+ !if (with_vxctau) then
+ !  call gspot_transgrid_and_pack(isppol, psps%usepaw, paral_kgb, nfftc, ngfftc, nfftf, &
+ !                                nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+ !  call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
+ !end if
 
  ! Calculate G-vectors, for this k-point. Count also the number of planewaves as a check.
  exchn2n3d=0; ikg=0
@@ -711,9 +688,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 
  Dctl%jobz   = toupper(jobz(1:1))
  Dctl%range  = "A"
- if (PRESENT(range)) then
-  Dctl%range = toupper(range)
- end if
+ if (PRESENT(range)) Dctl%range = toupper(range)
 
  Dctl%ecut = ecut
  Dctl%ecutsm = zero; if (PRESENT(ecutsm)) Dctl%ecutsm = ecutsm
@@ -724,10 +699,10 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 
  ABI_ALLOCATE(kg_k,(3,0))
 
-! * Total number of G-vectors for this k-point with istwf_k=1.
+ ! Total number of G-vectors for this k-point with istwf_k=1.
  call kpgsph(ecut,0,gmet,0,0,1,kg_k,kpoint,0,MPI_enreg_seq,0,Dctl%npwtot)
 
-! * G-vectors taking into account time-reversal symmetry.
+ ! G-vectors taking into account time-reversal symmetry.
  call kpgsph(ecut,0,gmet,0,0,istwf_k,kg_k,kpoint,0,MPI_enreg_seq,0,npw_k)
 
  Dctl%npw_k = npw_k
@@ -806,7 +781,7 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 
  Dctl%use_scalapack=0
  if (PRESENT(use_scalapack)) Dctl%use_scalapack=use_scalapack
- ABI_CHECK(Dctl%use_scalapack==0," scalapack mode not coded")
+ ABI_CHECK(Dctl%use_scalapack==0," scalapack mode not coded yet")
 
  call destroy_mpi_enreg(MPI_enreg_seq)
 
