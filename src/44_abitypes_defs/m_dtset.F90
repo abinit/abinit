@@ -759,7 +759,7 @@ type, public :: dataset_type
  real(dp) :: pw_unbal_thresh
  real(dp) :: ratsm
  real(dp) :: ratsph_extra
- real(dp) :: readchkprdm = 0
+ real(dp) :: getchkprdm = 0
  real(dp) :: recrcut
  real(dp) :: recefermi
  real(dp) :: rectolden
@@ -1873,6 +1873,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%d3e_pert3_atpol(:) = dtin%d3e_pert3_atpol(:)
  dtout%d3e_pert3_dir(:)   = dtin%d3e_pert3_dir(:)
  dtout%ga_rules(:)        = dtin%ga_rules(:)
+ dtout%getchkprdm         = dtin%getchkprdm
  dtout%gpu_devices(:)     = dtin%gpu_devices(:)
  dtout%jfielddir(:)       = dtin%jfielddir(:)
  dtout%kptrlatt(:,:)      = dtin%kptrlatt(:,:)
@@ -1950,7 +1951,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%pw_unbal_thresh    = dtin%pw_unbal_thresh
  dtout%ratsm              = dtin%ratsm
  dtout%ratsph_extra       = dtin%ratsph_extra
- dtout%readchkprdm        = dtin%readchkprdm
  dtout%recrcut            = dtin%recrcut
  dtout%recefermi          = dtin%recefermi
  dtout%rectolden          = dtin%rectolden
@@ -3142,7 +3142,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getdvdb getdvdb_filepath'
- list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
+ list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq getchkprdm'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getqps getscr getscr_filepath'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
@@ -3236,7 +3236,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
 !R
- list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut readchkprdm'
+ list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'

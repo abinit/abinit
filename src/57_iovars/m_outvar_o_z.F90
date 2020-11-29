@@ -744,9 +744,6 @@ contains
  dprarr(1,:)=dtsets(:)%rcut
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcut','LEN',0)
 
- intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%readchkprdm
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'readchkprdm','INT',0)
-
 !Variables used for recursion method
  dprarr(1,:)=dtsets(:)%recefermi
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'recefermi','ENE',0)

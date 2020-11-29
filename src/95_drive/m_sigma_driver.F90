@@ -229,7 +229,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  real(dp):: gsqcut,boxcut,ecutf  
  complex(dpc) :: max_degw,cdummy
- logical :: wfknocheck,rdm_update,readchkprdm,prtchkprdm  
+ logical :: wfknocheck,rdm_update,getchkprdm,prtchkprdm  
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname
@@ -342,10 +342,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  wfknocheck=.true.                         ! Used for printing WFK file subroutine
  if (gwcalctyp==21 .and. gw1rdm>0) then
    rdm_update=.true.
-   if (Dtset%readchkprdm==1) then          ! Input variable to decide if checkpoint files must be read
-     readchkprdm=.true.
+   if (Dtset%getchkprdm==1) then          ! Input variable to decide if checkpoint files must be read
+     getchkprdm=.true.
    else
-     readchkprdm=.false.
+     getchkprdm=.false.
    end if
    if (Dtset%prtchkprdm==1) then           ! Input variable to decide if checkpoint files must be read
      prtchkprdm=.true.
@@ -2443,7 +2443,7 @@ endif
          nateigv(ib,ib,ikcalc,1)=cone              ! Set to identity matrix
        end do
      enddo
-     if (readchkprdm) then
+     if (getchkprdm) then
        gw1rdm_fname=trim(dtfil%fnameabi_chkp_rdm)
        call read_chkp_rdm(Wfd,Kmesh,Sigp,QP_BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname)
      end if
