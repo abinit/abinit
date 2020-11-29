@@ -715,24 +715,24 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
      write(msg,'(a1)')' '
      call wrtout(std_out,msg,'COLL')
      occ_tmp(:)=0.0_dp;eigvect_tmp(:)=0.0_dp;
-     open(newunit=iunit,form='formatted',file=gw1rdm_fname,iostat=istat,status='old')
+     open(newunit=iunit,form='unformatted',file=gw1rdm_fname,iostat=istat,status='old')
      iread=0;ik_ibz_read=0;
      if (istat==0) then
        do
          if (iread<Wfd%mband) then
            iread=iread+1
-           read(iunit,*,iostat=istat) auxl_read
+           read(iunit,iostat=istat) auxl_read
            if (istat==0) then
              occ_tmp(iread)=auxl_read
            end if
          else if (iread<(iread_eigv+Wfd%mband)) then 
            iread=iread+1
-           read(iunit,*,iostat=istat) auxl_read
+           read(iunit,iostat=istat) auxl_read
            if (istat==0) then
              eigvect_tmp(iread-Wfd%mband)=auxl_read
            end if
          else
-           read(iunit,*,iostat=istat) ik_ibz_read
+           read(iunit,iostat=istat) ik_ibz_read
            if (istat==0 .and. ik_ibz_read/=0) then
             iread=0
             sigmak_todo(ik_ibz_read)=0
@@ -844,17 +844,17 @@ subroutine prt_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
    call wrtout(std_out,msg,'COLL')
    write(msg,'(a1)')' '
    call wrtout(std_out,msg,'COLL')
-   open(newunit=iunit,form='formatted',file=gw1rdm_fname)
+   open(newunit=iunit,form='unformatted',file=gw1rdm_fname)
    do iwrite=1,Wfd%mband
-     write(iunit,*) occs(iwrite,ik_ibz)
+     write(iunit) occs(iwrite,ik_ibz)
    end do
    do iwrite=1,Wfd%mband
      do iwrite2=1,Wfd%mband
-       write(iunit,*) real(nateigv(iwrite,iwrite2,ik_ibz,1))
-       write(iunit,*) aimag(nateigv(iwrite,iwrite2,ik_ibz,1))
+       write(iunit) real(nateigv(iwrite,iwrite2,ik_ibz,1))
+       write(iunit) aimag(nateigv(iwrite,iwrite2,ik_ibz,1))
      end do
    end do
-   write(iunit,*) ik_ibz
+   write(iunit) ik_ibz
    close(iunit)
  end if
 
