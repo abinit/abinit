@@ -1452,15 +1452,15 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
 
  !@gs_hamiltonian_type
  if (present(vlocal)) then
-   ABI_CHECK(size(vlocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc,"Wrong vlocal")
+   ABI_CHECK(size(vlocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc, "Wrong vlocal")
    Ham%vlocal => vlocal
  end if
  if (present(vxctaulocal)) then
-   ABI_CHECK(size(vxctaulocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*4,"Wrong vxctaulocal")
+   ABI_CHECK(size(vxctaulocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*4, "Wrong vxctaulocal")
    Ham%vxctaulocal => vxctaulocal
  end if
  if (present(vectornd)) then
-   ABI_CHECK(size(vectornd)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*3,"Wrong vectornd")
+   ABI_CHECK(size(vectornd)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc*3, "Wrong vectornd")
    Ham%vectornd => vectornd
  end if
 

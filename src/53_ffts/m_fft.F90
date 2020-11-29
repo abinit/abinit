@@ -2297,7 +2297,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  integer :: iflag,ig,comm_fft,me_g0,me_fft,n1,n2,n3,nd2proc,nd3proc
  integer :: nfftot,nproc_fft,option_ccfft,paral_kgb
  real(dp) :: fim,fre,xnorm
- character(len=500) :: message
+ character(len=500) :: msg
  logical :: luse_gpu_cuda,luse_ndo
 !arrays
  integer,parameter :: shiftg0(3)=0
@@ -2351,40 +2351,40 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  end if
 
  if ((fftalgc < 0 .or. fftalgc > 2)) then
-   write(message, '(a,i0,5a)' )&
+   write(msg, '(a,i0,5a)' )&
     'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
     'The third digit, fftalg(C), must be 0, 1, or 2',ch10,&
     'Action: change fftalg in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if (fftalgc /= 0 .and. ALL(fftalga /= [1,3,4,5])) then
-   write(message, '(a,i0,5a)' )&
+   write(msg, '(a,i0,5a)' )&
     'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
     'The first digit must be 1,3,4 when the last digit is not 0.',ch10,&
     'Action: change fftalg in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if (option < 0 .or. option > 3)then
-   write(message, '(a,i0,3a)' )&
+   write(msg, '(a,i0,3a)' )&
     'The option number ',option,' is not allowed.',ch10,&
     'Only option=0, 1, 2 or 3 are allowed presently.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if (option == 1 .and. cplex /= 1) then
-   write(message, '(3a,i0,a)' )&
+   write(msg, '(3a,i0,a)' )&
     'With the option number 1, cplex must be 1,',ch10,&
     'but it is cplex= ',cplex,'.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if (option==2 .and. (cplex/=1 .and. cplex/=2)) then
-   write(message, '(3a,i0,a)' )&
+   write(msg, '(3a,i0,a)' )&
     'With the option number 2, cplex must be 1 or 2,',ch10,&
     'but it is cplex= ',cplex,'.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  ! DMFT uses its own FFT algorithm (that should be wrapped in a different routine!)
@@ -2393,10 +2393,10 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    if(use_ndo==1) then
      luse_ndo=.true.
      if((size(fofginb,2)==0)) then
-       write(message, '(a,a,a,i4,i5)' )&
+       write(msg, '(a,a,a,i4,i5)' )&
         'fofginb has a dimension equal to zero and use_ndo==1',ch10,&
         'Action: check dimension of fofginb',size(fofginb,2),use_ndo
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end if
  end if
@@ -2933,7 +2933,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
  integer :: n4half1,n5,n5half1,n6 !nd2proc,nd3proc,i3_local,i2_local,
  integer :: comm_fft,nproc_fft,me_fft
  real(dp) :: xnorm
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
@@ -2961,24 +2961,24 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
  !write(std_out,*)' fourdp :me_fft',me_fft,'nproc_fft',nproc_fft,'nfft',nfft
 
  if (fftalgb /= 0 .and. fftalgb /= 1) then
-   write(message, '(a,i0,5a)' )&
+   write(msg, '(a,i0,5a)' )&
     'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
     'The second digit (fftalg(B)) must be 0 or 1.',ch10,&
     'Action: change fftalg in your input file.'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
  if (fftalgb == 1 .and. ALL(fftalga /= [1,3,4,5])) then
-   write(message,'(a,i0,5a)')&
+   write(msg,'(a,i0,5a)')&
     'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
     'When fftalg(B) is 1, the allowed values for fftalg(A) are 1 and 4.',ch10,&
     'Action: change fftalg in your input file.'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
  if (n4<n1.or.n5<n2.or.n6<n3) then
-   write(message,'(a,3(i0,1x),a,3(i0,1x))')'  Each of n4,n5,n6=',n4,n5,n6,'must be >= n1, n2, n3 =',n1,n2,n3
-   MSG_BUG(message)
+   write(msg,'(a,3(i0,1x),a,3(i0,1x))')'  Each of n4,n5,n6=',n4,n5,n6,'must be >= n1, n2, n3 =',n1,n2,n3
+   MSG_BUG(msg)
  end if
 
  ! Get the distrib associated with this fft_grid => for i2 and i3 planes
@@ -3333,7 +3333,7 @@ subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
  integer,parameter :: cplex2=2
  integer :: fftalg,fftalga,fftalgb,fftalgc,fftcache
  integer :: nd2proc,nd3proc,nproc_fft
- character(len=500) :: message
+ character(len=500) :: msg
 
 !*************************************************************************
 
@@ -3350,11 +3350,11 @@ subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
    MSG_ERROR("Old interface with FFTW2 is not supported anymore")
 
  else if(fftalga<1 .or. fftalga>4)then
-   write(message, '(a,a,a,i5,a,a)' )&
+   write(msg, '(a,a,a,i5,a,a)' )&
     'The allowed values of fftalg(A) are 1, 2, 3, and 4 .',ch10,&
     'The actual value of fftalg(A) is',fftalga,ch10,&
     'Action: check the value of fftalg in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  ! This routine will be removed ASAP.
@@ -4371,8 +4371,8 @@ end subroutine fourdp_6d
 !! fftpac
 !!
 !! FUNCTION
-!! Allow for data copying to modify the stride (dimensioning) of a three-
-!! dimensional array, for more efficient three dimensional fft.
+!! Allow for data copying to modify the stride (dimensioning) of a three-dimensional array,
+!! for more efficient three dimensional fft.
 !! NOTE that the arrays are in REAL space.
 !!
 !! Note that arrays aa and bb may be the same array (start at the same address).
@@ -4421,7 +4421,7 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,i3,index,me_fft,nproc_fft
- character(len=500) :: message
+ character(len=500) :: msg
  !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
@@ -4432,17 +4432,17 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
 
  if (option==1.or.option==2) then
    if (nd1<n1.or.nd2<n2.or.nd3<n3) then
-     write(message,'(a,3i0,2a,3i0,a)')&
+     write(msg,'(a,3i0,2a,3i0,a)')&
       'Each of nd1,nd2,nd3=',nd1,nd2,nd3,ch10,&
       'must be >= n1, n2, n3 =',n1,n2,n3,'.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
  else
    if (2*nd1<n1.or.nd2<n2.or.nd3<n3) then
-     write(message,'(a,3i0,2a,3i0,a)')&
+     write(msg,'(a,3i0,2a,3i0,a)')&
      'Each of 2*nd1,nd2,nd3=',2*nd1,nd2,nd3,ch10,&
      'must be >= (n1, n2, n3) =',n1,n2,n3,'.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
  end if
 
@@ -4450,6 +4450,7 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
  if (option==1) then
+   ! aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) real case
    do i3=1,n3
      if (me_fft==fftn3_distrib(i3)) then
        do i2=1,n2
@@ -4461,6 +4462,7 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
    end do
 
  else if (option==2) then
+   !  option=2  aa(n1*n2*n3,ispden) --> bb(nd1,nd2,nd3) real case
    !  Here we avoid corrupting the data in a while writing to b in the
    !  case in which a and b are same array.
    !  Also: replace "trash" data with 0 s to avoid floating point
@@ -4491,6 +4493,8 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
    end do
 !  MF
  else if (option==10 .or. option==11) then
+   ! option=10 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 real part
+   ! option=11 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 imag part
    index=1
    if(option==11) index=2
    do i3=1,n3
@@ -4503,8 +4507,8 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
    end do
 !  MF
  else
-   write(message,'(a,i0,a)')' Bad option =',option,'.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,a)')' Bad option =',option,'.'
+   MSG_BUG(msg)
  end if
 
 end subroutine fftpac

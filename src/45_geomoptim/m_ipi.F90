@@ -3,6 +3,14 @@
 !!  m_ipi
 !!
 !! FUNCTION
+!!  This module implements the client-side parf of the i-pi protocol.
+!!  The communication between the driver and the client (Abinit) is implemented as follows:
+!!     1)
+!!     2)
+!!
+!!  Only structural relaxations with ionmov 28 are implemented.
+!!  Support MD runs requires the proper handling of velocities.
+!!  No parallelism over images.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2020-2020 ABINIT group (MG)
@@ -69,7 +77,7 @@ module m_ipi
  use m_abihist
  use m_xmpi
  use m_errors
- use m_fsockets !, only : socket_from_string
+ use m_fsockets
 
  use m_fstrings,  only : sjoin, itoa
  use m_geometry,  only : xcart2xred, det3r, stress_voigt_to_mat
@@ -89,7 +97,7 @@ module m_ipi
 ! =============
 
  INTEGER, PARAMETER :: HDRLEN = 12
- integer, save :: socket !, socket_initialized = 0
+ integer, save :: socket
  integer, save :: origin_natom = 0
  real(dp), save :: origin_rprimd(3, 3) = zero
  real(dp), save, allocatable :: origin_xred(:,:)
@@ -102,6 +110,11 @@ contains
 !! ipi_setup
 !!
 !! FUNCTION
+!!  Initialize the socket from a string that is usually passed via the command line interface.
+!!  Get the initial configuration from the server and save it in module global variables
+!!  for subsequent consistency check.
+!!  These values, indeed, must agree with those read from the input file.
+!!  See also ipi_check_initial_consistency.
 !!
 !! INPUTS
 !!
@@ -138,6 +151,7 @@ subroutine ipi_setup(string, comm)
    call handle_posdata(origin_natom, origin_rprimd, origin_xred)
  end if
 
+ ! broadcast data to other procs.
  call xmpi_bcast(origin_natom, master, comm, ierr)
  call xmpi_bcast(origin_rprimd, master, comm, ierr)
  if (my_rank /= master) then
@@ -148,6 +162,21 @@ subroutine ipi_setup(string, comm)
 
 end subroutine ipi_setup
 !!***
+
+!!****f* m_ipi/ipi_check_initial_consistency
+!! NAME
+!! ipi_check_initial_consistency
+!!
+!! FUNCTION
+!! Compare initial configuration read from input file with the one trasmitted by the server.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! OUTPUT
+!!
+!! SOURCE
 
 subroutine ipi_check_initial_consistency(in_natom, in_rprimd, in_xred, ierr)
 
@@ -196,14 +225,29 @@ subroutine ipi_check_initial_consistency(in_natom, in_rprimd, in_xred, ierr)
 end subroutine ipi_check_initial_consistency
 !!***
 
+!!****f* m_ipi/ipi_check_initial_consistency
+!! NAME
+!! handle_posdata
+!!
+!! FUNCTION
+!! Receive new geometry from the server after POSDATA header.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
 subroutine handle_posdata(out_natom, out_rprimd, out_xred)
 
  integer,intent(out) :: out_natom
  real(dp),intent(out) :: out_rprimd(3,3)
  real(dp),allocatable,intent(out) :: out_xred(:,:)
 
- REAL*8 :: cellh(3,3), gprimd(3,3), mtxbuffer(9)
- REAL*8, ALLOCATABLE :: combuf(:), xcart(:,:)
+ real(dp) :: gprimd(3,3), mtxbuffer(9)
+ real(dp), allocatable :: combuf(:), xcart(:,:)
 
  call readbuffer(socket, mtxbuffer, 9)
  out_rprimd = transpose(reshape(mtxbuffer, [3, 3]))
@@ -253,6 +297,7 @@ end subroutine ipi_shutdown
 !! ipi_pred
 !!
 !! FUNCTION
+!!  "predict" new structure using the data sent by the server.
 !!
 !! INPUTS
 !! ab_mover <type(abimover)> : Datatype with all the information needed by the predictor
@@ -263,7 +308,7 @@ end subroutine ipi_shutdown
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist <type(abihist)> : History of positions,forces,acell, rprimd, stresses
+!! hist <type(abihist)>: History of positions,forces,acell, rprimd, stresses
 !!
 !! OUTPUT
 !!
@@ -307,19 +352,17 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
    ABI_CHECK(trim(header) == "GETFORCE", sjoin("Expecting GETFORCE header, got:", trim(header)))
 
    ! Communicate energy info back to i-pi
-   !write(*,*) " i-pi mode: Returning etotal, forces, and stress tensor "
+   call wrtout(std_out, " i-pi mode: Returning etotal, forces, and stress tensor to server...")
    call writebuffer(socket, "FORCEREADY  ", HDRLEN)
    call writebuffer(socket, etotal)
    call writebuffer(socket, natom)
    call writebuffer_dv(socket, hist%fcart(:,:,hist%ihist), 3 * natom)
    call stress_voigt_to_mat(strten, sigma)
-   !sigma = sigma * ucvol
-   ! No need to tranpose as it's a symmetric tensor.
+   ! Well it's a symmetric tensor.
    ! TODO: Check volume
+   sigma = transpose(sigma) * ucvol
    call writebuffer_dv(socket, sigma, 9)
-   !call writebuffer(socket, combuf, 3 * nat)
-   !call writebuffer(socket, reshape( vir, (/9/) ), 9)
-   !
+
    ! Note: i-pi can also receive an arbitrary string, that will be printed
    ! out to the "extra" trajectory file. This is useful if you want to
    ! return additional information, e.g. atomic charges, wannier centres,
@@ -338,7 +381,7 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
    ABI_CHECK(trim(header) == "POSDATA", sjoin("Expecting POSDATA header, got:", trim(header)))
    call handle_posdata(new_natom, new_rprimd, new_xred)
 
-   ! Some basic consistency checks. Obviously there are lot of things that can go wrong
+   ! Some basic consistency checks. Obviously there are lot of things that can go wrong here
    ! if the driver changes the space group or the input file is not consistent with
    ! the logic implemented by the server.
    ABI_CHECK(new_natom == ab_mover%natom, "ipi server shall not change the number of atoms!")
@@ -362,9 +405,9 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
  ! Fill the history with the variables xred, acell, rprimd, vel
  acell = one
  call var2hist(acell, hist, ab_mover%natom, new_rprimd, new_xred, zDEBUG)
- ihist_prev = abihist_findIndex(hist,-1)
+ !ihist_prev = abihist_findIndex(hist, -1)
  ! FIXME: I don't know how to handle vel if MD run!
- hist%vel(:,:,hist%ihist) = hist%vel(:,:,ihist_prev)
+ !hist%vel(:,:,hist%ihist) = hist%vel(:,:,ihist_prev)
 
 end subroutine ipi_pred
 !!***
