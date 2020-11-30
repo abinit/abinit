@@ -235,7 +235,7 @@ contains
            tmp=0.2*real(exp(cmplx(0.0,two_pi, kind=dp) * &
                                &dot_product(kpoint, self%supercell%supercell_maker%rvecs(:, i))), kind=dp)
            self%lwf(i*2-1)=tmp
-           self%lwf(i*2)=0.0
+           self%lwf(i*2)=tmp
          enddo
       ! random
       case(1)

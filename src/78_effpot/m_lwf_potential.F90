@@ -133,13 +133,13 @@ contains
        !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
        !if(iam_master) then
        call spmat_convert(self%coeff_coo, self%coeff)
+       call self%coeff_coo%diag(self%coeff_diag)
        call self%coeff_coo%finalize()
        !endif
        !call self%bilinear_csr_mat%sync(master=master, comm=comm, nblock=1)
        self%csr_mat_ready=.True.
        !call xmpi_bcast(self%csr_mat_ready, master, comm, ierr)
     endif
-    call self%coeff_coo%diag(self%coeff_diag)
 
   end subroutine convert_coeff_to_csr
 
@@ -205,6 +205,7 @@ contains
     call self%convert_coeff_to_csr()
     call self%coeff%mv(lwf, f)
 
+    ! force
     if (present(lwf_force)) then
        lwf_force(:) = lwf_force(:) - f(:)
        if (self%has_self_bound_term) then
@@ -213,7 +214,7 @@ contains
        endif
     endif
 
-    !energy =energy + 0.5_dp * sum(f*displacement)
+    ! energy
     etmp=0.5_dp * sum(f*lwf)
     if (self%has_self_bound_term) then
        etmp = etmp + &
@@ -222,7 +223,7 @@ contains
     end if
 
     !TODO: remove. For testing only
-    etmp = etmp+ self%beta*sum(lwf(::2)**2 * lwf(1::2)**2)
+    !etmp = etmp+ self%beta*sum(lwf(::2)**2 * lwf(1::2)**2)
 
 
     if (present(energy)) then
@@ -255,8 +256,11 @@ contains
     lwf(ilwf) = lwf_new
 
     call self%convert_coeff_to_csr()
+
+    deltaE=0.0_dp
+    tmp=0.0_dp
     call self%coeff%mv_one_row(ilwf, lwf, tmp)
-    deltaE=deltaE+ tmp*dlwf - self%coeff_diag(ilwf)*dlwf*dlwf
+    deltaE=deltaE+ tmp*dlwf - 0.5* self%coeff_diag(ilwf)*dlwf*dlwf
 
     ! bound term
     if (self%has_self_bound_term) then
@@ -264,14 +268,15 @@ contains
             & self%self_bound_coeff*(lwf_new**(self%self_bound_order) &
             & - lold**(self%self_bound_order))
     ! Adding x^6 and x^8 for VO2
-        deltaE=deltaE -1.833*(lwf_new**6-lold**6) + 1.838*(lwf_new**8-lold**8)
+        deltaE=deltaE -1.1344*(lwf_new**6-lold**6) + 0.438*(lwf_new**8-lold**8)
     end if
 
-    if(modulo(ilwf, 2)==0) then
-       deltaE=deltaE+ self%beta*((lwf_new**2- lold**2)*lwf(ilwf-1)**2)
-    else
-       deltaE=deltaE+ self%beta*((lwf_new**2- lold**2)*lwf(ilwf+1)**2)
-    endif
+    ! (Q1 Q2)^2 term
+   ! if(modulo(ilwf, 2)==0) then
+   !    deltaE=deltaE+ self%beta*((lwf_new**2- lold**2)*lwf(ilwf-1)**2)
+   ! else
+   !    deltaE=deltaE+ self%beta*((lwf_new**2- lold**2)*lwf(ilwf+1)**2)
+   ! endif
 
     deltaE=deltaE*340.0/1200.0
 

@@ -56,6 +56,7 @@
        integer :: nstep  ! number of steps
        integer :: imove ! index of lwf to be moved
        integer :: naccept  ! number of accepted steps
+       integer :: nattempt
      contains
        procedure :: initialize
        procedure :: finalize
@@ -82,6 +83,8 @@
       self%beta=1.0/self%temperature ! Kb in a.u. is 1.
       self%lwf_new=0.0_dp
       self%lwf_old=0.0_dp
+      self%nattempt=0
+      self%naccept=0
     end subroutine initialize
 
     !----------------------------------------------------------------------
@@ -118,6 +121,7 @@
      ! try to change lwf
      r=self%attempt(self%rng, effpot)
      ! metropolis-hastings
+     self%nattempt=self%nattempt+1
      if(self%rng%rand_unif_01()< min(1.0_dp, r) .and. abs(self%lwf_new)<0.5 ) then
         self%naccept=self%naccept+1
         call self%accept()
@@ -163,9 +167,12 @@
          & spin=spin, lwf=self%lwf, lwf_force=self%lwf_force, &
          & energy=self%energy, energy_table=energy_table)
     !print *, "Calculated energy", self%energy/self%supercell%ncell
+
     do i = 1, self%nstep
        call self%run_one_mc_step(effpot)
     end do
+    !print *, "Calculated MC energy", self%energy/self%supercell%ncell
+    !print *, "Accept rate:", (1.0_dp*self%naccept)/self%nattempt
     lwf(:)=self%lwf(:)
     if (present(energy_table)) then
        key = 'LWF energy'
@@ -212,7 +219,7 @@
    end function attempt
 
    !----------------------------------------------------------------------
-   !> @brief  rotate the  lwf by the average of angle (normal distribution)
+   !> @brief add to lwf by a random value.
    !----------------------------------------------------------------------
    subroutine move(rng, lwf_old, lwf_new, avg_amp)
      type(rng_t) :: rng

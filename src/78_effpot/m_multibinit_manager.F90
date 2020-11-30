@@ -188,7 +188,9 @@ contains
     endif
 
     ! Initialize the random number generator
-    call self%rng%set_seed([111111_dp, 2_dp])
+    !if(self%params%mb_random_seed()
+    !call self%rng%set_seed([111111_dp, 2_dp])
+    call self%rng%set_seed([int8(time())+111111_dp, int8(time()) ])
     ! use jump so that each cpu generates independent random numbers.
     if(my_rank>0) then
        do i =1,my_rank
