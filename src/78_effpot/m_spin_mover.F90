@@ -984,8 +984,8 @@ contains
                &     spin_temperature=T)
           call self%spin_ob%reset(self%params)
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
-          if(i==0) then
-             call self%set_initial_state()
+          if(i==1) then
+             call self%set_initial_state(mode=self%params%spin_init_state)
           else
              call self%hist%inc1()
           endif

@@ -276,12 +276,12 @@ contains
     end if
 
     ! self_bound_term as from the input parameters
-    !if (self%has_self_bound_term) then
-    !   self%lwf_force(:) = self%lwf_force(:) - &
-    !        & self%self_bound_coeff*self%self_bound_order* lwf**(self%self_bound_order-1)
-    !   etmp = etmp + &
-    !        & self%self_bound_coeff*sum(lwf**(self%self_bound_order))
-    !endif
+    if (self%has_self_bound_term) then
+       self%lwf_force(:) = self%lwf_force(:) - &
+            & self%self_bound_coeff*self%self_bound_order* lwf**(self%self_bound_order-1)
+       etmp = etmp + &
+            & self%self_bound_coeff*sum(lwf**(self%self_bound_order))
+    endif
 
     if (self%onebody_coeff%nnz/= 0) then
        do i =1, self%onebody_coeff%nnz

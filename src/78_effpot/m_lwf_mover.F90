@@ -248,6 +248,7 @@ contains
       real(dp) :: tmp
       real(dp) :: kpoint(3)
 
+      self%lwf(:)=0.0
       select case(mode)
       case(0)
          kpoint(:)=[0.5_dp, 0.0_dp, 0.5_dp]
@@ -293,7 +294,7 @@ contains
 
 #if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
-    NCF_CHECK_MSG(ierr, "The lwf_init_mode is set to 4. But opening netcdf file "//trim(fname)//" Failed. ")
+    NCF_CHECK_MSG(ierr, "The lwf_init_state is set to 4. But opening netcdf file "//trim(fname)//" Failed. ")
 
     ! sanity check. If the hist file is consistent with the current calculation
     ierr=nctk_get_dim(ncid, "nlwf" , nlwf)
@@ -443,11 +444,8 @@ contains
        endif
        call self%set_temperature(temperature=T)
        if(iam_master) then
-          ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
-          if(i==0) then
-             call self%set_initial_state()
-          !else
-          !   call self%hist%inc1()
+          if(i==1) then
+             call self%set_initial_state(mode=self%params%lwf_init_state)
           endif
 
           write(post_fname, "(I4.4)") i
@@ -461,14 +459,6 @@ contains
 
        if(iam_master) then
           call self%ncfile%finalize()
-          ! save observables
-          !Tlist(i)=T
-          !chi_list(i)=self%spin_ob%chi
-          !Cv_list(i)=self%spin_ob%Cv
-          !binderU4_list(i)=self%spin_ob%binderU4
-          !Mst_sub_list(:,:,i)=self%spin_ob%Mst_sub(:,:)  ! not useful
-          !Mst_sub_norm_list(:,i)=self%spin_ob%Avg_Mst_sub_norm(:)
-          !Mst_norm_total_list(i)=self%spin_ob%Avg_Mst_norm_total
        endif
     end do
 
