@@ -42,8 +42,8 @@ module m_gwrdm
  private :: no2ks,ks2no,printdm1,rotate_ks_no
 !!***
  
- public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
-           &prt_chkp_rdm,rot_integrals,print_total_energy,print_band_energies
+ public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,rot_integrals
+ public :: prt_chkp_rdm,print_total_energy,print_band_energies,read_chkp_rdm 
 !!***
 
 contains

@@ -2557,7 +2557,7 @@ endif
    !
    if (rdm_update) then
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
-     gw_rhor=0.0_dp
+     gw_rhor=zero
      !
      ! WARNING! 
      ! MRM: only the master has bands on Wfd_nato_master so it prints everything and computes gw_rhor 
@@ -2596,8 +2596,8 @@ endif
        ABI_MALLOC(new_hartr,(b1gw:b2gw,Sigp%nkptgw))
        ABI_MALLOC(gw_rhog,(2,nfftf))
        ABI_MALLOC(gw_vhartr,(nfftf))
-       gw_rhog=0.0_dp
-       gw_vhartr(:)=0.0_dp
+       gw_rhog=zero
+       gw_vhartr(:)=zero
        old_purex(:,:)=czero
        new_hartr(:,:)=czero
        !
