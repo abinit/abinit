@@ -644,7 +644,7 @@ end subroutine print_tot_occ
 
 !!****f* ABINIT/get_chkp_rdm
 !! NAME
-!!  get_chkp_rdm
+!! get_chkp_rdm
 !!
 !! FUNCTION
 !!  Read all checkpoint files built on previous runs
@@ -796,7 +796,7 @@ end subroutine get_chkp_rdm
 
 !!****f* ABINIT/print_chkp_rdm
 !! NAME
-!!  print_chkp_rdm
+!! print_chkp_rdm
 !!
 !! FUNCTION
 !!  Write the checkpoint file for a given k-point
@@ -869,7 +869,7 @@ end subroutine print_chkp_rdm
 
 !!****f* ABINIT/transf_integrals
 !! NAME
-!!  transf_integrals
+!! transf_integrals
 !!
 !! FUNCTION
 !!  Transform integrals from KS -> NO and NO -> KS orbitals
@@ -961,7 +961,7 @@ end subroutine transf_integrals
 
 !!****f* ABINIT/print_total_energy
 !! NAME
-!!  print_total_energy
+!! print_total_energy
 !!
 !! FUNCTION
 !!  Print total energy and energy components
