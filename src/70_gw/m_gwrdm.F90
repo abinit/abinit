@@ -168,9 +168,9 @@ function calc_Ec_GM_k(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
 
  DBG_ENTER("COLL")
 
- ec_integrated=0.0_dp
- spin_fact=2.0_dp
- fact=spin_fact*(1.0_dp/(two_pi*2.0_dp))
+ ec_integrated=zero
+ spin_fact=two
+ fact=spin_fact*(one/(two_pi*two))
 
  if (ib1/=1) then
    MSG_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was &
@@ -182,7 +182,7 @@ function calc_Ec_GM_k(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
    ! If a better way to produce more stable Sigma_c(iv) values is found, this subroutine can be use to evaluate GM Ecorr in the future. TODO
    do ibdm=1,ib2
      ! Sigma_pp(iv)/[(iv - e_ibdm,k)] + [Sigma_pp(iv)/[(iv - e_ibdm,k)]]^* = 2 Re [Sigma_pp(iv)/(iv - e_ibdm,k)]
-     ec_integrated=ec_integrated+2.0_dp*real( sum(weights(:)*sigcme_k(:,ibdm,ibdm,1)/(Sr%omega_i(:)-BSt%eig(ibdm,ik_ibz,1)) ) )
+     ec_integrated=ec_integrated+two*real( sum(weights(:)*sigcme_k(:,ibdm,ibdm,1)/(Sr%omega_i(:)-BSt%eig(ibdm,ik_ibz,1)) ) )
    end do
  endif
  
@@ -236,7 +236,7 @@ subroutine calc_rdmx(ib1,ib2,ik_ibz,pot,dm1,BSt)
 
  DBG_ENTER("COLL")
  tol8=1.0e-8
- spin_fact=2.0_dp
+ spin_fact=two
 
  write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sx-Vxc  and k-point: ',BSt%kptns(1:,ik_ibz)
  call wrtout(std_out,msg,'COLL')
@@ -307,8 +307,8 @@ subroutine calc_rdmc(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt,dm1)
 
  DBG_ENTER("COLL")
 
- spin_fact=2.0_dp
- fact=spin_fact*(1.0_dp/two_pi)
+ spin_fact=two
+ fact=spin_fact*(one/two_pi)
 
  write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sc(iw)  and k-point: ',BSt%kptns(1:,ik_ibz)
  call wrtout(std_out,msg,'COLL')
@@ -390,7 +390,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
  if (present(checksij)) then
   check_Sijmat=.true.
  end if
- tol10=1.0d-10
+ tol10=1.0e-10
 
  ndim=ib2-ib1+1
  lwork=2*ndim-1
@@ -401,7 +401,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
  ABI_MALLOC(eigenvect,(ndim,ndim))
  ABI_MALLOC(rwork,(3*ndim-2))
 
- dm1_tmp=0.0_dp
+ dm1_tmp=zero
  do ib2dm=1,ndim
    do ib1dm=ib2dm,ndim
      dm1_tmp(ib1dm,ib2dm)=dm1(ib1+(ib1dm-1),ib1+(ib2dm-1))
@@ -410,8 +410,8 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
    end do
  end do
 
- work=0.0_dp
- occs_tmp=0.0_dp
+ work=zero
+ occs_tmp=zero
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs_tmp,work,lwork,rwork,info)
  if (info/=0) then
@@ -431,7 +431,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
    eigenvect(ib2dm,ib1dm)=dm1_tmp(ib2dm,(ndim-(ib1dm-1)))
   end do
   if (abs(occs_tmp2(ib1dm))<tol10) then
-    occs_tmp2(ib1dm)=0.0_dp
+    occs_tmp2(ib1dm)=zero
   end if
  end do
 
@@ -443,7 +443,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
          Sib1k_ib2k=Sib1k_ib2k+conjg(eigenvect(ib3dm,ib1dm))*eigenvect(ib3dm,ib2dm)
        end do
        if (ib1dm==ib2dm) then
-         if(abs(Sib1k_ib2k-cmplx(1.0_dp,0.0_dp))>tol10) then
+         if(abs(Sib1k_ib2k-cmplx(one,zero))>tol10) then
            write(msg,'(a45,i5,a1,i5,f10.5)') 'Large deviation from identity for bands ',ib1dm,' ',ib2dm,real(Sib1k_ib2k) 
            call wrtout(std_out,msg,'COLL')
          endif
@@ -482,7 +482,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
  end if
 
  ! Store natural orbital eigenvectors matrix and occs. Also compute total number of electrons for this k-point
- toccs_k=0.0_dp
+ toccs_k=zero
  do ib1dm=1,ndim
    do ib2dm=1,ndim
      nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=eigenvect(ib1dm,ib2dm)
@@ -717,7 +717,7 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
      call wrtout(std_out,msg,'COLL')
      write(msg,'(a1)')' '
      call wrtout(std_out,msg,'COLL')
-     occ_tmp(:)=0.0_dp;eigvect_tmp(:)=0.0_dp;
+     occ_tmp(:)=zero;eigvect_tmp(:)=zero;
      open(newunit=iunit,form='unformatted',file=gw1rdm_fname,iostat=istat,status='old')
      iread=0;ik_ibz_read=0;
      if (istat==0) then
@@ -748,7 +748,7 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
               end do
             end do
             ik_ibz_read=0
-            occ_tmp=0.0_dp;eigvect_tmp=0.0_dp;
+            occ_tmp=zero;eigvect_tmp=zero;
            end if
          end if
          if(istat/=0) then
