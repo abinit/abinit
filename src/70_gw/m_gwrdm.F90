@@ -39,7 +39,7 @@ module m_gwrdm
  use m_xctk,           only : xcden  
  implicit none
 
- private :: no2ks,ks2no,printdm1 
+ private :: no2ks,ks2no,printdm1,rotate_ks_no
 !!***
  
  public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,read_chkp_rdm,&
@@ -67,6 +67,8 @@ contains
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!! SOURCE
+
 subroutine quadrature_sigma_cw(Sigp,Sr,weights)
 !Arguments ------------------------------------
 !scalars
@@ -642,7 +644,7 @@ end subroutine print_tot_occ
 
 !!****f* ABINIT/read_chkp_rdm
 !! NAME
-!! read_chk_rdm
+!! read_chkp_rdm
 !!
 !! FUNCTION
 !!  Read all checkpoint files built on previous runs
@@ -668,6 +670,7 @@ end subroutine print_tot_occ
 !!      m_sigma_driver
 !!
 !! CHILDREN
+
 subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname_in)
 !Arguments ------------------------------------
 !scalars
@@ -793,7 +796,7 @@ end subroutine read_chkp_rdm
 
 !!****f* ABINIT/prt_chkp_rdm
 !! NAME
-!! prt_chk_rdm
+!! prt_chkp_rdm
 !!
 !! FUNCTION
 !!  Write the checkpoint file for a given k-point
@@ -811,6 +814,7 @@ end subroutine read_chkp_rdm
 !!      m_sigma_driver
 !!
 !! CHILDREN
+
 subroutine prt_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 !Arguments ------------------------------------
 !scalars
@@ -955,9 +959,9 @@ subroutine rot_integrals(Sigp,Sr,Mels,Kmesh,nateigv)
 end subroutine rot_integrals
 !!***
 
-!!****f* ABINIT/print_total_energ
+!!****f* ABINIT/print_total_energy
 !! NAME
-!!  print_total_energ
+!!  print_total_energy
 !!
 !! FUNCTION
 !!  Print total energy and energy components
@@ -972,6 +976,8 @@ end subroutine rot_integrals
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!! SOURCE
+
 subroutine print_total_energy(ekin_energy,evext_energy,evextnl_energy,e_corepsp,eh_energy,ex_energy,&
        &exc_mbb_energy,e_ewald,etot,etot2,den_int)
 !Arguments ------------------------------------
@@ -1046,6 +1052,7 @@ subroutine print_total_energy(ekin_energy,evext_energy,evextnl_energy,e_corepsp,
   call wrtout(ab_out,msg,'COLL')
 
 end subroutine print_total_energy       
+!!***
 
 !!****f* ABINIT/print_band_energies
 !! NAME
@@ -1071,6 +1078,9 @@ end subroutine print_total_energy
 !! PARENTS
 !!      m_sigma_driver
 !!
+!! CHILDREN
+!! SOURCE
+
 subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,BSt,new_hartr,old_purex)
 !Arguments ------------------------------------
 !scalars
@@ -1142,6 +1152,7 @@ subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,BSt,new_hartr,old_pu
   call wrtout(ab_out,msg,'COLL')
 
 end subroutine print_band_energies
+!!***
 
 !!****f* ABINIT/rotate_ks_no
 !! NAME
