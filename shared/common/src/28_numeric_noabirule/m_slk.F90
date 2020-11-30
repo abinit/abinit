@@ -102,13 +102,15 @@ module m_slk
 
    integer :: myproc
    ! number of the processor
-   integer :: comm
 
+   integer :: comm
    ! MPI communicator underlying the BLACS grid.
+
    integer :: coords(2)
 
    type(grid_scalapack) :: grid
    ! the grid to which the processor is associated
+
  end type processor_scalapack
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -167,21 +169,36 @@ module m_slk
 
    type(descript_scalapack) :: descript
 
+#ifdef HAVE_LINALG_SCALAPACK
+ contains
+
+   procedure :: loc2glob => slk_matrix_loc2glob
+    ! Return global indices of a matrix element from the local indices.
+
+   procedure :: free => matrix_scalapack_free
+    ! Destroys ScaLAPACK matrix
+
+   procedure :: zinvert => slk_zinvert
+     ! Inverse of a complex matrix in double precision
+
+   procedure :: zdhp_invert => slk_zdhp_invert
+     ! Inverse of a Hermitian positive definite matrix.
+#endif
+
  end type matrix_scalapack
 
 
 #ifdef HAVE_LINALG_SCALAPACK
  public :: init_matrix_scalapack           ! Initialisation of a SCALAPACK matrix
- public :: destruction_matrix_scalapack    ! Destroys a matrix descriptor for ScaLAPACK.
  public :: matrix_get_local_cplx           ! Returns a local matrix coefficient of complex type.
  public :: matrix_get_local_real           ! Returns a local matrix coefficient of double precision type.
  public :: matrix_set_local_cplx           ! Sets a local matrix coefficient of complex type.
  public :: matrix_set_local_real           ! Sets a local matrix coefficient of double precision type.
- public :: idx_loc                         ! Local indices of a matrix entry
-                                           ! with respect to its global indices, independently of the processor.
+ public :: idx_loc                         ! Local indices of an entry
+                                           ! from its global indices, independently of the processor.
  public :: glob_loc                        ! Return global location of a matrix coefficient.
- public :: idx_glob                        ! Return global indices of a term of the matrix with respect to its local indices.
- public :: loc_glob                        ! Return global index from a local index (row or column) as a function of a given processor
+ public :: loc_glob                        ! Return global index from a local index (row or column)
+                                           ! as a function of a given processor
  public :: matrix_from_global              ! Fills SCALAPACK matrix from full matrix.
  public :: matrix_from_global_sym          ! Fills SCALAPACK matrix from a full matrix.
  public :: matrix_from_realmatrix          ! Fills SCALAPACK matrix from full matrix.
@@ -198,7 +215,7 @@ module m_slk
  !public :: my_locr
  !public :: my_locc
 
- public :: slk_pzgemm                        ! C := alpha*A*B + beta*C
+ public :: slk_pzgemm                        ! Compute: C := alpha*A*B + beta*C
  public :: compute_eigen_problem             ! Compute eigenvalues and eigenvectors of: A * X = lambda * X.
                                              ! complex and real cases.
  public :: compute_generalized_eigen_problem ! Compute_generalized_eigen_problem
@@ -213,14 +230,13 @@ module m_slk
                                              ! generalized Hermitian-definite eigenproblem, of the form
                                              ! sub( A )*x=(lambda)*sub( B )*x,  sub( A )*sub( B )x=(lambda)*x,
                                              ! or sub( B )*sub( A )*x=(lambda)*x.
- public :: slk_zinvert                       ! Inverse of a complex matrix in double precision
- public :: slk_zdhp_invert                   ! Iverse of a Hermitian positive definite matrix.
+
  public :: slk_write                         ! Writes a square scaLAPACK distributed matrix on an external file using MPI-IO.
  public :: slk_read                          ! Read a square scaLAPACK distributed matrix from an external file using MPI-IO.
  public :: slk_single_fview_read_mask        ! Returns an MPI datatype that can be used to read a scaLAPACK matrix from
                                              ! a binary file using MPI-IO.
                                              ! The view is created using the user-defined mask function
- public :: slk_symmetrize                    ! Symmetrizes a square scaLAPACK-distributed matrix.
+ public :: slk_symmetrize                    ! Symmetrizes a square scaLAPACK matrix.
  public :: slk_single_fview_read             ! Returns an MPI datatype to read a scaLAPACK distributed matrix
                                              ! from a binary file using MPI-IO.
  public :: slk_single_fview_write            ! Returns an MPI datatype to write a scaLAPACK distributed matrix
@@ -255,7 +271,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine build_grid_scalapack(grid,nbprocs,comm)
+subroutine build_grid_scalapack(grid, nbprocs, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nbprocs,comm
@@ -366,7 +382,7 @@ end subroutine build_processor_scalapack
 !!
 !! SOURCE
 
-subroutine init_scalapack(processor,comm)
+subroutine init_scalapack(processor, comm)
 
 !Arguments ------------------------------------
  integer, intent(in) :: comm
@@ -416,7 +432,7 @@ end subroutine init_scalapack
 subroutine end_scalapack(processor)
 
 !Arguments ------------------------------------
- type(processor_scalapack),intent(inout)    :: processor
+ type(processor_scalapack),intent(inout) :: processor
 
 ! *********************************************************************
 
@@ -453,17 +469,17 @@ end subroutine end_scalapack
 !!
 !! SOURCE
 
-subroutine init_matrix_scalapack(matrix,nbli_global,nbco_global,processor,istwf_k,tbloc)
+subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, istwf_k, tbloc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nbli_global,nbco_global,istwf_k
- integer,intent(in),optional :: tbloc
  type(matrix_scalapack),intent(inout) :: matrix
  type(processor_scalapack),intent(in),target  :: processor
+ integer,intent(in),optional :: tbloc
 
 !Local variables-------------------------------
- INTEGER, PARAMETER :: SIZE_BLOCS = 24 ! As recommended by Intel MKL, a more sensible default than the previous value of 40
- INTEGER :: info,sizeb
+ integer, parameter :: SIZE_BLOCS = 24 ! As recommended by Intel MKL, a more sensible default than the previous value of 40
+ integer :: info,sizeb
  integer,external :: NUMROC
  character(len=500) :: msg
 
@@ -529,9 +545,9 @@ end subroutine init_matrix_scalapack
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/destruction_matrix_scalapack
+!!****f* m_slk/matrix_scalapack_free
 !! NAME
-!!  destruction_matrix_scalapack
+!!  matrix_scalapack_free
 !!
 !! FUNCTION
 !!  Destroys a matrix descriptor for ScaLAPACK.
@@ -543,10 +559,10 @@ end subroutine init_matrix_scalapack
 !!
 !! SOURCE
 
-subroutine destruction_matrix_scalapack(matrix)
+subroutine matrix_scalapack_free(matrix)
 
 !Arguments ------------------------------------
- type(matrix_scalapack),intent(inout) :: matrix
+ class(matrix_scalapack),intent(inout) :: matrix
 
 ! *********************************************************************
 
@@ -561,7 +577,7 @@ subroutine destruction_matrix_scalapack(matrix)
  matrix%sizeb_local = 0
  matrix%descript%tab = 0
 
-end subroutine destruction_matrix_scalapack
+end subroutine matrix_scalapack_free
 !!***
 
 !----------------------------------------------------------------------
@@ -572,7 +588,7 @@ end subroutine destruction_matrix_scalapack
 !!
 !! FUNCTION
 !!  Returns a local matrix coefficient of complex type.
-!! Access to a component thanks to its local indices
+!!  Access to a component thanks to its local indices
 !!
 !! INPUTS
 !!  matrix= the matrix to process
@@ -586,12 +602,12 @@ end subroutine destruction_matrix_scalapack
 !!
 !! SOURCE
 
-pure function matrix_get_local_cplx(matrix,i,j)
+pure complex(dpc) function matrix_get_local_cplx(matrix, i, j)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
  integer, intent(in) :: i,j
- complex(dp) :: matrix_get_local_cplx
- type(matrix_scalapack),intent(in) :: matrix
+ !complex(dp) :: matrix_get_local_cplx
 
 ! *********************************************************************
 
@@ -618,12 +634,12 @@ end function matrix_get_local_cplx
 !!
 !! SOURCE
 
-pure function matrix_get_local_real(matrix,i,j)
+pure real(dp) function matrix_get_local_real(matrix,i,j)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
  integer, intent(in) :: i,j
- type(matrix_scalapack),intent(in) :: matrix
- real(dp) :: matrix_get_local_real
+ !real(dp) :: matrix_get_local_real
 
 ! *********************************************************************
 
@@ -660,9 +676,9 @@ end function matrix_get_local_real
 pure subroutine matrix_set_local_cplx(matrix,i,j,value)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: matrix
  integer, intent(in) :: i,j
  complex(dp), intent(in) :: value
- type(matrix_scalapack),intent(inout) :: matrix
 
 ! *********************************************************************
 
@@ -693,12 +709,12 @@ end subroutine matrix_set_local_cplx
 !!
 !! SOURCE
 
-pure subroutine matrix_set_local_real(matrix,i,j,value)
+pure subroutine matrix_set_local_real(matrix, i, j, value)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: matrix
  integer, intent(in) :: i,j
  real(dp), intent(in) :: value
- type(matrix_scalapack),intent(inout) :: matrix
 
 ! *********************************************************************
 
@@ -714,7 +730,7 @@ end subroutine matrix_set_local_real
 !!  idx_loc
 !!
 !! FUNCTION
-!!  Determination local indices from global indices, independently of the processor.
+!!  Return local indices from global indices, **independently** of the processor.
 !!
 !! INPUTS
 !!  matrix= the matrix to process
@@ -732,12 +748,12 @@ end subroutine matrix_set_local_real
 !!
 !! SOURCE
 
-subroutine idx_loc(matrix,i,j,iloc,jloc)
+subroutine idx_loc(matrix, i, j, iloc, jloc)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
  integer, intent(in) :: i,j
  integer, intent(out) :: iloc,jloc
- type(matrix_scalapack),intent(in) :: matrix
 
 ! *********************************************************************
 
@@ -765,14 +781,11 @@ end subroutine idx_loc
 !!
 !! SOURCE
 
-function glob_loc(matrix,idx,lico)
+integer function glob_loc(matrix, idx, lico)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
  integer, intent(in) :: idx, lico
- type(matrix_scalapack),intent(in) :: matrix
-
-!Return value ---------------------------------
- integer :: glob_loc
 
 !Local variables-------------------------------
  integer,external :: NUMROC
@@ -787,17 +800,17 @@ end function glob_loc
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/idx_glob
+!!****f* m_slk/slk_matrix_loc2glob
 !! NAME
-!!  idx_glob
+!!  slk_matrix_loc2glob
 !!
 !! FUNCTION
-!!  Determine the global indices of a term of the matrix from its local indices.
+!!  Determine the global indices of an element from its local indices.
 !!
 !! INPUTS
-!!  matrix= the matrix to process
-!!  iloc= local row of the coefficient
-!!  jloc= local column of the coefficient
+!!  matrix= the matrix to process.
+!!  iloc= local row index.
+!!  jloc= local column index.
 !!
 !! OUTPUT
 !!  i= row in the matrix
@@ -808,19 +821,19 @@ end function glob_loc
 !!
 !! SOURCE
 
-pure subroutine idx_glob(matrix,iloc,jloc,i,j)
+pure subroutine slk_matrix_loc2glob(matrix, iloc, jloc, i, j)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
  integer, intent(in) :: iloc,jloc
  integer, intent(out) :: i,j
- type(matrix_scalapack),intent(in) :: matrix
 
 ! *********************************************************************
 
- i = loc_glob(matrix,matrix%processor,iloc,1)
- j = loc_glob(matrix,matrix%processor,jloc,2)
+ i = loc_glob(matrix, matrix%processor, iloc, 1)
+ j = loc_glob(matrix, matrix%processor, jloc, 2)
 
-end subroutine idx_glob
+end subroutine slk_matrix_loc2glob
 !!***
 
 !----------------------------------------------------------------------
@@ -843,13 +856,12 @@ end subroutine idx_glob
 !!
 !! SOURCE
 
-pure function loc_glob(matrix,proc,idx,lico)
+integer pure function loc_glob(matrix, proc, idx, lico)
 
 !Arguments ------------------------------------
- integer, intent(in) :: idx,lico
- integer :: loc_glob
- type(matrix_scalapack),intent(in) :: matrix
+ class(matrix_scalapack),intent(in) :: matrix
  type(processor_scalapack),intent(in) :: proc
+ integer, intent(in) :: idx,lico
 
 !Local variables-------------------------------
  integer :: nbcyc,reste,nblocs
@@ -887,16 +899,16 @@ end function loc_glob
 !!
 !! SOURCE
 
-subroutine matrix_from_global(matrix,reference,istwf_k)
+subroutine matrix_from_global(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: matrix
  integer,intent(in) :: istwf_k
  real(dp),intent(in) :: reference(*)
- type(matrix_scalapack),intent(inout) :: matrix
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob,ind !cptr
- real(dp) :: err,val_real
+ real(dp) :: val_real !err,
  complex(dp)::val_cplx
  character(len=500) :: msg
 
@@ -907,7 +919,7 @@ subroutine matrix_from_global(matrix,reference,istwf_k)
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
-     call idx_glob(matrix,i,j,iglob,jglob)
+     call matrix%loc2glob(i, j, iglob, jglob)
 
      if (istwf_k/=2) then
         ind = jglob*(jglob-1)+2*iglob-1
@@ -961,16 +973,16 @@ end subroutine matrix_from_global
 !!
 !! SOURCE
 
-subroutine matrix_from_global_sym(matrix,reference,istwf_k)
+subroutine matrix_from_global_sym(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
- integer,intent(in) :: istwf_k
+ class(matrix_scalapack),intent(inout)  :: matrix
  real(dp),intent(in) :: reference(:)
- type(matrix_scalapack),intent(inout)  :: matrix
+ integer,intent(in) :: istwf_k
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob,ind !cptr
- real(dp) :: err
+ !real(dp) :: err
  complex(dp)::val_cplx
  real(dp)   ::val_real
  character(len=500) :: msg
@@ -982,7 +994,7 @@ subroutine matrix_from_global_sym(matrix,reference,istwf_k)
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
-     call idx_glob(matrix,i,j,iglob,jglob)
+     call matrix%loc2glob(i,j,iglob,jglob)
      if(jglob < iglob) then
         ind = iglob*(iglob-1)+2*jglob-1
      else
@@ -1043,24 +1055,23 @@ end subroutine matrix_from_global_sym
 !!
 !! SOURCE
 
-subroutine matrix_from_realmatrix(matrix,reference,istwf_k)
+subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: matrix
  integer,intent(in) :: istwf_k
- type(matrix_scalapack),intent(inout) :: matrix
 !arrays
  real(dp),intent(in) :: reference(:,:)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob,cptr
- real(dp) :: err,val
+ real(dp) :: val !err,
 
 ! *********************************************************************
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
-     call idx_glob(matrix,i,j,iglob,jglob)
-
+     call matrix%loc2glob(i, j, iglob, jglob)
      val = reference(iglob, jglob)
      call matrix_set_local_real(matrix,i,j,val)
    end do
@@ -1092,28 +1103,26 @@ end subroutine matrix_from_realmatrix
 !!
 !! SOURCE
 
-subroutine matrix_from_complexmatrix(matrix,reference,istwf_k)
+subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: matrix
  integer,intent(in) :: istwf_k
- type(matrix_scalapack),intent(inout) :: matrix
 !arrays
  real(dp),intent(in) :: reference(:,:)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob,cptr
- real(dp) :: err
+ !real(dp) :: err
  complex(dpc) :: val
 
 ! *********************************************************************
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
-     call idx_glob(matrix,i,j,iglob,jglob)
-
+     call matrix%loc2glob(i, j, iglob, jglob)
      val = dcmplx(reference(2*iglob-1, jglob),reference(2*iglob, jglob))
      call matrix_set_local_cplx(matrix,i,j,val)
-
    end do
  end do
 
@@ -1143,16 +1152,16 @@ end subroutine matrix_from_complexmatrix
 !!
 !! SOURCE
 
-subroutine matrix_to_global(matrix,reference,istwf_k)
+subroutine matrix_to_global(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
  integer,intent(in) :: istwf_k          !,nband_k
  real(dp),intent(inout) :: reference(*) !(nband_k*(nband_k+1))
- type(matrix_scalapack),intent(in) :: matrix
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob,ind,cptr
- real(dp) :: err
+ !real(dp) :: err
 
 ! *********************************************************************
 
@@ -1161,7 +1170,7 @@ subroutine matrix_to_global(matrix,reference,istwf_k)
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
-     call idx_glob(matrix,i,j,iglob,jglob)
+     call matrix%loc2glob(i, j, iglob, jglob)
 
      ind = jglob*(jglob-1)+2*iglob-1
      if (ind <= matrix%sizeb_global(2)*(matrix%sizeb_global(2)+1)) then
@@ -1208,37 +1217,26 @@ end subroutine matrix_to_global
 !!
 !! SOURCE
 
-subroutine matrix_to_realmatrix(matrix,reference,istwf_k)
+subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
  integer,intent(in) :: istwf_k
- type(matrix_scalapack),intent(in) :: matrix
 !arrays
  real(dp),intent(inout) :: reference(:,:)
 
 !Local variables-------------------------------
- integer      :: i,j,iglob,jglob,cptr
- real(dp)     :: err
+ integer :: i,j,iglob,jglob,cptr
  complex(dpc) :: zvar
 
 ! *********************************************************************
 
-!err = 0._DP
-!cptr = 0
-
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
-     call idx_glob(matrix,i,j,iglob,jglob)
-
+     call matrix%loc2glob(i, j, iglob, jglob)
      reference(iglob,jglob) = matrix_get_local_real(matrix,i,j)
-!    cptr = cptr + 1
    end do
  end do
-
-!if (cptr /= 0) THEN
-!write(std_out,*) matrix%processor%myproc,"erreur Linf matrix scalapack", &
-!&  err,"on",cptr,"terms"
-!end if
 
 end subroutine matrix_to_realmatrix
 !!***
@@ -1266,36 +1264,26 @@ end subroutine matrix_to_realmatrix
 !!
 !! SOURCE
 
-subroutine matrix_to_complexmatrix(matrix,reference,istwf_k)
+subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
- type(matrix_scalapack),intent(in) :: matrix
+ class(matrix_scalapack),intent(in) :: matrix
 !arrays
  complex(dpc),intent(inout) :: reference(:,:)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob,cptr
- real(dp) :: err
+ !real(dp) :: err
 
 ! *********************************************************************
 
-!err = 0._DP
-!cptr = 0
-
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
-     call idx_glob(matrix,i,j,iglob,jglob)
-
+     call matrix%loc2glob(i, j, iglob, jglob)
      reference(iglob,jglob) = matrix_get_local_cplx(matrix,i,j)
-!    cptr = cptr + 1
    end do
  end do
-
-!if (cptr /= 0) THEN
-!write(std_out,*) matrix%processor%myproc,"erreur Linf matrix scalapack", &
-!&  err,"on",cptr,"terms"
-!end if
 
 end subroutine matrix_to_complexmatrix
 !!***
@@ -1322,17 +1310,17 @@ end subroutine matrix_to_complexmatrix
 !!
 !! SOURCE
 
-subroutine matrix_to_reference(matrix,reference,istwf_k)
+subroutine matrix_to_reference(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
+ class(matrix_scalapack),intent(in) :: matrix
  integer,intent(in) :: istwf_k
- type(matrix_scalapack),intent(in) :: matrix
 !arrays
  real(dp),intent(inout) :: reference(:,:)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob,ind,cptr
- real(dp) :: err
+ !real(dp) :: err
 
 ! *********************************************************************
 
@@ -1341,7 +1329,7 @@ subroutine matrix_to_reference(matrix,reference,istwf_k)
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
-     call idx_glob(matrix,i,j,iglob,jglob)
+     call matrix%loc2glob(i, j, iglob, jglob)
 
      if (istwf_k/=2) then
        ind=(iglob-1)*2+1
@@ -1393,7 +1381,7 @@ end subroutine matrix_to_reference
 !!
 !! SOURCE
 
-subroutine slk_matrix_from_global_dpc_2D(Slk_mat,uplo,glob_mat)
+subroutine slk_matrix_from_global_dpc_2D(Slk_mat, uplo, glob_mat)
 
 !Arguments ------------------------------------
 !scalars
@@ -1403,7 +1391,7 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat,uplo,glob_mat)
  complex(dpc),intent(in) :: glob_mat(:,:)
 
 !Local variables-------------------------------
- integer :: ii,jj,iglob,jglob
+ integer :: ii, jj, iglob, jglob
 
 !************************************************************************
 
@@ -1415,7 +1403,7 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat,uplo,glob_mat)
    ! Full global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,ii,jj,iglob,jglob)
+       call slk_mat%loc2glob(ii, jj, iglob, jglob)
        Slk_mat%buffer_cplx(ii,jj) = glob_mat(iglob,jglob)
      end do
    end do
@@ -1424,7 +1412,7 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat,uplo,glob_mat)
    ! Only the upper triangle of the global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,ii,jj,iglob,jglob)
+       call slk_mat%loc2glob(ii, jj, iglob, jglob)
        if (jglob>=iglob) then
          Slk_mat%buffer_cplx(ii,jj) =        glob_mat(iglob,jglob)
        else
@@ -1437,7 +1425,7 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat,uplo,glob_mat)
    ! Only the lower triangle of the global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,ii,jj,iglob,jglob)
+       call slk_mat%loc2glob(ii, jj, iglob, jglob)
        if (jglob<=iglob) then
          Slk_mat%buffer_cplx(ii,jj) =        glob_mat(iglob,jglob)
        else
@@ -1513,7 +1501,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
    ! Only the upper triangle of the global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,ii,jj,iglob,jglob)
+       call slk_mat%loc2glob(ii, jj, iglob, jglob)
 
        if (jglob>=iglob) then
          ind = iglob + jglob*(jglob-1)/2
@@ -1530,7 +1518,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
    ! Only the lower triangle of the global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,ii,jj,iglob,jglob)
+       call slk_mat%loc2glob(ii, jj, iglob, jglob)
 
        if (jglob<=iglob) then
          ind = iglob + (jglob-1)*(2*n-jglob)/2
@@ -1557,8 +1545,8 @@ end subroutine slk_matrix_from_global_dpc_1Dp
 !!  slk_matrix_to_global_dpc_2D
 !!
 !! FUNCTION
-!!  Routine to fill a global matrix with respect to a SCALAPACK matrix.
-!!  target: Two-dimensional Double precision complex matrix.
+!!  Fill a global matrix with respect to a SCALAPACK matrix.
+!!  target: Two-dimensional double precision complex matrix.
 !!
 !! INPUTS
 !!  Slk_mat<matrix_scalapack>=The distributed matrix.
@@ -1578,12 +1566,12 @@ end subroutine slk_matrix_from_global_dpc_1Dp
 !!
 !! SOURCE
 
-subroutine slk_matrix_to_global_dpc_2D(Slk_mat,uplo,glob_mat)
+subroutine slk_matrix_to_global_dpc_2D(Slk_mat, uplo, glob_mat)
 
 !Arguments ------------------------------------
 !scalaras
+ class(matrix_scalapack),intent(in) :: Slk_mat
  character(len=*),intent(in) :: uplo
- type(matrix_scalapack),intent(in) :: Slk_mat
 !arrays
  complex(dpc),intent(inout) :: glob_mat(:,:)
 
@@ -1594,29 +1582,29 @@ subroutine slk_matrix_to_global_dpc_2D(Slk_mat,uplo,glob_mat)
 
  select case (uplo(1:1))
 
- case ("A","a")
+ case ("A", "a")
    ! Full global matrix has to be filled.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,ii,jj,iglob,jglob)
+       call slk_mat%loc2glob(ii, jj, iglob, jglob)
        glob_mat(iglob,jglob) = Slk_mat%buffer_cplx(ii,jj)
      end do
    end do
 
- case ("U","u")
+ case ("U", "u")
    ! Only the upper triangle of the global matrix is filled.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,ii,jj,iglob,jglob)
+       call slk_mat%loc2glob(ii, jj, iglob, jglob)
        if (jglob>=iglob) glob_mat(iglob,jglob) = Slk_mat%buffer_cplx(ii,jj)
      end do
    end do
 
- case ("L","l")
+ case ("L", "l")
    ! Only the lower triangle of the global matrix is filled.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,ii,jj,iglob,jglob)
+       call slk_mat%loc2glob(ii, jj, iglob, jglob)
        if (jglob<=iglob) glob_mat(iglob,jglob) = Slk_mat%buffer_cplx(ii,jj)
      end do
    end do
@@ -1773,7 +1761,7 @@ end function my_locc
 !!
 !! SOURCE
 
-subroutine slk_pzgemm(transa,transb,matrix1,alpha,matrix2,beta,results)
+subroutine slk_pzgemm(transa, transb, matrix1, alpha, matrix2, beta, results)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: transa,transb
@@ -1784,10 +1772,10 @@ subroutine slk_pzgemm(transa,transb,matrix1,alpha,matrix2,beta,results)
 !************************************************************************
 
  call PZGEMM(transa,transb,matrix1%sizeb_global(1),matrix2%sizeb_global(2),&
-&  matrix1%sizeb_global(2),alpha,matrix1%buffer_cplx,1,1,&
-&  matrix1%descript%tab,matrix2%buffer_cplx,1,1,         &
-&  matrix2%descript%tab,beta,results%buffer_cplx,1,1,    &
-&  results%descript%tab)
+             matrix1%sizeb_global(2),alpha,matrix1%buffer_cplx,1,1,&
+             matrix1%descript%tab,matrix2%buffer_cplx,1,1,         &
+             matrix2%descript%tab,beta,results%buffer_cplx,1,1,    &
+             results%descript%tab)
 
 end subroutine slk_pzgemm
 !!***
@@ -2188,8 +2176,8 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 &          processor%grid%dims(1),processor%grid%dims(2), &
 &          matrix1%descript%tab,processor%comm)
   end if
-  call destruction_matrix_scalapack(tmp1)
-  call destruction_matrix_scalapack(tmp2)
+  call tmp1%free()
+  call tmp2%free()
 
 #else
 !Arguments ------------------------------------
@@ -2450,8 +2438,8 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! ====================================
  ! DESTRUCTION SCALAPACK AND TMP MATRICES
  ! ====================================
- call destruction_matrix_scalapack(sca_matrix1)
- call destruction_matrix_scalapack(sca_matrix2)
+ call sca_matrix1%free()
+ call sca_matrix2%free()
 
  ABI_SFREE(z_tmp_evec)
  ABI_SFREE(r_tmp_evec)
@@ -2582,9 +2570,9 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  ! ====================================
  ! DESTRUCTION SCALAPACK AND TMP MATRICES
  ! ====================================
- call destruction_matrix_scalapack(sca_matrix1)
- call destruction_matrix_scalapack(sca_matrix2)
- call destruction_matrix_scalapack(sca_matrix3)
+ call sca_matrix1%free()
+ call sca_matrix2%free()
+ call sca_matrix3%free()
 
 end subroutine compute_eigen2
 !!***
@@ -2629,7 +2617,7 @@ end subroutine compute_eigen2
 !!
 !! SOURCE
 
-subroutine slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
+subroutine slk_pzheev(jobz, uplo, Slk_mat, Slk_vec, w)
 
 !Arguments ------------------------------------
 !scalars
@@ -2781,8 +2769,7 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
 
 !Local variables-------------------------------
 !scalars
- integer  :: lwork,lrwork,liwork,info
- integer ::  nvec_calc,ierr
+ integer  :: lwork,lrwork,liwork,info,nvec_calc,ierr
  real(dp) :: orfac
  character(len=500) :: msg
 !arrays
@@ -2793,34 +2780,33 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
 
 !************************************************************************
 
-! abstol = PDLAMCH(Slk_vecprocessor%grid%ictxt,'U')
+ ! abstol = PDLAMCH(Slk_vecprocessor%grid%ictxt,'U')
 
-  orfac  = -one ! Only for eigenvectors: use default value 10d-3.
-! Vectors within orfac*norm(A) will be reorthogonalized.
+ orfac  = -one ! Only for eigenvectors: use default value 10d-3.
+ ! Vectors within orfac*norm(A) will be reorthogonalized.
 
-! Allocate the arrays for the results of the calculation
-  ABI_MALLOC(gap,( Slk_mat%processor%grid%dims(1) * Slk_mat%processor%grid%dims(2)))
+ ! Allocate the arrays for the results of the calculation
+ ABI_MALLOC(gap, (Slk_mat%processor%grid%dims(1) * Slk_mat%processor%grid%dims(2)))
 
-  if (firstchar(jobz, ["V","v"])) then
-    ABI_MALLOC(ifail,(Slk_mat%sizeb_global(2)))
-    ABI_MALLOC(iclustr,( 2*Slk_mat%processor%grid%dims(1) * Slk_mat%processor%grid%dims(2)))
-  end if
-!
-! Get the optimal size of the work arrays.
-  lwork=-1; lrwork=-1; liwork=-1
-  ABI_MALLOC(work,(1))
-  ABI_MALLOC(iwork,(1))
-  ABI_MALLOC(rwork,(3))
-! This is clearly seen in the source in which rwork(1:3) is accessed
-! during the calcuation of the workspace size.
+ if (firstchar(jobz, ["V","v"])) then
+   ABI_MALLOC(ifail,(Slk_mat%sizeb_global(2)))
+   ABI_MALLOC(iclustr,( 2*Slk_mat%processor%grid%dims(1) * Slk_mat%processor%grid%dims(2)))
+ end if
+
+ ! Get the optimal size of the work arrays.
+ lwork=-1; lrwork=-1; liwork=-1
+ ABI_MALLOC(work,(1))
+ ABI_MALLOC(iwork,(1))
+ ABI_MALLOC(rwork,(3))
+ ! This is clearly seen in the source in which rwork(1:3) is accessed
+ ! during the calcuation of the workspace size.
 
   call PZHEEVX(jobz,range,uplo, Slk_mat%sizeb_global(2),Slk_mat%buffer_cplx,1,1,Slk_mat%descript%tab,&
-&  vl,vu,il,iu,abstol,mene_found,nvec_calc,eigen,orfac,&
-&  Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
-&  work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
+    vl,vu,il,iu,abstol,mene_found,nvec_calc,eigen,orfac,&
+    Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
+    work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
-  write(msg,'(a,i7)')" Problem to compute workspace to use ScaLAPACK, info: ",info
-  ABI_CHECK(info==0,msg)
+  ABI_CHECK(info==0, sjoin("Problem to compute workspace, info:", itoa(info)))
 
   lwork  = NINT(real(work(1)),kind=dp)
   lrwork = NINT(rwork(1))
@@ -2829,94 +2815,93 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
   ABI_FREE(work)
   ABI_FREE(rwork)
   ABI_FREE(iwork)
-!
-! FROM THE SCALAPACK MAN PAGE:
-! The computed eigenvectors may not be orthogonal if the minimal workspace is supplied and ORFAC is too
-! small. If you  want to guarantee orthogonality (at the cost of potentially poor performance) you should
-! add the following to LRWORK: (CLUSTERSIZE-1)*N where CLUSTERSIZE is  the  number  of  eigenvalues  in  the
-! largest cluster, where a cluster is defined as a set of close eigenvalues: { W(K),...,W(K+CLUSTERSIZE-1) |
-! W(J+1) <= W(J) + ORFAC*2*norm(A) }.
+  !
+  ! FROM THE SCALAPACK MAN PAGE:
+  ! The computed eigenvectors may not be orthogonal if the minimal workspace is supplied and ORFAC is too
+  ! small. If you  want to guarantee orthogonality (at the cost of potentially poor performance) you should
+  ! add the following to LRWORK: (CLUSTERSIZE-1)*N where CLUSTERSIZE is  the  number  of  eigenvalues  in  the
+  ! largest cluster, where a cluster is defined as a set of close eigenvalues: { W(K),...,W(K+CLUSTERSIZE-1) |
+  ! W(J+1) <= W(J) + ORFAC*2*norm(A) }.
 
   if ( firstchar(jobz, ["V","v"])) then
     lrwork = INT( lrwork + Slk_mat%sizeb_global(2) *(Slk_mat%sizeb_global(2)-1) )
   end if
 
-! ibuff(1) = lwork
-! ibuff(2) = lrwork !INT(lrwork + Slk_mat%sizeb_global(2) *(Slk_mat%sizeb_global(2)-1)
-! ibuff(3) = liwork
+  ! ibuff(1) = lwork
+  ! ibuff(2) = lrwork !INT(lrwork + Slk_mat%sizeb_global(2) *(Slk_mat%sizeb_global(2)-1)
+  ! ibuff(3) = liwork
 
-! Get the maximum of sizes of the work arrays processor%comm
-! call MPI_ALLREDUCE(ibuff,max_ibuff,3,MPI_integer,MPI_MAX,comm,ierr)
+  ! Get the maximum of sizes of the work arrays processor%comm
+  ! call MPI_ALLREDUCE(ibuff,max_ibuff,3,MPI_integer,MPI_MAX,comm,ierr)
 
-! lwork  = max_ibuff(1)
-! lrwork = max_ibuff(2)
-! liwork = max_ibuff(3)
+  ! lwork  = max_ibuff(1)
+  ! lrwork = max_ibuff(2)
+  ! liwork = max_ibuff(3)
 
-  ABI_MALLOC(work ,(lwork ))
-  ABI_MALLOC(rwork,(lrwork))
-  ABI_MALLOC(iwork,(liwork))
-!
-! Call the scaLAPACK routine.
+  ABI_MALLOC(work , (lwork ))
+  ABI_MALLOC(rwork, (lrwork))
+  ABI_MALLOC(iwork, (liwork))
 
-! write(std_out,*) 'I am using PZHEEVX'
+ ! Call the scaLAPACK routine.
+ ! write(std_out,*) 'I am using PZHEEVX'
   call PZHEEVX(jobz,range,uplo, Slk_mat%sizeb_global(2),Slk_mat%buffer_cplx,1,1,Slk_mat%descript%tab,&
-&  vl,vu,il,iu,abstol,mene_found,nvec_calc, eigen,orfac,&
-&  Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
-&  work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
+    vl,vu,il,iu,abstol,mene_found,nvec_calc, eigen,orfac,&
+    Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
+    work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
-! Handle the possible error.
-  if (info < 0) then
-    write(msg,'(a,i7,a)')" The ",-info,"-th argument of PZHEEVX had an illegal value."
-    if (info==-25) msg = " LRWORK is too small to compute all the eigenvectors requested, no computation is performed"
-    MSG_ERROR(msg)
-  end if
+ ! Handle possible error.
+ if (info < 0) then
+   write(msg,'(a,i7,a)')" The ",-info,"-th argument of PZHEEVX had an illegal value."
+   if (info==-25) msg = " LRWORK is too small to compute all the eigenvectors requested, no computation is performed"
+   MSG_ERROR(msg)
+ end if
 
-  if (info > 0) then
-    write(msg,'(a,i7)') " PZHEEVX returned info: ",info
-    call wrtout(std_out, msg)
-    if (MOD(info,2)/=0)then
-      write(msg,'(3a)')&
-      " One or more eigenvectors failed to converge. ",ch10,&
-      " Their indices are stored in IFAIL. Ensure ABSTOL=2.0*PDLAMCH('U')"
-      call wrtout(std_out, msg)
-    end if
-    if (MOD(info/2,2)/=0) then
-      write(msg,'(5a)')&
-      " Eigenvectors corresponding to one or more clusters of eigenvalues ",ch10,&
-      " could not be reorthogonalized because of insufficient workspace. ",ch10,&
-      " The indices of the clusters are stored in the array ICLUSTR."
-      call wrtout(std_out, msg)
-    end if
-    if (MOD(info/4,2)/=0) then
-      write(msg,'(3a)')" Space limit prevented PZHEEVX from computing all of the eigenvectors between VL and VU. ",ch10,&
-       " The number of eigenvectors  computed  is returned in NZ."
-      call wrtout(std_out, msg)
-    end if
-    if (MOD(info/8,2)/=0) then
-      msg = " PZSTEBZ  failed to compute eigenvalues. Ensure ABSTOL=2.0*PDLAMCH('U')"
-      call wrtout(std_out, msg)
-    end if
-    MSG_ERROR("Cannot continue")
-  end if
+ if (info > 0) then
+   write(msg,'(a,i7)') " PZHEEVX returned info: ",info
+   call wrtout(std_out, msg)
+   if (MOD(info,2)/=0)then
+     write(msg,'(3a)')&
+     " One or more eigenvectors failed to converge. ",ch10,&
+     " Their indices are stored in IFAIL. Ensure ABSTOL=2.0*PDLAMCH('U')"
+     call wrtout(std_out, msg)
+   end if
+   if (MOD(info/2,2)/=0) then
+     write(msg,'(5a)')&
+     " Eigenvectors corresponding to one or more clusters of eigenvalues ",ch10,&
+     " could not be reorthogonalized because of insufficient workspace. ",ch10,&
+     " The indices of the clusters are stored in the array ICLUSTR."
+     call wrtout(std_out, msg)
+   end if
+   if (MOD(info/4,2)/=0) then
+     write(msg,'(3a)')" Space limit prevented PZHEEVX from computing all of the eigenvectors between VL and VU. ",ch10,&
+      " The number of eigenvectors computed is returned in NZ."
+     call wrtout(std_out, msg)
+   end if
+   if (MOD(info/8,2)/=0) then
+     msg = " PZSTEBZ  failed to compute eigenvalues. Ensure ABSTOL=2.0*PDLAMCH('U')"
+     call wrtout(std_out, msg)
+   end if
+   MSG_ERROR("Cannot continue")
+ end if
 
-! Check the number of eigenvalues found wrt to the number of vectors calculated.
-  if ( firstchar(jobz, ['V','v']) .and. mene_found/=nvec_calc) then
-    write(msg,'(5a)')&
-    " The user supplied insufficient space and PZHEEVX is not able to detect this before beginning computation. ",ch10,&
-    " To get all the  eigenvectors requested, the user must supply both sufficient space to hold the ",ch10,&
-    " eigenvectors in Z (M .LE. DESCZ(N_)) and sufficient workspace to compute them. "
-    MSG_ERROR(msg)
-  end if
+ ! Check the number of eigenvalues found wrt to the number of vectors calculated.
+ if ( firstchar(jobz, ['V','v']) .and. mene_found/=nvec_calc) then
+   write(msg,'(5a)')&
+   " The user supplied insufficient space and PZHEEVX is not able to detect this before beginning computation. ",ch10,&
+   " To get all the  eigenvectors requested, the user must supply both sufficient space to hold the ",ch10,&
+   " eigenvectors in Z (M .LE. DESCZ(N_)) and sufficient workspace to compute them. "
+   MSG_ERROR(msg)
+ end if
 
-  ABI_FREE(work)
-  ABI_FREE(rwork)
-  ABI_FREE(iwork)
-  ABI_FREE(gap)
+ ABI_FREE(work)
+ ABI_FREE(rwork)
+ ABI_FREE(iwork)
+ ABI_FREE(gap)
 
-  if (firstchar(jobz, ["V","v"])) then
-    ABI_FREE(ifail)
-    ABI_FREE(iclustr)
-  end if
+ if (firstchar(jobz, ["V","v"])) then
+   ABI_FREE(ifail)
+   ABI_FREE(iclustr)
+ end if
 
 end subroutine slk_pzheevx
 !!***
@@ -3076,16 +3061,16 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
 
 !************************************************************************
 
-! abstol = PDLAMCH(Slk_vecprocessor%grid%ictxt,'U')
+ ! abstol = PDLAMCH(Slk_vecprocessor%grid%ictxt,'U')
 
  orfac  = -one ! Only for eigenvectors: use default value 10d-3.
-! Vectors within orfac*norm(A) will be reorthogonalized.
+ ! Vectors within orfac*norm(A) will be reorthogonalized.
 
-! ======================
-! Alignment requirements
-! ======================
-! The distributed submatrices A(IA:*, JA:*), C(IC:IC+M-1,JC:JC+N-1),
-! and B( IB:IB+N-1, JB:JB+N-1 ) must verify some alignment properties,
+ ! ======================
+ ! Alignment requirements
+ ! ======================
+ ! The distributed submatrices A(IA:*, JA:*), C(IC:IC+M-1,JC:JC+N-1),
+ ! and B( IB:IB+N-1, JB:JB+N-1 ) must verify some alignment properties,
 
  desca = Slk_matA%descript%tab
  descb = Slk_matB%descript%tab
@@ -3097,22 +3082,21 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
 
  ltest = .TRUE.
  ltest = ltest .and. (DESCA(MB_) == DESCA(NB_))
-!IA = IB = IZ
-!JA = IB = JZ
+ !IA = IB = IZ
+ !JA = IB = JZ
  ltest = ltest .and.ALL(DESCA(M_   )==(/DESCB(M_   ),DESCZ(M_   )/))
  ltest = ltest .and.ALL(DESCA(N_   )==(/DESCB(N_   ),DESCZ(N_   )/))
  ltest = ltest .and.ALL(DESCA(MB_  )==(/DESCB(MB_  ),DESCZ(MB_  )/))
  ltest = ltest .and.ALL(DESCA(NB_  )==(/DESCB(NB_  ),DESCZ(NB_  )/))
  ltest = ltest .and.ALL(DESCA(RSRC_)==(/DESCB(RSRC_),DESCZ(RSRC_)/))
  ltest = ltest .and.ALL(DESCA(CSRC_)==(/DESCB(CSRC_),DESCZ(CSRC_)/))
-!MOD( IA-1, DESCA( MB_ ) ) = 0
-!MOD( JA-1, DESCA( NB_ ) ) = 0
-!MOD( IB-1, DESCB( MB_ ) ) = 0
-!MOD( JB-1, DESCB( NB_ ) ) = 0
+ !MOD( IA-1, DESCA( MB_ ) ) = 0
+ !MOD( JA-1, DESCA( NB_ ) ) = 0
+ !MOD( IB-1, DESCB( MB_ ) ) = 0
+ !MOD( JB-1, DESCB( NB_ ) ) = 0
 
  if (.not.ltest) then
-   msg = " Alignment requirements not satisfied, check the caller"
-   MSG_ERROR(msg)
+   MSG_ERROR("Alignment requirements not satisfied, check the caller")
  end if
 
 !Allocate the arrays for the results of the calculation
@@ -3134,13 +3118,12 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
 !during the calcuation of the workspace size.
 
  call pzhegvx(ibtype,jobz,range,uplo, Slk_matA%sizeb_global(2),Slk_matA%buffer_cplx,1,1,Slk_matA%descript%tab,&
-& Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
-& vl,vu,il,iu,abstol,mene_found,nvec_calc,eigen,orfac,&
-& Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
-& work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
+   Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
+   vl,vu,il,iu,abstol,mene_found,nvec_calc,eigen,orfac,&
+   Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
+   work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
- write(msg,'(a,i0)')" Problem to compute workspace to use ScaLAPACK, info: ",info
- ABI_CHECK(info==0,msg)
+ ABI_CHECK(info == 0, sjoin("Problem to compute workspace, info:", itoa(info)))
 
  lwork  = NINT(real(work(1)),kind=dp)
  lrwork = NINT(rwork(1))
@@ -3149,43 +3132,42 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
  ABI_FREE(work)
  ABI_FREE(rwork)
  ABI_FREE(iwork)
-!
-!FROM THE SCALAPACK MAN PAGE:
-!The computed eigenvectors may not be orthogonal if the minimal workspace is supplied and ORFAC is too
-!small. If you  want to guarantee orthogonality (at the cost of potentially poor performance) you should
-!add the following to LRWORK: (CLUSTERSIZE-1)*N where CLUSTERSIZE is  the  number  of  eigenvalues  in  the
-!largest cluster, where a cluster is defined as a set of close eigenvalues: { W(K),...,W(K+CLUSTERSIZE-1) |
-!W(J+1) <= W(J) + ORFAC*2*norm(A) }.
 
- if ( firstchar(jobz, ["V","v"])) then
+ !FROM THE SCALAPACK MAN PAGE:
+ !The computed eigenvectors may not be orthogonal if the minimal workspace is supplied and ORFAC is too
+ !small. If you  want to guarantee orthogonality (at the cost of potentially poor performance) you should
+ !add the following to LRWORK: (CLUSTERSIZE-1)*N where CLUSTERSIZE is  the  number  of  eigenvalues  in  the
+ !largest cluster, where a cluster is defined as a set of close eigenvalues: { W(K),...,W(K+CLUSTERSIZE-1) |
+ !W(J+1) <= W(J) + ORFAC*2*norm(A) }.
+
+ if (firstchar(jobz, ["V","v"])) then
    lrwork = INT( lrwork + Slk_matA%sizeb_global(2) *(Slk_matA%sizeb_global(2)-1) )
  end if
 
-!ibuff(1) = lwork
-!ibuff(2) = lrwork !INT(lrwork + Slk_matA%sizeb_global(2) *(Slk_matA%sizeb_global(2)-1)
-!ibuff(3) = liwork
+ !ibuff(1) = lwork
+ !ibuff(2) = lrwork !INT(lrwork + Slk_matA%sizeb_global(2) *(Slk_matA%sizeb_global(2)-1)
+ !ibuff(3) = liwork
 
-!Get the maximum of sizes of the work arrays processor%comm
-!call MPI_ALLREDUCE(ibuff,max_ibuff,3,MPI_integer,MPI_MAX,comm,ierr)
+ !Get the maximum of sizes of the work arrays processor%comm
+ !call MPI_ALLREDUCE(ibuff,max_ibuff,3,MPI_integer,MPI_MAX,comm,ierr)
 
-!lwork  = max_ibuff(1)
-!lrwork = max_ibuff(2)
-!liwork = max_ibuff(3)
+ !lwork  = max_ibuff(1)
+ !lrwork = max_ibuff(2)
+ !liwork = max_ibuff(3)
 
- ABI_MALLOC(work ,(lwork ))
- ABI_MALLOC(rwork,(lrwork))
- ABI_MALLOC(iwork,(liwork))
-!
-!Call the scaLAPACK routine.
+ ABI_MALLOC(work , (lwork ))
+ ABI_MALLOC(rwork, (lrwork))
+ ABI_MALLOC(iwork, (liwork))
 
-!write(std_out,*) 'I am using PZHEGVX'
+ ! Call the scaLAPACK routine.
+ ! write(std_out,*) 'I am using PZHEGVX'
  call pzhegvx(ibtype,jobz,range,uplo, Slk_matA%sizeb_global(2),Slk_matA%buffer_cplx,1,1,Slk_matA%descript%tab,&
-& Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
-& vl,vu,il,iu,abstol,mene_found,nvec_calc, eigen,orfac,&
-& Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
-& work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
+    Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
+    vl,vu,il,iu,abstol,mene_found,nvec_calc, eigen,orfac,&
+    Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
+   work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
-!Handle the possible error.
+ ! Handle the possible error.
  if (info < 0) then
    write(msg,'(a,i7,a)')" The ",-info,"-th argument of PZHEGVX had an illegal value."
    if (info==-25) msg = " LRWORK is too small to compute all the eigenvectors requested, no computation is performed"
@@ -3256,13 +3238,12 @@ end subroutine slk_pzhegvx
 !! slk_zinvert
 !!
 !! FUNCTION
-!!  slk_zinvert provides an object-oriented interface to the ScaLAPACK set of routines used to compute
-!!  the inverse of a complex matrix in double precision
+!!  Compute the inverse of a complex matrix in double precision
 !!
 !! SIDE EFFECTS
-!!  Slk_mat<type(matrix_scalapack)>=The object storing the local buffer, the array descriptor, the context
-!!    and other quantities needed to call ScaLAPACK routines. In input, the matrix to invert, in output
-!!    the matrix inverted and distributed among the nodes.
+!!  Slk_mat<type(matrix_scalapack)>=
+!!    In input, the matrix to invert.
+!!    In output the matrix inverted and distributed among the nodes.
 !!
 !! PARENTS
 !!      m_exc_diago,m_hide_lapack
@@ -3275,7 +3256,7 @@ subroutine slk_zinvert(Slk_mat)
 
 !Arguments ------------------------------------
 !scalars
- type(matrix_scalapack),intent(inout) :: Slk_mat
+ class(matrix_scalapack),intent(inout) :: Slk_mat
 
 !Local variables ------------------------------
 !scalars
@@ -3287,19 +3268,19 @@ subroutine slk_zinvert(Slk_mat)
 
 !************************************************************************
 
- ABI_CHECK(allocated(Slk_mat%buffer_cplx),"buffer_cplx not allocated")
+ ABI_CHECK(allocated(Slk_mat%buffer_cplx), "buffer_cplx not allocated")
 
  !IMPORTANT NOTE: PZGETRF requires square block decomposition i.e., MB_A = NB_A.
- if (Slk_mat%descript%tab(MB_)/=Slk_mat%descript%tab(NB_)) then
+ if (Slk_mat%descript%tab(MB_) /= Slk_mat%descript%tab(NB_)) then
    MSG_ERROR(" PZGETRF requires square block decomposition i.e MB_A = NB_A.")
  end if
 
  ipiv_size = my_locr(Slk_mat) + Slk_mat%descript%tab(MB_)
- ABI_MALLOC(ipiv,(ipiv_size))
+ ABI_MALLOC(ipiv, (ipiv_size))
 
  ! P * L * U  Factorization.
- call PZGETRF(Slk_mat%sizeb_global(1),Slk_mat%sizeb_global(2),Slk_mat%buffer_cplx,&
-              1,1,Slk_mat%descript%tab,ipiv,info)
+ call PZGETRF(Slk_mat%sizeb_global(1), Slk_mat%sizeb_global(2), Slk_mat%buffer_cplx, &
+              1, 1, Slk_mat%descript%tab,ipiv, info)
  ABI_CHECK(info == 0, sjoin(" PZGETRF returned info:", itoa(info)))
 
  ! Get optimal size of workspace for PZGETRI.
@@ -3307,21 +3288,21 @@ subroutine slk_zinvert(Slk_mat)
  ABI_MALLOC(work,(1))
  ABI_MALLOC(iwork,(1))
 
- call PZGETRI(Slk_mat%sizeb_global(1),Slk_mat%buffer_cplx,1,1,Slk_mat%descript%tab,ipiv,&
-              work,lwork,iwork,liwork,info)
+ call PZGETRI(Slk_mat%sizeb_global(1), Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, ipiv, &
+              work, lwork, iwork, liwork, info)
  ABI_CHECK(info == 0, "PZGETRI: Error during compuation of workspace size")
 
- lwork = NINT(real(work(1))); liwork=iwork(1)
+ lwork = nint(real(work(1))); liwork=iwork(1)
  ABI_FREE(work)
  ABI_FREE(iwork)
 
  ! Solve the problem.
- ABI_MALLOC(work,(lwork))
- ABI_MALLOC(iwork,(liwork))
+ ABI_MALLOC(work, (lwork))
+ ABI_MALLOC(iwork, (liwork))
 
- call PZGETRI(Slk_mat%sizeb_global(1),Slk_mat%buffer_cplx,1,1,Slk_mat%descript%tab,ipiv,&
-              work,lwork,iwork,liwork,info)
- ABI_CHECK(info == 0, sjoin(" PZGETRI returned info:", itoa(info)))
+ call PZGETRI(Slk_mat%sizeb_global(1), Slk_mat%buffer_cplx, 1, 1, Slk_mat%descript%tab, ipiv, &
+              work, lwork, iwork, liwork, info)
+ ABI_CHECK(info == 0, sjoin("PZGETRI returned info:", itoa(info)))
 
  ABI_FREE(work)
  ABI_FREE(iwork)
@@ -3337,8 +3318,7 @@ end subroutine slk_zinvert
 !! slk_zdhp_invert
 !!
 !! FUNCTION
-!!  slk_zdhp_invert provides an object-oriented interface to the ScaLAPACK set of routines used to compute
-!!  the inverse of a Hermitian positive definite matrix.
+!!  Compute the inverse of an Hermitian positive definite matrix.
 !!
 !! INPUTS
 !!  uplo(global input)
@@ -3367,7 +3347,7 @@ subroutine slk_zdhp_invert(Slk_mat, uplo)
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
- type(matrix_scalapack),intent(inout) :: Slk_mat
+ class(matrix_scalapack),intent(inout) :: Slk_mat
 
 !Local variables ------------------------------
 !scalars
@@ -3376,7 +3356,7 @@ subroutine slk_zdhp_invert(Slk_mat, uplo)
 
 !************************************************************************
 
- ABI_CHECK(allocated(Slk_mat%buffer_cplx),"buffer_cplx not allocated")
+ ABI_CHECK(allocated(Slk_mat%buffer_cplx), "buffer_cplx not allocated")
 
  ! ZPOTRF computes the Cholesky factorization of a complex Hermitian positive definite.
  !  A = U**H * U,   if UPLO = 'U', or
@@ -3400,7 +3380,7 @@ end subroutine slk_zdhp_invert
 !!  slk_write
 !!
 !! FUNCTION
-!!  Routine to write a squared scaLAPACK distributed matrix on an external file using MPI-IO.
+!!  Routine to write a square scaLAPACK-distributed matrix to an external file using MPI-IO.
 !!
 !! INPUTS
 !!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK distribution with the local buffer
@@ -3440,7 +3420,7 @@ end subroutine slk_zdhp_invert
 !!
 !! SOURCE
 
-subroutine slk_write(Slk_mat,uplo,is_fortran_file,fname,mpi_fh,offset,flags,glob_subarray)
+subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags, glob_subarray)
 
 !Arguments ------------------------------------
 !scalars
@@ -3450,7 +3430,7 @@ subroutine slk_write(Slk_mat,uplo,is_fortran_file,fname,mpi_fh,offset,flags,glob
  logical,intent(in) :: is_fortran_file
  character(len=*),optional,intent(in) :: fname
  character(len=*),intent(in) :: uplo
- type(matrix_scalapack),intent(in) :: Slk_mat
+ class(matrix_scalapack),intent(in) :: Slk_mat
 !array
  integer,optional,intent(in) :: glob_subarray(2,2)
 
@@ -3745,7 +3725,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  ABI_CHECK_MPI(ierr,"READ_ALL")
 
  ! Symmetrize local buffer if uplo /= "All"
- call slk_symmetrize(Slk_mat,uplo,symtype)
+ call slk_symmetrize(Slk_mat, uplo, symtype)
 
 !BEGINDEBUG
 !call MPI_FILE_READ_AT(mpi_fh,my_offset+xmpio_bsize_frm,ctest,1,MPI_DOUBLE_complex,MPI_STATUS_IGNORE,ierr)
@@ -3918,7 +3898,7 @@ subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsbloc
 
    do jloc=1,Slk_mat%sizeb_local(2)
      do iloc=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+       call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
        if ( mask_of_glob(iglob,jglob,Slk_mat%sizeb_global)/= 0) then ! Will fill this entry.
          my_nel  = my_nel+1
          if (sweep==2) myel2loc(:,my_nel) = (/iloc,jloc/)
@@ -3942,7 +3922,7 @@ subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsbloc
  do el=1,my_nel
    iloc = myel2loc(1,el)
    jloc = myel2loc(2,el)
-   call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+   call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
    tmp_off = offset_of_glob(iglob,jglob,Slk_mat%sizeb_global,nsblocks,sub_block,bsize_elm,bsize_frm)
    if (xmpio_max_address(tmp_off)) offset_err=1   ! Test for possible wraparounds.
    max_displ = MAX(max_displ,tmp_off)
@@ -3988,7 +3968,7 @@ end subroutine slk_single_fview_read_mask
 !!  slk_symmetrize
 !!
 !! FUNCTION
-!!  This routine symmetrize a square scaLAPACK-distributed matrix.
+!!  Symmetrize a squared scaLAPACK-distributed matrix.
 !!
 !! INPUTS
 !!  uplo=String specifying whether only the upper or lower triangular part of the global matrix has been read
@@ -4012,13 +3992,13 @@ end subroutine slk_single_fview_read_mask
 !!
 !! SOURCE
 
-subroutine slk_symmetrize(Slk_mat,uplo,symtype)
+subroutine slk_symmetrize(Slk_mat, uplo, symtype)
 
 !Arguments ------------------------------------
 !scalars
+ class(matrix_scalapack),intent(inout) :: Slk_mat
  character(len=*),intent(in) :: symtype
  character(len=*),intent(in) :: uplo
- type(matrix_scalapack),intent(inout) :: Slk_mat
 
 !Local variables ------------------------------
 !scalars
@@ -4033,7 +4013,7 @@ subroutine slk_symmetrize(Slk_mat,uplo,symtype)
  is_real = (allocated(Slk_mat%buffer_real))
 
  ! One and only one buffer should be allocated.
- if (is_real.and.is_cplx) then
+ if (is_real .and. is_cplx) then
    write(msg,'(a,2l1)')" ScaLAPACK buffers are not allocated correctly, is_real=, is_cplx ",is_real,is_cplx
    MSG_ERROR(msg)
  end if
@@ -4042,18 +4022,18 @@ subroutine slk_symmetrize(Slk_mat,uplo,symtype)
 
  is_hermitian=.FALSE.; is_symmetric=.FALSE.
  select case (symtype(1:1))
-   case ("H","h")
-     is_hermitian=.TRUE.
-   case ("S","s")
-     is_symmetric=.TRUE.
-   case("N","n")
-     if ( ALL(uplo(1:1)/=(/"A","a"/)) ) then
-       msg = " Found symtype= "//TRIM(symtype)//", but uplo= "//TRIM(uplo)
-       MSG_ERROR(msg)
-     end if
-     RETURN  ! Nothing to do.
-   case default
-     MSG_ERROR("Wrong symtype "//TRIM(symtype))
+ case ("H","h")
+   is_hermitian=.TRUE.
+ case ("S","s")
+   is_symmetric=.TRUE.
+ case("N","n")
+   if (ALL(uplo(1:1) /= ["A","a"])) then
+     msg = " Found symtype= "//TRIM(symtype)//", but uplo= "//TRIM(uplo)
+     MSG_ERROR(msg)
+   end if
+   RETURN  ! Nothing to do.
+ case default
+   MSG_ERROR("Wrong symtype "//TRIM(symtype))
  end select
 
  !write(std_out,*)"is_cplx",is_cplx
@@ -4061,37 +4041,38 @@ subroutine slk_symmetrize(Slk_mat,uplo,symtype)
 
  select case (uplo(1:1))
 
- case ("A","a") ! Full global matrix has been read, nothing to do.
+ case ("A","a")
+   ! Full global matrix has been read, nothing to do.
    RETURN
 
- case ("U","u") ! Only the upper triangle of the global matrix was read.
-
+ case ("U", "u")
+   ! Only the upper triangle of the global matrix was read.
    if (is_cplx .and. is_hermitian) then
      ij_loc=0
      do jloc=1,Slk_mat%sizeb_local(2)
        do iloc=1,Slk_mat%sizeb_local(1)
-         call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+         call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
          ij_loc = ij_loc+1
          if (jglob<iglob) then ! Diagonal elements are not forced to be real.
-           Slk_mat%buffer_cplx(iloc,jloc) =  DCONJG(Slk_mat%buffer_cplx(iloc,jloc))
+           Slk_mat%buffer_cplx(iloc,jloc) = DCONJG(Slk_mat%buffer_cplx(iloc,jloc))
          end if
-!        if (iglob==jglob) Slk_mat%buffer_cplx(iloc,jloc) =  real(Slk_mat%buffer_cplx(iloc,jloc))
+         !if (iglob==jglob) Slk_mat%buffer_cplx(iloc,jloc) =  real(Slk_mat%buffer_cplx(iloc,jloc))
        end do
      end do
    end if
 
- case ("L","l") ! Only the lower triangle of the global matrix was read.
-
+ case ("L", "l")
+   ! Only the lower triangle of the global matrix was read.
    if (is_cplx .and. is_hermitian) then
      ij_loc=0
      do jloc=1,Slk_mat%sizeb_local(2)
        do iloc=1,Slk_mat%sizeb_local(1)
-         call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+         call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
          ij_loc = ij_loc+1
          if (jglob>iglob) then ! diagonal elements are not forced to be real.
            Slk_mat%buffer_cplx(iloc,jloc) =  DCONJG(Slk_mat%buffer_cplx(iloc,jloc))
          end if
-!        if (iglob==jglob) Slk_mat%buffer_cplx(iloc,jloc) =  real(Slk_mat%buffer_cplx(iloc,jloc))
+         !if (iglob==jglob) Slk_mat%buffer_cplx(iloc,jloc) =  real(Slk_mat%buffer_cplx(iloc,jloc))
        end do
      end do
    end if
@@ -4206,7 +4187,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
    ij_loc=0
    do jloc=1,Slk_mat%sizeb_local(2)
      do iloc=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+       call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
        ij_loc  = ij_loc+1
        my_offset = 2*(jglob-1)*bsize_frm + bsize_frm + (jglob-1)*nrows_glob*bsize_elm + (iglob-1) * bsize_elm
        my_offset = my_offset / bsize_etype
@@ -4221,7 +4202,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
    ij_loc=0
    do jloc=1,Slk_mat%sizeb_local(2)
      do iloc=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+       call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
        if (jglob>=iglob) then
          ijp_glob = iglob + jglob*(jglob-1)/2  ! Index for packed form
          cpad_frm = 2*(jglob-1)*bsize_frm
@@ -4243,7 +4224,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
    ij_loc=0
    do jloc=1,Slk_mat%sizeb_local(2)
      do iloc=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+       call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
        if (jglob<=iglob) then
          ijp_glob = iglob + (jglob-1)*(2*nrows_glob-jglob)/2 ! Index for packed form
          cpad_frm = 2*(jglob-1)*bsize_frm
@@ -4427,7 +4408,7 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
    ij_loc=0
    do jloc=1,Slk_mat%sizeb_local(2)
      do iloc=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+       call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
        if (iglob>=grow_min.and.iglob<=grow_max .and. &  ! glob_subarray element.
            jglob>=gcol_min.and.jglob<=gcol_max) then
          ij_loc  = ij_loc+1
@@ -4446,7 +4427,7 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
    ij_loc=0
    do jloc=1,Slk_mat%sizeb_local(2)
      do iloc=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+       call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
        if (jglob>=iglob) then
          ijp_glob = iglob + jglob*(jglob-1)/2  ! Index for packed form
          cpad_frm = 2*(jglob-1)*bsize_frm
@@ -4466,7 +4447,7 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
    ij_loc=0
    do jloc=1,Slk_mat%sizeb_local(2)
      do iloc=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,iloc,jloc,iglob,jglob)
+       call slk_mat%loc2glob(iloc, jloc, iglob, jglob)
        if (jglob<=iglob) then
          ijp_glob = iglob + (jglob-1)*(2*nrows_glob-jglob)/2 ! Index for packed form
          cpad_frm = 2*(jglob-1)*bsize_frm
@@ -4641,8 +4622,8 @@ subroutine slk_my_rclist(Slk_mat,rc_str,how_many,rc_list)
    !
    do col_loc=1,Slk_mat%sizeb_local(2)
      do row_loc=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,row_loc,col_loc,row_glob,col_glob)
-       !
+       call slk_mat%loc2glob(row_loc, col_loc, row_glob, col_glob)
+
        if (col_glob==1.and.row_loc==1) then
          nseen = nseen+1
          seen(nseen) = col_glob
@@ -4666,7 +4647,7 @@ subroutine slk_my_rclist(Slk_mat,rc_str,how_many,rc_list)
    !
    do col_loc=1,Slk_mat%sizeb_local(2)
      do row_loc=1,Slk_mat%sizeb_local(1)
-       call idx_glob(Slk_mat,row_loc,col_loc,row_glob,col_glob)
+       call slk_mat%loc2glob(row_loc, col_loc, row_glob, col_glob)
        !
        if (col_glob==1.and.row_loc==1) then
          nseen = nseen+1

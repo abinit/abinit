@@ -34,8 +34,6 @@
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
 
- implicit none
-
 !Arguments ------------------------------------
  integer :: itype
  character(len=1), intent(in) :: jobz
@@ -86,8 +84,8 @@
    call matrix_to_global(sca_b,b,istwf_k_)
    call matrix_to_reference(sca_ev,z,istwf_k_)
    call xmpi_sum(z,slk_communicator,ierr)
-   call destruction_matrix_scalapack(sca_a)
-   call destruction_matrix_scalapack(sca_ev)
+   call sca_a%free()
+   call sca_ev%free()
 #endif
 
 !===== LAPACK
@@ -119,8 +117,6 @@ end subroutine abi_dhpgv
 !! SOURCE
 !!
   subroutine abi_chpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: itype
@@ -180,8 +176,6 @@ end subroutine abi_chpgv
 !! SOURCE
 
 subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: itype

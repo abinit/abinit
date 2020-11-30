@@ -81,8 +81,8 @@
    call matrix_to_global(sca_a,a,istwf_k_)
    call matrix_to_reference(sca_ev,tmp_evec,istwf_k_)
    call xmpi_sum(tmp_evec,z,dim_evec1*n,slk_communicator,ierr)
-   call destruction_matrix_scalapack(sca_a)
-   call destruction_matrix_scalapack(sca_ev)
+   call sca_a%free()
+   call sca_ev%free()
    ABI_DEALLOCATE(tmp_evec)
 #endif
 

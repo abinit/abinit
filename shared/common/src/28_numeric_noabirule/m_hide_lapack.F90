@@ -406,12 +406,12 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
    ! Solve the problem with scaLAPACK.
    call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
 
-   call destruction_matrix_scalapack(Slk_mat)
+   call Slk_mat%free()
 
    if (want_eigenvectors) then ! A is overwritten with the eigenvectors
     a = czero
     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
-    call destruction_matrix_scalapack(Slk_vec)
+    call Slk_vec%free()
     call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
@@ -593,12 +593,12 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
    !! Solve the problem with scaLAPACK.
    !call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
    !
-   !call destruction_matrix_scalapack(Slk_mat)
+   !call Slk_mat%free()
    !
    !if (want_eigenvectors) then ! A is overwritten with the eigenvectors
    ! a = czero
    ! call slk_matrix_to_global_dpc_2D(Slk_vec,"All",a) ! Fill the entries calculated by this node.
-   ! call destruction_matrix_scalapack(Slk_vec)
+   ! call Slk_vec%free()
    ! call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
    !end if
    !
@@ -866,12 +866,12 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
    ! Solve the problem with scaLAPACK.
    call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
 
-   call destruction_matrix_scalapack(Slk_mat)
+   call Slk_mat%free()
 
    if (want_eigenvectors) then ! Collect the eigenvectors.
     z = zero
     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
-    call destruction_matrix_scalapack(Slk_vec)
+    call Slk_vec%free()
     call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
@@ -1045,7 +1045,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
    ! TODO
    !% call slk_pzhegv(itype,jobz,uplo,Slk_matA,Slk_matB,w)
 
-   call destruction_matrix_scalapack(Slk_matB)
+   call Slk_matB%free()
 
    if (firstchar(jobz,(/"V","v"/))) then ! A is overwritten with the eigenvectors
      a = czero
@@ -1053,7 +1053,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
      call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
    end if
 
-   call destruction_matrix_scalapack(Slk_matA)
+   call Slk_matA%free()
    call end_scalapack(Slk_processor)
    RETURN
 #endif
@@ -1274,7 +1274,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
   ! ! TODO
   ! call slk_pzhegv(itype,jobz,uplo,Slk_matA,Slk_matB,w)
 
-  ! call destruction_matrix_scalapack(Slk_matB)
+  ! call Slk_matB%free()
   !
   ! if (firstchar(jobz,(/"V","v"/))) then ! A is overwritten with the eigenvectors
   !  a = czero
@@ -1282,7 +1282,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
   !  call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
   ! end if
 
-  ! call destruction_matrix_scalapack(Slk_matA)
+  ! call Slk_matA%free()
 
   ! call end_scalapack(Slk_processor)
 
@@ -1504,12 +1504,12 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
    ! Solve the problem.
    call slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,m,w)
 
-   call destruction_matrix_scalapack(Slk_mat)
+   call Slk_mat%free()
 
    if (want_eigenvectors) then ! A is overwritten with the eigenvectors
     z = czero
     call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
-    call destruction_matrix_scalapack(Slk_vec)
+    call Slk_vec%free()
     call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
@@ -1771,12 +1771,12 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
   ! ! Solve the problem.
   ! call slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,m,w)
 
-  ! call destruction_matrix_scalapack(Slk_mat)
+  ! call Slk_mat%free()
   !
   ! if (want_eigenvectors) then ! A is overwritten with the eigenvectors
   !  z = czero
   !  call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
-  !  call destruction_matrix_scalapack(Slk_vec)
+  !  call Slk_vec%free()
   !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
   ! end if
 
@@ -2025,13 +2025,13 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
    ! TODO write the scaLAPACK wrapper.
    !call slk_pZHEGVX(itype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abstol,Slk_vec,m,w)
 
-   call destruction_matrix_scalapack(Slk_matA)
-   call destruction_matrix_scalapack(Slk_matB)
+   call Slk_matA%free()
+   call Slk_matB%free()
 
    if (want_eigenvectors) then ! A is overwritten with the eigenvectors
      z = czero
      call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
-     call destruction_matrix_scalapack(Slk_vec)
+     call Slk_vec%free()
      call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
@@ -2332,13 +2332,13 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
   ! ! TODO write the scaLAPACK wrapper.
   ! call slk_pZHEGVX(itype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abstol,Slk_vec,m,w)
 
-  ! call destruction_matrix_scalapack(Slk_matA)
-  ! call destruction_matrix_scalapack(Slk_matB)
+  ! call Slk_matA%free()
+  ! call Slk_matB%free()
   !
   ! if (want_eigenvectors) then ! A is overwritten with the eigenvectors
   !  z = czero
   !  call slk_matrix_to_global_dpc_2D(Slk_vec,"All",z) ! Fill the entries calculated by this node.
-  !  call destruction_matrix_scalapack(Slk_vec)
+  !  call Slk_vec%free()
   !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
   ! end if
 
@@ -2773,7 +2773,7 @@ subroutine cginv(a, n, comm)
   ! Reconstruct the global matrix from the distributed one.
   a = czero
   !! call slk_matrix_to_global_dpc_2D(Slk_mat,"All",a)  ! Fill the entries calculated by this node.
-  call destruction_matrix_scalapack(Slk_mat)
+  call Slk_mat%free()
 
   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
   call end_scalapack(Slk_processor)
@@ -2906,17 +2906,17 @@ subroutine zginv(a, n, comm)
    call slk_matrix_from_global_dpc_2D(Slk_mat,"All",a)
 
    ! Perform the calculation with scaLAPACK.
-   call slk_zinvert(Slk_mat)
+   call Slk_mat%zinvert()
 
    ! Reconstruct the global matrix from the distributed one.
    a = czero
    call slk_matrix_to_global_dpc_2D(Slk_mat,"All",a)  ! Fill the entries calculated by this node.
-   call destruction_matrix_scalapack(Slk_mat)
+   call Slk_mat%free()
 
    call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
    call end_scalapack(Slk_processor)
 
-   RETURN
+   return
 #endif
 
   MSG_BUG("You should not be here!")
@@ -3038,7 +3038,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   tbloc=SLK_BLOCK_SIZE
+   tbloc = SLK_BLOCK_SIZE
    call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
 
    write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
@@ -3047,12 +3047,12 @@ subroutine zhpd_invert(uplo, a, n, comm)
    call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
    ! Perform the calculation with scaLAPACK.
-   call slk_zdhp_invert(Slk_mat,uplo)
+   call Slk_mat%zdhp_invert(uplo)
 
    ! Reconstruct the global matrix from the distributed one.
    a = czero
    call slk_matrix_to_global_dpc_2D(Slk_mat,uplo,a)  ! Fill the entries calculated by this node.
-   call destruction_matrix_scalapack(Slk_mat)
+   call Slk_mat%free()
 
    call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
    call end_scalapack(Slk_processor)
