@@ -148,7 +148,8 @@ end subroutine quadrature_sigma_cw
 !!       = 1/(4*pi) * fact_spin * int _{   0  }^{ +Inf } dv 2 * Re{ Sigma_c ^k (iv) * G0(iv) } 
 !!
 !! PARENTS
-!!  m_sigma_driver.f90
+!!  m_sigma_driver
+!!
 !! CHILDREN
 !! SOURCE
 
@@ -208,7 +209,7 @@ end function calc_Ec_GM_k
 !! ib1=min band for given k
 !! ib2=max band for given k.
 !! ik_ibz= the label of k-point in the IBZ.
-!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
+!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver for more details). 
 !! pot=Self-energy-Potential difference, matrix size (i,j), where i and j belong to k.
 !! BSt=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
@@ -217,7 +218,8 @@ end function calc_Ec_GM_k
 !! OUTPUT
 !! Updated dm1 matrix array with Go (Sigma_x - alpha*Sigma_x - Vxc) Go
 !! PARENTS
-!!  m_sigma_driver.f90
+!!  m_sigma_driver
+!!
 !! CHILDREN
 !! SOURCE
 
@@ -286,7 +288,8 @@ end subroutine calc_rdmx
 !! OUTPUT
 !! Updated dm1 matrix array with int Go(iw) Sigma_c(iw) Go(iw) dw
 !! PARENTS
-!!  m_sigma_driver.f90
+!!  m_sigma_driver
+!!
 !! CHILDREN
 !! SOURCE
 
@@ -363,7 +366,8 @@ end subroutine calc_rdmc
 !! OUTPUT
 !! Compute the nat. orbitals and occ. numbers from the dm1 matrix (for exchange and correlations)
 !! PARENTS
-!!  m_sigma_driver.f90
+!!  m_sigma_driver
+!!
 !! CHILDREN
 !! SOURCE
 
@@ -534,7 +538,8 @@ end subroutine natoccs
 !! OUTPUT
 !! Updated Hdr and BSt information
 !! PARENTS
-!!  m_sigma_driver.f90
+!!  m_sigma_driver
+!!
 !! CHILDREN
 !! SOURCE
 
@@ -562,7 +567,7 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  enddo
  MSG_COMMENT("QP_BSt: occupancies were updated with nat. orb. ones")
  if ((size(Hdr%occ(:))/BSt%nkpt) < (b2gw-b1gw+1)) then
-   !Actually, we should never reach this point because the code should stop during Wfd initialization in m_sigma_driver.F90
+   !Actually, we should never reach this point because the code should stop during Wfd initialization in m_sigma_driver
    MSG_ERROR("Impossible to use the existing read WFK to build a new one!")
  end if
  
@@ -603,7 +608,8 @@ end subroutine update_hdr_bst
 !! Print the total (averaged) occ. = sum_k weight_k * Nelec_k 
 !!
 !! PARENTS
-!!  m_sigma_driver.f90
+!!  m_sigma_driver
+!!
 !! CHILDREN
 !! SOURCE
 
@@ -681,6 +687,7 @@ end subroutine print_tot_occ
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!! SOURCE
 
 subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname_in)
 !Arguments ------------------------------------
@@ -829,6 +836,7 @@ end subroutine get_chkprdm
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!! SOURCE
 
 subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 !Arguments ------------------------------------
@@ -913,6 +921,8 @@ end subroutine print_chkprdm
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!! SOURCE
+
 subroutine transf_ints(Sigp,Sr,Mels,Kmesh,nateigv)
 !Arguments ------------------------------------
 !scalars
@@ -1203,7 +1213,8 @@ end subroutine print_band_energies
 !! Mat=at the end an array containing the matrix elements in NO or KS basis
 !!
 !! PARENTS
-!!  m_sigma_driver.f90
+!!  m_sigma_driver
+!!
 !! CHILDREN
 !! SOURCE
 
@@ -1289,6 +1300,7 @@ end subroutine ks2no
 !!
 !! PARENTS
 !!  rotate_ks_no
+!!
 !! CHILDREN
 !! SOURCE
 
