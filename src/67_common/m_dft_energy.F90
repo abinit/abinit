@@ -102,6 +102,8 @@ contains
 !! of ehart, enxc, and eei.
 !! WARNING XG180913 : At present, Fock energy not computed !
 !!
+!! NOTE that this routine is callned in m_scfcv_core only when nstep == 0
+!!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of wavefunction
@@ -288,12 +290,12 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vzeeman(4)
  real(dp) :: magvec(dtset%nspden)
  real(dp),target :: vxctau_dum(0,0,0)
- real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
+ real(dp),allocatable :: buffer(:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
  real(dp),allocatable :: kinpw(:),kinpw_sav(:),kxc(:,:),occ_k(:),occblock(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d_sav(:,:,:)
  real(dp),allocatable :: resid_k(:),rhowfg(:,:),rhowfr(:,:),vlocal(:,:,:,:)
- real(dp),allocatable :: vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),v_constr_dft_r(:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),v_constr_dft_r(:,:)
  real(dp),pointer :: vxctau_(:,:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
@@ -1008,6 +1010,11 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 &     prtvol,gs_hamk%usepaw,cpopt,cwaveprj,&
 &     already_transposed=.false.)
    end if
+
+   !call cg_get_eigens(usepaw, istwf_k, npwsp, nband, cg, ghc, gsc, eig, me_g0, comm_bsf)
+   !call cg_get_residvecs(usepaw, npwsp, nband, eig, cg, ghc, gsc, gwork)
+   !call cg_norm2g(istwf_k, npwsp, nband, gwork, resid, me_g0, comm_bsf)
+   ! MG: Communicators are wrongi if paral_kgb. One should use mpi_enreg%comm_bandspinorfft
 
 !  Compute the residual, <Cn|(H-<Cn|H|Cn>)**2|Cn>:
    do iblocksize=1,blocksize

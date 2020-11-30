@@ -276,7 +276,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,isppol,npw_k
  integer :: ikg,istwf_k,exchn2n3d,prtvol
  integer :: jj,n1,n2,n3,n4,n5,n6,negv,nkpg,nprocs,npw_k_test,my_rank,optder
- integer :: ispden,type_calc,sij_opt,igsp2,cplex_ghg,iband,iorder_cprj,ibs1,ibs2
+ integer :: type_calc,sij_opt,igsp2,cplex_ghg,iband,iorder_cprj,ibs1,ibs2
  real(dp),parameter :: lambda0 = zero
  real(dp) :: ucvol,ecutsm,effmass_free,size_mat,ecut
  logical :: do_full_diago
@@ -289,7 +289,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 !arrays
  integer :: nloalg(3)
  integer,allocatable :: kg_k(:,:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),kptns_(3,1),kpoint(3),ylmgr_dum(1,1,1),rhodum(1)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),kptns_(3,1),kpoint(3),ylmgr_dum(1,1,1)
  real(dp),allocatable :: ph3d(:,:,:),pwave(:,:),ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:)
  real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gsg_mat(:,:,:)

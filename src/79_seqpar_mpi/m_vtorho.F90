@@ -380,7 +380,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:)
  real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
- real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vlocal_tmp(:,:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
@@ -390,7 +390,6 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
-!Variables for BigDFT
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
 #endif
