@@ -392,10 +392,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call xmpi_bcast(wfk_fname, master, comm, ierr)
 
  ! === Some variables need to be initialized/nullify at start ===
- call energies_init(KS_energies)
  usexcnhat=0
+ call energies_init(KS_energies)
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
+ ucvol_local = ucvol
  !
  ! === Define FFT grid(s) sizes ===
  ! * Be careful! This mesh is only used for densities, potentials and the matrix elements of v_Hxc. It is NOT the
@@ -3248,6 +3249,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! Dimensional primitive translations rprimd (from input), gprimd, metrics and unit cell volume
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ ucvol_local = ucvol
 
  Sigp%npwwfn=Dtset%npwwfn
  Sigp%npwx  =Dtset%npwsigx
