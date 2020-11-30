@@ -403,7 +403,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !  We need to tune the volume when wavelets are used because, not
 !  all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp)
+!   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp) ! MRM: BUG? TODO CHECK IT
+   ucvol_local = product(wvl%denspot%dpbox%hgrids) * real(product(wvl%denspot%dpbox%ndims), dp)
 #endif
  end if
 
@@ -3270,7 +3271,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !  We need to tune the volume when wavelets are used because, not
 !  all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp)
+!   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp) ! MRM: BUG? TODO CHECK IT
+   ucvol_local = product(wvl%denspot%dpbox%hgrids) * real(product(wvl%denspot%dpbox%ndims), dp)
 #endif
  end if
 
