@@ -219,7 +219,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,gw1rdm,x1rdm
+ integer :: gw1rdm,x1rdm
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: etot_sd,etot_mbb,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -2469,8 +2469,8 @@ endif
 !      Update the full 1RDM with the exchange corrected one for this k-point
        rdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)=rdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)+rdm_k(ib1:ib2,ib1:ib2)
 !      Compute NAT ORBS for exchange corrected 1-RDM
-       do ib1dm=ib1,ib2
-         rdm_k(ib1dm,ib1dm)=rdm_k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ik_ibz,1) ! Only restricted closed-shell calcs 
+       do ib=ib1,ib2
+         rdm_k(ib,ib)=rdm_k(ib,ib)+QP_BSt%occ(ib,ik_ibz,1) ! Only restricted closed-shell calcs 
        enddo
        call natoccs(ib1,ib2,rdm_k,nateigv,occs,QP_BSt,ik_ibz,0)          ! Only restricted closed-shell calcs 
        ABI_FREE(potk)     
