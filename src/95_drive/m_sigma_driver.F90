@@ -114,8 +114,8 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
  use m_spacepar,      only : hartre
- use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,get_chkp_rdm,&
-                         &print_chkp_rdm,transf_integrals,print_total_energy,print_band_energies,quadrature_sigma_cw
+ use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,get_chkprdm,&
+                         &print_chkprdm,transf_ints,print_total_energy,print_band_energies,quadrature_sigma_cw
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
                          destroy_operwan_realspace,destroy_plowannier,zero_operwan_realspace
@@ -2445,7 +2445,7 @@ endif
      enddo
      if (getchkprdm) then
        gw1rdm_fname=trim(dtfil%fnameabi_chkp_rdm)
-       call get_chkp_rdm(Wfd,Kmesh,Sigp,QP_BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname)
+       call get_chkprdm(Wfd,Kmesh,Sigp,QP_BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname)
      end if
      call xmpi_barrier(Wfd%comm)
      ! Prepare arrays for the imaginary freq. integration (quadrature) of Sigma_c(iw)
@@ -2533,7 +2533,7 @@ endif
 !          Print the checkpoint file if required
            if(prtchkprdm) then
              gw1rdm_fname=trim(dtfil%fnameabo_chkp_rdm)
-             call print_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname)
+             call print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname)
            end if
            ABI_FREE(rdm_k)     
          end if
@@ -2705,7 +2705,7 @@ endif
        !
        ! Transform <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>, <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>, & <KS_i|T|KS_j> -> <NO_i|T|NO_j>
        !
-       call transf_integrals(Sigp,Sr,GW1RDM_me,Kmesh,nateigv)
+       call transf_ints(Sigp,Sr,GW1RDM_me,Kmesh,nateigv)
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
        !
        ! Print Delta eik and band (state) energies

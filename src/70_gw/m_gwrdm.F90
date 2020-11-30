@@ -28,25 +28,25 @@ module m_gwrdm
  use m_time
  use m_wfd           
  use m_hdr
- use m_melemts,       only : melements_t
- use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
-                             kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
-                             get_bz_item, has_IBZ_item, find_qmesh
+ use m_melemts,        only : melements_t
+ use m_bz_mesh,        only : kmesh_t
  use m_dtset
- use m_gaussian_quadrature, only: cgqf
  use defs_datatypes,   only : ebands_t
  use m_sigma,          only : sigma_t
  use m_xctk,           only : xcden  
+ use m_gaussian_quadrature, only: cgqf
+
  implicit none
 
  private :: no2ks,ks2no,printdm1,rotate_ks_no
 !!***
  
- public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,transf_integrals
- public :: print_chkp_rdm,print_total_energy,print_band_energies,get_chkp_rdm 
+ public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,transf_ints
+ public :: print_chkprdm,print_total_energy,print_band_energies,get_chkprdm 
 !!***
 
 contains
+!!***
 
 !!****f* ABINIT/quadrature_sigma_cw
 !! NAME
@@ -85,36 +85,40 @@ subroutine quadrature_sigma_cw(Sigp,Sr,weights)
  real(dp),allocatable :: freqs(:)
 !************************************************************************
 
-  order_int=Sigp%nomegasi
-  write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a1)')' '
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  order_int=Sigp%nomegasi
-  ABI_MALLOC(freqs,(order_int))
-  gaussian_kind=1
-  gwalpha=zero
-  gwbeta=zero
-  wmin=zero
-  wmax=one
-  call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
-  ! From  0 to 1 -> 0 to infinity
-  weights(:)=weights(:)/(one-freqs(:))**two      
-  freqs(:)=freqs(:)/(one-freqs(:))               
-  ! Form complex frequencies from 0 to iInf and print them in the log file
-  write(msg,'(a52)')'           Re(iw)           Im(iw)           Weight  '
-  call wrtout(std_out,msg,'COLL')
-  write(msg,'(a52)')'          --------         --------         -------- '
-  call wrtout(std_out,msg,'COLL')
-  do ifreqs=1,order_int
-    Sigp%omegasi(ifreqs)=cmplx(zero,freqs(ifreqs))
-    Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
-    write(msg,'(3f17.5)') Sr%omega_i(ifreqs),weights(ifreqs)
-    call wrtout(std_out,msg,'COLL')
-  enddo
-  ABI_FREE(freqs)
+ DBG_ENTER("COLL")
+
+ order_int=Sigp%nomegasi
+ write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a1)')' '
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ order_int=Sigp%nomegasi
+ ABI_MALLOC(freqs,(order_int))
+ gaussian_kind=1
+ gwalpha=zero
+ gwbeta=zero
+ wmin=zero
+ wmax=one
+ call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
+ ! From  0 to 1 -> 0 to infinity
+ weights(:)=weights(:)/(one-freqs(:))**two      
+ freqs(:)=freqs(:)/(one-freqs(:))               
+ ! Form complex frequencies from 0 to iInf and print them in the log file
+ write(msg,'(a52)')'           Re(iw)           Im(iw)           Weight  '
+ call wrtout(std_out,msg,'COLL')
+ write(msg,'(a52)')'          --------         --------         -------- '
+ call wrtout(std_out,msg,'COLL')
+ do ifreqs=1,order_int
+   Sigp%omegasi(ifreqs)=cmplx(zero,freqs(ifreqs))
+   Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
+   write(msg,'(3f17.5)') Sr%omega_i(ifreqs),weights(ifreqs)
+   call wrtout(std_out,msg,'COLL')
+ enddo
+ ABI_FREE(freqs)
+
+ DBG_EXIT("COLL")
 
 end subroutine quadrature_sigma_cw 
 !!***
@@ -549,6 +553,7 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  integer :: ib1dm,ib2dm,dim_bands,ikpoint
 !arrays
 !************************************************************************
+
  DBG_ENTER("COLL")
 
  ! BSt occ (QP_BSt ones) are changed and never recoverd
@@ -574,6 +579,8 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  Hdr%npwarr(:)=Wfd%npwarr(:)                                   ! Use the npw and ngfft = ones used in GW calc
  Hdr%ngfft(1:3)=ngfft_in(1:3)
  MSG_COMMENT("Hdr_sigma: occupancies, npw, and ngfft were updated")
+
+ DBG_EXIT("COLL")
 
 end subroutine update_hdr_bst
 !!***
@@ -612,8 +619,10 @@ subroutine print_tot_occ(sigma,kmesh,BSt)
  character(len=500) :: msg
  integer :: ik,ib,spin
  real(dp) :: wtk,occ_bks,tot_occ
-
+! arrays
 ! *************************************************************************
+
+ DBG_ENTER("COLL")
 
  tot_occ=zero
 
@@ -639,12 +648,14 @@ subroutine print_tot_occ(sigma,kmesh,BSt)
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
+ DBG_EXIT("COLL")
+
 end subroutine print_tot_occ
 !!***
 
-!!****f* ABINIT/get_chkp_rdm
+!!****f* ABINIT/get_chkprdm
 !! NAME
-!! get_chkp_rdm
+!! get_chkprdm
 !!
 !! FUNCTION
 !!  Read all checkpoint files built on previous runs
@@ -671,7 +682,7 @@ end subroutine print_tot_occ
 !!
 !! CHILDREN
 
-subroutine get_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname_in)
+subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname_in)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_rank
@@ -693,6 +704,8 @@ subroutine get_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1r
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: occ_tmp(:),eigvect_tmp(:) 
+
+ DBG_ENTER("COLL")
 
  if (my_rank==0) then
    iread_eigv=Wfd%mband
@@ -791,12 +804,14 @@ subroutine get_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1r
    MSG_ERROR("Error distributing the natural orbital eigenvectors read from checkpoint file(s).")
  endif
 
-end subroutine get_chkp_rdm
+ DBG_EXIT("COLL")
+
+end subroutine get_chkprdm
 !!***
 
-!!****f* ABINIT/print_chkp_rdm
+!!****f* ABINIT/print_chkprdm
 !! NAME
-!! print_chkp_rdm
+!! print_chkprdm
 !!
 !! FUNCTION
 !!  Write the checkpoint file for a given k-point
@@ -815,7 +830,7 @@ end subroutine get_chkp_rdm
 !!
 !! CHILDREN
 
-subroutine print_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
+subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,my_rank
@@ -831,6 +846,8 @@ subroutine print_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
  character(len=fnlen) :: gw1rdm_fname
  character(len=500) :: msg
 !arrays
+
+ DBG_ENTER("COLL")
 
  if (my_rank==0) then
    if(ik_ibz<10) then
@@ -863,13 +880,15 @@ subroutine print_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
  end if
 
  call xmpi_barrier(Wfd%comm)
+
+ DBG_EXIT("COLL")
  
-end subroutine print_chkp_rdm
+end subroutine print_chkprdm
 !!***
 
-!!****f* ABINIT/transf_integrals
+!!****f* ABINIT/transf_ints
 !! NAME
-!! transf_integrals
+!! transf_ints
 !!
 !! FUNCTION
 !!  Transform integrals from KS -> NO and NO -> KS orbitals
@@ -894,7 +913,7 @@ end subroutine print_chkp_rdm
 !!      m_sigma_driver
 !!
 !! CHILDREN
-subroutine transf_integrals(Sigp,Sr,Mels,Kmesh,nateigv)
+subroutine transf_ints(Sigp,Sr,Mels,Kmesh,nateigv)
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(in) :: Kmesh
@@ -956,7 +975,7 @@ subroutine transf_integrals(Sigp,Sr,Mels,Kmesh,nateigv)
     ABI_FREE(Umat)
     ABI_FREE(mat2rot)
   end do
-end subroutine transf_integrals
+end subroutine transf_ints
 !!***
 
 !!****f* ABINIT/print_total_energy
@@ -989,67 +1008,73 @@ subroutine print_total_energy(ekin_energy,evext_energy,evextnl_energy,e_corepsp,
 !scalars
  character(len=500) :: msg
 !arrays
+!************************************************************************
+
+ DBG_ENTER("COLL")
        
-  write(msg,'(a1)')' '
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a98)')'---------------------------------------------------------------&
-          &----------------------------------'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Ekinetic   = : ',ekin_energy,' Ha ,',ekin_energy*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Evext_l    = : ',evext_energy,' Ha ,',evext_energy*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Evext_nl   = : ',evextnl_energy,' Ha ,',evextnl_energy*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Epsp_core  = : ',e_corepsp,' Ha ,',e_corepsp*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Ex[SD]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Exc[MBB]   = : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Enn        = : ',e_ewald,' Ha ,',e_ewald*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a98)')'-----------------------------------------------------------------&
-          &--------------------------------'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Etot[SD]   = : ',etot,' Ha ,',etot*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Etot[MBB]  = : ',etot2,' Ha ,',etot2*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,2(es16.6,a))')' Vee[MBB]   = : ',(exc_mbb_energy+eh_energy),' Ha ,',(exc_mbb_energy+eh_energy)*Ha_eV,' eV'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a,1(es16.6))')  ' Density    = : ',den_int
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a)')' Vee[SD] (= Ehartree + Ex[SD]) energy obtained using GW 1-RDM:'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a)')' Vee[MBB] (= Ehartree + Exc[MBB]) energy obtained using GW 1-RDM:'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a98)')'-------------------------------------------------------------------&
-          &------------------------------'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a1)')' '
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a98)')'---------------------------------------------------------------&
+         &----------------------------------'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Ekinetic   = : ',ekin_energy,' Ha ,',ekin_energy*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Evext_l    = : ',evext_energy,' Ha ,',evext_energy*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Evext_nl   = : ',evextnl_energy,' Ha ,',evextnl_energy*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Epsp_core  = : ',e_corepsp,' Ha ,',e_corepsp*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Ex[SD]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Exc[MBB]   = : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Enn        = : ',e_ewald,' Ha ,',e_ewald*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a98)')'-----------------------------------------------------------------&
+         &--------------------------------'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Etot[SD]   = : ',etot,' Ha ,',etot*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Etot[MBB]  = : ',etot2,' Ha ,',etot2*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,2(es16.6,a))')' Vee[MBB]   = : ',(exc_mbb_energy+eh_energy),' Ha ,',&
+         &(exc_mbb_energy+eh_energy)*Ha_eV,' eV'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a,1(es16.6))')  ' Density    = : ',den_int
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a)')' Vee[SD] (= Ehartree + Ex[SD]) energy obtained using GW 1-RDM:'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a)')' Vee[MBB] (= Ehartree + Exc[MBB]) energy obtained using GW 1-RDM:'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a98)')'-------------------------------------------------------------------&
+         &------------------------------'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+ DBG_EXIT("COLL")
 
 end subroutine print_total_energy       
 !!***
@@ -1100,56 +1125,61 @@ subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,BSt,new_hartr,old_pu
  complex(dpc) :: delta_band_ibik
  character(len=500) :: msg
 !arrays
+!************************************************************************
 
-  write(msg,'(a1)')  ' '
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a42)')  ' Computing band corrections Delta eik (eV)'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a42)')  ' -----------------------------------------'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a1)')  ' '
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a1)')  ' '
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a110)') ' Band corrections Delta eik = <KS_i|K[NO]-a*K[KS]+vH[NO]&
-        &-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a1)')  ' '
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  do ikcalc=1,Sigp%nkptgw
-    ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
-    write(msg,'(a127)')'---------------------------------------------------------&
-            &--------------------------------------------------------------------'
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out,msg,'COLL')
-    write(msg,'(a126)')' k-point  band      eik^GS        eik^new     Delta eik  &
-      &      K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]'
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out,msg,'COLL')
-    do ib=b1gw,b2gw
-      delta_band_ibik=(new_hartr(ib,ikcalc)-Mels%vhartree(ib,ib,ik_ibz,1))&
-      &+Sr%x_mat(ib,ib,ik_ibz,1)-Mels%vxcval(ib,ib,ik_ibz,1)-old_purex(ib,ikcalc)
-      eik_new=real(BSt%eig(ib,ik_ibz,1))+real(delta_band_ibik)
-      write(msg,'(i5,4x,i5,8(4x,f10.5))') &
-      & ik_ibz,ib,real(BSt%eig(ib,ik_ibz,1))*Ha_eV,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
-      & real(Sr%x_mat(ib,ib,ik_ibz,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,&
-      & real(Mels%vxcval(ib,ib,ik_ibz,1))*Ha_eV,&
-      & real(new_hartr(ib,ikcalc))*Ha_eV,real(Mels%vhartree(ib,ib,ik_ibz,1))*Ha_eV
-      call wrtout(std_out,msg,'COLL')
-      call wrtout(ab_out,msg,'COLL')
-    enddo
-  enddo
-  write(msg,'(a127)')'---------------------------------------------------------&
-          &--------------------------------------------------------------------'
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
+ DBG_ENTER("COLL")
+
+ write(msg,'(a1)')  ' '
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a42)')  ' Computing band corrections Delta eik (eV)'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a42)')  ' -----------------------------------------'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a1)')  ' '
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a1)')  ' '
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a110)') ' Band corrections Delta eik = <KS_i|K[NO]-a*K[KS]+vH[NO]&
+       &-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ write(msg,'(a1)')  ' '
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ do ikcalc=1,Sigp%nkptgw
+   ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
+   write(msg,'(a127)')'---------------------------------------------------------&
+           &--------------------------------------------------------------------'
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a126)')' k-point  band      eik^GS        eik^new     Delta eik  &
+     &      K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]'
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   do ib=b1gw,b2gw
+     delta_band_ibik=(new_hartr(ib,ikcalc)-Mels%vhartree(ib,ib,ik_ibz,1))&
+     &+Sr%x_mat(ib,ib,ik_ibz,1)-Mels%vxcval(ib,ib,ik_ibz,1)-old_purex(ib,ikcalc)
+     eik_new=real(BSt%eig(ib,ik_ibz,1))+real(delta_band_ibik)
+     write(msg,'(i5,4x,i5,8(4x,f10.5))') &
+     & ik_ibz,ib,real(BSt%eig(ib,ik_ibz,1))*Ha_eV,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
+     & real(Sr%x_mat(ib,ib,ik_ibz,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,&
+     & real(Mels%vxcval(ib,ib,ik_ibz,1))*Ha_eV,&
+     & real(new_hartr(ib,ikcalc))*Ha_eV,real(Mels%vhartree(ib,ib,ik_ibz,1))*Ha_eV
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   enddo
+ enddo
+ write(msg,'(a127)')'---------------------------------------------------------&
+         &--------------------------------------------------------------------'
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+ DBG_EXIT("COLL")
 
 end subroutine print_band_energies
 !!***
@@ -1316,11 +1346,17 @@ subroutine printdm1(ib1,ib2,dm1) ! Only used for debug on this file, do not use 
  character(len=500) :: msg
 !arrays
 !************************************************************************
+
+ DBG_ENTER("COLL")
+
  do ib1dm=ib1,ib2
    write(msg,'(a2,*(f10.5))') '  ',Real(dm1(ib1dm,ib1:ib2))
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end do
+
+ DBG_EXIT("COLL")
+
 end subroutine printdm1
 !!***
 
