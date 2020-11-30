@@ -42,8 +42,8 @@ module m_gwrdm
  private :: no2ks,ks2no,printdm1,rotate_ks_no
 !!***
  
- public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,rot_integrals
- public :: prt_chkp_rdm,print_total_energy,print_band_energies,read_chkp_rdm 
+ public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,transf_integrals
+ public :: print_chkp_rdm,print_total_energy,print_band_energies,get_chkp_rdm 
 !!***
 
 contains
@@ -642,9 +642,9 @@ subroutine print_tot_occ(sigma,kmesh,BSt)
 end subroutine print_tot_occ
 !!***
 
-!!****f* ABINIT/read_chkp_rdm
+!!****f* ABINIT/get_chkp_rdm
 !! NAME
-!! read_chkp_rdm
+!!  get_chkp_rdm
 !!
 !! FUNCTION
 !!  Read all checkpoint files built on previous runs
@@ -671,7 +671,7 @@ end subroutine print_tot_occ
 !!
 !! CHILDREN
 
-subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname_in)
+subroutine get_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname_in)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_rank
@@ -791,12 +791,12 @@ subroutine read_chkp_rdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1
    MSG_ERROR("Error distributing the natural orbital eigenvectors read from checkpoint file(s).")
  endif
 
-end subroutine read_chkp_rdm
+end subroutine get_chkp_rdm
 !!***
 
-!!****f* ABINIT/prt_chkp_rdm
+!!****f* ABINIT/print_chkp_rdm
 !! NAME
-!! prt_chkp_rdm
+!!  print_chkp_rdm
 !!
 !! FUNCTION
 !!  Write the checkpoint file for a given k-point
@@ -815,7 +815,7 @@ end subroutine read_chkp_rdm
 !!
 !! CHILDREN
 
-subroutine prt_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
+subroutine print_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,my_rank
@@ -864,12 +864,12 @@ subroutine prt_chkp_rdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 
  call xmpi_barrier(Wfd%comm)
  
-end subroutine prt_chkp_rdm
+end subroutine print_chkp_rdm
 !!***
 
-!!****f* ABINIT/rot_integrals
+!!****f* ABINIT/transf_integrals
 !! NAME
-!! rot_integrals
+!!  transf_integrals
 !!
 !! FUNCTION
 !!  Transform integrals from KS -> NO and NO -> KS orbitals
@@ -894,7 +894,7 @@ end subroutine prt_chkp_rdm
 !!      m_sigma_driver
 !!
 !! CHILDREN
-subroutine rot_integrals(Sigp,Sr,Mels,Kmesh,nateigv)
+subroutine transf_integrals(Sigp,Sr,Mels,Kmesh,nateigv)
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(in) :: Kmesh
@@ -956,7 +956,7 @@ subroutine rot_integrals(Sigp,Sr,Mels,Kmesh,nateigv)
     ABI_FREE(Umat)
     ABI_FREE(mat2rot)
   end do
-end subroutine rot_integrals
+end subroutine transf_integrals
 !!***
 
 !!****f* ABINIT/print_total_energy
