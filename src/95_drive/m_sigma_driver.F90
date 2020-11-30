@@ -396,17 +396,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  usexcnhat=0
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
- if (dtset%usewvl == 0) then
-   ucvol_local = ucvol
-#if defined HAVE_BIGDFT
- else
-!  We need to tune the volume when wavelets are used because, not
-!  all FFT points are used.
-!  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp) ! MRM: BUG? TODO CHECK IT
-#endif
- end if
-
  !
  ! === Define FFT grid(s) sizes ===
  ! * Be careful! This mesh is only used for densities, potentials and the matrix elements of v_Hxc. It is NOT the
@@ -3259,17 +3248,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! Dimensional primitive translations rprimd (from input), gprimd, metrics and unit cell volume
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- if (dtset%usewvl == 0) then
-   ucvol_local = ucvol
-#if defined HAVE_BIGDFT
- else
-!  We need to tune the volume when wavelets are used because, not
-!  all FFT points are used.
-!  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp) ! MRM: BUG? TODO CHECK IT
-#endif
- end if
-
 
  Sigp%npwwfn=Dtset%npwwfn
  Sigp%npwx  =Dtset%npwsigx
