@@ -61,7 +61,7 @@ contains
 !! weights=real quadrature weights.
 !!
 !! OUTPUT
-!! Updtae Sigp and Sr imaginary frequencies with iw, and weights with the quadrature weights 
+!! Update Sigp and Sr imaginary frequencies with iw, and weights with the quadrature weights 
 !!
 !! PARENTS
 !!      m_sigma_driver
@@ -136,7 +136,7 @@ end subroutine quadrature_sigma_cw
 !! ik_ibz= the label of k-point in the IBZ whose Galitskii-Migdal contribution is accounted.
 !! weights=array containing the weights used in the quadrature.
 !! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin)
-!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details).
+!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver for more details).
 !! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
@@ -154,7 +154,6 @@ end subroutine quadrature_sigma_cw
 !! SOURCE
 
 function calc_Ec_GM_k(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt) result(Ec_GM_k)
-
 !Arguments ------------------------------------
 !scalars
  real(dp) :: Ec_GM_k
@@ -224,7 +223,6 @@ end function calc_Ec_GM_k
 !! SOURCE
 
 subroutine calc_rdmx(ib1,ib2,ik_ibz,pot,dm1,BSt)
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ib1,ib2,ik_ibz
@@ -279,7 +277,7 @@ end subroutine calc_rdmx
 !! ik_ibz= the label of k-point in the IBZ.
 !! weights=array containing the weights used in the quadrature.
 !! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin) 
-!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details). 
+!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver for more details). 
 !! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
@@ -294,7 +292,6 @@ end subroutine calc_rdmx
 !! SOURCE
 
 subroutine calc_rdmc(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt,dm1)
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ib1,ib2,ik_ibz
@@ -356,7 +353,7 @@ end subroutine calc_rdmc
 !! iinfo=use Sigma_x or Sigma_c phaser
 !! weights=array containing the weights used in the quadrature.
 !! nateigv=array containing the natural eigenvectors in columns (nbands,nband,k-point,nspin)
-!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver.F90 for more details).
+!! dm1=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver for more details).
 !! occs = array containing the occ numbers for a given k-point occs(nband,k-point).
 !! Bst=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
@@ -614,7 +611,6 @@ end subroutine update_hdr_bst
 !! SOURCE
 
 subroutine print_tot_occ(sigma,kmesh,BSt)
-
 !Arguments ------------------------------------
 !scalars
  type(sigma_t),intent(in) :: sigma
@@ -711,6 +707,7 @@ subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rd
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: occ_tmp(:),eigvect_tmp(:) 
+! *************************************************************************
 
  DBG_ENTER("COLL")
 
@@ -854,6 +851,7 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
  character(len=fnlen) :: gw1rdm_fname
  character(len=500) :: msg
 !arrays
+! *************************************************************************
 
  DBG_ENTER("COLL")
 
@@ -932,12 +930,12 @@ subroutine transf_ints(Sigp,Sr,Mels,Kmesh,nateigv)
  type(melements_t),intent(inout) :: Mels
 !arrays
  complex(dpc),intent(in) :: nateigv(:,:,:,:)
-
 !Local variables-------------------------------
 !scalars
  integer :: ikcalc,ik_ibz,ib1,ib2,ib1dm,ib2dm
 !arrays
  complex(dpc),allocatable :: mat2rot(:,:),Umat(:,:)
+! *************************************************************************
 
   do ikcalc=1,Sigp%nkptgw                                                 
     ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
@@ -1011,8 +1009,8 @@ subroutine print_total_energy(ekin_energy,evext_energy,evextnl_energy,e_corepsp,
        &exc_mbb_energy,e_ewald,etot,etot2,den_int)
 !Arguments ------------------------------------
 !scalars
- real(dp),intent(in) :: ekin_energy,evext_energy,evextnl_energy,e_corepsp,eh_energy,ex_energy,&
-                        &exc_mbb_energy,e_ewald,etot,etot2,den_int
+ real(dp),intent(in) :: ekin_energy,evext_energy,evextnl_energy,e_corepsp,eh_energy,ex_energy
+ real(dp),intent(in) :: exc_mbb_energy,e_ewald,etot,etot2,den_int
 !arrays
 !Local variables-------------------------------
 !scalars
@@ -1127,7 +1125,6 @@ subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,BSt,new_hartr,old_pu
  integer,intent(in) :: b1gw,b2gw
 !arrays
  complex(dpc),intent(in) :: old_purex(:,:),new_hartr(:,:)
-
 !Local variables-------------------------------
 !scalars
  integer :: ib,ikcalc,ik_ibz
@@ -1230,12 +1227,14 @@ subroutine rotate_ks_no(ib1,ib2,Mat,Umat,option)
  integer:: ndim
 !arrays
 !************************************************************************
+
  ndim=ib2-ib1+1
  if (option==0) then
    call no2ks(ndim,Mat,Umat)
  else
    call ks2no(ndim,Mat,Umat)
  end if
+
 end subroutine rotate_ks_no
 !!***
 
@@ -1271,6 +1270,7 @@ subroutine ks2no(ndim,mat,rot)
 !arrays
  complex(dpc),allocatable :: res(:,:)
 !************************************************************************
+
  ABI_MALLOC(res,(ndim,ndim))
  res=czero
 
@@ -1316,6 +1316,7 @@ subroutine no2ks(ndim,mat,rot)
 !arrays
  complex(dpc),allocatable :: res(:,:)
 !************************************************************************
+
  ABI_MALLOC(res,(ndim,ndim))
  res=czero
 
