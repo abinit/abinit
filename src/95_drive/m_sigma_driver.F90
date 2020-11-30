@@ -403,8 +403,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !  We need to tune the volume when wavelets are used because, not
 !  all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-!   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp) ! MRM: BUG? TODO CHECK IT
-   ucvol_local = product(wvl%denspot%dpbox%hgrids) * real(product(wvl%denspot%dpbox%ndims), dp)
+   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp) ! MRM: BUG? TODO CHECK IT
 #endif
  end if
 
@@ -2813,13 +2812,9 @@ endif
      if (ALL(Sigp%minbnd==1).and. ALL(Sigp%maxbnd>=ks_vbik) ) then  ! FIXME here the two arrays use a different indexing.
 
        ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
-       !exc_mbb_energy = sigma_get_excene(Sr,Kmesh,QP_BSt) ! MBB at this stage is only for DEBUG
        write(msg,'(a,2(es16.6,a))')' New Exchange energy : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       !write(msg,'(a,2(es16.6,a))')' New Exc. MBB energy : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
-       !call wrtout(std_out,msg,'COLL')
-       !call wrtout(ab_out,msg,'COLL')
      end if
 
      ! Report the QP gaps (Fundamental and direct)
@@ -3271,8 +3266,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !  We need to tune the volume when wavelets are used because, not
 !  all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-!   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp) ! MRM: BUG? TODO CHECK IT
-   ucvol_local = product(wvl%denspot%dpbox%hgrids) * real(product(wvl%denspot%dpbox%ndims), dp)
+   ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp) ! MRM: BUG? TODO CHECK IT
 #endif
  end if
 
