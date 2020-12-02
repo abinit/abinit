@@ -337,7 +337,6 @@ subroutine build_processor_scalapack(processor,grid,myproc,comm)
  integer,intent(in) :: myproc,comm
  type(processor_scalapack),intent(inout) :: processor
  type(grid_scalapack),intent(in) :: grid
-!Local variables-------------------------------
 
 ! *********************************************************************
 
@@ -457,7 +456,7 @@ end subroutine end_scalapack
 !!  nbli_global= total number of lines
 !!  nbco_global= total number of columns
 !!  istwf_k= option parameter that describes the storage of wfs
-!!  tbloc= custom block size
+!!  tbloc= custom block size NOTE: NOT USED in the present version.
 !!
 !! OUTPUT
 !!  matrix= the matrix to process
@@ -607,7 +606,6 @@ pure complex(dpc) function matrix_get_local_cplx(matrix, i, j)
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: matrix
  integer, intent(in) :: i,j
- !complex(dp) :: matrix_get_local_cplx
 
 ! *********************************************************************
 
@@ -639,7 +637,6 @@ pure real(dp) function matrix_get_local_real(matrix,i,j)
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: matrix
  integer, intent(in) :: i,j
- !real(dp) :: matrix_get_local_real
 
 ! *********************************************************************
 
@@ -843,8 +840,7 @@ end subroutine slk_matrix_loc2glob
 !!  loc_glob
 !!
 !! FUNCTION
-!!  Determine the global index from a local index (row or column)
-!!  as a function of a given processor
+!!  Determine the global index from a local index (row or column) as a function of a given processor
 !!
 !! INPUTS
 !!  matrix= the matrix to process
@@ -909,7 +905,7 @@ subroutine matrix_from_global(matrix, reference, istwf_k)
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob,ind !cptr
  real(dp) :: val_real !err,
- complex(dp)::val_cplx
+ complex(dp) :: val_cplx
  character(len=500) :: msg
 
 ! *********************************************************************
@@ -1039,7 +1035,7 @@ end subroutine matrix_from_global_sym
 !!  matrix_from_realmatrix
 !!
 !! FUNCTION
-!!  Routine to fill a SCALAPACK matrix from a real global matrix.
+!!  Routine to fill a SCALAPACK matrix from a real global matrix (FULL STORAGE MODE)
 !!
 !! INPUTS
 !!  istwf_k= option parameter that describes the storage of wfs
@@ -1065,7 +1061,7 @@ subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob,cptr
- real(dp) :: val !err,
+ real(dp) :: val
 
 ! *********************************************************************
 
@@ -1087,7 +1083,7 @@ end subroutine matrix_from_realmatrix
 !!  matrix_from_complexmatrix
 !!
 !! FUNCTION
-!!  Routine to fill a SCALAPACK matrix from a global matrix.
+!!  Routine to fill a SCALAPACK matrix from a global matrix (FULL STORAGE MODE)
 !!
 !! INPUTS
 !!  istwf_k= option parameter that describes the storage of wfs
@@ -1113,7 +1109,6 @@ subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob,cptr
- !real(dp) :: err
  complex(dpc) :: val
 
 ! *********************************************************************
@@ -1136,7 +1131,7 @@ end subroutine matrix_from_complexmatrix
 !!  matrix_to_global
 !!
 !! FUNCTION
-!!  Inserts a ScaLAPACK matrix into a global one.
+!!  Inserts a ScaLAPACK matrix into a global one in PACKED storage mode.
 !!
 !! INPUTS
 !!  matrix= the matrix to process
@@ -1201,7 +1196,7 @@ end subroutine matrix_to_global
 !!  matrix_to_realmatrix
 !!
 !! FUNCTION
-!!  Inserts a ScaLAPACK matrix into a real matrix.
+!!  Inserts a ScaLAPACK matrix into a real matrix in FULL STORAGE MODE.
 !!
 !! INPUTS
 !!  matrix= the matrix to process
@@ -1227,7 +1222,7 @@ subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob,cptr
- complex(dpc) :: zvar
+ !complex(dpc) :: zvar
 
 ! *********************************************************************
 
@@ -1248,7 +1243,7 @@ end subroutine matrix_to_realmatrix
 !!  matrix_to_complexmatrix
 !!
 !! FUNCTION
-!!  Inserts a ScaLAPACK matrix into a complex matrix.
+!!  Inserts a ScaLAPACK matrix into a complex matrix in FULL STORAGE MODE.
 !!
 !! INPUTS
 !!  matrix= the matrix to process
@@ -1385,8 +1380,8 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat, uplo, glob_mat)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: uplo
  type(matrix_scalapack),intent(inout)  :: Slk_mat
+ character(len=*),intent(in) :: uplo
 !array
  complex(dpc),intent(in) :: glob_mat(:,:)
 
@@ -1399,7 +1394,7 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat, uplo, glob_mat)
 
  select case (uplo(1:1))
 
- case ("A","a")
+ case ("A", "a")
    ! Full global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
@@ -1408,7 +1403,7 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat, uplo, glob_mat)
      end do
    end do
 
- case ("U","u")
+ case ("U", "u")
    ! Only the upper triangle of the global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
@@ -1421,7 +1416,7 @@ subroutine slk_matrix_from_global_dpc_2D(Slk_mat, uplo, glob_mat)
      end do
    end do
 
- case ("L","l")
+ case ("L", "l")
    ! Only the lower triangle of the global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
@@ -1487,7 +1482,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
 
 !************************************************************************
 
- ABI_CHECK(allocated(Slk_mat%buffer_cplx),"%buffer_cplx not allocated")
+ ABI_CHECK(allocated(Slk_mat%buffer_cplx), "%buffer_cplx not allocated")
 
  szm = SIZE(glob_pmat)
  n = NINT( (-1 + SQRT(one+8*szm) )*half )
@@ -1497,7 +1492,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
 
  select case (uplo(1:1))
 
- case ("U","u")
+ case ("U", "u")
    ! Only the upper triangle of the global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
@@ -1514,7 +1509,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
      end do
    end do
 
- case ("L","l")
+ case ("L", "l")
    ! Only the lower triangle of the global matrix is used.
    do jj=1,Slk_mat%sizeb_local(2)
      do ii=1,Slk_mat%sizeb_local(1)
@@ -1771,10 +1766,10 @@ subroutine slk_pzgemm(transa, transb, matrix1, alpha, matrix2, beta, results)
 
 !************************************************************************
 
- call PZGEMM(transa,transb,matrix1%sizeb_global(1),matrix2%sizeb_global(2),&
-             matrix1%sizeb_global(2),alpha,matrix1%buffer_cplx,1,1,&
-             matrix1%descript%tab,matrix2%buffer_cplx,1,1,         &
-             matrix2%descript%tab,beta,results%buffer_cplx,1,1,    &
+ call PZGEMM(transa,transb,matrix1%sizeb_global(1),matrix2%sizeb_global(2), &
+             matrix1%sizeb_global(2),alpha,matrix1%buffer_cplx,1,1, &
+             matrix1%descript%tab,matrix2%buffer_cplx,1,1,          &
+             matrix2%descript%tab,beta,results%buffer_cplx,1,1,     &
              results%descript%tab)
 
 end subroutine slk_pzgemm
@@ -2382,8 +2377,8 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
  ! ================================
- call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k,10)
- call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k,10)
+ call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
 
  ! ==============================
  ! FILLING SCALAPACK MATRIX
@@ -2508,9 +2503,9 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
  ! ================================
- call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k,10)
- call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k,10)
- call init_matrix_scalapack(sca_matrix3,nbli_global,nbco_global,processor,istwf_k,10)
+ call init_matrix_scalapack(sca_matrix1,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_matrix2,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_matrix3,nbli_global,nbco_global,processor,istwf_k, tbloc=10)
 
  ! ==============================
  ! FILLING SCALAPACK MATRIX
@@ -2637,7 +2632,7 @@ subroutine slk_pzheev(jobz, uplo, Slk_mat, Slk_vec, w)
 
 !************************************************************************
 
- ABI_CHECK(allocated(Slk_mat%buffer_cplx),"buffer_cplx not allocated")
+ ABI_CHECK(allocated(Slk_mat%buffer_cplx), "buffer_cplx not allocated")
 
  ! Get optimal size of workspace.
  lwork=-1; lrwork=-1
@@ -2663,8 +2658,8 @@ subroutine slk_pzheev(jobz, uplo, Slk_mat, Slk_vec, w)
  !write(std_out,*)lwork,lrwork
 
  ! Solve the problem.
- ABI_MALLOC(work,(lwork))
- ABI_MALLOC(rwork,(lrwork))
+ ABI_MALLOC(work, (lwork))
+ ABI_MALLOC(rwork, (lrwork))
 
  call PZHEEV(jobz,uplo,Slk_mat%sizeb_global(2),Slk_mat%buffer_cplx,1,1,Slk_mat%descript%tab, &
              w,Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,work,lwork,rwork,lrwork,info)
@@ -2685,7 +2680,7 @@ end subroutine slk_pzheev
 !! FUNCTION
 !!  slk_pzheevx provides an object-oriented interface to the ScaLAPACK routine PZHEEVX that
 !!  computes selected eigenvalues and, optionally, eigenvectors of a complex hermitian matrix A.
-!!   A * X = lambda *  X
+!!  A * X = lambda *  X
 !!
 !! INPUTS
 !!  Slk_mat<matrix_scalapack>=ScaLAPACK matrix (matrix A)
@@ -2789,24 +2784,24 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
  ABI_MALLOC(gap, (Slk_mat%processor%grid%dims(1) * Slk_mat%processor%grid%dims(2)))
 
  if (firstchar(jobz, ["V","v"])) then
-   ABI_MALLOC(ifail,(Slk_mat%sizeb_global(2)))
-   ABI_MALLOC(iclustr,( 2*Slk_mat%processor%grid%dims(1) * Slk_mat%processor%grid%dims(2)))
+   ABI_MALLOC(ifail, (Slk_mat%sizeb_global(2)))
+   ABI_MALLOC(iclustr, (2*Slk_mat%processor%grid%dims(1) * Slk_mat%processor%grid%dims(2)))
  end if
 
  ! Get the optimal size of the work arrays.
  lwork=-1; lrwork=-1; liwork=-1
- ABI_MALLOC(work,(1))
- ABI_MALLOC(iwork,(1))
- ABI_MALLOC(rwork,(3))
+ ABI_MALLOC(work, (1))
+ ABI_MALLOC(iwork, (1))
+ ABI_MALLOC(rwork, (3))
  ! This is clearly seen in the source in which rwork(1:3) is accessed
- ! during the calcuation of the workspace size.
+ ! during the calculation of the workspace size.
 
   call PZHEEVX(jobz,range,uplo, Slk_mat%sizeb_global(2),Slk_mat%buffer_cplx,1,1,Slk_mat%descript%tab,&
     vl,vu,il,iu,abstol,mene_found,nvec_calc,eigen,orfac,&
     Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
     work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
-  ABI_CHECK(info==0, sjoin("Problem to compute workspace, info:", itoa(info)))
+  ABI_CHECK(info == 0, sjoin("Problem to compute workspace, info:", itoa(info)))
 
   lwork  = NINT(real(work(1)),kind=dp)
   lrwork = NINT(rwork(1))
@@ -2823,7 +2818,7 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
   ! largest cluster, where a cluster is defined as a set of close eigenvalues: { W(K),...,W(K+CLUSTERSIZE-1) |
   ! W(J+1) <= W(J) + ORFAC*2*norm(A) }.
 
-  if ( firstchar(jobz, ["V","v"])) then
+  if (firstchar(jobz, ["V","v"])) then
     lrwork = INT( lrwork + Slk_mat%sizeb_global(2) *(Slk_mat%sizeb_global(2)-1) )
   end if
 
@@ -2898,10 +2893,8 @@ subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_f
  ABI_FREE(iwork)
  ABI_FREE(gap)
 
- if (firstchar(jobz, ["V","v"])) then
-   ABI_FREE(ifail)
-   ABI_FREE(iclustr)
- end if
+ ABI_SFREE(ifail)
+ ABI_SFREE(iclustr)
 
 end subroutine slk_pzheevx
 !!***
@@ -3074,7 +3067,7 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
 
  desca = Slk_matA%descript%tab
  descb = Slk_matB%descript%tab
- if (firstchar(jobz, ["V","v"])) then
+ if (firstchar(jobz, ["V", "v"])) then
    descz = Slk_vec%descript%tab
  else
    descz = Slk_matA%descript%tab
@@ -3084,12 +3077,12 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
  ltest = ltest .and. (DESCA(MB_) == DESCA(NB_))
  !IA = IB = IZ
  !JA = IB = JZ
- ltest = ltest .and.ALL(DESCA(M_   )==(/DESCB(M_   ),DESCZ(M_   )/))
- ltest = ltest .and.ALL(DESCA(N_   )==(/DESCB(N_   ),DESCZ(N_   )/))
- ltest = ltest .and.ALL(DESCA(MB_  )==(/DESCB(MB_  ),DESCZ(MB_  )/))
- ltest = ltest .and.ALL(DESCA(NB_  )==(/DESCB(NB_  ),DESCZ(NB_  )/))
- ltest = ltest .and.ALL(DESCA(RSRC_)==(/DESCB(RSRC_),DESCZ(RSRC_)/))
- ltest = ltest .and.ALL(DESCA(CSRC_)==(/DESCB(CSRC_),DESCZ(CSRC_)/))
+ ltest = ltest .and.ALL(DESCA(M_   ) == [DESCB(M_   ), DESCZ(M_   )])
+ ltest = ltest .and.ALL(DESCA(N_   ) == [DESCB(N_   ), DESCZ(N_   )])
+ ltest = ltest .and.ALL(DESCA(MB_  ) == [DESCB(MB_  ), DESCZ(MB_  )])
+ ltest = ltest .and.ALL(DESCA(NB_  ) == [DESCB(NB_  ), DESCZ(NB_  )])
+ ltest = ltest .and.ALL(DESCA(RSRC_) == [DESCB(RSRC_), DESCZ(RSRC_)])
+ ltest = ltest .and.ALL(DESCA(CSRC_) == [DESCB(CSRC_), DESCZ(CSRC_)])
  !MOD( IA-1, DESCA( MB_ ) ) = 0
  !MOD( JA-1, DESCA( NB_ ) ) = 0
  !MOD( IB-1, DESCB( MB_ ) ) = 0
@@ -3099,8 +3092,8 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
    MSG_ERROR("Alignment requirements not satisfied, check the caller")
  end if
 
-!Allocate the arrays for the results of the calculation
- ABI_MALLOC(gap,( Slk_matA%processor%grid%dims(1) * Slk_matA%processor%grid%dims(2)))
+ !Allocate the arrays for the results of the calculation
+ ABI_MALLOC(gap, (Slk_matA%processor%grid%dims(1) * Slk_matA%processor%grid%dims(2)))
 
  if (firstchar(jobz, ["V","v"])) then
    ABI_MALLOC(ifail,(Slk_matA%sizeb_global(2)))
@@ -3108,14 +3101,14 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
  else
    ABI_MALLOC(ifail,(1))
  end if
-!
-!Get the optimal size of the work arrays.
+
+ ! Get the optimal size of the work arrays.
  lwork=-1; lrwork=-1; liwork=-1
  ABI_MALLOC(work,(1))
  ABI_MALLOC(iwork,(1))
  ABI_MALLOC(rwork,(3))
-!This is clearly seen in the source in which rwork(1:3) is accessed
-!during the calcuation of the workspace size.
+ ! This is clearly seen in the source in which rwork(1:3) is accessed
+ ! during the calcuation of the workspace size.
 
  call pzhegvx(ibtype,jobz,range,uplo, Slk_matA%sizeb_global(2),Slk_matA%buffer_cplx,1,1,Slk_matA%descript%tab,&
    Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
@@ -3222,11 +3215,9 @@ subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abst
  ABI_FREE(rwork)
  ABI_FREE(iwork)
  ABI_FREE(gap)
-
- if (firstchar(jobz, ["V", "v"]))  then
-   ABI_FREE(iclustr)
- end if
  ABI_FREE(ifail)
+
+ ABI_SFREE(iclustr)
 
 end subroutine slk_pzhegvx
 !!***
@@ -3270,7 +3261,7 @@ subroutine slk_zinvert(Slk_mat)
 
  ABI_CHECK(allocated(Slk_mat%buffer_cplx), "buffer_cplx not allocated")
 
- !IMPORTANT NOTE: PZGETRF requires square block decomposition i.e., MB_A = NB_A.
+ ! IMPORTANT NOTE: PZGETRF requires square block decomposition i.e., MB_A = NB_A.
  if (Slk_mat%descript%tab(MB_) /= Slk_mat%descript%tab(NB_)) then
    MSG_ERROR(" PZGETRF requires square block decomposition i.e MB_A = NB_A.")
  end if
@@ -4173,9 +4164,9 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
  call MPI_type_SIZE(etype,bsize_etype,mpi_err)
 
  ! Define the mapping between scaLAPACK buffer and the storage on file.
- ABI_MALLOC(block_length,(nel+2))
- ABI_MALLOC(block_displ,(nel+2))
- ABI_MALLOC(block_type,(nel+2))
+ ABI_MALLOC(block_length, (nel+2))
+ ABI_MALLOC(block_displ, (nel+2))
+ ABI_MALLOC(block_type, (nel+2))
  block_length(1)=1
  block_displ (1)=0
  block_type  (1)=MPI_LB
@@ -4383,17 +4374,17 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
  etype = MPI_BYTE
 
  ! Define the mapping between scaLAPACK buffer and the storage on file.
- ABI_MALLOC(block_length,(nel_max+2))
- ABI_MALLOC(block_displ,(nel_max+2))
- ABI_MALLOC(block_type,(nel_max+2))
+ ABI_MALLOC(block_length, (nel_max+2))
+ ABI_MALLOC(block_displ, (nel_max+2))
+ ABI_MALLOC(block_type, (nel_max+2))
  block_length(1)=1
  block_displ (1)=0
  block_type  (1)=MPI_LB
 
  ! Note that the view assumes that the file pointer points to the first Fortran record marker.
  offset_err=0
- select case (uplo(1:1))
 
+ select case (uplo(1:1))
  case ("A","a")
    ! The entire global matrix is written on disk. TODO can use contigous vectors for better access.
    grow_min=1; grow_max=nrows_glob
@@ -4600,8 +4591,7 @@ subroutine slk_my_rclist(Slk_mat,rc_str,how_many,rc_list)
 
 !Local variables ------------------------------
 !scalars
- integer :: col_loc,row_loc,row_glob,col_glob
- integer :: nseen,nrow_glob,ncol_glob
+ integer :: col_loc,row_loc,row_glob,col_glob,nseen,nrow_glob,ncol_glob
  !character(len=500) :: msg
 ! arrays
  integer,allocatable :: seen(:)

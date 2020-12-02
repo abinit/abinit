@@ -50,7 +50,6 @@ module m_ksdiago
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc
- use m_fourier_interpol,  only : transgrid
  use m_cgprj,             only : getcprj
 
  implicit none
@@ -248,9 +247,9 @@ contains
 !! SOURCE
 
 subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
-& typat,nfftf,nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij,&
-& Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_k,comm,ierr,&
-& Electronpositron) ! Optional arguments
+                   typat,nfftf,nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij,&
+                   Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_k,comm,ierr,&
+                   Electronpositron) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars

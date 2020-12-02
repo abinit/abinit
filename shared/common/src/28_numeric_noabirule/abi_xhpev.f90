@@ -32,7 +32,6 @@
 
   subroutine abi_dhpev(jobz,uplo,n,a,w,z,ldz,istwf_k,use_slk)
 
- implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
  character(len=1), intent(in) :: uplo
@@ -69,15 +68,14 @@
    dim_evec1= 2*n/istwf_k_
    ABI_ALLOCATE(tmp_evec,(dim_evec1,n))
    tmp_evec = zero
-   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_,10)
-   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_,10)
+   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_, tbloc=10)
+   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_, tbloc=10)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
 #else
    call matrix_from_global(sca_a,a,istwf_k_)
 #endif
-   call compute_eigen_problem(slk_processor,sca_a,&
-&        sca_ev,w,slk_communicator,istwf_k_)
+   call compute_eigen_problem(slk_processor,sca_a,sca_ev,w,slk_communicator,istwf_k_)
    call matrix_to_global(sca_a,a,istwf_k_)
    call matrix_to_reference(sca_ev,tmp_evec,istwf_k_)
    call xmpi_sum(tmp_evec,z,dim_evec1*n,slk_communicator,ierr)
@@ -115,8 +113,6 @@ end subroutine abi_dhpev
 !! SOURCE
 
   subroutine abi_chpev(jobz,uplo,n,a,w,z,ldz)
-
- implicit none
 
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
@@ -174,8 +170,6 @@ end subroutine abi_chpev
 !! SOURCE
 
   subroutine abi_zhpev(jobz,uplo,n,a,w,z,ldz)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz

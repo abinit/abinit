@@ -83,6 +83,11 @@ module m_abi_linalg
  integer,save :: eigen_z_lrwork=0
  integer,save :: eigen_liwork=0
 
+ ! MG FIXME: I really do not understand why we should use global variables to wrap Scalapack routines.
+ !
+ ! 1) The procedures are not thread-safe.
+ ! 2) The procedures cannot be reused with different dimensions without dellocating these globals
+
  integer,save,target,allocatable :: eigen_iwork(:)
  real(sp),save,target,allocatable :: eigen_c_rwork(:)
  real(dp),save,target,allocatable :: eigen_z_rwork(:)
