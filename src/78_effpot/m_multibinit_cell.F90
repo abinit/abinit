@@ -49,6 +49,8 @@ module m_multibinit_cell
      integer:: natom = 0
      integer, allocatable  :: zion(:)
      real(dp), allocatable :: masses(:), xcart(:,:)
+     integer, allocatable :: ilatt_prim(:)
+     integer, allocatable :: rvec(:,:)
      real(dp) :: cell(3,3)
    contains
      procedure :: initialize => latt_initialize
@@ -87,6 +89,7 @@ module m_multibinit_cell
      integer :: nlwf =0 ! number of lattice wannier functions
      integer, allocatable ::  ilwf_prim(:) ! index of primitive cell
      integer, allocatable ::  rvec(:,:) ! R cell vectors for each spin (for supercell)
+     real(dp), allocatable :: lwf_masses(:)
    contains
      Procedure :: initialize => lwf_initialize
      procedure :: finalize => lwf_finalize
@@ -546,6 +549,9 @@ contains
     class(mbcell_lwf_t), intent(inout) :: self
     integer, intent(in) :: nlwf
     self%nlwf=nlwf
+    ABI_MALLOC(self%ilwf_prim, (nlwf))
+    ABI_MALLOC(self%rvec, (3, nlwf))
+    ABI_MALLOC(self%lwf_masses, (nlwf))
   end subroutine lwf_initialize
 
   subroutine lwf_finalize(self)
@@ -553,6 +559,7 @@ contains
     self%nlwf=0
     ABI_SFREE(self%ilwf_prim)
     ABI_SFREE(self%rvec)
+    ABI_SFREE(self%lwf_masses)
   end subroutine lwf_finalize
 
   subroutine lwf_fill_supercell(self, sc_maker,supercell)
@@ -570,6 +577,7 @@ contains
     self%nlwf=sc_maker%ncells*unitcell%nlwf
     call sc_maker%repeat([(i ,i=1, unitcell%nlwf)], self%ilwf_prim)
     call sc_maker%rvec_for_each(unitcell%nlwf, self%rvec)
+    call sc_maker%repeat_real1d(unitcell%lwf_masses, self%lwf_masses)
   end subroutine lwf_from_unitcell
 
 end module m_multibinit_cell

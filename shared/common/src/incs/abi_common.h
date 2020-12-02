@@ -63,7 +63,7 @@
  2) Traditional CPP
 **/
 
-#if defined (FC_INTEL)
+#if defined (FC_INTEL) || defined (FC_AOCC)
 #define CONCAT(x,y) x ## y
 #else
 #define CONCAT(x,y) x/**/y
@@ -82,6 +82,7 @@
 
 /* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
 #define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; MSG_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
 
 /* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
 #define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))

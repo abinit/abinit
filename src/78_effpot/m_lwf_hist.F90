@@ -47,8 +47,9 @@ module m_lwf_hist
      integer :: nlwf = 0
      integer :: ihist=0
      real(dp), allocatable :: hist(:,:)
+     real(dp), allocatable :: vcart(:,:)
      real(dp), allocatable :: energy(:)
-     real(dp), pointer :: current_lwf(:)
+     real(dp), pointer :: current_lwf(:), current_vcart(:)
      real(dp), pointer :: current_energy
    contains
      procedure :: initialize
@@ -66,8 +67,8 @@ contains
     self%nlwf=nlwf
     self%mxhist=mxhist
     ABI_MALLOC(self%hist, (nlwf, mxhist))
+    ABI_MALLOC(self%vcart, (nlwf, mxhist))
     ABI_MALLOC(self%energy, (mxhist))
-    self%hist(:, :)=0.0_dp
   end subroutine initialize
 
   subroutine finalize(self)
@@ -77,7 +78,9 @@ contains
     self%ihist=0
     nullify(self%current_lwf)
     nullify(self%current_energy)
+    nullify(self%current_vcart)
     ABI_SFREE(self%hist)
+    ABI_SFREE(self%vcart)
     ABI_SFREE(self%energy)
   end subroutine finalize
 
@@ -88,18 +91,22 @@ contains
       if(array_to_zero) then
          self%ihist=1
          self%hist(:,:)=zero
+         self%vcart(:,:)=zero
          self%energy(:)=zero
       endif
     end subroutine reset
 
 
-  subroutine set_hist(self, lwf, energy)
+  subroutine set_hist(self, lwf, vcart, energy)
     class(lwf_hist_t), target, intent(inout) :: self
-    real(dp), intent(in) :: lwf(:), energy
+    real(dp), intent(in) :: lwf(:),  energy
+    real(dp), optional, intent(in) :: vcart(:)
     self%ihist=modulo(self%ihist+1, self%mxhist)+1
     self%hist(:,self%ihist)=lwf(:)
+    self%vcart(:,self%ihist)=vcart(:)
     self%energy(self%ihist)=energy
     self%current_lwf => self%hist(:,self%ihist)
+    self%current_vcart=> self%vcart(:,self%ihist)
     self%current_energy => self%energy(self%ihist)
   end subroutine set_hist
 

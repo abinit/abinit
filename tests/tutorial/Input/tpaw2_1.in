@@ -43,7 +43,6 @@ nshiftk   4
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw2_1.abo, tolnlines=  6, tolabs=  1.1e-4,    tolrel=  2.0e-3, fld_options=-medium

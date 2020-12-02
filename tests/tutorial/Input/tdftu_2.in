@@ -47,7 +47,6 @@ jpawu  0.8 0.0 eV
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
 #%%   tdftu_2.abo, tolnlines=  7, tolabs=  1.010e-02, tolrel=  2.000e-03, fld_options = -easy

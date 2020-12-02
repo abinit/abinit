@@ -59,7 +59,7 @@ program mrgdv
  integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, symv1scf, npert_miss, abimem_level
  real(dp) :: dvdb_qdamp, abimem_limit_mb
  character(len=24) :: codename
- character(len=500) :: command,arg, msg
+ character(len=500) :: command, arg, msg
  character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
  type(dvdb_t) :: dvdb
 !arrays

@@ -27,7 +27,7 @@ from pprint import pprint
 from pybtex.database import parse_file, Entry, BibliographyData
 from markdown.util import etree
 from pygments import highlight
-from pygments.lexers import BashLexer, BibTeXLexer
+from pygments.lexers import BashLexer, PythonLexer, BibTeXLexer
 from pygments.formatters import HtmlFormatter
 from doc.tests.pymods.termcolor import cprint
 from .variables import lazy_property, Variable,  ABI_TOPICS, ABI_RELEVANCES
@@ -1082,7 +1082,7 @@ The bibtex file is available [here](../abiref.bib).
                 if "@" in name:
                     # Handle [[dipdip@anaddb|text]]
                     vname, code = name.split("@")
-                    var = self.codevars[code][vname]
+                    var = self.codevars[code][vname.lower()]
                     url = "/variables/%s#%s" % (var.varset, var.name)
                     if a.text is None: a.text = name
                     html_classes.append("codevar-wikilink")
@@ -1140,7 +1140,7 @@ The bibtex file is available [here](../abiref.bib).
             if namespace in self.codevars:
                 # Handle [[anaddb:asr|text]] or [[abinit:ecut|text]]
                 assert fragment is None
-                var = self.codevars[namespace][name]
+                var = self.codevars[namespace][name.lower()]
                 url = "/variables/%s#%s" % (var.varset, var.name)
                 html_classes.append("codevar-wikilink")
                 if a.text is None:
@@ -1412,6 +1412,8 @@ Enter any string to search in the database. Clicking without any request will gi
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
             if path.endswith(".in"):
                 text = highlight(fh.read(), BashLexer(), HtmlFormatter(cssclass="codehilite small-text"))
+            elif path.endswith(".py"):
+                text = highlight(fh.read(), PythonLexer(), HtmlFormatter(cssclass="codehilite small-text"))
             else:
                 text = escape(fh.read(), tag="pre", cls="small-text")
 

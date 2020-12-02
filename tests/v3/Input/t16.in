@@ -28,7 +28,7 @@
  xred4 3*0.0d0  3*0.2501d0    getwfk4 1
  xred5 3*0.0d0  3*0.2499d0    getwfk5 1
 
- chksymbreak 0
+ chksymtnons 0
 
 #Common data
  acell   3*10.26

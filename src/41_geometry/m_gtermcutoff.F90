@@ -162,7 +162,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  real(dp)             :: gcart(3),gmet(3,3),gprimd(3,3)
  real(dp)             :: pdir(3),alpha(3)
  real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:)
- real(dp),allocatable :: gcutoff(:)
+ real(dp),allocatable,intent(inout) :: gcutoff(:)
 
 ! === Save dimension and other useful quantities in vcut% ===
 ! gcut%nfft      = PRODUCT(ngfft(1:3))  ! Number of points in the FFT mesh.
@@ -310,10 +310,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
      rcut_= rcut_loc
 
-     ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
-     hb_=half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
-     r0_=MIN(ha_,hb_)/N0
-     !
      ! ===================================================
      ! === Setup for the quadrature of matrix elements ===
      ! ===================================================
@@ -481,9 +477,9 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
                if (ierr/=0) then
                  MSG_ERROR("Accuracy not reached")
                end if
-                 gcutoff(ii)= quad*gpq(ii)
+                 gcutoff(ii)= -quad*gpq(ii)
              else
-                 gcutoff(ii)= zero
+                 gcutoff(ii)=  zero !-pi*rcut_loc**2*(two*LOG(rcut_loc)-one)
             end if
            end if
 

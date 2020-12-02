@@ -117,8 +117,11 @@ contains
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
-    call self%load_from_netcdf( fnames(3))
-    ABI_UNUSED_A(params)
+    if(trim(params%latt_pot_fname)=='') then
+       call self%load_from_netcdf(fnames(3))
+    else
+        call self%load_from_netcdf(params%latt_pot_fname)
+    end if
   end subroutine load_from_files
 
   !-------------------------------------------------------------------!
@@ -140,7 +143,7 @@ contains
     integer :: varid, i, j
 #if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
-    NCF_CHECK_MSG(ierr, "Open netcdf file")
+    NCF_CHECK_MSG(ierr, "Open netcdf file "//trim(fname))
 
     ierr=nctk_get_dim(ncid, "ifc_nR" , nR)
     ierr=nctk_get_dim(ncid, "natom", natom)
@@ -157,7 +160,7 @@ contains
 
     ierr =nf90_inq_varid(ncid, "ref_energy", varid)
     NCF_CHECK_MSG(ierr, "ref_energy")
-    ierr = nf90_get_var(ncid, varid, masses)
+    ierr = nf90_get_var(ncid, varid, ref_energy)
     NCF_CHECK_MSG(ierr, "ref_energy")
 
 
@@ -207,7 +210,7 @@ contains
     do iR =1, nR
        do i=1 , natom3
           do j=1, natom3
-             if (abs(ifc_vallist(j, i, iR))>1e-9) then
+             if (abs(ifc_vallist(j, i, iR))>1e-2) then
                 ! NOTE: in fortran the order of index in reversed when reading netcdf array.
                 call self%coeff%add_entry([iR, i, j], ifc_vallist(j, i, iR))
              end if

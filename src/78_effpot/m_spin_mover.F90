@@ -80,7 +80,7 @@ module m_spin_mover
 
 
   type, public, extends(abstract_mover_t) :: spin_mover_t
-     integer :: nspin, method
+     integer :: nspin, method=0
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:), Stmp2(:,:)
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:), buffer(:,:)
      real(dp) :: init_qpoint(3), init_rotate_axis(3) ! qpoint and rotation axis to set up initial spin configuration
@@ -984,8 +984,8 @@ contains
                &     spin_temperature=T)
           call self%spin_ob%reset(self%params)
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
-          if(i==0) then
-             call self%set_initial_state()
+          if(i==1) then
+             call self%set_initial_state(mode=self%params%spin_init_state)
           else
              call self%hist%inc1()
           endif

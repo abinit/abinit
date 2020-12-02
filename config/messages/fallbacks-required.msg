@@ -1,20 +1,18 @@
 The current configuration of Abinit requires the presence of
 fallbacks, i.e. external packages that can be built and
-bundled together for development and/or test purposes when
+bundled together for development and/or testing purposes when
 full versions of these external packages are not available
 on the system.
 
 If you intend to perform production calculations with
 optional features enabled, we highly recommend you to use
 the full version of these external packages instead. For
-more information on how to have them ready for Abinit,
+more information on how to have them installed for Abinit,
 please consult the Abinit Wiki at https://wiki.abinit.org/.
 
 If you are currently working on a development/unstable
 version of Abinit or making test calculations, you may use
-the Abinit Fallbacks, knowing that they sometimes produce
-unpredictable results and/or failures, some of which are
-very difficult to detect and/or analyze.
+the Abinit Fallbacks.
 
 The Abinit Fallbacks are developed as an independent
 and slowly-evolving project. You can download them from

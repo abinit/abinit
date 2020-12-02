@@ -279,7 +279,7 @@ ABI_RELEVANCES = OrderedDict([
 class Variable(object):
     """
     This object gathers information about a single variable. name, associated topics, description etc
-    It's constructed from the variables_CODENANE.py modules but client code usually
+    It is constructed from the variables_CODENAME.py modules but client code usually
     interact with variables via the :class:`VarDatabase` dictionary.
     """
     def __init__(self,
@@ -347,7 +347,7 @@ class Variable(object):
     @lazy_property
     def name(self):
         """Name of the variable without the executable name."""
-        return self.abivarname if "@" not in self.abivarname else self.abivarname.split("@")[0]
+        return self.abivarname.lower() if "@" not in self.abivarname else self.abivarname.split("@")[0].lower()
 
     @lazy_property
     def executable(self):

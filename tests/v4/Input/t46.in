@@ -61,7 +61,7 @@ typat 1 1 1 1 1    # All possible atoms are type 1.
              0.0000000000E+00  0.0000000000E+00  7.5055909000E+00
              0.0000000000E+00  3.7527954500E+00  1.1370551260E+01
              0.0000000000E+00  0.0000000000E+00  1.5202965441E+01
- chksymbreak 0
+ chksymtnons 0
 
 #Exchange-correlation functional
 ixc 1             # LDA Teter Pade parametrization

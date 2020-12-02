@@ -132,6 +132,9 @@ module m_multibinit_dataset
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
 
+  ! parameter for hybrid lattice_lwf
+  integer :: latt_lwf_anharmonic
+
   ! parameters for lwf
   integer :: lwf_dynamics
   integer :: lwf_init_state
@@ -197,6 +200,7 @@ module m_multibinit_dataset
   ! lwf related
   real(dp) :: lwf_dt
   real(dp) :: lwf_mc_avg_amp
+  real(dp) :: lwf_taut
   real(dp) :: lwf_temperature
   real(dp) :: lwf_self_bound_coeff
   real(dp) :: lwf_temperature_start   ! var temperature start
@@ -285,6 +289,13 @@ module m_multibinit_dataset
 
 ! characters
   character(len=fnlen) :: lwf_init_hist_fname
+  character(len=fnlen) :: spin_init_hist_fname
+  character(len=fnlen) :: latt_init_hist_fname
+  character(len=fnlen) :: latt_pot_fname
+  character(len=fnlen) :: spin_pot_fname
+  character(len=fnlen) :: lwf_pot_fname
+  character(len=fnlen) :: slc_pot_fname
+
 
  end type multibinit_dtset_type
 !!***
@@ -418,13 +429,22 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%test_prt_ph=0 
  multibinit_dtset%tolmxf=2.0d-5
 
+ multibinit_dtset%latt_lwf_anharmonic = 0
+
  multibinit_dtset%lwf_dynamics = 0
  multibinit_dtset%lwf_nctime = 1
  multibinit_dtset%lwf_ntime = 0
  multibinit_dtset%lwf_init_state = 0
- multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
+ multibinit_dtset%lwf_init_hist_fname=""
+ multibinit_dtset%latt_init_hist_fname=""
+ multibinit_dtset%spin_init_hist_fname=""
+ multibinit_dtset%latt_pot_fname=""
+ multibinit_dtset%spin_pot_fname=""
+ multibinit_dtset%lwf_pot_fname=""
+ multibinit_dtset%slc_pot_fname=""
  multibinit_dtset%lwf_dt=0
  multibinit_dtset%lwf_self_bound_order=0
+ multibinit_dtset%lwf_taut=0.0_dp
  multibinit_dtset%lwf_temperature=0.0_dp
  multibinit_dtset%lwf_mc_avg_amp=0.0_dp
  multibinit_dtset%lwf_self_bound_coeff=0.0_dp
@@ -1046,6 +1066,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_friction',tread,'DPR')
  if(tread==1) multibinit_dtset%latt_friction=dprarr(1)
 
+ multibinit_dtset%latt_lwf_anharmonic=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_lwf_anharmonic',tread,'INT')
+ if(tread==1) multibinit_dtset%latt_lwf_anharmonic=intarr(1)
+ if( .not. (0 <= multibinit_dtset%latt_lwf_anharmonic .and. multibinit_dtset%latt_lwf_anharmonic< 2) ) then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'latt_lwf_anharmonic is ',multibinit_dtset%latt_lwf_anharmonic,', but the only allowed values',ch10,&
+         &   'are 0 and 1',ch10,&
+         &   'Action: correct latt_lwf_anharmonic in your input file.'
+    MSG_ERROR(message)
+ end if
+
+
  multibinit_dtset%latt_taut=1000
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taut',tread,'DPR')
  if(tread==1) multibinit_dtset%latt_taut=dprarr(1)
@@ -1076,18 +1108,49 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
- multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
+
+ multibinit_dtset%lwf_init_hist_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_init_hist_fname',tread,'KEY',&
       & key_value=multibinit_dtset%lwf_init_hist_fname)
  if(.not. tread==1) multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
 
+ multibinit_dtset%spin_init_hist_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_init_hist_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%spin_init_hist_fname)
+ if(.not. tread==1) multibinit_dtset%spin_init_hist_fname="spin_init_hist.nc"
+
+ multibinit_dtset%latt_init_hist_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_init_hist_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_init_hist_fname)
+ if(.not. tread==1) multibinit_dtset%latt_init_hist_fname="latt_init_hist.nc"
+
+
+ multibinit_dtset%lwf_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%lwf_pot_fname)
+
+
+ multibinit_dtset%spin_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%spin_pot_fname)
+
+
+ multibinit_dtset%latt_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_pot_fname)
+
+ multibinit_dtset%slc_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%slc_pot_fname)
+
+
  multibinit_dtset%lwf_dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%lwf_dynamics=intarr(1)
- if( .not. (multibinit_dtset%lwf_dynamics <= 1) ) then
+ if( .not. (multibinit_dtset%lwf_dynamics <= 3) ) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'lwf_dynamics is ',multibinit_dtset%lwf_dynamics,', but the only allowed values',ch10,&
-         &   'are 0, 1 and negative values.',ch10,&
+         &   'are 0, 1, 2, 3 and negative values.',ch10,&
          &   'Action: correct lwf_dynamics in your input file.'
     MSG_ERROR(message)
  end if
@@ -1134,6 +1197,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%lwf_self_bound_coeff=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_self_bound_coeff',tread,'DPR')
  if(tread==1) multibinit_dtset%lwf_self_bound_coeff=dprarr(1)
+
+ multibinit_dtset%lwf_taut=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_taut',tread,'TIM')
+ if(tread==1) multibinit_dtset%lwf_taut=dprarr(1)
+ if(multibinit_dtset%lwf_taut<0)then
+    write(message, '(a,f10.1,a,a,a,a,a)' )&
+         &   'lwf_taut is ',multibinit_dtset%lwf_taut,'. The only allowed values',ch10,&
+         &   'are non-negative values.',ch10,&
+         &   'Action: correct lwf_taut in your input file.'
+    MSG_ERROR(message)
+ end if
 
 
  multibinit_dtset%lwf_temperature=0.0
