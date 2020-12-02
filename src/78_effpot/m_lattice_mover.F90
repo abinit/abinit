@@ -35,7 +35,7 @@ module m_lattice_mover
   use defs_basis
   use m_abicore
   use m_errors
-
+  use m_xmpi
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
@@ -79,9 +79,11 @@ module m_lattice_mover
      procedure :: prepare_ncfile
      procedure :: set_ncfile_name
      procedure :: set_initial_state ! initial state
+     procedure :: set_temperature
      procedure :: force_stationary
      procedure :: run_one_step
      procedure :: run_time
+     procedure :: run_varT
      procedure :: reset            ! reset the mover
      procedure :: get_T_and_Ek     ! calculate temperature and kinetic energy.
      procedure :: calc_observables ! call functions to calculate observables
@@ -155,6 +157,16 @@ contains
     self%total_time = self%dt * params%ntime 
     self%latt_dynamics = params%dynamics
   end subroutine set_params
+
+  !-------------------------------------------------------------------!
+  ! Set the mover temperature
+  !-------------------------------------------------------------------!
+  subroutine set_temperature(self, temperature)
+    class(lattice_mover_t), intent(inout) :: self
+    real(dp),intent(in) :: temperature
+    self%temperature = temperature !TODO: to Hartree ??
+  end subroutine set_temperature
+
 
   !-------------------------------------------------------------------!
   ! set initial state:
@@ -443,6 +455,112 @@ contains
     ABI_UNUSED_A(lwf)
     ABI_UNUSED_A(ihist)
   end subroutine get_state
+
+
+  !!****f* m_lwf_mover/run_varT
+  !!
+  !! NAME
+  !! run_varT
+  !!
+  !! FUNCTION
+  !! run M vs Temperature
+  !!
+  !! INPUTS
+  !! pot: potential
+  !! T_start, Tend, T_nstep
+  !u
+  !! OUTPUT
+  !!
+  !! PARENTS
+!!
+  !! CHILDREN
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
+  !! SOURCE
+  subroutine  run_varT(self, pot, ncfile_prefix, displacement, strain, spin, lwf, energy_table)
+    class(lattice_mover_t), intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: pot
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
+    character(fnlen), intent(inout) :: ncfile_prefix
+    type(hash_table_t), optional, intent(inout) :: energy_table
+    real(dp) :: T_start, T_end
+    integer :: T_nstep
+    !type(lwf_ncfile_t) :: lwf_ncfile
+    character(len=4) :: post_fname
+    real(dp) :: T, T_step
+    integer :: i
+    !integer :: Tfile, iostat
+    character(len=90) :: msg
+    !character(len=4200) :: Tmsg ! to write to var T file
+    !character(len=150) :: iomsg
+    !character(fnlen) :: Tfname ! file name for output various T calculation
+    !real(dp), allocatable :: Tlist(:), chi_list(:), Cv_list(:), binderU4_list(:)
+    !real(dp), allocatable :: Mst_sub_norm_list(:, :)
+    !real(dp), allocatable ::  Mst_norm_total_list(:)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    if (iam_master) then
+       T_start=self%params%latt_temperature_start
+       T_end=self%params%latt_temperature_end
+       T_nstep=self%params%latt_temperature_nstep
+       !Tfile=get_unit()
+       !Tfname = trim(ncfile_prefix)//'.varT'
+       !iostat=open_file(file=Tfname, unit=Tfile, iomsg=iomsg )
+       if (T_nstep<=1) then
+          T_step=0.0
+       else
+          T_step=(T_end-T_start)/(T_nstep-1)
+       endif
+       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
+            & "Starting temperature dependent calculations. T from ", &
+            & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+    end if
+
+    call xmpi_bcast(T_nstep, 0, comm, ierr)
+    do i=1, T_nstep
+       if(iam_master) then
+          T=T_start+(i-1)*T_step
+          msg=repeat("=", 79)
+          call wrtout(std_out, msg, "COLL")
+          call wrtout(ab_out, msg, "COLL")
+
+          write(msg, "(A13, 5X, ES13.5, A3)") "Temperature: ", T*Ha_K, " K."
+          call wrtout(std_out, msg, "COLL")
+          call wrtout(ab_out,  msg, "COLL")
+
+          ! set temperature
+          ! TODO make this into a subroutine set_params
+       endif
+       call self%set_temperature(temperature=T)
+       if(iam_master) then
+          if(i==1) then
+             call self%set_initial_state(mode=1)
+          endif
+
+          write(post_fname, "(I4.4)") i
+          call self%prepare_ncfile( self%params, &
+               & trim(ncfile_prefix)//'_T'//post_fname//'_latthist.nc')
+          call self%ncfile%write_one_step(self%current_xcart, self%current_vcart, self%energy, self%Ek )
+       endif
+
+       call self%run_time(pot, displacement=self%displacement, strain=strain, spin=spin, &
+            & lwf=lwf, energy_table=energy_table)
+
+       if(iam_master) then
+          call self%ncfile%finalize()
+       endif
+    end do
+
+  end subroutine run_varT
+  !!***
+
+
 
 end module m_lattice_mover
 

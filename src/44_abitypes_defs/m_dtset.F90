@@ -3167,6 +3167,9 @@ subroutine chkvars(string)
 !L
  list_vars=trim(list_vars)//' latt_init_hist_fname'
  list_vars=trim(list_vars)//' latt_friction latt_lwf_anharmonic latt_pot_fname latt_taut'
+ list_vars=trim(list_vars)//' latt_temperature latt_temperature_start latt_temperature_end'
+ list_vars=trim(list_vars)//' latt_temperature_nstep latt_var_temperature'
+
 ! list_vars=trim(list_vars)//' latt_taup latt_compressibility latt_mask'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'

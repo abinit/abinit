@@ -159,6 +159,7 @@ module m_multibinit_manager
      procedure :: run_spin_dynamics
      procedure :: run_spin_varT
      procedure :: run_lattice_dynamics
+     procedure :: run_lattice_varT
      procedure :: run_coupled_spin_latt_dynamics
      procedure :: run_lwf_dynamics
      procedure :: run_lwf_varT
@@ -179,10 +180,8 @@ contains
     logical :: iam_master
     integer :: i
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-
     self%filenames(:)=filenames(:)
     call xmpi_bcast(self%filenames, master, comm, ierr)
-
     !TODO: remove params as argument. It is here because the params are read
     ! in the multibinit_main function. Once we use multibinit_main2, remove it.
     if (present(params)) then
@@ -604,9 +603,24 @@ contains
     call self%lattice_mover%ncfile%finalize()
   end subroutine run_lattice_dynamics
 
+  
+  !-------------------------------------------------------------------!
+  ! Run lattice only dynamics at various T
+  !-------------------------------------------------------------------!
+  subroutine run_lattice_varT(self)
+    class(mb_manager_t), intent(inout) :: self
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%fill_supercell()
+    call self%set_movers()
+    call self%lattice_mover%run_varT(self%pots, self%filenames(2), energy_table=self%energy_table)
+  end subroutine run_lattice_varT
+
+
 
   !-------------------------------------------------------------------!
-  ! Run lattice only dynamics
+  ! Run lattice lwf hybrid dynamics
   !-------------------------------------------------------------------!
   subroutine run_lattice_lwf_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
@@ -715,7 +729,7 @@ contains
   end subroutine run_lwf_dynamics
 
   !-------------------------------------------------------------------!
-  ! Run LWF dynamics
+  ! Run LWF dynamics at various T
   !-------------------------------------------------------------------!
   subroutine run_lwf_varT(self)
     class(mb_manager_t), intent(inout) :: self
@@ -756,7 +770,11 @@ contains
        end if
     ! lattice
     else if(self%params%dynamics>0 .and. self%params%spin_dynamics<=0 .and. self%params%lwf_dynamics<=0)then
-       call self%run_lattice_dynamics()
+       if(self%params%latt_var_temperature==0) then
+          call self%run_lattice_dynamics()
+       else
+          call self%run_lattice_varT()
+       end if
 
     ! lattice + dummy lwf
     else if(self%params%dynamics>0 .and. self%params%spin_dynamics<=0 .and. self%params%latt_lwf_anharmonic==1) then
