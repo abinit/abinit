@@ -132,6 +132,10 @@ module m_multibinit_dataset
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
 
+  ! parameter for lattice
+  integer :: latt_var_temperature
+  integer :: latt_temperature_nstep
+
   ! parameter for hybrid lattice_lwf
   integer :: latt_lwf_anharmonic
 
@@ -196,6 +200,8 @@ module m_multibinit_dataset
   !real(dp) :: latt_taup     ! 
   !real(dp) :: latt_compressibility
   !integer :: latt_mask(3)
+  real(dp) :: latt_temperature_start
+  real(dp) :: latt_temperature_end
 
   ! lwf related
   real(dp) :: lwf_dt
@@ -428,6 +434,11 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%test_effpot=0 
  multibinit_dtset%test_prt_ph=0 
  multibinit_dtset%tolmxf=2.0d-5
+
+ multibinit_dtset%latt_temperature_start=0.0
+ multibinit_dtset%latt_temperature_end=0.0
+ multibinit_dtset%latt_temperature_nstep=0
+ multibinit_dtset%latt_var_temperature=0
 
  multibinit_dtset%latt_lwf_anharmonic = 0
 
@@ -1081,6 +1092,50 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%latt_taut=1000
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taut',tread,'DPR')
  if(tread==1) multibinit_dtset%latt_taut=dprarr(1)
+
+multibinit_dtset%latt_temperature_start=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_temperature_start',tread,'DPR')
+ if(tread==1) multibinit_dtset%latt_temperature_start=dprarr(1)
+ if(multibinit_dtset%latt_temperature_start<0.0)then
+    write(message, '(a,f10.1,a,a,a,a,a)' )&
+         &   'latt_temperature_start is ',multibinit_dtset%latt_temperature_start,'. The only allowed values',ch10,&
+         &   'are positives values.',ch10,&
+         &   'Action: correct latt_semperature_start in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%latt_temperature_end=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_temperature_end',tread,'DPR')
+ if(tread==1) multibinit_dtset%latt_temperature_end=dprarr(1)
+ if(multibinit_dtset%latt_temperature_end<0)then
+    write(message, '(a,f10.1,a,a,a,a,a)' )&
+         &   'latt_temperature_end is ',multibinit_dtset%latt_temperature_end,'. The only allowed values',ch10,&
+         &   'are positives values.',ch10,&
+         &   'Action: correct latt_semperature_end in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%latt_temperature_nstep=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_temperature_nstep',tread,'INT')
+ if(tread==1) multibinit_dtset%latt_temperature_nstep=intarr(1)
+ if(multibinit_dtset%latt_temperature_nstep<=0)then
+    write(message, '(a,i0,a,a,a,a)' )&
+         &   'latt_temperature_nstep is',multibinit_dtset%latt_temperature_nstep,', while it should be larger than 0',ch10,&
+         &   'Action: correct latt_temperature_nstep in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%latt_var_temperature=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_var_temperature',tread,'INT')
+ if(tread==1) multibinit_dtset%latt_var_temperature=intarr(1)
+ if(multibinit_dtset%latt_var_temperature/=0.and.multibinit_dtset%latt_var_temperature/=1)then
+    write(message, '(a,i0,a,a,a,a,a)' )&
+         &   'latt_var_temperature is',multibinit_dtset%latt_var_temperature,'. The only allowed values',ch10,&
+         &   'are 0, or 1.',ch10,&
+         &   'Action: correct latt_var_temperature in your input file.'
+    MSG_ERROR(message)
+ end if
+
 
 ! multibinit_dtset%latt_taup=1000
 ! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taup',tread,'DPR')
