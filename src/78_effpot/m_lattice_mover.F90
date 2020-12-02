@@ -549,7 +549,7 @@ contains
           call self%ncfile%write_one_step(self%current_xcart, self%current_vcart, self%energy, self%Ek )
        endif
 
-       call self%run_time(pot, displacement=self%displacement, strain=strain, spin=spin, &
+       call self%run_time(pot, spin=spin, &
             & lwf=lwf, energy_table=energy_table)
 
        if(iam_master) then

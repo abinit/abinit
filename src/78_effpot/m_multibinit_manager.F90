@@ -362,6 +362,8 @@ contains
     end if
     if(self%has_displacement) then
        self%params%temperature = self%params%temperature/Ha_K
+       self%params%latt_temperature_start =self%params%latt_temperature_start/Ha_K
+       self%params%latt_temperature_end=self%params%latt_temperature_end/Ha_K
     end if
     if(self%has_lwf) then
        self%params%lwf_temperature = self%params%lwf_temperature/Ha_K
