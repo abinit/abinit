@@ -395,7 +395,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  ! option=2: vtrial(n1*n2*n3,ispden) --> vlocal(nd1,nd2,nd3) real case
 
  !nvloc=1; if (nspden==4) nvloc=4
- ABI_MALLOC(vlocal, (n4,n5,n6,gs_hamk%nvloc))
+ ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamk%nvloc))
 
  ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
  ! Also take into account the spin.
@@ -477,10 +477,10 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  cplex_ghg = 2
  size_mat = cplex_ghg*(npw_k*nspinor)**2*dp*b2Mb
  write(msg,'(a,f0.3,a)')" Out-of-memory in ghg_mat. Memory required by the Hamiltonian matrix: ",size_mat," [Mb]."
- ABI_STAT_MALLOC(ghg_mat, (cplex_ghg,npw_k*nspinor,npw_k*nspinor), ierr)
+ ABI_STAT_MALLOC(ghg_mat, (cplex_ghg, npw_k*nspinor, npw_k*nspinor), ierr)
  ABI_CHECK(ierr == 0, msg)
  write(msg,'(a,f0.3,a)')" Out-of-memory in gsg_mat. Memory required by the PAW overlap operator: ",size_mat," [Mb]."
- ABI_STAT_MALLOC(gsg_mat, (cplex_ghg,npw_k*nspinor,npw_k*nspinor*Psps%usepaw), ierr)
+ ABI_STAT_MALLOC(gsg_mat, (cplex_ghg, npw_k*nspinor, npw_k*nspinor*Psps%usepaw), ierr)
  ABI_CHECK(ierr == 0, msg)
 
  ! Cwaveprj is ordered, see nonlop_ylm.
