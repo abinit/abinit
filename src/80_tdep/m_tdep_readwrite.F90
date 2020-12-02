@@ -480,7 +480,7 @@ contains
       MSG_ERROR('A keyword is not allowed. See the log file.')
     end if  
   end do
-! Output very important informations 
+! Output very important information 
   write(InVar%stdout,'(a)') ' '
   if (InVar%Impose_Symetry.eq.0) then
     write(InVar%stdout,'(a)') ' STOP IF THE DIJ (IFC) MATRIX IS NOT HERMITIAN (SYMETRIC)'

@@ -79,7 +79,7 @@ contains
 !!   | typat(natom)=type (integer) for each atom
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density

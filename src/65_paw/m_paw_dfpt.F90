@@ -432,7 +432,7 @@ end subroutine pawdfptenergy
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
 !!  dimnhat=second dimension of array nhat (0 or # of spin components)
-!!  distribfft<type(distribfft_type)>=--optional-- contains all the informations related
+!!  distribfft<type(distribfft_type)>=--optional-- contains all the information related
 !!                                    to the FFT parallelism and plane sharing
 !!  dyfr_cplex=1 if dyfrnl is real, 2 if it is complex
 !!  gsqcut=Fourier cutoff on G^2 for "large sphere" of radius double that of the basis sphere

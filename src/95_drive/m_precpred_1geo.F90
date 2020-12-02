@@ -97,7 +97,7 @@ contains
 !!   | nspden=number of spin-density components
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | nsym=number of symmetry elements in space group
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
 !!
 !! OUTPUT

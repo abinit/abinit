@@ -116,7 +116,7 @@ contains
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | nsym=number of symmetry elements in space group
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfftf=(effective) number of FFT grid points (for this processor)
 !!       for the "fine" grid (see NOTES below)
 !!  npwarr(nkpt)=number of planewaves in basis and boundary at this k point.
@@ -1604,7 +1604,7 @@ end subroutine prtxfase
 !!         2: write POSABIN file
 !!         3: write both
 !!  moldyn_file=name of the MD netcdf file
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  results_gs <type(results_gs_type)>=results (energy and its components,
 !!   forces and its components, the stress tensor) of a ground-state computation
 !!  rprimd(3,3)=real space primitive translations

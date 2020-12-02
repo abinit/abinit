@@ -62,8 +62,8 @@ contains
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
 !!  istep=id of the current iteration (first is 1).
-!!  mpi_enreg=informations about MPI parallelization
-!!  proj <type(wvl_projector_type)>=projectors informations for wavelets.
+!!  mpi_enreg=information about MPI parallelization
+!!  proj <type(wvl_projector_type)>=projectors information for wavelets.
 !!  vtrial(dtset%nfft)=external potential.
 !!  xcart(3,natom)=cartesian atomic coordinates
 !!
@@ -76,7 +76,7 @@ contains
 !!   | e_nlpsp_vfock(OUT)=nonlocal psp + potential Fock ACE part of total energy
 !!  residm=max value for gradient in the minimisation process.
 !!  rhor(dtset%nfft)=electron density in r space
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! PARENTS
 !!      m_vtorho

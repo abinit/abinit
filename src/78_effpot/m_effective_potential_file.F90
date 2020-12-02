@@ -228,7 +228,7 @@ CONTAINS  !=====================================================================
 !! comm=MPI communicator
 !!
 !! OUTPUT
-!! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential
+!! eff_pot<type(effective_potential_type)> = datatype with all the information for effective potential
 !!
 !! PARENTS
 !!      m_compute_anharmonics,m_multibinit_driver
@@ -625,7 +625,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 
  else if (filetype==2 .or. filetype==23) then
    write(message, '(5a)' )ch10,' The file ',trim(filename),&
-&                ' is XML file (extraction of all informations)'
+&                ' is XML file (extraction of all information)'
    call wrtout(std_out,message,'COLL')
 
    call system_getDimFromXML(filename,natom,ntypat,nqpt,nrpt)
@@ -1255,13 +1255,13 @@ end subroutine system_getDimFromXML
 !! and store them in effective potentential type
 !!
 !! INPUTS
-!! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential
+!! eff_pot<type(effective_potential_type)> = datatype with all the information for effective potential
 !! comm=MPI communicator
 !! character(len=*) filnam: name of input or output file
 !! strcpling = optional,logical to disable the strcpling
 !!
 !! OUTPUT
-!! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential
+!! eff_pot<type(effective_potential_type)> = datatype with all the information for effective potential
 !!
 !! PARENTS
 !!      m_effective_potential_file
