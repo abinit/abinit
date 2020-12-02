@@ -3,7 +3,7 @@
 !! m_slk
 !!
 !! FUNCTION
-!! This module contains the description of the variables used in the ScaLAPACK routines.
+!! This module contains high-level objects and wrappers around the ScaLAPACK and ELPA API.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2004-2020 ABINIT group (CS,GZ,FB,MG)
@@ -25,10 +25,6 @@ module m_slk
  use m_xmpi
  use m_errors
  use m_abicore
-
- use m_fstrings,      only : firstchar, toupper, itoa, sjoin
- use m_numeric_tools, only : print_arr
-
 #ifdef HAVE_LINALG_ELPA
  use m_elpa
 #endif
@@ -36,6 +32,9 @@ module m_slk
 #ifdef HAVE_MPI2
  use mpi
 #endif
+
+ use m_fstrings,      only : firstchar, toupper, itoa, sjoin
+ !use m_numeric_tools, only : print_arr
 
  implicit none
 

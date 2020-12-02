@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 """
-This script replaces strings in the source files.
+This script replaces strings in the source files. See replace_string function.
 """
 import sys
 import os
@@ -31,7 +31,7 @@ def find_source_paths():
 def all_files():
     """
     Return list with the absolute paths of all the files in the project, exclude binary files
-    or files that should not be changed.
+    or files that should not be modified.
     """
     def ignore_basename(f):
         black_list = [".pdf", ".pickle", ".swp", ".cpkl", ".gz", ".nc", "_HIST",
@@ -50,7 +50,8 @@ def all_files():
 def replace_string(s):
     """
     Main entry point for users.
-    Change old2new dictionary to replace old_expression with new one using replace method of python string.
+    Change old2new dict to replace old_expression with new one
+    using replace method of python string.
     """
     old2new = {
          "ABI_ALLOCATE(": "ABI_MALLOC(",
@@ -83,7 +84,7 @@ def replace_string(s):
 def main():
     #for path in all_files():
     for path in find_source_paths():
-        print("Changing file:", path)
+        print("Replacing strings in:", path)
         with open(path, "rt") as fh:
             s = replace_string(fh.read())
         with open(path, "wt") as fh:
