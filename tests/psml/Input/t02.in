@@ -19,7 +19,7 @@ typat 1
 znucl 26
 xred 3*0
 
-rprim  
+rprim
 -0.5  0.5  0.5
  0.5 -0.5  0.5
  0.5  0.5 -0.5
@@ -35,14 +35,14 @@ ixc -101130
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%  t02.out, tolnlines = 32, tolabs = 1.1e-06, tolrel = 9.00e-01
 #%% [paral_info]
 #%% max_nprocs = 14
 #%% [extra_info]
 #%% authors = M. Verstraete, Y. Pouillon
 #%% keywords = NC
-#%% description = 
+#%% description =
 #%%   Bulk iron, with and without spin-polarization, to compare with the PSML
 #%%   results of t06 and t10
 #%%<END TEST_INFO>

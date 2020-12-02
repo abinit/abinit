@@ -87,8 +87,6 @@ contains
 
 subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itime

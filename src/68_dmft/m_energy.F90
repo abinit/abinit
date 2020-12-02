@@ -130,8 +130,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_energy(cryst_struc,energies_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(crystal_t),intent(in) :: cryst_struc
@@ -184,8 +182,6 @@ end subroutine init_energy
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(energy_type),intent(inout) :: energies_dmft
@@ -234,8 +230,6 @@ end subroutine destroy_energy
 !! SOURCE
 
 subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -320,8 +314,6 @@ end subroutine print_energy
 !! SOURCE
 
 subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ_type,part)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -496,8 +488,6 @@ end subroutine compute_energy
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,fcalc_dft,ecalc_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(energy_type),intent(inout) :: energies_dmft
@@ -643,7 +633,6 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -787,8 +776,6 @@ end subroutine compute_migdal_energy
 
 subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(energy_type),intent(inout) :: energies_dmft
@@ -833,7 +820,7 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu.ne.-1) then
      ldim=2*lpawu+1
-     
+
      ABI_ALLOCATE(noccmmp,(2,2*pawtab_%lpawu+1,2*pawtab_%lpawu+1,nocc))
      ABI_ALLOCATE(nocctot,(nocc))
      noccmmp(:,:,:,:)=zero ; nocctot(:)=zero
@@ -955,8 +942,6 @@ end subroutine compute_dftu_energy
 
 subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(crystal_t),intent(in) :: cryst_struc
@@ -1059,8 +1044,6 @@ end subroutine compute_noninterentropy
 !! SOURCE
 
  function occup_fd(eig,fermie,temp)
-
- implicit none
 
 !Arguments ------------------------------------
 !type

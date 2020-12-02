@@ -58,8 +58,6 @@
 subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize,&
 &                          x_cplx,timopt,tim_xortho) ! optional arguments
 
-
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: blocksize,vectsize,spaceComm,x_cplx
@@ -154,8 +152,6 @@ end subroutine xorthonormalize
 
 subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: blocksize,vectsize,spaceComm
@@ -228,9 +224,8 @@ end subroutine ortho_reim
 !!      wrtout,xmpi_sum,zgemm,zpotrf,ztrsm
 !!
 !! SOURCE
-subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
 
- implicit none
+subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
 
 !Arguments ------------------------------------
 !scalars

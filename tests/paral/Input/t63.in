@@ -1,0 +1,82 @@
+# Crystalline alpha-quartz. 
+# Ground state with LOBPCG + RMM-DIIS eigensolver and paral_kgb parallelism with 4 MPI procs
+ndtset 2
+
+paral_kgb 1
+useylm 1
+use_gemm_nonlop 1
+#istwfk  *1
+#mixprec 1
+
+# Dataset 1: band parallelism with bandpp to take advange of use_gemm_nonlop.
+rmm_diis1  1
+npband1 4 bandpp1 8 npfft1 1
+tolvrs1    1.0d-6
+
+# Dataset 1: band + FFT parallelism. 
+# Read previous WFK, decrease tolvrs and reconverge with RMM-DIIS only.
+rmm_diis2 -3
+npband2 2 bandpp2 16 npfft2 2
+tolvrs2    1.0d-10
+getwfk2 -1
+
+#################### COMMON PART #########################
+nband      32   # nelect: 48. Include more bands to make RMM-DIIS more stable.
+nbdbuf     8    # Because RMM-DIIS performs less iterations 
+                # for empty states --> residuals won't decrease that much and we want 
+                # to avoid oscillations in the reference file.
+
+diemac       4.0
+ecut         28
+
+# Definition of the k-point grid
+occopt 1           # Semiconductor
+ngkpt   2 2 2
+nshiftk 1
+shiftk  0.0 0.0 0.0 # Include Gamma because we want to test istwfk 2.
+
+# Definition of the atom types
+natom  9
+npsp   2
+znucl  14  8
+ntypat 2
+typat 3*1  6*2
+
+# Experimental parameters (Wyckoff pag 312)
+# u(Si)= 0.465
+# x= 0.415 ; y= 0.272 ; z= 0.120
+
+acell   2*4.91304  5.40463  Angstrom
+
+xred   0.465   0.000   0.000              #Si
+       0.000   0.465   2/3                #Si
+      -0.465  -0.465   1/3                #Si
+       0.415   0.272   0.120              #O
+      -0.143  -0.415   0.4533333333333333 #O
+      -0.272   0.143   0.7866666666666666 #O
+       0.143  -0.272  -0.120              #O
+       0.272   0.415   0.5466666666666666 #O
+      -0.415  -0.143   0.2133333333333333 #O
+
+rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
+        5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
+        0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/O.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t63_MPI4.out, tolnlines= 150, tolabs= 2.0e-5, tolrel= 3.0e-4
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, RMM-DIIS
+#%% description =
+#%%   Crystalline alpha-quartz. 
+#%%   Ground state with LOBPCG + RMM-DIIS eigensolver and paral_kgb parallelism with 4 MPI procs.
+#%%<END TEST_INFO>

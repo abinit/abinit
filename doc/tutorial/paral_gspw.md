@@ -10,8 +10,8 @@ authors: FB, JB, MT
 This tutorial discusses how to perform ground-state calculations on hundreds/thousands
 of computing units (CPUs) using ABINIT.
 
-You will learn how to use some keywords related to the "KGB" parallelization scheme where
-"K" stands for "k-point", "G" refers to the wavevector of a planewave, and "B" stands for a "Band".
+You will learn how to use some keywords related to the **KGB** parallelization scheme where
+**K** stands for "k-point", **G** refers to the wavevector of a planewave, and **B** stands for "Band".
 It is possible to use ABINIT with other levels of parallelism but this is not the focus of this tutorial.
 You will learn how to speedup your calculations and how to improve their convergence rate.
 
@@ -32,9 +32,11 @@ All the input files can be found in the `Input` directory in the directory dedic
 You might have to adapt them to the path of the working directory.
 You can compare your results with reference output files located in `Refs`.
 
-> In the following, when "run ABINIT over nn CPUs" appears, you have to
-> use a specific command line or submission file, according to the operating system/architecture
-> of your computer.
+!!! note
+
+    In the following, when "run ABINIT over nn CPUs" appears, you have to
+    use a specific command line or submission file, according to the operating system/architecture
+    of your computer.
 
 <!---
 Some scripts are given as examples in the directory `\$ABI_HOME/doc/tutorial/paral_gspw_assets/`.
@@ -45,25 +47,26 @@ When the size of the system increases up to 100 or 1000 atoms, it is usually
 impossible to perform *ab initio* calculations with a single computing core.
 This is because the basis sets used to solve the problem (plane waves, bands, ...) increase
 &mdash; linearly, as the square, or even exponentially &mdash;.
-The computational resources are limited by 2 factors:
+The computational resources are limited by two factors:
 
 * The memory, i.e. the amount of data stored in RAM,
 * The computing efficiency, with specific bottlenecks.
 
 Therefore, it is mandatory to adopt a parallelization strategy:
 
-1. Distribute the data or share them on a large number of computing nodes,
+1. Distribute or share the data across a large number of computing nodes,
 2. Parallelize the time consuming routines.
 
-In this tutorial, we will show:
+In this tutorial, we will discuss:
 
 * How to improve performance by using a large number of computing units (CPU cores),
-* How to decrease the computational  time for a given number of CPU cores by...
+* How to decrease the computational time for a given number of CPU cores by:
 
     1. Reducing the time needed to perform one electronic iteration (improve efficiency)
     2. Reducing the number of electronic iterations (improve convergence)
 
-The tests are performed on a 108 gold atom system; in this tutorial the plane-wave
+The tests are performed on a 108 gold atom system.
+In this tutorial the plane-wave
 cutoff energy is strongly reduced, for practical reasons.
 
 ## 2 A simple way to begin: automatic distributed parallelism
@@ -96,7 +99,7 @@ Then run ABINIT on 1 CPU core (using 1 MPI process and 1 *openMP* thread).
 ABINIT should stop without starting a calculation (don't pay attention to the error message).
 At the end of the log file `*log`, you will see:
 
-```
+```md
  Computing all possible proc distributions for this input with #CPUs<=108:
 
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -189,14 +192,14 @@ tgspw_02.054-02.out:- Proc.   0 individual time (sec): cpu=         63.1  wall= 
 tgspw_02.108-01.out:- Proc.   0 individual time (sec): cpu=         74.4  wall=         76.0
 ```
 
-As far as the timing is concerned, the best distributions are then the ones
+As far as the timing is concerned, the best distributions are the ones
 proposed in section 2; (27x4) seems to be the best one.
 The prediction using [[autoparal]]**=1** was pretty good.
 
 Up to now, we have not learned more than before. We have so far only
 considered the timing of 10 electronic steps.
 However the "Locally Optimal Block Preconditioned Conjugate Gradient" algorithm (LOBPCG)
-&mdash; used in ABINIT by default &mdash; operates a diagonalization by block of eigenvectors.
+&mdash; used in ABINIT by default when [[paral_kgb]] == 1 &mdash; operates a diagonalization by block of eigenvectors.
 Each block of eigenvectors is concurrently diagonalized by the [[npband]] processes,
 one block after the other. When the [[npband]] value is modified, the size of the block
 changes accordingly (it is exactly equal to `npband`), and the solutions of the eigensolver are modified.
@@ -205,6 +208,7 @@ but the slowest at the end because many more steps are performed.
 In order to see this, we can have a look at the convergence rate at the end
 of the calculations.
 The last iterations of the SCF loops are:
+
 ```bash
 grep "ETOT 10" *02*out
 tgspw_02.009-12.out: ETOT 10  -4191.7097103563     3.739E-04 1.171E-05 6.693E+00
@@ -216,8 +220,8 @@ tgspw_02.054-02.out: ETOT 10  -4191.7113973688    -2.561E-04 1.181E-05 3.156E-01
 tgspw_02.108-01.out: ETOT 10  -4191.7114913729    -4.742E-05 1.646E-05 3.480E-02
 ```
 
-The last column indicates the convergence of the **potential
-residual**. You can see that this quantity is the smallest when [[npband]] is
+The last column indicates the convergence of the **residual of the potential**.
+You can see that this quantity is the smallest when [[npband]] is
 the highest. This result is expected: the convergence is better when the size
 of the block is the largest. But this (best) convergence is obtained for
 the (108x1) distribution... when the worst timing is measured.
@@ -229,9 +233,9 @@ So, you face a dilemma. The calculation with the smallest number of iterations
 In the following we will choose the (27x4) pair, because it
 definitively offers more guarantees concerning the convergence and the timing.
 
-> Note:
-> You could check that the convergence is not changed when the [[npfft]]
-value is modified.
+!!! note
+
+    You could check that the convergence is not changed when the [[npfft]] value is modified.
 
 ## 4 Even more sophisticated: BANDs Per Process (bandpp)
 
@@ -286,8 +290,8 @@ and the number of FFT processors [[npfft]] does not affect the convergence.
 
 !!!tip
 
-> It is possible to adjust the distribution of processes, without changing the
-> convergence, by reducing [[npband]] and increasing [[bandpp]] proportionally.
+    It is possible to adjust the distribution of processes, without changing the
+    convergence, by reducing [[npband]] and increasing [[bandpp]] proportionally.
 
 However, as you can see in the previous calculations, the CPU time per iteration
 increases when [[bandpp]] increases (note that the 2<sup>nd</sup> run performed less iterations
@@ -308,19 +312,17 @@ the convergence rate whatever the cost in total timing.
 
 We will see in the next section how the use of *hybrid parallelism* can improve this...
 
-!!!important
+!!! important
 
-> Using only MPI parallelism, the timing of a single electronic step increases
-> when [[bandpp]] increases but the convergence rate is better.
+    Using only MPI parallelism, the timing of a single electronic step increases
+    when [[bandpp]] increases but the convergence rate is better.
 
-!!!tip
-
-> The only exception is when [[istwfk]] = 2, i.e. when the wavefunctions are real.
-> This occurs when only the &Gamma; point  is used in the Brillouin Zone.
-> For even values of [[bandpp]], the real wavefunctions are associated in pairs
-> in the complex FFTs, leading to a reduction by a factor of their cost.
-> When calculations are performed at &Gamma; point you are strongly
-> encouraged to use `bandpp=2, 4,...` (even).
+    The only exception is when [[istwfk]] = 2, i.e. when the wavefunctions are real.
+    This occurs when only the &Gamma; point is used in the Brillouin Zone.
+    For even values of [[bandpp]], the real wavefunctions are associated in pairs
+    in the complex FFTs, leading to a reduction by a factor of their cost.
+    When calculations are performed at &Gamma; point you are strongly
+    encouraged to use `bandpp=2, 4,...` (even).
 
 
 ## 5 Hybrid parallelism: MPI+*openMP*
@@ -341,9 +343,10 @@ files and run ABINIT using 54 MPI processes and 2 *openMP* threads (by setting `
 Note: `54MPI x 2threads = 108 CPU cores`.
 <!--- ADDON3 --->
 
-> **Important note**:
-> When using threads, we have to impose [[npfft]]**=1**.
-> The best is to suppress it from the input file.
+!!! important
+
+    When using threads, we have to impose [[npfft]] **= 1**.
+    The best is to suppress it from the input file.
 
 
 Let's have a look at the timings and compare them to the same run without *openMP* threads:
@@ -378,18 +381,19 @@ This is in principle more efficient than in the pure MPI case.
 Scalar products and FFTs are done in parallel by the *openMP* tasks ([[npfft]] not used).
 So, note that there are subtle differences with the pure MPI case.
 
-> **Important note**:
-> When using threads, `bandpp` has to be a multiple of the number of threads.
+!!! important
 
-*How do we choose the number of threads?*
-It strongly depends on the computer architecture!
+    When using threads, `bandpp` has to be a multiple of the number of threads.
 
-> A computer is made of `nodes`. On each node, there are `sockets` containing a given number
-> of CPU cores. All the cores of the node can access the RAM of all the `sockets` but this access
-> is faster on their own `socket`. This is the origin of the famous *Non Uniform Memory
-> Access* effect (NUMA). The number of `threads` has thus to be a divisor of the total
-> number of CPU cores in the node, but it is better to choose a divisor of the number of
-> cores in a `socket`. Indeed ABINIT performance is very sensitive to NUMA effect.
+    *How do we choose the number of threads?*
+    Well, it strongly depends on the computer architecture!
+
+    A computer is made of `nodes`. On each node, there are `sockets` containing a given number
+    of CPU cores. All the cores of the node can access the RAM of all the `sockets` but this access
+    is faster on their own `socket`. This is the origin of the famous *Non Uniform Memory
+    Access* effect (NUMA). The number of `threads` has thus to be a divisor of the total
+    number of CPU cores in the node, but it is better to choose a divisor of the number of
+    cores in a `socket`. Indeed ABINIT performance is very sensitive to NUMA effect.
 
 <!--- ADDON5 --->
 
@@ -441,16 +445,16 @@ total number of targeted CPU cores, i.e. `nthreads x nMPI` and you should launch
 process with `OMP_NUM_THREADS=nn`.
 You can try this with `max_ncpus=108` and `OMP_NUM_THREADS=6`...
 
-!!!tip
+!!! tip
 
-> The rules to distribute the workload are:
->
-> * `npband x bandpp` (size of a block) should be maximalized.
->    It has to divide the number of bands (`nband`)
-> * `bandpp` has to be a multiple of the number of *openMP* tasks
-> * `nband` has to be a multiple of `npband x bandpp`.
->   Using [[autoparal]], the code gives you some good values for `nband`.
-> * In any case, the ideal distribution is system dependent!
+    The rules to distribute the workload are:
+
+    * `npband x bandpp` (size of a block) should be maximized.
+       It has to divide the number of bands (`nband`)
+    * `bandpp` has to be a multiple of the number of *openMP* tasks
+    * `nband` has to be a multiple of `npband x bandpp`.
+      Using [[autoparal]], the code gives you some good values for `nband`.
+    * In any case, the ideal distribution is system dependent!
 
 ## 6 The KGB parallelization
 
@@ -515,17 +519,18 @@ and only 70.7% when you parallelize.
 This behaviour is related to the [Amdhal's law](https://en.wikipedia.org/wiki/Amdahl%27s_law):
 
 > The speedup of a program using multiple processes in parallel computing is
-> limited by the time needed for the sequential fraction of the program.
->
-> For example, if a program needs 20 hours using a single processor core,
-> and a particular portion of 1 hour cannot be parallelized, while the remaining
-> portion of 19 hours (95%) can be parallelized, then regardless of how
-> many processor cores we have, the minimum execution time cannot be
-> less than that critical 1 hour. Hence the speedup is limited to 20.
+  limited by the time needed for the sequential fraction of the program.
+
+For example, if a program needs 20 hours using a single processor core,
+and a particular portion of 1 hour cannot be parallelized, while the remaining
+portion of 19 hours (95%) can be parallelized, then regardless of how
+many processor cores we have, the minimum execution time cannot be
+less than that critical 1 hour. Hence the speedup is limited to 20.
 
 In our case, the part above the loop over *k-points* in not parallelized by the
 KGB parallelization. Even if this part is very small &mdash; less than 1% &mdash;
 it determines an upper bound for the speedup.
 
-
+<!--
 <sub><sup>To do in the future: discuss convergence, wfoptalg, nline</sup></sub>
+-->

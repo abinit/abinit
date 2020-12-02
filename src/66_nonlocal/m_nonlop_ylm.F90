@@ -140,7 +140,7 @@ contains
 !!                          for choice 53, twisted derivative involves idir+1 and idir-1
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
 !!                        - strain component (1:9) in the case (choice=33,signs=2)
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,i,ntypat)= array giving l,m,n,lm,ln,s for i=lmn
 !!  istwf_k=option parameter that describes the storage of wfs
@@ -248,7 +248,7 @@ contains
 !! ==== if (signs==2) ====
 !! --if (paw_opt=0)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
-!!                or one of its derivatives to the input vect.  
+!!                or one of its derivatives to the input vect.
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
 !!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
@@ -326,17 +326,17 @@ contains
 !! Notes about choice==33:
 !!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
 !!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
-!!    in the reduced to cartesian derivative conversion process) is here 
+!!    in the reduced to cartesian derivative conversion process) is here
 !!    explicictly included in the formulas.
-!!  
+!!
 !!  **Notice that idir=1-9, in contrast to the strain perturbation (idir=1-6),
 !!    because this term is not symmetric w.r.t permutations of the two strain
 !!    indices.(Also applies for choice=25)
 !!
 !!  **A -i factor has been factorized out in all the contributions of the second
 !!    q-gradient of the metric Hamiltonian and in the first and second q-gradients
-!!    of the atomic displacement Hamiltonian. This is lately included in the 
-!!    matrix element calculation. 
+!!    of the atomic displacement Hamiltonian. This is lately included in the
+!!    matrix element calculation.
 !!
 !! TODO
 !! * Complete implementation of spin-orbit
@@ -476,7 +476,7 @@ contains
  ABI_CHECK(check,'BUG: when choice=7, paw_opt must be 3')
 !spin-orbit not yet allowed
  check=(maxval(indlmn(6,:,:))<=1)
- ABI_CHECK(check,'BUG: spin-orbit not yet allowed')
+ ABI_CHECK(check,'BUG: spin-orbit with Yml for nonlop not yet allowed')
 
 !Test: size of blocks of atoms
  mincat=min(NLO_MINCAT,maxval(nattyp))
@@ -542,7 +542,7 @@ contains
    if(signs==2) ndgxdtfac=2
    if(signs==2) nd2gxdt=3
    if(signs==2) nd2gxdtfac=3
- end if 
+ end if
  if (choice==51) then
    if(signs==1) ndgxdt=3
    if(signs==2) ndgxdt=1
@@ -651,7 +651,7 @@ contains
      call mkkpgcart(gprimd,kgin,kpgin_,kptin,nkpgin_,npwin)
    else
      call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
-   end if 
+   end if
 
  else
    nkpgin_ = nkpgin
@@ -668,7 +668,7 @@ contains
      call mkkpgcart(gprimd,kgout,kpgout_,kptout,nkpgout_,npwout)
    else
      call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
-   end if 
+   end if
 
  else
    nkpgout_ = nkpgout
