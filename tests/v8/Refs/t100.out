@@ -1,6 +1,6 @@
 
-.Version 9.1.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
+.Version 9.3.1 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 11 Mar 2020.
-- ( at 14h34 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h36 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t100_model.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -64,8 +64,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml
--Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml with LibXML library
+-Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t100_model.xml
+-Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t100_model.xml with Fortran
 
  Bound for ifc SR:
 
@@ -152,8 +152,8 @@ dipdip_range         2         2         2
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml
--Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml with LibXML library
+-Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t100_model.xml
+-Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t100_model.xml with Fortran
 
 ================================================================================
 
@@ -162,7 +162,7 @@ dipdip_range         2         2         2
 ================================================================================
 
 -Reading the training-set file :
--/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98.nc
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t98.nc
 
 
 ================================================================================
@@ -335,10 +335,10 @@ ________________________________________________________________________________
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.5
 
 ================================================================================
 
-+Total cpu time      2.149  and wall time      2.149 sec
++Total cpu time      3.469  and wall time      3.478 sec
 
  multibinit : the run completed succesfully.

@@ -33,12 +33,6 @@
   subroutine abi_dheev(jobz,uplo,n,a,lda,w,&
 &            x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dheev'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -145,12 +139,6 @@ end subroutine abi_dheev
 
 subroutine abi_cheev(jobz,uplo,n,a,lda,w)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_cheev'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -231,12 +219,6 @@ end subroutine abi_cheev
 !! SOURCE
 
 subroutine abi_zheev(jobz,uplo,n,a,lda,w)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zheev'
-!End of the abilint section
 
  implicit none
 

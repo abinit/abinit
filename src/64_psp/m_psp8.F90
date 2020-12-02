@@ -128,7 +128,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  integer :: mm,nn,nso
  real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn
  logical :: has_tvale
- character(len=500) :: message,errmsg
+ character(len=500) :: msg,errmsg
  type(pawrad_type) :: mesh
 !arrays
  integer, allocatable :: nproj_tmp(:)
@@ -170,17 +170,15 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Model core charge for nonlinear core xc correction, and 4 derivatives
 
  read (tmp_unit,*, err=10, iomsg=errmsg) rchrg,fchrg,qchrg
- write(message, '(3f20.14,t64,a)' ) rchrg,fchrg,qchrg,'rchrg,fchrg,qchrg'
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ write(msg, '(3f20.14,t64,a)' ) rchrg,fchrg,qchrg,'rchrg,fchrg,qchrg'
+ call wrtout([std_out, ab_out], msg)
 
  ABI_ALLOCATE(nproj_tmp,(mpssoang))
 
  nproj_tmp(:)=0
  read (tmp_unit,*, err=10, iomsg=errmsg) nproj_tmp(1:lmax+1)
- write(message, '(a,5i6)' ) '     nproj',nproj_tmp(1:lmax+1)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ write(msg, '(a,5i6)' ) '     nproj',nproj_tmp(1:lmax+1)
+ call wrtout([std_out, ab_out], msg)
 
 !place holder for future implementation of additional optional header
 !lines without invalidating existing psp files
@@ -194,32 +192,29 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  read (tmp_unit,*, err=10, iomsg=errmsg) extension_switch
  if (any(extension_switch==[2, 3])) then
    read (tmp_unit,*, err=10, iomsg=errmsg) nproj_tmp(lmax+2:2*lmax+1)
-   write(message, '(5x,a,i6)' ) 'spin-orbit psp, extension_switch',extension_switch
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
-   write(message, '(5x,a,5i6)' ) '   nprojso',nproj_tmp(lmax+2:2*lmax+1)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(5x,a,i6)' ) 'spin-orbit psp, extension_switch',extension_switch
+   call wrtout([std_out, ab_out], msg)
+   write(msg, '(5x,a,5i6)' ) '   nprojso',nproj_tmp(lmax+2:2*lmax+1)
+   call wrtout([std_out, ab_out], msg)
    has_tvale =  (extension_switch == 3)
  else if (any(extension_switch==[0,1])) then
-   write(message, '(5x,a,i6)' ) 'extension_switch',extension_switch
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(5x,a,i6)' ) 'extension_switch',extension_switch
+   call wrtout([std_out, ab_out], msg)
    has_tvale =  (extension_switch == 1)
  else
-   write(message, '(a,i0,2a)' ) 'invalid extension_switch: ',extension_switch,ch10,&
+   write(msg, '(a,i0,2a)' ) 'invalid extension_switch: ',extension_switch,ch10,&
 &   'Should be [0,1] for scalar-relativistic psp or [2,3] to include spin-orbit'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if(lloc<4) then
    if (nproj_tmp(lloc+1)/=0) then
-     write(message, '(a,i4,a,a,i4,5a)' )&
+     write(msg, '(a,i4,a,a,i4,5a)' )&
 &     'Pseudopotential input file has nproj=',nproj_tmp(lloc+1),ch10,&
 &     'for angular momentum',lloc,' which is the local potential.',ch10,&
 &     'Should be 0 for the local potential',ch10,&
 &     'Action: check your pseudopotential input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end if
 
@@ -232,15 +227,14 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  else if (any(extension_switch == [2,3])) then
    nso=2
    if (pspso==0) then
-     write (message, '(3a)') 'You are reading a pseudopotential file with spin orbit projectors',ch10,&
-&     ' but internal variable pspso is 0 - this is not possible for oncvpsp. Set nspinor to 2 and so_psp 1'
-! TODO: this should be a bug, not a warning. The code later crashes in init of indlmn
-     MSG_COMMENT(message)
+     write (msg, '(3a)') 'You are reading a pseudopotential file with spin orbit projectors',ch10,&
+&     ' but internal variable pspso is 0'
+     MSG_COMMENT(msg)
    end if
  else
-   write(message, '(a,i0,2a)' ) 'invalid extension_switch: ',extension_switch,ch10,&
+   write(msg, '(a,i0,2a)' ) 'invalid extension_switch: ',extension_switch,ch10,&
 &   'Should be [0,1] for scalar-relativistic psp or [2,3] to include spin-orbit'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  pspindex=0;iln=0;indlmn(:,:)=0
@@ -326,12 +320,12 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  end do !nn
 
  if(ll_err>0) then
-   write(message, '(5a,i4,a,i4,a,a)' )&
+   write(msg, '(5a,i4,a,i4,a,a)' )&
 &   'Pseudopotential input file does not have angular momenta in order',ch10,&
 &   'or has inconsistent general local potential index',ch10,&
 &   'Expected',ll_err-1,' , got',ll,ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
 !Check that rad grid is linear starting at zero
@@ -341,11 +335,11 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    damesh=max(damesh,abs(rad(irad)+amesh-rad(irad+1)))
  end do
  if(damesh>tol8 .or. rad(1)/=zero) then
-   write(message, '(5a)' )&
+   write(msg, '(5a)' )&
 &   'Pseudopotential input file requires linear radial mesh',ch10,&
 &   'starting at zero.',ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
 !Get core charge function and derivatives, if needed
@@ -417,9 +411,8 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 !Allow for option of no nonlocal corrections (lloc=lmax=0)
  if (lloc==0.and.lmax==0) then
-   write(message, '(a,f5.1)' ) ' Note: local psp for atom with Z=',znucl
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,f5.1)' ) ' Note: local psp for atom with Z=',znucl
+   call wrtout([std_out, ab_out], msg)
  else
 
 !  Compute Vanderbilt-KB form factors and fit splines
@@ -472,11 +465,11 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
      damesh=max(damesh,abs(rad(irad)+amesh-rad(irad+1)))
    end do
    if(damesh>tol8 .or. rad(1)/=zero) then
-     write(message, '(5a)' )&
+     write(msg, '(5a)' )&
 &     'Pseudopotential input file requires linear radial mesh',ch10,&
 &     'starting at zero.',ch10,&
 &     'Action: check your pseudopotential input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    !  Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
@@ -538,7 +531,7 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
 !scalars
  integer :: i1xccc,idum,irad,jj
  real(dp) :: amesh,c1,c2,c3,c4,damesh,dri,pi4i,tff,xp,xpm1,xpm2,xpp1,xx
- character(len=500) :: message,errmsg
+ character(len=500) :: msg,errmsg
 !arrays
  real(dp) :: rscale(5)
  real(dp),allocatable :: ff(:,:),rad(:)
@@ -566,20 +559,20 @@ subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
  end do
 
  if(damesh>tol8 .or. rad(1)/=zero) then
-   write(message, '(5a)' )&
-&   'Pseudopotential input file requires linear radial mesh',ch10,&
-&   'starting at zero.',ch10,&
-&   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   write(msg, '(5a)' )&
+   'Pseudopotential input file requires linear radial mesh',ch10,&
+   'starting at zero.',ch10,&
+   'Action: check your pseudopotential input file.'
+   MSG_ERROR(msg)
  end if
 
 !Check that input rchrg is consistent with last grid point
  if(rchrg>rad(mmax)) then
-   write(message, '(5a)' )&
-&   'Pseudopotential input file core charge mesh',ch10,&
-&   'is inconsistent with rchrg in header.',ch10,&
-&   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   write(msg, '(5a)' )&
+   'Pseudopotential input file core charge mesh',ch10,&
+   'is inconsistent with rchrg in header.',ch10,&
+   'Action: check your pseudopotential input file.'
+   MSG_ERROR(msg)
  end if
 
 !Factors for unit range scaling

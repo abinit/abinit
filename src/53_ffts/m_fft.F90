@@ -2276,7 +2276,6 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  tim_fourwf,weight_r,weight_i, &
 &  use_gpu_cuda,use_ndo,fofginb) ! Optional arguments
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,npwin,npwout,option

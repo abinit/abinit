@@ -51,7 +51,7 @@ MODULE m_io_kss
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa, strcat
- use m_hide_lapack,      only : xheevx, xhegvx
+ use m_hide_lapack,      only : xheevx_cplex, xhegvx_cplex
  use m_geometry,         only : metric, remove_inversion
  use m_mpinfo,           only : destroy_mpi_enreg, proc_distrb_cycle
  use m_fftcore,          only : get_kg, sphere
@@ -1286,12 +1286,13 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
        range = "I" ! the IL-th through IU-th eigenvalues will be found.
 
        if (psps%usepaw==0) then
-         call xheevx(jobz,range,"Upper",cplex_ghg,npw_k*nspinor,ghg_mat,zero,zero,&
-         1,nband_k,-tol8,negv,eig_ene,eig_vec,npw_k*nspinor)
+         call xheevx_cplex(jobz,range,"Upper",cplex_ghg,npw_k*nspinor,ghg_mat,zero,zero,&
+         1,nband_k,-tol8,negv,eig_ene,eig_vec,npw_k*nspinor,msg,ierr)
        else
-         call xhegvx(1,jobz,range,"Upper",cplex_ghg,npw_k*nspinor,ghg_mat,gtg_mat,zero,zero,&
-         1,nband_k,-tol8,negv,eig_ene,eig_vec,npw_k*nspinor)
+         call xhegvx_cplex(1,jobz,range,"Upper",cplex_ghg,npw_k*nspinor,ghg_mat,gtg_mat,zero,zero,&
+         1,nband_k,-tol8,negv,eig_ene,eig_vec,npw_k*nspinor,msg,ierr)
        end if
+       ABI_CHECK(ierr == 0, msg)
 
        ! Write eigenvalues.
        cfact=one !cfact=Ha_eV
@@ -1338,13 +1339,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
          count=[2,npws,npws,1,1,1])
        NCF_CHECK(ncerr)
      end if
-
-     !write(666,*)"{istep: ",istep,", ikpt: ", ikpt, ", isppol: ", isppol, ", npws: ",npws,"}"
-     !do jj=1,9
-     !  write(666, "(18(es11.3))")ghg_mat(:,jj,:9)
-     !  write(666, *)
-     !end do
-     !write(666, *) ghg_mat
 #endif
 
      ABI_FREE(ghg_mat)

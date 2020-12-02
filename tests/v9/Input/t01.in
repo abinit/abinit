@@ -6,10 +6,10 @@
 
   ndtset 3
 
-! Spin variables
+# Spin variables
   nsppol 1
 
-! Constrained calculation for charge, assymmetric
+# Constrained calculation for charge, assymmetric
   constraint_kind1  0 0
   constraint_kind2  0 10
   constraint_kind3  10 10
@@ -19,7 +19,7 @@
 
 #########################
 # Common input parameters
-  ! Unit cell
+# Unit cell
     acell   3*5.42
     ntypat 2  natom 2  typat 1 2
     znucl 2*26
@@ -27,7 +27,7 @@
             0.5 0.5 0.5
     chkprim 0
 
-  ! K-points and occupations
+# K-points and occupations
     kptopt 1
     ngkpt 4 4 4   ! 6 6 6 is more realistic
     nshiftk 1
@@ -36,11 +36,11 @@
     tsmear  0.008
     nband 24
 
-  ! Definition of the spheres
+# Definition of the spheres
     ratsph 2*2.1
     ratsm 0.05
 
-  ! Convergence parameters
+# Convergence parameters
     iscf 7
     ecut 10   ! 12 is more realistic
     pawecutdg 30.
@@ -56,15 +56,15 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t01.out, tolnlines = 18, tolabs = 80.0, tolrel = 0.4, fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords = PAW, ConstrainedDFT
-#%% description = 
-#%%   BCC iron, nonmagnetic, GGA, PAW. 
+#%% description =
+#%%   BCC iron, nonmagnetic, GGA, PAW.
 #%%   Test constrained DFT in non magnetic case.
 #%% topics = PAW, ConstrainedDFT
 #%%<END TEST_INFO>

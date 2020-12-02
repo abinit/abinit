@@ -412,32 +412,37 @@ Variable(
     requires="[[paral_kgb]] == 1",
     added_in_version="before_v9",
     text=r"""
-Control the size of the block in the LOBPCG algorithm. This keyword works only
-with [[paral_kgb]] = 1 and has to be either 1 or a multiple of 2.
+Control the size of the block in the LOBPCG algorithm.
+
+!!! important
+
+    This keyword works only with [[paral_kgb]] = 1 and has to be either 1 or a multiple of 2.
+    Moreover [[nband]] / ([[npband]]  $\times$ n) has to be integer.
 
 With [[npband]] = 1:
 
 * 1 --> band-per-band algorithm
 * n --> The minimization is performed using [[nband]] blocks of n bands.
 
-!!! warning
-
-    [[nband]] has to be an integer.
-
-With [[npband]] $\ne$ 1:
+With [[npband]] > 1:
 
 * 1 --> The minimization is performed using [[nband]] / [[npband]] blocks of [[npband]] bands.
 * n --> The minimization is performed using [[nband]] / ([[npband]] $\times$ n) blocks of [[npband]]  $\times$ n bands.
 
-!!! warning
-
-    [[nband]] / ([[npband]]  $\times$ n) has to be an integer.
-
 By minimizing a larger number of bands together in LOBPCG, we increase the
-convergence of the residual. The better minimization procedure (as concerns
+convergence of the residuals. The better minimization procedure (as concerns
 the convergence, but not as concerns the speed) is generally performed by
-using *bandpp*  $\times$ [[npband]] = [[nband]]. Put *bandpp* = 2 when [[istwfk]] = 2
-(the time spent in FFTs is divided by two).
+using *bandpp*  $\times$ [[npband]] = [[nband]].
+
+When performing Gamma-only calculations ([[istwfk]] = 2), it is recommended to set *bandpp* = 2
+(or a multiple of 2) as the time spent in FFTs is divided by two.
+Also, the time required to apply the non-local part of the KS Hamiltonian can be significantly
+reduced if [[bandpp]] > 1 is used in conjunction with [[use_gemm_nonlop]] = 1.
+
+Note that increasing the value of [[bandpp] can have a significant impact on the computing time
+(especially if [[use_gemm_nonlop]] is used)
+but keep in mind that the size of the workspace arrays will also increase so the calculation may go out-of-memory
+if a too large [[bandpp] is used in systems if many atoms.
 """,
 ),
 
@@ -1559,7 +1564,7 @@ Variable(
     abivarname="chksymbreak",
     varset="gstate",
     vartype="integer",
-    topics=['k-points_basic'],
+    topics=['k-points_useful'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="CHecK SYMmetry BREAKing",
@@ -1599,7 +1604,7 @@ Variable(
     defaultval=1,
     mnemonics="CHecK SYMmetry of TNONS",
     characteristics=['[[INPUT_ONLY]]'],
-    added_in_version="v9.2",
+    added_in_version="9.2.0",
     text=r"""
 This variable governs the behaviour of the code when there is a potential
 symmetry breaking, related to the presence
@@ -3308,10 +3313,10 @@ Variable(
 Defines the linear grid resolution (energy increment) to be used for the
 computation of the Density-Of-States, when [[prtdos]] is non-zero.
 If [[dosdeltae]] is set to zero (the default value), the actual increment is
-0.001 Ha if [[prtdos]] = 1, and the much smaller value 0.00005 Ha if
-[[prtdos]] = 2. This different default value arises because the [[prtdos]] = 1
-case, based on a smearing technique, gives a quite smooth DOS, while the DOS
-from the tetrahedron method, [[prtdos]] = 2, is rapidly varying.
+0.001 Ha if [[prtdos]] = 1 or 4 (smearing technique), and the much smaller value 0.00005 Ha if
+[[prtdos]] = 2, 3 or 5 (tetrahedron technique). This different default value arises because the
+smearing technique gives a quite smooth DOS, while the DOS
+from the tetrahedron method is rapidly varying.
 """,
 ),
 
@@ -4141,6 +4146,23 @@ If [[exchn2n3d]] is 1, the internal representation of the FFT arrays in
 reciprocal space will be array(n1,n3,n2), where the second and third
 dimensions have been switched. This is to allow to be coherent with the
 [[exchn2n3d]] = 4xx FFT treatment.
+""",
+),
+
+Variable(
+    abivarname="expert_user",
+    varset="gstate",
+    vartype="integer",
+    topics=['UnitCell_expert','crystal_expert','SmartSymm_expert','GeoOpt_expert','k-points_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EXPERTise of the USER",
+    added_in_version="9.2.2",
+    text=r"""
+If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
+If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero).
+(In the future, the level three will always be the maximum allowed value, with all checks set to zero, while a more refined behaviour
+might be implemented for [[expert_user]]==1 or 2).
 """,
 ),
 
@@ -5860,7 +5882,7 @@ Variable(
     defaultval=6,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
     requires="[[optdriver]] in [3,4]",
-    added_in_version="v9.1",
+    added_in_version="9.1",
     text=r"""
 Many-body calculations for fully periodic systems are problematic due to the
 presence of the integrable Coulomb singularity at $\mathbf{G}=0$ that hinders
@@ -6911,11 +6933,11 @@ Variable(
     dimensions=['[[natsph]]'],
     defaultval=Range(start=1, stop='[[natsph]]'),
     mnemonics="Index for the ATomic SPHeres of the atom-projected density-of-states",
-    requires="[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]",
+    requires="[[prtdos]] == 3 or 4 or [[pawfatbnd]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
 [[iatsph]] gives the number of the [[natsph]] atoms around which the sphere
-for atom-projected density-of-states will be build, in the [[prtdos]] = 3 case.
+for atom-projected density-of-states will be build, in the [[prtdos]] = 3 or 4 cases.
 The radius of these spheres is given by [[ratsph]].
 If [[pawfatbnd]] = 1 or 2, it gives the number of the [[natsph]] atoms around
 which atom-projected band structure will be built.
@@ -10097,11 +10119,11 @@ Variable(
     dimensions="scalar",
     defaultval="[[natom]]",
     mnemonics="Number of ATomic SPHeres for the atom-projected density-of-states",
-    requires="[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]",
+    requires="[[prtdos]] == 3 or 4 or [[pawfatbnd]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
 [[natsph]] gives the number of atoms around which the sphere for atom-projected
-density-of-states will be built, in the [[prtdos]] = 3 case. The
+density-of-states will be built, in the [[prtdos]] = 3 or 4 case. The
 indices of these atoms are given by [[iatsph]]. The radius of these spheres is given by [[ratsph]].
 If [[pawfatbnd]] = 1 or 2, it gives the number of atoms around which atom-projected
 band structure will be built (the indices of these atoms are given by [[iatsph]]).
@@ -10116,11 +10138,11 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of ATomic SPHeres for the l-projected density-of-states in EXTRA set",
-    requires="[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]",
+    requires="[[prtdos]] == 3 or 4 or [[pawfatbnd]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
 [[natsph_extra]] gives the number of extra spheres for which the angular-
-momentum-projected density-of-states will be built, in the [[prtdos]] = 3 case.
+momentum-projected density-of-states will be built, in the [[prtdos]] = 3 or 4 case.
 The radius of these spheres is given by [[ratsph_extra]]. This simulates the
 STS signal for an STM tip atom placed at the sphere position, according to the
 chemical nature of the tip (s- p- d- wave etc...).
@@ -14407,7 +14429,7 @@ Variable(
     defaultval=0,
     mnemonics="PREPAre LongWave calculation",
     characteristics=['[[DEVELOP]]'],
-    added_in_version="v9",
+    added_in_version="9.2.0",
     text=r"""
 The computation of spatial dispersion quantities from the longwave DFPT
 approach requires the first-order wavefunctions and densities obtained from
@@ -14713,11 +14735,13 @@ Variable(
     mnemonics="PRinT the Density Of States",
     added_in_version="before_v9",
     text=r"""
-Provide output of Density of States if set to 1, 2 or 3. Can either use a
-smearing technique ([[prtdos]] = 1), or the tetrahedron method ([[prtdos]] = 2).
-If [[prtdos]] = 3, provide output of Local Density of States inside a sphere
-centered on an atom, as well as the angular-momentum projected DOS, in the
-same sphere. The resolution of the linear grid of energies for which the DOS
+Provide output of Density of States if set to 1...5. Can either use a
+smearing technique ([[prtdos]] = 1 or 4), or the tetrahedron method ([[prtdos]] = 2, 3 or 5).
+If [[prtdos]] = 3 or 4, provide output of angular-momentum projected Local Density of States inside a sphere
+centered on different atoms (all or only those specified by [[iatsph]]),
+and possibly output m-decomposed LDOS if [[prtdosm]] is defined.
+
+The resolution of the linear grid of energies for which the DOS
 is computed can be tuned thanks to [[dosdeltae]].
 
 If [[prtdos]] = 1, the smeared density of states is obtained from the
@@ -14762,8 +14786,8 @@ step, with the name being made of
   * then followed by _DOS.
 
 If [[prtdos]] = 3, the same tetrahedron method as for [[prtdos]] = 2 is used, but
-the DOS inside a sphere centered on some atom is delivered, as well as the
-angular-momentum projected (l=0,1,2,3,4) DOS in the same sphere. The
+the angular-momentum projected (l=0,1,2,3,4) DOS in sphere centered on the atoms
+is computed (not directly the total atom-cenetered DOS). The
 preparation of this case, the parameters under which the computation is to be
 done, and the file denomination is similar to the [[prtdos]] = 2 case. However,
 three additional input variables might be provided, describing the atoms that
@@ -14773,19 +14797,14 @@ In case of PAW, [[ratsph]] radius has to be greater or equal to the largest PAW
 radius of the atom types considered (which is read from the PAW atomic data
 file; see rc_sph or r_paw). Additionally, printing and/or approximations in PAW
 mode can be controlled with [[pawprtdos]] keyword (in
-particular,[[pawprtdos]] = 2 can be used to compute quickly a very good
+particular, [[pawprtdos]] = 2 can be used to compute quickly a very good
 approximation of the DOS).
 
- * Note 1: when [[prtdos]] = 3, it is possible to output m-decomposed LDOS in _DOS
-file; simply use [[prtdosm]] keyword.
- * Note 2: the integrated total DOS in spheres around atoms can be obtained when
-[[prtdensph]] flag is activated. It can be compared to the integrated DOS
-provided in _DOS file when [[prtdos]] = 3.
+If [[prtdos]] = 4, delivers the sphere-projected DOS (like [[prtdos]] = 3), on the
+basis of a smearing approach (like [[prtdos]] = 1). See (like [[prtdos]] = 1
+for the additional input variables to be specified.
 
-[[prtdos]] = 4 delivers the sphere-projected DOS (like [[prtdos]] = 3), on the
-basis of a smearing approach (like [[prtdos]] = 1)
-
-[[prtdos]] = 5 delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
+If [[prtdos]] = 5, delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
 tetrahedron method (as [[prtdos]] = 2).
 """,
 ),
@@ -16172,7 +16191,7 @@ In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
 considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
 In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
 
-When [[prtdos]] = 3:
+When [[prtdos]] = 3 or 4 :
 
 Provides the radius of the spheres around the [[natsph]] atoms of indices
 [[iatsph]], in which the local DOS and its angular-momentum projections will
@@ -18735,19 +18754,22 @@ Variable(
     commentdefault="because it is not usually worth using it unless bandpp is large and it requires additional memory",
     added_in_version="before_v9",
     text=r"""
-This keyword tells abinit to use a BLAS routine to speed up the computation of
+This keyword tells abinit to use a BLAS3 routine to speed up the computation of
 the non-local operator. This requires the pre-computation of a large matrix,
 and has a significant memory overhead. In exchange, it provides improved
 performance when used on several bands at once (Chebyshev or LOBPCG algorithm
-with [[bandpp]]
+with [[bandpp] > 1]
 
 The memory overhead is proportional to the number of atoms, the number of
 plane waves, and the number of projectors per atom. It can be mitigated by
 distributing the array with [[npfft]]
-
 The performance depends crucially on having a good BLAS installed. Provided
 the BLAS supports OpenMP, this option also yields very good scaling for the
 nonlocal operator.
+
+This option is available only if [[useylm]] is 1. ABINIT will automatically set [[useylm]] to 1
+if [[use_gemm_nonlop]] is set to 1 in the input file (actually, this is only needed when NC pseudos are used as
+PAW already uses 1 for [[useylm]]).
 """,
 ),
 
@@ -21076,7 +21098,7 @@ Possible values are [0, -1, 1].
 Setting this flag to 0 deactivates the treatment of the LR contribution (not recommended in polar materials).
 
 If *dvdb_add_lr* is set to 1, the LR part is removed when computing the real-space representation
-of the DFPT potentials so that the potential in real space is short-ranged and ameneable to Fourier interpolation.
+of the DFPT potentials so that the potential in real space is short-ranged and amenable to Fourier interpolation.
 The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
 
 If *dvdb_add_lr* is set to -1, the LR part is removed before computing the real-space representation
@@ -21110,7 +21132,7 @@ Preliminary considerations:
 
 EPH calculations require very dense samplings of the BZ to converge and the memory requirements
 increase quickly with the number of k-points, q-points and [[natom]].
-The EPH code can MPI-distribute the most important datastructures but non all the MPI-levels
+The EPH code can MPI-distribute the most important data structures but non all the MPI-levels
 present the same scalability and the same parallel efficiency.
 Besides the maximum number of MPI processes that can be used for the different MPI-levels is related
 to the basic dimensions of the calculation.
@@ -21457,7 +21479,7 @@ Variable(
     mnemonics="PseudoPotential DIRectory PATH",
     added_in_version="9.0.0",
     text=r"""
-This variable specifies the directory that will prependeded to the names of the pseudopotentials
+This variable specifies the directory that will prepended to the names of the pseudopotentials
 specified in [[pseudos]].
 This option is useful when all your pseudos are gathered in a single directory in your file system
 and you don not want to type the absolute path for each pseudopotential file.
@@ -21693,7 +21715,7 @@ Note the following important remarks:
 
 - Multidatasets are supported but mind that some variables such as
   [[ntypat]], [[typat]] and [[znucl]] are tagged as [[NO_MULTI]].
-  In other words, one can read different files via [[structure]] and the multidatset syntax
+  In other words, one can read different files via [[structure]] and the multi dataset syntax
   provided these quantities do not change.
   ABINIT syntax such as `xred+` are, obviously, not supported.
 
@@ -21734,7 +21756,7 @@ Possible values are:
 
     0 --> Use unit super cell for $\RR$ space. All weights set to 1.
     1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algorithm as for the dynamical matrix).
-          Note that this option leads to more $\RR$-points with a non-neglibigle increase of the memory allocated.
+          Note that this option leads to more $\RR$-points with a non-negligible increase of the memory allocated.
 
 !!! tip
 
@@ -21754,7 +21776,7 @@ Variable(
     added_in_version="9.1.0",
     text=r"""
 This **advanced** variable defines the $\alpha$ parameter in the Gaussian filter $e^{-\frac{|\qG|^2}{4\alpha}}$
-that multiplies the Fourier components of the model potential in the long wavelength limit (Eq 24 of Brunin2020 PRB
+that multiplies the Fourier components of the model potential in the long wavelength limit (Eq 24 of [[cite:Brunin2020b]]
 see also [[cite:Sjakste2015]] and [[cite:Giustino2017]]).
 
 The $\alpha$ parameter determines the separation between the long-range and the short-range parts
@@ -21807,7 +21829,7 @@ Variable(
     text=r"""
 Gives the doping charge in units of |e_charge| / cm^3.
 Negative for n-doping, positive for p-doping.
-Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
+Alternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
 Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
 """,
 ),
@@ -21827,13 +21849,13 @@ in the computation of electron lifetimes ([[eph_task]] -4) and is used to predic
 the list of $\qq$-points in the BZ that will be needeed during the calculation.
 
 The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk$ but then this
-initial energy window must be increased a bit to accomodate for phonon absorption/emission (from $\kk$ to $\kq$).
-This is importat for $\nk$ states that are close to edge of the initial energy window as this states may be needed
+initial energy window must be increased a bit to accommodate for phonon absorption/emission (from $\kk$ to $\kq$).
+This is important for $\nk$ states that are close to edge of the initial energy window as this states may be needed
 for the linear interpolation used in tetrahedron method.
 
-In a nuthshell, the code increases the initial window using the max phonon frequency multiplied by [[eph_phwinfact]].
+In a nutshell, the code increases the initial window using the max phonon frequency multiplied by [[eph_phwinfact]].
 The default value is a compromise between numerical stability and efficiency.
-Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substancial decrease in the number of
+Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substantial decrease in the number of
 $\kq$ KS states that must be read from file with a subsequent decrease in the memory requirements for the wavefunctions.
 We recommended to perform initial tests to decide whether a value smaller than four can be used.
 """,
@@ -21849,7 +21871,138 @@ Variable(
     mnemonics="Radius of the Interatomic Force Constant SPHere",
     added_in_version="9.2.0",
     text=r"""
-Same meaning as [[rifcsph@anaddb]]
+Same meaning as [[rifcsph@anaddb]].
+""",
+),
+
+Variable(
+    abivarname="rmm_diis",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeed_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Activate the RMM-DIIS eigensolver for GS calculations.",
+    added_in_version="9.3.0",
+    text=r"""
+
+This variable activates the Residual Minimization Method, Direct Inversion in the Iterative Subspace (RMM-DIIS)
+eigensolver to **accelerate** GS computations, structural relaxations and molecular-dynamics simulations.
+The algorithm is inspired to [[cite:Kresse1996]] although the ABINIT implementation is not
+completely equivalent to the original formulation.
+RMM-DIIS can be used both with NC and PAW pseudos and is fully compatible with the [[paral_kgb]] distribution.
+This variable has no effect when [[optdriver]] > 0.
+
+It is worth noting that RMM-DIIS is usually employed **in conjunction with another eigenvalue solver**
+that is used to perform the initial SCF iterations.
+RMM-DIIS, indeed, **is not guaranteed to converge to the ground state**
+as the algorithm will find the eigenvector/eigenvalue pair closest to the input trial state.
+The reliability of RMM-DIIS thus **strongly** depends on the initialisation of the SCF cycle
+and on the quality of the input wavefunctions that are supposed to be reasonably close to the final solution.
+
+Both the CG and the LOBPCG solver can be used in conjunction with RMM-DIIS although
+it is strongly suggested to use LOBPCG with [[paral_kgb]] = 1 to take advantage of
+its better efficiency and improved parallel scalability.
+To activate RMM-DIIS with e.g. LOBPCG, it is sufficient to use:
+
+```
+paral_kgb 1
+rmm_diis  1
+```
+
+in the input file and then select the value of [[npkpt]], [[npband]], [[npfft]], [[npspinor]] according to the system.
+
+!!! tip
+
+    Using [[use_gemm_nonlop]] = 1 with [[bandpp]] > 1 can lead to a significant speedup
+    at the price of increased memory requirements.
+
+In the case of standard SCF calculations, Abinit activates the RMM-DIIS solver after 3 + [[rmm_diis]] SCF iterations.
+When performing structural relaxations, RMM-DIIS is activated after [[rmm_diis]] SCF iterations
+once the first GS calculation is completed.
+This means that using [[rmm_diis]] = 1 for a structural relaxation leads to:
+
+    - 4 SCF iterations with the CG/LOBPCG eigensolver followed by RMM-DIIS when are performing the **first GS calculation**.
+    - 1 SCF iterations with CG/LOBPCG followed by RMM-DIIS for all the subsequent relaxation steps.
+
+A negative value [[rmm_diis]] (e.g. -3) can be used to bypass the initial CG/LOBPCG iterations
+but this option should be used with extreme care and it is not recommended in general.
+
+RMM-DIIS usually requires less wall-time per iteration when compared to other approaches since
+there is no explicit orthogonalization while optimizing the trial states.
+Only a single full-band Cholesky orthogonalization is performed per SCF iteration before recomputing the new density.
+As a consequence, one RMM-DIIS iteration is usually faster (sometimes even by a factor > two) than one CG/LOBPCG iteration,
+especially in systems with relatively large [[mpw]].
+However, the additional steps of the algorithm (subspace rotation and Cholesky orthogonalization)
+present poor MPI-scalability hence this part will start to dominate the wall-time in systems with large [[nband]].
+
+The algorithm can also be used for NSCF band structure calculations although one should not expect RMM-DIIS
+to provide **high-energy** states of the same quality as the one obtain with other eigenvalue solvers.
+Although RMM-DIIS can be used for computing band structures and electron DOS with [[iscf]] = -2, we do not recommend
+using this solver to produce WFK files with many empty states as required by many-body calculations.
+
+From the above discussion, it should be clear that RMM-DIIS is **less stable** than the other eigenvalue solvers
+and you should be aware (and accept) that RMM-DIIS calculations **may fail**.
+In the best case scenario, one clearly sees the problem as the SCF cycle does not convergence and/or
+the code aborts with a non-zero exit status returned by one of the LAPACK routines.
+In the worst case scenario, RMM-DIIS may seamlessly **converge to the wrong solution**.
+This is especially true if the first LOBPCG/CG iterations fail to provide a reasonably-good initial starting point.
+
+In problematic cases, you may want to increase the value of [[rmm_diis]] so that more SCF iterations are done
+with LOBPCG/CG before activating RMM-DIIS.
+RMM-DIIS is indeed very sensitive to density mixing and increasing [[rmm_diis]] is a possible solution if you don't want
+to play with the variables defining the mixing algorithm.
+
+As a general rule, we **strongly suggest** to include in the calculation more [[nband]] bands that what is strictly
+needed to accommodate all the valence electrons (let's say > 10% of the occupied bands).
+Increasing [[nband]], indeed, increases the number of vectors used
+for the Rayleigh-Ritz subspace rotation and this step is crucial for finding the most accurate variational approximation
+to the eigenvectors before starting the DIIS optimization.
+
+For a given precision, RMM-DIIS usually requires more iterations than the other eigensolvers.
+For performance reasons, one should avoid using tight tolerances, .
+Something of the order of [[tolvrs] = 1e-8 or [[toldfe]] = 1e-10 to stop the SCF cycle should be fine.
+Avoid using ([[tolwfr]]) (criterion on the residuals) as converge criterion for SCF cycles
+Use [[tolwfr]] only if you are using RMM-DIIS for NSCF band structure calculations (as this is the only converge criterion
+available for NSCF calculations).
+
+Last but not least, note that the default implementation is quite aggressive at the level of memory allocations.
+A less memory-intensive version of the algorithm can be activated via [[rmm_diis_savemem]] = 1.
+
+TIPS:
+
+Mention [[bandpp]] and band locking.
+Use more permissive tolerances and then restart with tighter settings.
+
+On the other hand, please keep in mind that **RMM-DIIS is not guaranteed to find the correct ground-state**.
+Moreover the algorithm may have problems to converge and more iterations may be needed to reach a given precision.
+Also, the present implementation is optimized for converging occupied states so we do not recommend
+RMM-DIIS for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
+
+Obviously the time-to-solution depends on the overall number of SCF iterations required to reach convergence.
+This is the reason why providing RMM-DIIS with reasonable initial trial wavefunctions and potential
+is crucial both for performance and the reliability of the results.
+Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
+then restart from the WFK file using e.g. the LOBPCG solver to reconverge the results with stricter tolerance.
+""",
+),
+
+Variable(
+    abivarname="rmm_diis_savemem",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeed_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Save memory in the RMM-DIIS eigensolver.",
+    added_in_version="9.3.0",
+    text=r"""
+This variable allows one to save memory in the RMM-DIIS eigensolver when [[rmm_diis]] /= 0.
+By default, the RMM-DIIS routine allocates two extra arrays to reduce the number of applications of the Hamiltonian.
+The size of these arrays depends on the number of plane-waves treated by each processor and [[nband]].
+The amount of memory scales with [[npband]] and [[npfft] yet this extra memory is not negligible and the code
+may go out of memory for large systems.
+In this case, one can use [[rmm_diis_savemem]] = 1 to activate a version of RMM-DIIS that avoids these extra allocations.
 """,
 ),
 

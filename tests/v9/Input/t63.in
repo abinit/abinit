@@ -1,0 +1,25 @@
+t63_out_DDB
+Cu; Very rough 2x2x2 special point grid; low ecut.
+4
+t62o_DS3_DDB
+t62o_DS4_DDB
+t62o_DS5_DDB
+t62o_DS6_DDB
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t62.in, t63.in, t64.in, t65.in
+#%% [files]
+#%% files_to_test =
+#%%   t63.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [shell]
+#%% post_commands = 
+#%%  ww_cp t63_out_DDB t65o_DS20_DDB;
+#%% [extra_info]
+#%% authors = O. Nadeau
+#%% keywords = NC, DFPT, EPH
+#%% description = Merge the DDB files produced in t62.in
+#%%<END TEST_INFO>

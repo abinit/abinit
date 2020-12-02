@@ -262,7 +262,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !52  for density rho(r)       (fformr)
 !102 for potential V(r) file. (fformv)  NOT USED
 !scalars
- integer,parameter :: formeig=0,level=101,response=0 ,cplex1=1, master=0
+ integer,parameter :: formeig=0, level=101, response=0 ,cplex1=1, master=0, itime0=0
  integer :: ndtpawuj=0  ! Cannot use parameter because scfargs points to this! Have to get rid of pointers to scalars!
 #if defined HAVE_BIGDFT
  integer :: icoulomb
@@ -1281,7 +1281,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Should merge this call with the call for dtset%ionmov==4 and 5
 
      if (dtset%macro_uj==0) then
-       call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+       call scfcv_run(scfcv_args,itime0,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
      else
 !      Conduct determination of U
        call pawuj_drive(scfcv_args,dtset,electronpositron,rhog,rhor,rprimd,xred,xred_old)
@@ -1425,7 +1425,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !write final electric field components HONG
 
  if (dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt ==7 .or.  &
-& dtset%berryopt == 14 .or. dtset%berryopt == 16 .or. dtset%berryopt ==17 ) then ! output final elctric field data    !!HONG
+& dtset%berryopt == 14 .or. dtset%berryopt == 16 .or. dtset%berryopt ==17 ) then ! output final electric field data    !!HONG
    if (dtset%berryopt == 4) then
      write(msg,'(a,a)')   ch10, 'Constant unreduced E calculation  - final values:'
    else if (dtset%berryopt == 6 ) then
@@ -2466,6 +2466,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: itime0 = 0
  integer,target :: ndtpawuj=4
  integer :: iuj,conv_retcode
  real(dp) :: ures
@@ -2516,7 +2517,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
 
    !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
 !&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_run(scfcv_args,itime0,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
    scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
  end do

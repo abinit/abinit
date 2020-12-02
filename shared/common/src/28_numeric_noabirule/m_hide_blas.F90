@@ -570,8 +570,6 @@ CONTAINS  !=====================================================================
 
 subroutine blas_cholesky_ortho_spc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: vec_size,nvec
  logical,optional,intent(in) :: use_gemm

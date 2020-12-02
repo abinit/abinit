@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h25 )
   
-- input  file    -> t34.in
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t34/t34.in
 - output file    -> t34.out
 - root for input  files -> t34i
 - root for output files -> t34o
@@ -7815,10 +7815,10 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=         11.7  wall=         11.8
+- Proc.   0 individual time (sec): cpu=         15.8  wall=         15.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and  75 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.7  wall=         11.8
+.Delivered   0 WARNINGs and  77 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.8  wall=         15.8

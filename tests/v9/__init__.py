@@ -31,9 +31,14 @@ inp_files = [
 "t16.in", # check slightly incorrect xred, with large tolsym
 "t17.in", # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
 "t18.in", # check slightly incorrect rprim and xred, yielding correction to tnons, tolerated.
+"t19.in", # disable all checks thanks to expert_user
+"t20.in", # test treatment of inaccurate POSCAR file
+"t21.in", # test treatment of inaccurate POSCAR file
+"t29.in", # RMM-DIIS eigsolver for NC.
+"t30.in", # RMM-DIIS eigsolver for PAW.
 # GW/BSE
-"t21.in", # HF exchange checking q->0 terms
-"t22.in", # AC GW
+"t31.in", # HF exchange checking q->0 terms
+"t32.in", # AC GW
 # DFPT
 "t41.in",
 "t42.in",
@@ -51,15 +56,19 @@ inp_files = [
 "t59.in",
 "t60.in",
 "t61.in",
+"t62.in",
+"t63.in",
+"t64.in",
+"t65.in",
 # Spin dynamics in multibinit
 "t81.in", # set initial spin using rotation q-modulation
 "t82.in", # damping
 # New lattice mover in multibinit
-"t83.in", # Langevin NVT 
+"t83.in", # Langevin NVT
 "t84.in", # Berendsen NVT
 "t85.in", # Velocity Verlet NVE
 "t86.in", # Spin lattice coupling, Only Oiju term activated.
-"t87.in", # Spin lattice coupling, Oiju and Tijuv. 
+"t87.in", # Spin lattice coupling, Oiju and Tijuv.
 # GS Coulomb cut-off
 "t90.in", # checkG Coulomb cut-off, large tolerance a.t.m.
 ]

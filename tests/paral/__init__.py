@@ -4,7 +4,7 @@
 need_cpp_vars = [
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -14,15 +14,12 @@ is_multi_parallel = True
 
 #: List of input files
 inp_files = [
-#"si_kpt_band_fft.in",
-#"t_bandfft.in",
-#"t_kpt+spin.in"
 "t01.in",
 "t02.in",
 "t03.in",
 "t05.in",
-"t06.in", 
-"t07.in", 
+"t06.in",
+"t07.in",
 "t08.in",
 "t09.in",
 "t21.in",
@@ -36,6 +33,7 @@ inp_files = [
 "t29.in",
 "t30.in",
 "t31.in",
+"t32.in",
 "t41.in",
 "-t48.in", # MPI-IO, not tested here!
 "-t49.in", # MPI-IO, not tested here!
@@ -51,6 +49,8 @@ inp_files = [
 "t60.in",
 "-t61.in", # disabled for now
 "t62.in",
+"t63.in",
+"t64.in",
 "t71.in",
 "t72.in",
 "t73.in",

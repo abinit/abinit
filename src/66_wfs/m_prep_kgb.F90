@@ -75,7 +75,7 @@ contains
 !!  gvnlxc=matrix elements <G|Vnonlocal+VFockACE|C>
 !!  lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
 !!         Typically lambda is the eigenvalue (or its guess)
-!!  mpi_enreg=informations about mpi parallelization
+!!  mpi_enreg=information about mpi parallelization
 !!  prtvol=control print volume and debugging output
 !!  sij_opt= -PAW ONLY-  if  0, only matrix elements <G|H|C> have to be computed
 !!     (S=overlap)       if  1, matrix elements <G|S|C> have to be computed in gsc in addition to ghc
@@ -97,9 +97,9 @@ contains
 !!
 !! SOURCE
 
-subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
-&                      mpi_enreg,prtvol,sij_opt,cpopt,cwaveprj,&
-&                      already_transposed) ! optional argument
+subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksize, &
+                       mpi_enreg, prtvol, sij_opt, cpopt, cwaveprj, &
+                       already_transposed) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -109,7 +109,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(mpi_type),intent(inout) :: mpi_enreg
 !arrays
- real(dp),intent(inout) :: cwavef(:,:),gvnlxc (:,:),gwavef(:,:),swavef(:,:)
+ real(dp),intent(in) :: cwavef(:,:)
+ real(dp),intent(inout) :: gvnlxc (:,:),gwavef(:,:),swavef(:,:)
  type(pawcprj_type), intent(inout) :: cwaveprj(:,:)
 
 !Local variables-------------------------------
@@ -117,9 +118,9 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  integer,parameter :: tim_getghc=6
  integer :: bandpp,bandpp_sym,idatarecv0,ier,ikpt_this_proc,iscalc,mcg,my_nspinor
  integer :: nbval,ndatarecv,ndatarecv_tot,ndatasend_sym,nproc_band,nproc_fft
- integer :: old_me_g0,spaceComm=0
+ integer :: old_me_g0,spaceComm
  logical :: flag_inv_sym, do_transpose
- character(len=100) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: index_wavef_band(:),index_wavef_send(:),index_wavef_spband(:)
  integer,allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
@@ -165,27 +166,22 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
  mcg=2*gs_hamk%npw_fft_k*my_nspinor*bandpp
  if (do_transpose) mcg=2*gs_hamk%npw_k*my_nspinor*blocksize
  if (size(cwavef)<mcg) then
-   msg='wrong size for cwavef!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for cwavef!')
  end if
  if (size(gwavef)<mcg) then
-   msg='wrong size for gwavef!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for gwavef!')
  end if
  if (size(gvnlxc)<mcg) then
-   msg='wrong size for gvnlxc!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for gvnlxc!')
  end if
  if (sij_opt==1) then
    if (size(swavef)<mcg) then
-     msg='wrong size for swavef!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for swavef!')
    end if
  end if
  if (gs_hamk%usepaw==1.and.cpopt>=0) then
    if (size(cwaveprj)<gs_hamk%natom*my_nspinor*bandpp) then
-     msg='wrong size for cwaveprj!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for cwaveprj!')
    end if
  end if
 
@@ -555,7 +551,7 @@ end subroutine prep_getghc
 !!                        - k point direction in the case (choice=5,signs=2)
 !!                        - strain component (1:6) in the case (choice=2,signs=2) or (choice=6,signs=1)
 !!  lambdablock(blocksize)=factor to be used when computing (Vln-lambda.S) - only for paw_opt=2
-!!  mpi_enreg=informations about mpi parallelization
+!!  mpi_enreg=information about mpi parallelization
 !!  nnlout=dimension of enlout (when signs=1):
 !!  ntypat=number of types of atoms in cell
 !!  paw_opt= define the nonlocal operator concerned with
@@ -603,8 +599,8 @@ end subroutine prep_getghc
 !! SOURCE
 
 subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,&
-&                      blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc,&
-&                      tim_nonlop,cwavef,gvnlc,already_transposed)
+                       blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc, tim_nonlop,cwavef,gvnlc, &
+                       already_transposed) ! optional
 
 !Arguments ------------------------------------
  integer,intent(in) :: blocksize,choice,cpopt,idir,signs,nnlout,paw_opt
@@ -621,7 +617,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  integer :: bandpp,ier,ikpt_this_proc,my_nspinor,ndatarecv,nproc_band,npw,nspinortot
  integer :: old_me_g0,spaceComm=0,tim_nonlop
  logical :: do_transpose
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: index_wavef_band(:)
  integer,  allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
@@ -652,27 +648,23 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !Check sizes
  npw=hamk%npw_k;if (.not.do_transpose) npw=hamk%npw_fft_k
  if (size(cwavef)/=2*npw*my_nspinor*blocksize) then
-   msg = 'Incorrect size for cwavef!'
-   MSG_BUG(msg)
+   MSG_BUG('Incorrect size for cwavef!')
  end if
  if(choice/=0.and.signs==2) then
    if (paw_opt/=3) then
      if (size(gvnlc)/=2*npw*my_nspinor*blocksize) then
-       msg = 'Incorrect size for gvnlc!'
-       MSG_BUG(msg)
+       MSG_BUG('Incorrect size for gvnlc!')
      end if
    end if
    if(paw_opt>=3) then
      if (size(gsc)/=2*npw*my_nspinor*blocksize) then
-       msg = 'Incorrect size for gsc!'
-       MSG_BUG(msg)
+       MSG_BUG('Incorrect size for gsc!')
      end if
    end if
  end if
  if(cpopt>=0) then
    if (size(cwaveprj)/=hamk%natom*my_nspinor*mpi_enreg%bandpp) then
-     msg = 'Incorrect size for cwaveprj!'
-     MSG_BUG(msg)
+     MSG_BUG('Incorrect size for cwaveprj!')
    end if
  end if
 
@@ -873,7 +865,7 @@ end subroutine prep_nonlop
 !!  lmnmax=if useylm=1, max number of (l,m,n) comp. over all type of psps
 !!        =if useylm=0, max number of (l,n)   comp. over all type of psps
 !!  mgfft=maximum size of 1d ffts
-!!  mpi_enreg=informations about mpi parallelization
+!!  mpi_enreg=information about mpi parallelization
 !!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  mpssoang= 1+maximum (spin*angular momentum) for nonlocal pseudopotentials
 !!  natom=number of atoms in cell.
@@ -1360,7 +1352,7 @@ end subroutine prep_fourwf
 !! the value of mpi_enreg%distribfft%tab_fftwf2_distrib( (-kg_k_gather(2,i) )
 !!
 !! INPUTS
-!!  mpi_enreg          = informations about mpi parallelization
+!!  mpi_enreg          = information about mpi parallelization
 !!  bandpp             = number of couple of waves functions
 !!  nspinor            = number of spin
 !!  ndatarecv          = number of values received by the processor and sended
@@ -1628,7 +1620,7 @@ end subroutine prep_wavef_sym_do
 !! the value of mpi_enreg%distribfft%tab_fftwf2_distrib( (-kg_k_gather(2,i) )
 !!
 !! INPUTS
-!!  mpi_enreg          = informations about mpi parallelization
+!!  mpi_enreg          = information about mpi parallelization
 !!  bandpp             = number of groups of couple of waves functions
 !!  nspinor            = number of spin
 !!  ndatarecv          = number of values received by the processor and sended
