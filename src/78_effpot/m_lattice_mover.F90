@@ -395,7 +395,7 @@ contains
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
 
-          self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)+self%displacement
+          self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)+self%displacement(:,:)
           call self%ncfile%write_one_step(self%current_xcart, self%current_vcart, self%energy, self%Ek)
        end if
        !TODO: output, observables

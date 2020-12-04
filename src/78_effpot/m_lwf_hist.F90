@@ -43,7 +43,7 @@ module m_lwf_hist
 !!***
 
   type, public :: lwf_hist_t
-     integer :: mxhist = 0
+     integer :: mxhist = 1
      integer :: nlwf = 0
      integer :: ihist=0
      real(dp), allocatable :: hist(:,:)
