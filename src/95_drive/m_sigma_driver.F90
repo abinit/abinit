@@ -115,7 +115,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
  use m_spacepar,      only : hartre
  use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,get_chkprdm,&
-                         &print_chkprdm,transf_ints,print_total_energy,print_band_energies,quadrature_sigma_cw
+                         &print_chkprdm,change_matrix,print_total_energy,print_band_energies,quadrature_sigma_cw
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
                          destroy_operwan_realspace,destroy_plowannier,zero_operwan_realspace
@@ -262,7 +262,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
+ real(dp),allocatable :: weights(:),nat_occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -281,8 +281,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
  complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- complex(dpc),allocatable :: rdm_k_full(:,:,:),rdm_k(:,:),potk(:,:),nateigv(:,:,:,:)
- complex(dpc),allocatable :: old_purex(:,:),new_hartr(:,:)
+ complex(dpc),allocatable :: xrdm_k_full(:,:,:),rdm_k(:,:),potk(:,:),nateigv(:,:,:,:)
+ complex(dpc),allocatable :: old_ks_purex(:,:),new_hartr(:,:)
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
  complex(dpc),allocatable :: sigcme_k(:,:,:,:)
@@ -648,7 +648,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  if (rdm_update) then
    ABI_MALLOC(bdm_mask  ,(mband,Kmesh%nibz,Sigp%nsppol))
    bdm_mask=.FALSE.
-   if (my_rank==0) then
+   if (my_rank==master) then
      bdm_mask=.TRUE.
    end if
    ABI_MALLOC(bdm2_mask  ,(mband,Kmesh%nibz,Sigp%nsppol))
@@ -2410,6 +2410,8 @@ endif
    ABI_FREE(M1_q_m)
 
  else
+
+   ! COMMET MAU
    ABI_MALLOC(sigmak_todo,(Wfd%nkibz))
    sigmak_todo(:)=1
    if (rdm_update) then  ! Allocate the 1-RDM correction arrays
@@ -2418,30 +2420,31 @@ endif
        ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented assuming Sigp%nsppol==1
      end if
      ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
-     ABI_MALLOC(occs,(Wfd%mband,Wfd%nkibz))
-     ABI_MALLOC(rdm_k_full,(b1gw:b2gw,b1gw:b2gw,Wfd%nkibz))
+     ABI_MALLOC(nat_occs,(Wfd%mband,Wfd%nkibz))
+     ABI_MALLOC(xrdm_k_full,(b1gw:b2gw,b1gw:b2gw,Wfd%nkibz))
      write(msg,'(a34,2i9)')' Bands used for the GW_1RDM arrays',b1gw,b2gw
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     rdm_k_full=czero; occs=zero; nateigv=czero;
-     do ikcalc=1,Wfd%nkibz
+     xrdm_k_full=czero; nat_occs=zero; nateigv=czero;
+     do ik_ibz=1,Wfd%nkibz
        do ib=b1gw,b2gw
-         rdm_k_full(ib,ib,ikcalc)=QP_BSt%occ(ib,ikcalc,1)
+         xrdm_k_full(ib,ib,ik_ibz)=QP_BSt%occ(ib,ik_ibz,1)
        enddo
        do ib=1,Wfd%mband
-         occs(ib,ikcalc)=QP_BSt%occ(ib,ikcalc,1)   ! Copy initial occ numbers (in principle 2 or 0 from KS-DFT)
-         nateigv(ib,ib,ikcalc,1)=cone              ! Set to identity matrix
+         nat_occs(ib,ik_ibz)=QP_BSt%occ(ib,ik_ibz,1)   ! Copy initial occ numbers (in principle 2 or 0 from KS-DFT)
+         nateigv(ib,ib,ik_ibz,1)=cone              ! Set to identity matrix
        end do
      enddo
      if (getchkprdm) then
        gw1rdm_fname=trim(dtfil%fnameabi_chkp_rdm)
-       call get_chkprdm(Wfd,Kmesh,Sigp,QP_BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname)
+       call get_chkprdm(Wfd,Kmesh,Sigp,QP_BSt,nat_occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname)
      end if
      call xmpi_barrier(Wfd%comm)
      ! Prepare arrays for the imaginary freq. integration (quadrature) of Sigma_c(iw)
      ABI_MALLOC(weights,(Sigp%nomegasi))
      call quadrature_sigma_cw(Sigp,Sr,weights) 
-   end if  
+   end if
+
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
      ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
@@ -2457,12 +2460,12 @@ endif
        potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs 
        call calc_rdmx(ib1,ib2,ik_ibz,potk,rdm_k,QP_BSt)                                                 ! Only restricted closed-shell calcs 
 !      Update the full 1RDM with the exchange corrected one for this k-point
-       rdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)=rdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)+rdm_k(ib1:ib2,ib1:ib2)
+       xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)=xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)+rdm_k(ib1:ib2,ib1:ib2)
 !      Compute NAT ORBS for exchange corrected 1-RDM
        do ib=ib1,ib2
          rdm_k(ib,ib)=rdm_k(ib,ib)+QP_BSt%occ(ib,ik_ibz,1) ! Only restricted closed-shell calcs 
        enddo
-       call natoccs(ib1,ib2,rdm_k,nateigv,occs,QP_BSt,ik_ibz,0)          ! Only restricted closed-shell calcs 
+       call natoccs(ib1,ib2,rdm_k,nateigv,nat_occs,QP_BSt,ik_ibz,0)          ! Only restricted closed-shell calcs 
        ABI_FREE(potk)     
        ABI_FREE(rdm_k)     
      end if
@@ -2489,7 +2492,8 @@ endif
 &         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
           ! Compute correlated part using the coarse gwc_ngfft mesh.
-          if (x1rdm/=1 .and. sigmak_todo(ik_ibz)==1) then ! Only recompute correlation MELS if the point read was broken or not precomputed  
+          if (x1rdm/=1 .and. sigmak_todo(ik_ibz)==1) then ! Only recompute correlation MELS if the point read was broken or not precomputed 
+                                                          ! this comment only affects the gw1rdm update 
             call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
 &            Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &            gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
@@ -2505,27 +2509,21 @@ endif
        ! MRM: compute 1-RDM numerical correction (freq. integration G0 Sigma_c G0).
        if (rdm_update) then
          if (sigmak_todo(ik_ibz)==1) then ! Only recompute correlation update to the 1-RDM if the point read was broken or not precomputed  
-           ABI_MALLOC(rdm_k,(b1gw:b2gw,b1gw:b2gw)) 
-           rdm_k=czero 
-           ! Update the rdm_k_full with the corr. contribution?
            if (x1rdm/=1) then
+             ABI_MALLOC(rdm_k,(b1gw:b2gw,b1gw:b2gw)) 
+             rdm_k=czero 
              call calc_rdmc(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,QP_BSt,rdm_k)    ! Only restricted closed-shell calcs
-           end if
-!          Update the full 1RDM with the GW corrected one for this k-point
-           rdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)=rdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)+rdm_k(ib1:ib2,ib1:ib2)
-           rdm_k(ib1:ib2,ib1:ib2)=rdm_k_full(ib1:ib2,ib1:ib2,ik_ibz) 
-!          Compute nat orbs and occ numbers at k-point ik_ibz
-           if (x1rdm/=1) then
-             call natoccs(ib1,ib2,rdm_k,nateigv,occs,QP_BSt,ik_ibz,1) ! Only restricted closed-shell calcs 
-           else
-             call natoccs(ib1,ib2,rdm_k,nateigv,occs,QP_BSt,ik_ibz,0) ! Only restricted closed-shell calcs 
+!            Update the full 1RDM with the GW corrected one for this k-point
+             rdm_k(ib1:ib2,ib1:ib2)=xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)+rdm_k(ib1:ib2,ib1:ib2)  
+!            Compute nat orbs and occ numbers at k-point ik_ibz
+             call natoccs(ib1,ib2,rdm_k,nateigv,nat_occs,QP_BSt,ik_ibz,1) ! Only restricted closed-shell calcs 
+             ABI_FREE(rdm_k)     
            endif
 !          Print the checkpoint file if required
            if(prtchkprdm) then
              gw1rdm_fname=trim(dtfil%fnameabo_chkp_rdm)
-             call print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname)
+             call print_chkprdm(Wfd,nat_occs,nateigv,ik_ibz,my_rank,gw1rdm_fname)
            end if
-           ABI_FREE(rdm_k)     
          end if
        else
          sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
@@ -2534,7 +2532,7 @@ endif
      end do
      call xmpi_barrier(Wfd%comm)
      if (rdm_update) then
-       ABI_FREE(rdm_k_full) 
+       ABI_FREE(xrdm_k_full) 
        ABI_FREE(weights)
      end if
    end if
@@ -2552,13 +2550,11 @@ endif
      ! WARNING! 
      ! MRM: only the master has bands on Wfd_nato_master so it prints everything and computes gw_rhor 
      !
-     call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3)) ! All procs. update the QP_BSt and the Hdr_sigma
+     call update_hdr_bst(Wfd_nato_master,nat_occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3)) ! All procs. update the QP_BSt and the Hdr_sigma
      call print_tot_occ(Sr,Kmesh,QP_BSt) ! Compute unit cell (averaged) occ = \sum _k weight_k occ_k                           
-     if (my_rank==0) then
+     if (my_rank==master) then
        call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                          ! Let it use bdm_mask and build NOs
        call Wfd_nato_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)     ! Construct the density
-     end if
-     if (my_rank==0 .and. (dtset%prtwf == 1 .or. dtset%prtden == 1)) then
        if (dtset%prtwf == 1) then 
          gw1rdm_fname=dtfil%fnameabo_wfk                                         
          call Wfd_nato_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)   ! Print WFK file, here QP_BSt contains nat. orb. occs.
@@ -2579,16 +2575,16 @@ endif
      call Wfd_nato_master%free()
      call xmpi_barrier(Wfd%comm)
      ABI_FREE(bdm_mask) ! The master already used bdm_mask
-     ABI_FREE(occs)     ! Occs were already placed in QP_BSt
+     ABI_FREE(nat_occs)     ! Occs were already placed in QP_BSt
      call em1results_free(Er) ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory 
      if (gw1rdm==2 .and. Sigp%nkptgw==Wfd%nkibz) then  ! Compute energies only if all k-points are available
-       ABI_MALLOC(old_purex,(b1gw:b2gw,Sigp%nkptgw))   ! We need the hole 1-RDM to build Fock[GW.1RDM]!
+       ABI_MALLOC(old_ks_purex,(b1gw:b2gw,Sigp%nkptgw))   ! We need the hole 1-RDM to build Fock[GW.1RDM]!
        ABI_MALLOC(new_hartr,(b1gw:b2gw,Sigp%nkptgw))
        ABI_MALLOC(gw_rhog,(2,nfftf))
        ABI_MALLOC(gw_vhartr,(nfftf))
        gw_rhog=zero
        gw_vhartr(:)=zero
-       old_purex(:,:)=czero
+       old_ks_purex(:,:)=czero
        new_hartr(:,:)=czero
        !
        ! A) Compute Evext = int rho(r) vext(r) dr -> simply dot product on the FFT grid
@@ -2624,16 +2620,17 @@ endif
        ABI_FREE(gw_rhor)
        ABI_FREE(gw_rhog)
        ABI_FREE(gw_vhartr)
+       ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
        do ikcalc=1,Sigp%nkptgw                                                 
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
          do ib=b1gw,b2gw
-           new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ik_ibz,1)  ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
+           new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ik_ibz,1)  
          end do
        end do
        !
-       ! C) Exchange a*<KS_i|K^RANGE-SEP?[KS]|KS_j> and save old K 
+       ! C) Exchange <KS_i|hyb*K^RANGE-SEP?[KS]|KS_j> and save it in old_ks_purex 
        !
        call setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_hyb,ngfftf,comm) ! Build Vcp_ks and Vcp_full  
        call xmpi_barrier(Wfd%comm)
@@ -2648,7 +2645,7 @@ endif
            ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
            call xmpi_barrier(Wfd%comm)
            do ib=b1gw,b2gw
-             old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ik_ibz,1)              ! Save old alpha*<i|K[KS]|i> from the GS calc. for Delta eik
+             old_ks_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ik_ibz,1)              ! Save old alpha*<i|K[KS]|i> from the GS calc. for Delta eik
            enddo
          end do
        endif
@@ -2693,14 +2690,16 @@ endif
        ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)         ! Save the new total exchange energy Ex = Ex[GW.1RDM] 
        exc_mbb_energy=sigma_get_excene(Sr,Kmesh,QP_BSt)   ! Save the new total exchange-correlation MBB energy Exc = Exc^MBB[GW.1RDM] 
        !
-       ! Transform <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>, <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>, & <KS_i|T|KS_j> -> <NO_i|T|NO_j>
+       ! Transform <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>,
+       !           <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>, 
+       !       and     <KS_i|T|KS_j> -> <NO_i|T|NO_j>
        !
-       call transf_ints(Sigp,Sr,GW1RDM_me,Kmesh,nateigv)
+       call change_matrix(Sigp,Sr,GW1RDM_me,Kmesh,nateigv)
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
        !
        ! Print Delta eik and band (state) energies
        !
-       call print_band_energies(b1gw,b2gw,Sr,Sigp,KS_me,Kmesh,KS_BSt,new_hartr,old_purex)
+       call print_band_energies(b1gw,b2gw,Sr,Sigp,KS_me,Kmesh,KS_BSt,new_hartr,old_ks_purex)
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
        !
        ! Print the updated total energy and all energy components
@@ -2716,7 +2715,7 @@ endif
        !
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
        call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
-       ABI_FREE(old_purex)
+       ABI_FREE(old_ks_purex)
        ABI_FREE(new_hartr)
      else
        ABI_FREE(gw_rhor)

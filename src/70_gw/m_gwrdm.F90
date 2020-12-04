@@ -41,7 +41,7 @@ module m_gwrdm
  private :: no2ks,ks2no,printdm1,rotate_ks_no
 !!***
  
- public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,transf_ints
+ public :: quadrature_sigma_cw,calc_Ec_GM_k,calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,change_matrix
  public :: print_chkprdm,print_total_energy,print_band_energies,get_chkprdm 
 !!***
 
@@ -892,9 +892,9 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 end subroutine print_chkprdm
 !!***
 
-!!****f* ABINIT/transf_ints
+!!****f* ABINIT/change_matrix
 !! NAME
-!! transf_ints
+!! change_matrix
 !!
 !! FUNCTION
 !!  Transform integrals from KS -> NO and NO -> KS orbitals
@@ -921,7 +921,7 @@ end subroutine print_chkprdm
 !! CHILDREN
 !! SOURCE
 
-subroutine transf_ints(Sigp,Sr,Mels,Kmesh,nateigv)
+subroutine change_matrix(Sigp,Sr,Mels,Kmesh,nateigv)
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(in) :: Kmesh
@@ -983,7 +983,7 @@ subroutine transf_ints(Sigp,Sr,Mels,Kmesh,nateigv)
     ABI_FREE(Umat)
     ABI_FREE(mat2rot)
   end do
-end subroutine transf_ints
+end subroutine change_matrix
 !!***
 
 !!****f* ABINIT/print_total_energy
