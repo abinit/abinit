@@ -37,11 +37,6 @@
 # define NEWLINE \newline
 #endif
 
-/* This is just to test HAVE_MPI2_INPLACE on the test farm. */
-#define HAVE_MPI2
-#define HAVE_MPI2_INPLACE
-
-
 /*
  * These macros are used to pass information on the file and the line to the children if the compiler supports long lines.
  * Remember, indeed, that ISO doesn't define any standard and __FILE__ could expand to the full path name.

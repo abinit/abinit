@@ -137,6 +137,9 @@ MODULE m_xmpi
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released)
 
+ logical,save, private :: xmpi_use_inplace_operations = .True.
+ ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
+
  ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
  ! To exchange more than 2^32 data we need to create specific user-defined datatypes
  ! For this, we need some parameters:
@@ -175,6 +178,7 @@ MODULE m_xmpi
 
 ! Public procedures.
  public :: xmpi_init                  ! Initialize the MPI environment.
+ public :: xmpi_set_inplace_operations! Set internal flag to use MPI_IN_PLACE whenever possible.
  public :: xmpi_end                   ! Terminate the MPI environment.
  public :: xmpi_abort                 ! Hides MPI_ABORT from MPI library.
  public :: xmpi_show_info             ! Printout of the basic variables stored in this module (useful for debugging).
@@ -754,6 +758,33 @@ subroutine xmpi_init()
  end if
 
 end subroutine xmpi_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_set_inplace_operations
+!! NAME
+!!  xmpi_set_inplace_operations
+!!
+!! FUNCTION
+!!  Set internal flag to use MPI_IN_PLACE whenever possible.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine xmpi_set_inplace_operations(bool)
+
+!Local variables-------------------
+ logical :: bool
+
+! *************************************************************************
+
+ xmpi_use_inplace_operations = bool
+
+end subroutine xmpi_set_inplace_operations
 !!***
 
 !----------------------------------------------------------------------
