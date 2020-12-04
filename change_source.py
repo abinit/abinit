@@ -28,18 +28,18 @@ def source_paths_from_abinit_src():
     return source_paths
 
 
-def all_source_files(types=("fortran", "c", "include")):
+def all_source_files(types=("fortran", "c", "h")):
     """
     Return list with the absolute paths of all the files in the project, exclude binary files
     or files that should not be modified.
     """
     ext_list = []
-    if "fortran" in types: ext_list _= [".F90", ".f90"]
+    if "fortran" in types: ext_list += [".F90", ".f90", "finc"]
     if "c" in types: ext_list += [".c"]
-    if "include" in types: ext_list += [ ".h"]
+    if "h" in types: ext_list += [ ".h"]
     def select_basename(f):
         if any(f.endswith(b) for b in ext_list): return True
-        if f ==  os.path.basename(__file__): return True
+        if f ==  os.path.basename(__file__): return False
         return False
 
     all_files = []
@@ -74,7 +74,9 @@ def replace_string(s):
          "MSG_ERROR_NOSTOP(": "ABI_ERROR_NOSTOP(",
          "MSG_WARNING_IF(": "ABI_WARNING_IF(",
     }
-    old2new = {"informations": "information"}
+    # This is problematic. Use different name
+    #  define ABI_DATATYPE_ALLOCATE_SCALAR(type,scalar)  allocate(type::scalar)
+    #old2new = {"information": "information"}
 
     for old, new in old2new.items():
         s = s.replace(old, new)
@@ -85,7 +87,8 @@ def replace_string(s):
 def main():
     #for path in all_files():
     #for path in source_paths_from_abinit_src():
-    for path in all_source_files(types=("fortran", "c", "include"))
+    #for path in all_source_files(types=("fortran", "c", "h")):
+    for path in all_source_files(types=("fortran", "h")):
         print("Replacing strings in:", path)
         with open(path, "rt") as fh:
             s = replace_string(fh.read())
