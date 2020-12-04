@@ -1664,7 +1664,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      ! Legacy Files file mode.
      write(std_out, "(2a)")" DeprecationWarning: ",ch10
      write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
-     write(std_out, "(2a)")"     Use the syntax `abinit t01.abi` where t01.abi is an input with pseudopotenials.",ch10
+     write(std_out, "(2a)")"     Use the syntax `abinit t01.abi` where t01.abi is an input with pseudopotentials e.g.",ch10
      write(std_out, "(3a)")'            pseudos = "al.psp8, as.psp8"',ch10,ch10
 
      write(std_out,*,err=10,iomsg=errmsg)' Give name for formatted input file: '

@@ -66,7 +66,7 @@ contains
 !! INPUTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables
 !!  iout=unit number for output file
-!!  mpi_enregs(0:ndtset_alloc)=informations about MPI parallelization
+!!  mpi_enregs(0:ndtset_alloc)=information about MPI parallelization
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
 !!  npsp=number of pseudopotentials
@@ -97,7 +97,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !Local variables-------------------------------
 !scalars
- logical :: twvl,allow
+ logical :: twvl,allow, berryflag
  logical :: wvlbigdft=.false.
  integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
@@ -687,7 +687,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  ecut
 !  With planewaves, one must use positive ecut
    if(usewvl==0)then
-     if (abs(dt%ecut+1._dp)<tol8) then
+     !if (abs(dt%ecut+1._dp)<tol2) then
+     if (dt%ecut < tol2) then
        write(msg, '(3a)' )&
         'The input keyword "ecut" is compulsory !',ch10,&
         'Action: add a value for "ecut" in the input file.'
@@ -1222,13 +1223,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! ionmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ionmov',&
-     dt%ionmov,23,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26/),iout)
+     dt%ionmov,24, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,28],iout)
 
-   ! When optcell/=0, ionmov must be 2, 3, 13, 22 or 25 (except if imgmov>0)
+   ! When optcell/=0, ionmov must be 2, 3, 13, 22 or 25, 28 (except if imgmov>0)
    if(dt%optcell/=0)then
      if (dt%imgmov==0) then
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,6,(/2,3,13,15,22,25/),iout)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,7,[2,3,13,15,22,25,28],iout)
      else
        cond_string(1)='optcell' ; cond_values(1)=dt%optcell
        call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,1,(/0/),iout)
@@ -2490,17 +2491,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
       'You will not be able to perform input/output !'
      MSG_WARNING(msg)
    end if
+
    if(dt%paral_kgb==1.and.dt%nstep==0) then
-     msg='When k-points/bands/FFT parallelism is activated, nstep=0 is not allowed!'
-     MSG_ERROR_NOSTOP(msg, ierr)
+     MSG_ERROR_NOSTOP('When k-points/bands/FFT parallelism is activated, nstep=0 is not allowed!', ierr)
    end if
    if(dt%paral_kgb==1.and.dt%usefock>0) then
-     msg='Hartree-Fock or Hybrid Functionals are not compatible with bands/FFT parallelism!'
-     MSG_ERROR_NOSTOP(msg, ierr)
+     MSG_ERROR_NOSTOP('Hartree-Fock or Hybrid Functionals are not compatible with bands/FFT parallelism!', ierr)
    end if
 
 !  paral_rf
-   if ((response==0).and.(dt%paral_rf/=0)) then
+   if (response==0 .and. dt%paral_rf/=0) then
      write(msg,'(a,i3,3a,14(a,i2),4a)' )&
      'The input variable optdriver=',dt%optdriver,ch10,&
      'This is in conflict with the values of the other input variables,',ch10,&
@@ -2561,9 +2561,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  pawcross
-   if (usepaw==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'pawcross',dt%pawcross,2,(/0,1/),iout)
-   end if
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'pawcross',dt%pawcross,2,(/0,1/),iout)
 
 !  pawfatbnd
    call chkint_eq(0,0,cond_string,cond_values,ierr,'pawfatbnd',dt%pawfatbnd,3,(/0,1,2/),iout)
@@ -2580,14 +2578,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !end if
 
 !  pawlcutd
-   if (usepaw==1) then
-     call chkint_ge(0,0,cond_string,cond_values,ierr,'pawlcutd',dt%pawlcutd,0,iout)
-   end if
+   if (usepaw==1) call chkint_ge(0,0,cond_string,cond_values,ierr,'pawlcutd',dt%pawlcutd,0,iout)
 
 !  pawlmix
-   if (usepaw==1) then
-     call chkint_ge(0,0,cond_string,cond_values,ierr,'pawlmix',dt%pawlmix,0,iout)
-   end if
+   if (usepaw==1) call chkint_ge(0,0,cond_string,cond_values,ierr,'pawlmix',dt%pawlmix,0,iout)
 
 !  pawmixdg
    if (usepaw==1) then
@@ -2606,29 +2600,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  pawnhatxc
-   if (usepaw==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'pawnhatxc',dt%pawnhatxc,2,(/0,1/),iout)
-   end if
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'pawnhatxc',dt%pawnhatxc,2,(/0,1/),iout)
 
 !  pawnzlm
-   if (usepaw==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'pawnzlm',dt%pawnzlm,2,(/0,1/),iout)
-   end if
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'pawnzlm',dt%pawnzlm,2,(/0,1/),iout)
 
 !  pawoptmix
-   if (usepaw==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'pawoptmix',dt%pawoptmix,2,(/0,1/),iout)
-   end if
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'pawoptmix',dt%pawoptmix,2,(/0,1/),iout)
 
 !  pawprtdos
-   if (usepaw==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'pawprtdos',dt%pawprtdos,3,(/0,1,2/),iout)
-   end if
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'pawprtdos',dt%pawprtdos,3,(/0,1,2/),iout)
 
 !  pawprtvol
-   if (usepaw==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'pawprtvol',dt%pawprtvol,7,(/-3,-2,-1,0,1,2,3/),iout)
-   end if
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'pawprtvol',dt%pawprtvol,7,(/-3,-2,-1,0,1,2,3/),iout)
 
 !  pawspnorb
    if (usepaw==1) then
@@ -2667,9 +2651,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  pawxcdev
-   if (usepaw==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,3,(/0,1,2/),iout)
-   end if
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'pawxcdev',dt%pawxcdev,3,(/0,1,2/),iout)
 
 !  pimass
 !  Check that masses are > 0 if imgmov = 9 or 13
@@ -2781,7 +2763,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkdpr(0,0,cond_string,cond_values,ierr,'postoldff',dt%postoldff,1,zero,iout)
    if (dt%positron<0) then
      if ( (abs(dt%postoldfe)> tiny(0.0_dp).and.abs(dt%postoldff)> tiny(0.0_dp)).or.&
-&     (abs(dt%postoldfe)<=tiny(0.0_dp).and.abs(dt%postoldff)<=tiny(0.0_dp))) then
+          (abs(dt%postoldfe)<=tiny(0.0_dp).and.abs(dt%postoldff)<=tiny(0.0_dp))) then
        write(msg,'(5a)' )&
 &       'One and only one of the input tolerance criteria postoldfe or postoldff',ch10,&
 &       'must differ from zero !',ch10,&
@@ -2818,9 +2800,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  prtdensph
-   if (usepaw==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdensph',dt%prtdensph,2,(/0,1/),iout)
-   end if
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdensph',dt%prtdensph,2,(/0,1/),iout)
 
 !  prtdos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
@@ -3008,8 +2988,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 #if !defined HAVE_WANNIER90
    if(dt%prtwant==2) then
      write(msg, '(a,a,a)' )&
-&     ' prtwant==2 is only relevant if wannier90 library is linked',ch10,&
-&     ' Action: check compilation options'
+     ' prtwant==2 is only relevant if wannier90 library is linked',ch10,&
+     ' Action: check compilation options'
      MSG_ERROR_NOSTOP(msg,ierr)
    end if
 #endif
@@ -3030,11 +3010,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      do itypat=1,dt%ntypat
        if (pspheads(itypat)%pawheader%rpaw>dt%ratsph(itypat)) then
          write(msg, '(7a,i2,a,f15.12,3a)' )&
-&         'Projected DOS/density is required in the framework of PAW !',ch10,&
-&         'The radius of spheres in which DOS/density has to be projected',ch10,&
-&         'must be greater or equal than the (max.) PAW radius !',ch10,&
-&         'Rpaw(atom_type ',itypat,')= ',pspheads(itypat)%pawheader%rpaw,' au',ch10,&
-&         'Action: modify value of ratsph in input file.'
+         'Projected DOS/density is required in the framework of PAW !',ch10,&
+         'The radius of spheres in which DOS/density has to be projected',ch10,&
+         'must be greater or equal than the (max.) PAW radius !',ch10,&
+         'Rpaw(atom_type ',itypat,')= ',pspheads(itypat)%pawheader%rpaw,' au',ch10,&
+         'Action: modify value of ratsph in input file.'
          MSG_ERROR_NOSTOP(msg, ierr)
        end if
      end do
@@ -3095,6 +3075,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkdpr(1,1,cond_string,cond_values,ierr,'rprimd(2,3)',rprimd(2,3),0,0.0_dp,iout)
    end if
 
+   if (dt%rmm_diis /= 0) then
+     ! Check for calculations that are not implemented with RMM-DIIS
+     ABI_CHECK(dt%usefock == 0, "RMM-DIIS with Hartree-Fock or Hybrid Functionals is not implemented")
+     ABI_CHECK(dt%wfoptalg /= 1, "RMM-DIIS with Chebyshev is not supported.")
+     ABI_CHECK(dt%use_gpu_cuda == 0, "RMM-DIIS does not support GPUs.")
+     berryflag = any(dt%berryopt == [4, 14, 6, 16, 7, 17])
+     ABI_CHECK(.not. berryflag, "RMM-DIIS with Electric field is not supported.")
+   end if
+
 !  so_psp
    if(usepaw==0)then
      do ipsp=1,npsp
@@ -3132,34 +3121,34 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(abs(dt%spinmagntarget+99.99d0)>tol8 .and. abs(dt%spinmagntarget)>tol8)then
      if(nsppol==1)then
        write(msg, '(a,f8.2,4a)' )&
-&       'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
-&       'When nsppol=1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-&       'Action: modify value spinmagntarget or nsppol in input file.'
+       'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
+       'When nsppol=1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
+       'Action: modify value spinmagntarget or nsppol in input file.'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
      if(optdriver==RUNL_RESPFN)then
        write(msg, '(a,f8.2,4a)' )&
-&       'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
-&       'For a response function run, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-&       'Action: modify value spinmagntarget or nsppol in input file.'
+       'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
+       'For a response function run, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
+       'Action: modify value spinmagntarget or nsppol in input file.'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
      if(dt%prtdos==1)then
        write(msg, '(a,f8.2,4a)' )&
-&       'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
-&       'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-&       'Action: modify value spinmagntarget or nsppol in input file.'
+       'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
+       'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
+       'Action: modify value spinmagntarget or nsppol in input file.'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
    end if
 !  If nsppol==2 and spinmagntarget==0.0 , suggest to use anti-ferromagnetic capability of ABINIT.
    if(nsppol==2.and.abs(dt%spinmagntarget)<tol8)then
      write(msg,'(a,i3,2a,f7.2,6a)' )&
-&     ' This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=',nsppol,ch10,&
-&     ' in which the target spin-polarization is zero.                  ... spinmagntarget=',dt%spinmagntarget,ch10,&
-&     ' Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.',ch10,&
-&     ' In the former case, it is advantageous to use nsppol=1 and nspden=1,',ch10,&
-&     ' while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.'
+     ' This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=',nsppol,ch10,&
+     ' in which the target spin-polarization is zero.                  ... spinmagntarget=',dt%spinmagntarget,ch10,&
+     ' Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.',ch10,&
+     ' In the former case, it is advantageous to use nsppol=1 and nspden=1,',ch10,&
+     ' while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.'
      call wrtout(iout,msg,'COLL')
    end if
 
@@ -3183,16 +3172,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !    At least one of the symmetry operations must be antiferromagnetic
      if(minval(dt%symafm(1:dt%nsym))/=-1)then
        write(msg, '(5a)' )&
-&       'When nsppol==1 and nspden==2, at least one of the symmetry operations',ch10,&
-&       'must be anti-ferromagnetic (symafm=-1), in order to deduce the spin-down density',ch10,&
-&       'from the spin-up density.'
+       'When nsppol==1 and nspden==2, at least one of the symmetry operations',ch10,&
+       'must be anti-ferromagnetic (symafm=-1), in order to deduce the spin-down density',ch10,&
+       'from the spin-up density.'
        call wrtout(iout,msg,'COLL')
        call wrtout(std_out,  msg,'COLL')
        write(msg, '(7a)' ) &
-&       'However, it is observed that none of the symmetry operations is anti-ferromagnetic.',ch10,&
-&       'Action: Check the atomic positions, the input variables spinat, symrel, tnons, symafm.',ch10,&
-&       '        In case your system is not antiferromagnetic (it might be ferrimagnetic ...),',ch10,&
-&       '        you must use nsppol=2 with nspden=2 (the latter being the default when nsppol=2).'
+       'However, it is observed that none of the symmetry operations is anti-ferromagnetic.',ch10,&
+       'Action: Check the atomic positions, the input variables spinat, symrel, tnons, symafm.',ch10,&
+       '        In case your system is not antiferromagnetic (it might be ferrimagnetic ...),',ch10,&
+       '        you must use nsppol=2 with nspden=2 (the latter being the default when nsppol=2).'
        MSG_ERROR_NOSTOP(msg,ierr)
      end if
    end if
@@ -3241,9 +3230,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        do isym=1,dt%nsym
          if (sum(dt%tnons(:,isym)**2)>tol6) then
            write(msg,'(3a,i3,a,3f8.4,3a)')&
-&           'When optdriver==RUNL_SCREENING or RUNL_SIGMA, all the components of tnons must be zero.',ch10,&
-&           'However, for the symmetry operation number ',isym,', tnons =',dt%tnons(:,isym),'.',ch10,&
-&           'Action: use the symmetry finder (nsym=0) with symmorphi==0.'
+           'When optdriver==RUNL_SCREENING or RUNL_SIGMA, all the components of tnons must be zero.',ch10,&
+           'However, for the symmetry operation number ',isym,', tnons =',dt%tnons(:,isym),'.',ch10,&
+           'Action: use the symmetry finder (nsym=0) with symmorphi==0.'
            MSG_ERROR_NOSTOP(msg, ierr)
          end if
        end do
@@ -3300,8 +3289,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)/=-1.and.dt%lpawu(itypat)/=maxval(dt%lpawu(:))) then
            write(msg, '(3a)' )&
-&           'When usedmatpu/=0 (use of an initial density matrix for DFT+U),',ch10,&
-&           'lpawu must be equal for all types of atoms on which +U is applied !'
+           'When usedmatpu/=0 (use of an initial density matrix for DFT+U),',ch10,&
+           'lpawu must be equal for all types of atoms on which +U is applied !'
            MSG_ERROR_NOSTOP(msg,ierr)
          end if
        end do
@@ -3348,6 +3337,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  usefock and restrictions
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usefock',dt%usefock,2,(/0,1/),iout)
 
+   if (dt%use_gemm_nonlop == 1) then
+     if (dt%useylm /= 1) then
+       MSG_ERROR_NOSTOP('use_gemm_nonlop requires the input variable "useylm" to be 1',ierr)
+     end if
+   end if
+
 !  usekden
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usekden',dt%usekden,2,(/0,1/),iout)
    if(dt%usekden==0)then
@@ -3355,8 +3350,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
      if(dt%usekden<need_kden)then
        write(msg, '(3a)' )&
-&       'The functional is a MGGA, but the kinetic energy density',ch10, &
-&       'is not present. Please set "usekden 1" in the input file.'
+       'The functional is a MGGA, but the kinetic energy density',ch10, &
+       'is not present. Please set "usekden 1" in the input file.'
        MSG_ERROR(msg)
      end if
    else if(dt%usekden/=0)then
@@ -3914,7 +3909,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    write(msg,'(4a)')ch10,&
    ' Checking consistency of input data against itself revealed some problem(s).',ch10,&
    ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).'
-   call wrtout(iout,msg,'COLL')   
+   call wrtout(iout,msg,'COLL')
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above.'

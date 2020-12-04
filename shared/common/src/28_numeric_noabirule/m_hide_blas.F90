@@ -96,7 +96,7 @@
 
 #include "abi_common.h"
 
-MODULE m_hide_blas
+module m_hide_blas
 
  use defs_basis
  use m_abicore
@@ -569,8 +569,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine blas_cholesky_ortho_spc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: vec_size,nvec
@@ -1313,5 +1311,5 @@ end subroutine sqmat_oconjgtrans_dpc
 
 !----------------------------------------------------------------------
 
-END MODULE m_hide_blas
+end module m_hide_blas
 !!***

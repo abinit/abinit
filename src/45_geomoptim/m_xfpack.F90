@@ -91,8 +91,6 @@ contains
 subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ndim,nsym,optcell
@@ -288,8 +286,6 @@ end subroutine xfpack_vin2x
 subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
   & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ndim,nsym,optcell
@@ -462,8 +458,6 @@ end subroutine xfpack_x2vin
 
 subroutine xfpack_f2vout(fred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ndim,optcell
@@ -585,8 +579,6 @@ end subroutine xfpack_f2vout
 subroutine xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,fred,&
 & hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,vout,&
 & vout_prev,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -736,11 +728,8 @@ end subroutine xfh_recover_new
 
 subroutine xfh_update(ab_xfh,acell,fred_corrected,natom,rprim,strten,xred)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
-
 type(ab_xfh_type),intent(inout) :: ab_xfh
 integer,intent(in) :: natom
 

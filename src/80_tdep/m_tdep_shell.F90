@@ -524,7 +524,7 @@ contains
           ishell=nshell_tmp
 !FB          write(6,'(a,1x,4(i5,1x))') 'NEW SHELL2 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom
         end if  
-!       Classify the informations of the triplet in Shell3at
+!       Classify the information of the triplet in Shell3at
         do ii=1,6
 !         The Phij_NN has to be symetric (transposition symetries)
           if (ii==1) then ; watom=eatom ; xatom=fatom ; yatom=gatom ; endif !\Psi_ijk

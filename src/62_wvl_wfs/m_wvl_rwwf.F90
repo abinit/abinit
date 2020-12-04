@@ -59,14 +59,14 @@ contains
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  option= -2 for write with BigDFT format,
 !!          -1 for reading wavelets coefficients with BigDFT format,
 !!          2 for write,
 !!          1 for read.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  wff <type(wffile_type)>=struct info for wavefunction
-!!  wfs <type(wvl_wf_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_wf_type)>=wavefunctions information for wavelets.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
@@ -181,14 +181,14 @@ end subroutine wvl_read
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=input variables.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  option= -2 for write with BigDFT format,
 !!          -1 for reading wavelets coefficients with BigDFT format,
 !!          2 for write,
 !!          1 for read.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  wff <type(wffile_type)>=struct info for wavefunction
-!!  wfs <type(wvl_wf_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_wf_type)>=wavefunctions information for wavelets.
 !!
 !! OUTPUT
 !!

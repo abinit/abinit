@@ -96,7 +96,7 @@ CONTAINS
 !! cutoff_in = optional,cut off to apply to the range of interation if
 !!           the coefficient are genereted in this routine
 !! max_power_strain = maximum order of the strain of the strain phonon coupling
-!! fit_initializeData = optional, logical !If true, we store all the informations for the fit,
+!! fit_initializeData = optional, logical !If true, we store all the information for the fit,
 !!                      it will reduce the computation time but increase a lot the memory...
 !! fit_tolMSDF = optional, tolerance in eV^2/A^2 on the Forces for the fit process
 !! fit_tolMSDS = optional, tolerance in eV^2/A^2 on the Stresses for the fit process
@@ -505,7 +505,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Get the decomposition for each coefficients of the forces,stresses and energy for
 !each atoms and each step  (see equations 11 & 12 of  
 !PRB95,094115(2017)) [[cite:Escorihuela-Sayalero2017]]+ allocation
-!If the user does not turn off this initialization, we store all the informations for the fit,
+!If the user does not turn off this initialization, we store all the information for the fit,
 !it will reduce the computation time but increase a lot the memory...
  if(need_initialize_data)then
    ABI_ALLOCATE(energy_coeffs,(my_ncoeff,ntime))

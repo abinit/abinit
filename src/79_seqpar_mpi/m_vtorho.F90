@@ -41,6 +41,7 @@ module m_vtorho
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
+ use m_fstrings,           only : sjoin, itoa
  use m_time,               only : timab
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
@@ -52,7 +53,7 @@ module m_vtorho
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
- use m_hamiltonian,        only : init_hamiltonian, gs_hamiltonian_type
+ use m_hamiltonian,        only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_bandfft_kpt,        only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
                                   bandfft_kpt_savetabs, bandfft_kpt_restoretabs, prep_bandfft_tabs
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
@@ -112,6 +113,7 @@ contains
 !! The main part of it is a wf update over all k points.
 !!
 !! INPUTS
+!!  itime=Relaxation step.
 !!  afford=used to dimension susmat
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
@@ -156,7 +158,7 @@ contains
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfftdiel=maximum size of 1D FFTs, for the computation of the dielectric matrix
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  natom=number of atoms in cell.
 !!  nattyp(ntypat)= # atoms of each type.
@@ -251,6 +253,7 @@ contains
 !!  ==== if (usepaw==1) ====
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
+!!  rmm_diis_status= Status of the RMM-DIIS eigensolver. See m_rmm_diis
 !!
 !! PARENTS
 !!      m_scfcv_core
@@ -276,7 +279,7 @@ contains
 !!
 !! SOURCE
 
-subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
+subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &           eigen,electronpositron,energies,etotal,gbound_diel,&
 &           gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&
@@ -288,10 +291,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,xred,&
-&           ylm,ylmgr,ylmdiel)
+&           ylm,ylmgr,ylmdiel, rmm_diis_status)
 
 !Arguments -------------------------------
- integer, intent(in) :: afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
+ integer, intent(in) :: itime,afford,dbl_nnsclo,dielop,dielstrt,istep,istep_mix,lmax_diel,mcg,mcprj,mgfftdiel
  integer, intent(in) :: my_natom,natom,nfftf,nfftdiel,nkxc,npwdiel
  integer, intent(in) :: ntypat,optforces,optres,pwind_alloc,usecprj,with_vectornd
  real(dp), intent(in) :: cpus,etotal,gsqcut,ucvol
@@ -316,6 +319,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer, intent(in) :: irrzondiel(nfftdiel**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  integer, intent(in) :: kg(3,dtset%mpw*dtset%mkmem),kg_diel(3,npwdiel),nattyp(ntypat),ngfftdiel(18),npwarr(dtset%nkpt)
  integer, intent(in) :: pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
+ integer, intent(inout) :: rmm_diis_status(2, dtset%nkpt, dtset%nsppol)
  real(dp), intent(in) :: dmatpawu(:,:,:,:),gmet(3,3),gprimd(3,3),ph1d(2,3*(2*dtset%mgfft+1)*natom)
  real(dp), intent(in) :: ph1ddiel(2,(3*(2*mgfftdiel+1)*natom)*psps%usepaw)
  real(dp), intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
@@ -363,7 +367,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp) :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
- character(len=500) :: message
+ character(len=500) :: msg
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
@@ -376,19 +380,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:)
  real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
- real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vlocal_tmp(:,:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
  type(oper_type) :: dft_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
-
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
-
-!Variables for BigDFT
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
 #endif
@@ -403,6 +404,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Structured debugging if prtvol==-level
  prtvol=dtset%prtvol
+
+! Electric fields: set flag to turn on various behaviors
+ berryflag = any(dtset%berryopt == [4, 14, 6, 16, 7, 17])
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
  wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
@@ -440,8 +444,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Test optforces (to prevent memory overflow)
  if (optforces/=0.and.optforces/=1) then
-   write(message,'(a,i0)')' wrong value for optforces = ',optforces
-   MSG_BUG(message)
+   MSG_BUG(sjoin('wrong value for optforces: ',itoa(optforces)))
  end if
 
  iscf=dtset%iscf
@@ -455,7 +458,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      energies%e_fockdc=zero
    end if
    grnl(:)=zero
-   resid(:) = zero ! JWZ 13 May 2010. resid and eigen need to be fully zeroed each time before use
+   if (berryflag) then
+     resid(:) = zero ! JWZ 13 May 2010. resid and eigen need to be fully zeroed each time before use
+   end if
+   ! MG: The previous line is not compatible with the RMM-DIIS since rmm_diis recevies the previous resid_k
+   ! to select the accuracy level.
+   ! For the time being, we set resid to zero if berryflag to avoid breaking the CG solver with E-field
+   ! but it's clear that the treatment of resid should be rationalized and that the previous values should be passed to vtowfk
    eigen(:) = zero
    bdtot_index=0
    ibg=0;icg=0
@@ -500,27 +509,33 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
  end if
 
-!Set max number of non-self-consistent loops nnsclo_now for use in vtowfk
- if(iscf<0)then
-   ! ===== Non self-consistent =====
+ ! Here we set the max number of non-self-consistent loops nnsclo_now used in vtowfk
+ if (iscf<0) then
+   ! Non self-consistent case
    nnsclo_now=dtset%nstep
  else
-   ! ===== Self-consistent =====
-   if(dtset%nnsclo>0) then
-   ! ===== Self-consistent + imposed =====
+   ! Self-consistent case
+   if (dtset%nnsclo>0) then
+     ! Use input variable if specified and > 0
      nnsclo_now=dtset%nnsclo
-   else if (dtset%nnsclo<0) then
-   ! ===== Self-consistent + imposed during abs(nnsclo) steps =====
+   else if (dtset%nnsclo < 0) then
+     ! imposed during abs(nnsclo) steps
      nnsclo_now=1
      if (istep<=abs(dtset%nnsclo)) nnsclo_now=merge(5,dtset%useria,dtset%useria==0)
    else
-   ! ===== Self-consistent + default =====
-     nnsclo_now=1
-     if (dtset%usewvl==0) then
-     ! ----- Plane waves -----
-       if (istep<=2.and.iscf/=0) nnsclo_now=2
+     ! Default branch for self-consistent case.
+     ! Perform 2 NSCF loops for the first two iterations. This is important especially wfs have
+     ! been initialized with random numbers.
+     nnsclo_now = 1
+     if (dtset%usewvl == 0) then
+       ! Plane waves
+       if (istep <= 2 .and. iscf /= 0) nnsclo_now = 2
+       ! MG: I don't understand why we need to perform 2 NSCF loops after the first SCF cycle
+       ! when we are relaxing the structure as the initial density and wavefunctions should be already good enough.
+       ! Here I change the default behavior to avoid the extra loop but only if RMM-DIIS is used.
+       if (itime > 1 .and. dtset%rmm_diis /= 0) nnsclo_now = 1
      else
-     ! ----- Wavelets -----
+       ! Wavelets
        if (iscf==0) then
          nnsclo_now=0
        else if (istep<=2) then
@@ -530,16 +545,19 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
      end if
    end if
-   ! ===== Double is required =====
-   if(dbl_nnsclo==1)then
-     nnsclo_now=nnsclo_now*2
-   end if
+   ! Double the value if required
+   if (dbl_nnsclo==1) nnsclo_now=nnsclo_now*2
  end if
+
  if(dtset%wfoptalg==2)nnsclo_now=40  ! UNDER DEVELOPMENT
 
- write(message, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now = ',nnsclo_now,&
-   ', note that nnsclo, dbl_nnsclo, istep= ',dtset%nnsclo,dbl_nnsclo,istep
- call wrtout(std_out,message)
+ if (dtset%prtvol > 0) then
+   write(msg, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now = ',nnsclo_now,&
+     ', note that nnsclo, dbl_nnsclo, istep= ',dtset%nnsclo,dbl_nnsclo,istep
+   call wrtout(std_out,msg)
+ else
+   if (nnsclo_now > 1) call wrtout(std_out, sjoin(" Max number of non-self-consistent loops:", itoa(nnsclo_now)))
+ end if
 
 !==== Initialize most of the Hamiltonian ====
 !Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -649,11 +667,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 ! PLANE WAVES - Standard VTORHO procedure
 !===================================================================
 
-!  Electric fields: set flag to turn on various behaviors
-   berryflag = (dtset%berryopt == 4 .or. dtset%berryopt == 14 .or. &
-&   dtset%berryopt == 6 .or. dtset%berryopt == 16 .or. &
-&   dtset%berryopt == 7 .or. dtset%berryopt == 17)
-
 !  Electric field: allocate dphasek
    nkpt1 = dtset%nkpt
    if ( berryflag ) then
@@ -680,51 +693,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ikpt_loc = 0
      ikg=0
 
-!    Set up local potential vlocal with proper dimensioning, from vtrial
-!    Also take into account the spin.
-     if(dtset%nspden/=4)then
-       if (psps%usepaw==0.or.pawfgr%usefinegrid==0) then
-         call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal,2)
-         if(with_vxctau) then
-           do ii=1,4
-             call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-                         vxctau(:,:,ii),vxctaulocal(:,:,:,:,ii),2)
-           end do
-         end if
-       else
-         ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-         call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-                        rhodum,rhodum,cgrvtrial,vtrial)
-         call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-                     cgrvtrial,vlocal,2)
-         if(with_vxctau) then
-           do ii=1,4
-             call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-                           rhodum,rhodum,cgrvtrial,vxctau(:,:,ii))
-             call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
-                         cgrvtrial,vxctaulocal(:,:,:,:,ii),2)
-           end do
-         end if
-         ABI_DEALLOCATE(cgrvtrial)
-       end if
-     else
-       ABI_ALLOCATE(vlocal_tmp,(n4,n5,n6))
-       if (psps%usepaw==0.or.pawfgr%usefinegrid==0) then
-         do ispden=1,dtset%nspden
-           call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,vtrial,vlocal_tmp,2)
-           vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-         end do
-       else
-         ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-         call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-         do ispden=1,dtset%nspden
-           call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal_tmp,2)
-           vlocal(:,:,:,ispden)=vlocal_tmp(:,:,:)
-         end do
-         ABI_DEALLOCATE(cgrvtrial)
-       end if
-       ABI_DEALLOCATE(vlocal_tmp)
-     end if ! nspden
+     ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
+     ! Also, continue to initialize the Hamiltonian.
+
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                   dtset%nspden, gs_hamk%nvloc, 1, pawfgr, mpi_enreg, vtrial, vlocal)
+     call gs_hamk%load_spin(isppol, vlocal=vlocal, with_nonlocal=.true.)
+
+     if (with_vxctau) then
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                     dtset%nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+       call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
+     end if
 
      rhoaug(:,:,:,:)=zero
 
@@ -733,20 +713,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
      if(has_vectornd) then
         do idir = 1, 3
-           ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-           call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
-           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
-           ABI_DEALLOCATE(cgrvtrial)
+          ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
+          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+          call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
+          ABI_DEALLOCATE(cgrvtrial)
         end do
-     end if
-
-!    Continue to initialize the Hamiltonian
-     call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
-     if (with_vxctau) then
-       call gs_hamk%load_spin(isppol,vxctaulocal=vxctaulocal)
-     end if
-     if (has_vectornd) then
-       call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
+        call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
      end if
 
      call timab(982,2,tsec)
@@ -846,7 +818,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (optforces>0) grnl_k(:,:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
-       resid_k(:)=zero
+       resid_k(:) = resid(1+bdtot_index : nband_k+bdtot_index)
+       !resid_k(:)=zero
        zshift(:)=dtset%eshift
 
        ABI_ALLOCATE(kg_k,(3,npw_k))
@@ -862,15 +835,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Compute (1/2) (2 Pi)**2 (k+G)**2:
        ABI_ALLOCATE(kinpw,(npw_k))
-!       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k)
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !      Compute (k+G) vectors (only if useylm=1)
        nkpg=3*optforces*dtset%nloalg(3)
        ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
-       if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) then
-         call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
-       end if
+       if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
 
 !      Compute nonlocal form factors ffnl at all (k+G):
        ider=0;idir=0;dimffnl=1
@@ -903,16 +873,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Load band-FFT tabs (transposed k-dependent arrays)
        if (mpi_enreg%paral_kgb==1) then
-         if (istep<=1) then
-           call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
-         end if
+         if (istep<=1) call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
          call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
-&         gbound_k =my_bandfft_kpt%gbound, &
-&         kinpw_k  =my_bandfft_kpt%kinpw_gather, &
-&         kg_k     =my_bandfft_kpt%kg_k_gather, &
-&         kpg_k    =my_bandfft_kpt%kpg_k_gather, &
-         ffnl_k   =my_bandfft_kpt%ffnl_gather, &
-         ph3d_k   =my_bandfft_kpt%ph3d_gather)
+           gbound_k =my_bandfft_kpt%gbound, &
+           kinpw_k  =my_bandfft_kpt%kinpw_gather, &
+           kg_k     =my_bandfft_kpt%kg_k_gather, &
+           kpg_k    =my_bandfft_kpt%kpg_k_gather, &
+           ffnl_k   =my_bandfft_kpt%ffnl_gather, &
+           ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
 
 !      Build inverse of overlap matrix for chebfi
@@ -941,13 +909,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(984,2,tsec)
 
 !      Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
-       if (usefock) then
-         call fock_updateikpt(fock%fock_common,ikpt,isppol)
-       end if
-       if ((psps%usepaw==1).and.(usefock)) then
-         if ((fock%fock_common%optfor).and.(usefock_ACE==0)) then
-           fock%fock_common%forces_ikpt=zero
-         end if
+       if (usefock) call fock_updateikpt(fock%fock_common,ikpt,isppol)
+       if (psps%usepaw==1 .and. usefock) then
+         if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
        end if
 
 !      Compute the eigenvalues, wavefunction, residuals,
@@ -956,9 +920,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
 &       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
-&       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,nnsclo_now,npw_k,npwarr,&
+&       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
-&       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift)
+&       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
 
        call timab(985,1,tsec)
 
@@ -1015,9 +979,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ_k(iband)*grnl_k(:,iband)
              if (usefock) then
                energies%e_fock=energies%e_fock + half*fock%fock_common%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
-               if (usefock_ACE==0)then
-                 energies%e_fock0=energies%e_fock
-               endif
+               if (usefock_ACE==0) energies%e_fock0=energies%e_fock
              endif
            end if
          end do
@@ -1086,9 +1048,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
    call timab(988,1,tsec)
    if (usefock) then
-     if(fock%fock_common%optfor) then
-       call xmpi_sum(fock%fock_common%forces,mpi_enreg%comm_kpt,ierr)
-     end if
+     if(fock%fock_common%optfor) call xmpi_sum(fock%fock_common%forces,mpi_enreg%comm_kpt,ierr)
    end if
 !  Electric field: compute string-averaged change in Zak phase
 !  along each direction, store it in dphase(idir)
@@ -1159,17 +1119,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            end do
          end do
          if(nnn.ne.mb2dkpsp)  then
-           write(message,*)' BUG in vtorho2, buffer2',nnn,mb2dkpsp
-           MSG_BUG(message)
+           write(msg,*)' BUG in vtorho2, buffer2',nnn,mb2dkpsp
+           MSG_BUG(msg)
          end if
        end if
 !      Build sum of everything
        call timab(48,1,tsec)
        call xmpi_sum(buffer1,mpi_enreg%comm_kpt,ierr)
 !      if(mpi_enreg%paral_kgb/=1.and.paw_dmft%use_dmft==1) then
-       if(paw_dmft%use_dmft==1) then
-         call xmpi_sum(buffer2,mpi_enreg%comm_kpt,ierr)
-       end if
+       if(paw_dmft%use_dmft==1) call xmpi_sum(buffer2,mpi_enreg%comm_kpt,ierr)
        call timab(48,2,tsec)
 
 !      Unpack eigen,resid,eknk,enlxnk,grnlnk in buffer1
@@ -1263,24 +1221,24 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            end do
          end do
 
-         !  Test residm
+         ! Test residm
          if (paw_dmft%use_dmft>0 .and. residm>tol4 .and. dtset%dmftcheck>=0) then
            if(dtset%dmft_entropy>0)  then
-             write(message,'(a,e12.3)')&
+             write(msg,'(a,e12.3)')&
                ' WARNING: Wavefunctions not converged: DFT+DMFT calculation cannot be carried out safely ',residm
-             call wrtout(std_out,message)
+             call wrtout(std_out,msg)
            else
-             write(message,'(a,e12.3)')&
+             write(msg,'(a,e12.3)')&
               ' ERROR: Wavefunctions not converged: DFT+DMFT calculation cannot be carried out safely ',residm
-             call wrtout(std_out,message)
-             write(message,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
-             MSG_ERROR(message)
+             call wrtout(std_out,msg)
+             write(msg,'(a,i0)')'  Action: increase nline and nnsclo',dtset%nstep
+             MSG_ERROR(msg)
            end if
 
          else if (paw_dmft%use_dmft>0 .and. residm>tol10.and. dtset%dmftcheck>=0) then
-           write(message,'(3a)')ch10,&
+           write(msg,'(3a)')ch10,&
             '  Wavefunctions not converged: DFT+DMFT calculation might not be carried out safely ',ch10
-           MSG_WARNING(message)
+           MSG_WARNING(msg)
          end if
 
 !        ==  allocate paw_dmft%psichi and paw_dmft%eigen_dft
@@ -1324,27 +1282,27 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !        call print_dmft(paw_dmft,dtset%pawprtvol)
 !         if(dtset%paral_kgb==1) then
-!           write(message,'(5a)')ch10,&
+!           write(msg,'(5a)')ch10,&
 !&           ' Parallelization over bands is not yet compatible with self-consistency in DMFT ',ch10,&
 !&           ' Calculation of density does not taken into account non diagonal occupations',ch10
-!           call wrtout(std_out,message)
-!           call wrtout(ab_out,message)
-!!          MSG_ERROR(message)
+!           call wrtout(std_out,msg)
+!           call wrtout(ab_out,msg)
+!!          MSG_ERROR(msg)
 !           if(dtset%nstep>1) then
-!             write(message,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
-!             MSG_ERROR(message)
+!             write(msg,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
+!             MSG_ERROR(msg)
 !           end if
 !           residm=zero
 !         end if
 !        if(dtset%nspinor==2) then
 !          call flush_unit(ab_out)
-!          write(message,'(3a)')&
+!          write(msg,'(3a)')&
 !          &         ' Self consistent DFT+DMFT with nspinor==2 is not possible yet ',ch10,&
 !          &         ' Calculation are restricted to nstep =1'
-!          !         MSG_ERROR(message)
+!          !         MSG_ERROR(msg)
 !          if(dtset%nstep>1) then
-!          write(message,'(a,i0)')' Action: use nstep=1 instead of nstep=',dtset%nstep
-!          !           MSG_ERROR(message)
+!          write(msg,'(a,i0)')' Action: use nstep=1 instead of nstep=',dtset%nstep
+!          !           MSG_ERROR(msg)
 !          endif
 !        end if
 
@@ -1362,12 +1320,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if ! usedmft
 
      if(dtset%nbandkss/=0) then
-       write(message,'(a,i3,2a,i3,4a)') &
+       write(msg,'(a,i3,2a,i3,4a)') &
         " dtset%nbandkss = ",dtset%nbandkss,ch10,&
         " and dtset%usedmft = ",dtset%usedmft,ch10,&
         " a DFT loop is carried out without DMFT.",ch10,&
         " Only psichi's will be written at convergence of the DFT loop."
-       call wrtout(std_out,message)
+       call wrtout(std_out,msg)
      end if
 !    !=========  DMFT call end   ============================================
 
@@ -1456,7 +1414,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(paw_dmft%use_dmft==1) then
        energies%e_kinetic = energies%e_kinetic -ekindmft+ekindmft2
        if(abs(dtset%pawprtvol)>=2) then
-         write(message,'(4a,7(2x,a,2x,e14.7,a),a)') &
+         write(msg,'(4a,7(2x,a,2x,e14.7,a),a)') &
            "-----------------------------------------------",ch10,&
            "--- Energy for DMFT and tests (in Ha)  ",ch10,&
            "--- Ebandldatot    (Ha.) = ",ebandldatot,ch10,&
@@ -1467,7 +1425,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            "--- Ekindmftnondiag(Ha.) = ",ekindmft2,ch10,&
            "--- Edmft=         (Ha.) = ",edmft,ch10,&
            "-----------------------------------------------"
-         call wrtout(std_out,message)
+         call wrtout(std_out,msg)
        end if
 !       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
      end if
@@ -1570,7 +1528,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(989,2,tsec)
 
      end if ! nproc_kpt>1
-
 
 !    Compute the highest occupied eigenenergy
      if(iscf/=-1 .and. iscf/=-2)then
@@ -1679,19 +1636,19 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end do
        if(min_occ>0.01_dp)then
          if(dtset%nsppol==1)then
-           write(message, '(a,i0,3a,f7.3,5a)' )&
-             'For k-point number ',ikpt,',',ch10,&
-             'The minimal occupation factor is',min_occ,'.',ch10,&
+           write(msg, '(a,i0,3a,f7.3,5a)' )&
+             'For k-point number: ',ikpt,',',ch10,&
+             'The minimal occupation factor is: ',min_occ,'.',ch10,&
              'An adequate monitoring of convergence requires it to be  at most 0.01_dp.',ch10,&
              'Action: increase slightly the number of bands.'
          else
-           write(message, '(a,i0,3a,i0,a,f7.3,5a)' )&
-             'For k-point number ',ikpt,', and',ch10,&
-             'for spin polarization ',isppol, ' the minimal occupation factor is',min_occ,'.',ch10,&
+           write(msg, '(a,i0,3a,i0,a,f7.3,5a)' )&
+             'For k-point number: ',ikpt,', and',ch10,&
+             'for spin polarization: ',isppol, ' the minimal occupation factor is: ',min_occ,'.',ch10,&
              'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
              'Action: increase slightly the number of bands.'
          end if
-         MSG_WARNING(message)
+         MSG_WARNING(msg)
          exit ! It is enough if one lack of adequate occupation is identified, so exit.
        end if
      end do

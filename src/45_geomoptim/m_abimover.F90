@@ -781,7 +781,19 @@ case (15)
    specs%method = 'training set generator'
 !  Number of history
    specs%nhist = -1
+
+ case (28)
+   ! Values used in XML Output
+   specs%type4xml='simple'
+   specs%crit4xml='tolmxf'
+   !  Name of specs%method
+   specs%method = "i-pi protocol"
+   ! Number of history
+   !specs%nhist = 3
+   ! This is the initialization for ionmov==6
+
  case default
+   ! MG TODO: Why is this check deactivated. We should have an empty case for all the ionmov that can use the default values
    write(msg,"(a,i0)")"Wrong value for ionmov: ",ab_mover%ionmov
    !MSG_ERROR(msg)
  end select
@@ -981,15 +993,9 @@ subroutine mttk_fin(mttk_vars)
 
  type(mttk_type), intent(inout) :: mttk_vars
 
- if(allocated(mttk_vars%glogs))  then
-  ABI_DEALLOCATE(mttk_vars%glogs)
- end if
- if(allocated(mttk_vars%vlogs))  then
-  ABI_DEALLOCATE(mttk_vars%vlogs)
- end if
- if(allocated(mttk_vars%xlogs))  then
-  ABI_DEALLOCATE(mttk_vars%xlogs)
- end if
+ ABI_SFREE(mttk_vars%glogs)
+ ABI_SFREE(mttk_vars%vlogs)
+ ABI_SFREE(mttk_vars%xlogs)
 
 end subroutine mttk_fin
 !!***
@@ -1055,12 +1061,8 @@ subroutine abiforstr_fin(forstr)
 
  type(abiforstr), intent(inout) :: forstr
 
- if(allocated(forstr%fcart))  then
-    ABI_DEALLOCATE(forstr%fcart)
- end if
- if(allocated(forstr%fred))  then
-    ABI_DEALLOCATE(forstr%fred)
- end if
+ ABI_SFREE(forstr%fcart)
+ ABI_SFREE(forstr%fred)
 
 end subroutine abiforstr_fin
 !!***
@@ -1247,9 +1249,7 @@ subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
      deloc%ncart = deloc%ncart + 4-particip_atom(iatom)
    end if
  end do
- if (allocated(deloc%carts)) then
-   ABI_FREE(deloc%carts)
- end if
+ ABI_SFREE(deloc%carts)
  ABI_ALLOCATE(deloc%carts ,(2,deloc%ncart))
  icart = 0
  do iatom=1,natom
@@ -1276,13 +1276,10 @@ end subroutine make_prim_internals
 !! make_angles
 !!
 !! FUNCTION
-!!  (to be completed)
 !!
 !! INPUTS
-!!  (to be completed)
 !!
 !! OUTPUT
-!!  (to be completed)
 !!
 !! PARENTS
 !!      m_abimover
@@ -1358,9 +1355,7 @@ subroutine make_angles(deloc,natom)
    end do ! jbond do
  end do ! ibond
 
- if (allocated(deloc%angs)) then
-   ABI_FREE(deloc%angs)
- end if
+ ABI_SFREE(deloc%angs)
  ABI_ALLOCATE(deloc%angs,(2,3,deloc%nang))
  do iang=1,deloc%nang
    deloc%angs(:,:,iang) = angs_tmp(:,:,iang)
@@ -1377,13 +1372,10 @@ end subroutine make_angles
 !! make_dihedrals
 !!
 !! FUNCTION
-!!  (to be completed)
 !!
 !! INPUTS
-!!  (to be completed)
 !!
 !! OUTPUT
-!!  (to be completed)
 !!
 !! PARENTS
 !!      m_abimover
@@ -1487,9 +1479,7 @@ subroutine make_dihedrals(badangles,deloc)
  end do
 !end iang do
 
- if (allocated(deloc%dihedrals)) then
-   ABI_FREE(deloc%dihedrals)
- end if
+ ABI_SFREE(deloc%dihedrals)
 
  ABI_ALLOCATE(deloc%dihedrals,(2,4,deloc%ndihed))
  do idihed=1,deloc%ndihed
@@ -1507,9 +1497,7 @@ subroutine make_dihedrals(badangles,deloc)
    minshift = minval(diheds_tmp(2,:,idihed))
    maxshift = maxval(diheds_tmp(2,:,idihed))
    if (minshift <= 0 .or. maxshift > deloc%nrshift) then
-     write(std_out,*) ' make_dihedrals : Error : dihedral extends beyond '
-     write(std_out,*) '  first neighboring unit cells ! '
-     MSG_ERROR("Aborting now")
+     MSG_ERROR("dihedral extends beyond first neighboring unit cells!")
    end if
  end do
  ABI_DEALLOCATE(diheds_tmp)
@@ -1524,13 +1512,10 @@ end subroutine make_dihedrals
 !! make_bonds
 !!
 !! FUNCTION
-!!  (to be completed)
 !!
 !! INPUTS
-!!  (to be completed)
 !!
 !! OUTPUT
-!!  (to be completed)
 !!
 !! PARENTS
 !!      m_abimover
@@ -1609,9 +1594,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
    end do
  end do ! iatom
 
- if (allocated(deloc%bonds)) then
-   ABI_FREE(deloc%bonds)
- end if
+ ABI_SFREE(deloc%bonds)
 
  ABI_ALLOCATE(deloc%bonds,(2,2,deloc%nbond))
  do ibond=1,deloc%nbond
@@ -2220,21 +2203,10 @@ subroutine bonds_free(bonds)
 
 ! *********************************************************************
 
- if (allocated(bonds%bond_vect))then
-   ABI_DEALLOCATE(bonds%bond_vect)
- end if
-
- if (allocated(bonds%bond_length))then
-   ABI_DEALLOCATE(bonds%bond_length)
- end if
-
- if (allocated(bonds%nbondi))then
-   ABI_DEALLOCATE(bonds%nbondi)
- end if
-
- if (allocated(bonds%indexi))then
-   ABI_DEALLOCATE(bonds%indexi)
- end if
+ ABI_SFREE(bonds%bond_vect)
+ ABI_SFREE(bonds%bond_length)
+ ABI_SFREE(bonds%nbondi)
+ ABI_SFREE(bonds%indexi)
 
 end subroutine bonds_free
 !!***
@@ -2313,11 +2285,9 @@ subroutine print_bonds(amu,bonds,natom,ntypat,symbol,typat,znucl)
  end do
 
  do ii=1,bonds%nbonds
-
    write(std_out,'(a,i3)') 'BOND Index=',ii
    write(std_out,'(a,3f8.3)') '    Vector',bonds%bond_vect(:,ii)
    write(std_out,'(a,f8.3)')  '    bond Length',bonds%bond_length(ii)
-
  end do
 
 end subroutine print_bonds
@@ -2405,21 +2375,11 @@ subroutine delocint_fin(deloc)
 
  type(delocint), intent(inout) :: deloc
 
- if(allocated(deloc%angs))  then
-   ABI_DEALLOCATE(deloc%angs)
- end if
- if(allocated(deloc%bonds))  then
-   ABI_DEALLOCATE(deloc%bonds)
- end if
- if(allocated(deloc%carts))  then
-   ABI_DEALLOCATE(deloc%carts)
- end if
- if(allocated(deloc%dihedrals))  then
-   ABI_DEALLOCATE(deloc%dihedrals)
- end if
- if(allocated(deloc%rshift))  then
-   ABI_DEALLOCATE(deloc%rshift)
- end if
+ ABI_SFREE(deloc%angs)
+ ABI_SFREE(deloc%bonds)
+ ABI_SFREE(deloc%carts)
+ ABI_SFREE(deloc%dihedrals)
+ ABI_SFREE(deloc%rshift)
 
 end subroutine delocint_fin
 !!***

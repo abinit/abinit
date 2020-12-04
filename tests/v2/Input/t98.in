@@ -96,7 +96,7 @@ dilatmx2   1.0d0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t98.out, tolnlines = 33, tolabs = 1.1e-03, tolrel = 6.0e-02
+#%%   t98.out, tolnlines = 38, tolabs = 1.1e-03, tolrel = 6.0e-02
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

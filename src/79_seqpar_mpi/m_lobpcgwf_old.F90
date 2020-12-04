@@ -62,7 +62,7 @@ contains
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (hartree)
 !!  mcg=second dimension of the cg array
 !!  mgsc=second dimension of the gsc array
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  nbdblock : number of blocks
 !!  npw_k=number of plane waves at this k point

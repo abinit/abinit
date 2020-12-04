@@ -51,7 +51,7 @@ contains
 !! Ionmov predictor (1) Molecular dynamics
 !!
 !! Molecular dynamics, with or without viscous damping
-!! This function should be after the call to scfcv
+!! This function should be called after the call to scfcv
 !! Updates positions, velocities and forces
 !!
 !! INPUTS
@@ -96,8 +96,6 @@ contains
 !! SOURCE
 
 subroutine pred_moldyn(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -198,7 +196,7 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
 
 !write(std_out,*) '01'
 !##########################################################
-!### 01. Get or compute de time step dtion
+!### 01. Get or compute the time step dtion
 
  if (ab_mover%dtion>0)then
    hh = ab_mover%dtion
