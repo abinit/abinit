@@ -351,9 +351,9 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  !======================================================================================================
  ! Init Scalapack matrices
  !======================================================================================================
- call init_matrix_scalapack(sca_ham ,nband,nband,slk_processor,istwf_k,10)
- call init_matrix_scalapack(sca_ovl ,nband,nband,slk_processor,istwf_k,10)
- call init_matrix_scalapack(sca_evec,nband,nband,slk_processor,istwf_k,10)
+ call init_matrix_scalapack(sca_ham ,nband,nband,slk_processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_ovl ,nband,nband,slk_processor,istwf_k, tbloc=10)
+ call init_matrix_scalapack(sca_evec,nband,nband,slk_processor,istwf_k, tbloc=10)
 
  ! Get info
  blocksize = sca_ham%sizeb_blocs(1) ! Assume square blocs
@@ -551,6 +551,10 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
    gvnlxc = gsc_or_vnlxc_new
  end if
  call timab(timer_rotation, 2, tsec)
+
+ call sca_ham%free()
+ call sca_ovl%free()
+ call sca_evec%free()
 
 end subroutine rayleigh_ritz_distributed
 !!***
