@@ -268,7 +268,7 @@ contains
     do iR =1, nR
        do i=1 , nlwf
           do j=1, nlwf
-             if (abs(ifc(j, i, iR))>1e-9) then
+             if (abs(ifc(j, i, iR))>1e-4) then
                 ! NOTE: in fortran the order of index in reversed when reading netcdf array.
                 call self%coeff%add_entry([iR, i, j], ifc(j, i, iR))
              end if

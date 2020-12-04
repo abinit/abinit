@@ -203,6 +203,7 @@ contains
        end do
        call self%force_stationary()
        call self%get_T_and_Ek()
+       self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
     else if(mode==2) then ! Use reference structure and 0 velocity.
        ! other modes.
        if(self%latt_dynamics==102 .or. self%latt_dynamics==103 ) then
@@ -394,8 +395,7 @@ contains
                & (self%Ek+self%energy)/self%supercell%ncell
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
-
-          self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)+self%displacement(:,:)
+          self%current_xcart = self%supercell%lattice%xcart+self%displacement
           call self%ncfile%write_one_step(self%current_xcart, self%current_vcart, self%energy, self%Ek)
        end if
        !TODO: output, observables

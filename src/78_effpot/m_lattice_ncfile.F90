@@ -236,6 +236,7 @@ contains
     !if(self%write_traj ==1) then
     ncerr=nf90_put_var(self%ncid, self%xcart_id, xcart, &
             &      start=[1,1, itime], count=[3,natom, 1])
+
     ncerr=nf90_put_var(self%ncid, self%vcart_id, vcart, &
          &      start=[1,1, itime], count=[3,natom, 1])
 
