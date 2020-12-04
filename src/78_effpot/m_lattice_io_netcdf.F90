@@ -210,7 +210,7 @@ contains
     do iR =1, nR
        do i=1 , natom3
           do j=1, natom3
-             if (abs(ifc_vallist(j, i, iR))>1e-2) then
+             if (abs(ifc_vallist(j, i, iR))>1e-3) then
                 ! NOTE: in fortran the order of index in reversed when reading netcdf array.
                 call self%coeff%add_entry([iR, i, j], ifc_vallist(j, i, iR))
              end if
