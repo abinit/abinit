@@ -9,7 +9,7 @@ import os
 TOPDIR = os.path.dirname(os.path.realpath(__file__))
 
 
-def find_source_paths():
+def source_paths_from_abinit_src():
     """
     Return list with absolute paths of source files extracted from abinit.src
     """
@@ -28,22 +28,23 @@ def find_source_paths():
     return source_paths
 
 
-def all_files():
+def all_source_files(types=("fortran", "c", "include")):
     """
     Return list with the absolute paths of all the files in the project, exclude binary files
     or files that should not be modified.
     """
-    def ignore_basename(f):
-        black_list = [".pdf", ".pickle", ".swp", ".cpkl", ".gz", ".nc", "_HIST",
-                      ".pyc", ".png", "_DEN", ".pdf", ".nc", "_WFK"]
-        if any(f.endswith(b) for b in black_list): return True
+    ext_list = []
+    if "fortran" in types: ext_list _= [".F90", ".f90"]
+    if "c" in types: ext_list += [".c"]
+    if "include" in types: ext_list += [ ".h"]
+    def select_basename(f):
+        if any(f.endswith(b) for b in ext_list): return True
         if f ==  os.path.basename(__file__): return True
         return False
 
     all_files = []
     for root, dirs, files in os.walk(TOPDIR):
-        #if os.path.basename(root).startswith("_"): continue
-        all_files.extend(os.path.join(root, f) for f in files if not ignore_basename(f))
+        all_files.extend(os.path.join(root, f) for f in files if select_basename(f))
     return all_files
 
 
@@ -83,7 +84,8 @@ def replace_string(s):
 
 def main():
     #for path in all_files():
-    for path in find_source_paths():
+    #for path in source_paths_from_abinit_src():
+    for path in all_source_files(types=("fortran", "c", "include"))
         print("Replacing strings in:", path)
         with open(path, "rt") as fh:
             s = replace_string(fh.read())
