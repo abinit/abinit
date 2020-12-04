@@ -2228,11 +2228,12 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives a rough description of the initial GS density, for each type of atom.
-This value is only used to create the first exchange and correlation
-potential, and is not used anymore afterwards. For the time being, it
-corresponds to an average radius (a.u.) of the density, and is used to
-generate a gaussian density. If set to 0.0, an optimized value is used.
-No meaning for RF calculations.
+This value is used to create the first exchange and correlation
+potential. Afterwards, it is not used anymore, except in cases related to [[densfor_pred]]. 
+
+[[densty]] gives an average radius (a.u.) of a Gaussian density, that will make each pseudoion neutral.
+If set to 0.0, a tabulated value is used, announced as a 'decay length' in the log file.
+No meaning for RF calculations or any calculation in which a starting density is taken as input.
 """,
 ),
 
