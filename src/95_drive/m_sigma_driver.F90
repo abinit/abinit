@@ -2467,6 +2467,13 @@ endif
          ABI_FREE(potk)     
          ABI_FREE(rdm_k)     
        end if
+     else   
+       write(msg,'(a1)')  ' '
+       call wrtout(std_out,msg,'COLL')
+       write(msg,'(a64,i5)')  ' Skipping the calc. of Sigma_x - ( Vxc + hyb*Fock) for k-point: ',ik_ibz
+       call wrtout(std_out,msg,'COLL')
+       write(msg,'(a1)')  ' '
+       call wrtout(std_out,msg,'COLL')
      end if
    end do
    ! for the time being, do not remove this barrier!
