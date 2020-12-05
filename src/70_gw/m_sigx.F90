@@ -157,7 +157,7 @@ contains
 
 subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,&
 & Ltg_k,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
-& prtvol,pawcross)
+& prtvol,pawcross,tol_empty_in)
 
 !Arguments ------------------------------------
 !scalars
@@ -173,6 +173,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  type(sigma_t),intent(inout) :: Sr
  type(pawang_type),intent(in) :: Pawang
  type(wfd_t),target,intent(inout) :: Wfd,Wfdf
+ real(dp),intent(in) :: tol_empty_in 
 !arrays
  integer,intent(in) :: gwx_ngfft(18),ngfftf(18)
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat)
@@ -300,13 +301,13 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ! If nsppol==2, qp_occ $\in [0,1]$
  SELECT CASE (nsppol)
  CASE (1)
-   fact_sp=half; tol_empty=0.0001   ! below this value the state is assumed empty
+   fact_sp=half; tol_empty=tol_empty_in       ! below this value the state is assumed empty
    if (Sigp%nspinor==2) then
-    fact_sp=one; tol_empty=0.00005  ! below this value the state is assumed empty
+    fact_sp=one; tol_empty=half*tol_empty_in  ! below this value the state is assumed empty
    end if
  CASE (2)
-   fact_sp=one;  tol_empty=0.00005  ! to be consistent and obtain similar results if a metallic
- CASE DEFAULT                        ! spin unpolarized system is treated using nsppol==2
+   fact_sp=one;  tol_empty=half*tol_empty_in  ! to be consistent and obtain similar results if a metallic
+ CASE DEFAULT                                 ! spin unpolarized system is treated using nsppol==2
    MSG_BUG('Wrong nsppol')
  END SELECT
 

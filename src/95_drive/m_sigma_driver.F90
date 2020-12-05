@@ -223,7 +223,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: etot_sd,etot_mbb,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
- real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy 
+ real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy,tol_empty 
  real(dp) :: ucvol,ucvol_local,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -336,6 +336,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
+ tol_empty=0.01                            ! Initialize the tolerance used to decide if a band is empty (passed to m_sigx.F90)
  gwcalctyp=Dtset%gwcalctyp
  gw1rdm=Dtset%gw1rdm                       ! Input variable to decide if updates to the 1-RDM must be performed
  x1rdm=Dtset%x1rdm                         ! Input variable to use pure exchange correction on the 1-RDM ( Sigma_x - Vxc )
@@ -2448,7 +2449,7 @@ endif
        ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
        call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
 &       Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
-&       gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+&       gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
        if (rdm_update) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed  
          ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
          ABI_MALLOC(rdm_k,(b1gw:b2gw,b1gw:b2gw)) 
@@ -2639,7 +2640,7 @@ endif
            ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
            call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,KS_BSt,Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),& ! Notice we need KS occs 
            & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&                                   ! and band energy diffs       
-           & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+           & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
            ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
            call xmpi_barrier(Wfd%comm)
            do ib=b1gw,b2gw
@@ -2675,14 +2676,16 @@ endif
        ! E) Exchange <NO_i|K[NO]|NO_j> 
        !
        ! Get the matrix elements and save them on Sr%x_mat 
+       tol_empty=0.0001 ! Allow lower occ numbers
        do ikcalc=1,Sigp%nkptgw                                                 
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
          call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp_full,Kmesh,Qmesh,Ltg_k(ikcalc),& 
          & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_nato_all,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
-         & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+         & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
        end do
+       tol_empty=0.01 ! Recover standard value for tolerance on the occ numbers
        call xmpi_barrier(Wfd%comm)
        call vcoul_free(Vcp_full)
        ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)         ! Save the new total exchange energy Ex = Ex[GW.1RDM] 
