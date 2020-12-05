@@ -229,7 +229,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  real(dp):: gsqcut,boxcut,ecutf  
  complex(dpc) :: max_degw,cdummy
- logical :: wfknocheck,rdm_update,getchkprdm,prtchkprdm  
+ logical :: wfknocheck,rdm_update,readchkprdm,prtchkprdm  
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname
@@ -340,22 +340,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  gw1rdm=Dtset%gw1rdm                       ! Input variable to decide if updates to the 1-RDM must be performed
  x1rdm=Dtset%x1rdm                         ! Input variable to use pure exchange correction on the 1-RDM ( Sigma_x - Vxc )
  wfknocheck=.true.                         ! Used for printing WFK file subroutine
- if (gwcalctyp==21 .and. gw1rdm>0) then
-   rdm_update=.true.
-   if (Dtset%getchkprdm==1) then          ! Input variable to decide if checkpoint files must be read
-     getchkprdm=.true.
-   else
-     getchkprdm=.false.
-   end if
-   if (Dtset%prtchkprdm==1) then           ! Input variable to decide if checkpoint files must be read
-     prtchkprdm=.true.
-   else
-     prtchkprdm=.false.
-   end if
- else
-   rdm_update=.false.
- end if
-
+ rdm_update=(gwcalctyp==21 .and. gw1rdm>0) ! Input variable to decide whether to update GW density matrix  
+ readchkprdm=(Dtset%irdchkprdm==1)          ! Input variable to decide if checkpoint files must be read
+ prtchkprdm=(Dtset%prtchkprdm==1)          ! Input variable to decide if checkpoint files must be read  
+     
  mod10 =MOD(Dtset%gwcalctyp,10)
 
  ! Perform some additional checks for hybrid functional calculations
@@ -2439,7 +2427,7 @@ endif
          nateigv(ib,ib,ik_ibz,1)=cone                  ! Set to identity matrix
        end do
      enddo
-     if (getchkprdm) then
+     if (readchkprdm) then
        gw1rdm_fname=trim(dtfil%fnameabi_chkp_rdm)
        call get_chkprdm(Wfd,Kmesh,Sigp,QP_BSt,nat_occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname)
      end if

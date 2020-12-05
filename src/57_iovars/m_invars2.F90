@@ -457,8 +457,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtchkprdm',tread,'INT')
  if(tread==1) dtset%prtchkprdm=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getchkprdm',tread,'INT')
- if(tread==1) dtset%getchkprdm=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdchkprdm',tread,'INT')
+ if(tread==1) dtset%irdchkprdm=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_first_seed',tread,'INT')
  if(tread==1) then
