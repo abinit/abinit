@@ -2410,11 +2410,15 @@ endif
    ABI_FREE(M1_q_m)
 
  else
-
-   ! COMMET MAU
+   ! MRM: sigmak_todo is an array indicating whether the k-point must be computed for GW correction. This array is set to DO IT (to 1) for any GW calculation
+   ! it will only change to NOT DO IT (to 0) in case that a density matrix update calc. is used and we are reading checkpoint files
    ABI_MALLOC(sigmak_todo,(Wfd%nkibz))
    sigmak_todo(:)=1
-   if (rdm_update) then  ! Allocate the 1-RDM correction arrays
+
+   ! ======================================================
+   ! ==== Initialize arrays for density matrix updates ====
+   ! ======================================================
+   if (rdm_update) then  
      if (Sigp%nsppol/=1) then
        MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
        ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented assuming Sigp%nsppol==1
@@ -2432,7 +2436,7 @@ endif
        enddo
        do ib=1,Wfd%mband
          nat_occs(ib,ik_ibz)=QP_BSt%occ(ib,ik_ibz,1)   ! Copy initial occ numbers (in principle 2 or 0 from KS-DFT)
-         nateigv(ib,ib,ik_ibz,1)=cone              ! Set to identity matrix
+         nateigv(ib,ib,ik_ibz,1)=cone                  ! Set to identity matrix
        end do
      enddo
      if (getchkprdm) then
@@ -2445,35 +2449,41 @@ endif
      call quadrature_sigma_cw(Sigp,Sr,weights) 
    end if
 
+   ! ===================================
+   ! ==== Static part (Sigma_x-Vxc) ====
+   ! ===================================
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
-     ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
-     ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-     call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
-&     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
-&     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
-     if (rdm_update .and. sigmak_todo(ik_ibz)==1) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed  
-       ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
-       ABI_MALLOC(rdm_k,(b1gw:b2gw,b1gw:b2gw)) 
-       rdm_k=czero
-!      Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
-       potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs 
-       call calc_rdmx(ib1,ib2,ik_ibz,potk,rdm_k,QP_BSt)                                                 ! Only restricted closed-shell calcs 
-!      Update the full 1RDM with the exchange corrected one for this k-point
-       xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)=xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)+rdm_k(ib1:ib2,ib1:ib2)
-!      Compute NAT ORBS for exchange corrected 1-RDM
-       do ib=ib1,ib2
-         rdm_k(ib,ib)=rdm_k(ib,ib)+QP_BSt%occ(ib,ik_ibz,1) ! Only restricted closed-shell calcs 
-       enddo
-       call natoccs(ib1,ib2,rdm_k,nateigv,nat_occs,QP_BSt,ik_ibz,0)          ! Only restricted closed-shell calcs 
-       ABI_FREE(potk)     
-       ABI_FREE(rdm_k)     
+     if (sigmak_todo(ik_ibz)==1) then ! Do not compute MELS if the k-point was read from the checkpoint file
+                                      ! this IF only affects GW density matrix update! 
+       ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
+       ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+       call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
+&       Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
+&       gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+       if (rdm_update) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed  
+         ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
+         ABI_MALLOC(rdm_k,(b1gw:b2gw,b1gw:b2gw)) 
+         rdm_k=czero
+!        Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
+         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs 
+         call calc_rdmx(ib1,ib2,ik_ibz,potk,rdm_k,QP_BSt)                                                 ! Only restricted closed-shell calcs 
+!        Update the full 1RDM with the exchange corrected one for this k-point
+         xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)=xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)+rdm_k(ib1:ib2,ib1:ib2)
+!        Compute NAT ORBS for exchange corrected 1-RDM
+         do ib=ib1,ib2
+           rdm_k(ib,ib)=rdm_k(ib,ib)+QP_BSt%occ(ib,ik_ibz,1)           ! Only restricted closed-shell calcs 
+         enddo
+         call natoccs(ib1,ib2,rdm_k,nateigv,nat_occs,QP_BSt,ik_ibz,0)  ! Only restricted closed-shell calcs 
+         ABI_FREE(potk)     
+         ABI_FREE(rdm_k)     
+       end if
      end if
    end do
-
    ! for the time being, do not remove this barrier!
    call xmpi_barrier(Wfd%comm)
    call timab(421,2,tsec) ! calc_sigx_me
+
    ! ==========================================================
    ! ==== Correlation part using the coarse gwc_ngfft mesh ====
    ! ==========================================================
@@ -2492,8 +2502,8 @@ endif
 &         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
           ! Compute correlated part using the coarse gwc_ngfft mesh.
-          if (x1rdm/=1 .and. sigmak_todo(ik_ibz)==1) then ! Only recompute correlation MELS if the point read was broken or not precomputed 
-                                                          ! this comment only affects the gw1rdm update 
+          if (x1rdm/=1 .and. sigmak_todo(ik_ibz)==1) then ! Do not compute correlation MELS if the k-point was read from the checkpoint file 
+                                                          ! this IF only affects GW density matrix update 
             call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
 &            Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &            gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
@@ -2506,7 +2516,7 @@ endif
             call wrtout(std_out,msg,'COLL')
           end if
        end if
-       ! MRM: compute 1-RDM numerical correction (freq. integration G0 Sigma_c G0).
+       ! MRM: compute density matrix numerical correction (freq. integration G0 Sigma_c(iw) G0).
        if (rdm_update) then
          if (sigmak_todo(ik_ibz)==1) then ! Only recompute correlation update to the 1-RDM if the point read was broken or not precomputed  
            if (x1rdm/=1) then
@@ -2711,7 +2721,7 @@ endif
        call print_total_energy(ekin_energy,evext_energy,evextnl_energy,QP_energies%e_corepsp,eh_energy,ex_energy,&
        &exc_mbb_energy,QP_energies%e_ewald,etot_sd,etot_mbb,den_int)
        !
-       ! Clean GW1RDM_me
+       ! Clean GW1RDM_me and allocated arrays
        !
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating data
        call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
@@ -2726,7 +2736,7 @@ endif
  
    call xmpi_barrier(Wfd%comm)
 
-  ! MRM: skip the rest for rdm_update=true 
+  ! MRM: skip the rest for rdm_update=true (density matrix update) 
   if (.not.rdm_update) then 
    !  =====================================================
    !  ==== Solve Dyson equation storing results in Sr% ====
@@ -2854,14 +2864,14 @@ endif
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(KS_Bst, ncid))
-     NCF_CHECK(sigma_ncwrite(Sigp, Er, Sr, ncid)) ! Warning if gw1rdm>0 then Er is no longer present.
+     NCF_CHECK(sigma_ncwrite(Sigp, Er, Sr, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)
      NCF_CHECK(nf90_close(ncid))
    end if
 #endif
-  end if ! MRM skip if GW 1-RDM 
+  end if ! MRM skipped if GW density matrix update 
  end if ! ucrpa
 
  !----------------------------- END OF THE CALCULATION ------------------------
