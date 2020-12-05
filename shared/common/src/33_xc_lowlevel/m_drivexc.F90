@@ -619,7 +619,7 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 !scalars
  integer :: ifft,ispden,numneg
  real(dp) :: rhotmp,worst
- character(len=500) :: message
+ character(len=600) :: message
 !arrays
  real(dp) :: rho(2)
 
@@ -700,10 +700,14 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 
  if (numneg>0) then
    if (iwarn==0) then
-     write(message,'(a,i0,a,a,a,es10.2,a,e10.2,a,a,a,a)')&
+     write(message,'(a,i0,a,a,a,es10.2,a,e10.2,11a)')&
 &     'Density went too small (lower than xc_denpos) at ',numneg,' points',ch10,&
 &     'and was set to xc_denpos = ',xc_denpos,'. Lowest was ',worst,'.',ch10,&
-&     'Likely due to too low boxcut or too low ecut for',' pseudopotential core charge.'
+&     'This might be due to (1) too low boxcut or (2) too low ecut for',ch10,&
+&     ' pseudopotential core charge, or (3) too low ecut for estimated initial density.',ch10,&
+&     ' Possible workarounds : increase ecut, or define the input variable densty,',ch10,&
+&     ' with a value larger than the guess for the decay length, or initialize your,',ch10,&
+&     ' density with a preliminary LDA or GGA-PBE if you are using a more exotic xc functional.'
      MSG_WARNING(message)
    end if
    iwarn=iwarn+1

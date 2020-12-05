@@ -2228,11 +2228,12 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives a rough description of the initial GS density, for each type of atom.
-This value is only used to create the first exchange and correlation
-potential, and is not used anymore afterwards. For the time being, it
-corresponds to an average radius (a.u.) of the density, and is used to
-generate a gaussian density. If set to 0.0, an optimized value is used.
-No meaning for RF calculations.
+This value is used to create the first exchange and correlation
+potential. Afterwards, it is not used anymore, except in cases related to [[densfor_pred]]. 
+
+[[densty]] gives an average radius (a.u.) of a Gaussian density, that will make each pseudoion neutral.
+If set to 0.0, a tabulated value is used, announced as a 'decay length' in the log file.
+No meaning for RF calculations or any calculation in which a starting density is taken as input.
 """,
 ),
 
@@ -4922,9 +4923,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This variable is typically used to chain the calculations, in the multi-
-dataset mode ([[ndtset]] > 0), since it describes from which dataset [[acell]]
-and [[rprim]] are to be taken, as input of the present dataset. The cell
-parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
+dataset mode ([[ndtset]] > 0), since it describes from which dataset the output [[acell]]
+and [[rprim]] are to be taken (implicitly also [[scalecart]]), as input of the present dataset. 
+The cell parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
 If 0, no previously computed values are used.
 If >0, the value must be the index of the dataset from which the
 cell data is to be used as input data. It must be the index of a dataset already
@@ -15153,7 +15154,7 @@ real space tau(r), in units of Bohr^-5.
 The name of the kinetic energy density file will be the root output name, followed by _KDEN.
 Like a _DEN file, it can be analyzed by cut3d.
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
-Note that the computation of the kinetic energy density must be activate,
+Note that the computation of the kinetic energy density must be activated,
 thanks to the input variable [[usekden]].
 Please note that kinetic energy density is **not** yet implemented in the case
 of PAW ([[usepaw]] = 1) calculations.
