@@ -32,7 +32,7 @@
 !!  displs= relative offsets for incoming data (array)
 !!  sendcounts= number of sent elements (array)
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -42,13 +42,13 @@
 !!
 !!
 !! SOURCE
-subroutine xmpi_scatterv_int(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_scatterv_int(xval,sendcounts,displs,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
- integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(in) :: recvcount,root,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -58,10 +58,10 @@ subroutine xmpi_scatterv_int(xval,sendcounts,displs,recvbuf,recvcount,root,space
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_SCATTERV(xval,sendcounts,displs,MPI_INTEGER,recvbuf,recvcount,&
-&   MPI_INTEGER,root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_INTEGER,root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    dd=0;if (size(displs)>0) dd=displs(1)
    recvbuf(1:recvcount)=xval(dd+1:dd+recvcount)
@@ -86,7 +86,7 @@ end subroutine xmpi_scatterv_int
 !!  displs= relative offsets for incoming data (array)
 !!  sendcounts= number of sent elements (array)
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -96,13 +96,13 @@ end subroutine xmpi_scatterv_int
 !!
 !! SOURCE
 
-subroutine xmpi_scatterv_int2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_scatterv_int2d(xval,sendcounts,displs,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:,:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:,:)
  integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
- integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(in) :: recvcount,root,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -112,10 +112,10 @@ subroutine xmpi_scatterv_int2d(xval,sendcounts,displs,recvbuf,recvcount,root,spa
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_SCATTERV(xval,sendcounts,displs,MPI_INTEGER,recvbuf,recvcount,&
-&   MPI_INTEGER,root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_INTEGER,root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz1=size(recvbuf,1);cc=recvcount/sz1
    dd=0;if (size(displs)>0) dd=displs(1)/sz1
@@ -141,7 +141,7 @@ end subroutine xmpi_scatterv_int2d
 !!  displs= relative offsets for incoming data (array)
 !!  sendcounts= number of sent elements (array)
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -151,13 +151,13 @@ end subroutine xmpi_scatterv_int2d
 !!
 !! SOURCE
 
-subroutine xmpi_scatterv_dp(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_scatterv_dp(xval,sendcounts,displs,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:)
  integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
- integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(in) :: recvcount,root,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -167,10 +167,10 @@ subroutine xmpi_scatterv_dp(xval,sendcounts,displs,recvbuf,recvcount,root,spaceC
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_SCATTERV(xval,sendcounts,displs,MPI_DOUBLE_PRECISION,recvbuf,recvcount,&
-&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    dd=0;if (size(displs)>0) dd=displs(1)
    recvbuf(1:recvcount)=xval(dd+1:dd+recvcount)
@@ -195,7 +195,7 @@ end subroutine xmpi_scatterv_dp
 !!  displs= relative offsets for incoming data (array)
 !!  sendcounts= number of sent elements (array)
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -205,13 +205,13 @@ end subroutine xmpi_scatterv_dp
 !!
 !! SOURCE
 
-subroutine xmpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:)
  integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
- integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(in) :: recvcount,root,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -221,10 +221,10 @@ subroutine xmpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,spac
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_SCATTERV(xval,sendcounts,displs,MPI_DOUBLE_PRECISION,recvbuf,recvcount,&
-&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz1=size(recvbuf,1);cc=recvcount/sz1
    dd=0;if (size(displs)>0) dd=displs(1)/sz1
@@ -250,7 +250,7 @@ end subroutine xmpi_scatterv_dp2d
 !!  displs= relative offsets for incoming data (array)
 !!  sendcounts= number of sent elements (array)
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -260,13 +260,13 @@ end subroutine xmpi_scatterv_dp2d
 !!
 !! SOURCE
 
-subroutine xmpi_scatterv_dp3d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_scatterv_dp3d(xval,sendcounts,displs,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:)
  integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
- integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(in) :: recvcount,root,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -276,10 +276,10 @@ subroutine xmpi_scatterv_dp3d(xval,sendcounts,displs,recvbuf,recvcount,root,spac
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_SCATTERV(xval,sendcounts,displs,MPI_DOUBLE_PRECISION,recvbuf,recvcount,&
-&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz12=size(recvbuf,1)*size(recvbuf,2);cc=recvcount/sz12
    dd=0;if (size(displs)>0) dd=displs(1)/sz12
@@ -305,7 +305,7 @@ end subroutine xmpi_scatterv_dp3d
 !!  displs= relative offsets for incoming data (array)
 !!  sendcounts= number of sent elements (array)
 !!  root= rank of receiving process
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -315,13 +315,13 @@ end subroutine xmpi_scatterv_dp3d
 !!
 !! SOURCE
 
-subroutine xmpi_scatterv_dp4d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+subroutine xmpi_scatterv_dp4d(xval,sendcounts,displs,recvbuf,recvcount,root,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:,:)
  integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
- integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(in) :: recvcount,root,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -331,10 +331,10 @@ subroutine xmpi_scatterv_dp4d(xval,sendcounts,displs,recvbuf,recvcount,root,spac
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_SCATTERV(xval,sendcounts,displs,MPI_DOUBLE_PRECISION,recvbuf,recvcount,&
-&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,root,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz123=size(recvbuf,1)*size(recvbuf,2)*size(recvbuf,2);cc=recvcount/sz123
    dd=0;if (size(displs)>0) dd=displs(1)/sz123

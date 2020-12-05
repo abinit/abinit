@@ -28,13 +28,13 @@
 !!
 !! SOURCE
 
-subroutine xmpi_alltoall_int(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
+subroutine xmpi_alltoall_int(xval, sendsize, recvbuf, recvsize, comm, ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer ,intent(in) :: sendsize, recvsize
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -43,11 +43,11 @@ subroutine xmpi_alltoall_int(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
    call MPI_ALLTOALL(xval, sendsize, MPI_INTEGER, recvbuf, &
-&   recvsize, MPI_INTEGER, spaceComm, ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   recvsize, MPI_INTEGER, comm, ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=xval
  end if
 #else
@@ -67,24 +67,24 @@ end subroutine xmpi_alltoall_int
 !!
 !! SOURCE
 
-subroutine xmpi_alltoall_dp2d(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
+subroutine xmpi_alltoall_dp2d(xval, sendsize, recvbuf, recvsize, comm, ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in)    :: xval(:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:)
  integer ,intent(in) :: sendsize, recvsize
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
    call MPI_ALLTOALL(xval, sendsize, MPI_DOUBLE_PRECISION, recvbuf, &
-&   recvsize, MPI_DOUBLE_PRECISION, spaceComm, ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   recvsize, MPI_DOUBLE_PRECISION, comm, ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=xval
  end if
 #else
@@ -104,24 +104,24 @@ end subroutine xmpi_alltoall_dp2d
 !!
 !! SOURCE
 
-subroutine xmpi_alltoall_dp4d(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
+subroutine xmpi_alltoall_dp4d(xval, sendsize, recvbuf, recvsize, comm, ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in)    :: xval(:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:,:)
  integer ,intent(in) :: sendsize, recvsize
- integer ,intent(in) :: spaceComm
+ integer ,intent(in) :: comm
  integer ,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in spaceComm
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in comm
    call MPI_ALLTOALL(xval, sendsize, MPI_DOUBLE_PRECISION, recvbuf, &
-&   recvsize, MPI_DOUBLE_PRECISION, spaceComm, ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   recvsize, MPI_DOUBLE_PRECISION, comm, ier)
+ else if (comm == MPI_COMM_SELF) then
    recvbuf=xval
  end if
 #else

@@ -14,8 +14,6 @@
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! TODO
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -23,13 +21,13 @@
 !!
 !! SOURCE
 
-subroutine xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+subroutine xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:,:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:,:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
- integer,intent(in) :: nelem,spaceComm
+ integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -39,10 +37,10 @@ subroutine xmpi_allgatherv_int2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_ALLGATHERV(xval,nelem,MPI_INTEGER,recvbuf,recvcounts,displs,&
-&   MPI_INTEGER,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_INTEGER,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz1=size(xval,1)
    dd=0;if (size(displs)>0) dd=displs(1)/sz1
@@ -67,7 +65,7 @@ end subroutine xmpi_allgatherv_int2d
 !!  recvcounts= number of received elements
 !!  displs= relative offsets for incoming data
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -82,13 +80,13 @@ end subroutine xmpi_allgatherv_int2d
 !!
 !! SOURCE
 
-subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
- integer,intent(in) :: nelem,spaceComm
+ integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -98,10 +96,10 @@ subroutine xmpi_allgatherv_int(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ie
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_ALLGATHERV(xval,nelem,MPI_INTEGER,recvbuf,recvcounts,displs,&
-&   MPI_INTEGER,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_INTEGER,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    dd=0;if (size(displs)>0) dd=displs(1)
    cc=size(xval);if (size(recvcounts)>0) cc=recvcounts(1)
@@ -125,7 +123,7 @@ end subroutine xmpi_allgatherv_int
 !!  buf_int_size=size of buf_int array
 !!  buf_dp=buffer dp array that is going to be gathered
 !!  buf_dp_size=size of buf_dp array
-!!  spaceComm=MPI communicator
+!!  comm=MPI communicator
 !!
 !! OUTPUT
 !!  buf_int_all=buffer integer array gathered
@@ -141,11 +139,11 @@ end subroutine xmpi_allgatherv_int
 !!
 !! SOURCE
 subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
-&       buf_int_all,buf_int_size_all,buf_dp_all,buf_dp_size_all,spaceComm,ier)
+&       buf_int_all,buf_int_size_all,buf_dp_all,buf_dp_size_all,comm,ier)
 
 !Arguments-------------------------
 !scalars
- integer,intent(in) :: buf_dp_size,buf_int_size,spaceComm
+ integer,intent(in) :: buf_dp_size,buf_int_size,comm
  integer,intent(out) :: buf_dp_size_all,buf_int_size_all,ier
 !arrays
  integer, intent(in) :: buf_int(:)
@@ -173,9 +171,9 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
  ier=0
 
 #if defined HAVE_MPI
- if (spaceComm/=MPI_COMM_SELF.and.spaceComm/=MPI_COMM_NULL) then
+ if (comm/=MPI_COMM_SELF.and.comm/=MPI_COMM_NULL) then
 
-   nproc=xmpi_comm_size(spaceComm)
+   nproc=xmpi_comm_size(comm)
 
 !First version: using 2 allgather (one for ints, another for reals)
 !------------------------------------------------------------------
@@ -188,7 +186,7 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
      ABI_ALLOCATE(disp_dp,(nproc))
      ABI_ALLOCATE(count_size,(2*nproc))
      buf_size(1)=buf_int_size; buf_size(2)=buf_dp_size
-     call xmpi_allgather(buf_size,2,count_size,spaceComm,ier)
+     call xmpi_allgather(buf_size,2,count_size,comm,ier)
      do iproc=1,nproc
        count_int(iproc)=count_size(2*iproc-1)
        count_dp(iproc)=count_size(2*iproc)
@@ -207,9 +205,9 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
      if (ier/=0) call xmpi_abort(msg='error allocating buf_dp_all in xmpi_allgatherv')
 
 !  Communicate (one call for integers, one call for reals)
-     call xmpi_allgatherv(buf_int,buf_int_size,buf_int_all,count_int,disp_int,spaceComm,ierr)
-     call xmpi_allgatherv(buf_dp,buf_dp_size,buf_dp_all,count_dp,disp_dp,spaceComm,ierr)
-     
+     call xmpi_allgatherv(buf_int,buf_int_size,buf_int_all,count_int,disp_int,comm,ierr)
+     call xmpi_allgatherv(buf_dp,buf_dp_size,buf_dp_all,count_dp,disp_dp,comm,ierr)
+
 !  Release the memory
      ABI_DEALLOCATE(count_int)
      ABI_DEALLOCATE(disp_int)
@@ -222,15 +220,15 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
    else
 
 !  Compute size of message
-     call MPI_PACK_SIZE(buf_int_size,MPI_INTEGER,spaceComm,lg1,ier)
-     call MPI_PACK_SIZE(buf_dp_size,MPI_DOUBLE_PRECISION,spaceComm,lg2,ier)
+     call MPI_PACK_SIZE(buf_int_size,MPI_INTEGER,comm,lg1,ier)
+     call MPI_PACK_SIZE(buf_dp_size,MPI_DOUBLE_PRECISION,comm,lg2,ier)
      lg=lg1+lg2
 
 !  Pack data to be sent
      position=0 ; buf_pack_size=lg1+lg2
      ABI_ALLOCATE(buf_pack,(buf_pack_size))
-     call MPI_PACK(buf_int,buf_int_size,MPI_INTEGER,buf_pack,buf_pack_size,position,spaceComm,ier)
-     call MPI_PACK(buf_dp,buf_dp_size,MPI_DOUBLE_PRECISION,buf_pack,buf_pack_size,position,spaceComm,ier)
+     call MPI_PACK(buf_int,buf_int_size,MPI_INTEGER,buf_pack,buf_pack_size,position,comm,ier)
+     call MPI_PACK(buf_dp,buf_dp_size,MPI_DOUBLE_PRECISION,buf_pack,buf_pack_size,position,comm,ier)
 
 !  Gather size of all packed messages
      ABI_ALLOCATE(pos_all,(nproc*3))
@@ -241,7 +239,7 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
      ABI_ALLOCATE(displ_int,(nproc))
      ABI_ALLOCATE(displ_dp,(nproc))
      pos(1)=position;pos(2)=buf_int_size;pos(3)=buf_dp_size
-     call MPI_ALLGATHER(pos,3,MPI_INTEGER,pos_all,3,MPI_INTEGER,spaceComm,ier)
+     call MPI_ALLGATHER(pos,3,MPI_INTEGER,pos_all,3,MPI_INTEGER,comm,ier)
      ii=1
      do iproc=1,nproc
        counts(iproc)=pos_all(ii);ii=ii+1
@@ -267,17 +265,17 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
      if (ier/=0) call xmpi_abort(msg='error allocating buf_dp_size_all in xmpi_allgatherv')
 
 !  Gather all packed messages
-     call MPI_ALLGATHERV(buf_pack,position,MPI_PACKED,buf_pack_tot,counts,displ,MPI_PACKED,spaceComm,ier)
+     call MPI_ALLGATHERV(buf_pack,position,MPI_PACKED,buf_pack_tot,counts,displ,MPI_PACKED,comm,ier)
      position=0
      do iproc=1,nproc
        lg_int=buf_int_size1(iproc); lg_dp=buf_dp_size1(iproc)
        istart_int=displ_int(iproc); istart_dp=displ_dp(iproc)
        outbuf_int=>buf_int_all(istart_int+1:istart_int+lg_int)
        call MPI_UNPACK(buf_pack_tot,totalbufcount,position, outbuf_int,&
-&       lg_int,MPI_INTEGER,spaceComm,ier)
+&       lg_int,MPI_INTEGER,comm,ier)
        outbuf_dp=>buf_dp_all(istart_dp+1:istart_dp+lg_dp)
        call MPI_UNPACK(buf_pack_tot,totalbufcount,position,outbuf_dp,&
-&       lg_dp,MPI_DOUBLE_PRECISION,spaceComm,ier)
+&       lg_dp,MPI_DOUBLE_PRECISION,comm,ier)
      end do
 
 !  Release the memory
@@ -292,7 +290,7 @@ subroutine xmpi_allgatherv_int1_dp1(buf_int,buf_int_size,buf_dp,buf_dp_size,&
      ABI_DEALLOCATE(buf_pack)
 
    end if
- else if (spaceComm==MPI_COMM_SELF) then
+ else if (comm==MPI_COMM_SELF) then
 #endif
 
 !Sequential version
@@ -326,7 +324,7 @@ end subroutine xmpi_allgatherv_int1_dp1
 !!  recvcounts= number of received elements
 !!  displs= relative offsets for incoming data
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -340,13 +338,13 @@ end subroutine xmpi_allgatherv_int1_dp1
 !!      xmpi_allgatherv
 !!
 !! SOURCE
-subroutine xmpi_allgatherv_dp(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+subroutine xmpi_allgatherv_dp(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer,intent(in) :: recvcounts(:),displs(:)
- integer,intent(in) :: nelem,spaceComm
+ integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -356,10 +354,10 @@ subroutine xmpi_allgatherv_dp(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_ALLGATHERV(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs,&
-&   MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    dd=0;if (size(displs)>0) dd=displs(1)
    cc=size(xval);if (size(recvcounts)>0) cc=recvcounts(1)
@@ -383,7 +381,7 @@ end subroutine xmpi_allgatherv_dp
 !!  recvcounts= number of received elements
 !!  displs= relative offsets for incoming data
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -398,13 +396,13 @@ end subroutine xmpi_allgatherv_dp
 !!
 !! SOURCE
 
-subroutine xmpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+subroutine xmpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
- integer,intent(in) :: nelem,spaceComm
+ integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -414,10 +412,10 @@ subroutine xmpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,i
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_ALLGATHERV(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs,&
-&   MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz1=size(xval,1)
    dd=0;if (size(displs)>0) dd=displs(1)/sz1
@@ -442,7 +440,7 @@ end subroutine xmpi_allgatherv_dp2d
 !!  recvcounts= number of received elements
 !!  displs= relative offsets for incoming data
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -456,13 +454,13 @@ end subroutine xmpi_allgatherv_dp2d
 !!      xmpi_allgatherv
 !!
 !! SOURCE
-subroutine xmpi_allgatherv_dp3d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+subroutine xmpi_allgatherv_dp3d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
- integer,intent(in) :: nelem,spaceComm
+ integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables--------------
@@ -472,10 +470,10 @@ subroutine xmpi_allgatherv_dp3d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,i
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_ALLGATHERV(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs,&
-&   MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz12=size(xval,1)*size(xval,2)
    dd=0;if (size(displs)>0) dd=displs(1)/sz12
@@ -500,7 +498,7 @@ end subroutine xmpi_allgatherv_dp3d
 !!  recvcounts= number of received elements
 !!  displs= relative offsets for incoming data
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -514,13 +512,13 @@ end subroutine xmpi_allgatherv_dp3d
 !!      xmpi_allgatherv
 !!
 !! SOURCE
-subroutine xmpi_allgatherv_dp4d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+subroutine xmpi_allgatherv_dp4d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:,:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
- integer,intent(in) :: nelem,spaceComm
+ integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -530,10 +528,10 @@ subroutine xmpi_allgatherv_dp4d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,i
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_ALLGATHERV(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs,&
-&   MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz123=size(xval,1)*size(xval,2)*size(xval,3)
    dd=0;if (size(displs)>0) dd=displs(1)/sz123
@@ -558,7 +556,7 @@ end subroutine xmpi_allgatherv_dp4d
 !!  recvcounts= number of received elements
 !!  displs= relative offsets for incoming data
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -573,13 +571,13 @@ end subroutine xmpi_allgatherv_dp4d
 !!
 !! SOURCE
 
-subroutine xmpi_allgatherv_dp5d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+subroutine xmpi_allgatherv_dp5d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:,:,:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
- integer,intent(in) :: nelem,spaceComm
+ integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -589,10 +587,10 @@ subroutine xmpi_allgatherv_dp5d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,i
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_ALLGATHERV(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs,&
-&   MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz1234=size(xval,1)*size(xval,2)*size(xval,3)*size(xval,4)
    dd=0;if (size(displs)>0) dd=displs(1)/sz1234
@@ -618,7 +616,7 @@ end subroutine xmpi_allgatherv_dp5d
 !!  recvcounts= number of received elements
 !!  displs= relative offsets for incoming data
 !!  nelem= number of elements
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -633,13 +631,13 @@ end subroutine xmpi_allgatherv_dp5d
 !!
 !! SOURCE
 
-subroutine xmpi_allgatherv_dp6d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
+subroutine xmpi_allgatherv_dp6d(xval,nelem,recvbuf,recvcounts,displs,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:,:,:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:,:,:,:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
- integer,intent(in) :: nelem,spaceComm
+ integer,intent(in) :: nelem,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -649,10 +647,10 @@ subroutine xmpi_allgatherv_dp6d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,i
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_ALLGATHERV(xval,nelem,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs,&
-&   MPI_DOUBLE_PRECISION,spaceComm,ier)
- else if (spaceComm == MPI_COMM_SELF) then
+&   MPI_DOUBLE_PRECISION,comm,ier)
+ else if (comm == MPI_COMM_SELF) then
 #endif
    sz12345=size(xval,1)*size(xval,2)*size(xval,3)*size(xval,4)*size(xval,5)
    dd=0;if (size(displs)>0) dd=displs(1)/sz12345
@@ -674,7 +672,7 @@ end subroutine xmpi_allgatherv_dp6d
 !!
 !! INPUTS
 !!  xval_in = coeff2d_type array structure
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  xval_out = coeff2d_type array structure
@@ -689,11 +687,11 @@ end subroutine xmpi_allgatherv_dp6d
 !!
 !! SOURCE
 
-subroutine xmpi_allgatherv_coeff2d(xval_in,xval_out,spaceComm,ierr)
+subroutine xmpi_allgatherv_coeff2d(xval_in,xval_out,comm,ierr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out)   :: ierr
 !arrays
  type(coeff2_type),intent(in) :: xval_in(:)
@@ -717,12 +715,12 @@ subroutine xmpi_allgatherv_coeff2d(xval_in,xval_out,spaceComm,ierr)
 
  ierr=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_NULL) then
 
-   nproc=xmpi_comm_size(spaceComm)
+   nproc=xmpi_comm_size(comm)
    nb = size(xval_in,1)
 
-   if (spaceComm==MPI_COMM_SELF.or.nproc==1) then
+   if (comm==MPI_COMM_SELF.or.nproc==1) then
      do ii=1,nb
        n1=size(xval_in(ii)%value,1)
        n2=size(xval_in(ii)%value,2)
@@ -766,7 +764,7 @@ subroutine xmpi_allgatherv_coeff2d(xval_in,xval_out,spaceComm,ierr)
    end do
 
    call xmpi_allgatherv(buf_int,buf_int_size,buf_dp,buf_dp_size,buf_int_all, &
-&   buf_int_size_all,buf_dp_all,buf_dp_size_all,spaceComm,ierr)
+&   buf_int_size_all,buf_dp_all,buf_dp_size_all,comm,ierr)
 
 
    nb_out=buf_int_size_all/2
@@ -823,7 +821,7 @@ end subroutine xmpi_allgatherv_coeff2d
 !!
 !! INPUTS
 !!  xval_in = coeff2d_type array structure
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  indx= gives the indexes of xval_in in xval_out.
 !!        xval_in(i) will be transfered in xval_out(indx(i))
 !!
@@ -840,11 +838,11 @@ end subroutine xmpi_allgatherv_coeff2d
 !!
 !! SOURCE
 
-subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,spaceComm,indx,ierr)
+subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,comm,indx,ierr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: spaceComm
+ integer,intent(in) :: comm
  integer,intent(out)   :: ierr
 !arrays
  integer,intent(in) :: indx(:)
@@ -870,9 +868,9 @@ subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,spaceComm,indx,ierr)
  ierr=0 ; nb = size(xval_in,1)
 
 #if defined HAVE_MPI
- if (spaceComm == MPI_COMM_NULL) return
- nproc=xmpi_comm_size(spaceComm)
- if (spaceComm==MPI_COMM_SELF.or.nproc==1) then
+ if (comm == MPI_COMM_NULL) return
+ nproc=xmpi_comm_size(comm)
+ if (comm==MPI_COMM_SELF.or.nproc==1) then
 #endif
    do ii=1,nb
      n1=size(xval_in(ii)%value,1)
@@ -922,7 +920,7 @@ subroutine xmpi_allgatherv_coeff2d_indx(xval_in,xval_out,spaceComm,indx,ierr)
  end do
 
  call xmpi_allgatherv(buf_int,buf_int_size,buf_dp,buf_dp_size,buf_int_all, &
-&   buf_int_size_all,buf_dp_all,buf_dp_size_all,spaceComm,ierr)
+&   buf_int_size_all,buf_dp_all,buf_dp_size_all,comm,ierr)
 
  nb_out=buf_int_size_all/3
  indx_int=1;indx_dp=1

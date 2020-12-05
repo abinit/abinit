@@ -16,19 +16,19 @@
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_intv(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_intv(xval,master,comm,ier)
 
 !Arguments-------------------------
  integer,intent(inout) :: xval
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_INTEGER,master,spaceComm,ier)
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_BCAST(xval,1,MPI_INTEGER,master,comm,ier)
  end if
 #endif
 
@@ -44,7 +44,7 @@ end subroutine xmpi_bcast_intv
 !!  Target: one-dimensional integer arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -59,11 +59,11 @@ end subroutine xmpi_bcast_intv
 !!      mpi_bcast
 !!
 !! SOURCE
-subroutine xmpi_bcast_int1d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_int1d(xval,master,comm,ier)
 
 !Arguments ------------------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:)
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 !Local variables-------------------------------
@@ -73,9 +73,9 @@ subroutine xmpi_bcast_int1d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n=size(xval)
-   call MPI_BCAST(xval,n,MPI_INTEGER,master,spaceComm,ier)
+   call MPI_BCAST(xval,n,MPI_INTEGER,master,comm,ier)
  end if
 #endif
 end subroutine xmpi_bcast_int1d
@@ -90,7 +90,7 @@ end subroutine xmpi_bcast_int1d
 !!  Target: two-dimensional integer arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -106,11 +106,11 @@ end subroutine xmpi_bcast_int1d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_int2d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_int2d(xval,master,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:)
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -123,7 +123,7 @@ subroutine xmpi_bcast_int2d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
 
@@ -133,10 +133,10 @@ subroutine xmpi_bcast_int2d(xval,master,spaceComm,ier)
    ntot=int(n1*n2,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2,MPI_INTEGER,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2,MPI_INTEGER,master,comm,ier)
    else
      call xmpi_largetype_create(ntot,MPI_INTEGER,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,1,my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
 
@@ -155,7 +155,7 @@ end subroutine xmpi_bcast_int2d
 !!  Target: three-dimensional integer arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -170,11 +170,11 @@ end subroutine xmpi_bcast_int2d
 !!      mpi_bcast
 !!
 !! SOURCE
-subroutine xmpi_bcast_int3d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_int3d(xval,master,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:,:)
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 !Local variables-------------------------------
@@ -187,7 +187,7 @@ subroutine xmpi_bcast_int3d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -198,11 +198,11 @@ subroutine xmpi_bcast_int3d(xval,master,spaceComm,ier)
    ntot=int(n1*n2*n3,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2*n3,MPI_INTEGER,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2*n3,MPI_INTEGER,master,comm,ier)
    else
      nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_INTEGER,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -220,7 +220,7 @@ end subroutine xmpi_bcast_int3d
 !!  Target: three-dimensional integer arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -235,11 +235,11 @@ end subroutine xmpi_bcast_int3d
 !!      mpi_bcast
 !!
 !! SOURCE
-subroutine xmpi_bcast_int4d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_int4d(xval,master,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 !Local variables-------------------------------
@@ -252,7 +252,7 @@ subroutine xmpi_bcast_int4d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -264,13 +264,13 @@ subroutine xmpi_bcast_int4d(xval,master,spaceComm,ier)
    ntot=int(n1*n2*n3*n4,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_INTEGER,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_INTEGER,master,comm,ier)
    else
      nn=int(n1*n2*n3,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_INTEGER,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -288,7 +288,7 @@ end subroutine xmpi_bcast_int4d
 !!  Target: scalar double precisions.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -304,11 +304,11 @@ end subroutine xmpi_bcast_int4d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dpv(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dpv(xval,master,comm,ier)
 
 !Arguments ------------------------------------
  real(dp),intent(inout) :: xval
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 !Local variables-------------------------------
 
@@ -316,8 +316,8 @@ subroutine xmpi_bcast_dpv(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_BCAST(xval,1,MPI_DOUBLE_PRECISION,master,comm,ier)
  end if
 #endif
 
@@ -333,7 +333,7 @@ end subroutine xmpi_bcast_dpv
 !!  Target: double precision one-dimensional arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -348,11 +348,11 @@ end subroutine xmpi_bcast_dpv
 !!      mpi_bcast
 !!
 !! SOURCE
-subroutine xmpi_bcast_dp1d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dp1d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -364,9 +364,9 @@ subroutine xmpi_bcast_dp1d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n=size(xval,dim=1)
-   call MPI_BCAST(xval,n,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+   call MPI_BCAST(xval,n,MPI_DOUBLE_PRECISION,master,comm,ier)
  end if
 #endif
 
@@ -382,7 +382,7 @@ end subroutine xmpi_bcast_dp1d
 !!  Target: double precision two-dimensional arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -393,11 +393,11 @@ end subroutine xmpi_bcast_dp1d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dp2d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dp2d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -410,7 +410,7 @@ subroutine xmpi_bcast_dp2d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
 
@@ -420,10 +420,10 @@ subroutine xmpi_bcast_dp2d(xval,master,spaceComm,ier)
    ntot=int(n1*n2,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2,MPI_DOUBLE_PRECISION,master,comm,ier)
    else
      call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,1,my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -441,7 +441,7 @@ end subroutine xmpi_bcast_dp2d
 !!  Target: double precision three-dimensional arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -452,11 +452,11 @@ end subroutine xmpi_bcast_dp2d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dp3d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dp3d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -469,7 +469,7 @@ subroutine xmpi_bcast_dp3d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -480,11 +480,11 @@ subroutine xmpi_bcast_dp3d(xval,master,spaceComm,ier)
    ntot=int(n1*n2*n3,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,master,comm,ier)
    else
      nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -502,7 +502,7 @@ end subroutine xmpi_bcast_dp3d
 !!  Target: double precision four-dimensional arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -513,11 +513,11 @@ end subroutine xmpi_bcast_dp3d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dp4d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dp4d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -530,7 +530,7 @@ subroutine xmpi_bcast_dp4d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -542,13 +542,13 @@ subroutine xmpi_bcast_dp4d(xval,master,spaceComm,ier)
    ntot=int(n1*n2*n3*n4,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,master,comm,ier)
    else
      nn=int(n1*n2*n3,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -566,7 +566,7 @@ end subroutine xmpi_bcast_dp4d
 !!  Target: double precision five-dimensional arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -577,11 +577,11 @@ end subroutine xmpi_bcast_dp4d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dp5d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dp5d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -594,7 +594,7 @@ subroutine xmpi_bcast_dp5d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -607,14 +607,14 @@ subroutine xmpi_bcast_dp5d(xval,master,spaceComm,ier)
    ntot=int(n1*n2*n3*n4*n5,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,master,comm,ier)
    else
      nn=int(n1*n2*n3*n4,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1*n2*n3,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -632,7 +632,7 @@ end subroutine xmpi_bcast_dp5d
 !!  Target: double precision six-dimensional arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -643,11 +643,11 @@ end subroutine xmpi_bcast_dp5d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dp6d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dp6d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -660,7 +660,7 @@ subroutine xmpi_bcast_dp6d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -674,7 +674,7 @@ subroutine xmpi_bcast_dp6d(xval,master,spaceComm,ier)
    ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2*n3*n4*n5*n6,MPI_DOUBLE_PRECISION,master,comm,ier)
    else
      nn=int(n1*n2*n3*n4*n5,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1*n2*n3*n4,kind=int64)
@@ -682,7 +682,7 @@ subroutine xmpi_bcast_dp6d(xval,master,spaceComm,ier)
      if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -700,7 +700,7 @@ end subroutine xmpi_bcast_dp6d
 !!  Target: scalar single precisions.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -711,19 +711,19 @@ end subroutine xmpi_bcast_dp6d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_spv(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_spv(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(sp),intent(inout) :: xval
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_REAL,master,spaceComm,ier)
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_BCAST(xval,1,MPI_REAL,master,comm,ier)
  end if
 #endif
 
@@ -739,7 +739,7 @@ end subroutine xmpi_bcast_spv
 !!  Target: one-dimensional single precision arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -750,11 +750,11 @@ end subroutine xmpi_bcast_spv
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_sp1d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_sp1d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -766,9 +766,9 @@ subroutine xmpi_bcast_sp1d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n=size(xval,dim=1)
-   call MPI_BCAST(xval,n,MPI_REAL,master,spaceComm,ier)
+   call MPI_BCAST(xval,n,MPI_REAL,master,comm,ier)
  end if
 #endif
 
@@ -784,7 +784,7 @@ end subroutine xmpi_bcast_sp1d
 !!  Target: two-dimensional single precision arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -795,11 +795,11 @@ end subroutine xmpi_bcast_sp1d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_sp2d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_sp2d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -812,7 +812,7 @@ subroutine xmpi_bcast_sp2d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
 
@@ -822,10 +822,10 @@ subroutine xmpi_bcast_sp2d(xval,master,spaceComm,ier)
    ntot=int(n1*n2,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2,MPI_REAL,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2,MPI_REAL,master,comm,ier)
    else
      call xmpi_largetype_create(ntot,MPI_REAL,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,1,my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -843,7 +843,7 @@ end subroutine xmpi_bcast_sp2d
 !!  Target: three-dimensional single precision arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -854,11 +854,11 @@ end subroutine xmpi_bcast_sp2d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_sp3d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_sp3d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -871,7 +871,7 @@ subroutine xmpi_bcast_sp3d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -885,7 +885,7 @@ subroutine xmpi_bcast_sp3d(xval,master,spaceComm,ier)
    else
      nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_REAL,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -903,7 +903,7 @@ end subroutine xmpi_bcast_sp3d
 !!  Target: four-dimensional single precision arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -914,11 +914,11 @@ end subroutine xmpi_bcast_sp3d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_sp4d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_sp4d(xval,master,comm,ier)
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -931,7 +931,7 @@ subroutine xmpi_bcast_sp4d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -948,7 +948,7 @@ subroutine xmpi_bcast_sp4d(xval,master,spaceComm,ier)
      if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_REAL,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -966,7 +966,7 @@ end subroutine xmpi_bcast_sp4d
 !!  Target: scalar complexs.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -981,11 +981,11 @@ end subroutine xmpi_bcast_sp4d
 !!      mpi_bcast
 !!
 !! SOURCE
-subroutine xmpi_bcast_cplxv(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_cplxv(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc),intent(inout) :: xval
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -994,8 +994,8 @@ subroutine xmpi_bcast_cplxv(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_COMPLEX,master,spaceComm,ier)
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_BCAST(xval,1,MPI_COMPLEX,master,comm,ier)
  end if
 #endif
 
@@ -1011,7 +1011,7 @@ end subroutine xmpi_bcast_cplxv
 !!  Target: one-dimensional complex arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1026,11 +1026,11 @@ end subroutine xmpi_bcast_cplxv
 !!      mpi_bcast
 !!
 !! SOURCE
-subroutine xmpi_bcast_cplx1d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_cplx1d(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1042,9 +1042,9 @@ subroutine xmpi_bcast_cplx1d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n=size(xval(:))
-   call MPI_BCAST(xval,n,MPI_COMPLEX,master,spaceComm,ier)
+   call MPI_BCAST(xval,n,MPI_COMPLEX,master,comm,ier)
  end if
 #endif
 
@@ -1060,7 +1060,7 @@ end subroutine xmpi_bcast_cplx1d
 !!  Target: two-dimensional complex arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1071,11 +1071,11 @@ end subroutine xmpi_bcast_cplx1d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_cplx2d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_cplx2d(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1088,7 +1088,7 @@ subroutine xmpi_bcast_cplx2d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
 
@@ -1098,10 +1098,10 @@ subroutine xmpi_bcast_cplx2d(xval,master,spaceComm,ier)
    ntot=int(n1*n2,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2,MPI_COMPLEX,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2,MPI_COMPLEX,master,comm,ier)
    else
      call xmpi_largetype_create(ntot,MPI_COMPLEX,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,1,my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -1119,7 +1119,7 @@ end subroutine xmpi_bcast_cplx2d
 !!  Target: three-dimensional complex arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1130,11 +1130,11 @@ end subroutine xmpi_bcast_cplx2d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_cplx3d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_cplx3d(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1147,7 +1147,7 @@ subroutine xmpi_bcast_cplx3d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -1161,7 +1161,7 @@ subroutine xmpi_bcast_cplx3d(xval,master,spaceComm,ier)
    else
      nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_COMPLEX,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -1179,7 +1179,7 @@ end subroutine xmpi_bcast_cplx3d
 !!  Target: four-dimensional complex arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1189,11 +1189,11 @@ end subroutine xmpi_bcast_cplx3d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_bcast_cplx4d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_cplx4d(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1206,7 +1206,7 @@ subroutine xmpi_bcast_cplx4d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -1218,13 +1218,13 @@ subroutine xmpi_bcast_cplx4d(xval,master,spaceComm,ier)
    ntot=int(n1*n2*n3*n4,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_COMPLEX,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_COMPLEX,master,comm,ier)
    else
      nn=int(n1*n2*n3,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_COMPLEX,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -1242,7 +1242,7 @@ end subroutine xmpi_bcast_cplx4d
 !!  Target: scalar double complexs.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1253,19 +1253,19 @@ end subroutine xmpi_bcast_cplx4d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dcv(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dcv(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc),intent(inout):: xval
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_BCAST(xval,1,MPI_DOUBLE_COMPLEX,master,comm,ier)
  end if
 #endif
 
@@ -1281,7 +1281,7 @@ end subroutine xmpi_bcast_dcv
 !!  Target: one-dimensional double complex arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1292,11 +1292,11 @@ end subroutine xmpi_bcast_dcv
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dc1d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dc1d(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout):: xval(:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1308,9 +1308,9 @@ subroutine xmpi_bcast_dc1d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n=size(xval(:))
-   call MPI_BCAST(xval,n,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+   call MPI_BCAST(xval,n,MPI_DOUBLE_COMPLEX,master,comm,ier)
  end if
 #endif
 
@@ -1326,7 +1326,7 @@ end subroutine xmpi_bcast_dc1d
 !!  Target: two-dimensional double complex arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1338,11 +1338,11 @@ end subroutine xmpi_bcast_dc1d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dc2d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dc2d(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout):: xval(:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1355,7 +1355,7 @@ subroutine xmpi_bcast_dc2d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
 
@@ -1365,10 +1365,10 @@ subroutine xmpi_bcast_dc2d(xval,master,spaceComm,ier)
    ntot=int(n1*n2,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2,MPI_DOUBLE_COMPLEX,master,comm,ier)
    else
      call xmpi_largetype_create(ntot,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,1,my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,1,my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -1386,7 +1386,7 @@ end subroutine xmpi_bcast_dc2d
 !!  Target: three-dimensional double complex arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1397,11 +1397,11 @@ end subroutine xmpi_bcast_dc2d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dc3d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dc3d(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout):: xval(:,:,:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1414,7 +1414,7 @@ subroutine xmpi_bcast_dc3d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -1425,11 +1425,11 @@ subroutine xmpi_bcast_dc3d(xval,master,spaceComm,ier)
    ntot=int(n1*n2*n3,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2*n3,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2*n3,MPI_DOUBLE_COMPLEX,master,comm,ier)
    else
      nn=int(n1*n2,kind=int64);if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -1447,7 +1447,7 @@ end subroutine xmpi_bcast_dc3d
 !!  Target: four-dimensional complex arrays in double precision.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1458,11 +1458,11 @@ end subroutine xmpi_bcast_dc3d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_dc4d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_dc4d(xval,master,comm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 !Local variables-------------------
@@ -1475,7 +1475,7 @@ subroutine xmpi_bcast_dc4d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    n3=size(xval,dim=3)
@@ -1487,13 +1487,13 @@ subroutine xmpi_bcast_dc4d(xval,master,spaceComm,ier)
    ntot=int(n1*n2*n3*n4,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_DOUBLE_COMPLEX,master,spaceComm,ier)
+     call MPI_BCAST(xval,n1*n2*n3*n4,MPI_DOUBLE_COMPLEX,master,comm,ier)
    else
      nn=int(n1*n2*n3,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1*n2,kind=int64)
      if (nn>huge(0_int32)) nn=int(n1,kind=int64)
      call xmpi_largetype_create(ntot/nn,MPI_DOUBLE_COMPLEX,my_dt,my_op,MPI_OP_NULL)
-     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,spaceComm,ier)
+     call MPI_BCAST(xval,int(nn,kind=int32),my_dt,master,comm,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
  end if
@@ -1511,7 +1511,7 @@ end subroutine xmpi_bcast_dc4d
 !!  Target: character strings.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1522,11 +1522,11 @@ end subroutine xmpi_bcast_dc4d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_ch0d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_ch0d(xval,master,comm,ier)
 
 !Arguments-------------------------
  character(len=*),intent(inout) :: xval
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 !Local variables-------------------------------
@@ -1538,11 +1538,11 @@ subroutine xmpi_bcast_ch0d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   call MPI_COMM_RANK(spaceComm,rank,ier)
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_RANK(comm,rank,ier)
    if (rank==master) nch=len_trim(xval)
-   call MPI_BCAST(nch,1,MPI_INTEGER,master,spaceComm,ier)
-   call MPI_BCAST(xval,nch,MPI_CHARACTER,master,spaceComm,ier)
+   call MPI_BCAST(nch,1,MPI_INTEGER,master,comm,ier)
+   call MPI_BCAST(xval,nch,MPI_CHARACTER,master,comm,ier)
    if (rank/=master) xval(nch+1:)=''
  end if
 #endif
@@ -1559,7 +1559,7 @@ end subroutine xmpi_bcast_ch0d
 !!  Target: one-dimensional array of character stringss.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1569,11 +1569,11 @@ end subroutine xmpi_bcast_ch0d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_bcast_ch1d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_ch1d(xval,master,comm,ier)
 
 !Arguments-------------------------
  Character(len=*), DEV_CONTARRD intent(inout) :: xval(:)
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 !Local variables-------------------------------
@@ -1585,12 +1585,12 @@ subroutine xmpi_bcast_ch1d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    nch=0
    do ii=1,size(xval)
      nch=nch+len(xval(ii))
    end do
-   call MPI_BCAST(xval,nch,MPI_CHARACTER,master,spaceComm,ier)
+   call MPI_BCAST(xval,nch,MPI_CHARACTER,master,comm,ier)
  end if
 #endif
 
@@ -1607,7 +1607,7 @@ end subroutine xmpi_bcast_ch1d
 !!  Target: logical scalar
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1615,19 +1615,19 @@ end subroutine xmpi_bcast_ch1d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_log0d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_log0d(xval,master,comm,ier)
 
 !Arguments-------------------------
  logical,intent(inout) :: xval
- integer,intent(in) :: spaceComm,master
+ integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_LOGICAL,master,spaceComm,ier)
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_BCAST(xval,1,MPI_LOGICAL,master,comm,ier)
  end if
 #endif
 
@@ -1643,7 +1643,7 @@ end subroutine xmpi_bcast_log0d
 !!  Target: type(coeffi2) 1D-arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1654,11 +1654,11 @@ end subroutine xmpi_bcast_log0d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_coeffi2_1d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_coeffi2_1d(xval,master,comm,ier)
 
 !Arguments-------------------------
  type(coeffi2_type), intent(inout) :: xval(:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1671,8 +1671,8 @@ subroutine xmpi_bcast_coeffi2_1d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   me=xmpi_comm_rank(spaceComm)
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   me=xmpi_comm_rank(comm)
 
 !  Broadcast xval%value sizes
    n0=size(xval)
@@ -1684,7 +1684,7 @@ subroutine xmpi_bcast_coeffi2_1d(xval,master,spaceComm,ier)
        siz(2,ii)=size(xval(ii)%value,2)
      end do
    end if
-   call MPI_BCAST(siz,2*n0,MPI_INTEGER,master,spaceComm,ier)
+   call MPI_BCAST(siz,2*n0,MPI_INTEGER,master,comm,ier)
    siztot=0
    do ii=1,n0
      siztot=siztot+siz(1,ii)*siz(2,ii)
@@ -1705,7 +1705,7 @@ subroutine xmpi_bcast_coeffi2_1d(xval,master,spaceComm,ier)
    end if
 
 !  Broadcast the data
-   call MPI_BCAST(mpibuf,siztot,MPI_INTEGER,master,spaceComm,ier)
+   call MPI_BCAST(mpibuf,siztot,MPI_INTEGER,master,comm,ier)
 
 !  Retrieve the buffer
    jj=0
@@ -1738,7 +1738,7 @@ end subroutine xmpi_bcast_coeffi2_1d
 !!  Target: type(coeff2) 1D-arrays.
 !!
 !! INPUTS
-!!  spaceComm= MPI communicator
+!!  comm= MPI communicator
 !!  master= master MPI node
 !!
 !! OUTPUT
@@ -1749,11 +1749,11 @@ end subroutine xmpi_bcast_coeffi2_1d
 !!
 !! SOURCE
 
-subroutine xmpi_bcast_coeff2_1d(xval,master,spaceComm,ier)
+subroutine xmpi_bcast_coeff2_1d(xval,master,comm,ier)
 
 !Arguments-------------------------
  type(coeff2_type), intent(inout) :: xval(:)
- integer ,intent(in) :: spaceComm,master
+ integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
 
 !Local variables-------------------
@@ -1767,8 +1767,8 @@ subroutine xmpi_bcast_coeff2_1d(xval,master,spaceComm,ier)
 
  ier=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
-   me=xmpi_comm_rank(spaceComm)
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   me=xmpi_comm_rank(comm)
 
 !  Broadcast xval%value sizes
    n0=size(xval)
@@ -1780,7 +1780,7 @@ subroutine xmpi_bcast_coeff2_1d(xval,master,spaceComm,ier)
        siz(2,ii)=size(xval(ii)%value,2)
      end do
    end if
-   call MPI_BCAST(siz,2*n0,MPI_INTEGER,master,spaceComm,ier)
+   call MPI_BCAST(siz,2*n0,MPI_INTEGER,master,comm,ier)
    siztot=0
    do ii=1,n0
      siztot=siztot+siz(1,ii)*siz(2,ii)
@@ -1801,7 +1801,7 @@ subroutine xmpi_bcast_coeff2_1d(xval,master,spaceComm,ier)
    end if
 
 !  Broadcast the data
-   call MPI_BCAST(mpibuf,siztot,MPI_DOUBLE_PRECISION,master,spaceComm,ier)
+   call MPI_BCAST(mpibuf,siztot,MPI_DOUBLE_PRECISION,master,comm,ier)
 
 !  Retrieve the buffer
    jj=0

@@ -31,7 +31,7 @@
 !! INPUTS
 !!  dest :: rank of destination process
 !!  tag :: integer message tag
-!!  spaceComm :: MPI communicator
+!!  comm :: MPI communicator
 !!
 !! OUTPUT
 !!  ierr= exit status, a non-zero value meaning there is an error
@@ -41,11 +41,11 @@
 !!
 !! SOURCE
 
-subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
+subroutine xmpi_isend_int1d(xval,dest,tag,comm,request,ierr)
 
 !Arguments-------------------------
  integer ABI_ASYNC, intent(inout) :: xval(:)
- integer, intent(in) :: dest,tag,spaceComm
+ integer, intent(in) :: dest,tag,comm
  integer, intent(out)   :: ierr
  integer, intent(out) :: request
 
@@ -58,10 +58,10 @@ subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 
  ierr=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    my_tag = MOD(tag,xmpi_tag_ub)
-   call MPI_ISEND(xval,n1,MPI_INTEGER,dest,my_tag,spaceComm,request,ier)
+   call MPI_ISEND(xval,n1,MPI_INTEGER,dest,my_tag,comm,request,ier)
    xmpi_count_requests = xmpi_count_requests + 1
    ierr=ier
  end if
@@ -81,7 +81,7 @@ subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 !! INPUTS
 !!  dest :: rank of destination process
 !!  tag :: integer message tag
-!!  spaceComm :: MPI communicator
+!!  comm :: MPI communicator
 !!
 !! OUTPUT
 !!  ierr= exit status, a non-zero value meaning there is an error
@@ -91,11 +91,11 @@ subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 !!
 !! SOURCE
 
-subroutine xmpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
+subroutine xmpi_isend_dp1d(xval,dest,tag,comm,request,ierr)
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(inout) :: xval(:)
- integer, intent(in) :: dest,tag,spaceComm
+ integer, intent(in) :: dest,tag,comm
  integer, intent(out)   :: ierr
  integer, intent(out) :: request
 
@@ -108,10 +108,10 @@ subroutine xmpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
 
  ierr=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval)
    my_tag = MOD(tag,xmpi_tag_ub)
-   call MPI_ISEND(xval,n1,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,request,ier)
+   call MPI_ISEND(xval,n1,MPI_DOUBLE_PRECISION,dest,my_tag,comm,request,ier)
    xmpi_count_requests = xmpi_count_requests + 1
    ierr=ier
  end if
@@ -131,7 +131,7 @@ end subroutine xmpi_isend_dp1d
 !! INPUTS
 !!  dest :: rank of destination process
 !!  tag :: integer message tag
-!!  spaceComm :: MPI communicator
+!!  comm :: MPI communicator
 !!
 !! OUTPUT
 !!  ierr= exit status, a non-zero value meaning there is an error
@@ -141,11 +141,11 @@ end subroutine xmpi_isend_dp1d
 !!
 !! SOURCE
 
-subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
+subroutine xmpi_isend_dp2d(xval,dest,tag,comm,request,ierr)
 
 !Arguments-------------------------
  real(dp) ABI_ASYNC, intent(inout) :: xval(:,:)
- integer, intent(in) :: dest,tag,spaceComm
+ integer, intent(in) :: dest,tag,comm
  integer, intent(out)   :: ierr
  integer, intent(out) :: request
 
@@ -159,7 +159,7 @@ subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
 
  ierr=0
 #if defined HAVE_MPI
- if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    my_tag = MOD(tag,xmpi_tag_ub)
@@ -170,10 +170,10 @@ subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
    ntot=int(n1*n2,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_ISEND(xval,n1*n2,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,request,ier)
+     call MPI_ISEND(xval,n1*n2,MPI_DOUBLE_PRECISION,dest,my_tag,comm,request,ier)
    else
      call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_ISEND(xval,1,my_dt,dest,my_tag,spaceComm,request,ier)
+     call MPI_ISEND(xval,1,my_dt,dest,my_tag,comm,request,ier)
      call xmpi_largetype_free(my_dt,my_op)
    end if
 

@@ -273,6 +273,7 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"                               minutes"
         write(std_out,*)"                               minutes:seconds"
         write(std_out,*)"                               hours:minutes:seconds"
+        write(std_out,*)"                           At present only GS, relaxations and MD runs support this option"
         write(std_out,*)"--verbose                  Enable verbose mode in argparse"
         write(std_out,*)"-h, --help                 Show this help and exit."
 
@@ -281,7 +282,7 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"=============================="
         write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING"
         write(std_out,*)"--abimem-limit-mb NUM      Log malloc/free only if size > limit in Megabytes. Requires abimem-level 3"
-        write(std_out,*)"--fft-ialltoall[=yesno]    Use non-blocking ialltoall in MPI-FFT (used only if ndat>1 and MPI3)."
+        write(std_out,*)"--fft-ialltoall[=yesno]    Use non-blocking ialltoall in MPI-FFT (used only if ndat > 1 and MPI2+)."
         write(std_out,*)"--gnu-mtrace               Enable mtrace (requires GNU and clib)."
         write(std_out,*)"--ieee-halt                Halt the code if one of the *usual* IEEE exceptions is raised."
         write(std_out,*)"--ieee-signal              Signal the occurrence of the *usual* IEEE exceptions."

@@ -55,13 +55,16 @@ def replace_string(s):
     using replace method of python string.
     """
     old2new = {
+         # Malloc/free macros
          "ABI_ALLOCATE(": "ABI_MALLOC(",
          "ABI_DEALLOCATE(": "ABI_FREE(",
          "ABI_DATATYPE_ALLOCATE(": "ABI_MALLOC(",
          "ABI_DATATYPE_DEALLOCATE(": "ABI_FREE(",
          "ABI_STAT_ALLOCATE(": "ABI_STAT_MALLOC(",
-         "ABI_DATATYPE_ALLOCATE_SCALAR(": "ABI_MALLOC_SCALAR(",
+         "ABI_DATATYPE_ALLOCATE_SCALAR(": "ABI_MALLOC_TYPE_SCALAR(",
          "ABI_DATATYPE_DEALLOCATE_SCALAR(": "ABI_FREE(",
+         #"ABI_STAT_MALLOC(": "ABI_STAT_MALLOC_STAT(",
+         # Logging macros
          "MSG_COMMENT(": "ABI_COMMENT(",
          "MSG_WARNING(": "ABI_WARNING(",
          "MSG_COMMENT_UNIT(": "ABI_COMMENT_UNIT(",
@@ -77,6 +80,11 @@ def replace_string(s):
     # This is problematic. Use different name
     #  define ABI_DATATYPE_ALLOCATE_SCALAR(type,scalar)  allocate(type::scalar)
     #old2new = {"information": "information"}
+
+    # This is just to print the table in github md format.
+    #from tabulate import tabulate
+    #print(str(tabulate(old2new.items(), headers=["OLD", "NEW"], tablefmt="github")))
+    #raise RuntimeError("Just to print table.")
 
     for old, new in old2new.items():
         s = s.replace(old, new)
