@@ -2191,7 +2191,7 @@ end subroutine irrzg
 !!
 !! INPUTS
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
 !!  ngfft=array of dimensions for different FFT grids
 !!  nspden=number of spin-density components

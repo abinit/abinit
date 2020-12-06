@@ -4,15 +4,16 @@
 !!  abi_xgemm
 !!
 !! FUNCTION
-!!  abi_xgemm is the generic function that solve :
-!! *     C := alpha*op( A )*op( B ) + beta*C,
-!! *
-!! *  where  op( X ) is one of
-!! *
-!! *     op( X ) = X   or   op( X ) = X**T,
-!! *
-!! *  alpha and beta are scalars, and A, B and C are matrices, with op( A )
-!! *  an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
+!!  abi_xgemm is the generic function that solves:
+!!
+!!    C := alpha*op( A )*op( B ) + beta*C,
+!!
+!!  where  op( X ) is one of
+!!
+!!    op( X ) = X   or   op( X ) = X**T,
+!!
+!! alpha and beta are scalars, and A, B and C are matrices, with op( A )
+!! an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2001-2020 ABINIT group (LNguyen,FDahm (CS))
@@ -33,7 +34,6 @@
 !! FUNCTION
 !!
 !! INPUTS
-!!
 !!
 !! PARENTS
 !!
@@ -83,6 +83,67 @@
 #endif
 
 end subroutine abi_zgemm_2d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abi_linalg/abi_zgemm_2r
+!! NAME
+!! abi_zgemm_2r
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+ subroutine abi_zgemm_2r(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
+
+ !Arguments------------------------------------
+ character(len=1),intent(in) :: TRANSA
+ character(len=1),intent(in) :: TRANSB
+ integer,intent(in) :: K
+ integer,intent(in) :: LDA
+ integer,intent(in) :: LDB
+ integer,intent(in) :: LDC
+ integer,intent(in) :: M
+ integer,intent(in) :: N
+ complex(dpc),intent(in) :: ALPHA
+ complex(dpc),intent(in) :: BETA
+ real(dp),target,intent(in) :: A(*)
+ real(dp),target,intent(in) :: B(*)
+ real(dp),target,intent(inout) :: C(*)
+
+ integer :: info
+#ifdef DEV_LINALG_TIMING
+ real(dp) :: tsec(2)
+ call timab(TIMAB_XGEMM,1,tsec)
+#endif
+
+ if (ABI_LINALG_PLASMA_ISON) then
+   info = -1
+#ifdef HAVE_LINALG_PLASMA
+   !write(std_out,*)"Will call PLASMA_zgemm_c"
+   info = PLASMA_zgemm_c(trans_plasma(TRANSA),trans_plasma(TRANSB),M,N,K,ALPHA,&
+&    c_loc(A),LDA,c_loc(B),LDB,BETA,c_loc(C),LDC)
+#endif
+   ABI_CHECK(info==0,"PLASMA_zgemm_c returned info !=0")
+ else
+   if (use_zgemm3m(m,n,k)) then
+     call _ZGEMM3M(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
+   else
+     call zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
+   end if
+ end if
+
+#ifdef DEV_LINALG_TIMING
+ call timab(TIMAB_XGEMM,2,tsec)
+#endif
+
+end subroutine abi_zgemm_2r
 !!***
 
 !----------------------------------------------------------------------

@@ -1111,7 +1111,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
            'number of electrons = ',dtset%nelect,ch10,&
            'and spinmagntarget = ',dtset%spinmagntarget,ch10,&
            'This combination is not possible, because of a lack of bands.',ch10,&
-           'Action: modify input file ... ',ch10,&
+           'Action: modify input file',ch10,&
            '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
            MSG_ERROR(msg)
          end if

@@ -1290,7 +1290,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    ========================================
 !    New structure for geometry optimization
 !    ========================================
-   else if (dtset%ionmov>50.or.dtset%ionmov<=27) then
+   else if (dtset%ionmov>50.or.dtset%ionmov<=28) then
 
      ! TODO: return conv_retcode
      call mover(scfcv_args,ab_xfh,acell,args_gs%amu,dtfil,&
@@ -1309,8 +1309,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    else ! Not an allowed option
      write(msg, '(a,i0,2a)' )&
-&     'Disallowed value for ionmov=',dtset%ionmov,ch10,&
-&     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24 and 30'
+     'Disallowed value for ionmov=',dtset%ionmov,ch10,&
+     'Allowed values are: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24,28 and 30'
      MSG_BUG(msg)
    end if
 
@@ -2396,7 +2396,7 @@ end subroutine clnup2
 !!   | nsym=number of symmetry elements in space group
 !!  ecore=core psp energy (part of total energy) (hartree)
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)= # atoms of each type.
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  nspinor=number of spinorial components of the wavefunctions

@@ -1821,7 +1821,7 @@ end subroutine integrate_green
 !! INPUTS
 !!  char1 = character which precises the type of green function computed.
 !!  cryst_struc <type(crystal_t)>= crystal structure data.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  green  <type(green_type)>= green function data
 !!  pawang <type(pawang)>=paw angular mesh and related data
@@ -3615,7 +3615,7 @@ end subroutine newton
 !!  cryst_struc
 !!  istep    =  step of iteration for DFT.
 !!  dft_occup
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! OUTPUT

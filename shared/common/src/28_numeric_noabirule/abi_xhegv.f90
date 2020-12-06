@@ -37,8 +37,6 @@
   subroutine abi_dhegv(itype,jobz,uplo,n,a,lda,b,ldb,w, &
 &            x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: itype
  character(len=1), intent(in) :: jobz
