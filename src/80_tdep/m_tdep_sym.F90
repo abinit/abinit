@@ -10,13 +10,22 @@ module m_tdep_sym
  use defs_basis
  use m_abicore
  use m_errors
-
+ use m_xmpi
  use m_symtk,            only : mati3inv, symatm
  use m_symfind,          only : symfind, symanal, symlatt
  use m_tdep_latt,        only : Lattice_Variables_type, tdep_make_inbox
- use m_tdep_readwrite,   only : Input_Variables_type
+ use m_tdep_readwrite,   only : Input_Variables_type, MPI_enreg_type
 
  implicit none
+
+ type S_product
+
+   double precision, allocatable :: SS  (:,:,:)
+   double precision, allocatable :: SSS (:,:,:,:)
+   double precision, allocatable :: SSSS(:,:,:,:,:)
+
+ end type S_product
+
 
  type,public :: Symetries_Variables_type
 
@@ -32,6 +41,7 @@ module m_tdep_sym
    double precision, allocatable :: S_inv(:,:,:,:)
    double precision, allocatable :: tnons(:,:)
    double precision, allocatable :: xred_zero(:,:)
+   type(S_product),allocatable :: Sprod(:,:)
 
  end type Symetries_Variables_type
 
@@ -39,12 +49,13 @@ module m_tdep_sym
  public :: tdep_SearchS_1at
  public :: tdep_SearchS_2at
  public :: tdep_SearchS_3at
+ public :: tdep_SearchS_4at
  public :: tdep_calc_indsym2
 
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine tdep_make_sym(Invar,Lattice,Sym)
+ subroutine tdep_make_sym(Invar,Lattice,MPIdata,Sym)
 
   implicit none
 
@@ -53,6 +64,8 @@ contains
   type(Symetries_Variables_type),intent(out) :: Sym
   type(Input_Variables_type),intent(inout) :: InVar
   type(Lattice_Variables_type),intent(in) :: Lattice
+  type(MPI_enreg_type), intent(in) :: MPIdata
+  character(len=500) :: message
 
 ! Compute all the symetries coming from the bravais lattice
 ! The routine used is symlatt (from Abinit code)
@@ -66,35 +79,37 @@ contains
   ABI_MALLOC(Sym%S_ref,(3,3,Sym%nsym,2)) ; Sym%S_ref(:,:,:,1)=real(Sym%ptsymrel(:,:,1:Sym%nsym))
   ABI_MALLOC(Sym%S_inv,(3,3,Sym%nsym,2)) ; Sym%S_inv(:,:,:,1)=zero
   ABI_MALLOC(tmp1,(3,3)); tmp1(:,:)=0.d0
-  open(unit=75,file=trim(InVar%output_prefix)//'sym.dat')
+  if (MPIdata%iam_master) open(unit=75,file=trim(InVar%output_prefix)//'sym.dat')
   do isym=1,Sym%nsym
-    write(75,*) ' '
-    write(75,*) 'For isym=',isym
-    write(75,*) 'In reduced coordinates:'
-    write(75,'(3(f5.2,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
-    write(75,'(3(f5.2,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
-    write(75,'(3(f5.2,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
+    if (MPIdata%iam_master) then
+      write(75,*) ' '
+      write(75,*) 'For isym=',isym
+      write(75,*) 'In reduced coordinates:'
+      write(75,'(3(f5.2,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
+      write(75,'(3(f5.2,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
+      write(75,'(3(f5.2,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
+    end if
     call DGEMM('N','N',3,3,3,1.d0,Lattice%rprimdt,3,Sym%S_ref(:,:,isym,1),3,0.d0,tmp1,3)
     call DGEMM('N','N',3,3,3,1.d0,tmp1,3,Lattice%rprimdtm1,3,0.d0,Sym%S_ref(:,:,isym,1),3)
-    write(75,*) 'In cartesian coordinates:'
-    write(75,'(3(f5.2,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
-    write(75,'(3(f5.2,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
-    write(75,'(3(f5.2,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
-
     do ii=1,3
       do jj=1,3
         if (abs(Sym%S_ref(ii,jj,isym,1)).lt.tol8) Sym%S_ref(ii,jj,isym,1)=zero
       end do
     end do
-
 !   Inversion of S_ref (which is equivalent to the transposition)
     do ii=1,3
       do jj=1,3
         Sym%S_inv(ii,jj,isym,1)=Sym%S_ref(jj,ii,isym,1)
       end do
     end do
-
+    if (MPIdata%iam_master) then
+      write(75,*) 'In cartesian coordinates:'
+      write(75,'(3(f5.2,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
+      write(75,'(3(f5.2,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
+      write(75,'(3(f5.2,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
+    end if  
   end do
+  if (MPIdata%iam_master) close(75)
   write(InVar%stdout,'(a)') ' See the sym.dat file'
 
 ! We verify that S.S^T = Id
@@ -118,13 +133,14 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine tdep_SearchS_1at(InVar,Lattice,Sym,xred_ideal)
+ subroutine tdep_SearchS_1at(InVar,Lattice,MPIdata,Sym,xred_ideal)
 
   implicit none
 
   type(Input_Variables_type), intent(in) :: InVar
   type(Lattice_Variables_type), intent(in) :: Lattice
   type(Symetries_Variables_type), intent(inout) :: Sym
+  type(MPI_enreg_type), intent(in) :: MPIdata
   double precision, intent(in) :: xred_ideal(3,InVar%natom)
 
   integer :: ptgroupma,isym,jatom,ii,jj,mu
@@ -252,7 +268,7 @@ contains
     call DGEMV('T',3,3,1.d0,InVar%multiplicity(:,:),3,xred_ideal(:,iatom),1,0.d0,tmp_store(:,iatom),1)
   end do
 ! Write the Indsym of the atoms included in the (reference) unitcell (i.e.: the motif)
-  if (InVar%debug) then
+  if (InVar%debug.and.MPIdata%iam_master) then
     open(unit=40,file=trim(InVar%output_prefix)//'Indsym-unitcell.dat')
     do iatom=1,InVar%natom_unitcell
       write(40,*) '=========================================='
@@ -270,10 +286,7 @@ contains
   ABI_MALLOC(indsym2,(8,Sym%nptsym,InVar%natom,InVar%natom)); indsym2(:,:,:,:)=0
   tmpi(:,:)=0.d0
   tmpj(:,:)=0.d0
-  if (InVar%debug) open(unit=40,file=trim(InVar%output_prefix)//'Indsym-supercell.dat')
   do iatom=1,InVar%natom
-    if (InVar%debug) write(40,*) '=========================================='
-    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
 !   For a single iatom 
     call DGEMV('T',3,3,1.d0,InVar%multiplicity(:,:),3,xred_ideal(:,iatom),1,0.d0,tmpi(:,iatom),1)
     iatom_unitcell=mod(iatom-1,InVar%natom_unitcell)+1
@@ -284,26 +297,28 @@ contains
         vectsym(mu,isym) = Sym%symrec(1,mu,isym)*vecti(1)+Sym%symrec(2,mu,isym)*vecti(2)+Sym%symrec(3,mu,isym)*vecti(3)
       end do
       Sym%indsym(1:4,isym,iatom)=Sym%indsym(1:4,isym,iatom_unitcell)+vectsym(1:4,isym)
-      if (InVar%debug) then
-        write(40,'(a,i2,a,i4,a,3(i4,1x),a,i2,a,3(f10.5,1x))') '  indsym(isym=',isym,',',iatom,')=',&
-&         Sym%indsym(1:3,isym,iatom),'|iat=',Sym%indsym(4,isym,iatom),'| with tnons=',Sym%tnons(:,isym)
-      end if
       do jatom=1,InVar%natom
         indsym2(1:4,isym,iatom,jatom)=Sym%indsym(1:4,isym,iatom_unitcell)+vectsym(1:4,isym)
       end do
     end do
-    if (InVar%debug) write(40,'(a,i4)') ' '
   end do
-  if (InVar%debug) close(40)
+  if (InVar%debug.and.MPIdata%iam_master) then
+    open(unit=40,file=trim(InVar%output_prefix)//'Indsym-supercell.dat')
+    do iatom=1,InVar%natom
+      write(40,*) '=========================================='
+      write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
+      do isym=1,Sym%nptsym
+        write(40,'(a,i2,a,i4,a,3(i4,1x),a,i2,a,3(f10.5,1x))') '  indsym(isym=',isym,',',iatom,')=',&
+&         Sym%indsym(1:3,isym,iatom),'|iat=',Sym%indsym(4,isym,iatom),'| with tnons=',Sym%tnons(:,isym)
+      end do
+      write(40,'(a,i4)') ' '
+    end do
+    close(40)
+  end if  
 
 ! For a couple of (iatom,jatom). The (iatom,jatom) vector depends on the position of iatom (due to PBC)
-  if (InVar%debug) open(unit=40,file=trim(InVar%output_prefix)//'Indsym-2atoms.dat')
   do iatom=1,InVar%natom
-    if (InVar%debug) write(40,*) '=========================================='
-    if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
     do jatom=1,InVar%natom
-      if (InVar%debug) write(40,*) '  =========================================='
-      if (InVar%debug) write(40,'(a,i4,a,3(f10.5,1x))') '  For jatom=',jatom,' with xred (supercell)=',xred_ideal(:,jatom)
       temp3(:,1)=xred_ideal(:,jatom)-xred_ideal(:,iatom)
       call tdep_make_inbox(temp3(:,1),1,1d-3,temp3(:,1))
       temp3(:,1)=xred_ideal(:,iatom)+temp3(:,1)
@@ -316,16 +331,27 @@ contains
           vectsym(mu,isym) = Sym%symrec(1,mu,isym)*vectj(1)+Sym%symrec(2,mu,isym)*vectj(2)+Sym%symrec(3,mu,isym)*vectj(3)
         end do
         indsym2(5:8,isym,iatom,jatom)=Sym%indsym(1:4,isym,jatom_unitcell)+vectsym(1:4,isym)
-        if (InVar%debug) then
+      end do
+    end do
+  end do
+  if (InVar%debug.and.MPIdata%iam_master) then
+    open(unit=40,file=trim(InVar%output_prefix)//'Indsym-2atoms.dat')
+    do iatom=1,InVar%natom
+      write(40,*) '=========================================='
+      write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
+      do jatom=1,InVar%natom
+        write(40,*) '  =========================================='
+        write(40,'(a,i4,a,3(f10.5,1x))') '  For jatom=',jatom,' with xred (supercell)=',xred_ideal(:,jatom)
+        do isym=1,Sym%nptsym
           write(40,'(a,i2,a,i4,a,i4,a,3(i4,1x),a,i2,a,3(i4,1x),a,i2,a)') '  indsym2(isym=',isym,',',iatom,',',jatom,')=',&
 &           indsym2(1:3,isym,iatom,jatom),&
 &           '|iat=',indsym2(4,isym,iatom,jatom),'|',indsym2(5:7,isym,iatom,jatom),'|iat=',indsym2(8,isym,iatom,jatom),'|'
-        end if
+        end do
       end do
+      write(40,'(a,i4)') ' '
     end do
-    if (InVar%debug) write(40,'(a,i4)') ' '
-  end do
-  if (InVar%debug) close(40)
+    close(40)
+  end if  
   ABI_FREE(indsym2)
   write(InVar%stdout,'(a)') ' See the Indsym*.dat files (if debug)'
 
@@ -512,6 +538,149 @@ contains
   end do
 
  end subroutine tdep_SearchS_3at
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ subroutine tdep_SearchS_4at(InVar,iatom,jatom,katom,latom,eatom,fatom,gatom,hatom,Isym4at,Sym,xred_ideal)
+
+  implicit none
+
+  integer, intent(in) :: iatom,jatom,katom,latom,eatom,fatom,gatom,hatom
+  type(Input_Variables_type),intent(in) :: InVar
+  type(Symetries_Variables_type),intent(in) :: Sym
+  integer, intent(inout) :: Isym4at(2)
+  double precision, intent(in) :: xred_ideal(3,InVar%natom)
+
+  integer :: isym,ee,ff,gg,hh,ii
+  integer :: iatom_unitcell,jatom_unitcell,katom_unitcell,latom_unitcell
+  integer :: vecti(3),vectj(3),vectk(3),vectl(3),indsym2(8)
+  integer :: lattef(3),lattfe(3)
+  integer :: latteg(3),lattge(3)
+  integer :: latteh(3),latthe(3)
+  integer :: lattfg(3),lattgf(3)
+  integer :: lattfh(3),latthf(3)
+  integer :: lattgh(3),latthg(3)
+  double precision :: temp(3),tmp_store(3,InVar%natom_unitcell)
+  double precision :: tmp(3,InVar%natom)
+  logical :: ok
+
+! Search the couple of atoms (e,f) obtained through the transformation (R+t)
+! starting from (i,j)
+! In that case, note that two cases are possible:
+! - The bond is just transformed, so indsym(4,e)=i and indsym(4,f)=j
+! - The bond is transformed and reversed, so indsym(4,e)=j and indsym(4,f)=i
+
+! Store the positions of the atoms in the motif
+  do ii=1,InVar%natom_unitcell
+    call DGEMV('T',3,3,1.d0,InVar%multiplicity(:,:),3,xred_ideal(:,ii),1,0.d0,tmp_store(:,ii),1)
+  end do
+
+! Search the atom equivalent to iatom in the (reference) unitcell
+  do ii=1,InVar%natom
+    call DGEMV('T',3,3,1.d0,InVar%multiplicity(:,:),3,xred_ideal(:,ii),1,0.d0,tmp(:,ii),1)
+  end do
+! Note that in the (present) particular case : iatom_unitcell=iatom and vecti(:)=zero
+  iatom_unitcell=mod(iatom-1,InVar%natom_unitcell)+1
+  vecti(:)=nint(tmp(:,iatom)-tmp(:,iatom_unitcell))
+
+! Search the atom equivalent to jatom in the (reference) unitcell.
+! jatom can be outside the box (according to the value of iatom)
+! so we use the inbox procedure to put the distance within [-0.5,0.5[
+  temp(:)=xred_ideal(:,jatom)-xred_ideal(:,iatom)
+  call tdep_make_inbox(temp,1,1d-3,temp)
+  temp(:)=xred_ideal(:,iatom)+temp(:)
+  call DGEMV('T',3,3,1.d0,InVar%multiplicity(:,:),3,temp(:),1,0.d0,tmp(:,jatom),1)
+  jatom_unitcell=mod(jatom-1,InVar%natom_unitcell)+1
+  vectj(:)=nint(tmp(:,jatom)-tmp_store(:,jatom_unitcell))
+
+! Search the atom equivalent to katom in the (reference) unitcell.
+! katom can be outside the box (according to the value of iatom)
+! so we use the inbox procedure to put the distance within [-0.5,0.5[
+  temp(:)=xred_ideal(:,katom)-xred_ideal(:,iatom)
+  call tdep_make_inbox(temp,1,1d-3,temp)
+  temp(:)=xred_ideal(:,iatom)+temp(:)
+  call DGEMV('T',3,3,1.d0,InVar%multiplicity(:,:),3,temp(:),1,0.d0,tmp(:,katom),1)
+  katom_unitcell=mod(katom-1,InVar%natom_unitcell)+1
+  vectk(:)=nint(tmp(:,katom)-tmp_store(:,katom_unitcell))
+
+! Search the atom equivalent to latom in the (reference) unitcell.
+! latom can be outside the box (according to the value of iatom)
+! so we use the inbox procedure to put the distance within [-0.5,0.5[
+  temp(:)=xred_ideal(:,latom)-xred_ideal(:,iatom)
+  call tdep_make_inbox(temp,1,1d-3,temp)
+  temp(:)=xred_ideal(:,iatom)+temp(:)
+  call DGEMV('T',3,3,1.d0,InVar%multiplicity(:,:),3,temp(:),1,0.d0,tmp(:,latom),1)
+  latom_unitcell=mod(latom-1,InVar%natom_unitcell)+1
+  vectl(:)=nint(tmp(:,latom)-tmp_store(:,latom_unitcell))
+
+! To understand the meaning of "latt", see SearchS_1at
+  ok=.false.
+  do isym=1,Sym%nsym
+!   TODO : A CHECKER!!!!!!!!!!!!!!!!!  
+    indsym2(:)=zero
+    call tdep_calc_indsym2(InVar,eatom,fatom,indsym2,isym,Sym,xred_ideal)
+    ee=indsym2(4)
+    ff=indsym2(8)
+    lattef(:)=indsym2(1:3)
+    lattfe(:)=indsym2(5:7)
+
+    indsym2(:)=zero
+    call tdep_calc_indsym2(InVar,eatom,gatom,indsym2,isym,Sym,xred_ideal)
+    gg=indsym2(8)
+    latteg(:)=indsym2(1:3)
+    lattge(:)=indsym2(5:7)
+
+    indsym2(:)=zero
+    call tdep_calc_indsym2(InVar,eatom,hatom,indsym2,isym,Sym,xred_ideal)
+    hh=indsym2(8)
+    latteh(:)=indsym2(1:3)
+    latthe(:)=indsym2(5:7)
+
+    indsym2(:)=zero
+    call tdep_calc_indsym2(InVar,fatom,gatom,indsym2,isym,Sym,xred_ideal)
+    lattfg(:)=indsym2(1:3)
+    lattgf(:)=indsym2(5:7)
+
+    indsym2(:)=zero
+    call tdep_calc_indsym2(InVar,fatom,hatom,indsym2,isym,Sym,xred_ideal)
+    lattfh(:)=indsym2(1:3)
+    latthf(:)=indsym2(5:7)
+
+    indsym2(:)=zero
+    call tdep_calc_indsym2(InVar,gatom,hatom,indsym2,isym,Sym,xred_ideal)
+    lattgh(:)=indsym2(1:3)
+    latthg(:)=indsym2(5:7)
+
+    if (ee==iatom_unitcell.and.ff==jatom_unitcell.and.gg==katom_unitcell.and.hh==latom_unitcell) then
+!FB      if (InVar%debug) then
+!FB        write(InVar%stdout,*) 'For indef=iatom, indfg=jatom and indge=katom, isym=',isym
+!FB        write(InVar%stdout,'(4(a,i4))') ' + ',vecti(1),' - ',vectj(1),' - ',lattef(1),' + ',lattfe(1)
+!FB        write(InVar%stdout,'(4(a,i4))') ' + ',vecti(2),' - ',vectj(2),' - ',lattef(2),' + ',lattfe(2)
+!FB        write(InVar%stdout,'(4(a,i4))') ' + ',vecti(3),' - ',vectj(3),' - ',lattef(3),' + ',lattfe(3)
+!FB        write(InVar%stdout,*) ' '
+!FB        write(InVar%stdout,'(4(a,i4))') ' + ',vectj(1),' - ',vectk(1),' - ',lattfg(1),' + ',lattgf(1)
+!FB        write(InVar%stdout,'(4(a,i4))') ' + ',vectj(2),' - ',vectk(2),' - ',lattfg(2),' + ',lattgf(2)
+!FB        write(InVar%stdout,'(4(a,i4))') ' + ',vectj(3),' - ',vectk(3),' - ',lattfg(3),' + ',lattgf(3)
+!FB        write(InVar%stdout,*) ' '
+!FB        write(InVar%stdout,'(4(a,i4))') ' + ',vectk(1),' - ',vecti(1),' - ',lattge(1),' + ',latteg(1)
+!FB        write(InVar%stdout,'(4(a,i4))') ' + ',vectk(2),' - ',vecti(2),' - ',lattge(2),' + ',latteg(2)
+!FB        write(InVar%stdout,'(4(a,i4))') ' + ',vectk(3),' - ',vecti(3),' - ',lattge(3),' + ',latteg(3)
+!FB        write(InVar%stdout,*) ' '
+!FB      end if
+      if ((sum(abs((vecti(:)-lattef(:))-(vectj(:)-lattfe(:)))).lt.tol8).and.&
+&         (sum(abs((vecti(:)-latteg(:))-(vectk(:)-lattge(:)))).lt.tol8).and.&
+&         (sum(abs((vecti(:)-latteh(:))-(vectl(:)-latthe(:)))).lt.tol8).and.&
+&         (sum(abs((vectj(:)-lattfg(:))-(vectk(:)-lattgf(:)))).lt.tol8).and.&
+&         (sum(abs((vectj(:)-lattfh(:))-(vectl(:)-latthf(:)))).lt.tol8).and.&
+&         (sum(abs((vectk(:)-lattgh(:))-(vectl(:)-latthg(:)))).lt.tol8)) then
+        Isym4at(1)=isym
+        Isym4at(2)=1
+        ok=.true.
+      end if
+    end if
+    if (ok) exit
+  end do
+
+ end subroutine tdep_SearchS_4at
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_calc_indsym2(InVar,iatom,jatom,indsym2,isym,Sym,xred_ideal)

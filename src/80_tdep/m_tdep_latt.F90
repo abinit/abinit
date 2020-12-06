@@ -41,8 +41,14 @@ module m_tdep_latt
     double precision :: rprimdt       (3,3)
     double precision :: rprimdtm1     (3,3)
     double precision :: rprimd_MD     (3,3)
+    double precision :: Sij           (6,6)
     double precision :: ucvol
-    double precision :: BulkModulus
+    double precision :: BulkModulus_T
+    double precision :: BulkModulus_S
+    double precision :: HeatCapa_V
+    double precision :: HeatCapa_P
+    double precision :: Shear
+    double precision :: Density
 
   end type Lattice_Variables_type
 
@@ -83,7 +89,7 @@ end subroutine tdep_make_inbox
 
   implicit none
 
-  integer :: brav,ii,jj,kk,INFO,iout,line
+  integer :: brav,ii,jj,kk,INFO,line
   integer, allocatable :: IPIV(:)
   double precision :: acell_unitcell(3),multiplicity(3,3),multiplicitym1(3,3),temp2(3,3)
   double precision :: rprimd(3,3),rprimdt(3,3),rprimd_MD(3,3),rprim_tmp(3,3),rprimdm1(3,3)
@@ -145,7 +151,7 @@ end subroutine tdep_make_inbox
   end do
 
 !=============================================================================================
-! Here, rprim define a Primitive Lattice and NOT a Conventional lattice
+! Here, rprim defines a Primitive Lattice and NOT a Conventional lattice
 ! The lattice parameters have to multiply rprim on:
 ! 0/ line or column         --> line 0
 !                               Cubic, Fcc, Bcc, Ortho, Tetra, Rhombo, Hexa
@@ -182,6 +188,12 @@ end subroutine tdep_make_inbox
     rprim(2,1)= 0.5d0 ; rprim(2,2)= 0.5d0 ; rprim(2,3)=0.0d0
     rprim(3,1)= 0.0d0 ; rprim(3,2)= 0.0d0 ; rprim(3,3)=1.0d0
 ! For tetragonal: bravais(1)=4
+  else if (InVar%bravais(1).eq.4.and.InVar%bravais(2).eq.0) then !tetragonal
+    brav=1
+    line=2
+    rprim(1,1)=1.0d0 ; rprim(1,2)=0.0d0 ; rprim(1,3)=0.0d0
+    rprim(2,1)=0.0d0 ; rprim(2,2)=1.0d0 ; rprim(2,3)=0.0d0
+    rprim(3,1)=0.0d0 ; rprim(3,2)=0.0d0 ; rprim(3,3)=1.0d0
   else if (InVar%bravais(1).eq.4.and.InVar%bravais(2).eq.-1) then !body centered tetragonal
     brav=3
     line=2
@@ -322,16 +334,16 @@ end subroutine tdep_make_inbox
     write(InVar%stdout,'(a)') ' STOP : CALCULATION OF RPRIMD NOT IMPLEMENTED'
   end if
 
-! Starting from rprimd, compute gmet, rmet, gprimd
-!FB  call metric(Lattice%gmet,Lattice%gprimd,iout,Lattice%rmet,rprimd,Lattice%ucvol)
+! Starting from rprimd, compute gmet, rmet, gprimd  
+!FB  call metric(Lattice%gmet,Lattice%gprimd,InVar%stdlog,Lattice%rmet,rprimd,Lattice%ucvol)
 
 ! Define transpose and inverse of rprimd
   do ii=1,3
     do jj=1,3
       rprimdt(ii,jj)=rprimd(jj,ii)
     end do
-  end do
-  call metric(Lattice%gmet,Lattice%gprimd,iout,Lattice%rmet,rprimdt,Lattice%ucvol)
+  end do  
+  call metric(Lattice%gmet,Lattice%gprimd,InVar%stdlog,Lattice%rmet,rprimdt,Lattice%ucvol)
   ABI_MALLOC(IPIV,(3)); IPIV(:)=0
   ABI_MALLOC(WORK,(3)); WORK(:)=0.d0
   rprimdtm1(:,:)=rprimdt(:,:)

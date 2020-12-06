@@ -1685,11 +1685,13 @@ end subroutine corsifc9
 !!
 !! SOURCE
 
-subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
+subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
+                                                    unit_out) ! optional arguments
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ifcout,ifcana,prt_ifc,ncid
+ integer,optional,intent(in) :: unit_out
  class(ifc_type),intent(inout) :: Ifc
 !arrays
  integer,intent(in) :: atifc(Ifc%natom)
@@ -1713,6 +1715,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 ! *********************************************************************
 
  iout = ab_out
+ if (present(unit_out)) then
+   iout = unit_out
+ end if   
  dielt = ifc%dielt
 
  ! Compute the distances between atoms

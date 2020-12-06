@@ -18,12 +18,12 @@ module m_tdep_readwrite
 
   type Input_Variables_type
 
-    integer :: Impose_Symetry=0
     integer :: natom
     integer :: natom_unitcell
     integer :: nstep_max
     integer :: nstep_min
-    integer :: nstep
+    integer :: nstep_tot
+    integer :: my_nstep
     integer :: ntypat
     integer :: Use_ideal_positions
     integer :: stdout
@@ -33,12 +33,15 @@ module m_tdep_readwrite
     integer :: Slice
     integer :: Enunit
     integer :: ReadIFC
-    integer :: firstqptseg
+    integer :: together
+    integer :: Nproc(2)
+    integer :: BZlength
     integer :: ngqpt1(3)
     integer :: ngqpt2(3)
     integer :: bravais(11)
-    integer, allocatable ::typat_unitcell(:)
-    integer, allocatable ::typat(:)
+    integer, allocatable :: typat_unitcell(:)
+    integer, allocatable :: typat(:)
+    integer, allocatable :: lgth_segments(:)
     logical :: debug
     logical :: loto
     logical :: netcdf
@@ -47,6 +50,7 @@ module m_tdep_readwrite
     double precision :: dosdeltae
     double precision :: Rcut
     double precision :: Rcut3
+    double precision :: Rcut4
     double precision :: temperature
     double precision :: tolread
     double precision :: tolinbox
@@ -62,48 +66,38 @@ module m_tdep_readwrite
     double precision, allocatable :: xred(:,:,:)
     double precision, allocatable :: fcart(:,:,:)
     double precision, allocatable :: etot(:)
-!FB    double precision, allocatable :: sigma(:,:)
     character (len=2), allocatable :: special_qpt(:)
     character (len=200) :: output_prefix
     
   end type Input_Variables_type
 
-!FB  type, public :: Hist_type
-!FB
-!FB  ! scalars
-!FB    ! Index of the last element on all records
-!FB    integer :: ihist = 0
-!FB    ! Maximun size of the historical records
-!FB    integer :: mxhist = 0
-!FB    ! Booleans to know if some arrays are changing
-!FB    logical :: isVused  ! If velocities are changing
-!FB    logical :: isARused ! If Acell and Rprimd are changing
-!FB
-!FB  ! arrays
-!FB    ! Vector of (x,y,z)X(mxhist)
-!FB    real(dp), allocatable :: histA(:,:)
-!FB    ! Vector of (mxhist) values of energy
-!FB    real(dp), allocatable :: histE(:)
-!FB    ! Vector of (mxhist) values of ionic kinetic energy
-!FB    real(dp), allocatable :: histEk(:)
-!FB    ! Vector of (mxhist) values of Entropy
-!FB    real(dp), allocatable :: histEnt(:)
-!FB    ! Vector of (mxhist) values of time (relevant
-!FB    ! for MD calculations)
-!FB    real(dp), allocatable :: histT(:)
-!FB    ! Vector of (x,y,z)X(x,y,z)X(mxhist)
-!FB    real(dp), allocatable :: histR(:,:,:)
-!FB    ! Vector of (stress [6])X(mxhist)
-!FB    real(dp), allocatable :: histS(:,:)
-!FB    ! Vector of (x,y,z)X(natom)X(mxhist) values of velocity
-!FB    real(dp), allocatable :: histV(:,:,:)
-!FB    ! Vector of (x,y,z)X(natom)X(xcart,xred,fcart,fred)X(mxhist)
-!FB    real(dp), allocatable :: histXF(:,:,:,:)
-!FB
-!FB  end type Hist_type
+  type MPI_enreg_type
+
+    integer :: comm_shell
+    integer :: comm_step
+    integer :: comm_shellstep
+    integer :: nproc
+    integer :: nproc_shell
+    integer :: nproc_step
+    integer :: master
+    integer :: me_shell
+    integer :: me_step
+    integer, allocatable :: my_nshell(:)
+    integer :: my_nstep
+    logical :: iam_master
+    integer, allocatable :: nstep_all(:)
+    integer, allocatable :: shft_step(:)
+    logical, allocatable :: my_shell(:)
+    logical, allocatable :: my_step(:)
+
+  end type MPI_enreg_type
 
  public :: tdep_print_Aknowledgments
- public :: tdep_ReadEcho
+ public :: tdep_read_input
+ public :: tdep_distrib_data
+ public :: tdep_init_MPIdata
+ public :: tdep_init_MPIshell
+ public :: tdep_clean_MPI
 
 contains
 
@@ -131,7 +125,7 @@ contains
   write(stdout,'(a)') ' of the ABINIT implementation.'
   write(stdout,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
   write(stdout,'(a)') ' '
-  write(stdout,'(a)') '.[1] Thermal evolution of vibrational properties of $\\alpha$-U' 
+  write(stdout,'(a)') ' [1] Thermal evolution of vibrational properties of alpha-U' 
   write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).' ! [[cite:Bouchet2015]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' This paper is also available at http://www.arxiv.org/abs/xxxx'
@@ -147,54 +141,53 @@ contains
  end subroutine tdep_print_Aknowledgments 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine tdep_ReadEcho(InVar)
+ subroutine tdep_read_input(Hist,InVar)
 
 #if defined HAVE_NETCDF
  use netcdf
 #endif
 
+  type(Input_Variables_type),intent(out) :: InVar
+  type(abihist), intent(out) :: Hist
+
+  integer :: values(8)  
+  integer :: ncid, ncerr,ierr
+  integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id
+  integer :: ntypat_id
   integer :: ii,jj,tmp,istep,iatom,this_istep
-  character (len=30):: string,NormalMode,DebugMode,Impose_Symetry,Use_ideal_positions
+  double precision :: version_value,tmp1,tmp2,tmp3,dtion
+  character (len=30):: string,NormalMode,DebugMode,Use_ideal_positions
   character (len=30):: Born_charge,Dielec_constant,tolmotifinboxmatch,TheEnd,BZpath
-  character (len=30):: Order,Slice,Enunit,ReadIFC,firstqptseg,Ngqpt1,Ngqpt2,DosDeltae
-  double precision :: version_value,tmp1,tmp2,tmp3,nstep_int,nstep_float
+  character (len=30):: Order,Slice,Enunit,ReadIFC,together,Nproc,BZlength,Ngqpt1,Ngqpt2,DosDeltae
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
   character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
 &                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
-  character(len=500) :: filename
-  character(len=500) :: inputfilename
-  integer :: values(8)  
-  type(Input_Variables_type),intent(out) :: InVar
-  type(abihist) :: Hist
-  ! Temp variable to get dimensions of HIST file
-  integer :: ncid, ncerr
-  integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id
-  integer :: ntypat_id
+  character(len=500) :: filename,inputfilename,message
   logical :: has_nimage
-  real(dp) :: dtion
   real(dp), allocatable :: znucl(:)
 
 ! Define output files  
-  InVar%stdout=7
+  InVar%stdout=8
   InVar%stdlog=6
   !open(unit=InVar%stdlog,file='data.log')
 
 ! Define Keywords
   NormalMode='NormalMode'
   DebugMode='DebugMode'
-  Impose_Symetry='Impose_Symetry'
   Use_Ideal_Positions='Use_Ideal_Positions'
   Born_Charge='Born_Charge'
   Dielec_Constant='Dielec_Constant'
   DosDeltae='DosDeltae'
   BZpath='BZpath'
-  Firstqptseg='Firstqptseg'
+  BZlength='BZlength'
   Order='Order'
   Slice='Slice'
   Enunit='Enunit'
   ReadIFC='ReadIFC'
+  together='together'
+  Nproc='Nproc'
   Ngqpt1='Ngqpt1'
   Ngqpt2='Ngqpt2'
   TolMotifInboxMatch='TolMotifInboxMatch'
@@ -205,8 +198,9 @@ contains
   InVar%Order=2
   InVar%Slice=1
   InVar%Enunit=0
-  InVar%ReadIFC=0
-  InVar%firstqptseg=100
+  InVar%together=1
+  InVar%Nproc(:)=1
+  InVar%BZlength=0
   InVar%tolread=1.d-8
   InVar%tolmotif=5.d-2
   InVar%tolinbox=5.d-2
@@ -238,9 +232,7 @@ contains
 12 continue
   if ( inputfilename == "" ) inputfilename='input.in'
   if ( filename == "" ) filename='HIST.nc'
-
-  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
-
+  if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
 
 #if defined HAVE_NETCDF
  !Open netCDF file
@@ -285,7 +277,7 @@ contains
   else
     MSG_ERROR('Please use recent format for the input file')
   end if  
-  write(InVar%stdout,'(a)') '.Copyright (C) 1998-2020 ABINIT group (FB,JB).'
+  write(InVar%stdout,'(a)') '.Copyright (C) 1998-2019 ABINIT group (FB,JB).'
   write(InVar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
   write(InVar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
   write(InVar%stdout,'(a)') ' under certain conditions (GNU General Public License,'
@@ -329,9 +321,23 @@ contains
   ABI_MALLOC(InVar%typat_unitcell,(InVar%natom_unitcell)); InVar%typat_unitcell(:)=0 
   read(40,*) string,InVar%typat_unitcell(:)
   write(InVar%stdout,'(1x,a20,20(1x,i4))') string,(InVar%typat_unitcell(jj),jj=1,InVar%natom_unitcell)
+! To avoid some troubles and inconsistency between the .in and .nc files, when we use NetCDF or not.    
   if (InVar%netcdf) then
+    read(40,*) string
+    backspace(40)
+    if (string.eq.'ntypat') then
+      write(InVar%stdlog,'(1x,a)') 'When the NetCDF file .nc is used, the ntypat keywork is not allowed.' 
+      MSG_ERROR('ACTION : Please modify your input file')
+    end if  
     string='ntypat'
   else
+    read(40,*) string
+    backspace(40)
+    if (string.ne.'ntypat') then
+      write(InVar%stdlog,'(1x,a)') 'The NetCDF file .nc is not used.' 
+      write(InVar%stdlog,'(1x,a,1x,a)') 'In your input file, the code search the ntypat keywork but found :',string
+      MSG_ERROR('ACTION : Please modify your input file')
+    end if  
     read(40,*) string,InVar%ntypat
   end if  
   write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ntypat
@@ -400,9 +406,6 @@ contains
     if (string.eq.DosDeltae) then
       read(40,*) string,InVar%dosdeltae
       write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%dosdeltae
-    else if (string.eq.Impose_Symetry) then
-      read(40,*) string,InVar%Impose_Symetry
-      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%Impose_Symetry
     else if (string.eq.Use_ideal_positions) then  
       read(40,*) string,InVar%Use_ideal_positions
       write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%Use_ideal_positions
@@ -428,28 +431,37 @@ contains
         ABI_MALLOC(InVar%special_qpt,(InVar%BZpath))
         backspace(40)
         read(40,*) string,tmp,(InVar%special_qpt(jj),jj=1,InVar%BZpath)
-        write(InVar%stdout,'(a,1x,10(a2,"-"))') ' Special q-points: ',InVar%special_qpt(:)
+        write(InVar%stdout,'(a,1x,a2,10("-",a2))') ' Special q-points: ',InVar%special_qpt(:)
       end if
     else if (string.eq.Order) then  
-      read(40,*) string,InVar%Order,InVar%Rcut3
-      write(InVar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,InVar%Order,InVar%Rcut3
-      if (InVar%Rcut3.gt.InVar%Rcut) then
-        MSG_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
-      end if  
+      read(40,*) string,InVar%Order
+      backspace(40)
+      if (InVar%Order.eq.3) then
+        read(40,*) string,InVar%Order,InVar%Rcut3
+        write(InVar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,InVar%Order,InVar%Rcut3
+        if (InVar%Rcut3.gt.InVar%Rcut) then
+          MSG_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
+        end if  
+      else if (InVar%Order.eq.4) then
+        read(40,*) string,InVar%Order,InVar%Rcut3,InVar%Rcut4
+        write(InVar%stdout,'(1x,a20,1x,i4,2(1x,f15.10))') string,InVar%Order,InVar%Rcut3,InVar%Rcut4
+        if (InVar%Rcut4.gt.InVar%Rcut) then
+          MSG_ERROR('The cutoff radius of the fourth order cannot be greater than the second order one.')
+        end if  
+      else
+        MSG_ERROR('Only the 3rd and 4th orders are allowed. Change your input file.')
+      end if
     else if (string.eq.Slice) then  
       read(40,*) string,InVar%Slice
       write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%Slice
-      nstep_float=float(InVar%nstep_max-InVar%nstep_min+1)/float(InVar%Slice)
-      nstep_int  =float(int(nstep_float))
-      write(InVar%stdout,*) nstep_int,nstep_float
-      if (abs(nstep_float-nstep_int).gt.tol8) then
-        MSG_ERROR('Change nstep_min. (nstep_max-nstep_min+1)/Slice has to be an integer.')
-      end if  
     else if (string.eq.Enunit) then  
       read(40,*) string,InVar%Enunit
-      if (InVar%Enunit.eq.0) write(InVar%stdout,'(1x,a20,1x,i4,1x,a)') string,InVar%Enunit,'(energy in meV)'
-      if (InVar%Enunit.eq.1) write(InVar%stdout,'(1x,a20,1x,i4,1x,a)') string,InVar%Enunit,'(energy in cm-1)'
-      if (InVar%Enunit.eq.2) write(InVar%stdout,'(1x,a20,1x,i4,1x,a)') string,InVar%Enunit,'(energy in Ha)'
+      if (InVar%Enunit.eq.0) write(InVar%stdout,'(1x,a20,1x,i4,1x,a)') string,InVar%Enunit,'(Phonon frequencies in meV)'
+      if (InVar%Enunit.eq.1) write(InVar%stdout,'(1x,a20,1x,i4,1x,a)') string,InVar%Enunit,'(Phonon frequencies in cm-1)'
+      if (InVar%Enunit.eq.2) write(InVar%stdout,'(1x,a20,1x,i4,1x,a)') string,InVar%Enunit,'(Phonon frequencies in Ha)'
+    else if (string.eq.Nproc) then  
+      read(40,*) string,InVar%Nproc(1),InVar%Nproc(2)
+      write(InVar%stdout,'(1x,a20,1x,i4,1x,i4)') string,InVar%Nproc(1),InVar%Nproc(2)
     else if (string.eq.ReadIFC) then  
       read(40,*) string,InVar%ReadIFC
       if (InVar%ReadIFC.eq.1) then
@@ -459,9 +471,16 @@ contains
       else  
         write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ReadIFC
       end if  
-    else if (string.eq.Firstqptseg) then  
-      read(40,*) string,InVar%firstqptseg
-      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%firstqptseg
+    else if (string.eq.together) then  
+      read(40,*) string,InVar%together
+      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%together
+    else if (string.eq.BZlength) then  
+      read(40,*) string,InVar%BZlength
+      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%BZlength
+      ABI_MALLOC(InVar%lgth_segments,(InVar%BZlength))
+      backspace(40)
+      read(40,*) string,tmp,(InVar%lgth_segments(jj),jj=1,InVar%BZlength)
+      write(InVar%stdout,'(a,1x,i3,10("-",i3))') ' Length of BZ : ',InVar%lgth_segments(:)
     else if (string.eq.Ngqpt1) then  
       read(40,*) string,InVar%ngqpt1(:)
       write(InVar%stdout,'(1x,a20,1x,3(i4,1x))') string,InVar%ngqpt1(:)
@@ -480,19 +499,7 @@ contains
       MSG_ERROR('A keyword is not allowed. See the log file.')
     end if  
   end do
-! Output very important information 
-  write(InVar%stdout,'(a)') ' '
-  if (InVar%Impose_Symetry.eq.0) then
-    write(InVar%stdout,'(a)') ' STOP IF THE DIJ (IFC) MATRIX IS NOT HERMITIAN (SYMETRIC)'
-  else if (InVar%Impose_Symetry.eq.1) then
-    write(InVar%stdout,'(a)') ' SYMETRIZE THE DIJ MATRIX (HERMITIAN)'
-  else if (InVar%Impose_Symetry.eq.2) then
-    write(InVar%stdout,'(a)') ' SYMETRIZE THE IFC MATRIX (SYMETRIC)'
-  else if (InVar%Impose_Symetry.eq.3) then
-    write(InVar%stdout,'(a)') ' SYMETRIZE THE DIJ MATRIX (HERMITIAN) AND THE IFC MATRIX (SYMETRIC)'
-  else
-    write(InVar%stdout,'(a)') ' STOP: THIS VALUE IS NOT ALLOWED FOR Impose_Symetry'
-  end if
+! Output very important informations 
   if (InVar%Use_ideal_positions.eq.0) then
     write(InVar%stdout,'(a)') ' USE AVERAGE POSITIONS TO COMPUTE SPECTRUM'
   else if (InVar%Use_ideal_positions.eq.1) then
@@ -501,35 +508,56 @@ contains
     write(InVar%stdout,'(a)') ' STOP: THIS VALUE IS NOT ALLOWED FOR Use_Ideal_Positions'
   end if
   if (InVar%loto) write(InVar%stdout,'(a)') ' USE NON-ANALYTICAL CORRECTIONS (LO-TO)'
-  InVar%nstep=(InVar%nstep_max-InVar%nstep_min+1)/InVar%Slice
-  write(InVar%stdout,'(a)') ' '
-  write(InVar%stdout,'(a)') ' WARNING: ALL the quantities are now computed :'
-  write(InVar%stdout,'(a,1x,i4)') '                                      from nstep_min=',InVar%nstep_min
-  write(InVar%stdout,'(a,1x,i4)') '                                        to nstep_max=',InVar%nstep_max
-  if (InVar%Slice.ne.1) then
-    write(InVar%stdout,'(a,1x,i4)') '                                    by using a slice=',InVar%Slice
+
+! Allowed values
+  if ((InVar%together.ne.1).and.(InVar%together.ne.0)) then
+    MSG_ERROR('STOP: The value of input variable TOGETHER is not allowed') 
   end if  
-  write(InVar%stdout,'(a,1x,i4)') '          So, the real number of time steps is nstep=',InVar%nstep
-! End of read and echo  
+! Incompatible variables :
+  if ((InVar%ReadIFC.eq.1).and.(InVar%together.eq.1).and.(InVar%Order.gt.2)) then
+    MSG_ERROR('STOP: ReadIFC=1, together=1 and Order=3 or 4 are incompatible')
+  end if  
+
+! Compute Nstep as a function of the slice
+  InVar%nstep_tot=int(float(InVar%nstep_max-InVar%nstep_min)/float(InVar%Slice)+1)
+  write(6,*) 'nstep_tot=',InVar%nstep_tot
   close(40)
 
+
+ end subroutine tdep_read_input
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ subroutine tdep_distrib_data(Hist,InVar,MPIdata)
+
+  implicit none 
+
+  type(Input_Variables_type), intent(inout) :: InVar
+  type(MPI_enreg_type), intent(in) :: MPIdata
+  type(abihist), intent(in) :: Hist
+
+  integer :: this_istep,istep,iatom,jstep
+  double precision :: tmp1,tmp2,tmp3
+  
+  InVar%my_nstep=MPIdata%my_nstep
+ 
 ! Read xred.dat, fcart.dat and etot.dat ASCII files or extract them from the HIST.nc netcdf file.
   write(InVar%stdout,'(a)') ' '
-  ABI_MALLOC(InVar%xred,(3,InVar%natom,InVar%nstep))  ; InVar%xred(:,:,:)=0.d0
-  ABI_MALLOC(InVar%fcart,(3,InVar%natom,InVar%nstep)) ; InVar%fcart(:,:,:)=0.d0
-  ABI_MALLOC(InVar%etot,(InVar%nstep))                ; InVar%etot(:)=0.d0
-!FB  ABI_MALLOC(InVar%sigma,(6,InVar%nstep))             ; InVar%sigma(:,:)=0.d0
+  ABI_MALLOC(InVar%xred,(3,InVar%natom,InVar%my_nstep))  ; InVar%xred(:,:,:)=0.d0
+  ABI_MALLOC(InVar%fcart,(3,InVar%natom,InVar%my_nstep)) ; InVar%fcart(:,:,:)=0.d0
+  ABI_MALLOC(InVar%etot,(InVar%my_nstep))                ; InVar%etot(:)=0.d0
+  this_istep=0
+  jstep=0
   if (InVar%netcdf) then
-    this_istep=0
-    do istep=1,InVar%nstep_max
-      if ((istep.lt.InVar%nstep_min).or.(mod(istep-InVar%nstep_min,InVar%Slice).ne.0)) then
+    do istep=InVar%nstep_min,InVar%nstep_max
+      if (mod(istep-InVar%nstep_min,InVar%Slice).ne.0) then
         cycle
       else
+        jstep=jstep+1
+        if (.not.MPIdata%my_step(jstep)) cycle
         this_istep=this_istep+1
         InVar%xred(:,:,this_istep) =Hist%xred (:,:,istep)
         InVar%fcart(:,:,this_istep)=Hist%fcart(:,:,istep)
         InVar%etot(this_istep)     =Hist%etot     (istep)
-!FB        InVar%sigma(:,this_istep)  =Hist%strten (:,istep)
       end if
     end do !istep  
     write(InVar%stdout,'(a)') ' The Xred, Fcart, Etot and Stress data are extracted from the NetCDF file: HIST.nc '
@@ -537,30 +565,217 @@ contains
     open(unit=60,file='fcart.dat')
     open(unit=50,file='xred.dat')
     open(unit=40,file='etot.dat')
-    this_istep=0
-    do istep=1,InVar%nstep_max
-      if ((istep.lt.InVar%nstep_min).or.(mod(istep-InVar%nstep_min,InVar%Slice).ne.0)) then
-        read(40,*) tmp1
-      else 
-        this_istep=this_istep+1
-        read(40,*) InVar%etot(this_istep)
-      end if  
+    do istep=1,InVar%nstep_min-1
+      read(40,*) tmp1
       do iatom=1,InVar%natom
-        if ((istep.lt.InVar%nstep_min).or.(mod(istep-InVar%nstep_min,InVar%Slice).ne.0)) then
+        read(50,*) tmp1,tmp2,tmp3
+        read(60,*) tmp1,tmp2,tmp3
+      end do
+    end do 
+    do istep=InVar%nstep_min,InVar%nstep_max
+      if (mod(istep-InVar%nstep_min,InVar%Slice).ne.0) then
+        read(40,*) tmp1
+        do iatom=1,InVar%natom
           read(50,*) tmp1,tmp2,tmp3
           read(60,*) tmp1,tmp2,tmp3
-        else 
-          read(50,*) InVar%xred (1,iatom,this_istep),InVar%xred (2,iatom,this_istep),InVar%xred (3,iatom,this_istep)
-          read(60,*) InVar%fcart(1,iatom,this_istep),InVar%fcart(2,iatom,this_istep),InVar%fcart(3,iatom,this_istep)
-        end if
-      end do
-    end do !istep 
+        end do
+      else
+        jstep=jstep+1
+        if (.not.MPIdata%my_step(jstep)) then
+          read(40,*) tmp1
+          do iatom=1,InVar%natom
+            read(50,*) tmp1,tmp2,tmp3
+            read(60,*) tmp1,tmp2,tmp3
+          end do
+        else
+          this_istep=this_istep+1
+          read(40,*) InVar%etot(this_istep)
+          do iatom=1,InVar%natom
+            read(50,*) InVar%xred (1,iatom,this_istep),InVar%xred (2,iatom,this_istep),InVar%xred (3,iatom,this_istep)
+            read(60,*) InVar%fcart(1,iatom,this_istep),InVar%fcart(2,iatom,this_istep),InVar%fcart(3,iatom,this_istep)
+          end do
+        end if !my_step  
+      end if !slice
+    end do !istep
     close(40)
     close(50)
     close(60)
     write(InVar%stdout,'(a)') ' The Xred, Fcart and Etot data are extracted from the ASCII files: xred.dat, fcart.dat \& etot.dat'
-  end if  
- end subroutine tdep_ReadEcho
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  end if !netcdf
 
+ end subroutine tdep_distrib_data
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! subroutine tdep_init_MPIshell(InVar,MPIdata,Shelllllll)
+ subroutine tdep_init_MPIshell(InVar,MPIdata)
+
+  implicit none 
+
+  type(Input_Variables_type), intent(in) :: InVar
+  type(MPI_enreg_type), intent(in) :: MPIdata
+
+ end subroutine tdep_init_MPIshell
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ subroutine tdep_init_MPIdata(InVar,MPIdata)
+
+  implicit none 
+
+  type(Input_Variables_type), intent(in) :: InVar
+  type(MPI_enreg_type), intent(out) :: MPIdata
+  integer :: ii,remain,ierr,iproc,istep
+  integer, allocatable :: nstep_acc(:)
+  integer, allocatable :: tab_step(:)
+  character(len=500) :: message
+  
+#if defined HAVE_MPI
+  integer :: dimcart,commcart_2d,me_cart_2d
+  logical :: reorder
+  integer,allocatable :: coords(:),sizecart(:)
+  logical,allocatable :: periode(:), keepdim(:)
+#endif
+
+! Check the number of processors
+  MPIdata%nproc_shell=InVar%Nproc(1)
+  MPIdata%nproc_step =InVar%Nproc(2)
+  MPIdata%nproc = xmpi_comm_size(xmpi_world)
+  if (MPIdata%nproc_step*MPIdata%nproc_shell.ne.MPIdata%nproc) then
+    MSG_WARNING('The parallelization is performed over steps')
+    MPIdata%nproc_step = xmpi_comm_size(xmpi_world)
+  end if  
+
+  MPIdata%master         = 0
+  MPIdata%iam_master     =.false.
+! Initialize the MPIdata datastructure for sequential calculation
+  if (MPIdata%nproc.eq.1) then
+    MPIdata%comm_shell     = xmpi_comm_null
+    MPIdata%comm_step      = xmpi_comm_null
+    MPIdata%comm_shellstep = xmpi_comm_null
+    MPIdata%me_shell       = 0
+    MPIdata%me_step        = 0
+    MPIdata%my_nstep       = InVar%nstep_tot
+    MPIdata%iam_master     = (MPIdata%me_step == MPIdata%master)
+  end if
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!! Parallel calculation !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!! Definition of the processor grid !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#if defined HAVE_MPI
+!FB  if (MPIdata%nproc.eq.1) return
+
+! Create the global cartesian 2D-communicator
+  dimcart=2
+  ABI_ALLOCATE(sizecart,(dimcart))
+  ABI_ALLOCATE(periode,(dimcart))
+  sizecart(1)=MPIdata%nproc_shell ! MPIdata%nproc_shell
+  sizecart(2)=MPIdata%nproc_step  ! MPIdata%nproc_step
+  periode(:)=.false.;reorder=.false.
+  call MPI_CART_CREATE(xmpi_world,dimcart,sizecart,periode,reorder,commcart_2d,ierr)
+  ABI_DEALLOCATE(periode)
+  ABI_DEALLOCATE(sizecart)
+
+! Find the index and coordinates of the current processor
+  call MPI_COMM_RANK(commcart_2d,me_cart_2d,ierr)
+  ABI_ALLOCATE(coords,(dimcart))
+  call MPI_CART_COORDS(commcart_2d,me_cart_2d,dimcart,coords,ierr)
+  MPIdata%me_shell=coords(1)
+  MPIdata%me_step =coords(2)
+  ABI_DEALLOCATE(coords)
+  if ((MPIdata%me_shell == MPIdata%master).and.(MPIdata%me_step == MPIdata%master)) then
+    MPIdata%iam_master = .true.
+  end if  
+
+  ABI_ALLOCATE(keepdim,(dimcart))
+! Create the communicator for shell distribution
+  keepdim(1)=.true.
+  keepdim(2)=.false.
+  call MPI_CART_SUB(commcart_2d,keepdim,MPIdata%comm_shell,ierr)
+! Create the communicator for step distribution
+  keepdim(1)=.false.
+  keepdim(2)=.true.
+  call MPI_CART_SUB(commcart_2d,keepdim,MPIdata%comm_step,ierr)
+! Create the communicator for shellstep distribution
+  keepdim(1)=.true.
+  keepdim(2)=.true.
+  call MPI_CART_SUB(commcart_2d,keepdim,MPIdata%comm_shellstep,ierr)
+  ABI_DEALLOCATE(keepdim)
+  call xmpi_comm_free(commcart_2d)
+
+! Write some data
+  write(message,'(1x,a20,2(1x,i4))') 'Number of processors :',MPIdata%nproc_shell,MPIdata%nproc_step
+  call wrtout(InVar%stdout,message,'COLL')
+!FB  write(message,'(a,2i5)') 'me_shell and me_step : ',MPIdata%me_shell,MPIdata%me_step
+!FB  call wrtout(InVar%stdout,message,'COLL')
+#endif
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!! Distribution over STEP processors !!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  MPIdata%my_nstep =int(InVar%nstep_tot/MPIdata%nproc_step)
+  remain=InVar%nstep_tot-MPIdata%nproc_step*MPIdata%my_nstep
+  do ii=1,remain
+    if ((ii-1).eq.MPIdata%me_step) MPIdata%my_nstep=MPIdata%my_nstep+1
+  end do
+  ABI_MALLOC(MPIdata%nstep_all,(MPIdata%nproc_step)); MPIdata%nstep_all(:)=zero
+  call xmpi_allgather(MPIdata%my_nstep,MPIdata%nstep_all,MPIdata%comm_step,ierr)
+  write(InVar%stdout,'(a)') ' '
+  write(InVar%stdout,'(a)') ' WARNING: ALL the quantities are now computed :'
+  write(InVar%stdout,'(a,1x,i4)') '                                      from nstep_min=',InVar%nstep_min
+  write(InVar%stdout,'(a,1x,i4)') '                                        to nstep_max=',InVar%nstep_max
+  if (InVar%Slice.ne.1) then
+    write(InVar%stdout,'(a,1x,i4)') '                                    by using a slice=',InVar%Slice
+  end if  
+  write(InVar%stdout,'(a,1x,i4)') '          So, the real number of time steps is nstep=',InVar%nstep_tot
+  if (MPIdata%nproc_step.gt.1) then
+    write(Invar%stdout,'(a,1000(1x,i5))') 'Distribution of number of steps wrt the number of processors=',MPIdata%nstep_all(:)
+  end if
+
+  ABI_MALLOC(nstep_acc,(MPIdata%nproc_step+1)); nstep_acc(:)=zero
+  nstep_acc(1)=0
+  do ii=2,MPIdata%nproc_step+1
+    nstep_acc(ii)=nstep_acc(ii-1)+MPIdata%nstep_all(ii-1)
+  end do
+  if (nstep_acc(MPIdata%nproc_step+1).ne.InVar%nstep_tot) then
+    write(6,*) 'STOP : pb in nstep_acc'
+    stop
+  end if
+
+  ABI_MALLOC(tab_step,(InVar%nstep_tot)); tab_step(:)=zero
+  ABI_MALLOC(MPIdata%my_step ,(InVar%nstep_tot)); MPIdata%my_step (:)=.false.
+  do iproc=1,MPIdata%nproc_step
+    do istep=1,InVar%nstep_tot
+      if ((istep.gt.nstep_acc(iproc)).and.(istep.le.nstep_acc(iproc+1))) then
+        tab_step(istep)=iproc-1
+      end if
+    end do
+  end do
+  do istep=1,InVar%nstep_tot
+    MPIdata%my_step(istep) = (tab_step(istep) == MPIdata%me_step)
+  end do
+
+  ABI_MALLOC(MPIdata%shft_step,(MPIdata%nproc_step)); MPIdata%shft_step(:)=zero
+  MPIdata%shft_step(1)=0
+  do ii=2,MPIdata%nproc_step
+    MPIdata%shft_step(ii)=MPIdata%shft_step(ii-1)+MPIdata%nstep_all(ii-1)
+  end do
+  ABI_FREE(nstep_acc)
+  ABI_FREE(tab_step)
+
+ end subroutine tdep_init_MPIdata
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ subroutine tdep_clean_mpi(MPIdata)
+
+  implicit none 
+
+  type(MPI_enreg_type), intent(inout) :: MPIdata
+
+  ABI_FREE(MPIdata%shft_step)
+  ABI_FREE(MPIdata%nstep_all)
+  ABI_FREE(MPIdata%my_step)
+
+ end subroutine tdep_clean_mpi
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module m_tdep_readwrite
