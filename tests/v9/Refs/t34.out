@@ -1,6 +1,6 @@
 
 .Version 9.3.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu8.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun  6 Dec 2020.
-- ( at 21h36 )
+- ( at 22h03 )
   
-- input  file    -> /home/marm314/Installers/abinit/abinit/tests/Test_suite/v9_t33-t34/t34.in
+- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33-t34-t35/t34.in
 - output file    -> t34.out
 - root for input  files -> t34i
 - root for output files -> t34o
@@ -44,7 +44,7 @@ _ WF disk file :      0.224 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -58,7 +58,7 @@ _ WF disk file :      0.224 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
              ecut      8.00000000E+00 Hartree
          ecutsigx      8.00000000E+00 Hartree
           ecutwfn      8.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         512
         gwcalctyp          21
            gw1rdm           2
        irdchkprdm           1
@@ -186,7 +186,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -196,8 +196,8 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/marm314/Installers/abinit/abinit/tests/Psps_for_tests/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/marm314/Installers/abinit/abinit/tests/Psps_for_tests/Si-GGA.psp8
+- pspini: atom type   1  psp file is /home/marm314/abinit/tests/Psps_for_tests/Si-GGA.psp8
+- pspatm: opening atomic psp file    /home/marm314/abinit/tests/Psps_for_tests/Si-GGA.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    150713                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -269,8 +269,8 @@ meta: {optdriver: 4, gwcalctyp: 21, }
 
   Number of electrons    =    8.0000
 
-  QP Band energy    [Ha] = -1.66975012250605E-01
-  QP Hartree energy [Ha] =  5.54495639364861E-01
+  QP Band energy    [Ha] = -1.66975012250597E-01
+  QP Hartree energy [Ha] =  5.54495643194287E-01
 
 --------------------------------------------------------------------------------
 
@@ -375,17 +375,17 @@ meta: {optdriver: 4, gwcalctyp: 21, }
   k-point  band      eik^GS        eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
     2        1      -5.46844     -11.48455      -6.01611     -16.74090       0.00000     -10.71985       3.81673       3.81179
     2        2      -0.98491      -4.87168      -3.88677     -14.81468       0.00000     -10.92224       4.31242       4.30675
-    2        3       0.69211      -2.09054      -2.78266     -12.86520       0.00000     -10.07963       2.26161       2.25869
-    2        4       3.16166       0.93725      -2.22441     -13.23150       0.00000     -11.00111       4.40242       4.39643
+    2        3       0.69211      -2.09055      -2.78266     -12.86520       0.00000     -10.07963       2.26161       2.25869
+    2        4       3.16166       0.93725      -2.22441     -13.23151       0.00000     -11.00111       4.40242       4.39643
     2        5       6.98504      11.45023       4.46518      -5.11821       0.00000      -9.58229       1.19811       1.19701
     2        6       9.32846      14.55668       5.22822      -4.91100       0.00000     -10.13681       2.38227       2.37986
     2        7       9.72942      14.46398       4.73456      -5.51889       0.00000     -10.24924       2.82459       2.82038
     2        8      10.74689      16.27297       5.52608      -4.37490       0.00000      -9.89871       2.09479       2.09251
   -----------------------------------------------------------------------------------------------------------------------------
   k-point  band      eik^GS        eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
-    3        1      -3.34860      -8.38605      -5.03744     -15.92324       0.00000     -10.88030       4.20801       4.20252
+    3        1      -3.34860      -8.38605      -5.03745     -15.92324       0.00000     -10.88030       4.20801       4.20252
     3        2      -3.34860      -8.38604      -5.03744     -15.92323       0.00000     -10.88030       4.20801       4.20252
-    3        3       1.60714      -1.22715      -2.83429     -13.46433       0.00000     -10.62543       3.50404       3.49942
+    3        3       1.60714      -1.22715      -2.83429     -13.46434       0.00000     -10.62543       3.50404       3.49942
     3        4       1.60714      -1.22714      -2.83428     -13.46432       0.00000     -10.62543       3.50404       3.49942
     3        5       5.20468       9.55915       4.35446      -4.63628       0.00000      -8.99124      -0.17033      -0.16983
     3        6       5.20469       9.55914       4.35445      -4.63629       0.00000      -8.99124      -0.17033      -0.16983
@@ -394,11 +394,11 @@ meta: {optdriver: 4, gwcalctyp: 21, }
   -----------------------------------------------------------------------------------------------------------------------------
   k-point  band      eik^GS        eik^new     Delta eik        K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
     4        1      -3.16882      -8.13840      -4.96958     -15.98413       0.00000     -11.00865       4.51337       4.50747
-    4        2      -3.16882      -8.13839      -4.96957     -15.98412       0.00000     -11.00865       4.51337       4.50747
+    4        2      -3.16882      -8.13839      -4.96957     -15.98413       0.00000     -11.00865       4.51337       4.50747
     4        3       0.58450      -2.28552      -2.87002     -12.87072       0.00000      -9.99807       2.05686       2.05423
     4        4       0.58450      -2.28553      -2.87003     -12.87073       0.00000      -9.99807       2.05687       2.05423
     4        5       8.81199      13.39267       4.58068      -5.01340       0.00000      -9.59229       1.19680       1.19501
-    4        6       8.81199      13.39266       4.58067      -5.01341       0.00000      -9.59229       1.19680       1.19501
+    4        6       8.81199      13.39265       4.58066      -5.01341       0.00000      -9.59229       1.19680       1.19501
     4        7       9.57913      14.90379       5.32465      -4.73739       0.00000     -10.05968       2.32882       2.32645
     4        8       9.57914      14.90381       5.32467      -4.73738       0.00000     -10.05968       2.32882       2.32645
   -----------------------------------------------------------------------------------------------------------------------------
@@ -426,17 +426,17 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  -------------------------------------------------------------------------------------------------
  Ekinetic   = :     3.155821E+00 Ha ,    8.587426E+01 eV
  Evext_l    = :    -2.286036E+00 Ha ,   -6.220619E+01 eV
- Evext_nl   = :     1.139732E+00 Ha ,    3.101368E+01 eV
+ Evext_nl   = :     1.139732E+00 Ha ,    3.101367E+01 eV
  Epsp_core  = :     5.612462E-01 Ha ,    1.527229E+01 eV
  Ehartree   = :     5.559652E-01 Ha ,    1.512858E+01 eV
- Ex[SD]     = :    -2.100173E+00 Ha ,   -5.714861E+01 eV
+ Ex[SD]     = :    -2.100173E+00 Ha ,   -5.714862E+01 eV
  Exc[MBB]   = :    -2.365523E+00 Ha ,   -6.436915E+01 eV
  Enn        = :    -8.435820E+00 Ha ,   -2.295503E+02 eV
  -------------------------------------------------------------------------------------------------
  Etot[SD]   = :    -7.409264E+00 Ha ,   -2.016163E+02 eV
- Etot[MBB]  = :    -7.674613E+00 Ha ,   -2.088369E+02 eV
+ Etot[MBB]  = :    -7.674614E+00 Ha ,   -2.088369E+02 eV
  Vee[SD]    = :    -1.544208E+00 Ha ,   -4.202003E+01 eV
- Vee[MBB]   = :    -1.809557E+00 Ha ,   -4.924056E+01 eV
+ Vee[MBB]   = :    -1.809558E+00 Ha ,   -4.924057E+01 eV
  Density    = :     7.963172E+00
  Vee[SD] (= Ehartree + Ex[SD]) energy obtained using GW 1-RDM:
  Vee[MBB] (= Ehartree + Exc[MBB]) energy obtained using GW 1-RDM:
@@ -457,7 +457,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
            etotal1     0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         512
         gwcalctyp          21
            gw1rdm           2
        irdchkprdm           1
@@ -645,10 +645,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        811.3  wall=         52.5
+- Proc.   0 individual time (sec): cpu=         11.1  wall=         11.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        811.3  wall=         52.5
+.Delivered   1 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.1  wall=         11.2
