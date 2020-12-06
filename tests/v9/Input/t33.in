@@ -15,7 +15,8 @@ getwfk2       -1       # Obtain WFK file from previous dataset
 nband2         8       # Bands to be used in the screening calculation
 ecuteps2       5       # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
 nfreqim2      40       # Number of freqs (w') in Imag axis used in Gauss-Legendre quadrature integration of Sigma_c(iw) = G(iw,iw') W(iw') dw'
-gwrpacorr2     1
+gwrpacorr2     1       # Compute RPA correlation energy 
+gwgmcorr2      1       # Compute Galitskii-Migdal correlation energy
 ############
 # Dataset 3
 ############
