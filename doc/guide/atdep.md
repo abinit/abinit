@@ -1,22 +1,23 @@
-# The a-TDEP utility  
+# The aTDEP utility  
 
 The Temperature Dependent Effective Potential (TDEP) method
 has been developped by O. Hellman *et al.* [[cite:Hellman2011]],
-[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the |a-TDEP| implementation
+[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the aTDEP implementation
 in ABINIT has been performed and used for the first time in 2015 by
 J. Bouchet and F. Bottin [[cite:Bouchet2015]], [[cite:Bouchet2017]].
 
-This manual can be found as a pdf file: [[pdf:a-TDEP_Guide| a-TDEP guide]]
+* User guide (in a pdf format): [[pdf:aTDEP_Guide| aTDEP guide]]  
+* Theory: [[pdf:aTDEP_Paper|aTDEP paper]] corresponding to the article [[cite:Bottin2020]]
 
 ## Prerequisite and theory
 
 The approach used in this code is detailed in a publication dedicated to the development
-of all formula (see [[pdf:a-TDEP_Paper|a-TDEP paper]]). We strongly encourage all the users to carefully read
+of all formula (see [[pdf:aTDEP_Paper|aTDEP paper]]). We strongly encourage all the users to carefully read
 this paper before beginning. All the vibrational, elastic and thermodynamic
-quantities computed by |a-TDEP| are
-presented with the same writing conventions as the ones used in the output files of |a-TDEP|.
+quantities computed by aTDEP are
+presented with the same writing conventions as the ones used in the output files of aTDEP.
 In the same manner, a comprehensive understanding of some ABINIT basic variables is also required
-in order to fill the input file and read the output file of |a-TDEP|.
+in order to fill the input file and read the output file of aTDEP.
 
 In addition, this paper is also useful to understand
 the limitations and convergences which are inherent to the present method.
@@ -25,7 +26,7 @@ article, with some references and illustrating examples.
 
 ## The ABINIT computation
 
-To run |a-TDEP|, a preliminary
+To run aTDEP, a preliminary
 ABINIT simulation is needed. This one could be a molecular dynamic trajectory
 or a set of "ground state" calculations on specific configurations (representative of a given thermodynamic state).
 After that, all the configurations have to be merged:
@@ -34,9 +35,9 @@ After that, all the configurations have to be merged:
 as they are written in the output file of ABINIT. In the later case, the 3 files can be built easily
 by concatenating in each one all the time steps or configurations (using `agrep` shell instruction, for example).
 
-## The |a-TDEP| computation
+## The aTDEP computation
 
-In a same manner as performed for ABINIT, the use of |a-TDEP| is quite simple. 
+In a same manner as performed for ABINIT, the use of aTDEP is quite simple. 
 One has just to execute `atdep` as follows:
 
 ```sh
@@ -56,7 +57,7 @@ one is absent, the code will automatically search the 3 `ASCII.dat` files.
 
 ## The input files
 
-An example of a |a-TDEP|  calculation (in the special case where the *NetCDF* file `HIST.nc` is employed)
+An example of a aTDEP  calculation (in the special case where the *NetCDF* file `HIST.nc` is employed)
 can be found in [[test:v8_37]]. The 2 input files are
 given in the `tests/v8/Input` directory.  
 Let us describe briefly this [[test:v8_37]] file:
@@ -88,7 +89,7 @@ More details:
   keywords (here [[ngqpt2@atdep|ngqpt2]] defining the q-point grid for the vDOS integration
   is set to 2 2 2 in order to have a test sufficiently fast, which means that
   all the thermodynamic quantities have no sense.)
-All the input variables are defined in the `a-TDEP` section of the input variables description.
+All the input variables are defined in the `aTDEP` section of the input variables description.
 Note that some input variables, not defined in the `input.in` file, are obtained
 from the `HIST.nc` file. In particular, the features of the supercell.
 
@@ -96,7 +97,7 @@ from the `HIST.nc` file. In particular, the features of the supercell.
 
 ## The output files
 
-A large number of output files are obtained after an execution of |a-TDEP|.
+A large number of output files are obtained after an execution of aTDEP.
 
 {% dialog tests/v8/Refs/t37.out %}
 {% dialog tests/v8/Refs/t37omega.dat %}

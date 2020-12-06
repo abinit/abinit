@@ -2747,7 +2747,7 @@ class MultibinitTest(BaseTest):
 
 class TdepTest(BaseTest):
     """
-    Class for a-TDEP tests. Redefine the make_stdin method of BaseTest
+    Class for aTDEP tests. Redefine the make_stdin method of BaseTest
     """
     def make_stdin(self):
         t_stdin = StringIO()

@@ -217,7 +217,7 @@ see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]
   1. [[topic:Abipy|Abipy - ABINIT swiss knife]]
   2. [[topic:APPA|Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis]]
   3. [[topic:Band2eps|Band2eps for phonon dispersion curves]]
-  4. [[topic:a-TDEP|Temperature Dependent Effective Potential, for thermodynamical properties]]
+  4. [[topic:aTDEP|Temperature Dependent Effective Potential, for thermodynamical properties]]
 
 ## 12 Miscellaneous topics
   

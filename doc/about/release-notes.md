@@ -620,10 +620,10 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - S Sec Second  for the ABINIT input file;
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
-**D.13** a-TDEP utility:
-added [[guide:a-TDEP|a-TDEP user guide]],
-[[topic:a-TDEP|a-TDEP topic]], and corresponding input variable documentation.
-References: [[pdf:a-TDEP_Paper|a-TDEP paper]].
+**D.13** aTDEP utility:
+added [[guide:aTDEP|aTDEP user guide]],
+[[topic:aTDEP|aTDEP topic]], and corresponding input variable documentation.
+References: [[pdf:aTDEP_Paper|aTDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].
 
 By F. Bottin, J. Bouchet, J. Bieder (MR491,422).
@@ -660,7 +660,7 @@ Upgrade atompaw to 4.1.0.6. Upgrade Libxc to 4+. Prepare the interface to LibXC 
 
 By M. Torrent, JM Beuken (MR 649, 532, 470, 465, 441)
 
-**D.21** Write yaml file for fatbands (phonopy format) with a-TDEP
+**D.21** Write yaml file for fatbands (phonopy format) with aTDEP
 
 By J. Bieder (MR510)
 
@@ -1354,10 +1354,10 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - S Sec Second  for the ABINIT input file;
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
-**D.13** a-TDEP utility:
-added [[guide:a-TDEP|A-TDEP user guide]],
-[[topic:a-TDEP|a-TDEP topic]], and corresponding input variable documentation.
-References: [[pdf:a-TDEP_Paper|a-TDEP paper]].
+**D.13** aTDEP utility:
+added [[guide:aTDEP|A-TDEP user guide]],
+[[topic:aTDEP|aTDEP topic]], and corresponding input variable documentation.
+References: [[pdf:aTDEP_Paper|aTDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].
 
 By F. Bottin, J. Bouchet, J. Bieder (MR491,422).
@@ -1394,7 +1394,7 @@ Upgrade atompaw to 4.1.0.6. Upgrade Libxc to 4+.
 
 By M. Torrent, JM Beuken (MR 532, 470, 465, 441)
 
-**D.21** Write yaml file for fatbands (phonopy format) with a-TDEP
+**D.21** Write yaml file for fatbands (phonopy format) with aTDEP
 
 By J. Bieder (MR510)
 

@@ -1,19 +1,19 @@
 ---
 description: How to perform a Tdep calculation
-authors: YB, FBottin
+authors: FBottin, JBouchet
 ---
 <!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform thermodynamic, elastic and transport properties calculations including explicit temperature effects with the ABINIT package.  
 
-User guide: [[pdf:a-TDEP_Guide| a-TDEP guide]]  
-Theory: [[pdf:a-TDEP_Paper|a-TDEP paper]]
+* User guide: [[pdf:aTDEP_Guide| aTDEP guide]]  
+* Theory: [[pdf:aTDEP_Paper|aTDEP paper]] corresponding to the article [[cite:Bottin2020]]
 
 ## Introduction
 
 The Temperature Dependent Effective Potential (TDEP) method
 has been developped by O. Hellman *et al.* [[cite:Hellman2011]],
-[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the |a-TDEP| implementation
+[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the |aTDEP| implementation
 in ABINIT has been performed and used for the first time in 2015 by
 J. Bouchet and F. Bottin [[cite:Bouchet2015]], [[cite:Bouchet2017]].
 
@@ -21,7 +21,7 @@ The capture of thermal effects in solid state physic is a long standing
 issue and several stand-alone or post-process computational codes are
 available. Using different theoretical frameworks, they propose to provide
 some thermodynamic quantities involving the so called anharmonic effects.
-|a-TDEP| calculation can produce almost all the temperature-dependent
+|aTDEP| calculation can produce almost all the temperature-dependent
 thermodynamic quantities you want, from a single *ab initio*
 molecular dynamic (AIMD) trajectory and by means of a Graphical User
 Interface (GUI) very easy to use ([[https://github.com/abinit/abiout|AGATE]]).

@@ -23,6 +23,7 @@ pages:
     - Abinit: guide/abinit.md
     - Aim: guide/aim.md
     - Anaddb: guide/anaddb.md
+    - aTDEP: guide/atdep.md
     - Cut3d: guide/cut3d.md
     - Fold2Bloch: guide/fold2bloch.md
     - Mrgddb: guide/mrgddb.md
@@ -31,7 +32,6 @@ pages:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
-    - a-TDEP: guide/a-TDEP.md
     - Installation:
         - HowTo: installation.md
         - MacOS: INSTALL_MacOS.md
@@ -47,6 +47,7 @@ pages:
     - topics/APPA.md
     - topics/Artificial.md
     - topics/AtomManipulator.md
+    - topics/aTDEP.md
     - topics/AtomTypes.md
     - topics/Bader.md
     - topics/Band2eps.md
@@ -123,7 +124,6 @@ pages:
     - topics/STM.md
     - topics/Susceptibility.md
     - topics/TDDFT.md
-    - topics/a-TDEP.md
     - topics/TDepES.md
     - topics/Temperature.md
     - topics/TransPath.md
@@ -157,9 +157,9 @@ pages:
         - VdW: variables/vdw.md
         - Wannier90: variables/w90.md
     - Anaddb: variables/anaddb.md
+    - aTDEP: variables/atdep.md
     - Multibinit: variables/multibinit.md
     - Optic: variables/optic.md
-    - a-TDEP: variables/atdep.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
     - Statistics: variables/varset_stats.md
@@ -211,6 +211,9 @@ pages:
         - Lattice Model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
         - Spin Model: tutorial/spin_model.md
+    - aTDEP: 
+        - ATDEP1: tutorial/atdep1.md
+        - ATDEP2: tutorial/atdep2.md
     #- tutorial/abitk.md
     - tutorial/cut3d.md
     - tutorial/fold2bloch.md
@@ -400,4 +403,4 @@ extra:
         #netcdf: https://www.unidata.ucar.edu/software/netcdf/docs/faq.html#whatisit
         #YAML: https://en.wikipedia.org/wiki/YAML
         #JSON: https://en.wikipedia.org/wiki/JSON
-        aTDEP: '<span style="font-variant:small-caps;">a</span>-TDEP'
+        #aTDEP: '<span style="font-variant:small-caps;">a</span>TDEP'
