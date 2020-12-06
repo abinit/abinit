@@ -41,6 +41,7 @@ inp_files = [
 "t32.in", # AC GW
 "t33.in", # GW 1RDM and related quantities 
 "t34.in", # Same as t33.in but reading checkpoints
+"t35.in", # GW 1RDM and related quantities (using only Sigma_x)
 # DFPT
 "t41.in",
 "t42.in",

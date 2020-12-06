@@ -97,7 +97,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t33.in, t34.in
+#%% test_chain = t33.in, t34.in, t35.in
 #%% [files]
 #%% files_to_test =
 #%%  t33.out, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01
@@ -110,6 +110,8 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%%  ww_cp t33o_DS3_CHKP_RDM_1 t34i_DS1_CHKP_RDM_1;
 #%%  ww_cp t33o_DS3_CHKP_RDM_2 t34i_DS1_CHKP_RDM_2;
 #%%  ww_cp t33o_DS3_CHKP_RDM_5 t34i_DS1_CHKP_RDM_5;
+#%%  ww_cp t33o_DS1_WFK t35i_DS1_WFK;
+#%%  ww_cp t33o_DS2_SCR t35i_DS1_SCR;
 #%% [extra_info]
 #%% authors = M. Rodriguez-Mayorga
 #%% keywords = NC, GW

@@ -5,9 +5,8 @@ ndtset      1
 ############
 # Calculation of the Self-Energy matrix elements (GW corrections)
 optdriver      4       # Self-Energy calculation
-irdchkprdm     1       # Read checkpoint files (will read for k-points 1, 2, and 5). 
 gw1rdm         2       # Update 1-RDM with GW and use it to print DEN and WFK files, and for new FOCK matrix elements
-x1rdm          0       # Use only exchange correction x1rdm=1 OR use also Sigma_c x1rdm=0
+x1rdm          1       # Use only exchange correction x1rdm=1 OR use also Sigma_c x1rdm=0
 symsigma       0       # Sym. switched off for sigma
 gwcalctyp     21       # Compute the linearized density as when doing self-consistent AC_GW
 nband          8       # Bands to be used in the Self-Energy calculation
@@ -83,12 +82,12 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% test_chain = t33.in, t34.in, t35.in
 #%% [files]
 #%% files_to_test =
-#%%  t34.out, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01
+#%%  t35.out, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Rodriguez-Mayorga
 #%% keywords = NC, GW
 #%% description = 
-#%%  Same as t33.out but reading some checkpoint (i.e. 1, 2, and 5) files
+#%%  GW 1RDM update BUT using only Sigma_X (not including Sigma_c term).
 #%%<END TEST_INFO>
