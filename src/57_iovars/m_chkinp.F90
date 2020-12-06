@@ -1110,6 +1110,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
    end if
+   ! gwgmcorr
+   if(dt%gwgmcorr==1 .and. dt%gwrpacorr/=1) then
+     write(msg,'(3a)' )&
+     'gwgmcorr>0 can only be used with gwrpacorr=1',ch10,&
+     'Action: set gwgmcorr to 0 or gwrpacorr to 1'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
 
    ! gwls_stern_kmax
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_stern_kmax',dt%gwls_stern_kmax,1,iout)

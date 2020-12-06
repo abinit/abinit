@@ -1220,6 +1220,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gwrpacorr
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwrpacorr','INT',0)
 
+ intarr(1,:)=dtsets(:)%gwgmcorr
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwgmcorr','INT',0)
+
 !gw_customnfreqsp
 !It actually overrides the content of nfreqsp (which is forbidden !) in dtset.
 !This is to be cleaned ...

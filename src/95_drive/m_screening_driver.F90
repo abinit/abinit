@@ -1232,7 +1232,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ec_rpa(:)=zero
        ec_gm(:)=zero
      end if
-     call calc_rpa_functional(Dtset%gwrpacorr,label,iqibz,Ep,Vcp,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa,ec_gm)
+     call calc_rpa_functional(Dtset%gwrpacorr,Dtset%gwgmcorr,label,iqibz,Ep,Vcp,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa,ec_gm)
      if (label==Ep%nqcalc) then
        ABI_FREE(ec_rpa)
        ABI_FREE(ec_gm)
@@ -2563,13 +2563,13 @@ end subroutine random_stopping_power
 !!
 !! SOURCE
 
-subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa,ec_gm)
+subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa,ec_gm)
 
  use m_hide_lapack, only : xginv, xheev
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iqcalc,iq,gwrpacorr,spaceComm
+ integer,intent(in) :: iqcalc,iq,gwrpacorr,gwgmcorr,spaceComm
  type(kmesh_t),intent(in) :: Qmesh
  type(vcoul_t),intent(in) :: Pvc
  type(Datafiles_type),intent(in) :: Dtfil
@@ -2705,7 +2705,7 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
          call wrtout(ab_out,msg,'COLL')
        end do
      end if
-     if(gwrpacorr==1) then ! exact integration over the coupling constant
+     if(gwrpacorr==1 .and. gwgmcorr==1) then ! Only exact integration over the coupling constant
        write(unt,'(a,(2x,f14.8))') '#GM',ecorr_gm
        write(msg,'(2a,(2x,f14.8))') ch10,' Galitskii-Migdal energy [Ha] :',ecorr_gm
        call wrtout(std_out,msg,'COLL')
