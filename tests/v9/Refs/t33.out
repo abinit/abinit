@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 28 Nov 2020.
-- ( at 14h44 )
+.Starting date : Mon  7 Dec 2020.
+- ( at 00h15 )
   
-- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33/t33.in
+- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33-t34-t35/t33.in
 - output file    -> t33.out
 - root for input  files -> t33i
 - root for output files -> t33o
@@ -111,6 +111,9 @@ _ WF disk file :      0.224 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
         gwrpacorr1          0
         gwrpacorr2          1
         gwrpacorr3          0
+         gwgmcorr1          0
+         gwgmcorr2          1
+         gwgmcorr3          0
              iscf1         15
              iscf2          7
              iscf3          7
@@ -2027,6 +2030,9 @@ meta: {optdriver: 4, gwcalctyp: 21, }
         gwrpacorr1          0
         gwrpacorr2          1
         gwrpacorr3          0
+         gwgmcorr1          0
+         gwgmcorr2          1
+         gwgmcorr3          0
              iscf1         15
              iscf2          7
              iscf3          7
@@ -2234,10 +2240,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         23.2  wall=         23.3
+- Proc.   0 individual time (sec): cpu=         22.8  wall=         22.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.2  wall=         23.3
++Overall time at end (sec) : cpu=         22.8  wall=         22.9
