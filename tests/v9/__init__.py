@@ -39,7 +39,8 @@ inp_files = [
 # GW/BSE
 "t31.in", # HF exchange checking q->0 terms
 "t32.in", # AC GW
-"t33.in", # GW 1RDM 
+"t33.in", # GW 1RDM and related quantities 
+"t34.in", # Same as t33.in but reading checkpoints
 # DFPT
 "t41.in",
 "t42.in",

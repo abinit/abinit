@@ -1,38 +1,21 @@
-ndtset      3
+ndtset      1
 
 ############
 # Dataset 1
 ############
-# SCF-GS run 
-nband1    8
-iscf1    15
-############
-# Dataset 2
-############
-# Calculation of the screening (epsilon^-1 matrix)
-optdriver2     3       # Screening calculation
-getwfk2       -1       # Obtain WFK file from previous dataset
-nband2         8       # Bands to be used in the screening calculation
-ecuteps2       5       # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
-nfreqim2      40       # Number of freqs (w') in Imag axis used in Gauss-Legendre quadrature integration of Sigma_c(iw) = G(iw,iw') W(iw') dw'
-gwrpacorr2     1
-############
-# Dataset 3
-############
 # Calculation of the Self-Energy matrix elements (GW corrections)
-optdriver3     4       # Self-Energy calculation
+optdriver      4       # Self-Energy calculation
+irdchkprdm     1       # Read checkpoint files (will read for k-points 1, 2, and 5). 
 gw1rdm         2       # Update 1-RDM with GW and use it to print DEN and WFK files, and for new FOCK matrix elements
 x1rdm          0       # Use only exchange correction x1rdm=1 OR use also Sigma_c x1rdm=0
 symsigma       0       # Sym. switched off for sigma
 gwcalctyp     21       # Compute the linearized density as when doing self-consistent AC_GW
-getwfk3       -2       # Obtain WFK file from dataset 1
-getscr3       -1       # Obtain SCR file from previous dataset
-nband3         8       # Bands to be used in the Self-Energy calculation
-ecutsigx3    8.0
-nomegasi3     20       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
+nband          8       # Bands to be used in the Self-Energy calculation
+ecutsigx     8.0
+nomegasi      20       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
 
-nkptgw3        6       # number of k-point where to calculate the GW correction
-kptgw3                 # k-points in reduced coordinates, read from output
+nkptgw         6       # number of k-point where to calculate the GW correction
+kptgw                  # k-points in reduced coordinates (1-6), read from output
     -2.50000000E-01 -2.50000000E-01  0.00000000E+00 
     -2.50000000E-01  2.50000000E-01  0.00000000E+00 
      5.00000000E-01  5.00000000E-01  0.00000000E+00 
@@ -40,7 +23,7 @@ kptgw3                 # k-points in reduced coordinates, read from output
      5.00000000E-01  0.00000000E+00  0.00000000E+00 
      0.00000000E+00  0.00000000E+00  0.00000000E+00 
 
-bdgw3      
+bdgw       
             1  8     # calculate GW corrections for bands from 1 to 8
             1  8     
             1  8    
@@ -100,19 +83,12 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% test_chain = t33.in, t34.in
 #%% [files]
 #%% files_to_test =
-#%%  t33.out, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01
+#%%  t34.out, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01
 #%% [paral_info]
 #%% max_nprocs = 8
-#%% [shell]
-#%% post_commands =
-#%%  ww_cp t33o_DS1_WFK t34i_DS1_WFK;
-#%%  ww_cp t33o_DS2_SCR t34i_DS1_SCR;
-#%%  ww_cp t33o_DS3_CHKP_RDM_1 t34i_DS1_CHKP_RDM_1;
-#%%  ww_cp t33o_DS3_CHKP_RDM_2 t34i_DS1_CHKP_RDM_2;
-#%%  ww_cp t33o_DS3_CHKP_RDM_5 t34i_DS1_CHKP_RDM_5;
 #%% [extra_info]
 #%% authors = M. Rodriguez-Mayorga
 #%% keywords = NC, GW
 #%% description = 
-#%%  GW.at.KS density matrix test (Print new WFK and DEN files and compute energies)
+#%%  Same as t33.out but reading some checkpoint (i.e. 1, 2, and 5) files
 #%%<END TEST_INFO>
