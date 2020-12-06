@@ -318,10 +318,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (dtset%tolwfr > zero) then
    lock_tolwfr = tol2 * dtset%tolwfr
  else
-   lock_tolwfr = tol10
-   if (accuracy_level >= 2) lock_tolwfr = tol12
-   if (accuracy_level >= 3) lock_tolwfr = tol16
-   if (accuracy_level >= 4) lock_tolwfr = tol20
+   lock_tolwfr = tol14
+   if (accuracy_level >= 2) lock_tolwfr = tol16
+   if (accuracy_level >= 3) lock_tolwfr = tol18
+   if (accuracy_level >= 4) lock_tolwfr = tol20 * tol2
  end if
 
  ! Use mixed precisions if requested by the user but only for low accuracy_level
@@ -395,6 +395,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! - Convergence behaviour may depend on bsize as branches are taken according to
  !   the status of all bands in the block.
  ! TODO: Transpose only once per block and then work with already_transposed = .True.
+ if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
@@ -689,8 +690,8 @@ contains
 function resids2str(level) result(str)
   character(len=*),intent(in) :: level
   character(len=500) :: str
-  !res_stats = stats_eval(resid(1:nb_pocc))
-  res_stats = stats_eval(resid(1:nband))
+  res_stats = stats_eval(resid(1:nb_pocc))
+  !res_stats = stats_eval(resid(1:nband))
   write(str, "(1x, a12, 4(es10.3))") trim(level), res_stats%mean, res_stats%min, res_stats%max, res_stats%stdev
 end function resids2str
 

@@ -4551,7 +4551,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
    ! MG: Do not remove this initialization.
    ! telast_06 stops in fxphase on inca_debug and little_buda (very very strange, due to atlas?)
-   work=zero
+   !work=zero
 
    call abi_xgemm('N','N',npw_k*my_nspinor,nband_k,nband_k,cone, &
      cg(:,icg+1:npw_k*my_nspinor*nband_k+icg),npw_k*my_nspinor, &
