@@ -2400,7 +2400,7 @@ endif
 
  else
    ! MRM: sigmak_todo is an array indicating whether the k-point must be computed for GW correction. This array is set to DO IT (to 1) for any GW calculation
-   ! it will only change to NOT DO IT (to 0) in case that a density matrix update calc. is used and we are reading checkpoint files
+   ! and it will only change to NOT DO IT (to 0) in case that a density matrix update calc. is used and we are reading checkpoint files
    ABI_MALLOC(sigmak_todo,(Wfd%nkibz))
    sigmak_todo(:)=1
 
