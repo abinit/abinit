@@ -93,10 +93,10 @@ and
 These are similar to those determined in [tutorial 1](base1),
 although they have been obtained in one run.
 You can also check that the residual forces are lower than `5.0d-4`.
-Convergence issues are discussed in [[help:abinit#7|section 7]] of the abinit help file.
+Convergence issues are discussed in [[help:abinit#numerical-quality|section 6]] of the abinit help file, on numerical quality.
 You should read it.
 By the way, you have read many parts of the abinit help file!
-You are missing the sections [[help:abinit#2|2]], [[help:abinit#5|5]],  [[help:abinit#7|7]].
+You are missing the sections [[help:abinit#2|2]], [[help:abinit#pseudopotential-files|5]],  [[help:abinit#numerical-quality|6]].
 
 You are also missing the description of many input variables.
 We suggest that you finish reading entirely the abinit help file now, while
