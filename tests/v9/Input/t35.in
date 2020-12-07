@@ -42,7 +42,7 @@ ntypat  1         # There is only one type of atom
 znucl   2         # The keyword "znucl" refers to the atomic number of the 
                   # possible type(s) of atom. The pseudopotential(s) 
                   # mentioned in the "files" file must correspond
-                  # to the type(s) of atom. Here, the only type is Silicon.
+                  # to the type(s) of atom. Here, the only type is Helium.
                          
 # Definition of the atoms
 natom  1          # There is one atom
