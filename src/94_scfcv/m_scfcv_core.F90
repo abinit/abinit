@@ -333,7 +333,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  integer :: mcprj_wvl
 #endif
  integer :: me,me_wvl,mgfftdiel,mgfftf,moved_atm_inside,moved_rhor,my_nspinor,n1xccc
- integer :: n3xccc,ncpgr,nddir,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrcondft,ngrvdw,nhatgrdim,nk3xc,nkxc
+ integer :: n3xccc,ncpgr,nfftdiel,nfftmix,nfftmix_per_nfft,nfftotf,ngrcondft,ngrvdw,nhatgrdim,nk3xc,nkxc
  integer :: npawmix,npwdiel,nstep,nzlmopt,optcut,optcut_hf,optene,optgr0,optgr0_hf
  integer :: optgr1,optgr2,optgr1_hf,optgr2_hf,option,optrad,optrad_hf,optres,optxc,prtfor,prtxml,quit
  integer :: quit_sum,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
@@ -1129,10 +1129,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      end if
      ABI_ALLOCATE(vectornd,(with_vectornd*nfftf,3))
      if(with_vectornd .EQ. 1) then
-       do nddir=1,3
-        call make_vectornd(1,gsqcut,nddir,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
-             & rprimd,vectornd(:,nddir),xred)
-       end do
+        call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
+             & rprimd,vectornd,xred)
      endif
 
    end if ! moved_atm_inside==1 .or. istep==1

@@ -69,27 +69,16 @@ contains
 !!
 !! FUNCTION
 !! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
-!! in r space, in direction idir. This is done by computing A(G) followed by FFT.
+!! in r space. This is done by computing A(G) followed by FFT.
 !!
 !! NOTES
 !! This code is copied and modified from m_spacepar/hartre where a very similar loop
 !! over G is done followed by FFT to real space
 !!
 !! INPUTS
-!! cplex
-!! gsqcut
-!! idir
-!! izero
-!! mpi_enreg
-!! natom
-!! nfft
-!! ngfft
-!! nucdipmom
-!! rprimd
-!! xred
 !!
 !! OUTPUT
-!!  vectornd(nfft)=Vector potential in real space, along Cartesian direction idir
+!!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
 !!
 !! PARENTS
 !!      m_scfcv_core
@@ -99,18 +88,18 @@ contains
 !!
 !! SOURCE
 
-subroutine make_vectornd(cplex,gsqcut,idir,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom,&
+subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom,&
      & rprimd,vectornd,xred)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,izero,natom,nfft
+ integer,intent(in) :: cplex,izero,natom,nfft
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
- real(dp),intent(out) :: vectornd(nfft)
+ real(dp),intent(out) :: vectornd(nfft,3)
 
 !Local variables-------------------------------
  !scalars
@@ -128,7 +117,7 @@ subroutine make_vectornd(cplex,gsqcut,idir,izero,mpi_enreg,natom,nfft,ngfft,nucd
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),gred(3),mcgc(3),rmet(3,3)
  real(dp) :: rgbasis(3,3,3)
- real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work(:,:)
+ real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
 
 
 ! *************************************************************************
@@ -189,8 +178,10 @@ subroutine make_vectornd(cplex,gsqcut,idir,izero,mpi_enreg,natom,nfft,ngfft,nucd
  ig1max=-1;ig2max=-1;ig3max=-1
  ig1min=n1;ig2min=n2;ig3min=n3
 
- ABI_ALLOCATE(work,(2,nfft))
- work=zero
+ ABI_ALLOCATE(work1,(2,nfft))
+ ABI_ALLOCATE(work2,(2,nfft))
+ ABI_ALLOCATE(work3,(2,nfft))
+ work1=zero; work2=zero; work3=zero
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
  ! Triple loop on each dimension
@@ -214,8 +205,8 @@ subroutine make_vectornd(cplex,gsqcut,idir,izero,mpi_enreg,natom,nfft,ngfft,nucd
        ii1=1
        if(i23==0 .and. ig2==0 .and. ig3==0)then
          ii1=2
-         work(re,1+i23)=zero
-         work(im,1+i23)=zero
+         work1(re,1+i23)=zero
+         work1(im,1+i23)=zero
        end if
 
        ! Final inner loop on the first dimension (note the lower limit)
@@ -242,14 +233,23 @@ subroutine make_vectornd(cplex,gsqcut,idir,izero,mpi_enreg,natom,nfft,ngfft,nucd
                 ! r.G has no need of the metric if both terms are in reduced coords
                 mcgc = MATMUL(TRANSPOSE(gprimd),mcgc)
                 
-                work(re,ii) = work(re,ii) + real(prefac*cgr*mcgc(idir)/gs)
-                work(im,ii) = work(im,ii) + aimag(prefac*cgr*mcgc(idir)/gs)
+                work1(re,ii) = work1(re,ii) + real(prefac*cgr*mcgc(1)/gs)
+                work2(re,ii) = work2(re,ii) + real(prefac*cgr*mcgc(2)/gs)
+                work3(re,ii) = work3(re,ii) + real(prefac*cgr*mcgc(3)/gs)
+
+                work1(im,ii) = work1(im,ii) + aimag(prefac*cgr*mcgc(1)/gs)
+                work2(im,ii) = work2(im,ii) + aimag(prefac*cgr*mcgc(2)/gs)
+                work3(im,ii) = work3(im,ii) + aimag(prefac*cgr*mcgc(3)/gs)
 
              end do
           else
              ! gs>cutoff
-             work(re,ii)=zero
-             work(im,ii)=zero
+             work1(re,ii)=zero
+             work1(im,ii)=zero
+             work2(re,ii)=zero
+             work2(im,ii)=zero
+             work3(re,ii)=zero
+             work3(im,ii)=zero
           end if
 
        end do ! End loop on i1
@@ -263,15 +263,29 @@ subroutine make_vectornd(cplex,gsqcut,idir,izero,mpi_enreg,natom,nfft,ngfft,nucd
 
  if ( izero .EQ. 1 ) then
    ! Set contribution of unbalanced components to zero
-    call zerosym(work,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+
+    call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work2,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+    call zerosym(work3,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+
  end if
 
  ! Fourier Transform
  ABI_ALLOCATE(ndvecr,(cplex*nfft))
  ndvecr=zero
- call fourdp(cplex,work,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:)=ndvecr(:)
- ABI_DEALLOCATE(work)
+ call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,1)=ndvecr(:)
+ ABI_DEALLOCATE(work1)
+ 
+ ndvecr=zero
+ call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,2) = ndvecr(:)
+ ABI_DEALLOCATE(work2)
+ 
+ ndvecr=zero
+ call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
+ vectornd(:,3) = ndvecr(:)
+ ABI_DEALLOCATE(work3)
  ABI_DEALLOCATE(ndvecr)
 
 end subroutine make_vectornd
