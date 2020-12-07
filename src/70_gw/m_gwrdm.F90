@@ -1027,48 +1027,48 @@ subroutine print_total_energy(ekin_energy,evext_energy,evextnl_energy,e_corepsp,
          &----------------------------------'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Ekinetic   = : ',ekin_energy,' Ha ,',ekin_energy*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Ekinetic   = : ',ekin_energy,' Ha ,',ekin_energy*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Evext_l    = : ',evext_energy,' Ha ,',evext_energy*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Evext_l    = : ',evext_energy,' Ha ,',evext_energy*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Evext_nl   = : ',evextnl_energy,' Ha ,',evextnl_energy*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Evext_nl   = : ',evextnl_energy,' Ha ,',evextnl_energy*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Epsp_core  = : ',e_corepsp,' Ha ,',e_corepsp*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Epsp_core  = : ',e_corepsp,' Ha ,',e_corepsp*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Ehartree   = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Ex[SD]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Ex[SD]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Exc[MBB]   = : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Exc[MBB]   = : ',exc_mbb_energy,' Ha ,',exc_mbb_energy*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Enn        = : ',e_ewald,' Ha ,',e_ewald*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Enn        = : ',e_ewald,' Ha ,',e_ewald*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  write(msg,'(a98)')'-----------------------------------------------------------------&
          &--------------------------------'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Etot[SD]   = : ',etot,' Ha ,',etot*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Etot[SD]   = : ',etot,' Ha ,',etot*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Etot[MBB]  = : ',etot2,' Ha ,',etot2*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Etot[MBB]  = : ',etot2,' Ha ,',etot2*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+ write(msg,'(a,f10.5,a,f10.3,a)')' Vee[SD]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,2(es16.6,a))')' Vee[MBB]   = : ',(exc_mbb_energy+eh_energy),' Ha ,',&
+ write(msg,'(a,f10.5,a,f10.3,a)')' Vee[MBB]   = : ',(exc_mbb_energy+eh_energy),' Ha ,',&
          &(exc_mbb_energy+eh_energy)*Ha_eV,' eV'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
- write(msg,'(a,1(es16.6))')  ' Density    = : ',den_int
+ write(msg,'(a,f10.5)')  ' Density    = : ',den_int
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  write(msg,'(a)')' Vee[SD] (= Ehartree + Ex[SD]) energy obtained using GW 1-RDM:'
@@ -1164,15 +1164,15 @@ subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,BSt,new_hartr,old_pu
            &--------------------------------------------------------------------'
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-   write(msg,'(a126)')' k-point  band      eik^GS        eik^new     Delta eik  &
-     &      K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]'
+   write(msg,'(a)')'  k-point  band      eik^GS        eik^new     Delta eik  &
+     &       K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]'
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    do ib=b1gw,b2gw
      delta_band_ibik=(new_hartr(ib,ikcalc)-Mels%vhartree(ib,ib,ik_ibz,1))&
      &+Sr%x_mat(ib,ib,ik_ibz,1)-Mels%vxcval(ib,ib,ik_ibz,1)-old_purex(ib,ikcalc)
      eik_new=real(BSt%eig(ib,ik_ibz,1))+real(delta_band_ibik)
-     write(msg,'(i5,4x,i5,8(4x,f10.5))') &
+     write(msg,'(i5,4x,i5,8(4x,f10.3))') &
      & ik_ibz,ib,real(BSt%eig(ib,ik_ibz,1))*Ha_eV,eik_new*Ha_eV,real(delta_band_ibik)*Ha_eV,& 
      & real(Sr%x_mat(ib,ib,ik_ibz,1))*Ha_eV,real(old_purex(ib,ikcalc))*Ha_eV,&
      & real(Mels%vxcval(ib,ib,ik_ibz,1))*Ha_eV,&
