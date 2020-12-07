@@ -712,7 +712,7 @@ subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rd
 
  DBG_ENTER("COLL")
 
- if (my_rank==0) then
+ if (my_rank==master) then
    iread_eigv=Wfd%mband
    iread_eigv=iread_eigv*(2*iread_eigv)
    ABI_MALLOC(occ_tmp,(Wfd%mband))
@@ -857,7 +857,7 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 
  DBG_ENTER("COLL")
 
- if (my_rank==0) then
+ if (my_rank==master) then
    if(ik_ibz<10) then
      write(gw1rdm_fname,"(a,i1)") trim(gw1rdm_fname_out),ik_ibz
    else if(ik_ibz<100 .and. ik_ibz>=10) then
