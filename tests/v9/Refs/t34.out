@@ -1,6 +1,6 @@
 
 .Version 9.3.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu8.3 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon  7 Dec 2020.
-- ( at 20h52 )
+- ( at 20h57 )
   
-- input  file    -> /home/marm314/Installers/abinit/abinit/tests/Test_suite/v9_t33-t34-t35/t34.in
+- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33-t34-t35/t34.in
 - output file    -> t34.out
 - root for input  files -> t34i
 - root for output files -> t34o
@@ -44,7 +44,7 @@ _ WF disk file :      0.031 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -58,7 +58,7 @@ _ WF disk file :      0.031 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
              ecut      8.00000000E+00 Hartree
          ecutsigx      8.00000000E+00 Hartree
           ecutwfn      8.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         512
         gwcalctyp          21
            gw1rdm           2
        irdchkprdm           1
@@ -159,7 +159,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  2.5000000  2.5000000  G(1)= -0.2000000  0.2000000  0.2000000
@@ -169,8 +169,8 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/marm314/Installers/abinit/abinit/tests/Psps_for_tests/He-GGA.psp8
-- pspatm: opening atomic psp file    /home/marm314/Installers/abinit/abinit/tests/Psps_for_tests/He-GGA.psp8
+- pspini: atom type   1  psp file is /home/marm314/abinit/tests/Psps_for_tests/He-GGA.psp8
+- pspatm: opening atomic psp file    /home/marm314/abinit/tests/Psps_for_tests/He-GGA.psp8
 - He    ONCVPSP-3.2.3.1  r_core=   1.26476   1.13601
 -  2.00000   2.00000    170510                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -242,7 +242,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
   Number of electrons    =    2.0000
 
   QP Band energy    [Ha] = -7.95592502835262E-01
-  QP Hartree energy [Ha] =  3.53069364627211E-01
+  QP Hartree energy [Ha] =  3.53069363469165E-01
 
 --------------------------------------------------------------------------------
 
@@ -281,7 +281,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  number of real frequencies                          1
  number of imag frequencies                        120
  Self-Consistent on Energies and Wavefunctions
- Bands used for the GW_1RDM arrays        1        8
+ Bands used for the GW 1RDM arrays        1        8
  number of imaginary frequencies for Sigma_c        40
 
  Computing the 1-RDM correction for  Sx-Vxc  and k-point:    0.50000   0.50000   0.00000
@@ -349,7 +349,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
     2        2        14.098        20.169         6.072        -4.556         0.000       -10.661         1.125         1.158
     2        3        23.721        30.411         6.689        -2.905         0.000        -9.583        -0.275        -0.286
     2        4        40.528        47.715         7.187        -1.760         0.000        -8.929        -0.995        -1.013
-    2        5        42.660        50.949         8.289        -2.987         0.000       -11.312         1.753         1.789
+    2        5        42.660        50.949         8.289        -2.987         0.000       -11.313         1.753         1.789
     2        6        57.976        66.182         8.207        -2.011         0.000       -10.238         0.549         0.569
     2        7        63.769        72.284         8.515        -1.775         0.000       -10.297         0.279         0.287
     2        8        65.601        74.041         8.440        -1.723         0.000       -10.168         0.376         0.381
@@ -428,7 +428,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
           ecutwfn      8.00000000E+00 Hartree
            etotal1     0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         512
         gwcalctyp          21
            gw1rdm           2
        irdchkprdm           1
@@ -589,10 +589,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          2.1
+.Delivered   1 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.1  wall=          2.2

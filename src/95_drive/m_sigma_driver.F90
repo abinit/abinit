@@ -2415,7 +2415,7 @@ endif
      ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
      ABI_MALLOC(nat_occs,(Wfd%mband,Wfd%nkibz))
      ABI_MALLOC(xrdm_k_full,(b1gw:b2gw,b1gw:b2gw,Wfd%nkibz))
-     write(msg,'(a34,2i9)')' Bands used for the GW_1RDM arrays',b1gw,b2gw
+     write(msg,'(a34,2i9)')' Bands used for the GW 1RDM arrays',b1gw,b2gw
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      xrdm_k_full=czero; nat_occs=zero; nateigv=czero;
