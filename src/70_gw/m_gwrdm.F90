@@ -701,7 +701,8 @@ subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rd
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ierr,iunit,ib1,ib2,ib3,ikcalc,istat,ik_ibz,ik_ibz_read,iread,iread_eigv
+ integer :: ierr,ib1,ib2,ib3,ikcalc,istat,ik_ibz,ik_ibz_read,iread,iread_eigv
+ integer(8) :: iunit
  real(dp) :: auxl_read
  character(len=fnlen) :: gw1rdm_fname
  character(len=500) :: msg
@@ -847,7 +848,8 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iunit,iwrite,iwrite2
+ integer :: iwrite,iwrite2
+ integer(8) :: iunit
  character(len=fnlen) :: gw1rdm_fname
  character(len=500) :: msg
 !arrays
