@@ -137,7 +137,7 @@ MODULE m_xmpi
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released)
 
- logical,save, private :: xmpi_use_inplace_operations = .True.
+ logical,save, private :: xmpi_use_inplace_operations = .False.
  ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
 
  ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.

@@ -222,7 +222,7 @@ type(args_t) function args_parser() result(args)
       call linalg_allow_gemm3m(parse_yesno(arg, "--use-xgemm3m"), write_msg=iam_master)
 
     ! Enable/disable usage of MPI_IN_PLACE.
-    else if (begins_with(arg, "--use_mpi-in-place")) then
+    else if (begins_with(arg, "--use-mpi-in-place")) then
       call xmpi_set_inplace_operations(parse_yesno(arg, "--use-mpi-in-place"))
 
     ! Enable/disable PLASMA
@@ -259,7 +259,10 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"-d, --dry-run              Validate input file and exit."
         write(std_out,*)"-j, --omp-num-threads      Set the number of OpenMp threads."
         write(std_out,*)"--use-xgemm3m[=yesno]      Use ZGEMM3M routines instead of ZGEMM. Default: no "
-        write(std_out,*)"--use-mpi-in-place[=yesno] Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum. Default: yes"
+        write(std_out,*)"--use-mpi-in-place[=yesno] Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum. Default: no"
+        write(std_out,*)"                           Note that some MPI libs e.g. intel-mpi may not implement this feature"
+        write(std_out,*)"                           correctly so it is adviced to test this option with e.g. structural"
+        write(std_out,*)"                           relaxations before running production calculations."
         write(std_out,*)"--log                      Enable log files and status files in parallel execution."
         write(std_out,*)"--netcdf-classic           Use netcdf classic mode for new files if parallel-IO is not needed."
         write(std_out,*)"                           Default is netcdf4/hdf5"
