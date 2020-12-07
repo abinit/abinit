@@ -42,6 +42,7 @@ module m_scfcv_core
  use m_cgtools
  use m_dtfil
  use m_distribfft
+ use m_nonlop,           only : nonlop_counter
 
 
  use defs_datatypes,     only : pseudopotential_type
@@ -1014,7 +1015,9 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     call wrtout(std_out, sjoin("{SCF_istep:", itoa(istep-1),", wall_time:", sec2str(wtime_step), "} <<< TIME"))
+     call wrtout(std_out, sjoin("{SCF_istep:", itoa(istep-1), ", Vnl|psi>:", itoa(nonlop_counter), &
+                  ", wall_time: '", sec2str(wtime_step), "'} <<< TIME"))
+     nonlop_counter = 0
 
      if (have_timelimit_in(MY_NAME)) then
        if (istep > 2) then

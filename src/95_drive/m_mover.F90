@@ -484,7 +484,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     write(msg,*)sjoin("{mover_itime:", itoa(itime - 1), ", wall_time:", sec2str(wtime_step), "} <<< TIME")
+     write(msg,*)sjoin("{mover_itime:", itoa(itime - 1), ", wall_time: '", sec2str(wtime_step), "'} <<< TIME")
      if(need_verbose)call wrtout(std_out, msg)
      if (have_timelimit_in(MY_NAME)) then
        if (itime > 2) then
