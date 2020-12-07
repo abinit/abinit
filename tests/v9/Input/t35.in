@@ -11,7 +11,7 @@ symsigma       0       # Sym. switched off for sigma
 gwcalctyp     21       # Compute the linearized density as when doing self-consistent AC_GW
 nband          8       # Bands to be used in the Self-Energy calculation
 ecutsigx     8.0
-nomegasi      20       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
+nomegasi      40       # Number of freqs (w) in Imag axis used for Sigma_c(iw) 
 
 nkptgw         6       # number of k-point where to calculate the GW correction
 kptgw                  # k-points in reduced coordinates (1-6), read from output
@@ -32,24 +32,23 @@ bdgw
 # Data common to the three different datasets
 
 # Definition of the unit cell: fcc
-acell  3*10.217        # This is equivalent to   10.217 10.217 10.217
+acell  3*5.000         # This is equivalent to    5.000  5.000  5.000
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5   
        0.5  0.5  0.0
 
 # Definition of the atom types
 ntypat  1         # There is only one type of atom
-znucl  14         # The keyword "znucl" refers to the atomic number of the 
+znucl   2         # The keyword "znucl" refers to the atomic number of the 
                   # possible type(s) of atom. The pseudopotential(s) 
                   # mentioned in the "files" file must correspond
                   # to the type(s) of atom. Here, the only type is Silicon.
                          
 # Definition of the atoms
-natom  2          # There are two atoms
-typat  1 1        # They both are of type 1, that is, Silicon.
+natom  1          # There is one atom
+typat  1          # of type 1, that is, Helium.
 xred              # Reduced coordinate of atoms
-      0.0  0.0  0.0
-      0.25 0.25 0.25
+      0.50 0.50 0.50
 
 # Definition of the k-point grid
 ngkpt   2 2 2  
@@ -74,7 +73,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
                   # Here, we follow the prescription for bulk silicon.
                   #
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Si-GGA.psp8"
+ pseudos "He-GGA.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
