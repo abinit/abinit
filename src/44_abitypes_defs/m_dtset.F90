@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_dtset
+module m_dtset
 
  use defs_basis
  use m_abicore
@@ -530,6 +530,8 @@ type, public :: dataset_type
  integer :: rfuser
  integer :: rf2_dkdk
  integer :: rf2_dkde
+ integer :: rmm_diis = 0
+ integer :: rmm_diis_savemem = 0
 !S
  integer :: sigma_nshiftk = 1      ! Number of shifts in k-mesh for Sigma_{nk}.
  integer :: signperm
@@ -1105,7 +1107,7 @@ subroutine dtset_chkneu(dtset, charge, occopt)
            'number of electrons = ',dtset%nelect,ch10,&
            'and spinmagntarget = ',dtset%spinmagntarget,ch10,&
            'This combination is not possible, because of a lack of bands.',ch10,&
-           'Action: modify input file ... ',ch10,&
+           'Action: modify input file',ch10,&
            '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
            MSG_ERROR(msg)
          end if
@@ -1161,12 +1163,12 @@ subroutine dtset_chkneu(dtset, charge, occopt)
 
      end if
 
-!    Here, treat the case when the number of allowed bands is not large enough
    else
-     write(msg, '(a,i0,8a)' )&
-     'Initialization of occ, with occopt: ',occopt,ch10,&
-     'There are not enough bands to get charge balance right',ch10,&
-     'Action: modify input file ... ',ch10,&
+     ! Here, treat the case when the number of allowed bands is not large enough
+     write(msg, '(a,i0,2a, es12.4, 6a)' )&
+     'Initialization of occ variables with occopt: ',occopt,ch10,&
+     'There are not enough bands to get charge balance right with nelect:', dtset%nelect, ch10, &
+     'Action: modify input file ',ch10,&
      '(check the pseudopotential charges, the variable charge,',ch10,&
      'and the declared number of bands, nband)'
      MSG_ERROR(msg)
@@ -1776,6 +1778,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfuser             = dtin%rfuser
  dtout%rf2_dkdk           = dtin%rf2_dkdk
  dtout%rf2_dkde           = dtin%rf2_dkde
+ dtout%rmm_diis           = dtin%rmm_diis
+ dtout%rmm_diis_savemem   = dtin%rmm_diis_savemem
  dtout%rhoqpmix           = dtin%rhoqpmix
  dtout%rifcsph            = dtin%rifcsph
  dtout%signperm           = dtin%signperm
@@ -3233,6 +3237,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
  list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs'
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
+ list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'

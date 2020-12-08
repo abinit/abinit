@@ -951,7 +951,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
        '- pspatm : Reading pseudopotential header in XML form from ', trim(psps%filpsp(ipsp))
      call wrtout([std_out, ab_out], msg)
 
-!    Return header informations
+!    Return header information
      call pawpsxml2ab(psps%filpsp(ipsp),ecut_tmp, pspheads_tmp,0)
      lmax=pspheads_tmp%lmax
      pspxc=pspheads_tmp%pspxc

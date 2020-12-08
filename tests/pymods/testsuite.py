@@ -3648,8 +3648,15 @@ class AbinitTestSuite(object):
                     stats_suite[test.suite_name] = d
 
                 stats_suite[test.suite_name][test.status] += 1
-                stats_suite[test.suite_name]["run_etime"] += test.run_etime
-                stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
+                try:
+                    stats_suite[test.suite_name]["run_etime"] += test.run_etime
+                    stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
+                except AttributeError:
+                    print("Cannot access run_etime, tot_etime attributes of test:\n\t%s" % str(test))
+                    print("Likely due to timeout error.")
+                    print("Continuing anyway despite the error.")
+                    stats_suite[test.suite_name]["run_etime"] += 0.0
+                    stats_suite[test.suite_name]["tot_etime"] += 0.0
 
             suite_names = sorted(stats_suite.keys())
 

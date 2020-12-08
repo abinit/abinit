@@ -1,4 +1,4 @@
-#i coding: utf-8
+# coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 executable = "abinit"
@@ -412,32 +412,37 @@ Variable(
     requires="[[paral_kgb]] == 1",
     added_in_version="before_v9",
     text=r"""
-Control the size of the block in the LOBPCG algorithm. This keyword works only
-with [[paral_kgb]] = 1 and has to be either 1 or a multiple of 2.
+Control the size of the block in the LOBPCG algorithm.
+
+!!! important
+
+    This keyword works only with [[paral_kgb]] = 1 and has to be either 1 or a multiple of 2.
+    Moreover [[nband]] / ([[npband]]  $\times$ n) has to be integer.
 
 With [[npband]] = 1:
 
 * 1 --> band-per-band algorithm
 * n --> The minimization is performed using [[nband]] blocks of n bands.
 
-!!! warning
-
-    [[nband]] has to be an integer.
-
-With [[npband]] $\ne$ 1:
+With [[npband]] > 1:
 
 * 1 --> The minimization is performed using [[nband]] / [[npband]] blocks of [[npband]] bands.
 * n --> The minimization is performed using [[nband]] / ([[npband]] $\times$ n) blocks of [[npband]]  $\times$ n bands.
 
-!!! warning
-
-    [[nband]] / ([[npband]]  $\times$ n) has to be an integer.
-
 By minimizing a larger number of bands together in LOBPCG, we increase the
-convergence of the residual. The better minimization procedure (as concerns
+convergence of the residuals. The better minimization procedure (as concerns
 the convergence, but not as concerns the speed) is generally performed by
-using *bandpp*  $\times$ [[npband]] = [[nband]]. Put *bandpp* = 2 when [[istwfk]] = 2
-(the time spent in FFTs is divided by two).
+using *bandpp*  $\times$ [[npband]] = [[nband]].
+
+When performing Gamma-only calculations ([[istwfk]] = 2), it is recommended to set *bandpp* = 2
+(or a multiple of 2) as the time spent in FFTs is divided by two.
+Also, the time required to apply the non-local part of the KS Hamiltonian can be significantly
+reduced if [[bandpp]] > 1 is used in conjunction with [[use_gemm_nonlop]] = 1.
+
+Note that increasing the value of [[bandpp] can have a significant impact on the computing time
+(especially if [[use_gemm_nonlop]] is used)
+but keep in mind that the size of the workspace arrays will also increase so the calculation may go out-of-memory
+if a too large [[bandpp] is used in systems if many atoms.
 """,
 ),
 
@@ -1599,7 +1604,7 @@ Variable(
     defaultval=1,
     mnemonics="CHecK SYMmetry of TNONS",
     characteristics=['[[INPUT_ONLY]]'],
-    added_in_version="v9.2",
+    added_in_version="9.2.0",
     text=r"""
 This variable governs the behaviour of the code when there is a potential
 symmetry breaking, related to the presence
@@ -2223,11 +2228,12 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives a rough description of the initial GS density, for each type of atom.
-This value is only used to create the first exchange and correlation
-potential, and is not used anymore afterwards. For the time being, it
-corresponds to an average radius (a.u.) of the density, and is used to
-generate a gaussian density. If set to 0.0, an optimized value is used.
-No meaning for RF calculations.
+This value is used to create the first exchange and correlation
+potential. Afterwards, it is not used anymore, except in cases related to [[densfor_pred]]. 
+
+[[densty]] gives an average radius (a.u.) of a Gaussian density, that will make each pseudoion neutral.
+If set to 0.0, a tabulated value is used, announced as a 'decay length' in the log file.
+No meaning for RF calculations or any calculation in which a starting density is taken as input.
 """,
 ),
 
@@ -3309,7 +3315,7 @@ Defines the linear grid resolution (energy increment) to be used for the
 computation of the Density-Of-States, when [[prtdos]] is non-zero.
 If [[dosdeltae]] is set to zero (the default value), the actual increment is
 0.001 Ha if [[prtdos]] = 1 or 4 (smearing technique), and the much smaller value 0.00005 Ha if
-[[prtdos]] = 2, 3 or 5 (tetrahedron technique). This different default value arises because the 
+[[prtdos]] = 2, 3 or 5 (tetrahedron technique). This different default value arises because the
 smearing technique gives a quite smooth DOS, while the DOS
 from the tetrahedron method is rapidly varying.
 """,
@@ -4152,7 +4158,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="EXPERTise of the USER",
-    added_in_version="v9.2.2",
+    added_in_version="9.2.2",
     text=r"""
 If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
 If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero).
@@ -4917,9 +4923,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This variable is typically used to chain the calculations, in the multi-
-dataset mode ([[ndtset]] > 0), since it describes from which dataset [[acell]]
-and [[rprim]] are to be taken, as input of the present dataset. The cell
-parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
+dataset mode ([[ndtset]] > 0), since it describes from which dataset the output [[acell]]
+and [[rprim]] are to be taken (implicitly also [[scalecart]]), as input of the present dataset. 
+The cell parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
 If 0, no previously computed values are used.
 If >0, the value must be the index of the dataset from which the
 cell data is to be used as input data. It must be the index of a dataset already
@@ -5877,7 +5883,7 @@ Variable(
     defaultval=6,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
     requires="[[optdriver]] in [3,4]",
-    added_in_version="v9.1",
+    added_in_version="9.1",
     text=r"""
 Many-body calculations for fully periodic systems are problematic due to the
 presence of the integrable Coulomb singularity at $\mathbf{G}=0$ that hinders
@@ -7286,150 +7292,208 @@ Variable(
     mnemonics="IONic MOVEs",
     added_in_version="before_v9",
     text=r"""
-Choice of algorithm to control the displacements of ions, and eventually (see
-[[optcell]]) changes of cell shape and size.
+Choice of algorithm to control the displacements of ions, and eventually changes of cell shape and size (see [[optcell]]).
+No meaning for RF calculations.
 
-  * 0 --> Do not move ions;
+  * 0 --> Do not move ions (**default behaviour**)
 
-  * 1 --> Move atoms using molecular dynamics with optional viscous damping (friction linearly proportional to velocity). The viscous damping is controlled by the parameter "[[vis]]". If actual undamped molecular dynamics is desired, set [[vis]] to 0. The implemented algorithm is the generalisation of the Numerov technique (6th order), but is NOT invariant upon time-reversal, so that the energy is not conserved. The value **ionmov** = 6 will usually be preferred, although the algorithm that is implemented is lower-order. The time step is governed by [[dtion]].
-**Purpose:** Molecular dynamics (if [[vis]] = 0), Structural optimization (if
-[[vis]] >0)
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** Viscous parameter [[vis]], time step [[dtion]], index of atoms fixed [[iatfix]]
+  * 1 --> Move atoms using molecular dynamics with optional viscous damping (friction linearly proportional to velocity).
+  The viscous damping is controlled by the [[vis]] parameter.
+  If undamped molecular dynamics is desired, set [[vis]] to 0.
+  The implemented algorithm is the generalisation of the Numerov technique (6th order), but is NOT invariant upon time-reversal,
+  so that the energy is not conserved.
+  The value **ionmov** = 6 will usually be preferred, although the algorithm that is implemented is lower-order.
+  The time step is governed by [[dtion]].
+  **Purpose:** Molecular dynamics (if [[vis]] = 0), Structural optimization (if [[vis]] >0)
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+  **Related variables:** Viscous parameter [[vis]], time step [[dtion]], index of atoms fixed [[iatfix]]
 
-  * 2 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS). This is much more efficient for structural optimization than viscous damping, when there are less than about 10 degrees of freedom to optimize. Another version of the BFGS is available with **ionmov** == 22, and is apparently more robust and efficient than **ionmov** == 2.
-**Purpose:** Structural optimization
-**Cell optimization:** Yes (if [[optcell]]/=0)
-**Related variables:**
+  * 2 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS).
+  This is much more efficient for structural optimization than viscous damping, when there are
+  less than about 10 degrees of freedom to optimize.
+  Another version of the BFGS is available with **ionmov** == 22, and is apparently more robust and
+  efficient than **ionmov** == 2.
+  **Purpose:** Structural optimization
+  **Cell optimization:** Yes (if [[optcell]]/=0)
 
-  * 3 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS), modified to take into account the total energy as well as the gradients (as in usual BFGS).
-See [[cite:Schlegel1982]]. Might be better than **ionmov** = 2 for few degrees of freedom (less than 3 or 4). Can be very
-unstable - use with caution!
-**Purpose:** Structural optimization
-**Cell optimization:** Yes (if [[optcell]]/=0)
-**Related variables:**
+  * 3 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS),
+  modified to take into account the total energy as well as the gradients (as in usual BFGS).
+  See [[cite:Schlegel1982]]. Might be better than **ionmov** = 2 for few degrees of freedom (less than 3 or 4).
+  Can be very unstable - use with caution!
+  **Purpose:** Structural optimization
+  **Cell optimization:** Yes (if [[optcell]]/=0)
 
-  * 4 --> Conjugate gradient algorithm for simultaneous optimization of potential and ionic degrees of freedom. It can be used with [[iscf]] = 2 and [[iscf]] =5 or 6 (WARNING: this is under development, and does not work very well in many cases).
-**Purpose:** Structural optimization
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:**
+  * 4 --> Conjugate gradient algorithm for simultaneous optimization of potential and ionic degrees of freedom.
+  It can be used with [[iscf]] = 2 and [[iscf]] =5 or 6
+  (WARNING: this is under development, and does not work very well in many cases).
+  **Purpose:** Structural optimization
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
 
-  * 5 --> Simple relaxation of ionic positions according to (converged) forces. Equivalent to **ionmov** = 1 with zero masses, albeit the relaxation coefficient is not [[vis]], but [[iprcfc]].
-**Purpose:** Structural optimization
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:**
+  * 5 --> Simple relaxation of ionic positions according to (converged) forces.
+  Equivalent to **ionmov** = 1 with zero masses, albeit the relaxation coefficient is not [[vis]], but [[iprcfc]].
+  **Purpose:** Structural optimization
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
 
-  * 6 --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987a]] p 81]. The only related parameter is the time step ([[dtion]]).
-**Purpose:** Molecular dynamics
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
+  * 6 --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987a]] p 81].
+  The only related parameter is the time step ([[dtion]]).
+  **Purpose:** Molecular dynamics
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+  **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
 
-  * 7 --> Quenched Molecular dynamics using the Verlet algorithm, and stopping each atom for which the scalar product of velocity and force is negative. The only related parameter is the time step ([[dtion]]). The goal is not to produce a realistic dynamics, but to go as fast as possible to the minimum. For this purpose, it is advised to set all the masses to the same value (for example, use the Carbon mass, i.e. set [[amu]] to 12 for all type of atoms).
-**Purpose:** Structural optimization
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
+  * 7 --> Quenched Molecular dynamics using the Verlet algorithm, and stopping each atom for which
+  the scalar product of velocity and force is negative. The only related parameter is the time step ([[dtion]]).
+  The goal is not to produce a realistic dynamics, but to go as fast as possible to the minimum.
+  For this purpose, it is advised to set all the masses to the same value
+  (for example, use the Carbon mass, i.e. set [[amu]] to 12 for all type of atoms).
+  **Purpose:** Structural optimization
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+  **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
 
   * 8 --> Molecular dynamics with Nose-Hoover thermostat, using the Verlet algorithm.
-**Purpose:** Molecular dynamics
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** time step ([[dtion]]), Temperatures ([[mdtemp]]), and
-thermostat mass ([[noseinert]]).
+  **Purpose:** Molecular dynamics
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+  **Related variables:** time step ([[dtion]]), Temperatures ([[mdtemp]]), and thermostat mass ([[noseinert]]).
 
   * 9 --> Langevin molecular dynamics.
-**Purpose:** Molecular dynamics
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]) and
-friction coefficient ([[friction]]).
+  **Purpose:** Molecular dynamics
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+  **Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]) and friction coefficient ([[friction]]).
 
-  * 10 --> Delocalized internal coordinates with BFGS simple
-**Purpose:** Structural optimization
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:**
+  * 10 --> Delocalized internal coordinates with simple BFGS
+  **Purpose:** Structural optimization
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
 
   * 11 --> Delocalized internal coordinates with BFGS using total energy
-**Purpose:** Structural optimization
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:**
+  **Purpose:** Structural optimization
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
 
   * 12 --> Isokinetic ensemble molecular dynamics.
-The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed in [[cite:Zhang1997]],
-as worked out in [[cite:Minary2003]].
-The conservation of the kinetic energy is obtained within machine precision, at each step.
-As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
-microscopic kinetic energy is hosted is 3*natom-4. Indeed, the total kinetic energy is constrained, which accounts for
-minus one degree of freedom (also mentioned in [[cite:Minary2003]]), but also there are three degrees of freedom
-related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
-total momentum is also preserved (but this is not mentioned in [[cite:Minary2003]]). When some atom is fixed in one or more direction,
-e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly,
-albeit taking into account that the total momentum is not preserved
-anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
-**Purpose:** Molecular dynamics
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** time step ([[dtion]]) and the first temperature in [[mdtemp]] in case the velocities [[vel]] are not initialized, or all initialized to zero.
+    The equation of motion of the ions in contact with a thermostat are solved with the
+    algorithm proposed in [[cite:Zhang1997]], as worked out in [[cite:Minary2003]].
+    The conservation of the kinetic energy is obtained within machine precision at each step.
+    As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
+    microscopic kinetic energy is hosted is 3*[[natom]] - 4.
+    Indeed, the total kinetic energy is constrained, which accounts for
+    minus one degree of freedom (also mentioned in [[cite:Minary2003]]), but also there are three degrees of freedom
+    related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
+    total momentum is also preserved (but this is not mentioned in [[cite:Minary2003]]).
+    When some atom is fixed in one or more direction,
+    e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly,
+    albeit taking into account that the total momentum is not preserved
+    anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
+    **Related variables:** time step ([[dtion]]) and the first temperature in [[mdtemp]] in case
+    the velocities [[vel]] are not initialized, or all initialized to zero.
 
-  * 13 --> Isothermal/isenthalpic ensemble. The equation of motion of the ions in contact with a thermostat and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
-If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in
-addition.
-**Purpose:** Molecular dynamics
-**Cell optimization:** Yes (if [[optcell]]/=0)
-**Related variables:** The time step ([[dtion]]), the temperatures
-([[mdtemp]]), the number of thermostats ([[nnos]]), and the masses of
-thermostats ([[qmass]]).
+  * 13 --> Isothermal/isenthalpic ensemble. The equation of motion of the ions in contact with a thermostat
+    and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
+    If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in addition.
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** Yes (if [[optcell]]/=0)
+    **Related variables:** The time step ([[dtion]]), the temperatures ([[mdtemp]]),
+    the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
 
-  * 14 --> Simple molecular dynamics with a symplectic algorithm proposed in [[cite:Blanes2002]]  (called SRKNa14] of the kind first published in [[cite:Yoshida1990]]This algorithm requires at least 14 evaluation of the forces (actually 15 are done within Abinit) per time step. At this cost it usually gives much better energy conservation than the verlet algorithm (**ionmov** 6) for a 30 times bigger value of [[dtion]]. Notice that the potential energy of the initial atomic configuration is never evaluated using this algorithm.
-**Purpose:** Molecular dynamics
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:**
+  * 14 --> Simple molecular dynamics with a symplectic algorithm proposed in [[cite:Blanes2002]]  (called SRKNa14]
+    of the kind first published in [[cite:Yoshida1990]].
+    This algorithm requires at least 14 evaluation of the forces (actually 15 are done within Abinit) per time step.
+    At this cost it usually gives much better energy conservation than the verlet algorithm (**ionmov** 6)
+    for a 30 times bigger value of [[dtion]].
+    Notice that the potential energy of the initial atomic configuration is never evaluated using this algorithm.
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
 
-  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by
-Erik Bitzek, Pekka Koskinen, Franz Gähler, Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]].
-According to the authors, the efficiency of this method is nearly the same as L-bfgs (**ionmov** = 22).
-It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps.
-The initial time step is set with [[dtion]]. Note that the physical meaning and unit of [[dtion]] are different from the default ones.
-The purpose of this algorithm is relaxation, not molecular dynamics. [[dtion]] governs the ion position changes, but the cell parameter changes as well.
-The positions are in reduced coordinates instead of in cartesian coordinates. The suggested first guess of dtion is 0.03.
-**Purpose:** Relaxation
-**Cell optimization:** Yes (if [[optcell]]/=0)
-**Related variables:** The initial time step [[dtion]]
+  * 15 --> Fast inertial relaxation engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler,
+    Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]].
+    According to the authors, the efficiency of this method is nearly the same as L-bfgs (**ionmov** = 22).
+    It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps.
+    The initial time step is set with [[dtion]]. Note that the physical meaning and unit of [[dtion]] are different
+    from the default ones.
+    The purpose of this algorithm is relaxation, not molecular dynamics. [[dtion]] governs the ion position changes,
+    but the cell parameter changes as well.
+    The positions are in reduced coordinates instead of in cartesian coordinates.
+    The suggested first guess of dtion is 0.03.
+    **Purpose:** Relaxation
+    **Cell optimization:** Yes (if [[optcell]]/=0)
+    **Related variables:** The initial time step [[dtion]]
 
-  * 20 --> Direct inversion of the iterative subspace. Given a starting point [[xred]] that is a vector of length 3*[[natom]] (reduced nuclei coordinates), and unit cell parameters ([[rprimd]]) this routine uses the DIIS (direct inversion of the iterative subspace) to minimize the gradient (forces) on atoms. The preconditioning used to compute errors from gradients is using an inverse hessian matrix obtained by a BFGS algorithm. This method is known to converge to the nearest point where gradients vanish. This is efficient to refine positions around a saddle point for instance.
-**Purpose:** Structural optimization
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** DIIS memory [[diismemory]]
+  * 20 --> Direct inversion of the iterative subspace.
+    Given a starting point [[xred]] that is a vector of length 3*[[natom]] (reduced nuclei coordinates),
+    and unit cell parameters ([[rprimd]]) this routine uses the DIIS (direct inversion of the iterative subspace)
+    to minimize the gradient (forces) on atoms.
+    The preconditioning used to compute errors from gradients is using an inverse hessian matrix obtained by a BFGS algorithm.
+    This method is known to converge to the nearest point where gradients vanish.
+    This is efficient to refine positions around a saddle point for instance.
+    **Purpose:** Structural optimization
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
+    **Related variables:** DIIS memory [[diismemory]]
 
-  * 22 --> Conduct structural optimization using the Limited-memory Broyden-Fletcher-Goldfarb-Shanno minimization (L-BFGS) [[cite:Nocedal1980]]. The working routines were based on the original implementation of J. Nocedal available on netlib.org. This algorithm can be much better than the native implementation of BFGS in ABINIT (**ionmov** = 2) when one approaches convergence, perhaps because of better treatment of numerical details.
-**Purpose:** Structural optimization
-**Cell optimization:** Yes (if [[optcell]]/=0)
-**Related variables:**
+  * 22 --> Conduct structural optimization using the Limited-memory
+    Broyden-Fletcher-Goldfarb-Shanno minimization (L-BFGS) [[cite:Nocedal1980]].
+    The routines are based on the original implementation by J. Nocedal available on netlib.org.
+    This algorithm can be much better than the native implementation of BFGS in ABINIT (**ionmov** = 2)
+    when one approaches convergence, perhaps because of better treatment of numerical details.
+    **Purpose:** Structural optimization
+    **Cell optimization:** Yes (if [[optcell]]/=0)
 
-  * 23 --> Use of Learn on The Fly method (LOTF) for Molecular Dynamics. In the framework of isokinetic MD, the atomic forces and positions are computed by using LOTF interpolation. A SCF computation is performed only any [[lotf_nitex]] steps. The results of the SCF are used to compute the parameters of a short range classical potential (for the moment only the glue potential for gold is implemented). Then these parameters are continuously tuned to compute atomic trajectories. LOTF has to be enabled at configure time. If LOTF is not enabled and **ionmov** = 23, abinit will set automatically **ionmov** = 12.
-The LOTF cycle is divided in the following steps:
-a) Initialization (SFC at t=0) and computation of potential parameters.
-b) Extrapolation of the atomic forces and positions for [[lotf_nitex]] time
-step. To perform this extrapolation, the potential computed in a) is used
-(Verlet algorithm).
-c) SFC at t=[[lotf_nitex]]. Computation of the potential parameters.
-d) LOTF interpolation, linear interpolation of the potential parameters and
-computation of the atomic forces and positions between t=0 and t=lotf_nitex.
-**Purpose:** Molecular Dynamics
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** [[dtion]], [[lotf_classic]], [[lotf_nitex]],
-[[lotf_nneigx]], [[lotf_version]].
+  * 23 --> Use of Learn on The Fly method (LOTF) for Molecular Dynamics.
+    In the framework of isokinetic MD, the atomic forces and positions are computed by using LOTF interpolation.
+    A SCF computation is performed only any [[lotf_nitex]] steps.
+    The results of the SCF are used to compute the parameters of a short range classical potential
+    (for the moment only the glue potential for gold is implemented). Then these parameters are continuously
+    tuned to compute atomic trajectories. LOTF has to be enabled at configure time.
+    If LOTF is not enabled and **ionmov** = 23, abinit will set automatically **ionmov** = 12.
+    The LOTF cycle is divided in the following steps:
+    a) Initialization (SFC at t=0) and computation of potential parameters.
+    b) Extrapolation of the atomic forces and positions for [[lotf_nitex]] time
+    step. To perform this extrapolation, the potential computed in a) is used
+    (Verlet algorithm).
+    c) SFC at t=[[lotf_nitex]]. Computation of the potential parameters.
+    d) LOTF interpolation, linear interpolation of the potential parameters and
+    computation of the atomic forces and positions between t=0 and t=lotf_nitex.
+    **Purpose:** Molecular Dynamics
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
+    **Related variables:** [[dtion]], [[lotf_classic]], [[lotf_nitex]], [[lotf_nneigx]], [[lotf_version]].
 
-  * 24 --> Simple constant energy molecular dynamics using the velocity Verlet symplectic algorithm (second order), see [[cite:Hairer2003]]. The only related parameter is the time step ([[dtion]]).
-**Purpose:** Molecular dynamics
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** time step [[dtion]]
+  * 24 --> Simple constant energy molecular dynamics using
+   the velocity Verlet symplectic algorithm (second order), see [[cite:Hairer2003]].
+   The only related parameter is the time step ([[dtion]]).
+   **Purpose:** Molecular dynamics
+   **Cell optimization:** No (Use [[optcell]] = 0 only)
+   **Related variables:** time step [[dtion]]
 
-  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to **ionmov** = 24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
-Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via short $NVE$ trajectories (ten **ionmov** = 24 steps in current implementation).
- The initial momenta for each trial are randomly sampled from Boltzmann distribution, and the final trajectory state is either accepted or rejected based on the Metropolis criterion.
- Such strategy allows to simultaneously update all reduced coordinates, achieve higher acceptance ratio than classical Metropolis Monte Carlo and better sampling efficiency for shallow energy landscapes [[cite:Prokhorenko2018]].
-**Purpose:** Monte Carlo sampling
-**Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
+  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble).
+  The underlying molecular dynamics corresponds to **ionmov** = 24.
+  The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
+  Within the HMC algorithm [[cite:Duane1987]], the trial states are generated
+  via short $NVE$ trajectories (ten **ionmov** = 24 steps in current implementation).
+  The initial momenta for each trial are randomly sampled from Boltzmann distribution,
+  and the final trajectory state is either accepted or rejected based on the Metropolis criterion.
+  Such strategy allows to simultaneously update all reduced coordinates, achieve higher acceptance
+  ratio than classical Metropolis Monte Carlo and better sampling efficiency
+  for shallow energy landscapes [[cite:Prokhorenko2018]].
+  **Purpose:** Monte Carlo sampling
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+  **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
 
-No meaning for RF calculations.
+  * 27 --> TO BE DOCUMENTED
+
+  * 28 --> Update atomic positions and unit cell parameters using the i-pi client-server protocol
+   as described in [[cite:Kapil2019]].
+   In this case, ABINIT (the client) sends total energies, forces and stress tensor to the server
+   that sends back the new configuration (atomic positions and cell parameters) to the ab-initio
+   engine for further calculations.
+   Note that the server is supposed to generate an input file that is consistent with the optimization/MD
+   algorithm implemented by ABINIT.
+   For instance, a server that wants to performs calculations with varying unit cells
+   should set [[optcell]] > 0 in the initial input.
+
+   Note that this feature is still under DEVELOPMENT and is mainly used to interface ABINIT
+   with the ASE optimization routines.
+   Examples will be provided when the feature is ready for production.
+
+   **Purpose:** Structural optimization driver by the server (MD runs are not yet supported)
+   **Cell optimization:** Yes (provide [[optcell]] > 0 in the initial input)
 """,
 ),
 
@@ -14424,7 +14488,7 @@ Variable(
     defaultval=0,
     mnemonics="PREPAre LongWave calculation",
     characteristics=['[[DEVELOP]]'],
-    added_in_version="v9",
+    added_in_version="9.2.0",
     text=r"""
 The computation of spatial dispersion quantities from the longwave DFPT
 approach requires the first-order wavefunctions and densities obtained from
@@ -15090,7 +15154,7 @@ real space tau(r), in units of Bohr^-5.
 The name of the kinetic energy density file will be the root output name, followed by _KDEN.
 Like a _DEN file, it can be analyzed by cut3d.
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
-Note that the computation of the kinetic energy density must be activate,
+Note that the computation of the kinetic energy density must be activated,
 thanks to the input variable [[usekden]].
 Please note that kinetic energy density is **not** yet implemented in the case
 of PAW ([[usepaw]] = 1) calculations.
@@ -18749,19 +18813,22 @@ Variable(
     commentdefault="because it is not usually worth using it unless bandpp is large and it requires additional memory",
     added_in_version="before_v9",
     text=r"""
-This keyword tells abinit to use a BLAS routine to speed up the computation of
+This keyword tells abinit to use a BLAS3 routine to speed up the computation of
 the non-local operator. This requires the pre-computation of a large matrix,
 and has a significant memory overhead. In exchange, it provides improved
 performance when used on several bands at once (Chebyshev or LOBPCG algorithm
-with [[bandpp]]
+with [[bandpp] > 1]
 
 The memory overhead is proportional to the number of atoms, the number of
 plane waves, and the number of projectors per atom. It can be mitigated by
 distributing the array with [[npfft]]
-
 The performance depends crucially on having a good BLAS installed. Provided
 the BLAS supports OpenMP, this option also yields very good scaling for the
 nonlocal operator.
+
+This option is available only if [[useylm]] is 1. ABINIT will automatically set [[useylm]] to 1
+if [[use_gemm_nonlop]] is set to 1 in the input file (actually, this is only needed when NC pseudos are used as
+PAW already uses 1 for [[useylm]]).
 """,
 ),
 
@@ -21090,7 +21157,7 @@ Possible values are [0, -1, 1].
 Setting this flag to 0 deactivates the treatment of the LR contribution (not recommended in polar materials).
 
 If *dvdb_add_lr* is set to 1, the LR part is removed when computing the real-space representation
-of the DFPT potentials so that the potential in real space is short-ranged and ameneable to Fourier interpolation.
+of the DFPT potentials so that the potential in real space is short-ranged and amenable to Fourier interpolation.
 The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
 
 If *dvdb_add_lr* is set to -1, the LR part is removed before computing the real-space representation
@@ -21124,7 +21191,7 @@ Preliminary considerations:
 
 EPH calculations require very dense samplings of the BZ to converge and the memory requirements
 increase quickly with the number of k-points, q-points and [[natom]].
-The EPH code can MPI-distribute the most important datastructures but non all the MPI-levels
+The EPH code can MPI-distribute the most important data structures but non all the MPI-levels
 present the same scalability and the same parallel efficiency.
 Besides the maximum number of MPI processes that can be used for the different MPI-levels is related
 to the basic dimensions of the calculation.
@@ -21471,7 +21538,7 @@ Variable(
     mnemonics="PseudoPotential DIRectory PATH",
     added_in_version="9.0.0",
     text=r"""
-This variable specifies the directory that will prependeded to the names of the pseudopotentials
+This variable specifies the directory that will prepended to the names of the pseudopotentials
 specified in [[pseudos]].
 This option is useful when all your pseudos are gathered in a single directory in your file system
 and you don not want to type the absolute path for each pseudopotential file.
@@ -21707,7 +21774,7 @@ Note the following important remarks:
 
 - Multidatasets are supported but mind that some variables such as
   [[ntypat]], [[typat]] and [[znucl]] are tagged as [[NO_MULTI]].
-  In other words, one can read different files via [[structure]] and the multidatset syntax
+  In other words, one can read different files via [[structure]] and the multi dataset syntax
   provided these quantities do not change.
   ABINIT syntax such as `xred+` are, obviously, not supported.
 
@@ -21748,7 +21815,7 @@ Possible values are:
 
     0 --> Use unit super cell for $\RR$ space. All weights set to 1.
     1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algorithm as for the dynamical matrix).
-          Note that this option leads to more $\RR$-points with a non-neglibigle increase of the memory allocated.
+          Note that this option leads to more $\RR$-points with a non-negligible increase of the memory allocated.
 
 !!! tip
 
@@ -21768,7 +21835,7 @@ Variable(
     added_in_version="9.1.0",
     text=r"""
 This **advanced** variable defines the $\alpha$ parameter in the Gaussian filter $e^{-\frac{|\qG|^2}{4\alpha}}$
-that multiplies the Fourier components of the model potential in the long wavelength limit (Eq 24 of Brunin2020 PRB
+that multiplies the Fourier components of the model potential in the long wavelength limit (Eq 24 of [[cite:Brunin2020b]]
 see also [[cite:Sjakste2015]] and [[cite:Giustino2017]]).
 
 The $\alpha$ parameter determines the separation between the long-range and the short-range parts
@@ -21821,7 +21888,7 @@ Variable(
     text=r"""
 Gives the doping charge in units of |e_charge| / cm^3.
 Negative for n-doping, positive for p-doping.
-Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
+Alternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
 Require metallic occupation scheme [[occopt]] e.g. Fermi-Dirac.
 """,
 ),
@@ -21841,13 +21908,13 @@ in the computation of electron lifetimes ([[eph_task]] -4) and is used to predic
 the list of $\qq$-points in the BZ that will be needeed during the calculation.
 
 The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk$ but then this
-initial energy window must be increased a bit to accomodate for phonon absorption/emission (from $\kk$ to $\kq$).
-This is importat for $\nk$ states that are close to edge of the initial energy window as this states may be needed
+initial energy window must be increased a bit to accommodate for phonon absorption/emission (from $\kk$ to $\kq$).
+This is important for $\nk$ states that are close to edge of the initial energy window as this states may be needed
 for the linear interpolation used in tetrahedron method.
 
-In a nuthshell, the code increases the initial window using the max phonon frequency multiplied by [[eph_phwinfact]].
+In a nutshell, the code increases the initial window using the max phonon frequency multiplied by [[eph_phwinfact]].
 The default value is a compromise between numerical stability and efficiency.
-Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substancial decrease in the number of
+Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substantial decrease in the number of
 $\kq$ KS states that must be read from file with a subsequent decrease in the memory requirements for the wavefunctions.
 We recommended to perform initial tests to decide whether a value smaller than four can be used.
 """,
@@ -21863,7 +21930,138 @@ Variable(
     mnemonics="Radius of the Interatomic Force Constant SPHere",
     added_in_version="9.2.0",
     text=r"""
-Same meaning as [[rifcsph@anaddb]]
+Same meaning as [[rifcsph@anaddb]].
+""",
+),
+
+Variable(
+    abivarname="rmm_diis",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeed_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Activate the RMM-DIIS eigensolver for GS calculations.",
+    added_in_version="9.3.0",
+    text=r"""
+
+This variable activates the Residual Minimization Method, Direct Inversion in the Iterative Subspace (RMM-DIIS)
+eigensolver to **accelerate** GS computations, structural relaxations and molecular-dynamics simulations.
+The algorithm is inspired to [[cite:Kresse1996]] although the ABINIT implementation is not
+completely equivalent to the original formulation.
+RMM-DIIS can be used both with NC and PAW pseudos and is fully compatible with the [[paral_kgb]] distribution.
+This variable has no effect when [[optdriver]] > 0.
+
+It is worth noting that RMM-DIIS is usually employed **in conjunction with another eigenvalue solver**
+that is used to perform the initial SCF iterations.
+RMM-DIIS, indeed, **is not guaranteed to converge to the ground state**
+as the algorithm will find the eigenvector/eigenvalue pair closest to the input trial state.
+The reliability of RMM-DIIS thus **strongly** depends on the initialisation of the SCF cycle
+and on the quality of the input wavefunctions that are supposed to be reasonably close to the final solution.
+
+Both the CG and the LOBPCG solver can be used in conjunction with RMM-DIIS although
+it is strongly suggested to use LOBPCG with [[paral_kgb]] = 1 to take advantage of
+its better efficiency and improved parallel scalability.
+To activate RMM-DIIS with e.g. LOBPCG, it is sufficient to use:
+
+```
+paral_kgb 1
+rmm_diis  1
+```
+
+in the input file and then select the value of [[npkpt]], [[npband]], [[npfft]], [[npspinor]] according to the system.
+
+!!! tip
+
+    Using [[use_gemm_nonlop]] = 1 with [[bandpp]] > 1 can lead to a significant speedup
+    at the price of increased memory requirements.
+
+In the case of standard SCF calculations, Abinit activates the RMM-DIIS solver after 3 + [[rmm_diis]] SCF iterations.
+When performing structural relaxations, RMM-DIIS is activated after [[rmm_diis]] SCF iterations
+once the first GS calculation is completed.
+This means that using [[rmm_diis]] = 1 for a structural relaxation leads to:
+
+    - 4 SCF iterations with the CG/LOBPCG eigensolver followed by RMM-DIIS when are performing the **first GS calculation**.
+    - 1 SCF iterations with CG/LOBPCG followed by RMM-DIIS for all the subsequent relaxation steps.
+
+A negative value [[rmm_diis]] (e.g. -3) can be used to bypass the initial CG/LOBPCG iterations
+but this option should be used with extreme care and it is not recommended in general.
+
+RMM-DIIS usually requires less wall-time per iteration when compared to other approaches since
+there is no explicit orthogonalization while optimizing the trial states.
+Only a single full-band Cholesky orthogonalization is performed per SCF iteration before recomputing the new density.
+As a consequence, one RMM-DIIS iteration is usually faster (sometimes even by a factor > two) than one CG/LOBPCG iteration,
+especially in systems with relatively large [[mpw]].
+However, the additional steps of the algorithm (subspace rotation and Cholesky orthogonalization)
+present poor MPI-scalability hence this part will start to dominate the wall-time in systems with large [[nband]].
+
+The algorithm can also be used for NSCF band structure calculations although one should not expect RMM-DIIS
+to provide **high-energy** states of the same quality as the one obtain with other eigenvalue solvers.
+Although RMM-DIIS can be used for computing band structures and electron DOS with [[iscf]] = -2, we do not recommend
+using this solver to produce WFK files with many empty states as required by many-body calculations.
+
+From the above discussion, it should be clear that RMM-DIIS is **less stable** than the other eigenvalue solvers
+and you should be aware (and accept) that RMM-DIIS calculations **may fail**.
+In the best case scenario, one clearly sees the problem as the SCF cycle does not convergence and/or
+the code aborts with a non-zero exit status returned by one of the LAPACK routines.
+In the worst case scenario, RMM-DIIS may seamlessly **converge to the wrong solution**.
+This is especially true if the first LOBPCG/CG iterations fail to provide a reasonably-good initial starting point.
+
+In problematic cases, you may want to increase the value of [[rmm_diis]] so that more SCF iterations are done
+with LOBPCG/CG before activating RMM-DIIS.
+RMM-DIIS is indeed very sensitive to density mixing and increasing [[rmm_diis]] is a possible solution if you don't want
+to play with the variables defining the mixing algorithm.
+
+As a general rule, we **strongly suggest** to include in the calculation more [[nband]] bands that what is strictly
+needed to accommodate all the valence electrons (let's say > 10% of the occupied bands).
+Increasing [[nband]], indeed, increases the number of vectors used
+for the Rayleigh-Ritz subspace rotation and this step is crucial for finding the most accurate variational approximation
+to the eigenvectors before starting the DIIS optimization.
+
+For a given precision, RMM-DIIS usually requires more iterations than the other eigensolvers.
+For performance reasons, one should avoid using tight tolerances, .
+Something of the order of [[tolvrs] = 1e-8 or [[toldfe]] = 1e-10 to stop the SCF cycle should be fine.
+Avoid using ([[tolwfr]]) (criterion on the residuals) as converge criterion for SCF cycles
+Use [[tolwfr]] only if you are using RMM-DIIS for NSCF band structure calculations (as this is the only converge criterion
+available for NSCF calculations).
+
+Last but not least, note that the default implementation is quite aggressive at the level of memory allocations.
+A less memory-intensive version of the algorithm can be activated via [[rmm_diis_savemem]] = 1.
+
+TIPS:
+
+Mention [[bandpp]] and band locking.
+Use more permissive tolerances and then restart with tighter settings.
+
+On the other hand, please keep in mind that **RMM-DIIS is not guaranteed to find the correct ground-state**.
+Moreover the algorithm may have problems to converge and more iterations may be needed to reach a given precision.
+Also, the present implementation is optimized for converging occupied states so we do not recommend
+RMM-DIIS for highly-accurate calculations especially if KS states in the empty region are needed (e.g. GW calculations).
+
+Obviously the time-to-solution depends on the overall number of SCF iterations required to reach convergence.
+This is the reason why providing RMM-DIIS with reasonable initial trial wavefunctions and potential
+is crucial both for performance and the reliability of the results.
+Obviously, it is possible to use [[rmm_diis]] to perform initial GS or structural relaxations and
+then restart from the WFK file using e.g. the LOBPCG solver to reconverge the results with stricter tolerance.
+""",
+),
+
+Variable(
+    abivarname="rmm_diis_savemem",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeed_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Save memory in the RMM-DIIS eigensolver.",
+    added_in_version="9.3.0",
+    text=r"""
+This variable allows one to save memory in the RMM-DIIS eigensolver when [[rmm_diis]] /= 0.
+By default, the RMM-DIIS routine allocates two extra arrays to reduce the number of applications of the Hamiltonian.
+The size of these arrays depends on the number of plane-waves treated by each processor and [[nband]].
+The amount of memory scales with [[npband]] and [[npfft] yet this extra memory is not negligible and the code
+may go out of memory for large systems.
+In this case, one can use [[rmm_diis_savemem]] = 1 to activate a version of RMM-DIIS that avoids these extra allocations.
 """,
 ),
 

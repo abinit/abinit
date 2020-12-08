@@ -26,7 +26,7 @@
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       4
      lnmax =       2     mgfft =      60  mpssoang =       3    mqgrid =    3001
      natom =     256  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =       1    n1xccc =    2501    ntypat =       1
@@ -34,7 +34,7 @@
 -    mband =         500        mffmem =           1         mkmem =           1
        mpw =         588          nfft =      216000          nkpt =           1
 ================================================================================
-P This job should need less than                      80.523 Mbytes of memory.
+P This job should need less than                      80.622 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      4.488 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 ================================================================================
@@ -43,7 +43,7 @@ _ WF disk file :      4.488 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       4
      lnmax =       2     mgfft =      60  mpssoang =       3    mqgrid =    3001
      natom =     256  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =       1    n1xccc =    2501    ntypat =       1
@@ -51,7 +51,7 @@ _ WF disk file :      4.488 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 -    mband =         520        mffmem =           1         mkmem =           1
        mpw =         588          nfft =      216000          nkpt =           1
 ================================================================================
-P This job should need less than                      81.408 Mbytes of memory.
+P This job should need less than                      81.507 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      4.668 Mbytes ; DEN or POT disk file :      1.650 Mbytes.
 ================================================================================
@@ -289,6 +289,7 @@ P           mkmem           1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
   use_gemm_nonlop           1
+           useylm           1
          wfoptalg         114
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  1.6946900105E+00  1.6946900105E+00
@@ -6587,6 +6588,7 @@ P           mkmem           1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
                        1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
   use_gemm_nonlop           1
+           useylm           1
          wfoptalg         114
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  1.6946900105E+00  1.6946900105E+00

@@ -743,7 +743,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  if (my_iomode /= IO_MODE_ETSF .and. nproc_fft == 1) my_iomode = IO_MODE_FORTRAN
  if (nproc_fft > 1 .and. my_iomode == IO_MODE_FORTRAN) my_iomode = IO_MODE_MPI
 
- call wrtout(std_out, sjoin(ch10, "  fftdatar_write: About to write data to:", path, "with iomode:",iomode2str(my_iomode)))
+ call wrtout(std_out, sjoin(ch10, "fftdatar_write: About to write data to:", path, "with iomode:",iomode2str(my_iomode)))
  call cwtime(cputime, walltime, gflops, "start")
 
  ! Get MPI-FFT tables from input ngfft

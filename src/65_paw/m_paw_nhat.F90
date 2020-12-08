@@ -1666,7 +1666,7 @@ end subroutine pawsushat
 !!
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
-!!  distribfft<type(distribfft_type)>=--optional-- contains all the informations related
+!!  distribfft<type(distribfft_type)>=--optional-- contains all the information related
 !!                                    to the FFT parallelism and plane sharing
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc

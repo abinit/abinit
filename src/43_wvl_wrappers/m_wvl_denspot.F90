@@ -148,7 +148,7 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 !Note: change allocateRhoPot
  call allocateRhoPot(wvl%Glr,nsppol,wvl%atoms,xcart,den%denspot)
 
-!Aditional informations.
+!Aditional information.
  den%symObj = wvl%atoms%astruct%sym%symObj
 
  ABI_DEALLOCATE(xcart)

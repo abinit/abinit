@@ -40,8 +40,8 @@ module m_xg
   use m_errors
   use m_abicore
 
-  use defs_basis, only : std_err, std_out
-  use m_time,     only: timab
+  use defs_basis, only : std_err, std_out, zero
+  use m_time,     only : timab
   use m_xmpi,     only : xmpi_sum
 
 
@@ -307,20 +307,21 @@ module m_xg
       MSG_ERROR("cols < 1 ")
     end if
 
+    ! MG: Initialize arrays with zero to avoid SIGFPE in xmpi_sum
     select case (space)
     case (SPACE_R,SPACE_CR)
       if ( allocated(xg%vecR) ) then
         ABI_FREE(xg%vecR)
       end if
       ABI_MALLOC(xg%vecR,(1:rows,1:cols))
-      !xg%vecR(:,:) = 0.d0
+      xg%vecR(:,:) = zero
       xg%trans = 't'
     case (SPACE_C)
       if ( allocated(xg%vecC) ) then
         ABI_FREE(xg%vecC)
       end if
       ABI_MALLOC(xg%vecC,(1:rows,1:cols))
-      !xg%vecC(:,:) = dcmplx(0.d0)
+      xg%vecC(:,:) = zero
       xg%trans = 'c'
     case default
       MSG_ERROR("Invalid space")

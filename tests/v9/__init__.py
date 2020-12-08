@@ -34,6 +34,8 @@ inp_files = [
 "t19.in", # disable all checks thanks to expert_user
 "t20.in", # test treatment of inaccurate POSCAR file
 "t21.in", # test treatment of inaccurate POSCAR file
+"t29.in", # RMM-DIIS eigsolver for NC.
+"t30.in", # RMM-DIIS eigsolver for PAW.
 # GW/BSE
 "t31.in", # HF exchange checking q->0 terms
 "t32.in", # AC GW
@@ -62,11 +64,11 @@ inp_files = [
 "t81.in", # set initial spin using rotation q-modulation
 "t82.in", # damping
 # New lattice mover in multibinit
-"t83.in", # Langevin NVT 
+"t83.in", # Langevin NVT
 "t84.in", # Berendsen NVT
 "t85.in", # Velocity Verlet NVE
 "t86.in", # Spin lattice coupling, Only Oiju term activated.
-"t87.in", # Spin lattice coupling, Oiju and Tijuv. 
+"t87.in", # Spin lattice coupling, Oiju and Tijuv.
 # GS Coulomb cut-off
 "t90.in", # checkG Coulomb cut-off, large tolerance a.t.m.
 ]

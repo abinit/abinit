@@ -4,6 +4,7 @@ npband 10
 npfft 1
 npkpt 1
 use_gemm_nonlop 1
+useylm 1
 
 prtden 0 prtwf 0 prteig 0
 ecut 6.

@@ -1208,7 +1208,7 @@ end subroutine wvl_rhov_abi2big_gen
 !! see doc/variables/vargs.html#ngfft for details about ngfft
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=informations about MPI parallelization (description of the
+!!  mpi_enreg=information about MPI parallelization (description of the
 !!            density and potentials scatterring is allocated and updated).
 !!  dtset <type(dataset_type)>=the FFT grid is changed.
 !!
@@ -1297,7 +1297,7 @@ end subroutine wvl_setngfft
 !!
 !! FUNCTION
 !! When wavelets are used, the box definition needs to be changed.
-!! The box size is recomputed knowing some psp informations such as
+!! The box size is recomputed knowing some psp information such as
 !! the radius for coarse and fine grid. Then, the atoms are translated
 !! to be included in the new box. Finally the FFT grid is computed using
 !! the fine wavelet mesh and a buffer characteristic of used wavelets plus
