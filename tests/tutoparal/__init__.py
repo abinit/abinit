@@ -25,40 +25,40 @@ subsuites = [
 
 #: List of input files
 inp_files = [
-#"gswvl_01.in",
-#"gswvl_02.in",
-#"tdfpt_01.in",
-#"tdfpt_02.in",
-"tdfpt_03.in",
-"tdfpt_04.in",
-#"tdfpt_03PAW.in,"
-#"tdfpt_04PAW.in",
-#"tdmft_1.in",
-#"tdmft_2.in",
-"tgspw_01.in",
-"tgspw_02.in",    # OK
-"tgspw_03.in",    # OK
-#"tgspw_04.in",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
-#"tgspw_05.in",
-"tmbt_1.in",   # OK     
-"tmbt_2.in",   # OK
-"tmbt_3.in",   # OK
-"tmbt_4.in",   # OK
-#"tmbt_5.in",  
-#"tmoldyn_01.in",    # This is not stable. Does it use random number generators?
-#"tmoldyn_02.in",
-#"tmoldyn_03.in",
-#"tmoldyn_04.in",
-#"tmoldyn_05.in",
-#"tmoldyn_06.in",
-#"tmoldyn_07.in",
-"tstring_01.in",   # MPI Error in MPI_ALLREDUCE
-#"tstring_02.in",
-#"tstring_03.in",
-#"tstring_04.in",
-"tucrpa_1.in",
-"tucrpa_2.in",
-#"tucrpa_3.in",
-#"tucrpa_4.in",
-#"tucrpa_5.in",
+#"gswvl_01.abi",
+#"gswvl_02.abi",
+#"tdfpt_01.abi",
+#"tdfpt_02.abi",
+"tdfpt_03.abi",
+"tdfpt_04.abi",
+#"tdfpt_03PAW.abi,"
+#"tdfpt_04PAW.abi",
+#"tdmft_1.abi",
+#"tdmft_2.abi",
+"tgspw_01.abi",
+"tgspw_02.abi",    # OK
+"tgspw_03.abi",    # OK
+#"tgspw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
+#"tgspw_05.abi",
+"tmbt_1.abi",   # OK     
+"tmbt_2.abi",   # OK
+"tmbt_3.abi",   # OK
+"tmbt_4.abi",   # OK
+#"tmbt_5.abi",  
+#"tmoldyn_01.abi",    # This is not stable. Does it use random number generators?
+#"tmoldyn_02.abi",
+#"tmoldyn_03.abi",
+#"tmoldyn_04.abi",
+#"tmoldyn_05.abi",
+#"tmoldyn_06.abi",
+#"tmoldyn_07.abi",
+"tstring_01.abi",   # MPI Error in MPI_ALLREDUCE
+#"tstring_02.abi",
+#"tstring_03.abi",
+#"tstring_04.abi",
+"tucrpa_1.abi",
+"tucrpa_2.abi",
+#"tucrpa_3.abi",
+#"tucrpa_4.abi",
+#"tucrpa_5.abi",
 ]

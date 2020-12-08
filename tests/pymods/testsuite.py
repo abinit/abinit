@@ -625,7 +625,7 @@ class AbinitTestInfoParser(object):
             inp_fname: test input file
             defaults: default values passed to the INI parser.
         """
-        logger.info("Parsing TEST_INFO section from input file : " + str(inp_fname))
+        #print("Parsing TEST_INFO section from input file : " + str(inp_fname))
 
         self.inp_fname = os.path.abspath(inp_fname)
         self.inp_dir, x = os.path.split(self.inp_fname)
@@ -779,6 +779,7 @@ class AbinitTestInfoParser(object):
                 # print(self.inp_fname, d["max_nprocs"])
 
         # Add the name of the input file.
+        #print("Before AbiitTestInfo", self.inp_fname)
         d['inp_fname'] = self.inp_fname
 
         return AbinitTestInfo(d)
@@ -813,6 +814,8 @@ class AbinitTestInfoParser(object):
         parse = TESTCNF_KEYWORDS[opt][0]
 
         fnames = parse(self.parser.get(section, opt))
+        # HACK
+        fnames = [f.replace(".in", ".abi") for f in fnames]
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
 
     def yaml_test(self):
@@ -1224,6 +1227,7 @@ def make_abitest_from_input(inp_fname, abenv, keywords=None, need_cpp_vars=None,
     Factory function to generate a Test object from the input file inp_fname
     """
     inp_fname = os.path.abspath(inp_fname)
+    #print("make_abitest_from_input got inp_fname", inp_fname)
 
     parser = AbinitTestInfoParser(inp_fname)
 
@@ -1264,7 +1268,7 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
     while inp_fnames:
         inp_fname = inp_fnames.pop(0)
 
-        # print("inp_fname", inp_fname)
+        #print("inp_fname", inp_fname)
         parser = AbinitTestInfoParser(inp_fname)
         nprocs_to_test = parser.nprocs_to_test
 
@@ -1284,13 +1288,14 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
                 out_tests.append(cls(test_info, abenv))
 
         else:
-            logger.info("got chain input %s" % inp_fname)
+            #print("got chain input for inp_fname:", inp_fname)
             # print(parser.chain_inputs())
 
             # Build the test chain with np nprocessors.
             for np in nprocs_to_test:
                 tchain_list = []
                 for cht_fname in parser.chain_inputs():
+                    #print("cht_fname", cht_fname)
                     t = make_abitest_from_input(cht_fname, abenv, keywords=keywords, need_cpp_vars=need_cpp_vars, with_np=np)
                     tchain_list.append(t)
 
@@ -3199,19 +3204,24 @@ class AbinitTestSuite(object):
 
     def git_rename(self):
 
+        seen = set()
         def rename(test):
             #print(test, type(test))
+            if test.inp_fname in seen: return
+            seen.add(test.inp_fname)
+
             root, ext = os.path.splitext(test.inp_fname)
-            assert ext == ".in"
+            #assert ext == ".in"
             new = root + ".abi"
             inbase = os.path.basename(root)
             cmd = f"git mv {test.inp_fname} {new}"
-            import subprocess
-            #subprocess.run(cmd, shell=True, check=True)
+            #import subprocess
             #print("cmd", cmd)
+            #subprocess.run(cmd, shell=True, check=True)
             #call(cmd)
             #print("inp_fname", test.inp_fname)
 
+            """
             # Rename ref files
             old_new = []
             for f in test.files_to_test:
@@ -3239,12 +3249,37 @@ class AbinitTestSuite(object):
                 #print(s)
                 #with open(os.path.splitext(test.inp_fname), "wt") as fh:
                 #    fh.write(s)
+        """
 
+        def rename_chain(chain):
+            old_new = []
+            for test in chain:
+                print(test)
+                root, ext = os.path.splitext(test.inp_fname)
+                #assert ext == ".abi"
+                old = os.path.basename(root + ".in")
+                new = os.path.basename(root + ".abi")
+                #inbase = os.path.basename(root)
+                #cmd = f"git mv {test.inp_fname} {new}"
+                old_new.append((old, new))
+
+            # Change names in TEST_INFO section
+            if old_new:
+                for test in chain:
+                    with open(test.inp_fname, "rt") as fh:
+                        s = fh.read()
+                        for old, new in old_new:
+                            print("replacing test_chain`", old, "`with:`", new, "`in:", test.inp_fname)
+                            s = s.replace(old, new)
+                    #print(s)
+                    #with open(os.path.splitext(test.inp_fname), "wt") as fh:
+                    #    fh.write(s)
 
         for test in self:
             if isinstance(test, ChainOfTests):
-                for t in test:
-                    rename(t)
+                rename_chain(test)
+                #for t in test:
+                #    rename(t)
             else:
                 rename(test)
 
