@@ -27,7 +27,7 @@
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t16.ddb.in
-#%% test_chain = t16.in, t17.in
+#%% test_chain = t16.abi, t17.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t17.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00

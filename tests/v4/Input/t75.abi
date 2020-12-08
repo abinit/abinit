@@ -68,7 +68,7 @@ nbdbuf 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t75.in, t76.in, t77.in
+#%% test_chain = t75.abi, t76.abi, t77.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t75.out, tolnlines = 4, tolabs = 1.010e-03, tolrel = 6.000e-05, fld_options =  -medium

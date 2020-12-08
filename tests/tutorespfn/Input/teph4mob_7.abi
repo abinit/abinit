@@ -93,7 +93,7 @@ nband 8
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
+#%% test_chain =  teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_7.out, tolnlines= 57, tolabs=  80, tolrel= 0.05;

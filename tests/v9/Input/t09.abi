@@ -80,7 +80,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t09.in, t10.in
+#%% test_chain = t09.abi, t10.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t09.out, tolnlines = 37, tolabs = 8.000e-05, tolrel = 3.000e-01, fld_options = -medium;

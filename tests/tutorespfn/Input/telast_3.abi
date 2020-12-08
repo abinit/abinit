@@ -7,7 +7,7 @@ instrflag  1  !the flag for the internal strain tensor
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = telast_2.in, telast_3.in
+#%% test_chain = telast_2.abi, telast_3.abi
 #%% input_ddb = telast_2o_DS3_DDB
 #%% [files]
 #%% files_to_test = 

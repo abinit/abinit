@@ -88,7 +88,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in
+#%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi, t54.abi
 #%% [shell] 
 #%% post_commands = 
 #%%  ww_cp t50o_DS2_WFK t51i_DS1_WFK;

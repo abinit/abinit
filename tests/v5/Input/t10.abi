@@ -7,7 +7,7 @@ t09o
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = conducti
-#%% test_chain = t09.in, t10.in
+#%% test_chain = t09.abi, t10.abi
 #%% [files]
 #%% files_to_test = 
 #%%  t10.out,   tolnlines =10, tolabs = 8.0e-10, tolrel = 9.0e-06, fld_options = -easy;

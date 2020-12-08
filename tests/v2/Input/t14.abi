@@ -8,7 +8,7 @@ t14.ddb.5.0.25.in
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t14.in, t15.in
+#%% test_chain = t14.abi, t15.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t14.ddb.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00

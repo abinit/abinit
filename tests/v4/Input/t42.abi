@@ -53,7 +53,7 @@ diemac 20
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t42.in, t43.in, t44.in, t45.in
+#%% test_chain = t42.abi, t43.abi, t44.abi, t45.abi
 #%% [files]
 #%% files_to_test = t42.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [shell]

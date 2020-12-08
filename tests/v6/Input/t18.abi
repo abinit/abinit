@@ -58,7 +58,7 @@ ecut 15.0          # Maximal kinetic energy cut-off, in Hartree
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t18.in, t19.in
+#%% test_chain = t18.abi, t19.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t18.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  -medium

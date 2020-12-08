@@ -91,7 +91,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t38.in, t39.in, t40.in
+#%% test_chain = t38.abi, t39.abi, t40.abi
 #%% need_cpp_vars = 
 #%% [files]
 #%% files_to_test = 

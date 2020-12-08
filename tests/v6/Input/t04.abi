@@ -43,7 +43,7 @@ getwfk    -1          # Use GS wave functions from dataset1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t04.in, t05.in
+#%% test_chain = t04.abi, t05.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t04.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0

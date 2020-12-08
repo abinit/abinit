@@ -115,7 +115,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t58.in, t59.in
+#%% test_chain = t58.abi, t59.abi
 #%% [shell] 
 #%% post_commands = 
 #%%   ww_mv t58o_DS3_DDB t59i_DS7_DDB;

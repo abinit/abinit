@@ -41,7 +41,7 @@ xred 3*0
 #%% [setup]
 #%% executable = abinit
 #%% input_prefix = t11o
-#%% test_chain = t11.in, t12.in, t13.in, t14.in, t15.in, t16.in, t17.in, t18.in, t19.in, t20.in
+#%% test_chain = t11.abi, t12.abi, t13.abi, t14.abi, t15.abi, t16.abi, t17.abi, t18.abi, t19.abi, t20.abi
 #%% [files]
 #%% files_to_test = t15.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]

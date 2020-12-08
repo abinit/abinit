@@ -33,7 +33,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t61.in, t62.in, t63.in, t64.in, t65.in
+#%% test_chain = t61.abi, t62.abi, t63.abi, t64.abi, t65.abi
 #%% [shell]
 #%% pre_commands = 
 #%%   ww_cp t62o_DDB t65i_DDB;

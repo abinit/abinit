@@ -14,7 +14,7 @@ ntime  = 50
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% test_chain = t95,t96,t97,t98.in
+#%% test_chain = t95,t96,t97,t98.abi
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10

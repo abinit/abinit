@@ -20,7 +20,7 @@ bound_rangePower = 6 6
 #%% executable = multibinit
 #%% system_xml = t100_model.xml
 #%% md_hist = t98.nc
-#%% test_chain = t98.in, t99.in, t100.in
+#%% test_chain = t98.abi, t99.abi, t100.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t100.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;

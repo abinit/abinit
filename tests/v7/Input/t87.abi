@@ -18,7 +18,7 @@ t85o_DS9_POT2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
-#%% test_chain = t85.in, t86.in, t87.in, t88.in, t89.in
+#%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t87.stdout, tolnlines=00, tolabs=6.000e-08, tolrel=4.000e-04, fld_options=-medium

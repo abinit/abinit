@@ -131,7 +131,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t23.in, t24.in, t25.in
+#%% test_chain = t23.abi, t24.abi, t25.abi
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
 #%% files_to_test = 

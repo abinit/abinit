@@ -90,7 +90,7 @@ jpawu  0.0000  # values in Hartree
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t28.in, t29.in
+#%% test_chain = t28.abi, t29.abi
 #%% [files]
 #%% files_to_test =
 ###%%                  t28.out,      tolnlines =7, tolabs =2.0e-6 , tolrel = 1.4e-05, fld_options=-medium ;

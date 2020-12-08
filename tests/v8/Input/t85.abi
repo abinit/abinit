@@ -155,7 +155,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t85.in, t86.in
+#%% test_chain = t85.abi, t86.abi
 #%% [shell]
 #%% post_commands = 
 #%%   ww_mv t85o_DS2_DEN   t86o_DS2_DEN;

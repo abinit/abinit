@@ -167,7 +167,7 @@ optdriver7    5 # for nonlinear calculation
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t87.in, t88.in, t89.in
+#%% test_chain = t87.abi, t88.abi, t89.abi
 #%% [shell]
 #%% post_commands =
 #%%   ww_mv t88o_DS2_DEN   t89o_DS2_DEN;

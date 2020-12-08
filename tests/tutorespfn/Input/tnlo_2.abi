@@ -104,7 +104,7 @@ nbdbuf 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tnlo_2.in, tnlo_3.in, tnlo_4.in, tnlo_5.in
+#%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi, tnlo_5.abi
 #%% [files]
 #%% files_to_test = 
 #%%   tnlo_2.out, tolnlines=  9, tolabs=  9.000e-07, tolrel=  6.000e-05

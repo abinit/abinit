@@ -23,7 +23,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = optic
-#%% test_chain = toptic_1.in, toptic_2.in
+#%% test_chain = toptic_1.abi, toptic_2.abi
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
 #%% [files]
 #%% files_to_test = 

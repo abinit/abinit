@@ -29,7 +29,7 @@ lstep2 1.0d-4  #
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = aim
-#%% test_chain = t56.in, t57.in
+#%% test_chain = t56.abi, t57.abi
 #%% [files]
 #%% files_to_test = t57.out, tolnlines= 12, tolabs=  3.000e-04, tolrel=  1.000e+00, fld_options=-easy
 #%% psp_files=DensityCore_pw/08-O.8.fc, DensityCore_pw/12-Mg.8.fc 

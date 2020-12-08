@@ -26,7 +26,7 @@ blue 0 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = band2eps
-#%% test_chain = trf2_1.in, trf2_3.in, trf2_4.in, trf2_5.in, trf2_6.in, trf2_7.in
+#%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% no_check = yes
 #%% [files]
 ### the tests have been disabled

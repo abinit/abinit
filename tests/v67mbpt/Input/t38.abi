@@ -8,7 +8,7 @@ t37o_DS4_SCR
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgscr
-#%% test_chain = t37.in, t38.in, t39.in
+#%% test_chain = t37.abi, t38.abi, t39.abi
 #%% [files]
 #%% files_to_test=t38.stdout, tolnlines=2, tolabs=1.1e-05, tolrel=2.0e-07
 #%% [paral_info]

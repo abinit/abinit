@@ -78,7 +78,7 @@ diemac 12.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t38.in, t39.in
+#%% test_chain = t38.abi, t39.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t38.out,             tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -ridiculous;

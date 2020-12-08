@@ -3272,8 +3272,8 @@ class AbinitTestSuite(object):
                             print("replacing test_chain`", old, "`with:`", new, "`in:", test.inp_fname)
                             s = s.replace(old, new)
                     #print(s)
-                    #with open(os.path.splitext(test.inp_fname), "wt") as fh:
-                    #    fh.write(s)
+                    with open(test.inp_fname, "wt") as fh:
+                        fh.write(s)
 
         for test in self:
             if isinstance(test, ChainOfTests):

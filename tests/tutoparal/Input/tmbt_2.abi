@@ -66,7 +66,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tmbt_1.in, tmbt_2.in, tmbt_3.in, tmbt_4.in
+#%% test_chain = tmbt_1.abi, tmbt_2.abi, tmbt_3.abi, tmbt_4.abi
 #%% [files]
 #%% [paral_info]
 #%% max_nprocs = 20

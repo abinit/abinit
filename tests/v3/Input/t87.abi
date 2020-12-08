@@ -63,7 +63,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t87.in, t88.in, t89.in, t90.in, t91.in
+#%% test_chain = t87.abi, t88.abi, t89.abi, t90.abi, t91.abi
 #%% [files]
 #%% files_to_test = t87.out, tolnlines=  3, tolabs=  1.100e-03, tolrel=  1.000e-02
 #%% [paral_info]

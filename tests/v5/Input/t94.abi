@@ -77,7 +77,7 @@ qph1l
 #%% executable = anaddb
 #%% input_ddb = t86.ddb.out
 #%% input_gkk = t87o
-#%% test_chain = t85.in, t86.in, t87.in, t88.in, t89.in, t90.in, t91.in, t92.in, t93.in, t94.in, t95.in
+#%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi, t90.abi, t91.abi, t92.abi, t93.abi, t94.abi, t95.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t94.out, tolnlines = 17, tolabs = 3.0e-04, tolrel = 4.0e-06, fld_options = -medium

@@ -11,7 +11,7 @@ t78o_DS62_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t78.in, t79.in, t80.in, t81.in
+#%% test_chain = t78.abi, t79.abi, t80.abi, t81.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t79.ddb.out, tolnlines=    0,   tolabs=  0.0,         tolrel= 0.0, fld_options = -easy

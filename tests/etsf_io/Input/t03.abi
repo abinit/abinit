@@ -14,7 +14,7 @@ t01o_CUT3DDENPOT.nc
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = cut3d
-#%% test_chain = t01.in, t03.in
+#%% test_chain = t01.abi, t03.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t03.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium

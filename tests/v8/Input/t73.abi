@@ -70,7 +70,7 @@ prteig  0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t71.in, t72.in, t73.in, t74.in, t75.in, t76.in, t77.in, t78.in, t79.in, t80.in
+#%% test_chain = t71.abi, t72.abi, t73.abi, t74.abi, t75.abi, t76.abi, t77.abi, t78.abi, t79.abi, t80.abi
 #%% [files]
 #%% files_to_test = 
 #%%    t73.out,  tolnlines =0, tolabs =0, tolrel = 1.0E-8, fld_options=-medium ;

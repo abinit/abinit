@@ -138,7 +138,7 @@ znucl 3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t90.in, t91.in, t92.in, t93.in, t94.in
+#%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
 #%% no_check = yes
 #%% [files]
 #%% files_to_test = 

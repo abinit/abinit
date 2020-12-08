@@ -8,7 +8,7 @@ t51o_DS1_EIGR2D
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in
+#%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi, t54.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t53.ddb.out, tolnlines=    0,   tolabs=  0.0,         tolrel= 0.0, fld_options=-ridiculous

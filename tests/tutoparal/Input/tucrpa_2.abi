@@ -139,7 +139,7 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tucrpa_2.in
+#%% test_chain = tucrpa_2.abi
 #%% [files]
 #%% [shell] 
 #%% [paral_info]

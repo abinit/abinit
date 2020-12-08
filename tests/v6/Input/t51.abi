@@ -13,7 +13,7 @@ t50o_DS9_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t50.in, t51.in, t52.in, t53.in
+#%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t51.ddb.out,  tolnlines=    0,   tolabs=  0.0,         tolrel= 0.0

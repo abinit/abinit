@@ -19,7 +19,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = trf2_1.in, trf2_3.in, trf2_4.in, trf2_5.in, trf2_6.in, trf2_7.in
+#%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% input_ddb = trf2_3.ddb.out 
 #%% [files]
 #%% files_to_test = 

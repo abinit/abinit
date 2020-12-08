@@ -90,7 +90,7 @@ diemac 12.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tbs_1.in, tbs_2.in, tbs_3.in, tbs_4.in
+#%% test_chain = tbs_1.abi, tbs_2.abi, tbs_3.abi, tbs_4.abi
 #%% [files]
 #%% files_to_test = 
 #%%   tbs_1.out,  tolnlines= 20, tolabs=  1.1e-2,    tolrel=  4.0e-2

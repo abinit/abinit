@@ -20,7 +20,7 @@ qph2l 0.0 0.0 1.0 0.0  ! why here the normalization factor is 0
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t67o_DS3_DDB
-#%% test_chain = t67.in, t68.in
+#%% test_chain = t67.abi, t68.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t68.out, tolnlines = 1, tolabs = 5.637e-05, tolrel = 1.001e+00, fld_options = -easy

@@ -44,7 +44,7 @@ pseudos "PseudosTM_pwteter/12mg.pspnc, 05b.soft_tm"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = teph4isotc_1.in
+#%% test_chain = teph4isotc_1.abi
 #%% [files]
 #%% use_git_submodule = test_submodule
 #%% files_to_test =

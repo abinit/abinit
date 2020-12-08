@@ -7,7 +7,7 @@ t81o_DS2_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t81.in, t82.in, t83.in
+#%% test_chain = t81.abi, t82.abi, t83.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t82.ddb.out ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00

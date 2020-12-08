@@ -33,7 +33,7 @@ default                                     ! All parameters set to default for 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atompaw
-#%% test_chain = t03.in, t04.in
+#%% test_chain = t03.abi, t04.abi
 #%% no_check = yes
 #%% [paral_info]
 #%% max_nprocs = 1

@@ -15,7 +15,7 @@ t96o_DS10_1WF3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrggkk
-#%% test_chain = t96.in, t97.in, t98.in, t99.in
+#%% test_chain = t96.abi, t97.abi, t98.abi, t99.abi
 #%% [files]
 #%% files_to_test = 
 #%%    t98.stdout, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00

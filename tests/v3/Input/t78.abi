@@ -99,7 +99,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t78.in, t79.in
+#%% test_chain = t78.abi, t79.abi
 #%% [files]
 #%% files_to_test = t78.out, tolnlines=  3, tolabs=  3.000e-07, tolrel=  4.000e-04, fld_options=-medium
 #%% [paral_info]

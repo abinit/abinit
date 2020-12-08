@@ -8,7 +8,7 @@ t41o_DS5_POT1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
-#%% test_chain = t41.in, t42.in, t43.in, t44.in
+#%% test_chain = t41.abi, t42.abi, t43.abi, t44.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t43.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
@@ -18,5 +18,5 @@ t41o_DS5_POT1
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = Merge the DFPT POT files produced in t41.in
+#%% description = Merge the DFPT POT files produced in t41.abi
 #%%<END TEST_INFO>

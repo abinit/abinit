@@ -53,7 +53,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t71.in, t72.in
+#%% test_chain = t71.abi, t72.abi
 #%% [files]
 #%% files_to_test = 
 #%%  t71.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00

@@ -8,7 +8,7 @@ tlw_1o_DS5_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain =  tlw_1.in, tlw_2.in, tlw_3.in
+#%% test_chain =  tlw_1.abi, tlw_2.abi, tlw_3.abi
 #%% [files]
 #%% files_to_test =
 #%%   tlw_2.ddb.out, tolnlines=  0, tolabs=  1.143e-09, tolrel=  3.000e-09, fld_options = -medium

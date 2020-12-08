@@ -40,7 +40,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t45.in, t46.in, t47.in
+#%% test_chain = t45.abi, t46.abi, t47.abi
 #%% [files]
 #%% files_to_test = t45.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]

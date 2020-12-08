@@ -78,7 +78,7 @@ iatprj_bs 1 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = t72.in, t73.in, t74.in, t75.in, t76.in
+#%% test_chain = t72.abi, t73.abi, t74.abi, t75.abi, t76.abi
 #%% input_ddb = t73.ddb.out 
 #%% input_gkk = t74o
 #%% [files]

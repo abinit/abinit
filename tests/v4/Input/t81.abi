@@ -56,7 +56,7 @@ znucl     14.00000
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t81.in, t82.in, t83.in 
+#%% test_chain = t81.abi, t82.abi, t83.abi 
 #%% [files]
 #%% files_to_test = 
 #%%   t81.out, tolnlines = 1, tolabs = 3.810e-09, tolrel = 2.000e-02

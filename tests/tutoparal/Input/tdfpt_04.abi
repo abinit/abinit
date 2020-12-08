@@ -67,7 +67,7 @@ timopt -2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tdfpt_03.in, tdfpt_04.in
+#%% test_chain = tdfpt_03.abi, tdfpt_04.abi
 #%% [files]
 #%% [paral_info]
 #%% max_nprocs = 24

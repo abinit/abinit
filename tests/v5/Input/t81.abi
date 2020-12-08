@@ -47,7 +47,7 @@ xred 3*0 3*1/4
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t81.in, t82.in, t83.in, t84.in
+#%% test_chain = t81.abi, t82.abi, t83.abi, t84.abi
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp t81o_DS1_WFK t82i_WFK;

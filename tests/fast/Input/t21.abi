@@ -53,7 +53,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% input_prefix = t20o 
-#%% test_chain = t17.in, t19.in, t20.in, t21.in, t23.in
+#%% test_chain = t17.abi, t19.abi, t20.abi, t21.abi, t23.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t21.out, tolnlines = 2, tolabs = 1e-14, tolrel = 1.e-14

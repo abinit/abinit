@@ -54,7 +54,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t03.in, t05.in, t06.in, t07.in, t08.in, t09.in, t11.in, t12.in, t14.in, t16.in
+#%% test_chain = t03.abi, t05.abi, t06.abi, t07.abi, t08.abi, t09.abi, t11.abi, t12.abi, t14.abi, t16.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t03.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00

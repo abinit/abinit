@@ -44,7 +44,7 @@
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t79.ddb.out
-#%% test_chain = t78.in, t79.in, t80.in, t81.in
+#%% test_chain = t78.abi, t79.abi, t80.abi, t81.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t80.out, tolnlines = 10, tolabs = 2.e-4, tolrel = 1.e-6, fld_options =  

@@ -8,7 +8,7 @@ t57o_DS6_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
+#%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
 #%% [files]
 #%% files_to_test =
 #%%   t58.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
@@ -21,5 +21,5 @@ t57o_DS6_DDB
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = Merge the DDB files produced in t57.in
+#%% description = Merge the DDB files produced in t57.abi
 #%%<END TEST_INFO>

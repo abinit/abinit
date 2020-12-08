@@ -55,7 +55,7 @@ enunit     1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tgw2_1.in, tgw2_2.in, tgw2_3.in, tgw2_4.in
+#%% test_chain = tgw2_1.abi, tgw2_2.abi, tgw2_3.abi, tgw2_4.abi
 #%% [files]
 #%% files_to_test = 
 #%%   tgw2_2.out, tolnlines= 32, tolabs=  1.1e-02, tolrel=  4.0e-01 

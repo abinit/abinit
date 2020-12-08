@@ -13,7 +13,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = tffield_2.in, tffield_3.in
+#%% test_chain = tffield_2.abi, tffield_3.abi
 #%% input_ddb = tffield_2o_DS3_DDB
 #%% [files]
 #%% files_to_test = 

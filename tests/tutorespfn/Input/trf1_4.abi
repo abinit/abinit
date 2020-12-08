@@ -70,7 +70,7 @@ diemac 9.0             # Although this is not mandatory, it is worth to
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = trf1_1.in, trf1_2.in, trf1_3.in, trf1_4.in
+#%% test_chain = trf1_1.abi, trf1_2.abi, trf1_3.abi, trf1_4.abi
 #%% input_prefix = trf1_1o
 #%% [files]
 #%% files_to_test = 

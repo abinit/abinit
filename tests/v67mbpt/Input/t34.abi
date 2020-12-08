@@ -70,7 +70,7 @@ bs_interp_m3_width 1.0 # Size of the M3 interpolation (default is 1)
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t31.in, t32.in, t33.in, t34.in, t35.in
+#%% test_chain = t31.abi, t32.abi, t33.abi, t34.abi, t35.abi
 #%% [files]
 #%% files_to_test = 
 #%%  t34.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;

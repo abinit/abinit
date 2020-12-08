@@ -493,8 +493,8 @@ def main():
             raise
             show_examples_and_exit(str(exc))
 
-    test_suite.git_rename()
-    return 1
+    #test_suite.git_rename()
+    #return 1
 
     if not test_suite:
         cprint("No test fulfills the requirements specified by the user!", "red")

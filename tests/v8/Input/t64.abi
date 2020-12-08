@@ -36,7 +36,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = t61.in, t62.in, t63.in, t64.in, t65.in
+#%% test_chain = t61.abi, t62.abi, t63.abi, t64.abi, t65.abi
 #%% input_ddb = t62o_DDB
 #%% [files]
 #%% files_to_test =

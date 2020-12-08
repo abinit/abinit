@@ -68,7 +68,7 @@ kptbounds2  1/4 1/4 1/4 #R'
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tucrpa_1.in
+#%% test_chain = tucrpa_1.abi
 #%% [files]
 #%% [shell] 
 #%% [paral_info]

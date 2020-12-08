@@ -129,7 +129,7 @@ znucl 6
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t41.in, t42.in, t43.in, t44.in
+#%% test_chain = t41.abi, t42.abi, t43.abi, t44.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t44.out, tolnlines = 150, tolabs = 0.07, tolrel = 2.0e-1

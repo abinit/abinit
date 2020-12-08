@@ -72,7 +72,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% input_prefix = t04o
-#%% test_chain = t04.in, t07.in
+#%% test_chain = t04.abi, t07.abi
 #%% no_check = yes
 #%% [files]
 # MG: this file is not tested ###%% t07.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
@@ -86,6 +86,6 @@
 #%%   Bulk Aluminium, FCC, with 10 special points, occopt=7 and tsmear=0.05 .
 #%%   Start from the wavefunctions of case 4, reformatted by case 6.
 #%%   Ask to compute the DOS. See the WARNING described in case 6.
-#%%   Cannot use more that 2 processors due to t04.in
+#%%   Cannot use more that 2 processors due to t04.abi
 #%% topics = ElecDOS
 #%%<END TEST_INFO>

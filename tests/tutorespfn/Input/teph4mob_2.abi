@@ -14,7 +14,7 @@ teph4mob_1o_DS10_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in,
+#%% test_chain =  teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi,
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_2.stdout, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03

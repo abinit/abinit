@@ -102,7 +102,7 @@ nshiftk   1              # Use one copy of grid only (default)
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = telast_2.in, telast_3.in
+#%% test_chain = telast_2.abi, telast_3.abi
 #%% [files]
 #%% files_to_test = 
 #%%   telast_2.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy

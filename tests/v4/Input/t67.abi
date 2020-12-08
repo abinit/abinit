@@ -66,7 +66,7 @@ nshiftk   1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t67.in, t68.in
+#%% test_chain = t67.abi, t68.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t67.out, tolnlines = 17, tolabs = 21.0, tolrel = 3.000e-03, fld_options = -easy

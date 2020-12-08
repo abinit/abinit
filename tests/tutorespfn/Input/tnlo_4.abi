@@ -9,7 +9,7 @@ tnlo_2o_DS5_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = tnlo_2.in, tnlo_3.in, tnlo_4.in, tnlo_5.in
+#%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi, tnlo_5.abi
 #%% [files]
 #%% files_to_test = 
 #%%   tnlo_4.ddb.out, tolnlines=  0, tolabs=  1.143e-09, tolrel=  3.000e-09, fld_options=-medium

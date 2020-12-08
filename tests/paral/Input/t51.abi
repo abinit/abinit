@@ -39,7 +39,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t51.in, t52.in, t53.in
+#%% test_chain = t51.abi, t52.abi, t53.abi
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10

@@ -44,7 +44,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% input_prefix = t31o
-#%% test_chain = t31.in, t32.in
+#%% test_chain = t31.abi, t32.abi
 #%% [files]
 #%% files_to_test = t32.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]

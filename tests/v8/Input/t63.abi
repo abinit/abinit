@@ -8,7 +8,7 @@ t61o_DS5_POT1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
-#%% test_chain = t61.in, t62.in, t63.in, t64.in, t65.in
+#%% test_chain = t61.abi, t62.abi, t63.abi, t64.abi, t65.abi
 #%% [shell]
 #%% post_commands = ww_cp t63o_DVDB t65i_DVDB
 #%% [files]
@@ -19,5 +19,5 @@ t61o_DS5_POT1
 #%% [extra_info]
 #%% authors = G. Antonius
 #%% keywords = NC, DFPT, EPH
-#%% description = Merge the DFPT POT files produced in t61.in
+#%% description = Merge the DFPT POT files produced in t61.abi
 #%%<END TEST_INFO>

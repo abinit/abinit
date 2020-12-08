@@ -92,7 +92,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tudet_1.in, tudet_2.in, tudet_3.in
+#%% test_chain = tudet_1.abi, tudet_2.abi, tudet_3.abi
 #%% [files]
 #%% files_to_test = 
 #%%   tudet_2.abo, tolnlines=  4, tolabs=  8.000e-03, tolrel=  6.500e-01, fld_options = -easy

@@ -24,7 +24,7 @@ maxatd   14.0   # Important to include enough starting atoms,
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = aim
-#%% test_chain = t30.in, t31.in
+#%% test_chain = t30.abi, t31.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t31.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium

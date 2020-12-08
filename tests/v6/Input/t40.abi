@@ -24,7 +24,7 @@ qph1l
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = t37.in, t38.in, t39.in, t40.in
+#%% test_chain = t37.abi, t38.abi, t39.abi, t40.abi
 #%% input_ddb = t38.ddb.out 
 #%% input_gkk = t39.ddb.out 
 #%% [files]

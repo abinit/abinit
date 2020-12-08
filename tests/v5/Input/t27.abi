@@ -8,7 +8,7 @@ t26o_DS3_EIGR2D
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% test_chain = t26.in, t27.in, t28.in
+#%% test_chain = t26.abi, t27.abi, t28.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t27.ddb.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -easy

@@ -112,7 +112,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t58.in, t59.in
+#%% test_chain = t58.abi, t59.abi
 #%% [shell] 
 #%% post_commands = 
 #%% [files]

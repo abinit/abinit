@@ -59,7 +59,7 @@ qph1l
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain =  teph_1.in, teph_2.in, teph_3.in, teph_4.in, teph_5.in, teph_6.in
+#%% test_chain =  teph_1.abi, teph_2.abi, teph_3.abi, teph_4.abi, teph_5.abi, teph_6.abi
 #%% input_ddb = teph_2.ddb.out 
 #%% input_gkk = teph_3o_GKK.bin
 #%% [files]

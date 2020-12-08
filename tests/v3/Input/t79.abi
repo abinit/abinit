@@ -17,7 +17,7 @@ t78o_DS2_WFK
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = conducti
-#%% test_chain = t78.in, t79.in
+#%% test_chain = t78.abi, t79.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t79.out, tolnlines=  1, tolabs=  4.000e-08, tolrel=  7.000e-06, fld_options=-medium;

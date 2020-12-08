@@ -10,7 +10,7 @@ t63        # Root for the output name
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = cut3d
-#%% test_chain = t62.in, t63.in, t64.in
+#%% test_chain = t62.abi, t63.abi, t64.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t63_k1_b1, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium 

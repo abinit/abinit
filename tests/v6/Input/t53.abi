@@ -30,7 +30,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = t50.in, t51.in, t52.in, t53.in
+#%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi
 #%% input_ddb = t51.ddb.out
 #%% input_gkk = t52.ddb.out
 #%% [files]

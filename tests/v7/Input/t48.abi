@@ -26,7 +26,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = optic
-#%% test_chain = t47.in, t48.in, t49.in
+#%% test_chain = t47.abi, t48.abi, t49.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t48_0001_0001-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 

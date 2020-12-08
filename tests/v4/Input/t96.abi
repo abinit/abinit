@@ -34,7 +34,7 @@ iscf 17 # Needed for electron-positron
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t95.in, t96.in
+#%% test_chain = t95.abi, t96.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t96.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00

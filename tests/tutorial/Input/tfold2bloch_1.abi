@@ -77,7 +77,7 @@ nshiftk   1              # Use one copy of grid only (default)
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tfold2bloch_1.in, tfold2bloch_2.in
+#%% test_chain = tfold2bloch_1.abi, tfold2bloch_2.abi
 #%% [files]
 #%% files_to_test = 
 #%%   tfold2bloch_1.out, tolnlines=38, tolabs=2.0e-4, tolrel=2.0e-02

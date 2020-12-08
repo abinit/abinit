@@ -23,7 +23,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = optic
-#%% test_chain = t11.in, t12.in
+#%% test_chain = t11.abi, t12.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t12_0001_0001-linopt.out          , tolnlines = 3,   tolabs = 3.0e-03, tolrel = 2.0e-04, fld_options = -easy;

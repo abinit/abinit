@@ -23,7 +23,7 @@
 #%% [setup]
 #%% executable = optic
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
-#%% test_chain = t41.in, t42.in
+#%% test_chain = t41.abi, t42.abi
 #%% [files]
 #%% files_to_test = 
 #%%   t42_0001_0001-linopt.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy

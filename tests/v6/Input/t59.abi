@@ -21,7 +21,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = t58.in, t59.in
+#%% test_chain = t58.abi, t59.abi
 #%% input_ddb = t58o_DS2_DDB
 #%% input_gkk = t58o_DS2_EIGR2D
 #%% [files]

@@ -5,7 +5,7 @@ tfold2bloch_1o_DS2_WFK # WFK file
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = fold2Bloch
-#%% test_chain = tfold2bloch_1.in, tfold2bloch_2.in
+#%% test_chain = tfold2bloch_1.abi, tfold2bloch_2.abi
 #%% [files]
 #%% files_to_test = 
 #%%   tfold2bloch.f2b, tolnlines=100, tolabs=0.1, tolrel=0.2;
