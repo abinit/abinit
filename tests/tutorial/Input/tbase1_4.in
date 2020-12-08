@@ -6,7 +6,7 @@
 prtden 1
 
 #-----------------------------------------------------------------
-#What follows is similar to the t11.in file, except the interatomic distance
+#What follows is similar to the tbase1_1.in file, except the interatomic distance
 
 #Definition of the unit cell
 acell 10 10 10    # The keyword "acell" refers to the
@@ -14,13 +14,14 @@ acell 10 10 10    # The keyword "acell" refers to the
 #rprim 1 0 0  0 1 0  0 0 1 # This line, defining orthogonal primitive vectors,
                            # is commented, because it is precisely the default value of rprim
 
-#Definition of the atom types
+#Definition of the atom types and pseudopotentials
 ntypat 1          # There is only one type of atom
-znucl 1           # The keyword "znucl" refers to the atomic number of the 
-                  # possible type(s) of atom. The pseudopotential(s) 
-                  # mentioned in the "files" file must correspond
-                  # to the type(s) of atom. Here, the only type is Hydrogen.
-                         
+znucl 1           # The keyword "znucl" refers to the atomic number of the possible type(s) of atom.
+                  # Here, the only type is Hydrogen. The pseudopotential(s)
+                  # mentioned after the keyword "pseudos" should correspond to this type of atom.
+pp_dirpath "$ABI_PSPDIR"                 # This is the path to the directory were pseudopotentials for tests are stored
+pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8"  # Name and location of the pseudopotential
+
 
 #Definition of the atoms
 natom 2           # There are two atoms
@@ -30,15 +31,13 @@ xcart             # This keyword indicate that the location of the atoms
   -0.761  0.0 0.0 # Triplet giving the coordinates of atom 1, in Bohr
    0.761  0.0 0.0 # Triplet giving the coordinates of atom 2, in Bohr
 
-#Definition of the planewave basis set
-ecut 10.0         # Maximal kinetic energy cut-off, in Hartree
-
-#Definition of the k-point grid
-kptopt 0          # Enter the k points manually 
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 10.0         # Maximal plane-wave kinetic energy cut-off, in Hartree
+kptopt 0          # Enter the k points manually
 nkpt 1            # Only one k point is needed for isolated system,
                   # taken by default to be 0.0 0.0 0.0
 
-#Definition of the SCF procedure
+#Parameters for the SCF procedure
 nstep 10          # Maximal number of SCF cycles
 toldfe 1.0d-6     # Will stop when, twice in a row, the difference
                   # between two consecutive evaluations of total energy
@@ -51,10 +50,12 @@ diemac 2.0        # Although this is not mandatory, it is worth to
                   # Here, we follow the prescriptions for molecules
                   # in a big box
 
+#Definition of the output file : uncomment the next line to modify the default .abo suffix
+#output_file  "tbase1_4.out"
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosGTH_pwteter/01h.pspgth"
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

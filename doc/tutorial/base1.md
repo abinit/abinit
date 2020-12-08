@@ -65,37 +65,22 @@ cd Work
 ```
 
 We will do most of the actions of this tutorial in this working directory.
-Now copy the *tbase1_x.files* files file inside *Work* with:
-
-    cp ../tbase1_x.files .
-
-Edit the *tbase1_x.files*. It is not very long (only 6 lines).
-It gives the information needed for the code to build other file names.
-The original version of the files file is:
-
-{% dialog tests/tutorial/Input/tbase1_x.files %}
-
-Modify the first and second lines of *tbase1_x.files* file, so that it reads:
-
-    tbase1_1.in
-    tbase1_1.out
+Let's now run the code ...
 
 !!! tip
 
-    You will discover more about this file in [[help:abinit#intro|section 1.1]]
-    of the help file. Please, read it now.
+    The [[help:abinit#intro|section 1.1]] of the ABINIT help file explains how to run ABINIT.
+    You might read it now, then follow the commands hereafter.
 
-Later, you will **modify again** these lines, to treat more cases.
-Make sure that the last line, gives the correct location of the pseudopotential file.
-Close *tbase1_x.files* then copy *$ABI_TESTS/tutorial/Input/tbase1_1.in* in *Work*:
+Copy *$ABI_TESTS/tutorial/Input/tbase1_1.in* in *Work*:
 
     cp ../tbase1_1.in .
 
-Also later, we will look at this file, and learn about its content.
+Later, we will look at this file, and learn about its content.
 For now, you will try to run the code.
-So, in the *Work* directory, type:
+In the *Work* directory, type:
 
-    abinit < tbase1_x.files > log 2> err &
+    abinit tbase1_1.in >& log &
 
 Wait a few seconds ... it's done!
 You can look at the content of the *Work* directory with the **ls** command.
@@ -103,13 +88,12 @@ You should get something like:
 
 ```sh
 ls
-log                  tbase1_1o_DDB        tbase1_1o_EIG        tbase1_1o_OUT.nc
-tbase1_1.in          tbase1_1o_DEN        tbase1_1o_EIG.nc     tbase1_1o_WFK
-tbase1_1.out         tbase1_1o_EBANDS.agr tbase1_1o_GSR.nc     tbase1_x.files
+log           tbase1_1o_DDB	    tbase1_1o_EIG     tbase1_1o_OUT.nc
+tbase1_1.in   tbase1_1o_DEN	    tbase1_1o_EIG.nc  tbase1_1o_WFK
+tbase1_1.out  tbase1_1o_EBANDS.agr  tbase1_1o_GSR.nc
 ```
 
-Different output files have been created, including a *log* file, the standard error file *err*
-and the output file *tbase1_1.out*.
+Different output files have been created, including a *log* file and the output file *tbase1_1.out*.
 To check that everything is correct, you can make a diff of
 *tbase1_1.out* with the reference file *$ABI_TESTS/tutorial/Refs/tbase1_1.out*
 
@@ -121,44 +105,60 @@ Perhaps you will need to ignore the blanks, with the command *diff -b* instead o
 
 That reference file uses slightly different file names.
 You should get some difference, but rather inoffensive ones, like differences in the name of input
-files or timing differences, e.g.:
+files, slightly different numerical results, or timing differences, e.g.:
 
 ```diff
 2,3c2,3
-< .Version 8.8.3 of ABINIT
-< .(MPI version, prepared for a x86_64_linux_gnu5.4 computer)
+< .Version 9.3.2 of ABINIT 
+< .(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer) 
 ---
-> .Version 8.8.0  of ABINIT
-> .(MPI version, prepared for a x86_64_linux_gnu5.3 computer)
-17c17
-< .Starting date : Fri 27 May 2018.
+> .Version 9.3.1 of ABINIT 
+> .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+17,18c17,18
+< .Starting date : Mon  7 Dec 2020.
+< - ( at 21h07 )
 ---
-> .Starting date : Thu 26 May 2018.
-27c27
+> .Starting date : Tue 10 Nov 2020.
+> - ( at 22h21 )
+20,21c20,21
 < - input  file    -> tbase1_1.in
+< - output file    -> tbase1_1.out
 ---
-> - input  file    -> ../tbase1_1.in
-29,30c29,30
-< - root for input  files -> tbase1_xi
-< - root for output files -> tbase1_xo
+> - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tbase1_1/tbase1_1.in
+> - output file    -> tbase1_1.out
+121,122c121,122
+< - pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests//Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+< - pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests//Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
 ---
-> - root for input  files -> tbase1_1i
-> - root for output files -> tbase1_1o
-92,93c92,93
-< - pspini: atom type   1  psp file is ../../../Psps_for_tests/01h.pspgth
-< - pspatm: opening atomic psp file    ../../../Psps_for_tests/01h.pspgth
+> - pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+> - pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+158c158
+<  ETOT  4  -1.1037223548791    -5.258E-06 4.146E-07 2.715E-04
 ---
-> - pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.7/trunk/8.0.7-private/tests/Psps_for_tests/01h.pspgth
-> - pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.7/trunk/8.0.7-private/tests/Psps_for_tests/01h.pspgth
-166c166
-<  prteigrs : about to open file tbase1_xo_EIG
+>  ETOT  4  -1.1037223548790    -5.258E-06 4.146E-07 2.715E-04
+226,227c226,227
+<     1     -1.92347254650475    -0.00000000000000    -0.00000000000000
+<     2      1.92347254650475    -0.00000000000000    -0.00000000000000
 ---
->  prteigrs : about to open file tbase1_1o_EIG
-214c214
+>     1     -1.92347254650465    -0.00000000000000    -0.00000000000000
+>     2      1.92347254650465    -0.00000000000000    -0.00000000000000
+240c240
+< kinetic             :  1.00347260970045E+00
+---
+> kinetic             :  1.00347260970044E+00
+242c242
+< xc                  : -6.34653320022589E-01
+---
+> xc                  : -6.34653320022590E-01
+249c249
+< band_energy         : -7.30497167497589E-01
+---
+> band_energy         : -7.30497167497614E-01
+314c314
 < - Total cpu        time (s,m,h):          4.7        0.08      0.001
 ---
 > - Total cpu        time (s,m,h):          4.6        0.08      0.001
-221,229c221,228
+321,329c321,328
 ```
 
 (... and what comes after that is related only to timing ...).
@@ -170,7 +170,8 @@ Finally, it might also be that the default FFT algorithm differs from
 the one of the reference machine, in which case the line mentioning [[fftalg]]
 will differ (*fftalg* will not be 312). If you get something else, you should ask for help!
 
-In this part of the output file, note the dash `-` that is inserted in the first column.
+You can have a very quick look at the beginning of the output file *tbase1_1.out*. 
+In this part of the output file, note the dot `.` or dash `-` that is inserted in the first column.
 This is not important for the user: it is used to post-process the output file using some automatic tool.
 As a rule, you should ignore symbols placed in the first column of the abinit output file.
 
@@ -180,8 +181,7 @@ later, what is in the *tbase1_1.out* and *log* output files.
 
 !!! tip
 
-    Running the code is described in [[help:abinit#exec|section 1.2]] of the abinit help file.
-    Please, read it now.
+    If you have not read it, please read [[help:abinit#intro|section 1.1]] of the ABINIT help file.
 
 It is now time to edit the *tbase1_1.in* input file.
 
@@ -204,10 +204,10 @@ found in different files (non-exhaustive list):
   * [[varset:dfpt|Density Functional Perturbation Theory (DFPT) variables]]
 
 However, the number of such variables is rather large!
-Note that a dozen of input variables were needed to run the first test case.
+Note that only a dozen of input variables were needed to run the first test case.
 This is possible because there are defaults values for the other input variables.
 When it exists, the default value is mentioned at the fourth line of the section
-related to each input variable, in the corresponding input variables file.
+related to each input variable.
 Some input variables are also preprocessed, in order to derive convenient
 values for other input variables.
 Defaults are not existing or were avoided for the few input variables that you find in *tbase1_1.in*.
@@ -217,6 +217,8 @@ So, take a few minutes to have a look at the input variables of *tbase1_1.in*:
   * [[acell]]
   * [[ntypat]]
   * [[znucl]]
+  * [[pp_dirpath]]
+  * [[pseudos]]
   * [[natom]]
   * [[typat]]
   * [[xcart]]
@@ -231,7 +233,7 @@ Have also a look at [[kpt]] and [[iscf]].
 It is now time to have a look at the two output files of the run.
 
 First, open the *log* file. You can begin to read it. It is nasty. Jump to its end.
-You will find there the number of WARNINGS and COMMENTS that were issued by the code during execution.
+Twenty lines before the end, you will find the number of WARNINGS and COMMENTS that were issued by the code during execution.
 You might try to find them in the file (localize the keywords WARNING or COMMENT in this file).
 Some of them are for the experienced user. For the present time, we will ignore them.
 You can find more information about messages in the log file in
@@ -246,41 +248,51 @@ You can find more information about messages in the log file in
 
     to get:
 
-        Events found in /Users/gmatteo/git_repos/abinit_quick_prs/tests/tutorial/Input/Work/log
+        Events found in /Users/gonze/_Research/ABINIT_git/beauty/tests/tutorial/Input/Work/log
 
-        [1] <AbinitWarning at m_nctk.F90:570>
-            netcdf lib does not support MPI-IO and: NetCDF: Parallel operation on file opened for non-parallel access
-
-        [2] <AbinitWarning at m_nctk.F90:590>
-            The netcdf library does not support parallel IO, see message above
-            Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.
-            Action: install a netcdf4+HDF5 library with MPI-IO support.
-
-        [3] <AbinitComment at m_symfind.F90:816>
+        [1] <AbinitComment at m_dtfil.F90:1470>
+            Output file: tbase1_1.out already exists.
+    
+        [2] <AbinitComment at m_dtfil.F90:1494>
+            Renaming old: tbase1_1.out to: tbase1_1.out0001
+    
+        [3] <AbinitWarning at m_ingeo.F90:887>
+            The tolerance on symmetries =   1.000E-05 is bigger than 1.0e-8.
+            In order to avoid spurious effects, the atomic coordinates have been
+            symmetrized before storing them in the dataset internal variable.
+            So, do not be surprised by the fact that your input variables (xcart, xred, ...)
+            do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.
+            In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.
+    
+        [4] <AbinitComment at m_symfind.F90:999>
             The Bravais lattice determined only from the primitive
             vectors, bravais(1)=  7, is more symmetric
             than the real one, iholohedry=  4, obtained by taking into
             account the atomic positions. Start deforming the primitive vector set.
-
-        [4] <AbinitComment at m_memeval.F90:2451>
+    
+        [5] <AbinitComment at m_memeval.F90:2397>
             Despite there is only a local part to pseudopotential(s),
             lmnmax and lnmax are set to 1.
-
-        [5] <AbinitComment at m_xgScalapack.F90:244>
+    
+        [6] <AbinitComment at m_xgScalapack.F90:236>
             xgScalapack in auto mode
-
-        [6] <AbinitComment at m_memeval.F90:2451>
+    
+        [7] <AbinitComment at m_memeval.F90:2397>
             Despite there is only a local part to pseudopotential(s),
             lmnmax and lnmax are set to 1.
-
-        [7] <AbinitWarning at m_drivexc.F90:1077>
+    
+        [8] <AbinitWarning at m_drivexc.F90:711>
             Density went too small (lower than xc_denpos) at 38 points
             and was set to xc_denpos =   1.00E-14. Lowest was  -0.13E-13.
-            Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+            This might be due to (1) too low boxcut or (2) too low ecut for
+            pseudopotential core charge, or (3) too low ecut for estimated initial density.
+            Possible workarounds : increase ecut, or define the input variable densty,
+            with a value larger than the guess for the decay length, or initialize your,
+            density with a preliminary LDA or GGA-PBE if you are using a more exotic xc functional.
+    
+        num_errors: 0, num_warnings: 2, num_comments: 6, completed: True
 
-        num_errors: 0, num_warnings: 3, num_comments: 4, completed: True
-
-Now open the *tbase1_1.out* file.
+Now open the *tbase1_1.out* file. Alternatively, you might have a look at the reference file we provide below.
 
 {% dialog tests/tutorial/Refs/tbase1_1.out %}
 
@@ -324,12 +336,12 @@ in the input file, but that appear in the echo written in *tbase1_1.out*:
     valid for the k-point (0, 0, 0), to decrease the number of planewave by about a factor of two.
     The full set of plane waves is **1503** (see later in the *tbase1_1.out* file).
     The code indicates the time-reversal symmetry by a value of [[istwfk]] = 2,
-    instead of the default istwfk = 1.
+    instead of the default [[istwfk]] = 1.
 
 [[nsym]]
 :   It is the number of symmetries of the system. Its value is 16.
     The 3x3 matrices [[symrel]]
-    define the symmetries operation. In this case, none of the symmetries is
+    define the symmetry operations. In this case, none of the symmetries is
     accompanied by a translation, that would appear in the variable [[tnons]]. The
     code did an automatic analysis of symmetries.
     They could alternatively be set by hand, or using the symmetry builder (to be described later).
@@ -338,7 +350,7 @@ in the input file, but that appear in the echo written in *tbase1_1.out*:
 :   Alternative to [[xcart]] to specify the positions of atoms within the primitive cell.
 
 Now, you can start reading the description of the remaining of the
-*tbase1_1.out* file in [[help:abinit#6.3|section 6.3]] of the abinit help file.
+*tbase1_1.out* file in [[help:abinit#53-more-on-the-main-output-file|section 5.3]] of the abinit help file.
 Look at the *tbase1_1.out* file at the same time.
 
 You have read completely an output file! Could you answer the following questions?
@@ -437,7 +449,7 @@ you should read the corresponding descriptive section in the abinit help file.
 We will now complete the description of the meaning of each term: there are
 still a few indications that you should be aware of, even if you will not use them in the tutorial.
 These might appear in the description of some input variables.
-For this, you should read the [[help:abinit#parameters|section 3.2]] of the abinit help file.
+For this, you should read the [[help:abinit#parameters|section 3.3]] of the abinit help file.
 
 There are three methodologies to compute the optimal distance between the two Hydrogen atoms.
 One could:
@@ -460,10 +472,10 @@ the input file, and then gather all the data, in a convenient form to be plotted
 
 Well, are you a UNIX guru? If not, there is an easier path, all within abinit!
 This is the multi-dataset mode. Detailed explanations about it can be found in sections
-[[help:abinit#multidataset|3.3]],
-[[help:abinit#series|3.4]],
-[[help:abinit#loop|3.5]] and
-[[help:abinit#filenames-multidataset|3.6]] of the abinit help file.
+[[help:abinit#multidatasets|3.4]],
+[[help:abinit#series|3.5]],
+[[help:abinit#loop|3.6]] and
+[[help:abinit#filenames-multidataset|3.7]] of the abinit help file.
 
 Now, can you write an input file that will do the computation described above
 (interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of 0.05 Bohr)? You might start from *tbase1_1.in*.
@@ -477,7 +489,7 @@ The input file *\$ABI_TESTS/tutorial/Input/tbase1_2.in* is an example of file th
 
 {% dialog tests/tutorial/Input/tbase1_2.in %}
 
-while *\$ABI_TESTS/tutorial/Refs/tbase1_2.out* is the reference output file.
+while *\$ABI_TESTS/tutorial/Refs/tbase1_2.abo* is the reference output file.
 
 {% dialog tests/tutorial/Refs/tbase1_2.out %}
 
@@ -485,12 +497,8 @@ Run the code with *tbase1_2.in* (this might take fifteen seconds or so on a PC a
 
 ```sh
 cp ../tbase1_2.in .
-abinit < tbase1_x.file > log 2> err
+abinit tbase1_2.in  >& log 
 ```
-
-!!! important
-
-    Do not forget to change the file names in the *tbase1_x.files* file.
 
 Now examine the output file quickly (there are many
 repetition of sections, for the different datasets), and get the output
@@ -566,7 +574,6 @@ while *tbase1_3.out* is an example of output file:
 
 {% dialog tests/tutorial/Refs/tbase1_3.out %}
 
-If you decide to use these files, do not forget to change the file names in the *tbase1_x.files* file.
 So, you run the code with your input file (a few seconds), examine quietly this file (which is much smaller
 than the *tbase1_2.out* file), and get some significant output data gathered in the final echo of variables:
 

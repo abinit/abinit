@@ -30,10 +30,20 @@ or, in the background, with the command
 where standard out and standard error are piped to the log file called "log"
 (piping the standard error, thanks to the '&' sign placed after '>' is
 **really important** for the analysis of eventual failures, when not due to
-ABINIT, but to other sources, like disk full problem...). The user can
-specify any names he/she wishes for any of these files. Variations of the
-above commands could be needed, depending on the flavor of UNIX that is used
+ABINIT, but to other sources, like disk full problem...). It is also possible 
+to dissociate the standard error file from the standard output file with the
+command
+
+    abinit abi_in > log 2> err &
+
+or even more explicitly 
+
+    abinit run.in > run.log 2> run.err &
+
+Actually, the user can specify any names he/she wishes for any of these files. Variations of the
+above commands could be needed, depending on the flavor of Unix that is used
 on the platform that is considered for running the code.  
+If you do not underderstand the syntax above, which is standard Unix, please get familiarized with Unix before continuing.
 
 <a id="2"></a>
 ## 2 The underlying theoretical framework and algorithms
@@ -760,7 +770,8 @@ ABINIT use.
 The **main output file** is a formatted output file to be kept as the permanent record of the run.
 
 Note that it is expected **not** to exist at the beginning of the run:  
-If a file with the name specified in the "files" file already exists, the code
+If a file with the same name as the one specified by the input variable [[output_file]] 
+(see also the default output file name description) already exists, the code
 will generate, from the given one, another name, appended with **.A**. If
 this new name already exists, it will try to append **.B**, and so on, until **.Z**.  
 Then, the code stops, and asks you to clean the directory.

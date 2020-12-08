@@ -21538,14 +21538,14 @@ Variable(
     mnemonics="PseudoPotential DIRectory PATH",
     added_in_version="9.0.0",
     text=r"""
-This variable specifies the directory that will prepended to the names of the pseudopotentials
+This variable specifies the directory that will be prepended to the names of the pseudopotentials
 specified in [[pseudos]].
 This option is useful when all your pseudos are gathered in a single directory in your file system
 and you don not want to type the absolute path for each pseudopotential file.
 
 This variable is used when Abinit is executed with the new syntax:
 
-    abinit run.abi > run.log 2> run.err &
+    abinit abi_in >& log &
 
 The string must be quoted in double quotation marks:
 
@@ -21593,7 +21593,7 @@ Variable(
     text=r"""
 String defining the list of pseudopotential files when Abinit is executed with the new syntax:
 
-    abinit run.abi > run.log 2> run.err &
+    abinit abi_in >& log &
 
 The string must be quoted in double quotation marks and multiple files should be separated by a comma, e.g.
 

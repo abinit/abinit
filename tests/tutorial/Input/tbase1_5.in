@@ -1,9 +1,9 @@
 # H atom in a big box
 #
-# Same file as t11.in, except that natom, typat, and xcart were changed,
+# Same file as tbase1_1.in, except that natom, typat, and xcart were changed,
 # and that the input variables nband, nsppol, occ and occopt are used.
 
-
+#Variables specific to this test
 nsppol 2          # Allow a spin-polarized calculation
 occopt 2          # Allow occupation numbers to be set by hand
 nband  1 1        # Number of bands for spin up and spin down
@@ -13,19 +13,19 @@ spinat 0.0 0.0 1.0  # Gives an initial estimation of the spin on the atom (easy)
 prtvol 2          # Adjust print volume. This will allow to see the analysis of the spin polarization for some points of the FFT grid.
 
 
-
 #Definition of the unit cell
 acell 10 10 10    # The keyword "acell" refers to the
                   # lengths of the primitive vectors (in Bohr)
 #rprim 1 0 0  0 1 0  0 0 1 # This line, defining orthogonal primitive vectors,
                            # is commented, because it is precisely the default value of rprim
 
-#Definition of the atom types
+#Definition of the atom types and pseudopotentials
 ntypat 1          # There is only one type of atom
-znucl 1           # The keyword "znucl" refers to the atomic number of the 
-                  # possible type(s) of atom. The pseudopotential(s) 
-                  # mentioned in the "files" file must correspond
-                  # to the type(s) of atom. Here, the only type is Hydrogen.
+znucl 1           # The keyword "znucl" refers to the atomic number of the possible type(s) of atom.
+                  # Here, the only type is Hydrogen. The pseudopotential(s)
+                  # mentioned after the keyword "pseudos" should correspond to this type of atom.
+pp_dirpath "$ABI_PSPDIR"                 # This is the path to the directory were pseudopotentials for tests are stored
+pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8"  # Name and location of the pseudopotential
                          
 
 #Definition of the atoms
@@ -35,15 +35,13 @@ xcart             # This keyword indicate that the location of the atoms
                   # will follow, one triplet of number for each atom
    0.0 0.0 0.0    # Triplet giving the coordinates of atom 1, in Bohr
 
-#Definition of the planewave basis set
-ecut 10.0         # Maximal kinetic energy cut-off, in Hartree
-
-#Definition of the k-point grid
-kptopt 0          # Enter the k points manually 
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 10.0         # Maximal plane-wave kinetic energy cut-off, in Hartree
+kptopt 0          # Enter the k points manually
 nkpt 1            # Only one k point is needed for isolated system,
                   # taken by default to be 0.0 0.0 0.0
 
-#Definition of the SCF procedure
+#Parameters for the SCF procedure
 nstep 10          # Maximal number of SCF cycles
 toldfe 1.0d-6     # Will stop when, twice in a row, the difference 
                   # between two consecutive evaluations of total energy 
@@ -56,10 +54,12 @@ diemac 2.0        # Although this is not mandatory, it is worth to
                   # Here, we follow the prescriptions for molecules 
                   # in a big box
 
+#Definition of the output file : uncomment the next line to modify the default .abo suffix
+#output_file  "tbase1_5.out"
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosGTH_pwteter/01h.pspgth"
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -73,6 +73,6 @@ diemac 2.0        # Although this is not mandatory, it is worth to
 #%% keywords = 
 #%% description = 
 #%%   H atom in a big box
-#%%   Same file as t11.in, except that natom, typat, and xcart were changed,
+#%%   Same file as tbase1_1.in, except that natom, typat, and xcart were changed,
 #%%   and that the input variables nband, nsppol, occ and occopt are used.
 #%%<END TEST_INFO>
