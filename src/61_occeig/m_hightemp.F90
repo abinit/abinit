@@ -553,7 +553,7 @@ contains
       do while(fn>minocc)
         fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
         ii=ii+1
-        valuesent(ii)=2*(fn*log(fn)+(1.-fn)*log(1.-fn))
+        valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
         ix=ix+step
       end do
       if (ii>1) then
@@ -579,7 +579,7 @@ contains
       do while(fn>minocc)
         fn=fermi_dirac(ix,fermie,tsmear)
         ii=ii+1
-        valuesent(ii)=(fn*log(fn)+(1.-fn)*log(1.-fn))*&
+        valuesent(ii)=-(fn*log(fn)+(1.-fn)*log(1.-fn))*&
         & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
         ix=ix+step
       end do
