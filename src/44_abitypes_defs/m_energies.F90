@@ -40,7 +40,7 @@ module m_energies
  private
 
 !public parameter
- integer, public, parameter :: n_energies=35
+ integer, public, parameter :: n_energies=36
   ! Number of energies stored in energies datastructure
 
 !!***
