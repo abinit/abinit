@@ -702,7 +702,7 @@ subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rd
 !scalars
  integer,parameter :: master=0
  integer :: ierr,ib1,ib2,ib3,ikcalc,istat,ik_ibz,ik_ibz_read,iread,iread_eigv
- integer(8) :: iunit
+ integer,parameter :: iunit=666314
  real(dp) :: auxl_read
  character(len=fnlen) :: gw1rdm_fname
  character(len=500) :: msg
@@ -736,7 +736,7 @@ subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rd
      write(msg,'(a1)')' '
      call wrtout(std_out,msg,'COLL')
      occ_tmp(:)=zero;eigvect_tmp(:)=zero;
-     open(newunit=iunit,form='unformatted',file=gw1rdm_fname,iostat=istat,status='old')
+     open(unit=iunit,form='unformatted',file=gw1rdm_fname,iostat=istat,status='old')
      iread=0;ik_ibz_read=0;
      if (istat==0) then
        do
@@ -849,7 +849,7 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 !scalars
  integer,parameter :: master=0
  integer :: iwrite,iwrite2
- integer(8) :: iunit
+ integer,parameter :: iunit=666314
  character(len=fnlen) :: gw1rdm_fname
  character(len=500) :: msg
 !arrays
@@ -873,7 +873,7 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
    call wrtout(std_out,msg,'COLL')
    write(msg,'(a1)')' '
    call wrtout(std_out,msg,'COLL')
-   open(newunit=iunit,form='unformatted',file=gw1rdm_fname)
+   open(unit=iunit,form='unformatted',file=gw1rdm_fname)
    do iwrite=1,Wfd%mband
      write(iunit) occs(iwrite,ik_ibz)
    end do
