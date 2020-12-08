@@ -342,8 +342,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  x1rdm=Dtset%x1rdm                         ! Input variable to use pure exchange correction on the 1-RDM ( Sigma_x - Vxc )
  wfknocheck=.true.                         ! Used for printing WFK file subroutine
  rdm_update=(gwcalctyp==21 .and. gw1rdm>0) ! Input variable to decide whether to update GW density matrix  
- readchkprdm=(Dtset%irdchkprdm==1)          ! Input variable to decide if checkpoint files must be read
- prtchkprdm=(Dtset%prtchkprdm==1)          ! Input variable to decide if checkpoint files must be read  
+ readchkprdm=(Dtset%irdchkprdm==1)         ! Input variable to decide if checkpoint files must be read
+ prtchkprdm=(Dtset%prtchkprdm==1)          ! Input variable to decide if checkpoint files must be written
      
  mod10 =MOD(Dtset%gwcalctyp,10)
 

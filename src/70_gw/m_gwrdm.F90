@@ -700,9 +700,8 @@ subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rd
  complex(dpc),intent(inout) :: nateigv(:,:,:,:)
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
+ integer,parameter :: master=0,iunit=666314
  integer :: ierr,ib1,ib2,ib3,ikcalc,istat,ik_ibz,ik_ibz_read,iread,iread_eigv
- integer,parameter :: iunit=666314
  real(dp) :: auxl_read
  character(len=fnlen) :: gw1rdm_fname
  character(len=500) :: msg
@@ -847,9 +846,8 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
  complex(dpc),intent(in) :: nateigv(:,:,:,:)
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
+ integer,parameter :: master=0,iunit=666314
  integer :: iwrite,iwrite2
- integer,parameter :: iunit=666314
  character(len=fnlen) :: gw1rdm_fname
  character(len=500) :: msg
 !arrays
