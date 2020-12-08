@@ -433,7 +433,7 @@ gw_icutcoul10         3 # old deprecated value of icutcoul, only used for legacy
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t22.out, tolnlines = 600, tolabs = 1.1e-2, tolrel = 6.0e-2, fld_options =  -medium
+#%%   t22.abo, tolnlines = 600, tolabs = 1.1e-2, tolrel = 6.0e-2, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

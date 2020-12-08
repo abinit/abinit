@@ -71,7 +71,7 @@ xcart   2.000d0  4.000d0   4.000d0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t87.out, tolnlines = 0, tolabs = 6.000e-10, tolrel = 1.000e-09, fld_options =  -medium
+#%%   t87.abo, tolnlines = 0, tolabs = 6.000e-10, tolrel = 1.000e-09, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

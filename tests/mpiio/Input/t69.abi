@@ -106,9 +106,9 @@
 #%% nprocs_to_test = 2, 4
 #%% max_nprocs = 4
 #%% [NCPU_2]
-#%% files_to_test = t69_MPI2.out, tolnlines= 0,   tolabs= 0.0, tolrel= 0.0, fld_options = -easy
+#%% files_to_test = t69_MPI2.abo, tolnlines= 0,   tolabs= 0.0, tolrel= 0.0, fld_options = -easy
 #%% [NCPU_4]
-#%% files_to_test = t69_MPI4.out, tolnlines= 6,   tolabs= 0.0, tolrel= 0.0, fld_options = -easy
+#%% files_to_test = t69_MPI4.abo, tolnlines= 6,   tolabs= 0.0, tolrel= 0.0, fld_options = -easy
 #%% [extra_info]
 #%% keywords = NC, DFPT
 #%% authors = Unknown

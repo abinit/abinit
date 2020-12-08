@@ -91,7 +91,7 @@ znucl 3 9
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t61.out, tolnlines = 30, tolabs = 20.0, tolrel = 5.0e-2
+#%%   t61.abo, tolnlines = 30, tolabs = 20.0, tolrel = 5.0e-2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

@@ -97,7 +97,7 @@ nbdbuf 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnlo_6.out, tolnlines=  1, tolabs=  1.01e-8, tolrel=  7e-5
+#%%   tnlo_6.abo, tolnlines=  1, tolabs=  1.01e-8, tolrel=  7e-5
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

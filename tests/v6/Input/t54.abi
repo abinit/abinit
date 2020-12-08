@@ -76,7 +76,7 @@ diemac 2.0
 #%% test_chain = t54.abi, t55.abi, t56.abi, t57.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t54.out, tolnlines = 26, tolabs = 2.e-4, tolrel = 0.5, fld_options = -medium
+#%%   t54.abo, tolnlines = 26, tolabs = 2.e-4, tolrel = 0.5, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

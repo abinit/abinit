@@ -61,7 +61,7 @@ qpt2   0.0 0.0 0.0
 #%% test_chain = t68.abi, t69.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t68.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t68.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

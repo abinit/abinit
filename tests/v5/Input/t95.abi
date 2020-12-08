@@ -76,7 +76,7 @@ qph1l
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi, t90.abi, t91.abi, t92.abi, t93.abi, t94.abi, t95.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t95.out, tolnlines = 18, tolabs = 2.0e-04, tolrel = 4.5e-05
+#%%   t95.abo, tolnlines = 18, tolabs = 2.0e-04, tolrel = 4.5e-05
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

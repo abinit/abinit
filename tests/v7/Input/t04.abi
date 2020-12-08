@@ -59,7 +59,7 @@ occopt 7
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t04.out, tolnlines = 13, tolabs = 1.0e-8, tolrel = 1.0e-3, fld_options = -easy;
+#%%   t04.abo, tolnlines = 13, tolabs = 1.0e-8, tolrel = 1.0e-3, fld_options = -easy;
 #%%   t04o_DOS_ATEXTRA0010, tolnlines = 11, tolabs = 1.0e-9, tolrel = 1.0e-6
 #%% [paral_info]
 #%% max_nprocs = 4

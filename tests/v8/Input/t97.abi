@@ -75,7 +75,7 @@ occopt1? 7
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t97.out, tolnlines = 220, tolabs = 4.0e+4, tolrel = 1.1, fld_options = -ridiculous
+#%%   t97.abo, tolnlines = 220, tolabs = 4.0e+4, tolrel = 1.1, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

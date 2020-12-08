@@ -92,7 +92,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t07.out, tolnlines = 23, tolabs = 2.0e-3, tolrel = 6.0e-3, fld_options =  -medium
+#%%   t07.abo, tolnlines = 23, tolabs = 2.0e-3, tolrel = 6.0e-3, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

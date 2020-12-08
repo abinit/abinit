@@ -135,7 +135,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
 #%% files_to_test = 
-#%%   t25.out, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
+#%%   t25.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

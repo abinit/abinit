@@ -28,7 +28,7 @@ spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 #%% coeff_xml = no
 #%% [files]
 #%% files_to_test = 
-#%%   tmulti5_1.out,tolnlines = 1, tolabs = 2.000e+03, tolrel = 3.000e-1, fld_options = -medium;
+#%%   tmulti5_1.abo,tolnlines = 1, tolabs = 2.000e+03, tolrel = 3.000e-1, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

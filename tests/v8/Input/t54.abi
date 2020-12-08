@@ -30,7 +30,7 @@
 #%%   iw_cp t54_MoO2_DDB t54_MoO2_DDB;
 #%% [files]
 #%% files_to_test = 
-#%%   t54.out, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
+#%%   t54.abo, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
 #%% [paral_info]
 #%% max_nprocs = 24
 #%% [extra_info]

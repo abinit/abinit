@@ -82,16 +82,16 @@
 #%% nprocs_to_test = 1, 2, 4
 #%% max_nprocs = 4
 #%% [NCPU_1]
-#%% files_to_test = t60_MPI1.out, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
+#%% files_to_test = t60_MPI1.abo, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
 #%% [NCPU_2]
-#%% files_to_test = t60_MPI2.out, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
+#%% files_to_test = t60_MPI2.abo, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
 #%% [NCPU_4]
-#%% files_to_test = t60_MPI4.out, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
+#%% files_to_test = t60_MPI4.abo, tolnlines= 6, tolabs=  2.0e-5, tolrel= 3.0e-4
 #%% [extra_info]
 #%% authors = S. Ponc\'e 
 #%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%  Diamond.
 #%%  Diamond dynamical temperature-dependent of the electronic structure. 
-#%%  Three q-points are computed. Test of the parallelization. Must be compared with v7/Refs/t55.out
+#%%  Three q-points are computed. Test of the parallelization. Must be compared with v7/Refs/t55.abo
 #%%<END TEST_INFO>

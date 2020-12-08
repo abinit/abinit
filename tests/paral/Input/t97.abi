@@ -20,7 +20,7 @@ optcell = 2
 #%% [NCPU_1]
 #%% system_xml = t97_sys.xml
 #%% files_to_test = 
-#%%   t97_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t97_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t97_MPI1_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_2]
 #%% system_xml = t97_sys.xml

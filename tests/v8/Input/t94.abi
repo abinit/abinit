@@ -33,7 +33,7 @@ prtebands 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t94.out, tolnlines=   0,   tolabs= 1e-6,  tolrel= 1e-12, fld_options = -medium
+#%%   t94.abo, tolnlines=   0,   tolabs= 1e-6,  tolrel= 1e-12, fld_options = -medium
 #%% [shell] 
 #%% [paral_info]
 #%% max_nprocs = 1

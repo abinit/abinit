@@ -47,7 +47,7 @@
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t27_MPI4.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options= -easy
+#%% files_to_test = t27_MPI4.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options= -easy
 #%% [extra_info]
 #%% keywords = PAW 
 #%% authors = Unknown

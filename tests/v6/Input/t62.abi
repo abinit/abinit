@@ -109,7 +109,7 @@ pawecutdg   9.
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t62.out, tolnlines = 50, tolabs = 3.5e-2, tolrel = 9.0e-3, fld_options = -easy
+#%%   t62.abo, tolnlines = 50, tolabs = 3.5e-2, tolrel = 9.0e-3, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

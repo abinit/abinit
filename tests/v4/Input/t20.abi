@@ -6,7 +6,7 @@
 ## Although this is not activated in the present input file, one should simply
 ## uncomment the next lines to use the new way of launching ABINIT, without the "files" file.
 # pseudos  = '20ca_sic.drh, 8o_sic.drh'
-# output_file  = 't20.out'
+# output_file  = 't20.abo'
 ## Possibly, the path to the pseudopotential directory might be defined
 # pp_dirpath  = '../../Psps_for_tests'
 
@@ -63,7 +63,7 @@ nloc_alg  2
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t20.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%%   t20.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

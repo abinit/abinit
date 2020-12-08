@@ -71,7 +71,7 @@ bs_interp_kmult   2 2 2
 #%% test_chain = t31.abi, t32.abi, t33.abi, t34.abi, t35.abi
 #%% [files]
 #%% files_to_test = 
-#%%  t32.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t32.abo,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t32o_DS1_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t32o_DS1_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t32o_DS1_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;

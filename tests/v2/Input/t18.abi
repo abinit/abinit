@@ -25,7 +25,7 @@
 #%% test_chain = t18.abi, t19.abi, t20.abi, t21.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t18.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t18.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% extra_inputs = t18.ddb.in.gz
 #%% [paral_info]
 #%% max_nprocs = 4

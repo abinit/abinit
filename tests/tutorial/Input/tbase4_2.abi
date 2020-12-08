@@ -71,7 +71,7 @@ toldfe 1.0d-6     # Will stop when, twice in a row, the difference
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tbase4_2.out, tolnlines=  0, tolabs=  1.051e-07, tolrel=  1.158e-03, fld_options = -easy
+#%%   tbase4_2.abo, tolnlines=  0, tolabs=  1.051e-07, tolrel=  1.158e-03, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

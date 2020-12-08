@@ -92,7 +92,7 @@ diemac 12.0       # Although this is not mandatory, it is worth to
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t60.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t60.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% nprocs_to_test = 
 #%% max_nprocs = 2

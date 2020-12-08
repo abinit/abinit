@@ -122,9 +122,9 @@ pawecutdg   9.
 #%% nprocs_to_test = 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_4]
-#%% files_to_test = t62_MPI4.out, tolnlines = 50, tolabs= 3.0e-2, tolrel= 2.0e-1, fld_options = -easy
+#%% files_to_test = t62_MPI4.abo, tolnlines = 50, tolabs= 3.0e-2, tolrel= 2.0e-1, fld_options = -easy
 #%% [NCPU_10]
-#%% files_to_test = t62_MPI10.out, tolnlines = 65, tolabs= 3.0e-2, tolrel= 2.0e-1, fld_options = -easy
+#%% files_to_test = t62_MPI10.abo, tolnlines = 65, tolabs= 3.0e-2, tolrel= 2.0e-1, fld_options = -easy
 #%% [extra_info]
 #%% authors = M. Torrent, M. Delaveau
 #%% keywords = PAW, DFPT, DDK

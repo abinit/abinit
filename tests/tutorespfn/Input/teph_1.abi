@@ -141,7 +141,7 @@ znucl        13
 #%% test_chain =  teph_1.abi, teph_2.abi, teph_3.abi, teph_4.abi, teph_5.abi, teph_6.abi
 #%% [files]
 #%% files_to_test = 
-#%%   teph_1.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03, fld_options= -easy
+#%%   teph_1.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

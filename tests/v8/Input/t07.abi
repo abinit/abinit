@@ -91,7 +91,7 @@ ndtset 3 jdtset 1 2 3
 #%% test_chain = t07.abi,t08.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t07.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
+#%%   t07.abo, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

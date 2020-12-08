@@ -128,7 +128,7 @@ ixc     7
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t65.out, tolnlines = 12, tolabs = 1.05e-03, tolrel = 2.0e-03, fld_options = -medium
+#%%   t65.abo, tolnlines = 12, tolabs = 1.05e-03, tolrel = 2.0e-03, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

@@ -159,7 +159,7 @@ ndtset 13 jdtset 1 2 3 4 5 6  22 23 24 25 26 12 13
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t96.out, tolnlines = 2, tolabs = 3.4000e-4, tolrel = 4.1000e-4, fld_options = -easy
+#%%   t96.abo, tolnlines = 2, tolabs = 3.4000e-4, tolrel = 4.1000e-4, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

@@ -43,7 +43,7 @@
 #%% test_chain = t12.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t12.out, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy
+#%%   t12.abo, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

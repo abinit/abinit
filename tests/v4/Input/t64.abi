@@ -50,7 +50,7 @@ nshiftk   4
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t64.out, tolnlines = 3, tolabs = 1.100e-09, tolrel = 5.0e-04
+#%%   t64.abo, tolnlines = 3, tolabs = 1.100e-09, tolrel = 5.0e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

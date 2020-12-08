@@ -54,7 +54,7 @@ rprim   1.0000000000E+00  4.9609008825E-09 -2.0533856472E-08
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t15.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t15.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

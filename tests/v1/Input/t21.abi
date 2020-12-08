@@ -47,7 +47,7 @@ prtlden 1 # Test the Laplacian of electronic density.
 #%% executable = abinit 
 #%% test_chain = t21.abi, t22.abi, t23.abi, t24.abi
 #%% [files]
-#%% files_to_test = t21.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% files_to_test = t21.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

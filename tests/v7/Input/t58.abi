@@ -123,7 +123,7 @@
 #%%   ww_mv t58o_DS4_WFQ t59o_DS4_WFQ;
 #%% [files]
 #%% files_to_test = 
-#%%   t58.out, tolnlines = 40, tolabs = 1.1e-3, tolrel = 8.0e-4, fld_options = -medium
+#%%   t58.abo, tolnlines = 40, tolabs = 1.1e-3, tolrel = 8.0e-4, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

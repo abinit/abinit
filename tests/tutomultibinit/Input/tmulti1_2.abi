@@ -14,7 +14,7 @@ dipdip  = 0
 #%% system_xml = tmulti1_2_model.xml
 #%% [files]
 #%% files_to_test = 
-#%%   tmulti1_2.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   tmulti1_2.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   tmulti1_2_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 1

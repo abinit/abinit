@@ -103,11 +103,11 @@ paral_kgb 0
 #%% nprocs_to_test = 1, 2, 4
 #%% max_nprocs = 4
 #%% [NCPU_1]
-#%% files_to_test = t73_MPI1.out, tolnlines=   23,   tolabs=  4.0e-3,      tolrel= 9.5e-2
+#%% files_to_test = t73_MPI1.abo, tolnlines=   23,   tolabs=  4.0e-3,      tolrel= 9.5e-2
 #%% [NCPU_2]
-#%% files_to_test = t73_MPI2.out, tolnlines=   23,   tolabs=  4.0e-3,      tolrel= 9.5e-2
+#%% files_to_test = t73_MPI2.abo, tolnlines=   23,   tolabs=  4.0e-3,      tolrel= 9.5e-2
 #%% [NCPU_4]
-#%% files_to_test = t73_MPI4.out, tolnlines=   23,   tolabs=  4.0e-3,      tolrel= 9.5e-2
+#%% files_to_test = t73_MPI4.abo, tolnlines=   23,   tolabs=  4.0e-3,      tolrel= 9.5e-2
 #%% [extra_info]
 #%% keywords = NC, GW
 #%% authors = F. Bruneval

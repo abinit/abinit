@@ -140,7 +140,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tdepes_4.out,  tolnlines= 0, tolabs=  0.000e-00, tolrel=  0.000e-00, fld_options=-easy
+#%%   tdepes_4.abo,  tolnlines= 0, tolabs=  0.000e-00, tolrel=  0.000e-00, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -11,7 +11,7 @@ instrflag  1  !the flag for the internal strain tensor
 #%% input_ddb = telast_2o_DS3_DDB
 #%% [files]
 #%% files_to_test = 
-#%%   telast_3.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%%   telast_3.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

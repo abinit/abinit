@@ -58,7 +58,7 @@ enunit     1
 #%% test_chain = tgw2_1.abi, tgw2_2.abi, tgw2_3.abi, tgw2_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tgw2_2.out, tolnlines= 32, tolabs=  1.1e-02, tolrel=  4.0e-01 
+#%%   tgw2_2.abo, tolnlines= 32, tolabs=  1.1e-02, tolrel=  4.0e-01 
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp tgw2_2o_SCR tgw2_3i_SCR;

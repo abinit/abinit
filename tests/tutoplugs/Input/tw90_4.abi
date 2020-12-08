@@ -74,7 +74,7 @@ w90iniprj3 2
 #%% pre_commands = iw_cp tw90_4o_DS3_w90.win tw90_4o_DS3_w90.win
 #%% [files]
 #%% files_to_test = 
-#%%   tw90_4.out, tolnlines=    8,   tolabs=  2.0e-04,   tolrel=  3.00e-02, fld_options = -medium
+#%%   tw90_4.abo, tolnlines=    8,   tolabs=  2.0e-04,   tolrel=  3.00e-02, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

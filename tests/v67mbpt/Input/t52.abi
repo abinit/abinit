@@ -105,7 +105,7 @@
 #%% pre_commands = iw_cp test_EP.nc test_EP.nc
 #%% [files]
 #%% files_to_test = 
-#%%  t52.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t52.abo,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -46,7 +46,7 @@ getwfk    -1          # Use GS wave functions from dataset1
 #%% test_chain = t04.abi, t05.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t04.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t04.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

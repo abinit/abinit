@@ -56,7 +56,7 @@ nstep 10
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t31.out, tolnlines=   7,   tolabs=  1.1e-02,      tolrel= 5.0e-04, fld_options = -easy
+#%%   t31.abo, tolnlines=   7,   tolabs=  1.1e-02,      tolrel= 5.0e-04, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -26,7 +26,7 @@ latt_friction=0.1
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
-#%%   t83.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t83.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -41,7 +41,7 @@ xred 3*0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t30.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% files_to_test = t30.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

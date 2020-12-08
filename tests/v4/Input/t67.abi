@@ -69,7 +69,7 @@ nshiftk   1
 #%% test_chain = t67.abi, t68.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t67.out, tolnlines = 17, tolabs = 21.0, tolrel = 3.000e-03, fld_options = -easy
+#%%   t67.abo, tolnlines = 17, tolabs = 21.0, tolrel = 3.000e-03, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

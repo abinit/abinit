@@ -37,7 +37,7 @@ iscf 17 # Needed for electron-positron
 #%% test_chain = t95.abi, t96.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t96.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t96.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

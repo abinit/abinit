@@ -158,7 +158,7 @@ optdriver7    5 # for nonlinear calculation
 #%% test_chain = t85.abi, t86.abi
 #%% [files]
 #%% files_to_test = 
-#%%    t86.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
+#%%    t86.abo, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

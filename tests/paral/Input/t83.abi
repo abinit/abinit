@@ -82,13 +82,13 @@ jpawu2  0.5   eV
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%                  t83.out,  tolnlines =0, tolabs =1.1e-16, tolrel = 2.0e-16, fld_options=-medium ;
+#%%                  t83.abo,  tolnlines =0, tolabs =1.1e-16, tolrel = 2.0e-16, fld_options=-medium ;
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   t83_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t83_MPI10.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t83_MPI10o_DS2_atom_01_Gtau_offdiag_02.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [extra_info]
 #%% authors = B. Amadon

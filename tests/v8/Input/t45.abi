@@ -54,9 +54,9 @@ qpath
 #%%   iw_cp t45_Mg2Si_k666_q888_0.01_DDB t45_Mg2Si_k666_q888_0.01_DDB
 #%% [files]
 #%% files_to_test = 
-#%%   t45.out, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
-#%%   t45.out_GRUNS_DOS, tolnlines = 33, tolabs = 6.0e-02, tolrel = 8.0e-2, fld_options= -ridiculous;
-#%%   t45.out_GRUNS_QPATH, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options= -ridiculous;
+#%%   t45.abo, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
+#%%   t45.abo_GRUNS_DOS, tolnlines = 33, tolabs = 6.0e-02, tolrel = 8.0e-2, fld_options= -ridiculous;
+#%%   t45.abo_GRUNS_QPATH, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 24
 #%% [extra_info]

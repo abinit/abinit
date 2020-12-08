@@ -88,7 +88,7 @@
 #%% test_chain = t76.abi, t77.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t76.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t76.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

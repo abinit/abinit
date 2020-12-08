@@ -71,7 +71,7 @@ znucl  13
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t04.out, tolnlines=50, tolabs=5.0e-02, tolrel=1.0e-02;
+#%%   t04.abo, tolnlines=50, tolabs=5.0e-02, tolrel=1.0e-02;
 #%%   t04o_DS1_INTERP_EBANDS.data, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 8

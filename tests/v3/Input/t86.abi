@@ -83,7 +83,7 @@ diemac 3.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t86.out, tolnlines = 2, tolabs = 1.1e-05, tolrel = 3.0e-04, fld_options = -medium
+#%%   t86.abo, tolnlines = 2, tolabs = 1.1e-05, tolrel = 3.0e-04, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

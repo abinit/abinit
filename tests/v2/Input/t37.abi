@@ -156,7 +156,7 @@ kpt
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t37.out, tolnlines = 2, tolabs = 1.010e-03, tolrel = 4.000e-04, fld_options = -easy
+#%%   t37.abo, tolnlines = 2, tolabs = 1.010e-03, tolrel = 4.000e-04, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 32
 #%% [extra_info]

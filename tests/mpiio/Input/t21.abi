@@ -72,7 +72,7 @@
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t21_MPI4.out, tolnlines=   10,   tolabs=  2.6e-2,      tolrel= 4.0e-1, fld_options = -easy
+#%% files_to_test = t21_MPI4.abo, tolnlines=   10,   tolabs=  2.6e-2,      tolrel= 4.0e-1, fld_options = -easy
 #%% [extra_info]
 #%% keywords = NC 
 #%% authors = Unknown

@@ -2,7 +2,7 @@ ddb_filepath = "t91.ddb.out"
 gkk_filepath = "t92o"
 ddk_filepath = "t94.ddk"
 eph_prefix = "t94"
-output_file = "t94.out"
+output_file = "t94.abo"
 outdata_prefix = "t94_outdata"
 
 ep_extrael 0.1
@@ -79,7 +79,7 @@ iatprj_bs 1
 #%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t94.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
+#%%   t94.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
 #%%   t94_outdata_ep_SBK, tolnlines = 50, tolabs = 8.0e-07, tolrel = 7.0e-05
 #%% [shell]
 #%% pre_commands = 

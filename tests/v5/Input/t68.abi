@@ -98,7 +98,7 @@ xred    0.0  0.0  0.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t68.out, tolnlines = 15, tolabs = 2.000e-03, tolrel = 7.423e-04, fld_options = -medium
+#%%   t68.abo, tolnlines = 15, tolabs = 2.000e-03, tolrel = 7.423e-04, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

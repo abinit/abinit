@@ -28,7 +28,7 @@
 #%% executable = anaddb
 #%% use_files_file = yes
 #%% [files]
-#%% files_to_test = t13.out, tolnlines=  0, tolabs=  6.510e-13, tolrel=  4.409e-05
+#%% files_to_test = t13.abo, tolnlines=  0, tolabs=  6.510e-13, tolrel=  4.409e-05
 #%% extra_inputs = t13.ddb.in.gz
 #%% [paral_info]
 #%% max_nprocs = 4

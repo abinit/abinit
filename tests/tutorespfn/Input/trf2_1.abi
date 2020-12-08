@@ -116,7 +116,7 @@
 #%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% [files]
 #%% files_to_test = 
-#%%   trf2_1.out, tolnlines= 14, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium
+#%%   trf2_1.abo, tolnlines= 14, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -92,7 +92,7 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test = 
-#%%   t99_MPI4.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t99_MPI4o_DS2_Legendre_coefficients.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
 #%% [extra_info]
 #%% authors = B. Amadon, V. Planes

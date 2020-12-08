@@ -70,7 +70,7 @@ tolsym 1.0e-8 # Since we make rather small lattice vector changes, with the defa
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tffield_4.out, tolnlines=  3, tolabs= 9.999e-9, tolrel= 1.224e-04
+#%%   tffield_4.abo, tolnlines=  3, tolabs= 9.999e-9, tolrel= 1.224e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

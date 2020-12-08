@@ -19,7 +19,7 @@ maxcpd 10.0
 #%% test_chain = t18.abi, t19.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t19.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t19.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% psp_files = DensityCore_pw/01-H.8.fc, DensityCore_pw/53-I.8.fc
 #%% [paral_info]
 #%% max_nprocs = 1

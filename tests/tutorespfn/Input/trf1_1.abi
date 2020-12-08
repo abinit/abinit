@@ -65,7 +65,7 @@ diemac 9.0             # Although this is not mandatory, it is worth to
 #%% test_chain = trf1_1.abi, trf1_2.abi, trf1_3.abi, trf1_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   trf1_1.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%%   trf1_1.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

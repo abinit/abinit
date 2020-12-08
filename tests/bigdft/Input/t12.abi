@@ -52,7 +52,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t12.out, tolnlines = 0, tolabs = 2.300e-09, tolrel = 4.177e-13, fld_options = -medium
+#%%   t12.abo, tolnlines = 0, tolabs = 2.300e-09, tolrel = 4.177e-13, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

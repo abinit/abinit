@@ -156,7 +156,7 @@ dmft_solv3 2         # usefull to avoid supplementary variables in the input fil
 #%% executable = abinit
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
-#%% files_to_test =   t78.out, tolnlines=   17,   tolabs=  1.5e-3,  tolrel= 2.0e-3, fld_options = -medium
+#%% files_to_test =   t78.abo, tolnlines=   17,   tolabs=  1.5e-3,  tolrel= 2.0e-3, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

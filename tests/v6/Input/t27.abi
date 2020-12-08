@@ -58,7 +58,7 @@ ngkpt 1 1 1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t27.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t27.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

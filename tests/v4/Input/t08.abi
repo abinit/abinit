@@ -56,7 +56,7 @@ pawecutdg 10.
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t08.out, tolnlines = 40, tolabs = 1.010e-05, tolrel = 7.322e-02, fld_options = -medium
+#%%   t08.abo, tolnlines = 40, tolabs = 1.010e-05, tolrel = 7.322e-02, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 14
 #%% [extra_info]

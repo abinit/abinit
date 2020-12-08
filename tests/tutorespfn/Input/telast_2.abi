@@ -105,7 +105,7 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% test_chain = telast_2.abi, telast_3.abi
 #%% [files]
 #%% files_to_test = 
-#%%   telast_2.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%%   telast_2.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

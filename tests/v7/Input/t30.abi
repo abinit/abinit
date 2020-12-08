@@ -87,7 +87,7 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% test_chain = t30.abi, t31.abi
 #%% [files]
 #%% files_to_test =
-#%%                  t30.out,  tolnlines =120, tolabs =0.005, tolrel = 3.5e-01, fld_options=-medium ;
+#%%                  t30.abo,  tolnlines =120, tolabs =0.005, tolrel = 3.5e-01, fld_options=-medium ;
 #%% [shell] 
 #%% post_commands = 
 #%%    ww_cp t30o_DS2_WFK t31o_DS1_WFK;

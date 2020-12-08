@@ -108,7 +108,7 @@ nbdbuf 0
 #%% test_chain = tnlo_7.abi, tnlo_8.abi, tnlo_9.abi, tnlo_10.abi, tnlo_11.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tnlo_10.out, tolnlines=  9, tolabs=  8.0e-07, tolrel=  6.0e-05
+#%%   tnlo_10.abo, tolnlines=  9, tolabs=  8.0e-07, tolrel=  6.0e-05
 #%% [shell]
 #%% post_commands = 
 #%%   ww_mv tnlo_10i_WFK tnlo_11i_WFK;

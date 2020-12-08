@@ -48,7 +48,7 @@ ixc -1009
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t14.out, tolnlines = 0, tolabs = 1.1e-06, tolrel = 0.00e+00
+#%%  t14.abo, tolnlines = 0, tolabs = 1.1e-06, tolrel = 0.00e+00
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

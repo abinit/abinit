@@ -17,7 +17,7 @@
 #%% input_ddb = tffield_2o_DS3_DDB
 #%% [files]
 #%% files_to_test = 
-#%%   tffield_3.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%%   tffield_3.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -26,7 +26,7 @@
 #%% input_gkk = t58o_DS2_EIGR2D
 #%% [files]
 #%% files_to_test = 
-#%%   t59.out, tolnlines = 7, tolabs = 4.0e-2, tolrel = 2.0e-4
+#%%   t59.abo, tolnlines = 7, tolabs = 4.0e-2, tolrel = 2.0e-4
 #%% psp_files = 
 #%% [paral_info]
 #%% max_nprocs = 2

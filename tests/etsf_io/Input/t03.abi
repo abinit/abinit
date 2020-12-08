@@ -4,7 +4,7 @@ t01o_DEN.nc
 0 0 0
 1 1 1
 100
-t03.out
+t03.abo
 1
 15
 t01o_CUT3DDENPOT.nc
@@ -17,7 +17,7 @@ t01o_CUT3DDENPOT.nc
 #%% test_chain = t01.abi, t03.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t03.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%%   t03.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
 #%% psp_files = 
 #%% [paral_info]
 #%% max_nprocs = 1

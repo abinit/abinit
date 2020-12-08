@@ -113,7 +113,7 @@ nbdbuf 0
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
 #%% [files]
 #%% files_to_test = 
-#%%   t66.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t66.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 5
 #%% [extra_info]

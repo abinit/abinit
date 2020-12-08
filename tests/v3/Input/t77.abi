@@ -90,7 +90,7 @@ prtbbb 1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t77.out, tolnlines = 45, tolabs = 4.0e-03, tolrel = 1.001e+00, fld_options =  -easy
+#%%   t77.abo, tolnlines = 45, tolabs = 4.0e-03, tolrel = 1.001e+00, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

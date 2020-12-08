@@ -77,7 +77,7 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t02.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t02.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

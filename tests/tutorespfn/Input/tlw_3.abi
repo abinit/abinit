@@ -9,7 +9,7 @@ flexoflag  1
 #%% test_chain =  tlw_1.abi, tlw_2.abi, tlw_3.abi
 #%% [files]
 #%% files_to_test =
-#%%   tlw_3.out, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options = -easy
+#%%   tlw_3.abo, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

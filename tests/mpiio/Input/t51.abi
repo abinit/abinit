@@ -65,7 +65,7 @@ natom 2
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test=t51_MPI4.out, tolnlines=2, tolabs=1.1e-8, tolrel=5e-4
+#%% files_to_test=t51_MPI4.abo, tolnlines=2, tolabs=1.1e-8, tolrel=5e-4
 #%% [extra_info]
 #%% keywords = NC, DFPT
 #%% authors = M. Giantomassi

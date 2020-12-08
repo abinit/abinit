@@ -85,7 +85,7 @@ dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t47.out, tolnlines = 27, tolabs = 8.0e-5, tolrel = 2.0e-3, fld_options =  -medium
+#%%   t47.abo, tolnlines = 27, tolabs = 8.0e-5, tolrel = 2.0e-3, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

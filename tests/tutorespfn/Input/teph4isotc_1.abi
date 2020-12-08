@@ -48,7 +48,7 @@ pseudos "PseudosTM_pwteter/12mg.pspnc, 05b.soft_tm"
 #%% [files]
 #%% use_git_submodule = test_submodule
 #%% files_to_test =
-#%%   teph4isotc_1.out, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4isotc_1.abo, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

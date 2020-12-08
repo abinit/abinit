@@ -64,7 +64,7 @@ gw_icutcoul3  6
 #%% test_chain = t12.abi, t13.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t12.out, tolnlines = 20, tolabs = 2.0e-3, tolrel = 6.0e-3, fld_options =  -medium
+#%%   t12.abo, tolnlines = 20, tolabs = 2.0e-3, tolrel = 6.0e-3, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

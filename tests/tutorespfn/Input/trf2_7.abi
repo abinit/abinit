@@ -34,7 +34,7 @@
 #%% input_ddb = trf2_3.ddb.out 
 #%% [files]
 #%% files_to_test = 
-#%%   trf2_7.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%%   trf2_7.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

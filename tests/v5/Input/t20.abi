@@ -96,7 +96,7 @@ prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t20.out,                                tolnlines = 9, tolabs = 5.410e-02, tolrel = 4.000e-02, fld_options = -easy;
+#%%   t20.abo,                                tolnlines = 9, tolabs = 5.410e-02, tolrel = 4.000e-02, fld_options = -easy;
 #%%   t20o_DS2_FATBANDS_at0001_Ni_is1_l2_m+0, tolnlines = 5, tolabs = 1.001e-04, tolrel = 1.100e-03, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 3

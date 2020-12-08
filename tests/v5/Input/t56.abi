@@ -47,7 +47,7 @@ prtden 0   prtwf 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t56.out, tolnlines = 0, tolabs = 2.994e-13, tolrel = 1.001e+00
+#%%   t56.abo, tolnlines = 0, tolabs = 2.994e-13, tolrel = 1.001e+00
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

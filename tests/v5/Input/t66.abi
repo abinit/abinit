@@ -137,7 +137,7 @@ tolwfr  1.0d-10
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t66.out, tolnlines = 15, tolabs = 1.010e-02, tolrel = 6.000e-03, fld_options = -medium
+#%%   t66.abo, tolnlines = 15, tolabs = 1.010e-02, tolrel = 6.000e-03, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

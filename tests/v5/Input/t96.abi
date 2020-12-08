@@ -87,7 +87,7 @@ znucl 28
 #%% test_chain = t96.abi, t97.abi, t98.abi, t99.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t96.out, tolnlines = 3, tolabs = 2.1e-02, tolrel = 1.001e+00, fld_options = -easy
+#%%   t96.abo, tolnlines = 3, tolabs = 2.1e-02, tolrel = 1.001e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -55,7 +55,7 @@ prtden 0  prteig 0  prtwf 0
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t28_MPI4.out, tolnlines= 25, tolabs=  5.0e-3, tolrel= 1.001, fld_options = -easy
+#%% files_to_test = t28_MPI4.abo, tolnlines= 25, tolabs=  5.0e-3, tolrel= 1.001, fld_options = -easy
 #%% [extra_info]
 #%% keywords = PAW 
 #%% authors = M. Torrent

@@ -103,7 +103,7 @@ diemac 13.0
 #%% test_chain =  tlw_1.abi, tlw_2.abi, tlw_3.abi
 #%% [files]
 #%% files_to_test =
-#%%   tlw_1.out, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
+#%%   tlw_1.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

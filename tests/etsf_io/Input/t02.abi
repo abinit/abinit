@@ -54,7 +54,7 @@ istwfk2    10*1               # Wavefunction storage mode for each k-point
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t02.out, tolnlines = 1, tolabs = 1.001e-09, tolrel = 3.000e-09
+#%%   t02.abo, tolnlines = 1, tolabs = 1.001e-09, tolrel = 3.000e-09
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

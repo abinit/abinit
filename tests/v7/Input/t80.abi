@@ -130,7 +130,7 @@ nstep 100              # Maximal number of SCF cycles
 #%% post_commands = 
 #%% [files]
 #%% files_to_test = 
-#%%   t80.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t80.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

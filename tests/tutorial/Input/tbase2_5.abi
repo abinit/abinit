@@ -80,7 +80,7 @@ diemac 2.0        # Although this is not mandatory, it is worth to
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tbase2_5.out, tolnlines=  0, tolabs=  3.681e-09, tolrel=  2.000e-04, fld_options = -medium
+#%%   tbase2_5.abo, tolnlines=  0, tolabs=  3.681e-09, tolrel=  2.000e-04, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

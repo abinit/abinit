@@ -40,7 +40,7 @@ bound_step = 100
 #%% md_hist = t13_HIST
 #%% [files]
 #%% files_to_test = 
-#%%   t15.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t15.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t15_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 1

@@ -27,7 +27,7 @@ maxatd   14.0   # Important to include enough starting atoms,
 #%% test_chain = t30.abi, t31.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t31.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%%   t31.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
 #%% psp_files = DensityCore_pw/12-Mg.8.fc
 #%% [paral_info]
 #%% max_nprocs = 1

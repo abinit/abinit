@@ -80,7 +80,7 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% test_chain = tfold2bloch_1.abi, tfold2bloch_2.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tfold2bloch_1.out, tolnlines=38, tolabs=2.0e-4, tolrel=2.0e-02
+#%%   tfold2bloch_1.abo, tolnlines=38, tolabs=2.0e-4, tolrel=2.0e-02
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

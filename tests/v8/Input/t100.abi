@@ -23,7 +23,7 @@ bound_rangePower = 6 6
 #%% test_chain = t98.abi, t99.abi, t100.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t100.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t100.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t100_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 1

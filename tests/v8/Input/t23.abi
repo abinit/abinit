@@ -31,7 +31,7 @@ spin_write_traj = 0
 #%% system_xml = t23.xml
 #%% [files]
 #%% files_to_test = 
-#%%   t23.out, tolnlines = 1, tolabs = 2e3, tolrel = 1, fld_options = -medium;
+#%%   t23.abo, tolnlines = 1, tolabs = 2e3, tolrel = 1, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

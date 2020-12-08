@@ -49,7 +49,7 @@ ngfft 8 8 8
 #%% nprocs_to_test =  4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t49_MPI4.out, tolnlines=   26,   tolabs=  2.0e-8,      tolrel= 4.0e-7
+#%% files_to_test = t49_MPI4.abo, tolnlines=   26,   tolabs=  2.0e-8,      tolrel= 4.0e-7
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown

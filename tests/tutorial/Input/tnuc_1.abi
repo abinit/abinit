@@ -40,7 +40,7 @@ xred # here come the fractional coordinates from the cif file
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnuc_1.out, tolnlines=  3, tolabs=  1.2e-8 , tolrel= 3.0e-8
+#%%   tnuc_1.abo, tolnlines=  3, tolabs=  1.2e-8 , tolrel= 3.0e-8
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

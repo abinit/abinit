@@ -86,7 +86,7 @@ nbdbuf 0
 #%% test_chain = tnlo_2.abi, tnlo_3.abi, tnlo_4.abi, tnlo_5.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tnlo_3.out, tolnlines=  1, tolabs=  3.100e-08, tolrel=  2.000e-08, fld_options = -medium
+#%%   tnlo_3.abo, tolnlines=  1, tolabs=  3.100e-08, tolrel=  2.000e-08, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

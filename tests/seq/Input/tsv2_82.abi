@@ -68,7 +68,7 @@ berryopt4 -1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = tsv2_82.out, tolnlines=  0, tolabs=  1.209e-11, tolrel=  6.000e-06
+#%% files_to_test = tsv2_82.abo, tolnlines=  0, tolabs=  1.209e-11, tolrel=  6.000e-06
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

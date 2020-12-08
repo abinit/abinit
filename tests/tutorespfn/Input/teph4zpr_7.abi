@@ -54,7 +54,7 @@
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =
-#%%   teph4zpr_7.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4zpr_7.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

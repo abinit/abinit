@@ -34,7 +34,7 @@ xcart -0.2 -0.3 -2.8
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t91.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  
+#%%   t91.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

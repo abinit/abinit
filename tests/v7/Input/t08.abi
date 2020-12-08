@@ -87,7 +87,7 @@ pitransform6 2  #staging
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t08.out, tolnlines=5, tolabs=2.0e-4, tolrel=6.0e-4, fld_options = -easy
+#%% files_to_test = t08.abo, tolnlines=5, tolabs=2.0e-4, tolrel=6.0e-4, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

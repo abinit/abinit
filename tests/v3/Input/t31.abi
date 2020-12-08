@@ -102,7 +102,7 @@
 #%% need_cpp_vars = 
 #%% [files]
 #%% files_to_test = 
-#%%   t31.out, tolnlines = 6, tolabs = 1.100e-03, tolrel = 5.400e-04
+#%%   t31.abo, tolnlines = 6, tolabs = 1.100e-03, tolrel = 5.400e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

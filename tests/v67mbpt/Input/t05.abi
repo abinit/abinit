@@ -85,7 +85,7 @@ ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
 #%% test_chain = t04.abi, t05.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t05.out, tolnlines = 10, tolabs = 1.1e-3, tolrel = 4.0e-2, fld_options =  -medium
+#%%   t05.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 4.0e-2, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

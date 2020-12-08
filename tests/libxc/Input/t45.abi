@@ -142,7 +142,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t45.out, tolnlines=15, tolabs= 7.0e-3, tolrel= 0.02, fld_options= -easy
+#%%   t45.abo, tolnlines=15, tolabs= 7.0e-3, tolrel= 0.02, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

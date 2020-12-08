@@ -93,7 +93,7 @@ xred
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%  t92.out, tolnlines = 20, tolabs = 0.30, tolrel = 0.13;
+#%%  t92.abo, tolnlines = 20, tolabs = 0.30, tolrel = 0.13;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

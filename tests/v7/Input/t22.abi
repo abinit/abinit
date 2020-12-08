@@ -82,7 +82,7 @@ jpawu   0.6   0.0  eV
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t22.out, tolnlines=   40,   tolabs=  1.1e-1,      tolrel= 2.0e-1, fld_options = -easy
+#%%   t22.abo, tolnlines=   40,   tolabs=  1.1e-1,      tolrel= 2.0e-1, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -110,13 +110,13 @@ paral_kgb 0
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_1]
-#%% files_to_test = t72_MPI1.out, tolnlines=   14,   tolabs=  1.1e-3,      tolrel= 3.0e-2
+#%% files_to_test = t72_MPI1.abo, tolnlines=   14,   tolabs=  1.1e-3,      tolrel= 3.0e-2
 #%% [NCPU_2]
-#%% files_to_test = t72_MPI2.out, tolnlines=   14,   tolabs=  1.1e-3,      tolrel= 3.0e-2
+#%% files_to_test = t72_MPI2.abo, tolnlines=   14,   tolabs=  1.1e-3,      tolrel= 3.0e-2
 #%% [NCPU_4]
-#%% files_to_test = t72_MPI4.out, tolnlines=   14,   tolabs=  1.1e-3,      tolrel= 3.0e-2
+#%% files_to_test = t72_MPI4.abo, tolnlines=   14,   tolabs=  1.1e-3,      tolrel= 3.0e-2
 #%% [NCPU_10]
-#%% files_to_test = t72_MPI10.out, tolnlines=   14,   tolabs=  1.1e-3,      tolrel= 3.0e-2
+#%% files_to_test = t72_MPI10.abo, tolnlines=   14,   tolabs=  1.1e-3,      tolrel= 3.0e-2
 #%% [extra_info]
 #%% keywords =  NC, GW
 #%% authors =  M. Giantomassi

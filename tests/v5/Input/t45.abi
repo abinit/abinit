@@ -40,7 +40,7 @@ znucl 14 14
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t45.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%%   t45.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

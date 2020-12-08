@@ -73,7 +73,7 @@ enunit       2
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t09.out, tolnlines = 20, tolabs = 1.1e-3, tolrel = 1.1, fld_options =  -medium
+#%%   t09.abo, tolnlines = 20, tolabs = 1.1e-3, tolrel = 1.1, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -81,7 +81,7 @@ freqremax4   31 eV
 #%% test_chain = t37.abi, t38.abi, t39.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t37.out, tolnlines = 20, tolabs = 2.0e-2, tolrel = 5.0e-1, fld_options = -ridiculous;
+#%%   t37.abo, tolnlines = 20, tolabs = 2.0e-2, tolrel = 5.0e-1, fld_options = -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

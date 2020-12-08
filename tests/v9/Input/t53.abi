@@ -53,7 +53,7 @@ znucl 6
 #%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi, t54.abi, t55.abi, t56.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t53.out, tolnlines = 10, tolabs = 1.1e-3, tolrel = 2.0e-2
+#%%   t53.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 2.0e-2
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

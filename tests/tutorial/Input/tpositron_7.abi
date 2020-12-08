@@ -72,7 +72,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tpositron_7.out, tolnlines= 7, tolabs=9., tolrel= 1.0, fld_options= -easy
+#%%   tpositron_7.abo, tolnlines= 7, tolabs=9., tolrel= 1.0, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

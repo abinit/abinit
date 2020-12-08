@@ -38,7 +38,7 @@ tsmear 5.0d-3
 #%% test_chain = t95.abi, t96.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t95.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t95.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [shell]
 #%% post_commands = ww_cp t95o_DEN t96i_DEN
 #%% [paral_info]

@@ -15,7 +15,7 @@ optcell =  2  # Relaxation of the cell
 #%% system_xml = tmulti1_2_model.xml
 #%% [files]
 #%% files_to_test = 
-#%%   tmulti1_3.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   tmulti1_3.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

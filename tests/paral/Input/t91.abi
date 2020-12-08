@@ -85,11 +85,11 @@ jpawu2  0.0000 0.0  # values in Hartree
 #%% nprocs_to_test = 1, 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_1]
-#%% files_to_test = t91_MPI1.out, tolnlines=    1,   tolabs=  2.0e-8,      tolrel= 1.1e-0, fld_options = -medium
+#%% files_to_test = t91_MPI1.abo, tolnlines=    1,   tolabs=  2.0e-8,      tolrel= 1.1e-0, fld_options = -medium
 #%% [NCPU_4]
-#%% files_to_test = t91_MPI4.out, tolnlines=    1,   tolabs=  2.0e-8,      tolrel= 1.1e-0, fld_options = -medium
+#%% files_to_test = t91_MPI4.abo, tolnlines=    1,   tolabs=  2.0e-8,      tolrel= 1.1e-0, fld_options = -medium
 #%% [NCPU_10]
-#%% files_to_test = t91_MPI10.out, tolnlines=    1,   tolabs=  2.0e-8,      tolrel= 1.1e-0, fld_options = -medium
+#%% files_to_test = t91_MPI10.abo, tolnlines=    1,   tolabs=  2.0e-8,      tolrel= 1.1e-0, fld_options = -medium
 #%% [extra_info]
 #%% keywords = PAW, DMFT
 #%% authors = B. Amadon

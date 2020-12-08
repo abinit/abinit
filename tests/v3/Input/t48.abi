@@ -49,7 +49,7 @@
 #%% need_cpp_vars = 
 #%% [files]
 #%% files_to_test = 
-#%%   t48.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t48.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

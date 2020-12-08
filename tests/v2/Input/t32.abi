@@ -46,7 +46,7 @@
 #%% test_chain = t30.abi, t31.abi, t32.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t32.out, tolnlines = 4, tolabs = 1.1e-5, tolrel = 2.0e-8 
+#%%   t32.abo, tolnlines = 4, tolabs = 1.1e-5, tolrel = 2.0e-8 
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

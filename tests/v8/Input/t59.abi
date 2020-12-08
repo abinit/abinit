@@ -63,7 +63,7 @@ znucl 14.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t59.out, tolnlines = 70, tolabs = 1.0e-3, tolrel = 2.0e-2
+#%%   t59.abo, tolnlines = 70, tolabs = 1.0e-3, tolrel = 2.0e-2
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

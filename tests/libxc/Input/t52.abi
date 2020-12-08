@@ -62,7 +62,7 @@ nbandhf  4         # number of occupied states
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t52.out, tolnlines=15, tolabs=3.000e-08, tolrel=5.000e-03
+#%% files_to_test = t52.abo, tolnlines=15, tolabs=3.000e-08, tolrel=5.000e-03
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

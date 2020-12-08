@@ -100,7 +100,7 @@ nbdbuf 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = tsv3_04.out, tolnlines=2, tolabs=1.1e-7, tolrel=1.2e-3, fld_options = -medium
+#%% files_to_test = tsv3_04.abo, tolnlines=2, tolabs=1.1e-7, tolrel=1.2e-3, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

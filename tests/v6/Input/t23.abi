@@ -32,7 +32,7 @@ rprim
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t23.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t23.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 63
 #%% [extra_info]

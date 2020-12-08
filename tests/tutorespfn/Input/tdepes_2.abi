@@ -63,7 +63,7 @@ nsym 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tdepes_2.out,  tolnlines= 20, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium
+#%%   tdepes_2.abo,  tolnlines= 20, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

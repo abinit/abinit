@@ -74,7 +74,7 @@ targetpol 0.0 0.0 0.45
 #%% executable = anaddb
 #%% [files]
 #%% files_to_test = 
-#%%   t71.out, tolnlines = 10, tolabs = 6.0e-10, tolrel = 2.000e-07
+#%%   t71.abo, tolnlines = 10, tolabs = 6.0e-10, tolrel = 2.000e-07
 #%% extra_inputs =t71.ddb.in.gz
 #%% [paral_info]
 #%% max_nprocs = 4

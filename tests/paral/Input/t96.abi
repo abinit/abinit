@@ -33,7 +33,7 @@ ntime  = 50
 #%% [NCPU_1]
 #%% input_ddb  = t95_DDB
 #%% files_to_test = 
-#%%   t96_MPI1.out, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
+#%%   t96_MPI1.abo, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
 #%%   t96_MPI1_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_2]
 #%% input_ddb  = t95_DDB 

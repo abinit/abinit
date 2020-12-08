@@ -38,7 +38,7 @@
 #%% executable = anaddb
 #%% [files]
 #%% files_to_test = 
-#%%   t71.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t71.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% extra_inputs = t71.ddb.in.gz
 #%% [paral_info]
 #%% max_nprocs = 4

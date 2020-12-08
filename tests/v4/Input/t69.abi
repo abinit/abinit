@@ -104,7 +104,7 @@ diemac 9.0             # Although this is not mandatory, it is worth to
 #%% test_chain = t69.abi, t70.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t69.out, tolnlines = 0, tolabs = 5.000e-07, tolrel = 4.000e-08, fld_options =  -easy
+#%%   t69.abo, tolnlines = 0, tolabs = 5.000e-07, tolrel = 4.000e-08, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

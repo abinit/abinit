@@ -59,7 +59,7 @@
 #%% executable =  abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t04.out, tolnlines = 4, tolabs = 1.1e-9, tolrel = 4.0e-01
+#%%   t04.abo, tolnlines = 4, tolabs = 1.1e-9, tolrel = 4.0e-01
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -131,7 +131,7 @@ znucl        13
 #%% executable = abinit
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi, t90.abi, t91.abi, t92.abi, t93.abi, t94.abi, t95.abi
 #%% [files]
-#%% files_to_test = t85.out, tolnlines= 56, tolabs=  3.000e-02, tolrel=  6.000e-03, fld_options=-easy
+#%% files_to_test = t85.abo, tolnlines= 56, tolabs=  3.000e-02, tolrel=  6.000e-03, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -111,7 +111,7 @@ diemac 9.0             # Although this is not mandatory, it is worth to
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   trf1_5.out, tolnlines=  1, tolabs=  6.000e-07, tolrel=  5.000e-08, fld_options = -medium
+#%%   trf1_5.abo, tolnlines=  1, tolabs=  6.000e-07, tolrel=  5.000e-08, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

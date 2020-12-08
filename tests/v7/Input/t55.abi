@@ -79,7 +79,7 @@
 #%% post_commands = 
 #%% [files]
 #%% files_to_test = 
-#%%   t55.out, tolnlines = 7, tolabs = 1.1e-3, tolrel = 2.0e-4, fld_options = -medium
+#%%   t55.abo, tolnlines = 7, tolabs = 1.1e-3, tolrel = 2.0e-4, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

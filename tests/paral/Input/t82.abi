@@ -31,28 +31,28 @@ fit_iatom = -1
 #%% coeff_xml = t82_coeffs.xml
 #%% md_hist = t81_HIST
 #%% files_to_test = 
-#%%   t82_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t82_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI1_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_2]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
 #%% md_hist = t81_HIST
 #%% files_to_test = 
-#%%   t82_MPI2.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t82_MPI2.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI2_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_4]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
 #%% md_hist = t81_HIST
 #%% files_to_test = 
-#%%   t82_MPI4.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t82_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI4_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [NCPU_10]
 #%% system_xml = t82_sys.xml
 #%% coeff_xml = t82_coeffs.xml
 #%% md_hist = t81_HIST
 #%% files_to_test = 
-#%%   t82_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t82_MPI10.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI10_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [extra_info]
 #%% authors = A. MARTIN, M.M. Schmitt

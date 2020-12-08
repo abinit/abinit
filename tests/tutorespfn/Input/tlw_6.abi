@@ -111,7 +111,7 @@
 #%% input_ddb = tlw_5.ddb.out 
 #%% [files]
 #%% files_to_test = 
-#%%   tlw_6.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%%   tlw_6.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

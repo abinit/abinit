@@ -96,11 +96,11 @@
 #%% nprocs_to_test = 1, 2, 4
 #%% max_nprocs = 4
 #%% [NCPU_1]
-#%% files_to_test = t74_MPI1.out, tolnlines=   16,   tolabs=  1.1e-3,      tolrel= 2.0e-2
+#%% files_to_test = t74_MPI1.abo, tolnlines=   16,   tolabs=  1.1e-3,      tolrel= 2.0e-2
 #%% [NCPU_2]
-#%% files_to_test = t74_MPI2.out, tolnlines=   16,   tolabs=  1.1e-3,      tolrel= 2.0e-2
+#%% files_to_test = t74_MPI2.abo, tolnlines=   16,   tolabs=  1.1e-3,      tolrel= 2.0e-2
 #%% [NCPU_4]
-#%% files_to_test = t74_MPI4.out, tolnlines=   16,   tolabs=  1.1e-3,      tolrel= 2.0e-2
+#%% files_to_test = t74_MPI4.abo, tolnlines=   16,   tolabs=  1.1e-3,      tolrel= 2.0e-2
 #%% [extra_info]
 #%% keywords =  NC, GW
 #%% authors = F. Bruneval

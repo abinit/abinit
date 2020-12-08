@@ -63,7 +63,7 @@ enunit     1
 #%% test_chain = tgw2_1.abi, tgw2_2.abi, tgw2_3.abi, tgw2_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tgw2_1.out, tolnlines=0, tolabs=0.000e+00, tolrel=3.000e-02
+#%%   tgw2_1.abo, tolnlines=0, tolabs=0.000e+00, tolrel=3.000e-02
 #%% [shell] 
 #%% post_commands = 
 #%%   ww_cp tgw2_1o_DS2_WFK tgw2_2i_WFK;

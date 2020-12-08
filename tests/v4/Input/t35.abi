@@ -54,7 +54,7 @@ xred 3*0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t35.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
+#%%   t35.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
 #%%   t35o_DS2_DOS, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
 #%%   t35o_DS3_DOS_AT0001, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]

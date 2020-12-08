@@ -47,7 +47,7 @@ istwfk 8*1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t01.out, tolnlines=   15,   tolabs=  1.5e-04,   tolrel=  1.00e-01
+#%% files_to_test = t01.abo, tolnlines=   15,   tolabs=  1.5e-04,   tolrel=  1.00e-01
 #%% extra_inputs=t01o_w90.win 
 #%% [paral_info]
 #%% max_nprocs = 8

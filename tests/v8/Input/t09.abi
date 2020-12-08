@@ -31,7 +31,7 @@ ntime  = 50
 #%% input_ddb = t09.ddb.in
 #%% [files]
 #%% files_to_test = 
-#%%   t09.out, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
+#%%   t09.abo, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
 #%%   t09_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1

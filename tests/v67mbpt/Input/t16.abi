@@ -115,7 +115,7 @@ xred
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t16.out,          tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t16.abo,          tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t16o_DS3_EXC_MDF, tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t16o_DS4_EXC_MDF, tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%% [paral_info]

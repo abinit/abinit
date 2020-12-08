@@ -108,13 +108,13 @@
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_1]
-#%% files_to_test = t55_MPI1.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -medium
+#%% files_to_test = t55_MPI1.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -medium
 #%% [NCPU_2]
-#%% files_to_test = t55_MPI2.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -medium
+#%% files_to_test = t55_MPI2.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -medium
 #%% [NCPU_4]
-#%% files_to_test = t55_MPI4.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -medium
+#%% files_to_test = t55_MPI4.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -medium
 #%% [NCPU_10]
-#%% files_to_test = t55_MPI10.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -medium
+#%% files_to_test = t55_MPI10.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -medium
 #%% [extra_info]
 #%% keywords = NC, DFPT
 #%% authors = Unknown

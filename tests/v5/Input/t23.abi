@@ -72,7 +72,7 @@ diemac 9.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t23.out, tolnlines = 0, tolabs = 2.000e-07, tolrel = 2.000e-07, fld_options = -easy
+#%%   t23.abo, tolnlines = 0, tolabs = 2.000e-07, tolrel = 2.000e-07, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -26,7 +26,7 @@
 #%% test_chain = t03.abi, t05.abi, t06.abi, t07.abi, t08.abi, t09.abi, t11.abi, t12.abi, t14.abi, t16.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t09.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t09.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp t09o_WFK t11i_WFK;

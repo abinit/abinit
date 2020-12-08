@@ -58,7 +58,7 @@
 #%% test_chain = t27.abi, t28.abi, t29.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t28.out,       tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
+#%%   t28.abo,       tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
 #%%   t28o_TIM2_GEO, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00 
 #%% [paral_info]
 #%% max_nprocs = 1

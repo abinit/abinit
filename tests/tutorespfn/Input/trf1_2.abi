@@ -68,7 +68,7 @@ diemac 9.0             # Although this is not mandatory, it is worth to
 #%% input_prefix = trf1_1o
 #%% [files]
 #%% files_to_test = 
-#%%   trf1_2.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%%   trf1_2.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

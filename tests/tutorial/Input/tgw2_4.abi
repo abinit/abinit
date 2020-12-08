@@ -64,7 +64,7 @@ enunit     1
 #%% test_chain = tgw2_1.abi, tgw2_2.abi, tgw2_3.abi, tgw2_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tgw2_4.out, tolnlines=  2, tolabs=  1.010e-06, tolrel=  3.000e-02 
+#%%   tgw2_4.abo, tolnlines=  2, tolabs=  1.010e-06, tolrel=  3.000e-02 
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

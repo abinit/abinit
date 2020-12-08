@@ -27,7 +27,7 @@ fit_iatom = -1
 #%% md_hist = t13_HIST
 #%% [files]
 #%% files_to_test = 
-#%%   t14.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t14.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t14_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 1

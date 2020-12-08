@@ -65,7 +65,7 @@ toldff 5.0d-5
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tbase4_6.out, tolnlines=  0, tolabs=  1.010e-06, tolrel=  3.000e-04, fld_options = -easy
+#%%   tbase4_6.abo, tolnlines=  0, tolabs=  1.010e-06, tolrel=  3.000e-04, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

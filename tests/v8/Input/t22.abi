@@ -118,7 +118,7 @@ vel
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t22.out, tolnlines = 3, tolabs = 1e-08, tolrel = 0.002
+#%%   t22.abo, tolnlines = 3, tolabs = 1e-08, tolrel = 0.002
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

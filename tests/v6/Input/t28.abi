@@ -77,7 +77,7 @@ kptrlatt -4  4  4      # In cartesian coordinates, this grid is simple cubic, an
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t28.out, tolnlines = 3, tolabs = 1.1e-7, tolrel = 2.0e-4, fld_options = -medium
+#%%   t28.abo, tolnlines = 3, tolabs = 1.1e-7, tolrel = 2.0e-4, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

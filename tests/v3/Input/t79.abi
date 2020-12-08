@@ -20,7 +20,7 @@ t78o_DS2_WFK
 #%% test_chain = t78.abi, t79.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t79.out, tolnlines=  1, tolabs=  4.000e-08, tolrel=  7.000e-06, fld_options=-medium;
+#%%   t79.abo, tolnlines=  1, tolabs=  4.000e-08, tolrel=  7.000e-06, fld_options=-medium;
 #%%   t79_Kth, tolnlines=  50, tolabs=  4.000e-08, tolrel=  7.000e-06, fld_options=-easy;
 #%%   t79_Lij, tolnlines=  50, tolabs=  4.000e-08, tolrel=  7.000e-06, fld_options=-easy;
 #%%   t79_abs, tolnlines=  50, tolabs=  4.000e-04, tolrel=  7.000e-06, fld_options=-ridiculous;

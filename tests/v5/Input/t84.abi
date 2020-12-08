@@ -33,7 +33,7 @@ qph1l 0.0  0.0  0.0  1.0
 #%% test_chain = t81.abi, t82.abi, t83.abi, t84.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t84.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t84.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%%## extra_inputs = t83.ddb.out.gz
 #%% psp_files = 
 #%% [paral_info]

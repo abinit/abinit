@@ -12,7 +12,7 @@ chneut 0
 #%% test_chain = t72.abi, t73.abi, t74.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t74.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
+#%%   t74.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

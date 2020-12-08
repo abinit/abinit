@@ -115,7 +115,7 @@ rprim11
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t61.out, tolnlines = 0, tolabs = 9.984e-09, tolrel = 6.000e-04, fld_options =  -medium
+#%%   t61.abo, tolnlines = 0, tolabs = 9.984e-09, tolrel = 6.000e-04, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

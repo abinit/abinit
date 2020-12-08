@@ -26,7 +26,7 @@ qph1l   0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
 #%% test_chain = t68.abi, t69.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t69.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t69.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

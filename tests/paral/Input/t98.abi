@@ -22,7 +22,7 @@ ntime  = 50
 #%% [NCPU_1]
 #%% system_xml = t98_sys.xml
 #%% files_to_test = 
-#%%   t98_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t98_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t98_MPI1_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_2]
 #%% system_xml = t98_sys.xml

@@ -40,7 +40,7 @@ tsmear 0.1 eV
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t11.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t11.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t11o_DS2_BLZTRP.ns_energy, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t11o_DS2_BLZTRP.struct, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t11o_DS2_ns_BLZTRP.def, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;

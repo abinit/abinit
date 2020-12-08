@@ -53,7 +53,7 @@ znucl 28
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t15.out, tolnlines = 2, tolabs = 5.000e-01, tolrel = 4.000e-01, fld_options = -ridiculous
+#%%   t15.abo, tolnlines = 2, tolabs = 5.000e-01, tolrel = 4.000e-01, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

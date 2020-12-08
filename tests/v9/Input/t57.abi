@@ -121,7 +121,7 @@ kptopt7   1
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t57.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
+#%%   t57.abo, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
 #%%   t57o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
 #%% [paral_info]
 #%% max_nprocs = 10

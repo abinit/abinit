@@ -94,7 +94,7 @@
 #%% need_cpp_vars = 
 #%% [files]
 #%% files_to_test = 
-#%%   t86.out, tolnlines = 12, tolabs = 1.010e-03, tolrel = 4.000e-02
+#%%   t86.abo, tolnlines = 12, tolabs = 1.010e-03, tolrel = 4.000e-02
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

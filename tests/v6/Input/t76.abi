@@ -83,7 +83,7 @@ iatprj_bs 1 2
 #%% input_gkk = t74o
 #%% [files]
 #%% files_to_test = 
-#%%   t76.out,       tolnlines = 20, tolabs = 1.1, tolrel = 1.1, fld_options =  -easy;
+#%%   t76.abo,       tolnlines = 20, tolabs = 1.1, tolrel = 1.1, fld_options =  -easy;
 #%%   t76_BTRAP, tolnlines = 0,  tolabs = 0.0, tolrel = 0.0, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 2

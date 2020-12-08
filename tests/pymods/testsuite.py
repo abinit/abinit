@@ -339,6 +339,7 @@ class FileToTest(object):
         # FIXME Hack due to the stdout-out ambiguity
         if not os.path.exists(ref_fname) and ref_fname.endswith(".stdout"):
             ref_fname = ref_fname[:-7] + ".out"
+            #ref_fname = ref_fname[:-7] + ".abo"
         out_fname = os.path.abspath(os.path.join(workdir, self.name))
 
         opts = {
@@ -2277,6 +2278,7 @@ pp_dirpath $ABI_PSPDIR
 
             if not os.path.isfile(ref_fname) and ref_fname.endswith(".stdout"):
                 ref_fname = ref_fname[:-7] + ".out"  # FIXME Hack due to the stdout-out ambiguity
+                #ref_fname = ref_fname[:-7] + ".abo"  # FIXME Hack due to the stdout-out ambiguity
 
             out_fname = os.path.abspath(os.path.join(self.workdir, f.name))
 
@@ -2289,7 +2291,7 @@ pp_dirpath $ABI_PSPDIR
             f.hdiff_fname = hdiff_fname
 
             x, ext = os.path.splitext(f.name)
-            safe_hdiff = ext in {".out", ".stdout"}  # Create HTML diff file only for these files
+            safe_hdiff = ext in {".out", ".abo", ".stdout"}  # Create HTML diff file only for these files
 
             if ref_exists and out_exists and safe_hdiff:
                 out_opt = "-m"
@@ -2327,6 +2329,7 @@ pp_dirpath $ABI_PSPDIR
 
             if not os.path.isfile(ref_fname) and ref_fname.endswith(".stdout"):
                 ref_fname = ref_fname[:-7] + ".out"  # FIXME Hack due to the stdout-out ambiguity
+                #ref_fname = ref_fname[:-7] + ".abo"  # FIXME Hack due to the stdout-out ambiguity
 
             out_fname = os.path.abspath(os.path.join(self.workdir, f.name))
 
@@ -2556,7 +2559,7 @@ class AbinitTest(BaseTest):
         # and we might want to change it especially if we are debugging the code
         inp_fname = self.inp_fname
         t_stdin.write(os.path.basename(inp_fname) + "\n")
-        t_stdin.write(self.id + ".out" + "\n")
+        t_stdin.write(self.id + ".abo" + "\n")
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
@@ -2587,7 +2590,8 @@ class AbinitTest(BaseTest):
         app = extra.append
 
         if 'output_file = "' not in line:
-            app('output_file = "%s"' % (self.id + ".out"))
+            #app('output_file = "%s"' % (self.id + ".out"))
+            app('output_file = "%s"' % (self.id + ".abo"))
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
@@ -2647,7 +2651,7 @@ class AnaddbTest(BaseTest):
         t_stdin = StringIO()
 
         t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
-        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + ".abo" + "\n")       # 2) formatted output file e.g. t13.abo
         t_stdin.write(self.get_ddb_path() + "\n")    # 3) input derivative database e.g. t13.ddb.in
         t_stdin.write(self.id + ".md" + "\n")        # 4) output molecular dynamics e.g. t13.md
         t_stdin.write(self.get_gkk_path() + "\n")    # 5) input elphon matrix elements  (GKK file) :
@@ -2671,7 +2675,7 @@ class AnaddbTest(BaseTest):
             app('ddb_filepath = "%s"' % (self.get_ddb_path()))
 
         if 'output_file = "' not in line:
-            app('output_file = "%s"' % (self.id + ".out"))
+            app('output_file = "%s"' % (self.id + ".abo"))
 
         # EPH stuff
         gkk_path = self.get_gkk_path()
@@ -2701,7 +2705,7 @@ class MultibinitTest(BaseTest):
         t_stdin = StringIO()
 
         t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
-        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + ".abo" + "\n")       # 2) formatted output file e.g. t13.abo
 
         if self.input_ddb:
             iddb_fname = os.path.join(self.inp_dir, self.input_ddb)
@@ -2765,7 +2769,7 @@ class TdepTest(BaseTest):
             self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
 
         t_stdin.write(md_hist_fname + "\n")
-        t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.abo
 
         return t_stdin.getvalue()
 
@@ -2811,7 +2815,7 @@ class OpticTest(BaseTest):
         t_stdin = StringIO()
 
         t_stdin.write(self.inp_fname + "\n")  # optic input file e.g. .../Input/t57.in
-        t_stdin.write(self.id + ".out\n")     # Output. e.g t57.out
+        t_stdin.write(self.id + ".abo\n")     # Output. e.g t57.abo
         t_stdin.write(self.id + "\n")         # Used as suffix to diff and prefix to log file names,
                                                # and also for roots for temporaries
 
@@ -3204,6 +3208,7 @@ class AbinitTestSuite(object):
 
     def git_rename(self):
 
+        import subprocess
         seen = set()
         def rename(test):
             #print(test, type(test))
@@ -3215,13 +3220,12 @@ class AbinitTestSuite(object):
             new = root + ".abi"
             inbase = os.path.basename(root)
             cmd = f"git mv {test.inp_fname} {new}"
-            #import subprocess
+
             #print("cmd", cmd)
             #subprocess.run(cmd, shell=True, check=True)
             #call(cmd)
             #print("inp_fname", test.inp_fname)
 
-            """
             # Rename ref files
             old_new = []
             for f in test.files_to_test:
@@ -3232,7 +3236,11 @@ class AbinitTestSuite(object):
                     new, ext = os.path.splitext(old_ref)
                     new = new + ".abo"
                     cmd = f"git mv {old_ref} {new}"
-                    #print(cmd)
+                    print(cmd)
+                    if os.path.exists(old_ref) and not os.path.exists(new):
+                        subprocess.run(cmd, shell=True, check=True)
+                    if not os.path.exists(old_ref):
+                        print("Warning. unexistent:", old_ref)
                     old_new.append((os.path.basename(old_ref), os.path.basename(new)))
 
                 else:
@@ -3247,9 +3255,8 @@ class AbinitTestSuite(object):
                         print("replacing`", old, "`with:`", new, "`in:", test.inp_fname)
                         s = s.replace(old, new)
                 #print(s)
-                #with open(os.path.splitext(test.inp_fname), "wt") as fh:
-                #    fh.write(s)
-        """
+                with open(test.inp_fname, "wt") as fh:
+                    fh.write(s)
 
         def rename_chain(chain):
             old_new = []
@@ -3277,9 +3284,10 @@ class AbinitTestSuite(object):
 
         for test in self:
             if isinstance(test, ChainOfTests):
-                rename_chain(test)
-                #for t in test:
-                #    rename(t)
+                #print("Skipping test chain")
+                #rename_chain(test)
+                for t in test:
+                    rename(t)
             else:
                 rename(test)
 
@@ -4052,6 +4060,7 @@ class Results(object):
                 # FIXME Hack due to the ambiguity stdout, out!
                 if not os.path.exists(ref_fname) and ref_fname.endswith(".stdout"):
                     ref_fname = ref_fname[:-7] + ".out"
+                    #ref_fname = ref_fname[:-7] + ".abo"
                 ref_files.append(ref_fname)
 
         return out_files, ref_files

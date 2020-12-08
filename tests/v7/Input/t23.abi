@@ -134,7 +134,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%% test_chain = t23.abi, t24.abi, t25.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t23.out, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 0.92565, fld_options = -medium
+#%%   t23.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 0.92565, fld_options = -medium
 #%% [shell] 
 #%% post_commands = 
 #%%    ww_cp t23o_DS3_WFK t24i_DS4_WFK;

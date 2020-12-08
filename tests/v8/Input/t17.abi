@@ -69,7 +69,7 @@ xred
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%    t17.out,  tolnlines =0, tolabs =1.1e-11, tolrel = 2.0e-12, fld_options=-medium ;
+#%%    t17.abo,  tolnlines =0, tolabs =1.1e-11, tolrel = 2.0e-12, fld_options=-medium ;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -65,7 +65,7 @@ prtden 0  prteig 0  prtwf 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t07.out, tolnlines = 3, tolabs = 3.0e-6, tolrel = 3.0e-4, fld_options = -medium
+#%%   t07.abo, tolnlines = 3, tolabs = 3.0e-6, tolrel = 3.0e-4, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

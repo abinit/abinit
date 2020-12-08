@@ -51,7 +51,7 @@ ixc -101130
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t12.out, tolnlines = 3, tolabs = 1.1e-06, tolrel = 0.002
+#%%  t12.abo, tolnlines = 3, tolabs = 1.1e-06, tolrel = 0.002
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

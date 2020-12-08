@@ -24,7 +24,7 @@ opt_coeff  = 10 15
 #%% test_chain = t98.abi, t99.abi, t100.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t99.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t99.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   before_opt_diff_energy.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   after_opt_diff_energy.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%% [paral_info]

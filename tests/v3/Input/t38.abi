@@ -78,7 +78,7 @@ toldfe 1.0d-6
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t38.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t38.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

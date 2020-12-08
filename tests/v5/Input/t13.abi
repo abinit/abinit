@@ -4,10 +4,10 @@ t11o_DS1_PAWDEN
 -0.25 -0.25 -0.25
  1.50  1.50  1.50
 70
-t13.out
+t13.abo
 1
 5
-t13.outden
+t13.aboden
 0
 
 #%%<BEGIN TEST_INFO>
@@ -16,7 +16,7 @@ t13.outden
 #%% test_chain = t11.abi, t12.abi, t13.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t13.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t13.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

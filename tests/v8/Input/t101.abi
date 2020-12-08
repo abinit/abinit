@@ -38,10 +38,10 @@ optcell =  2  # Relaxation of the cell (0 nothing,1 only acell (uniform), 2 acel
 #%% coeff_xml = t101_coeffs.xml
 #%% [shell]
 #%% pre_commands = 
-#%%   iw_cp p4mbm.nc t101.out_HIST.nc
+#%%   iw_cp p4mbm.nc t101.abo_HIST.nc
 #%% [files]
 #%% files_to_test = 
-#%%   t101.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -hard;
+#%%   t101.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -hard;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

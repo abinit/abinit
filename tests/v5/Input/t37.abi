@@ -69,7 +69,7 @@ prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t37.out, tolnlines = 9, tolabs = 5.410e-02, tolrel = 3.500e-02, fld_options = -easy
+#%%   t37.abo, tolnlines = 9, tolabs = 5.410e-02, tolrel = 3.500e-02, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 3
 #%% [extra_info]

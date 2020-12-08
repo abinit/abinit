@@ -155,7 +155,7 @@ bdgw
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t02.out, use_yaml = no, tolnlines = 12, tolabs = 6.0e-3, tolrel = 1.2e-1, fld_options =  -medium
+#%%   t02.abo, use_yaml = no, tolnlines = 12, tolabs = 6.0e-3, tolrel = 1.2e-1, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 16
 #%% [extra_info]

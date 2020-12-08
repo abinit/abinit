@@ -43,7 +43,7 @@ kptopt 0          # Enter the k points manually
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   ttddft_1.out, tolnlines=  6, tolabs=  1.010e-02, tolrel=  4.000e-01
+#%%   ttddft_1.abo, tolnlines=  6, tolabs=  1.010e-02, tolrel=  4.000e-01
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

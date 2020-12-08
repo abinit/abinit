@@ -50,7 +50,7 @@
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t25_MPI4.out, tolnlines=   39,   tolabs=  3.0e-5,      tolrel= 6.0e-1
+#%% files_to_test = t25_MPI4.abo, tolnlines=   39,   tolabs=  3.0e-5,      tolrel= 6.0e-1
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = A. Levitt

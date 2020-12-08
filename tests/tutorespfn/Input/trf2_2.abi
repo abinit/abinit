@@ -65,7 +65,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   trf2_2.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-medium
+#%%   trf2_2.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

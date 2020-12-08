@@ -63,7 +63,7 @@ tolwfr 1.e-8
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t14.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t14.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

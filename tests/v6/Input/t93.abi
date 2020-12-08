@@ -80,7 +80,7 @@ iatprj_bs 1 2
 #%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t93.out, tolnlines = 40, tolabs = 0.015, tolrel = 1.4e-1, fld_options =  -easy
+#%%   t93.abo, tolnlines = 40, tolabs = 0.015, tolrel = 1.4e-1, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

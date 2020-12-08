@@ -111,7 +111,7 @@ pawecutdg   9.
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t51.out, tolnlines = 12, tolabs = 1.1e01, tolrel = 1.e-2, fld_options = -easy
+#%%   t51.abo, tolnlines = 12, tolabs = 1.1e01, tolrel = 1.e-2, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

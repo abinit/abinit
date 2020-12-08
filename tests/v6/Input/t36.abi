@@ -72,7 +72,7 @@ timopt  2
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t36.out, tolnlines = 6, tolabs = 2.0e-2, tolrel = 4.0e-4, fld_options =  -easy
+#%%   t36.abo, tolnlines = 6, tolabs = 2.0e-2, tolrel = 4.0e-4, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

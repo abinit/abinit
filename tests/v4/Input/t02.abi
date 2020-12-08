@@ -93,7 +93,7 @@ rfatpol5   1 2
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t02.out, tolnlines = 12, tolabs = 1.100e-03, tolrel = 1.0e-02, fld_options =  -medium
+#%%   t02.abo, tolnlines = 12, tolabs = 1.100e-03, tolrel = 1.0e-02, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

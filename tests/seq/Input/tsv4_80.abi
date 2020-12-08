@@ -69,7 +69,7 @@ diemac 9.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tsv4_80.out,      tolnlines= 59, tolabs=  2.000e-05, tolrel=  3.000e-02, fld_options =-medium
+#%%   tsv4_80.abo,      tolnlines= 59, tolabs=  2.000e-05, tolrel=  3.000e-02, fld_options =-medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

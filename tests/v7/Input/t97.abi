@@ -54,7 +54,7 @@ prteig 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t97.out, tolnlines = 9, tolabs = 5.0e-04, tolrel = 5.0e-04, fld_options = -easy
+#%%   t97.abo, tolnlines = 9, tolabs = 5.0e-04, tolrel = 5.0e-04, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

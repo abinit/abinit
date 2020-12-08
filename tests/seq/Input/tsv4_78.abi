@@ -98,7 +98,7 @@ jdtset  11
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tsv4_78.out, tolnlines=  0, tolabs=  5.757e-08, tolrel=  1.001e+00, fld_options=-easy
+#%%   tsv4_78.abo, tolnlines=  0, tolabs=  5.757e-08, tolrel=  1.001e+00, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -143,7 +143,7 @@ optdriver7    5 # for nonlinear calculation
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%    t81.out, tolnlines =1 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
+#%%    t81.abo, tolnlines =1 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

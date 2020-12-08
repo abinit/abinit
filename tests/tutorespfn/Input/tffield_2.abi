@@ -80,7 +80,7 @@ ndtset 3
 #%% test_chain = tffield_2.abi, tffield_3.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tffield_2.out, tolnlines=  2, tolabs=  5.000e-07, tolrel=  3.000e-04, fld_options=-medium
+#%%   tffield_2.abo, tolnlines=  2, tolabs=  5.000e-07, tolrel=  3.000e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -109,7 +109,7 @@
 #%% test_chain = t62.abi, t63.abi, t64.abi, t65.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t62.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
+#%%   t62.abo, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
 #%%   t62o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
 #%% [paral_info]
 #%% max_nprocs = 10

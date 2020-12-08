@@ -32,7 +32,7 @@
 #%% input_gkk = t56.ddb.out 
 #%% [files]
 #%% files_to_test = 
-#%%   t57.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t57.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

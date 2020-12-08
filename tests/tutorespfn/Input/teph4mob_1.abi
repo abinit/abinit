@@ -120,7 +120,7 @@
 #%% test_chain =  teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi,
 #%% [files]
 #%% files_to_test =
-#%%   teph4mob_1.out, tolnlines= 90, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   teph4mob_1.abo, tolnlines= 90, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

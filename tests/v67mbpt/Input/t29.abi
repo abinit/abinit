@@ -98,7 +98,7 @@ xred
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t29.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t29.abo,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t29o_DS3_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t29o_DS3_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t29o_DS3_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous

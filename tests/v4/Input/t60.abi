@@ -57,7 +57,7 @@ nshiftk   1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t60.out, tolnlines = 1, tolabs = 4.000e-08, tolrel = 4.000e-04, fld_options = -medium
+#%%   t60.abo, tolnlines = 1, tolabs = 4.000e-08, tolrel = 4.000e-04, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

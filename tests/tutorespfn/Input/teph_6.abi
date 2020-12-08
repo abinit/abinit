@@ -72,7 +72,7 @@ qph1l
 #%% input_gkk = teph_3o_GKK.bin
 #%% [files]
 #%% files_to_test = 
-#%%   teph_6.out, tolnlines= 21, tolabs=  3.000e-01, tolrel=  3.000e-02
+#%%   teph_6.abo, tolnlines= 21, tolabs=  3.000e-01, tolrel=  3.000e-02
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

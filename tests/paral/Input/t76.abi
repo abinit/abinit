@@ -100,15 +100,15 @@ diemac 12.0
 #%% [files]
 #%% [NCPU_1]
 #%% files_to_test = 
-#%%    t76_MPI1.out,   tolnlines = 10 , tolabs = 1.1e-2, tolrel = 4.0e-2;
+#%%    t76_MPI1.abo,   tolnlines = 10 , tolabs = 1.1e-2, tolrel = 4.0e-2;
 #%%    t76_MPI1o_DS3_EXC_MDF, tolnlines = 100, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous
 #%% [NCPU_2]
 #%% files_to_test = 
-#%%    t76_MPI2.out,   tolnlines = 10 , tolabs = 1.1e-2, tolrel = 4.0e-2;
+#%%    t76_MPI2.abo,   tolnlines = 10 , tolabs = 1.1e-2, tolrel = 4.0e-2;
 #%%    t76_MPI2o_DS3_EXC_MDF, tolnlines = 100, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous
 #%% [NCPU_4]
 #%% files_to_test = 
-#%%    t76_MPI4.out,   tolnlines = 10 , tolabs = 1.1e-2, tolrel = 4.0e-2;
+#%%    t76_MPI4.abo,   tolnlines = 10 , tolabs = 1.1e-2, tolrel = 4.0e-2;
 #%%    t76_MPI4o_DS3_EXC_MDF, tolnlines = 100, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous
 #%% [extra_info]
 #%% authors = M. Giantomassi

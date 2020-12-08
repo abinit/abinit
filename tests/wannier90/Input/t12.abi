@@ -61,7 +61,7 @@ w90iniprj2 1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t12.out, tolnlines = 6, tolabs = 9.0e-5, tolrel = 1.1, fld_options = -medium
+#%%   t12.abo, tolnlines = 6, tolabs = 9.0e-5, tolrel = 1.1, fld_options = -medium
 #%% [shell]
 #%% pre_commands = iw_cp t12_w90.win w90.win
 #%% [paral_info]

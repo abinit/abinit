@@ -141,7 +141,7 @@
 #%% [files]
 #%% [NCPU_32]
 #%% files_to_test = 
-#%%   tgspw_03_MPI32.out, tolnlines = 150, tolabs = 1.1e-3, tolrel = 1.0e-2 
+#%%   tgspw_03_MPI32.abo, tolnlines = 150, tolabs = 1.1e-3, tolrel = 1.0e-2 
 #%% [paral_info]
 #%% max_nprocs = 32
 #%% nprocs_to_test = 32

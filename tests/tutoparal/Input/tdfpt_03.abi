@@ -69,7 +69,7 @@ npfft  1
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%% files_to_test = tdfpt_03_MPI24.out, tolnlines = 0, tolabs = 0.0, tolrel= 0.0
+#%% files_to_test = tdfpt_03_MPI24.abo, tolnlines = 0, tolabs = 0.0, tolrel= 0.0
 #%% post_commands = 
 #%%   ww_cp tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFK;
 #%%   ww_mv tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFQ'

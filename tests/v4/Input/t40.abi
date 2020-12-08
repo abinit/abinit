@@ -37,7 +37,7 @@
 #%% executable = abinit
 #%% test_chain = t40.abi, t41.abi
 #%% [files]
-#%% files_to_test = t40.out, tolnlines=  1, tolabs=  1.000e-02, tolrel=  6.201e-05
+#%% files_to_test = t40.abo, tolnlines=  1, tolabs=  1.000e-02, tolrel=  6.201e-05
 #%% [shell]
 #%% post_commands = ww_mv t40o_DEN t41_DEN
 #%% [paral_info]

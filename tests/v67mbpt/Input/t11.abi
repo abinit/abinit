@@ -172,7 +172,7 @@ bs_freq_mesh8      0 10.0 0.1 eV
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t11.out,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
+#%%  t11.abo,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t11o_DS4_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t11o_DS4_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t11o_DS4_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;

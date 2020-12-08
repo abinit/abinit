@@ -45,10 +45,10 @@ iatfixz = 6 9 10
 #%% coeff_xml = t102_coeffs.xml
 #%% [shell]
 #%% pre_commands = 
-#%%   iw_cp p4mbm.nc t102.out_HIST.nc
+#%%   iw_cp p4mbm.nc t102.abo_HIST.nc
 #%% [files]
 #%% files_to_test = 
-#%%   t102.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -hard;
+#%%   t102.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -hard;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

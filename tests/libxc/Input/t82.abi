@@ -59,7 +59,7 @@ getddk3?     21
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t82.out, tolnlines = 56, tolabs = 1.0001e-03, tolrel = 1.1e-02, fld_options = -easy
+#%%   t82.abo, tolnlines = 56, tolabs = 1.0001e-03, tolrel = 1.1e-02, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

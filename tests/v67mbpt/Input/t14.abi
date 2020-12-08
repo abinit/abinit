@@ -133,7 +133,7 @@ timopt -1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t14.out              ,tolnlines = 20, tolabs = 2.0e-2, tolrel = 5.0e-1, fld_options =  -ridiculous;
+#%%   t14.abo              ,tolnlines = 20, tolabs = 2.0e-2, tolrel = 5.0e-1, fld_options =  -ridiculous;
 #%%   t14o_DS4_EXC_MDF     ,tolnlines = 74, tolabs = 3.0e-2, tolrel = 5.0e-1, fld_options =  -ridiculous;
 #%%   t14o_DS4_GW_NLF_MDF  ,tolnlines = 74, tolabs = 3.0e-2, tolrel = 5.0e-1, fld_options =  -ridiculous;
 #%%   t14o_DS4_RPA_NLF_MDF ,tolnlines = 74, tolabs = 3.0e-2, tolrel = 5.0e-1, fld_options =  -ridiculous

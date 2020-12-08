@@ -69,7 +69,7 @@ istwfk 4*1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t70.out, tolnlines=7, tolabs=1.000e-08, tolrel=5.000e-04
+#%% files_to_test = t70.abo, tolnlines=7, tolabs=1.000e-08, tolrel=5.000e-04
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

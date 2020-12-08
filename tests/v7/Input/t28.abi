@@ -93,8 +93,8 @@ jpawu  0.0000  # values in Hartree
 #%% test_chain = t28.abi, t29.abi
 #%% [files]
 #%% files_to_test =
-###%%                  t28.out,      tolnlines =7, tolabs =2.0e-6 , tolrel = 1.4e-05, fld_options=-medium ;
-#%%                  t28.out,      tolnlines =7, tolabs =1.1e-4 , tolrel = 0.0001198, fld_options=-easy ;
+###%%                  t28.abo,      tolnlines =7, tolabs =2.0e-6 , tolrel = 1.4e-05, fld_options=-medium ;
+#%%                  t28.abo,      tolnlines =7, tolabs =1.1e-4 , tolrel = 0.0001198, fld_options=-easy ;
 #%% [shell] 
 #%% post_commands = 
 #%%    ww_cp t28o_DS1_WFK t29i_DS2_WFK;

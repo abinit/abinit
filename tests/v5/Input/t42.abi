@@ -65,7 +65,7 @@ charge22  1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t42.out, tolnlines = 1, tolabs = 2.000e-10, tolrel = 2.000e-10
+#%%   t42.abo, tolnlines = 1, tolabs = 2.000e-10, tolrel = 2.000e-10
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

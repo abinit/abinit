@@ -62,7 +62,7 @@ nsppol 2    spinmagntarget  0.0d0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = tsv4_90.out, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% files_to_test = tsv4_90.abo, tolnlines=0, tolabs=0.0, tolrel=0.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -67,7 +67,7 @@ accuracy7 6
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t64.out, tolnlines=149, tolabs=6.00e-05, tolrel=2.00e-05
+#%% files_to_test = t64.abo, tolnlines=149, tolabs=6.00e-05, tolrel=2.00e-05
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

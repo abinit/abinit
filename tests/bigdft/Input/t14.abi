@@ -76,7 +76,7 @@ prtwf 0      # Don't output the wave-functions
 #%% exclude_builders = alps_gnu_9.3_openmpi
 #%% [files]
 #%% files_to_test = 
-#%%   t14.out, tolnlines = 2, tolabs = 1.0e-4, tolrel = 1.0e-4
+#%%   t14.abo, tolnlines = 2, tolabs = 1.0e-4, tolrel = 1.0e-4
 #%% extra_inputs = t14i_OCCUP
 #%% [paral_info]
 #%% max_nprocs = 1

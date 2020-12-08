@@ -44,7 +44,7 @@ xred 3*0
 #%% input_prefix = t11o
 #%% test_chain = t11.abi, t12.abi, t13.abi, t14.abi, t15.abi, t16.abi, t17.abi, t18.abi, t19.abi, t20.abi
 #%% [files]
-#%% files_to_test = t19.out ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  
+#%% files_to_test = t19.abo ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -112,7 +112,7 @@ znucl  13
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t88.out, tolnlines= 100, tolabs=5.000e-02, tolrel=5.0e-02, fld_options= -easy;
+#%%   t88.abo, tolnlines= 100, tolabs=5.000e-02, tolrel=5.0e-02, fld_options= -easy;
 #%%   t88o_DS1_EDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_BXSF, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_PH.bxsf, tolnlines=20, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;

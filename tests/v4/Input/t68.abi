@@ -23,7 +23,7 @@ qph2l 0.0 0.0 1.0 0.0  ! why here the normalization factor is 0
 #%% test_chain = t67.abi, t68.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t68.out, tolnlines = 1, tolabs = 5.637e-05, tolrel = 1.001e+00, fld_options = -easy
+#%%   t68.abo, tolnlines = 1, tolabs = 5.637e-05, tolrel = 1.001e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

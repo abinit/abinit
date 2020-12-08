@@ -61,7 +61,7 @@ diemac 4.0       # Although this is not mandatory, it is worth to
 #%% test_chain = t60.abi, t61.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t60.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t60.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

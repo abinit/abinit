@@ -72,7 +72,7 @@
 #%% test_chain = t41.abi, t42.abi, t43.abi, t44.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t41.out, tolnlines = 20, tolabs = 1.1e-3, tolrel = 0.06
+#%%   t41.abo, tolnlines = 20, tolabs = 1.1e-3, tolrel = 0.06
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]

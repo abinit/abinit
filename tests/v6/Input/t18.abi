@@ -61,7 +61,7 @@ ecut 15.0          # Maximal kinetic energy cut-off, in Hartree
 #%% test_chain = t18.abi, t19.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t18.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  -medium
+#%%   t18.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  -medium
 #%% [shell]
 #%% post_commands = ww_cp t18o_DEN t19i_DEN
 #%% [paral_info]

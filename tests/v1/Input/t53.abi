@@ -47,7 +47,7 @@ diemixmag 0.333333333333d0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t53.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t53.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

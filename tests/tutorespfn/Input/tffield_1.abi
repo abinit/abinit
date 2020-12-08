@@ -67,7 +67,7 @@ jdtset 1 2 3
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tffield_1.out, tolnlines=  1, tolabs=  1.100e-08, tolrel=  3.000e-04
+#%%   tffield_1.abo, tolnlines=  1, tolabs=  1.100e-08, tolrel=  3.000e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

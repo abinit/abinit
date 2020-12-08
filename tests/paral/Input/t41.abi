@@ -105,7 +105,7 @@ mdtemp 3600 3600
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t41_MPI4.out, tolnlines=   10,   tolabs=  1.0e-4,      tolrel= 5.0e-5, fld_options= -medium
+#%% files_to_test = t41_MPI4.abo, tolnlines=   10,   tolabs=  1.0e-4,      tolrel= 5.0e-5, fld_options= -medium
 #%% [extra_info]
 #%% keywords = PAW 
 #%% authors = M. Mancini, S. Mazevet

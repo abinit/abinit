@@ -56,7 +56,7 @@ diemix 0.5
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t51.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t51.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 16
 #%% [extra_info]

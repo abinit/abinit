@@ -44,7 +44,7 @@ nshiftk   4
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t17.out, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00;
+#%%   t17.abo, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00;
 #%%   t17o_DS1_DOS , tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options=-ridiculous;
 #####%%   t17o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options=-ridiculous;
 #%% [paral_info]

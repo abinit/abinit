@@ -85,7 +85,7 @@ ecut  8       # Maximal kinetic energy cut-off, in Hartree
 #%%    iw_cp tw90_3o_DS2_w90.win tw90_3o_DS2_w90.win
 #%% [files]
 #%% files_to_test = 
-#%%  tw90_3.out,  tolnlines=   12,   tolabs=  3.00e-04,   tolrel=  2.00e-02, fld_options = -medium
+#%%  tw90_3.abo,  tolnlines=   12,   tolabs=  3.00e-04,   tolrel=  2.00e-02, fld_options = -medium
 #%% extra_inputs = 
 #%% [paral_info]
 #%% max_nprocs = 1

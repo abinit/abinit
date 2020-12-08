@@ -81,7 +81,7 @@ diemac 12.0
 #%% test_chain = t38.abi, t39.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t38.out,             tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -ridiculous;
+#%%   t38.abo,             tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -ridiculous;
 #%%   t38o_DS3_DOS_AT0002, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 2

@@ -49,7 +49,7 @@
 #%% test_chain = t02.abi, t03.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t03.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t03.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

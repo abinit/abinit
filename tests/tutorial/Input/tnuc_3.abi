@@ -41,7 +41,7 @@ xred     0.000000000000000   0.000000000000000   0.000000000000000
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnuc_3.out, tolnlines=  3, tolabs=  6.000e-10, tolrel=  3.000e-10
+#%%   tnuc_3.abo, tolnlines=  3, tolabs=  6.000e-10, tolrel=  3.000e-10
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

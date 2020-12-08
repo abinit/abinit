@@ -62,7 +62,7 @@ xred 3*0 3*1/4
 #%% test_chain = t11.abi, t12.abi, t13.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t11.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%%   t11.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

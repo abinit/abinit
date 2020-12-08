@@ -56,7 +56,7 @@ qrefine 2 2 2
 #%% test_chain = t78.abi, t79.abi, t80.abi, t81.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t81.out, tolnlines = 14, tolabs = 2.e-4, tolrel = 1.e-6
+#%%   t81.abo, tolnlines = 14, tolabs = 2.e-4, tolrel = 1.e-6
 #%% psp_files = 
 #%% [paral_info]
 #%% max_nprocs = 4

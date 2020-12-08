@@ -72,7 +72,7 @@ toldfe 1.0d-6
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tbase4_8.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -medium
+#%%   tbase4_8.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

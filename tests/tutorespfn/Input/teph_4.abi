@@ -58,7 +58,7 @@ qph1l
 #%% test_chain =  teph_1.abi, teph_2.abi, teph_3.abi, teph_4.abi, teph_5.abi, teph_6.abi
 #%% [files]
 #%% files_to_test = 
-#%%   teph_4.out, tolnlines=  300, tolabs=  3.010e-05, tolrel=  6.000e-07, fld_options=-medium
+#%%   teph_4.abo, tolnlines=  300, tolabs=  3.010e-05, tolrel=  6.000e-07, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

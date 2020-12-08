@@ -90,7 +90,7 @@
 #%% test_chain = t78.abi, t79.abi, t80.abi, t81.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t78.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%%   t78.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
