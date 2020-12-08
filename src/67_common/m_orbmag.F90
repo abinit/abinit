@@ -4231,13 +4231,12 @@ end subroutine ndpaw_energy
 !! SOURCE
 
 subroutine ndpw_energy(cg,dtset,energy,gmet,mcg,mpi_enreg,nband_occ,nfftf,npwarr,pawfgr,&
-    & ucvol,vectornd,with_vectornd)
+    & vectornd,with_vectornd)
 
  !Arguments ------------------------------------
 
  !scalars
  integer,intent(in) :: mcg,nband_occ,nfftf,with_vectornd
- real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: energy
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
