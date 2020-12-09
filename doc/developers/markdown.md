@@ -675,42 +675,42 @@ creates a *closed* element:
 To create a button that opens a ==dialog== containing an **input file**, use:
 
 ```
-    {% dialog tests/v1/Input/t01.in %}
+    {% dialog tests/v1/Input/t01.abi %}
 ```
 
 that produces:
 
-{% dialog tests/v1/Input/t01.in %}
+{% dialog tests/v1/Input/t01.abi %}
 
 If multiple files are used such as in:
 
-    {% dialog tests/v1/Input/t01.in tests/v1/Input/t02.in tests/v1/Input/t03.in %}
+    {% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
 
 a modal window with tabs is produced:
 
-{% dialog tests/v1/Input/t01.in tests/v1/Input/t02.in tests/v1/Input/t03.in %}
+{% dialog tests/v1/Input/t01.abi tests/v1/Input/t02.abi tests/v1/Input/t03.abi %}
 
 
 To create a ==button== that opens a modal window containing an **input file**, use:
 
 ```
-    {% modal tests/v1/Input/t01.in %}
+    {% modal tests/v1/Input/t01.abi %}
 ```
 
 that produces:
 
-{% modal tests/v1/Input/t01.in %}
+{% modal tests/v1/Input/t01.abi %}
 
 This is useful for tutorials to give direct access to the input files.
 If multiple files are used such as in:
 
 ```
-    {% modal tests/v1/Input/t01.in tests/v1/Input/t02.in %}
+    {% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
 ```
 
 a modal window with tabs is produced
 
-{% modal tests/v1/Input/t01.in tests/v1/Input/t02.in %}
+{% modal tests/v1/Input/t01.abi tests/v1/Input/t02.abi %}
 
 ## MathJax
 
