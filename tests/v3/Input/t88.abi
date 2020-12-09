@@ -1,0 +1,22 @@
+3
+t88o
+t87o_DS2_SCR
+t87o_DS3_SCR
+t87o_DS4_SCR
+1
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgscr
+#%% test_chain = t87.abi, t88.abi, t89.abi, t90.abi, t91.abi
+#%% [files]
+#%% files_to_test = t88.stdout, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = GW
+#%% authors = R. Shaltaf
+#%% description =
+#%%  Test of mrgscr utility
+#%%  Merging the screening files already generated in the test 87 in a single file.
+#%%<END TEST_INFO>

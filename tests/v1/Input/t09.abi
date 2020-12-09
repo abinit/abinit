@@ -1,0 +1,46 @@
+# Oxygen molecule, with occopt=2 and nsppol=2,
+# for comparison with case 08.
+ acell 7 7 9
+ diemac 1.0d0
+ diemix 0.333333333333d0
+ ecut 14
+ kptopt 0
+ kpt   3*0.0
+ natom  2
+ nband 8 8
+ nkpt 1
+ nsppol 2   nstep 20
+ nsym 1
+ ntypat  1
+ occ 1.0  1.0  1.0  1.0  1.0  1.0  1.0  0.0
+     1.0  1.0  1.0  1.0  1.0  0.0  0.0  0.0
+ occopt 2
+ rprim 1 0 0  0 1 0  0 0 1
+ spinat 0.0 0.0 1.0
+        0.0 0.0 1.0
+ toldfe 1.d-7
+ typat  1 1
+ wtk  1
+ xcart    0.0 0.0  0.55
+          0.0 0.0 -0.55
+          Angstrom
+ znucl  8.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/8o.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit 
+#%% [files]
+#%% files_to_test = t09.abo ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%  O2 molecule, treated as a spin-polarized molecule, with fixed occupation
+#%%  numbers (occopt=2), with nsppol=2 . Gives total energy of -32.09792 Hartree
+#%%<END TEST_INFO>

@@ -1,0 +1,106 @@
+# FCC Al
+# Perform the computation of 6 dynamical matrices, generated automatically.
+# Use minimal ecut and nkpt.
+
+ ndtset 12
+ udtset 6 2
+
+#Input that is common to most datasets, but not all
+  getden 11
+  getwfk 11
+  kptopt 3
+    nqpt 1
+  qptopt 1  # Automatic generation of the q point
+ ngqpt   2 2 2
+ nshiftq 4
+ shiftq 0.0 0.0 0.0
+        0.0 0.5 0.5
+        0.5 0.0 0.5
+        0.5 0.5 0.0
+    iqpt:? 1
+    iqpt+? 1
+
+#Dataset 11 : SCF
+  getden11  0
+  getwfk11  0
+    nqpt11  0
+  prtden11  1
+    iscf11  7
+
+#Dataset 12 : phonon at gamma
+  getwfq12  0
+
+#Dataset 1? : q=0 0 0
+#    qpt1?  3*0.0d0
+
+#Dataset 2? : RF at q=0 0 0
+#    qpt2?  0.25d0 0.25d0 0.0d0
+
+
+#Dataset ?1 : non-SCF
+    iscf?1 -2
+  tolwfr?1  1.0d-22
+
+#Dataset ?2 : RF
+
+  getwfq?2  -1
+ rfatpol?2  1 1
+   rfdir?2  1 1 1
+  rfphon?2  1
+  tolvrs?2  1.0d-10
+
+
+#Common data
+
+ ngkpt  2 2 2
+ ecut 2.5
+ acell 3*7.60
+
+ natom  1
+#nband 4 is enough for the ground state properties (determination of the density,
+#but not for accurate RF properties). In particular, in order
+#to obtain a small breaking of the acoustic sum rule (on the order of 1 cm-1),
+#with tsmear=0.04, nband 6  is needed.
+ nband 4
+ nbdbuf 2
+
+ ngfft 3*12  # test 26    this is to avoid any boxcut < 2, however, not mandatory
+
+ nstep 30
+ ntypat  1
+ occopt 4
+  tsmear 0.04 # to ensure good portability of the test
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+
+ typat  1
+ xred  0.0 0.0 0.0
+ znucl 13.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t78.abi, t79.abi, t80.abi, t81.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t78.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Generate first-order responses for FCC Aluminum.
+#%%   Very low cut-off, to keep CPU the lowest possible
+#%%   Aim at a regular sampling of phonon wavevectors, needed to
+#%%   interpolate the dynamical matrix over the whole Brillouin Zone.
+#%%   Use the definition through ngqpt and nshiftq.
+#%%   Otherwise, similar to Tv2#26
+#%%<END TEST_INFO>

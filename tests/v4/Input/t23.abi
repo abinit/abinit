@@ -1,0 +1,100 @@
+# Fake H crystal.
+# Test orthorhombic spacegroups
+
+ndtset 56
+spgroup1   63   spgroupma1   459
+spgroup2   63   spgroupma2   460
+spgroup3   63   spgroupma3   461
+spgroup4   63   spgroupma4   462
+spgroup5   63   spgroupma5   463
+spgroup6   63   spgroupma6   464
+spgroup7   63   spgroupma7   465
+spgroup8   64   spgroupma8   471
+spgroup9   64   spgroupma9   472
+spgroup10   64   spgroupma10   473
+spgroup11   64   spgroupma11   474
+spgroup12   64   spgroupma12   475
+spgroup13   64   spgroupma13   476
+spgroup14   64   spgroupma14   477
+spgroup15   65   spgroupma15   483
+spgroup16   65   spgroupma16   484
+spgroup17   65   spgroupma17   485
+spgroup18   65   spgroupma18   486
+spgroup19   65   spgroupma19   487
+spgroup20   66   spgroupma20   493
+spgroup21   66   spgroupma21   494
+spgroup22   66   spgroupma22   495
+spgroup23   66   spgroupma23   496
+spgroup24   66   spgroupma24   497
+spgroup25   67   spgroupma25   503
+spgroup26   67   spgroupma26   504
+spgroup27   67   spgroupma27   505
+spgroup28   67   spgroupma28   506
+spgroup29   67   spgroupma29   507
+spgroup30   68   spgroupma30   513
+spgroup31   68   spgroupma31   514
+spgroup32   68   spgroupma32   515
+spgroup33   68   spgroupma33   516
+spgroup34   68   spgroupma34   517
+spgroup35   69   spgroupma35   523
+spgroup36   69   spgroupma36   524
+spgroup37   69   spgroupma37   525
+spgroup38   70   spgroupma38   529
+spgroup39   70   spgroupma39   530
+spgroup40   70   spgroupma40   531
+spgroup41   71   spgroupma41   535
+spgroup42   71   spgroupma42   536
+spgroup43   71   spgroupma43   537
+spgroup44   72   spgroupma44   541
+spgroup45   72   spgroupma45   542
+spgroup46   72   spgroupma46   543
+spgroup47   72   spgroupma47   544
+spgroup48   72   spgroupma48   545
+spgroup49   73   spgroupma49   550
+spgroup50   73   spgroupma50   551
+spgroup51   73   spgroupma51   552
+spgroup52   74   spgroupma52   556
+spgroup53   74   spgroupma53   557
+spgroup54   74   spgroupma54   558
+spgroup55   74   spgroupma55   559
+spgroup56   74   spgroupma56   560
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+                   # and allow the recognition of space group
+acell 7 8 9
+angdeg  90 90 90
+natom 8
+ntypat 1
+znucl 1
+natrd 1
+xred 0.17 0.15 0.11
+spinat 0.0 0.0 1.0
+typat 1
+ecut 1
+  kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t23.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H based fake crystals : magnetic groups, Shubnikov type III
+#%%   Test the generation and recognition of the
+#%%   orthorhombic space groups (part III : spgroup 63 to 74)
+#%%<END TEST_INFO>

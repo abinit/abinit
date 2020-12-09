@@ -1,0 +1,110 @@
+# ----------------------------------------------------------------------------------
+#  ABINIT automatic test - Thomas-Fermi without orbital method
+#
+#  Test the temperature-dependent XC functional (ixc=50)
+#    (Ichimaru et al Phys. Rep. 149, 91-205 (1987)
+#  Test the von Weizsacker gradient correction (tfkinfunc=11 or 12)
+#
+#                                                               JF Danel, M Torrent
+# ----------------------------------------------------------------------------------
+
+#Thomas-Fermi-Weizsacker specific parameter
+ tfkinfunc  11       # TFW method after some initialization steps
+ tfw_toldfe 1.0e-8  # Tolerance for the initialization steps
+ ixc        50       # Ichimaru XC (temperature-dependent)
+
+#Plane wave cut-off
+ ecut 75
+
+#Brillouin zone sampling (not relevant for TF)
+ tphysel     0.1469972355
+ kptopt      0
+ nkpt        1
+ occopt      0
+ istwfk      1
+ occ         160
+ nband       1
+
+#SCF procedure
+ toldfe      1.0e-9
+ nstep       50
+ diemix      0.5
+
+#Molecular Dynamics
+ ionmov      12
+ dtion       6.93
+ ntime       2
+
+#Unit cell
+ chkprim     0
+ acell       3*3.38447
+ rprim       1 0 0
+             0 1 0
+             0 0 1
+ ntypat      1
+ znucl       5
+ amu         10.8113
+ natom       32
+ typat       32*1
+ tolsym      1.0e-8 # The default value of tolsym is quite permissive, so that the cell would be identified as being non-primitive with a high multiplicity
+ xred
+  0.0000026487 0.0000019908 -0.0000037886
+  0.2500018579 0.2499988383 0.0000027427
+  0.2500044305 0.0000041627 0.2500036192
+  -0.0000029645 0.2500029366 0.2500004804
+  -0.0000020271 0.0000040493 0.5000040964
+  0.2500037398 0.2499999814 0.5000007620
+  0.2499966276 -0.0000022609 0.7500036458
+  -0.0000000760 0.2499996366 0.7500034894
+  -0.0000000402 0.4999979105 -0.0000031958
+  0.2500018418 0.7500022755 -0.0000036094
+  0.2500010311 0.4999999242 0.2500033813
+  0.0000022425 0.7499967821 0.2499972197
+  -0.0000000147 0.4999962126 0.4999963824
+  0.2499986044 0.7499982481 0.5000043190
+  0.2500040848 0.5000012210 0.7500033683
+  0.0000031813 0.7499999607 0.7499983497
+  0.4999989433 0.0000015883 0.0000010888
+  0.7499975891 0.2499965123 -0.0000042745
+  0.7499960785 0.0000014721 0.2499986360
+  0.4999978827 0.2499983139 0.2499959115
+  0.4999992733 0.0000043449 0.5000008357
+  0.7499976546 0.2500015875 0.5000026178
+  0.7499998743 -0.0000034273 0.7500038304
+  0.5000012567 0.2500001771 0.7499970784
+  0.5000005756 0.4999992620 0.0000032994
+  0.7499989439 0.7499974433 -0.0000017399
+  0.7500022936 0.5000013865 0.2500048484
+  0.4999983824 0.7500039756 0.2499963607
+  0.4999991079 0.4999950541 0.5000028328
+  0.7500027439 0.7499979368 0.4999961467
+  0.7500036553 0.5000022101 0.7499954916
+  0.4999994911 0.7500048647 0.7500020791
+
+#Miscelaneous
+ prtden      0
+ prteig      0
+ prtwf       0
+ densfor_pred      0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "05b.soft_tm"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test=
+#%%   t11.abo, tolnlines = 10, tolabs = 2.0e-5, tolrel = 2.0e-5, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = JF. Danel, M. Torrent
+#%% keywords =
+#%% description =
+#%%   Boron, 32 atoms - Thomas-Fermi method (without orbitals)
+#%%   Test the temperature-dependent XC functional (ixc=50)
+#%%   (Ichimaru et al Phys. Rep. 149, 91-205 (1987)
+#%%   Test the von Weizsacker gradient correction (tfkinfunc=11 or 12)
+#%% topics = Recursion
+#%%<END TEST_INFO>

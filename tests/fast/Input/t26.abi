@@ -1,0 +1,63 @@
+#   Ytterbium, one atom per primitive cell, fcc structure
+
+ acell 3*10.358
+ diemac 12.0d0
+ ecut 10
+ enunit 2  
+ intxc  1
+ kptopt 0
+ kpt  1 1 1     1 2 2    kptnrm 4
+ natom  1 nband 8
+ nkpt  2
+ nline 3   nstep 20
+ nsym  24  ntypat  1
+ occ 8*2.0d0 occopt  0  
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ symrel
+  1  0  0   0  1  0   0  0  1
+  0  1 -1   1  0 -1   0  0 -1
+  0 -1  1   0 -1  0   1 -1  0
+ -1  0  0  -1  0  1  -1  1  0
+  0  1  0   0  0  1   1  0  0
+  1  0 -1   0  0 -1   0  1 -1
+  0 -1  0   1 -1  0   0 -1  1
+ -1  0  1  -1  1  0  -1  0  0
+  0  0  1   1  0  0   0  1  0
+  0  0 -1   0  1 -1   1  0 -1
+  1 -1  0   0 -1  1   0 -1  0
+ -1  1  0  -1  0  0  -1  0  1
+  1  0 -1   0  1 -1   0  0 -1
+  0  1  0   1  0  0   0  0  1
+ -1  0  1  -1  0  0  -1  1  0
+  0 -1  0   0 -1  1   1 -1  0
+ -1  1  0  -1  0  1  -1  0  0
+  1 -1  0   0 -1  0   0 -1  1
+  0  0 -1   1  0 -1   0  1 -1
+  0  0  1   0  1  0   1  0  0
+  0 -1  1   1 -1  0   0 -1  0
+ -1  0  0  -1  1  0  -1  0  1
+  1  0  0   0  0  1   0  1  0
+  0  1 -1   0  0 -1   1  0 -1
+ tnons 72*0.0
+ tolwfr 1.0d-16
+ typat  1 
+ wtk  1 3
+ xred 3*0.00d0
+ znucl 70
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/70yb.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t26.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = Test an f-electron system: fcc Yb (Z=70).  2 sp
+#%%<END TEST_INFO>

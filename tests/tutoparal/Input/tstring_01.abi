@@ -1,0 +1,96 @@
+#######################################
+#       INPUT FILE FOR ABINIT         #
+#                                     #
+#  Hydronium ion + NH3 molecule       #
+#  Ground state calculation           #
+#  keeping O and H atoms fixed        #
+#######################################
+
+# Default units (when not mentioned) are Hartree, Bohr
+
+# Options for parallelism
+# =======================
+ npband 10 npfft 2  bandpp 1    # CPU distribution for 20 CPU cores
+ paral_kgb 1                    # Parallelism (de-)activation
+
+# Input/output options
+# ====================
+ prtwf 0                        # Option for WF printing
+ prtden 0                       # Option for density printing
+ prteig 0                       # Option for eigvalues printing
+ prtdensph 0                    # Option for integrated density printing
+ timopt 0                       # Option for time analysis printing
+
+# Convergence parameters
+# ======================
+ ecut 20. hartree               # Plane wave basis cut-off
+ pawecutdg 40. hartree          # PAW "Fine grid" cut-off
+
+# Control of the relaxation
+# =========================
+ ionmov 2                       # BFGS (Broyden) algorithm for ions relaxation
+ optcell 0                      # No cell optimization
+ ntime 500                      # Max. number of "time" steps
+ tolmxf 5.0d-5                  # Stopping criterion of relaxation cycle
+
+# Control of the SCF cycle
+# ========================
+ toldff 5.0d-7                  # Stopping criterion of SCF cycle
+ nstep 50                       # Maximal number of SCF steps
+
+# Electronic configuration
+# ========================
+ nband  10                      # Number of bands to compute
+ occopt 1                       # Occupations scheme
+ ixc -001009                    # Select LDA XC functional (LDA PZ from LibXC)
+
+# Brillouin zone sampling
+# =======================
+ kptopt 0                       # Scheme for k-points generation
+ nkpt 1  kpt 3*0.               # Explicit k-point (gamma point)
+ nsym 1                         # No symmetry 
+
+# Definition of the unit cell
+# ===========================
+ acell  10. 5. 5. Angstrom       # Scaling for primitive vectors
+ rprim  1.0  0.0  0.0            # Primitive vectors
+        0.0  1.0  0.0
+        0.0  0.0  1.0
+ natom  8                        # Number of atoms
+ ntypat 3  typat 1 3 3 2 3 3 3 3 # Type of atoms (H2O + NH3 + H)
+ znucl 8.0 7.0 1.0               # Z of atoms
+ natfix 2  iatfix 1 4            # Keep O and N atoms fixed
+ charge 1.0                      # Charge of the simulation cell
+ xcart                           # Atom positions in reduced coord
+ 0.000E+00  0.000E+00  0.000E+00 # O (H2O)
+-3.759E-01 -2.859E-01  8.710E-01 # H (H2O)
+-3.844E-01  8.676E-01 -2.854E-01 # H (H2O)
+ 4.000E+00  0.000E+00  0.000E+00 # N (NH3)
+ 4.346E+00 -9.979E-02 -9.545E-01 # H (NH3)
+ 4.319E+00 -7.867E-01  5.670E-01 # H (NH3)
+ 4.341E+00  8.736E-01  4.023E-01 # H (NH3)
+ 1.028E+00  2.270E-02  1.568E-02 # H (proton)
+    Angstrom
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "8o_hard.paw, 7n.paw, 1h.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [NCPU_20]
+#%% files_to_test = 
+#%%   tstring_01_MPI20.abo, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%% [paral_info]
+#%% nprocs_to_test = 20
+#%% max_nprocs = 20
+#%% [extra_info]
+#%% authors = 
+#%% keywords = 
+#%% description = 
+#%%   Hydronium ion + NH3 molecule      
+#%%   Ground state calculation         
+#%%   keeping O and H atoms fixed     
+#%%<END TEST_INFO>

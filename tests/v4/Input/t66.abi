@@ -1,0 +1,105 @@
+# Crystalline AlP - rhombohedral distortion imposed
+# Piezoelectroc tensor calculation
+
+  ndtset  4
+
+#First dataset : Self-consistent ground-state run
+
+ kptopt1  1
+
+#Second dataset :  Non-self-consistent run for full k point set
+
+   iscf2  -2
+ getden2  1
+ getwfk2  1
+
+#Third dataset : finite-difference d/dk ground-state calculation
+#                uses bdberry_new
+
+berryopt3  -2
+  getwfk3  2
+  getden3  1
+    iscf3  -2
+   rfdir3  1 1 1
+
+#Fourth dataset : electric field and strain response
+
+ getwfk4  2
+ getddk4  3
+  rfdir4  1 0 0
+ rfelfd4  3
+ rfstrs4  3
+ diemix4  0.85
+ diemac4  1.0
+
+# Common data
+
+   acell  3*10.30
+  diemac  6.0
+    ecut  4.0
+  kptopt  3
+   natom  2
+   nband  4
+  nbdbuf  0
+   ngkpt  4 4 4
+ nshiftk  1
+   nstep  60
+  ntypat  2
+  occopt  1
+  prtden  1
+  prtvol  10
+   rprim  0.05 0.55 0.55
+          0.55 0.05 0.55
+          0.55 0.55 0.05
+  shiftk  0.5 0.5 0.5
+    xred  3*0.00d0 3*0.25d0
+  tolwfr  1.d-12
+   typat  1 2
+   znucl  13 15
+
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "13al.3.hgh, 15p.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t66.abo, tolnlines = 36, tolabs = 5.000e-04, tolrel = 1.001e+00, fld_options = -easy 
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = D. R. Hamann
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Test of the strain perturbation for the rigid-ion piezoelectric
+#%%   tensor.  Rhombohedrally distorted
+#%%   AlP as in the previous test, but using a ground-state finite-
+#%%   difference calculation of the d/dk wave functions.  Such
+#%%   calculations were used extensively to test the response function
+#%%   piezoelectric tensor by comparison to numerical derivatives of
+#%%   the ground-state polarization.  Using the same k sample in the
+#%%   ground state and response function calculations, excellent
+#%%   agreement has been obtained in a variety of cases (including a
+#%%   better-converged version of this one).  Results using the finite-
+#%%   diffrence d/dk and the analytic d/dk as in the preceeding test
+#%%   agree in the limit of large k sample. The analytic form converges
+#%%   much more rapidly, and is consistent with the slowly converging
+#%%   polarization numerical derivatives. The present version of this
+#%%   calculation uses berryopt = -2 to utilize the routine
+#%%   berryphase_new.f
+#%%   The ground-state polarization calculations used to compute the
+#%%   numerical derivatives in such tests should also be computed using
+#%%   berryphase_new.f setting berryopt = -1 and rfdir = 1 1 1 so that the
+#%%   cartesian polarization is automatically generated. This eliminates
+#%%   several issues that needed special attention using berryopt = 1
+#%%   and the original berryphase.f routine.
+#%%   The resulting cartesian polarization derivatives represent the
+#%%   "improper" piezoelectric tensor, and have to be corrected to yield
+#%%   the "proper" tensor as described in D. Vanderbilt, J. Phys. Chem.
+#%%   Solids 61, 147 (2000), using Eq.(15).  The response-function calculation
+#%%   gives the proper piezoelectric tensor.  Only the electron response, and
+#%%   not the strain-induced movement of the rigid ions contributes to the
+#%%   proper tensor.
+#%% topics = Berry, DFPT
+#%%<END TEST_INFO>

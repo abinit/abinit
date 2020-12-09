@@ -1,0 +1,83 @@
+# Hydrogen diatomic molecule : computation of derivatives
+# of the energy, to a very high accuracy
+# Similar to Test_v3#8, except use the xc revPBE GGA
+# Datasets 1 to 5 : GS computations at slightly different geometries,
+#  for finite-difference analysis of forces, including the target
+#  geometry (for dataset 3)
+# Step 6 : RF calculation
+
+ ndtset 6
+
+    xred1  -0.047 0 0   0.04690  0 0
+    xred2  -0.047 0 0   0.04695  0 0
+    xred3  -0.047 0 0   0.047    0 0
+    xred4  -0.047 0 0   0.04705  0 0
+    xred5  -0.047 0 0   0.04710  0 0
+
+    xred6  -0.047 0 0   0.047    0 0
+
+#Specific for RF
+  rfphon6  1
+ rfatpol6  2 2
+   rfdir6  1 0 0
+  rfmeth6 -1      ! This is simply to exercise this value of frmeth
+    nqpt6  1
+     qpt6  0.0 0.0 0.0
+  getwfk6  3
+   nstep6  20
+
+#Common data
+ acell 12 10 10
+ amu 1.008
+ diemac 1.0d0   diemix 0.5d0
+ ecut 4.5
+ ixc 14
+ getwfk -1
+
+  kptopt 0
+ kpt   3*0.0
+ natom  2
+ nband 1
+
+ nkpt 1
+ nline 3   nstep 30
+ nsym 4  ntypat  1
+
+ rprim 1 0 0  0 1 0  0 0 1
+ symrel  1  0  0   0  1  0   0  0  1
+         1  0  0   0  1  0   0  0 -1
+         1  0  0   0 -1  0   0  0  1
+         1  0  0   0 -1  0   0  0 -1
+ tnons 12*0
+ tolvrs 1.0d-16
+ typat  2*1
+ wtk  1
+ znucl  1.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t70.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   H2 molecule, using a local pseudopotential, and GGA.
+#%%   Similar to test 8 of v3
+#%%   but use the revPBE XC functional.
+#%%   Compute the interatomic force constant for the
+#%%   displacement of the second atom along x.
+#%%   RF calculation of the 2DTE gives 188.66748730880 Ha
+#%%   while finite differences gives :
+#%%   with delta(xred)=0.0002, 188.66799915 Ha
+#%%   with delta(xred)=0.0001, 188.66761529 Ha .
+#%%   Combining the results gives 188.66748734 Ha.
+#%%   Excellent.
+#%%<END TEST_INFO>

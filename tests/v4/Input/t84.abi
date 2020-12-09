@@ -1,0 +1,96 @@
+# Silicon structure
+     acell     10.263  10.263  10.263
+     rprim      0.00   0.50   0.50
+                0.50   0.00   0.50
+                0.50   0.50   0.00
+     natom      2
+      xred      0.00   0.00   0.00
+                0.25   0.25   0.25
+    ntypat      1
+     typat      1      1
+     znucl     14.00
+
+# Parameters common to all runs
+      ecut      6.0
+     ecutwfn    6.0 
+     ecutsigx   3.56069426E+00 Hartree
+     ecuteps    2.1
+    kptopt      1
+     ngkpt      4      4      4
+   nshiftk     1
+    shiftk     0.00   0.00   0.00
+    istwfk     8*1
+     nstep    100
+    enunit      2
+
+    ndtset      4
+    gwpara      1   # gwpara 2 is much  better
+    symsigma    0
+
+# Self-consistent run to get the WFK File
+    tolwfr1    1.00d-10
+    nband1      35
+    nbdbuf1     5
+
+# Calculation of the dielectric matrix
+ optdriver2     3
+ gwcalctyp2     2
+    getwfk2     1
+     nband2    16
+   nfreqim2     4
+   nfreqre2     5
+ freqremax2     1.
+      awtr2     0       # Note : the default awtr 1 is better
+      symchi      0     # Note : the default symchi 1 is better
+
+# Calculation of the GW corrections with PPM
+ optdriver3     4
+ gwcalctyp3     0
+    getwfk3     1
+    getscr3     2
+
+     nband3    30
+    nkptgw3     2
+     kptgw3     0.00   0.00   0.00
+                0.50   0.50   0.00
+      bdgw3     4      5
+                4      5
+ gw_icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
+
+
+# Calculation of the GW corrections without PPM
+ optdriver4     4
+ gwcalctyp4     2
+    getwfk4     1
+    getscr4     2
+
+     nband4    30
+    nkptgw4     2
+     kptgw4     0.00   0.00   0.00
+                0.50   0.50   0.00
+      bdgw4     4      5
+                4      5
+ gw_icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
+
+#    nfreqsp4  200
+#  freqspmax4    1.
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t84.abo, tolnlines = 26, tolabs = 1.010e-03, tolrel = 6.000e-02
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = F. Bruneval
+#%% keywords = GW
+#%% description = 
+#%%   Si FCC, in primitive cell (2 atoms/cell).
+#%%   Test GW calculation with and without plasmon-pole model.
+#%% topics = GW
+#%%<END TEST_INFO>

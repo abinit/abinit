@@ -1,0 +1,65 @@
+# ================================================================
+# Si in diamond structure - PAW
+# Cell optimisation
+#
+# Test for Abinit: use of a Graphics Processing Unit
+#
+# Test structure relaxation (multiples calls to gstate)
+# Low cut-off for test; few k-points
+# ================================================================
+
+#Datasets (2 different PW cut-off)
+ ndtset 2
+ fftalg 401
+ getcell -1
+
+#Structure Optimization
+ ionmov 2  ntime 4  tolmxf 1.0d-4
+ optcell 1  dilatmx 1.01
+
+#Unit cell
+ acell 3*10.40  rprim 0 .5 .5 .5  0 .5 .5 .5 0
+ natom 2  ntypat 1  typat 1 1
+ xred  3*0.00d0
+       3*0.25d0
+ znucl 14  nband 4
+
+#K-points and symmmetries
+ kptopt 1 ngkpt 2 2 2
+ nsym 0  chksymbreak 0
+ occopt 1
+
+#Self-consistent cycle
+ nstep 20  toldfe 1.0d-8
+
+#Plane-wave basis set
+ ecut1 3.0  ecut2 4.0
+ pawecutdg 10.
+ ecutsm 0.5
+
+#Miscelaneous
+ prtwf 0  prtden 0  prteig 0
+
+#The following parameter is present for testing purposes only;
+#It forces the use of linear algebra on the GPU.
+gpu_linalg_limit 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.pbe"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t04.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW
+#%% description =
+#%%   Silicon - diamond structure - PAW - volume relaxation
+#%%   Test the use of GPU within Projector Augmented-Wave formalism.
+#%%   Test structure relaxation (multiple calls to gstate routine).
+#%%<END TEST_INFO>

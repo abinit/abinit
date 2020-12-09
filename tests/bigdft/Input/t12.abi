@@ -1,0 +1,65 @@
+# 78pt.18.khgh
+
+ nstep 20
+
+ acell 3*20
+ wvl_hgrid 0.45
+ wvl_crmult 5
+ wvl_frmult 10
+ wvl_bigdft_comp 1 #to follow the BigDFT workflow
+ # Value not high enough, but used for quick test
+ tolwfr 1e-2
+ kptopt 0
+ kpt   0 0 0
+ istwfk 1
+ natom  1
+ nkpt  1
+ nsym  1
+ ntypat  1
+ rprim   1 0 0  0 1 0  0 0 1
+ symrel  1 0 0  0 1 0  0 0 1
+ typat  1
+ xred
+  0.5 0.5 0.5
+ occopt 2
+ znucl  78
+
+ ixc 11
+ optforces 0
+ optstress 0
+
+ usewvl 1
+ icoulomb 1
+ iscf 0
+ nsppol 2
+ nspden 2
+ nband 10 10
+ occ 1 1 1 1 1 1 1 1 1 1   1 1 1 1 1 1 1 1 0 0
+ nwfshist 6
+ nscforder 16
+ wvl_nprccg 15
+
+# Avoid print densities, wavefunctions and eigenvalues
+ prteig 0
+ prtden 0
+ prtwf  0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "78pt.18.khgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t12.abo, tolnlines = 0, tolabs = 2.300e-09, tolrel = 4.177e-13, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = 
+#%% description = 
+#%%   Pt single atom with semi-core electrons, Krack pseudopotentials (pspcod = 10),
+#%%   and colinear spin polarisation (GGA functional).
+#%% topics = Wavelets
+#%%<END TEST_INFO>

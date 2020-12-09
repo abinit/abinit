@@ -1,0 +1,103 @@
+# H2 molecule, in a somewhat small box.
+# Computation of transition path between two local minima of the geometry space.
+# Use of the parallelization over images ; several values of prtvolimg tested
+#===============================================================================
+
+
+#String method parameters
+#************************
+ntimimage 10
+nimage 7
+imgmov 2
+fxcartfactor 10.0
+tolimg 1.d-5
+
+#Transition path definition
+#**************************
+natfix 1
+iatfix 1
+xcart         3*0d0           3*0.766911
+xcart_lastimg 3*0d0  2.233089 2*0.766911
+dynimage  0 5*1 0  # Will do relaxation only for the 5 internal images
+
+#Parallelization parameters
+#**************************
+#npimage 2  # Not set: let the code determine automatically
+            #          the distribution of processors
+            # With 1  proc,  should be: npkpt 1, npimage 1
+            # With 2  procs, should be: npkpt 1, npimage 2
+            # With 4  procs, should be: npkpt 1, npimage 4
+            # With 10 procs, should be: npkpt 2, npimage 5
+
+
+#Test prtolimg with 3 datasets
+#*****************************
+ndtset 3
+prtvolimg1 0
+prtvolimg2 1
+prtvolimg3 2
+
+#===============================================================================
+
+#Unit cell description
+#*********************
+acell  3*3.0d0
+natom  2
+ntypat  2   # Treat the two atoms as inequivalent,
+typat  1 2  # in order ot be able to fix the position of one of them,
+znucl 1 1   # and not the other.
+nband  1
+
+#k-points and symetries
+#**********************
+kptopt 1
+ngkpt 4 4 4
+chksymbreak 0
+
+#Plane wave basis set
+#********************
+ecut 15.0d0
+ecutsm 0.5d0
+
+#SCF procedure parameters
+#************************
+nstep 20
+toldff  2.0d-6
+paral_kgb 0
+autoparal 1
+
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
+ pseudos "1h.pspnc, 1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = .*_nag_7.0_.*
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
+#%% [NCPU_1]
+#%% files_to_test = t08_MPI1.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_2]
+#%% files_to_test = t08_MPI2.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_4]
+#%% files_to_test = t08_MPI4.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [NCPU_10]
+#%% files_to_test = t08_MPI10.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [extra_info]
+#%% keywords = PAW, IMAGES
+#%% authors = M. Torrent
+#%% description = 
+#%%   Test the string method within parallelization over images
+#%%   Inspired by test v6#22.
+#%%   Hydrogen diatomic molecule in a cell, close to BCC
+#%%   7 images, exploring the transition path.
+#%%   Three datasets, testing each value of prtvolimg.
+#%%   Processors distribution automatically determined:
+#%%      # With 1  proc,  should be: npkpt 1, npimage 1
+#%%      # With 2  procs, should be: npkpt 2, npimage 1
+#%%      # With 4  procs, should be: npkpt 4, npimage 1
+#%%      # With 10 procs, should be: npkpt 2, npimage 5
+#%% topics = parallelism, TransPath
+#%%<END TEST_INFO>

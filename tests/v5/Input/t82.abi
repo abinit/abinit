@@ -1,0 +1,58 @@
+ecut 5
+
+kptopt 3
+tolvrs 1.0D-10
+rfelfd 3
+rfdir 1 1 1
+nqpt 1
+qpt 3*0
+
+irdwfk 1
+irdddk 1
+
+prtden 0
+prteig 0
+prtwf 0
+
+nstep 50
+
+acell 3*5.43 angstrom
+rprim
+0 1/2 1/2
+1/2 0 1/2
+1/2 1/2 0
+
+occopt 1
+nband 4
+ngkpt 2 2 2
+nshiftk 4
+shiftk
+3*1/2
+1/2 0 0
+0 1/2 0
+0 0 1/2
+#
+znucl 14
+ntypat 1
+typat 2*1
+natom 2
+xred 3*0 3*1/4
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t81.abi, t82.abi, t83.abi, t84.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t82.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT, DDK
+#%% description = 
+#%%   Compute silicon electric field perturbation, using WFK and DDK files produced in previous test.
+#%%<END TEST_INFO>

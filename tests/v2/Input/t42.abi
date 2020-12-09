@@ -1,0 +1,83 @@
+# (HeH)+ system. acell much too small, ecut also. Excited state computation, using
+# ground-state potential Fermi-Amaldi (=xOEP for 2 electron systems),
+# and either xOEP kernel (ixc=20), LDA kernel (ixc=21) or
+# BPG hybrid kernel (ixc=22)
+
+ prtvol   2
+
+ ndtset    4
+
+    ixc1   20
+  nband1   1
+ prtden1   1
+ tolwfr1   1.0d-22
+
+   iscf2  -1
+    ixc2   20
+  nband2   20
+ getden2   1
+ getwfk2   1
+
+   iscf3  -1
+    ixc3   21
+  nband3   20
+ getden3   1
+ getwfk3   2
+
+   iscf4  -1
+    ixc4   22
+  nband4   20
+ getden4   1
+ getwfk4   2
+
+#Common
+ kptopt 0
+ nkpt  1    kptnrm  4
+     kpt  0 0 0
+     wtk  1
+
+ acell 3*10
+ boxcenter 3*0.0d0
+ charge 1.0d0
+ diemac 1.0d0   diemix 0.5d0
+ ecut 9
+
+ natom  2
+ nbdbuf 0
+
+ nstep 30
+ nsym 6  ntypat  2
+ occopt 1
+ rprim 1 0 0  0 1 0  0 0 1
+ symrel 1  0  0    0  1  0     0  0  1
+        0  1  0    1  0  0     0  0  1
+        1  0  0    0  0  1     0  1  0
+        0  0  1    0  1  0     1  0  0
+        0  1  0    0  0  1     1  0  0
+        0  0  1    1  0  0     0  1  0
+ tnons 18*0.0d0
+ tolwfr 1.0d-9
+ typat  1 2
+ xcart    3*0.0       3*1.1547006  # dist=2
+ znucl  2 1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/2he.2.hgh, PseudosHGH_pwteter/1h.1.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t42.abo, tolnlines = 2, tolabs = 1.100e-05, tolrel = 1.100e-03, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   (HeH)+ in a big box. Computation of excitation energies in TDDFT,
+#%%   in the following approximations : TDxOEP/xOEP, TDLDA/xOEP,
+#%%   BPG hybrid/xOEP.
+#%% topics = TDDFT
+#%%<END TEST_INFO>

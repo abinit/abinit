@@ -1,0 +1,61 @@
+ paral_kgb 1
+ use_slk 1
+ bandpp 2
+ istwfk 2
+ npband 2 npkpt 1 npfft 2
+
+ # To test the different FFT libraries
+ #fftalg 312
+ #fftalg 401
+ #fftalg 402
+ 
+
+ ngfft 18 18 18
+ ngfftdg 36 36 36
+ mem_test 0
+
+ occopt 1 
+ kptopt 0
+ nkpt 1 toldfe 1.0d-10 
+
+ # Do not write WFK and DEN files
+ prtwf 0
+ prtden 0
+
+ ecut 15. pawecutdg 50
+ diemac 12.0d0  enunit 2
+ nstep 5
+ acell 3*7.0
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ chksymtnons 0
+ znucl 6
+ nband 12 occ 4*2 8*0
+ ntypat 1 typat 1 1  natom 2
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = abiref_gnu_9.2_openmpi
+#%% exec_args = --timelimit 1:20:00
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t29_MPI4.abo, tolnlines=   35,   tolabs=  1.1e-5,      tolrel= 2.0e-2
+#%% [extra_info]
+#%% keywords = PAW
+#%% authors = M. Giantomassi
+#%% description = 
+#%%    C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
+#%%    Test MPI-FFT with 2 processors, istwfk=2 and bandpp 2
+#%% topics = parallelism
+#%%<END TEST_INFO>

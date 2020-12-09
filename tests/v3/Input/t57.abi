@@ -1,0 +1,65 @@
+#Driver
+
+surf  1  # build the Bader surface
+crit  2  # determine the critical points
+atom  1  # The basin of attraction of atom 1 will be examined
+gpsurf 1  # output for GNUplot
+irho  1   # drives the integration of the Bader charge
+
+#Parameter
+
+# nsa 2  #  one might gain a bit of cpu time
+# nsb 2  #  by using these values, smaller than the default
+# nsc 2
+
+inpt 50      # This value is suitable
+ntheta 5     # This value is much too small
+nphi 5       # This value is much too small
+thetamax   1.57079632679  # These two variables define an octant
+phimax   1.57079632679    #
+atrad  1.7
+radstp 0.03
+ratmin 1.0
+maxatd 8.0   # The starting atoms within this distance are sufficient
+maxcpd 5.0
+lgrad2 1.0d-4  # Such loose criteria are needed to catch all the CPs.
+lstep2 1.0d-4  #
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = aim
+#%% test_chain = t56.abi, t57.abi
+#%% [files]
+#%% files_to_test = t57.out, tolnlines= 12, tolabs=  3.000e-04, tolrel=  1.000e+00, fld_options=-easy
+#%% psp_files=DensityCore_pw/08-O.8.fc, DensityCore_pw/12-Mg.8.fc 
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC
+#%% description =
+#%%   MgO FCC crystal, Bader analysis. Examine the Oxygen atom only. 
+#%%   Determine correctly 18 bonding critical points,
+#%%   24 ring critical points, and 8 cage critical points.
+#%%   (In agreement with Euler's relation : #BCP-#RCP+#CCP=2)
+#%%   The bonding critical points are quite accurate,
+#%%   while for the ring critical points, the criteria
+#%%   defined by the input variables lstep and lgrad are not fulfilled
+#%%   for all the CP. The coordinates are rather inaccurate.
+#%%   In particular, the symmetry between RCP is broken.
+#%%   This is seen the most clearly at the level of the
+#%%   laplacian eigenvalues. This breaking of symmetry
+#%%   naturally originates from the fact that the FFT grid
+#%%   is not symmetric (the lattice was chosen primitive FCC), 
+#%%   so that the finite elements used for the
+#%%   interpolation are also not symmetric.
+#%%   This cannot be improved by just tuning the numerical
+#%%   parameters. Instead, one should consider the Bader
+#%%   analysis in a FCC conventional cell, instead of the
+#%%   primitive one.
+#%%   Get 2 core electrons, 7.6796 valence electrons.
+#%%   The nucleus charge is +8. The Oxygen atom-in-molecule
+#%%   has a net charge of -1.6796.
+#%% topics = Bader
+#%%<END TEST_INFO>

@@ -1,0 +1,67 @@
+#   ----------------------------------------
+#   -     Input file for Abinit            -
+#   - Ca, simple cubic , 1 special k-point -
+#   -     Testing GS paw energy            -
+#   ----------------------------------------
+
+# 1-PAW options:
+# ---------------------
+ pawecutdg 15.
+ pawoptmix 1
+ pawmixdg 1
+# 2-Options for output:
+# ---------------------
+  prtdos 0 prtwf 1  enunit 2
+
+# 3-Parameters governing the convergence:
+# ---------------------------------------
+  ecut 3.  nband 6  nline 5  ntime 5  nstep 25
+  toldfe 1.d-8
+
+# 4-Options for the choice of calculation:
+# ----------------------------------------
+  ixc 7  occopt 7  tsmear 0.02
+  optcell 0  ionmov 0
+  so_psp 1
+  ortalg 1
+
+# 5-Definition of the unit cell:
+# ------------------------------
+  acell 3.0 3.5 4.0
+  rprim  1.4  0.0  0.0
+         0.0  1.4  0.0
+         0.0  0.0  1.4
+  natom 1  ntypat 1
+  typat 1  znucl 20.
+  xred 0.00 0.00 0.00
+  nsym 1
+  
+# 6-Definition of K-points :
+# --------------------------
+ kptopt 0
+  nkpt 1  kptnrm 1  istwfk 1
+  kpt 0 0 0
+  wtk 1 
+# Output density to an ETSF file
+  iomode  3
+# Output wavefunction to an ETSF file
+  pawprtwf 1 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "20ca.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t09.abo, tolnlines = 0, tolabs = 2.000e-10, tolrel = 5.000e-10, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = PAW
+#%% description = 
+#%%   Ca atom in PAW. Test the output of density in PAW formalism with ETSF_IO.
+#%%   Also test the output of the wavefunctions in PAW formalism with ETSF_IO.
+#%%<END TEST_INFO>

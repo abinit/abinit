@@ -1,0 +1,84 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+# Prelimirary step for test v5#39 (macro_uj)                    #
+#                       and v5#40 (testirdden)                  #
+#                                                               #
+# Fe bcc 2 atomic supercell - ferromag.- PAW DJA 2010 & MT 2009 #
+#################################################################
+#Unit cell
+      acell  3*5.42
+    chkprim  0                  # 0: do not check if uc primitive
+      rprim  1.00 0.00 0.00
+             0.00 1.00 0.00
+             0.00 0.00 1.00
+
+#Spin polarization
+      nsppol  2                    #1 unpolarized / 2 polarized
+      spinat  0 0  2.843062
+              0 0  2.843062
+
+
+#Definition of the atom types
+     ntypat  1
+      znucl  26
+
+#Definition of the atoms
+      natom  2
+      typat  2*1               # atomic types
+       xred
+             0.0 0.0 0.0
+             0.5 0.5 0.5
+       ecut  8                   # Energy cutoff
+  pawecutdg  20                  # pawecutdg > 2*ecut
+      nband  25                  # Fe_2 minband=17
+
+#Definition of the SCF procedure
+      nstep  15                  # max  number SCF cycles
+      tolvrs 10d-12
+
+#Definition of the k-point grid
+     kptopt  1                    # 1:  automatic generation of k points
+      ngkpt  3 3 3                # n x n x n
+    nshiftk  1
+     shiftk  0.5 0.5 0.5
+
+#Smearing
+     occopt  4
+     tsmear  0.05 eV
+
+#DFT+U
+    usepawu  1                    # 1 at lim dble cnt / 2 rnd m fld dle cnt
+      lpawu  2                    # ang moments corrrected
+
+#Save disk space & Miscelaneous
+     prteig  0
+     prtden  1                    # This is the default value
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t38.abi, t39.abi, t40.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t38.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
+#%% [shell]
+#%% post_commands = 
+#%%   ww_cp t38o_WFK t39i_WFK;
+#%%   ww_cp t38o_DEN t40i_DEN
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Torrent, D.J. Adams
+#%% keywords = PAW
+#%% description = 
+#%%   Preliminary step for test 40:
+#%%   bcc Fe ferromagnetic structure. Relatively low cut-offs and few k-points.
+#%%   This test is done within GGA and magnetism in PAW formalism.
+#%%   Wavefunction printed to be used in v5#39  test.
+#%%   Density is printed out to prepare v5#40 test.
+#%% topics = DFT+U
+#%%<END TEST_INFO>
