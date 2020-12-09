@@ -97,7 +97,7 @@ jpawu  0.0000  # values in Hartree
 #%%   t92_MPI4.abo,   tolnlines=  178, tolabs=  0.03, tolrel= 0.03, fld_options = -medium
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   t92_MPI10.out, tolnlines=   178, tolabs=  0.017, tolrel= 0.03, fld_options = -medium
+#%%   t92_MPI10.abo, tolnlines=   178, tolabs=  0.017, tolrel= 0.03, fld_options = -medium
 #%% [extra_info]
 #%% authors = J. Bieder, B. Amadon
 #%% keywords = DMFT, CTQMC

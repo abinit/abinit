@@ -38,17 +38,17 @@ ntime  = 50
 #%% [NCPU_2]
 #%% input_ddb  = t95_DDB 
 #%% files_to_test = 
-#%%   t96_MPI2.out, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
+#%%   t96_MPI2.abo, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
 #%%   t96_MPI2_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_4]
 #%% input_ddb  = t95_DDB 
 #%% files_to_test = 
-#%%   t96_MPI4.out, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
+#%%   t96_MPI4.abo, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
 #%%   t96_MPI4_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_10]
 #%% input_ddb  = t95_DDB 
 #%% files_to_test = 
-#%%   t96_MPI10.out, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
+#%%   t96_MPI10.abo, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
 #%%   t96_MPI10_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [extra_info]
 #%% authors = A. MARTIN

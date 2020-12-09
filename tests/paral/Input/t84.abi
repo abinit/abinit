@@ -91,7 +91,7 @@ bandpp2 11
 #%% exclude_builders = .*_nag_7.0_.*
 #%% [files]
 #%% files_to_test =
-#%%   t84.out, tolnlines =  3, tolabs =5.0e-1, tolrel = 5.0e-1, fld_options=-medium ;
+#%%   t84.abo, tolnlines =  3, tolabs =5.0e-1, tolrel = 5.0e-1, fld_options=-medium ;
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10

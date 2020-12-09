@@ -240,7 +240,7 @@ dipdip_range         2         2         1
 
  Check Symmetry of Start Structure and Impose it for dynamics run
 
- Restart from external structure stored in file: t101.out_HIST.nc                                                                                                                                                                                                                                                        
+ Restart from external structure stored in file: t101.abo_HIST.nc                                                                                                                                                                                                                                                        
 
 
  The size of the supercell for the fit is   2   2   1

@@ -10,7 +10,7 @@ t09o
 #%% test_chain = t09.abi, t10.abi
 #%% [files]
 #%% files_to_test = 
-#%%  t10.abo,   tolnlines =10, tolabs = 8.0e-10, tolrel = 9.0e-06, fld_options = -easy;
+#%%  t10.out,   tolnlines =10, tolabs = 8.0e-10, tolrel = 9.0e-06, fld_options = -easy;
 #%%  t10_Kth,   tolnlines =50, tolabs = 1.2e-06, tolrel = 2.3e-01, fld_options = -easy;
 #%%  t10_abs,   tolnlines =50, tolabs = 4.0e+04, tolrel = 3.2e-05, fld_options = -ridiculous;
 #%%  t10_sigX,  tolnlines =10, tolabs = 2.1e-10, tolrel = 1.0e-07, fld_options = -easy;

@@ -29,7 +29,7 @@ phimax   1.57079632679    #
 #%% test_chain = t32.abi, t33.abi, t34.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t34.abo, tolnlines = 19, tolabs = 4.000e-03, tolrel = 4.000e-03, fld_options = -medium
+#%%   t34.out, tolnlines = 19, tolabs = 4.000e-03, tolrel = 4.000e-03, fld_options = -medium
 #%% psp_files = DensityCore_pw/08-O.8.fc, DensityCore_pw/12-Mg.8.fc
 #%% [paral_info]
 #%% max_nprocs = 1
