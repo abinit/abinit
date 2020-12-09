@@ -555,7 +555,7 @@ than the *tbase1_2.abo* file), and get some significant output data gathered in 
                        7.4307198349E-01  0.0000000000E+00  0.0000000000E+00
 
 According to these data (see [[xcart]]), the optimal interatomic distance is
-about 1.48614 Bohr, in good agreement with the estimation of *tbase1_2.abo*.
+about 1.486 Bohr, in good agreement with the estimation of *tbase1_2.abo*.
 If you have time (this is to be done at home), you might try to change the
 stopping criteria, and redo the calculation, to see the level of convergence
 of the interatomic distance.
@@ -580,10 +580,10 @@ same computation is done on different platforms.
 The charge density has already been computed, for all geometries, in the
 above-mentioned runs. Here, we will print this quantity.
 
-We start from the optimized interatomic distance 1.522 Bohr, and make a run at fixed geometry.
+We start from the optimized interatomic distance 1.486 Bohr, and make a run at fixed geometry.
 The input variable [[prtden]] must be set to 1.
 To understand correctly the content of the [[prtden]] description, it is worth to read a much
-more detailed description of the *files* file, in [[help:abinit#files-file|section 4]] of the abinit_help file.
+more detailed description of the file names in ABINIT, in [[help:abinit#32_file_names_in_abinit|section 3.2]] of the abinit_help file.
 
 The input file *tbase1_4.abi* is an example of input file for a run that will print a density.
 
@@ -591,9 +591,9 @@ The input file *tbase1_4.abi* is an example of input file for a run that will pr
 
 The run will take a few seconds.
 
-The density will be output in the *tbase1_xo_DEN* file. Try to edit it...
+The density will be output in the *tbase1_4o_DEN* file. Try to edit it...
 No luck! This file is unformatted, not written using the ASCII code.
-Even if you cannot read it, its description is provided in the abinit_help. It
+Even if you cannot read it, its description is provided in the abinit help file. It
 contains first a header, then the density numbers. The description of the
 header is presented in [[help:abinit#header|section 6.4]] of the abinit_help
 file, while the body of the _DEN file is presented in [[help:abinit#denfile|section 6.5]].
@@ -607,7 +607,7 @@ This utility is available in the ABINIT package.
 You might try to use it now, to generate two-dimensional cuts in the density, and visualize the charge density contours.
 Read the corresponding [[help:cut3d|Cut3D help file]]
 
-Then, try to run cut3d to analyse *tbase1_xo_DEN*.
+Then, try to run cut3d to analyse *tbase1_4o_DEN*.
 You should first try to translate the unformatted
 density data to indexed formatted data, by using option 6 in the adequate menu.
 Save the indexed formatted data to file *tbase1_xo_DEN_indexed*.
@@ -630,7 +630,7 @@ as discussed in this [jupyter notebook](https://nbviewer.jupyter.org/github/abin
 The atomisation energy is the energy needed to separate a molecule in its constituent atoms, each being neutral.
 In the present case, one must compute first the total energy of an isolated hydrogen atom.
 The atomisation energy will be the difference between the total
-energy of H$_2 and twice the total energy of H.
+energy of H$_2$ and twice the total energy of H.
 There are some subtleties in the calculation of an isolated atom.
 
 * In many cases, the ground state of an isolated atom is spin-polarized, see the variables [[nsppol]] and [[spinat]];
@@ -659,8 +659,6 @@ while *tbase1_5.abo* is an example of output file.
 
 {% dialog tests/tutorial/Refs/tbase1_5.out %}
 
-If you decide to use the *tbase1_5.abi file*, do not forget to
-change the file names in the *tbase1_x.files* file.
 The run lasts a few seconds.
 
 You should read the output file, and note the tiny differences related with
@@ -669,68 +667,68 @@ the spin-polarisation:
 The electronic eigenvalues are now given for both spin up and spin down cases:
 
 ```
-Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
-kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -0.26414
-Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
-kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -0.11112
+ Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
+ kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.26661
+ Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
+ kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.11113
 ```
 
-If you run again, while having set [[prtvol]] to 2 in the input file, because [[occopt]],
-the charge density and spin polarisation at each point of the FFT grid is also analyzed:
+As [[prtvol]]=2, The charge density at several points (maximum, minimum) is echoed, but also
+the spin polarisation, because of the value of [[nspden]] and [[occopt]]:
 
 ```
-    Total charge density [el/Bohr^3]
-     Maximum=    1.4053E-01  at reduced coord.    0.0000    0.0000    0.0000
-Next maximum=    1.2019E-01  at reduced coord.    0.0000    0.0000    0.9667
-     Minimum=    3.4544E-06  at reduced coord.    0.4667    0.4333    0.4333
-Next minimum=    3.4544E-06  at reduced coord.    0.5333    0.4333    0.4333
-Spin up density      [el/Bohr^3]
-     Maximum=    1.4053E-01  at reduced coord.    0.0000    0.0000    0.0000
-Next maximum=    1.2019E-01  at reduced coord.    0.0000    0.0000    0.9667
-     Minimum=    3.4544E-06  at reduced coord.    0.4667    0.4333    0.4333
-Next minimum=    3.4544E-06  at reduced coord.    0.5333    0.4333    0.4333
-Spin down density    [el/Bohr^3]
-     Maximum=    0.0000E+00  at reduced coord.    0.9667    0.9667    0.9667
-Next maximum=    0.0000E+00  at reduced coord.    0.9333    0.9667    0.9667
-     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
-Next minimum=    0.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
-Magnetization (spin up - spin down) [el/Bohr^3]
-     Maximum=    1.4053E-01  at reduced coord.    0.0000    0.0000    0.0000
-Next maximum=    1.2019E-01  at reduced coord.    0.0000    0.0000    0.9667
-     Minimum=    3.4544E-06  at reduced coord.    0.4667    0.4333    0.4333
-Next minimum=    3.4544E-06  at reduced coord.    0.5333    0.4333    0.4333
-Relative magnetization (=zeta, between -1 and 1)
-     Maximum=    1.0000E+00  at reduced coord.    0.9667    0.9667    0.9667
-Next maximum=    1.0000E+00  at reduced coord.    0.9333    0.9667    0.9667
-     Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
-Next minimum=    1.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
+ Total charge density [el/Bohr^3]
+      Maximum=    1.4353E-01  at reduced coord.    0.0000    0.0000    0.0000
+ Next maximum=    1.2266E-01  at reduced coord.    0.0000    0.0000    0.9667
+      Minimum=    3.2349E-06  at reduced coord.    0.4667    0.4333    0.4333
+ Next minimum=    3.2349E-06  at reduced coord.    0.5333    0.4333    0.4333
+   Integrated=    1.0000E+00
+ Spin up density      [el/Bohr^3]
+      Maximum=    1.4353E-01  at reduced coord.    0.0000    0.0000    0.0000
+ Next maximum=    1.2266E-01  at reduced coord.    0.0000    0.0000    0.9667
+      Minimum=    3.2349E-06  at reduced coord.    0.4667    0.4333    0.4333
+ Next minimum=    3.2349E-06  at reduced coord.    0.5333    0.4333    0.4333
+   Integrated=    1.0000E+00
+ Spin down density    [el/Bohr^3]
+      Maximum=    0.0000E+00  at reduced coord.    0.9667    0.9667    0.9667
+ Next maximum=    0.0000E+00  at reduced coord.    0.9333    0.9667    0.9667
+      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+ Next minimum=    0.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
+   Integrated=    0.0000E+00
+ Magnetization (spin up - spin down) [el/Bohr^3]
+      Maximum=    1.4353E-01  at reduced coord.    0.0000    0.0000    0.0000
+ Next maximum=    1.2266E-01  at reduced coord.    0.0000    0.0000    0.9667
+      Minimum=    3.2349E-06  at reduced coord.    0.4667    0.4333    0.4333
+ Next minimum=    3.2349E-06  at reduced coord.    0.5333    0.4333    0.4333
+   Integrated=    1.0000E+00
+ Relative magnetization (=zeta, between -1 and 1)
+      Maximum=    1.0000E+00  at reduced coord.    0.9667    0.9667    0.9667
+ Next maximum=    1.0000E+00  at reduced coord.    0.9333    0.9667    0.9667
+      Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+ Next minimum=    1.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
 ```
 
 The **zeta** variable is the ratio between the spin-density difference and the
 charge density. It varies between +1 and -1. In the present case of Hydrogen,
 there is no spin down density, so the zeta variable is +1.
-(Comment: in this part of the output file, note the comma "," that is inserted
-in the first column. This is not important for the user: it is used to post-process
-the output file using some automatic tool.
-As a rule, you should ignore symbols placed in the first column of the ABINIT output file.)
 
 The total energy is
 
-    etotal   -4.7010531489E-01
+    etotal     -4.7393103688E-01
 
 while the total energy of the H$_2$ molecule is (see test 13):
 
-    etotal   -1.1058360644E+00
+    etotal     -1.1182883138E+00
 
-The atomisation energy is thus 0.1656 Ha (The difference between the total
+The atomisation energy is thus 0.1704 Ha (The difference between the total
 energy of the H$_2$ molecule and twice the energy of an isolated Hydrogen atom).
 
 At this stage, we can compare our results:
 
-  * bond length: 1.522 Bohr
-  * atomisation energy at that bond length: 0.1656 Ha = 4.506 eV
+  * bond length: 1.486 Bohr
+  * atomisation energy at that bond length: 0.1704 Ha = 4.637 eV
 
 with the experimental data as well as theoretical data using a much more
 accurate technique (see [[cite:Kolos1960]], especially p.225)
@@ -740,10 +738,10 @@ accurate technique (see [[cite:Kolos1960]], especially p.225)
 
 |                       | Our results | Experiment
 | :--                   | :--         | :--
-bond length [Bohr]      | 1.522       | 1.401
-atomisation energy [eV] | 4.506       | 4.747
+bond length [Bohr]      | 1.486       | 1.401
+atomisation energy [eV] | 4.637       | 4.747
 
-The bond length is awful (nearly 10% off), and the atomisation energy is a bit too low, 5% off.
+The bond length is rather bad (about 6% off), and the atomisation energy is a bit too low, 2.5% off.
 What is wrong??
 
 Well, are you sure that the input parameters that we did not discuss are correct?
@@ -757,7 +755,9 @@ These are:
 
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell, the local-density approximation
 (as well as the local-spin-density approximation) in the
-Teter parametrization, and a pseudopotential from the Goedecker-Hutter-Teter table [[cite:Goedecker1996]].
+Teter parametrization, and a LDA pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>,
+copied in the ABINIT directory $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8 . You might have a look at
+the file $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/README.md to learn more about pseudopotentials.
 
 We will see in the [next tutorial](base2) how to address the choice
 of these parameters (except the pseudopotential).

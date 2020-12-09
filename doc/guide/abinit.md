@@ -933,16 +933,96 @@ at fixed atomic positions, these subroutines are:
 <a id="header"></a>
 ### 5.4 The header
   
-The **wavefunction files**, **density files**, and **potential files** all
-begin with the same records, called the "header".
+The **wavefunction files**, **density files**, and **potential files** are not plain text files (as they are quite big,
+and need some kind of compressed storage mode), but either binary files (from FORTRAN write statements), or netcdf files. 
+See the input variable [[iomode]].
+FORTRAN binary format is the default, and will be the focus of the following sections. 
+Reading a netcdf file is actually much easier than reading a FORTRAN binary file, as netcdf
+files can be addressed by content.
+
+In order to provide the relevant metadata about the run that generated such numerical data,
+the **wavefunction files**, **density files**, and **potential files** (irrespective of the format) 
+contain standardized basic information. In case of FORTRAN,  
+such files begin with the same records, called the "header".
 This header is treated using the hdr_type Fortran data structure inside ABINIT. 
 There are dedicated routines inside ABINIT for initializing a header, updating it,
 reading the header of an unformatted disk file, writing a header to an unformatted disk file,
 echoing a header to a formatted disk file, cleaning a header data structure.
 
 The header is made of 4 + [[ntypat]] unformatted records, obtained by the
-following Fortran90 instructions (format 5.7):
+following Fortran90 instructions (format 9.0):
+
+```fortran
+     write(unit=header) codvsn,headform,fform
+
+     write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
+    & nkpt,nspden,nspinor,nsppol,nsym,npsp,ntypat,occopt,pertcase,usepaw,&
+    & ecut,ecutdg,ecutsm,ecut_eff,qptn(1:3),rprimd(1:3,1:3),stmbias,&
+    & tphysel,tsmear,usewvl,nshiftk_orig,nshiftk,mband
+
+     write(unit=header) istwfk(1:nkpt),nband(1:nkpt*nsppol),&
+    & npwarr(1:nkpt),so_psp(1:npsp),symafm(1:nsym),symrel(1:3,1:3,1:nsym),&
+    & typat(1:natom),kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),&
+    & znucltypat(1:ntypat),wtk(1:nkpt)
+
+     write(unit=unit) residm,xred(1:3,1:natom),etotal,fermie,amu(1:ntypat)
+
+     write(unit=unit) kptopt,pawcpxocc,nelect,charge,icoulomb,&
+    & kptrlatt(3,3),kptrlatt_orig(3,3),shiftk_orig(3),shiftk(3)
+
+     do ipsp=1,npsp
+    ! (npsp lines, 1 for each pseudo; npsp=ntypat, except if alchemical pseudo-atoms)
+      write(unit=unit) title,znuclpsp,zionpsp,pspso,&
+    &  pspdat,pspcod,pspxc,lmn_size,md5_pseudos
+     enddo
+
+    !(in case of usepaw==1, there are some additional records)
+     if (usepaw==1)then
+      write(unit=unit)( pawrhoij(iatom)%nrhoijsel(1:nspden),iatom=1,natom), cplex, nspden
+      write(unit=unit)((pawrhoij(iatom)%rhoijselect(1:      nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom),&
+    &                 ((pawrhoij(iatom)%rhoijp     (1:cplex*nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom)
+     endif
+```
+
+where the type of the different variables is:
     
+```fortran
+    character*8 :: codvsn
+    integer :: headform,fform
+    integer :: bantot,cplex,date,icoulomb,intxc,ixc,kptopt,mband,natom,ngfft(3),&
+    & nkpt,npsp,nshiftk_orig,nshiftk,nspden,nspinor,nsppol,nsym,ntypat,occopt,&
+    & pawcpxocc,pertcase,usepaw,usewvl
+    double precision :: acell(3),charge,ecut,ecutdg,ecutsm,ecut_eff,etotal,&
+    & fermie,nelect,qptn(3),residm,rprimd(3,3),shiftk(3),shiftk_orig(3),&
+    & stmbias,tphysel,tsmear
+    integer :: istwfk(nkpt),kptrlatt(3,3),kptrlatt_orig(3,3),nband(nkpt*nsppol),&
+    & npwarr(nkpt),so_psp(npsp),symafm(nsym),symrel(3,3,nsym),typat(natom),&
+    & nrhoijsel(nspden),rhoijselect(*,nspden)
+    double precision :: amu(ntypat),kpt(3,nkpt),occ(bantot),tnons(3,nsym),&
+    & znucltypat(ntypat),wtk(nkpt),xred(3,natom)
+    character*132 :: title
+    character*32 :: md5_pseudos
+    double precision :: znuclpsp,zionpsp
+    integer :: pspso,pspdat,pspcod,pspxc,lmn_size
+    double precision :: rhoij(*,nspden)
+```
+
+NOTE: _etotal is set to its true value only for density and potential files.
+For other files, it is set to 1.0d20_  
+NOTE: _ecut_eff= [[ecut]]*([[dilatmx]])$^2$_  
+NOTE: _For all cases where occupation numbers are defined (that is, positive
+iscf, and iscf=-3), and for non-metallic occupation numbers, the Fermi energy
+is set to the highest occupied eigenenergy. This might not correspond to the
+expected Fermi energy for a later non-self-consistent calculation (e.g. the band structure)_
+
+The header might differ for different versions of ABINIT. One pre-v5.3 format
+is described below. Note however, that the current version of ABINIT should be
+able to read all the previous formats (not to write them), with the exception
+of wavefunction files for which the [[ecutsm]] value was non-zero (there has
+been a change of definition of the smearing function in v4.4).
+
+The format for ABINIT versions 8.0 to 8.11 was:
+
 ```fortran
      write(unit=header) codvsn,headform,fform
      write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
@@ -966,8 +1046,8 @@ following Fortran90 instructions (format 5.7):
      endif
 ```
 
-where the type of the different variables is:
-    
+where the type of the different variables was:
+
 ```fortran
     character*6 :: codvsn
     integer :: headform,fform
@@ -983,50 +1063,12 @@ where the type of the different variables is:
     integer :: pspso,pspdat,pspcod,pspxc,lmax,lloc,mmax=integers
     double precision :: residm,xred(3,natom),etotal,fermie,rhoij(*,nspden)
 ```
-
-NOTE: _etotal is set to its true value only for density and potential files.
-For other files, it is set to 1.0d20_  
-NOTE: _ecut_eff= [[ecut]]* [[dilatmx]] 2_  
-NOTE: _For all cases where occupation numbers are defined (that is, positive
-iscf, and iscf=-3), and for non-metallic occupation numbers, the Fermi energy
-is set to the highest occupied eigenenergy. This might not correspond to the
-expected Fermi energy for a later non-self-consistent calculation (e.g. the band structure)_
-
-The header might differ for different versions of ABINIT. One pre-v5.3 format
-is described below. Note however, that the current version of ABINIT should be
-able to read all the previous formats (not to write them), with the exception
-of wavefunction files for which the [[ecutsm]] value was non-zero (there has
-been a change of definition of the smearing function in v4.4).
-
-The format for version 4.4, 4.5, 4.6, 5.0, 5.1 and 5.2 was:
    
-```fortran
-     write(unit=header) codvsn,headform,fform
-     write(unit=header) bantot,date,intxc,ixc,natom,ngfft(1:3),&
-    & nkpt,nspden,nspinor,nsppol,nsym,npsp,ntypat,occopt,pertcase,usepaw,&
-    & ecut,ecutdg,ecutsm,ecut_eff,qptn(1:3),rprimd(1:3,1:3),stmbias,tphysel,tsmear
-     write(unit=header) istwfk(1:nkpt),nband(1:nkpt*nsppol),&
-    & npwarr(1:nkpt),so_typat(1:ntypat),symafm(1:nsym),symrel(1:3,1:3,1:nsym),typat(1:natom),&
-    & kpt(1:3,1:nkpt),occ(1:bantot),tnons(1:3,1:nsym),znucltypat(1:ntypat)
-     do ipsp=1,npsp
-    ! (npsp lines, 1 for each pseudopotential; npsp=ntypat, except if alchemical pseudo-atoms)
-      write(unit=unit) title,znuclpsp,zionpsp,pspso,pspdat,pspcod,pspxc,lmn_size
-     enddo
-    !(in case of usepaw==0, final record: residm, coordinates, total energy, Fermi energy)
-     write(unit=unit) residm,xred(1:3,1:natom),etotal,fermie
-    !(in case of usepaw==1, there are some additional records)
-     if (usepaw==1)then
-      write(unit=unit)(pawrhoij(iatom)%nrhoijsel(1:nspden),iatom=1,natom)
-      write(unit=unit)((pawrhoij(iatom)%rhoijselect(1:nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom),&
-    &                 ((pawrhoij(iatom)%rhoijp     (1:nrhoijsel(ispden),ispden),ispden=1,nspden),iatom=1,natom)
-     endif
-```
-
 <a id="denfile"></a>
 ### 5.5 The density output file
   
 This is an unformatted data file containing the electron density on the real
-space FFT grid. It consists of the header records followed by
+space FFT grid. It consists of the [header records](#header) followed by
 
 ```fortran
     do ispden=1,nspden
@@ -1034,17 +1076,17 @@ space FFT grid. It consists of the header records followed by
     enddo
 ```
 
-where **rhor** is the electron density in electrons/Bohr^3, and cplex is the
-number of complex components of the density (cplex=1 for GS calculations -the
-density is real-, and cplex=1 or 2 for RF). The input variable [[nspden]]
+where **rhor** is the electron density in electrons/Bohr^3, and **cplex** is the
+number of complex components of the density (**cplex**=1 for GS calculations -the
+density is real-, and **cplex**=1 or 2 for RF). The input variable [[nspden]]
 describes the number of components of the density. The first component (the
 only one present when [[nspden]]=1) is always the total charge density. When
 [[nspden]]=2, the second component is the density associated with spin-up
 electrons. When [[nspden]]=4, the second, third and fourth components
 correspond to the x, y and z projections of the local magnetization, in units
-of hbar/2. Note that the meaning of the different components of the density
+of $\hbar/2$. Note that the meaning of the different components of the density
 differs for the density array (rhor) and for the different potential arrays
-(vxc...), see section  6.6.
+(vxc...), see the [next section](#localpotfile).
 
 To identify the points in real space which correspond with the index "ir"
 above, consider the following.  
@@ -1069,7 +1111,7 @@ whole grid is viewed as being periodically repeated.
 <a id="localpotfile"></a>
 ### 5.6 The potential files
   
-Also unformatted files consisting of the header records and
+Also unformatted files consisting of the [header records](#header) and
     
 ```fortran
     do ispden=1,nspden
@@ -1091,13 +1133,13 @@ to use the same format as for the other potential files, the spin-independent
 array is written twice, once for spin-up and one for spin-down.
 
 <a id="wfkfile"></a>
-**5.7. The wavefunction output file**
+###5.7 The wavefunction output file
 
 This is an unformatted data file containing the planewaves coefficients of all
 the wavefunctions, and different supplementary data.
 
-The **ground-state** wf file consists of the header records, and data written
-with the following lines of FORTRAN (version 4.0 and more recent versions):
+The **ground-state** wf file consists of the [header records](#header), and data written
+with the following lines of FORTRAN:
 
 ```fortran    
           bantot=0                                    <-- counts over all bands
@@ -1137,8 +1179,8 @@ cell, and the stresses. The type of the different variables is:
     double precision :: cg,dummy,eigen,fred,occ,xred
 ```
 
-The **response-function** wf file consists of the header records, and data
-written with the following lines of FORTRAN (version 4.0 and more recent versions):
+The **response-function** wf file consists of the [header records](#header), and data
+written with the following lines of FORTRAN:
     
 ```fortran
     bantot=0                                    <-- counts over all bands
@@ -1154,14 +1196,6 @@ written with the following lines of FORTRAN (version 4.0 and more recent version
      enddo
     enddo
 ```
-
-In version previous to 4.0, npw and nspinor were combined:
-    
-```fortran
-    write(unit) npw*nspinor,nband
-```
-
-while the planewave coordinate record was not present (in both GS and RF cases).
 
 Note that there is an alternative format (_KSS) for the output of the
 wavefunction coefficients, activated by a non-zero value of [[nbandkss]].
@@ -1183,24 +1217,22 @@ information on such files:
   
 For massively parallel runs, one cannot afford to have some of the output
 files that are usually created. Explicitly, the log file and also the status
-file become problematic. By default, with less than N processors, they are
-created, but beyond N processors, they are deactivated except for the main log
+file become problematic. By default, with $N=2$ processors or less than $N=2$ processors, they are
+created, but beyond $N=2$ processors, they are deactivated except for the main log
 file (master processor).
 
 This default behaviour can be changed as follows. If a file named "_NOLOG"
 exists in the current directory, then no log file and no status file will be
-created, even with less than N processors. By contrast, if a file "_LOG"
+created, even with less than $N=2$ processors. By contrast, if a file "_LOG"
 exists in the current directory, then a log file and the status files will be
-created, even with more than N processors. Alternatively, if a file named
-"_MAINLOG" exists and there are less than N processors, only the master
+created, even with more than $N=2$ processors. Alternatively, if a file named
+"_MAINLOG" exists and there are less than $N=2$ processors, only the master
 processor writes the log and status files (this mimic the default behavior
-when using more than N processors but with less than N processors)
+when using more than $N=2$ processors but with less than $N=2$ processors)
 
-In ABINITv7, N was set at N=100. However, with ABINITv8, N has been switched
-to 2. It can be changed "by hand", though: modify NPROC_NO_EXTRA_LOG in
-src/10_defs/defs_basis.F90 and recompile. See src/95_drive/iofn1.F90 for more explanation.
-
-
+In ABINITv7, $N$ was set at $N=100$. However, with ABINITv8, $N$ has been switched
+to $2$. It can be changed "by hand", though: modify NPROC_NO_EXTRA_LOG in
+src/10_defs/defs_basis.F90 and recompile. See 44_abitypes_defs/m_dtfil.F90 for more explanation.
 
 
 <a id="numerical-quality"></a>
