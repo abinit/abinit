@@ -515,7 +515,7 @@ The forces change sign also between datasets 10 and 11:
             fcart11    3.5571726338E-03 -0.0000000000E+00 -0.0000000000E+00
                       -3.5571726338E-03 -0.0000000000E+00 -0.0000000000E+00
 
-From these two values, using a linear interpolation, one get the optimal value of 1.4872 Bohr.
+From these two values, using a linear interpolation, one get the optimal value of 1.487 Bohr.
 Note that *the number of SCF cycles drops from 6 to 5 when the wavefunctions are read from the previous dataset*.
 
 ## Computation of the interatomic distance (method 2)
@@ -547,15 +547,15 @@ while *tbase1_3.abo* is an example of output file:
 So, you run the code with your input file (a few seconds), examine quietly this file (which is much smaller
 than the *tbase1_2.abo* file), and get some significant output data gathered in the final echo of variables:
 
-        etotal   -1.1058360644E+00
-         fcart    1.8270533893E-04  0.0000000000E+00  0.0000000000E+00
-                 -1.8270533893E-04  0.0000000000E+00  0.0000000000E+00
-          ...
-         xcart   -7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
-                  7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
+           etotal     -1.1182883138E+00
+            fcart     -6.6032223725E-05 -0.0000000000E+00 -0.0000000000E+00
+                       6.6032223725E-05 -0.0000000000E+00 -0.0000000000E+00
+             ...
+            xcart     -7.4307198349E-01  0.0000000000E+00  0.0000000000E+00
+                       7.4307198349E-01  0.0000000000E+00  0.0000000000E+00
 
 According to these data (see [[xcart]]), the optimal interatomic distance is
-about 1.522 Bohr, in good agreement with the estimation of *tbase1_2.abo*.
+about 1.48614 Bohr, in good agreement with the estimation of *tbase1_2.abo*.
 If you have time (this is to be done at home), you might try to change the
 stopping criteria, and redo the calculation, to see the level of convergence
 of the interatomic distance.

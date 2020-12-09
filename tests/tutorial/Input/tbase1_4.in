@@ -28,8 +28,8 @@ natom 2           # There are two atoms
 typat 1 1         # They both are of type 1, that is, Hydrogen
 xcart             # This keyword indicate that the location of the atoms
                   # will follow, one triplet of number for each atom
-  -0.761  0.0 0.0 # Triplet giving the coordinates of atom 1, in Bohr
-   0.761  0.0 0.0 # Triplet giving the coordinates of atom 2, in Bohr
+  -0.743  0.0 0.0 # Triplet giving the coordinates of atom 1, in Bohr
+   0.743  0.0 0.0 # Triplet giving the coordinates of atom 2, in Bohr
 
 #Numerical parameters of the calculation : planewave basis set and k point grid
 ecut 10.0         # Maximal plane-wave kinetic energy cut-off, in Hartree
