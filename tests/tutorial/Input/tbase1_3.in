@@ -11,9 +11,9 @@ tolmxf  5.0d-4         # Stopping criterion for the geometry optimization : when
 xcart  -0.7   0.0 0.0  # The starting values of the
         0.7   0.0 0.0  # atomic coordinates
 
-toldff  5.0d-5         # Will stop the SCF cycle when, twice in a row, 
-                       # the difference between two consecutive evaluations of
-                       # forces differ by less than toldff (in Hartree/Bohr)
+tolrff  0.02           # Will stop the SCF cycle when, twice in a row, 
+                       # the ratio between the absolute maximal change of force in the SCF loop
+                       # and the largest force is smaller than tolrff
 
 
 nband    1             # Only one band is occupied. In order to get the energy,
