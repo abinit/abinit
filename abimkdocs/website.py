@@ -1678,7 +1678,7 @@ class AbinitStats(object):
         from subprocess import check_output
         num_f90files = int(check_output(["ls -l %s/*/*.F90 | wc" % src_dir], shell=True))
         num_f90lines = int(check_output(["cat %s/*/*.F90 | wc" % src_dir], shell=True))
-        num_tests = int(check_output(["ls %s/tests/*/Input/t*in | wc" % src_dir], shell=True))
+        num_tests = int(check_output(["ls %s/tests/*/Input/t*abi | wc" % src_dir], shell=True))
         self.parse()
 
     def json_dump(self, path):

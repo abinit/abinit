@@ -103,8 +103,8 @@ The prefix for files is **tdepes**. As usual, we use the shorthand `~abinit` to 
 the root directory where the abinit package has been deployed, but most often
 consider the paths relative to this directory.
 
-First, examine the [[tests/tutorespfn/Input/tdepes_1.in]] input file.
-{% dialog tests/tutorespfn/Input/tdepes_1.in %}
+First, examine the [[tests/tutorespfn/Input/tdepes_1.abi]] input file.
+{% dialog tests/tutorespfn/Input/tdepes_1.abi %}
 
 Note that there are three datasets ([[ndtset]]=3). The first dataset corresponds to a standard
 self-consistent calculation, with an unshifted eight k-point grid,
@@ -312,7 +312,7 @@ In this case, we should first use [[help:mrgddb|mrgddb]] to merge the _DDB and _
 but since we only have one q-point we do not have to perform this step.
 The static temperature dependence and the G2F can be computed thanks to anaddb
 with the files file [[tests/tutorespfn/Input/tdepes_2.files]] and the input
-file [[tests/tutorespfn/Input/tdepes_2.in]].
+file [[tests/tutorespfn/Input/tdepes_2.abi]].
 
 {% dialog tests/tutorespfn/Input/tdepes_2.files %}
 
@@ -321,7 +321,7 @@ if its reading in the standard output:
 
 ```
   Give name for formatted input file:
--   tdepes_2.in
+-   tdepes_2.abi
   Give name for formatted output file:
 -   tdepes_2.out
   Give name for input derivative database:
@@ -336,7 +336,7 @@ if its reading in the standard output:
 -   dummy.ddk
 ```
 
-{% dialog tests/tutorespfn/Input/tdepes_2.in %}
+{% dialog tests/tutorespfn/Input/tdepes_2.abi %}
 
 As concern the anaddb input file, note that the electron-phonon analysis is triggered by
 [[anaddb:thmflag]] 3, as well as [[anaddb:telphint]] 1 .
@@ -432,8 +432,8 @@ Suppose that one is looking for the number of q-points corresponding to
     nshiftq 1
     shiftq 0.0 0.0 0.0
 
-One make a quick ABINIT run with [[tests/tutorespfn/Input/tdepes_2.in]].
-Note that several input variables have been changed with respect to [[tests/tutorespfn/Input/tdepes_1.in]]:
+One make a quick ABINIT run with [[tests/tutorespfn/Input/tdepes_2.abi]].
+Note that several input variables have been changed with respect to [[tests/tutorespfn/Input/tdepes_1.abi]]:
 
     ndtset 1
     nstep 0
@@ -486,9 +486,9 @@ So, compared to the first run in this tutorial, we have to replace
 
     ndtset 3     by      ndtset 24 udtset 8 3
 
-in the input file [[tests/tutorespfn/Input/tdepes_3.in]], and adjusted accordingly all input variables that were dataset-dependent.
+in the input file [[tests/tutorespfn/Input/tdepes_3.abi]], and adjusted accordingly all input variables that were dataset-dependent.
 
-{% dialog tests/tutorespfn/Input/tdepes_3.in %}
+{% dialog tests/tutorespfn/Input/tdepes_3.abi %}
 
 Please, refer to the
 [[help:abinit#35-defining-a-double-loop-dataset|explanation of the usage of a double-loop of datasets]]
@@ -517,10 +517,10 @@ After possibly modifying [[tests/tutorespfn/Input/tdepes_3.files]] to account fo
 
 This is a significantly longer ABINIT run (still less than one minute), also producing many files.
 
-When the run is finished, copy the file [[tests/tutorespfn/Input/tdepes_3_temperature.in]] in the
+When the run is finished, copy the file [[tests/tutorespfn/Input/tdepes_3_temperature.abi]] in the
 working directory (if not yet done) and launch the python script with:
 
-    ./temperature_final.py < tdepes_3_temperature.in
+    ./temperature_final.py < tdepes_3_temperature.abi
 
 {% dialog tests/tutorespfn/Input/tdepes_3.files %}
 
@@ -571,9 +571,9 @@ $\Psi^{(0)}_{kBS+q}$
 Reading the previous quantity we obtain the el-ph matrix elements along the BS with all physical
 quantities integrated over a homogeneous grid.
 
-We will use the [[tests/tutorespfn/Input/tdepes_4.in]] input file
+We will use the [[tests/tutorespfn/Input/tdepes_4.abi]] input file
 
-{% dialog tests/tutorespfn/Input/tdepes_4.in %}
+{% dialog tests/tutorespfn/Input/tdepes_4.abi %}
 
 Note the use of the usual input variables to define a path in the Brillouin Zone to build an electronic band structure:
 [[kptbounds]], [[kptopt]], and [[ndivsm]]. Note also that we have defined [[qptopt]]=3. The number of q-points
@@ -620,7 +620,7 @@ L \Gamma X W K L W X K \Gamma
 
 or more directly
 
-    ./plot_bs.py < tdepes_4_plot_bs.in
+    ./plot_bs.py < tdepes_4_plot_bs.abi
 
 This should give the following bandstructure
 

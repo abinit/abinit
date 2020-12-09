@@ -102,12 +102,12 @@ Fenced code has three back-ticks around it.
 while indenting the code with four space, such as in
 
 ```md
-    abinit < tbase1_x.files 2> log &
+    abinit run.abi 2> log &
 ```
 
 produces
 
-    abinit < tbase1_x.files 2> log &
+    abinit run.abi 2> log &
 
 Fenced blocks is an alternative form that allows the specification of the language 
 used for syntax highlighting.
@@ -330,11 +330,11 @@ Examples:
 | `[[anaddb:dipdip]]` | [[anaddb:dipdip]]
 | `[[dipdip@anaddb]]` | [[dipdip@anaddb]]
 | `[[cite:Amadon2008]]` | [[cite:Amadon2008]]
-| `[[~abinit/tests/tutorial/Input/tbase1_1.in]]` | [[~abinit/tests/tutorial/Input/tbase1_1.in]]
-| `[[tests/tutorial/Input/tbase1_1.in]]` | [[tests/tutorial/Input/tbase1_1.in]]
+| `[[~abinit/tests/tutorial/Input/tbase1_1.abi]]` | [[~abinit/tests/tutorial/Input/tbase1_1.abi]]
+| `[[tests/tutorial/Input/tbase1_1.abi]]` | [[tests/tutorial/Input/tbase1_1.abi]]
 | `[[test:libxc_41]]` | [[test:libxc_41]]
-| `[[tests/tutorial/Refs/tbase1_1.out]]` |  [[tests/tutorial/Refs/tbase1_1.out]]
-| `[[~abinit/tests/tutorial/Refs/tbase1_1.out]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
+| `[[tests/tutorial/Refs/tbase1_1.abo]]` |  [[tests/tutorial/Refs/tbase1_1.abo]]
+| `[[~abinit/tests/tutorial/Refs/tbase1_1.abo]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.abo]]
 | `[[~abinit/tests/Psps_for_tests/6c_lda.paw]]` | [[~abinit/tests/Psps_for_tests/6c_lda.paw]]
 | `[[tests/Psps_for_tests/6c_lda.paw]]` | [[tests/Psps_for_tests/6c_lda.paw]]
 
