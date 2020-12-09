@@ -34,29 +34,8 @@ This tutorial should take about 2 hours.
 
 ## Computing the (pseudo) total energy and some associated quantities
 
-<!--
-Note that the present tutorial will use four different windows: one to
-visualize the text of the tutorial (the present window), a second to run the
-code, a third to visualize sections of the [[help:abinit]] (that will open
-automatically), and a fourth one for the description of input variables (that
-will also open automatically). Try to manage adequately these four windows.
-In addition to the present window, open the second window.
-Go to the Tutorial directory (that we refer as `~abinit/tests/tutorial/Input`).
-
-```sh
-cd ~abinit/tests/tutorial/Input
-cd $ABI_TESTS/tutorial/Input
-```
-
-In that directory, you will find the necessary input files to run the examples related to this tutorial.
-Take a few seconds to read the names of the files already present in `~abinit/tests/tutorial/Input`.
-Compare with the tutorials mentioned in the index of the [Tutorial home page](index.md).
-You will find other input files, specific for the Density Functional
-Perturbation Theory ("Response functions") capabilities in the directory `~abinit/tests/tutorespfn/Input`.
--->
-
-For this tutorial, we need a working directory.
-So, you should create a *Work* subdirectory inside $ABI_TESTS/tutorial with the commands:
+For this tutorial, one needs a working directory.
+So, you should create a *Work* subdirectory inside $ABI_TESTS/tutorial, e.g. with the commands:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
@@ -65,22 +44,22 @@ cd Work
 ```
 
 We will do most of the actions of this tutorial in this working directory.
-Let's now run the code ...
+Let us now run the code ...
 
 !!! tip
 
     The [[help:abinit#intro|section 1.1]] of the ABINIT help file explains how to run ABINIT.
     You might read it now, then follow the commands hereafter.
 
-Copy *$ABI_TESTS/tutorial/Input/tbase1_1.in* in *Work*:
+Copy *$ABI_TESTS/tutorial/Input/tbase1_1.abi* in *Work*:
 
-    cp ../tbase1_1.in .
+    cp ../tbase1_1.abi .
 
 Later, we will look at this file, and learn about its content.
 For now, you will try to run the code.
 In the *Work* directory, type:
 
-    abinit tbase1_1.in >& log &
+    abinit tbase1_1.abi >& log &
 
 Wait a few seconds ... it's done!
 You can look at the content of the *Work* directory with the **ls** command.
@@ -89,19 +68,17 @@ You should get something like:
 ```sh
 ls
 log           tbase1_1o_DDB	    tbase1_1o_EIG     tbase1_1o_OUT.nc
-tbase1_1.in   tbase1_1o_DEN	    tbase1_1o_EIG.nc  tbase1_1o_WFK
-tbase1_1.out  tbase1_1o_EBANDS.agr  tbase1_1o_GSR.nc
+tbase1_1.abi  tbase1_1o_DEN	    tbase1_1o_EIG.nc  tbase1_1o_WFK
+tbase1_1.abo  tbase1_1o_EBANDS.agr  tbase1_1o_GSR.nc
 ```
 
-Different output files have been created, including a *log* file and the output file *tbase1_1.out*.
+Different output files have been created, including a *log* file and the output file *tbase1_1.abo*.
 To check that everything is correct, you can make a diff of
-*tbase1_1.out* with the reference file *$ABI_TESTS/tutorial/Refs/tbase1_1.out*
+*tbase1_1.abo* with the reference file *$ABI_TESTS/tutorial/Refs/tbase1_1.abo*
 
 ```sh
-diff tbase1_1.out ../../Refs/tbase1_1.out | less
+diff tbase1_1.abo ../../Refs/tbase1_1.abo | less
 ```
-
-Perhaps you will need to ignore the blanks, with the command *diff -b* instead of *diff*.
 
 That reference file uses slightly different file names.
 You should get some difference, but rather inoffensive ones, like differences in the name of input
@@ -121,47 +98,41 @@ files, slightly different numerical results, or timing differences, e.g.:
 > .Starting date : Tue 10 Nov 2020.
 > - ( at 22h21 )
 20,21c20,21
-< - input  file    -> tbase1_1.in
-< - output file    -> tbase1_1.out
+< - input  file    -> tbase1_1.abi
+< - output file    -> tbase1_1.abo
 ---
-> - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorial_tbase1_1/tbase1_1.in
-> - output file    -> tbase1_1.out
-121,122c121,122
-< - pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests//Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-< - pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests//Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+> - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Test_suite/tutorial_tbase1_1/tbase1_1.abi
+> - output file    -> tbase1_1.abo
+117,118c117,118
+< - pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/beauty/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+< - pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/beauty/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 ---
-> - pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-> - pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-158c158
-<  ETOT  4  -1.1037223548791    -5.258E-06 4.146E-07 2.715E-04
+> - pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+> - pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+216,217c216,217
+<     1     -1.38336201933863    -0.00000000000000    -0.00000000000000
+<     2      1.38336201933863    -0.00000000000000    -0.00000000000000
 ---
->  ETOT  4  -1.1037223548790    -5.258E-06 4.146E-07 2.715E-04
-226,227c226,227
-<     1     -1.92347254650475    -0.00000000000000    -0.00000000000000
-<     2      1.92347254650475    -0.00000000000000    -0.00000000000000
+>     1     -1.38336201933879    -0.00000000000000    -0.00000000000000
+>     2      1.38336201933879    -0.00000000000000    -0.00000000000000
+230,232c230,232
+< kinetic             :  1.01705426532945E+00
+< hartree             :  7.26359620833820E-01
+< xc                  : -6.39065298290653E-01
 ---
->     1     -1.92347254650465    -0.00000000000000    -0.00000000000000
->     2      1.92347254650465    -0.00000000000000    -0.00000000000000
-240c240
-< kinetic             :  1.00347260970045E+00
+> kinetic             :  1.01705426532942E+00
+> hartree             :  7.26359620833802E-01
+> xc                  : -6.39065298290642E-01
+239c239
+< band_energy         : -7.38843481479430E-01
 ---
-> kinetic             :  1.00347260970044E+00
-242c242
-< xc                  : -6.34653320022589E-01
----
-> xc                  : -6.34653320022590E-01
-249c249
-< band_energy         : -7.30497167497589E-01
----
-> band_energy         : -7.30497167497614E-01
+> band_energy         : -7.38843481479398E-01
 314c314
 < - Total cpu        time (s,m,h):          4.7        0.08      0.001
 ---
 > - Total cpu        time (s,m,h):          4.6        0.08      0.001
 321,329c321,328
 ```
-
-(... and what comes after that is related only to timing ...).
 
 If you do not run on a PC under Linux with GNU Fortran compiler, e.g. the
 Intel compiler, you might also have small numerical differences, on the order of 1.0d-10 at most.
@@ -170,20 +141,20 @@ Finally, it might also be that the default FFT algorithm differs from
 the one of the reference machine, in which case the line mentioning [[fftalg]]
 will differ (*fftalg* will not be 312). If you get something else, you should ask for help!
 
-You can have a very quick look at the beginning of the output file *tbase1_1.out*. 
+You can have a very quick look at the beginning of the output file *tbase1_1.abo*. 
 In this part of the output file, note the dot `.` or dash `-` that is inserted in the first column.
 This is not important for the user: it is used to post-process the output file using some automatic tool.
 As a rule, you should ignore symbols placed in the first column of the abinit output file.
 
 Supposing everything went well, we will now detail the different steps that
-took place: how to run the code, what is in the *tbase1_1.in* input file, and,
-later, what is in the *tbase1_1.out* and *log* output files.
+took place: how to run the code, what is in the *tbase1_1.abi* input file, and,
+later, what is in the *tbase1_1.abo* and *log* output files.
 
 !!! tip
 
     If you have not read it, please read [[help:abinit#intro|section 1.1]] of the ABINIT help file.
 
-It is now time to edit the *tbase1_1.in* input file.
+It is now time to edit the *tbase1_1.abi* input file.
 
 {% dialog tests/tutorial/Input/tbase1_1.in %}
 
@@ -210,9 +181,9 @@ When it exists, the default value is mentioned at the fourth line of the section
 related to each input variable.
 Some input variables are also preprocessed, in order to derive convenient
 values for other input variables.
-Defaults are not existing or were avoided for the few input variables that you find in *tbase1_1.in*.
+Defaults are not existing or were avoided for the few input variables that you find in *tbase1_1.abi*.
 These are particularly important input variables.
-So, take a few minutes to have a look at the input variables of *tbase1_1.in*:
+So, take a few minutes to have a look at the input variables of *tbase1_1.abi*:
 
   * [[acell]]
   * [[ntypat]]
@@ -251,10 +222,10 @@ You can find more information about messages in the log file in
         Events found in /Users/gonze/_Research/ABINIT_git/beauty/tests/tutorial/Input/Work/log
 
         [1] <AbinitComment at m_dtfil.F90:1470>
-            Output file: tbase1_1.out already exists.
+            Output file: tbase1_1.abo already exists.
     
         [2] <AbinitComment at m_dtfil.F90:1494>
-            Renaming old: tbase1_1.out to: tbase1_1.out0001
+            Renaming old: tbase1_1.abo to: tbase1_1.abo0001
     
         [3] <AbinitWarning at m_ingeo.F90:887>
             The tolerance on symmetries =   1.000E-05 is bigger than 1.0e-8.
@@ -292,14 +263,14 @@ You can find more information about messages in the log file in
     
         num_errors: 0, num_warnings: 2, num_comments: 6, completed: True
 
-Now open the *tbase1_1.out* file. Alternatively, you might have a look at the reference file we provide below.
+Now open the *tbase1_1.abo* file. Alternatively, you might have a look at the reference file we provide below.
 
 {% dialog tests/tutorial/Refs/tbase1_1.out %}
 
 You find some general information about the output file [[help:abinit#outputfile|here]] .
 You should also:
 
-* examine the header of *tbase1_1.out*
+* examine the header of *tbase1_1.abo*
 * examine the report on memory needs (do not read each value of parameters)
 * examine the echo of preprocessed input data,
 
@@ -311,13 +282,13 @@ If the code does not stop there, the input parameters are consistent.
 At this stage, many default values have been provided, and the preprocessing is finished.
 
 It is worth to come back to the echo of preprocessed input data.
-You should first examine the *tbase1_1.in* file in more details, and read the meaning of
+You should first examine the *tbase1_1.abi* file in more details, and read the meaning of
 each of its variables in the corresponding input variables file, if it has not yet been done.
 Then, you should examine some variables that were **not** defined
-in the input file, but that appear in the echo written in *tbase1_1.out*:
+in the input file, but that appear in the echo written in *tbase1_1.abo*. Search for:
 
 [[nband]]
-:   its value is 2.
+:   Its value is 2.
     It is the number of electronic states that will be treated by the code. It has
     been computed by counting the number of valence electrons in the unit cell
     (summing the valence electrons brought by each pseudopotential) then occupying
@@ -325,7 +296,7 @@ in the input file, but that appear in the echo written in *tbase1_1.out*:
     least one, maybe more, depending on the size of the system).
 
 [[ngfft]]
-:   its value is 30 30 30.
+:   Its value is 30 30 30.
     It is the number of points of the three-dimensional FFT grid. It has been
     derived from [[ecut]] and the dimension of the cell ([[acell]]).
 
@@ -334,7 +305,7 @@ in the input file, but that appear in the echo written in *tbase1_1.out*:
     The maximal number of plane waves ([[mpw]]) is mentioned in the memory evaluation section: it is **752**.
     Well, this is not completely right, as the code took advantage of the time-reversal symmetry,
     valid for the k-point (0, 0, 0), to decrease the number of planewave by about a factor of two.
-    The full set of plane waves is **1503** (see later in the *tbase1_1.out* file).
+    The full set of plane waves is **1503** (search for npw in the *tbase1_1.abo* file).
     The code indicates the time-reversal symmetry by a value of [[istwfk]] = 2,
     instead of the default [[istwfk]] = 1.
 
@@ -350,8 +321,8 @@ in the input file, but that appear in the echo written in *tbase1_1.out*:
 :   Alternative to [[xcart]] to specify the positions of atoms within the primitive cell.
 
 Now, you can start reading the description of the remaining of the
-*tbase1_1.out* file in [[help:abinit#53-more-on-the-main-output-file|section 5.3]] of the abinit help file.
-Look at the *tbase1_1.out* file at the same time.
+*tbase1_1.abo* file in [[help:abinit#53-more-on-the-main-output-file|section 5.3]] of the abinit help file.
+Look at the *tbase1_1.abo* file at the same time.
 
 You have read completely an output file! Could you answer the following questions?
 (There might be numerical differences, from platform to platform, in the quoted results!)
@@ -361,20 +332,20 @@ You have read completely an output file! Could you answer the following question
     6 SCF cycles were needed:
 
              iter   Etot(hartree)      deltaE(h)  residm     vres2
-         ETOT  1  -1.1013391225242    -1.101E+00 4.220E-04 8.396E+00
-         ETOT  2  -1.1036939626391    -2.355E-03 7.374E-09 2.840E-01
-         ETOT  3  -1.1037170965209    -2.313E-05 7.389E-08 1.549E-02
-         ETOT  4  -1.1037223548790    -5.258E-06 4.146E-07 2.715E-04
-         ETOT  5  -1.1037224212232    -6.634E-08 4.091E-09 5.700E-06
-         ETOT  6  -1.1037224213136    -9.037E-11 5.808E-12 3.076E-07
+         ETOT  1  -1.1093804698962    -1.109E+00 6.384E-04 1.736E+01
+         ETOT  2  -1.1170431098364    -7.663E-03 7.449E-08 2.737E-01
+         ETOT  3  -1.1171736936408    -1.306E-04 5.867E-06 6.992E-02
+         ETOT  4  -1.1171842773283    -1.058E-05 8.862E-07 5.492E-04
+         ETOT  5  -1.1171843458762    -6.855E-08 1.683E-09 1.404E-05
+         ETOT  6  -1.1171843463443    -4.681E-10 2.580E-11 3.672E-07
 
          At SCF step    6, etot is converged :
-          for the second time, diff in etot=  9.038E-11 < toldfe=  1.000E-06
+          for the second time, diff in etot=  4.681E-10 < toldfe=  1.000E-06
 
     Note that the number of steps that were allowed, [[nstep]] = 10, is larger than
     the number of steps effectively needed to reach the stopping criterion. As a
     rule, you should always check that the number of steps that you allowed was
-    sufficient to reach the target tolerance. You might now play a bit with nstep,
+    sufficient to reach the target tolerance. You might now play a bit with [[nstep]],
     as e.g. set it to 5, to see how abinit reacts.
 
     Side note: in most of the tutorial examples, [[nstep]] will be enough to reach
@@ -394,13 +365,13 @@ You have read completely an output file! Could you answer the following question
 
     These values are:
 
-         cartesian forces (hartree/bohr) at end:
-            1     -0.03740558871217     0.00000000000000     0.00000000000000
-            2      0.03740558871217     0.00000000000000     0.00000000000000
-         frms,max,avg= 2.1596127E-02 3.7405589E-02   0.000E+00  0.000E+00  0.000E+00 h/b
+         cartesian_forces: # hartree/bohr
+         - [ -2.69021104E-02,  -0.00000000E+00,  -0.00000000E+00, ]
+         - [  2.69021104E-02,  -0.00000000E+00,  -0.00000000E+00, ]
+         force_length_stats: {min:   2.69021104E-02, max:   2.69021104E-02, mean:   2.69021104E-02, }
 
     On the first atom (located at -0.7 0 0 in cartesian coordinates, in Bohr), the
-    force vector is pointing in the minus x direction, and in the plus x direction
+    force vector is pointing in the $-x$ direction, and in the $+x$ direction
     for the second atom located at +0.7 0 0 .
     The H$_2$ molecule would like to expand...
 
@@ -410,11 +381,11 @@ You have read completely an output file! Could you answer the following question
 
         Eigenvalues (hartree) for nkpt=   1  k points:
         kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-        -0.36525  -0.01379
+        -0.36942   -0.01446
 
     As mentioned in the [[help:abinit#averagepot|abinit help file]]
     the absolute value of eigenenergies is not meaningful. Only differences of eigenenergies, as well
-    as differences with the potential. The difference is 0.35147 Hartree, that is 9.564 eV .
+    as differences with the potential. The difference is 0.35496 Hartree, that is 9.6588 eV .
     Moreover, remember that Kohn-Sham eigenenergies are formally **not connected** to
     experimental excitation energies! (Well, more is to be said later about this in the GW tutorials).
 
@@ -424,15 +395,14 @@ You have read completely an output file! Could you answer the following question
     The maximum electronic density in electron per Bohr cube is reached at the mid-point between the two H atoms:
 
         Total charge density [el/Bohr^3]
-        ,     Maximum=    2.6907E-01  at reduced coord.    0.0000    0.0000    0.0000
-
+              Maximum=    2.7281E-01  at reduced coord.    0.0000    0.0000    0.0000
 
 !!! tip
 
     If |AbiPy| is installed on your machine, you can use the |abiopen| script
     with the `--expose` option to visualize the SCF cycle from the main output file:
 
-        abiopen.py tbase1_1.out --expose --seaborn
+        abiopen.py tbase1_1.abo --expose --seaborn
 
     ![](base1_assets/abiopen_tbase1_1.png)
 
@@ -444,7 +414,7 @@ You have read completely an output file! Could you answer the following question
 ## Computation of the interatomic distance (method 1)
 
 Starting from now, every time a new input variable is mentioned,
-you should read the corresponding descriptive section in the abinit help file.
+you should read the corresponding descriptive section in the [[help:abinit#averagepot|abinit help file]].
 
 We will now complete the description of the meaning of each term: there are
 still a few indications that you should be aware of, even if you will not use them in the tutorial.
@@ -463,7 +433,7 @@ One could:
 We will begin with the computation of energy and forces for different values of the interatomic distance.
 This exercise will allow you to learn how to use multiple datasets.
 
-The interatomic distance in the *tbase1_1.in* file was 1.4 Bohr.
+The interatomic distance in the *tbase1_1.abi* file was 1.4 Bohr.
 Suppose you decide to examine the interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of 0.05 Bohr.
 That is, 21 calculations.
 If you are a UNIX guru, it will be easy for you to write a script that will
@@ -478,14 +448,14 @@ This is the multi-dataset mode. Detailed explanations about it can be found in s
 [[help:abinit#filenames-multidataset|3.7]] of the abinit help file.
 
 Now, can you write an input file that will do the computation described above
-(interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of 0.05 Bohr)? You might start from *tbase1_1.in*.
+(interatomic distances from 1.0 Bohr to 2.0 Bohr, by steps of 0.05 Bohr)? You might start from *tbase1_1.abi*.
 Try to define a series, and to use the [[getwfk]] input variable (the latter will make the computation much faster).
 
 You should likely have a look at the section that describes the [[irdwfk]] and
 [[getwfk]] input variables: in particular, look at the meaning of *getwfk -1*
 Also, define explicitly the number of states (or supercell "bands") to be one, using the input variable [[nband]].
 
-The input file *\$ABI_TESTS/tutorial/Input/tbase1_2.in* is an example of file that will do the job,
+The input file *\$ABI_TESTS/tutorial/Input/tbase1_2.abi* is an example of file that will do the job,
 
 {% dialog tests/tutorial/Input/tbase1_2.in %}
 
@@ -493,89 +463,89 @@ while *\$ABI_TESTS/tutorial/Refs/tbase1_2.abo* is the reference output file.
 
 {% dialog tests/tutorial/Refs/tbase1_2.out %}
 
-Run the code with *tbase1_2.in* (this might take fifteen seconds or so on a PC at 3 GHz),
+Run the code with *tbase1_2.abi* (this might take fifteen seconds or so on a PC at 3 GHz),
 
 ```sh
-cp ../tbase1_2.in .
-abinit tbase1_2.in  >& log 
+cp ../tbase1_2.abi .
+abinit tbase1_2.abi  >& log 
 ```
 
 Now examine the output file quickly (there are many
 repetition of sections, for the different datasets), and get the output
-energies gathered in the final echo of variables:
+energies gathered in the **final echo of variables**:
 
-        etotal1  -1.0368223891E+00
-        etotal2  -1.0538645433E+00
-        etotal3  -1.0674504851E+00
-        etotal4  -1.0781904896E+00
-        etotal5  -1.0865814785E+00
-        etotal6  -1.0930286804E+00
-        etotal7  -1.0978628207E+00
-        etotal8  -1.1013539124E+00
-        etotal9  -1.1037224213E+00
-        etotal10 -1.1051483730E+00
-        etotal11 -1.1057788247E+00
-        etotal12 -1.1057340254E+00
-        etotal13 -1.1051125108E+00
-        etotal14 -1.1039953253E+00
-        etotal15 -1.1024495225E+00
-        etotal16 -1.1005310615E+00
-        etotal17 -1.0982871941E+00
-        etotal18 -1.0957584182E+00
-        etotal19 -1.0929800578E+00
-        etotal20 -1.0899835224E+00
-        etotal21 -1.0867972868E+00
+           etotal1    -1.0557522713E+00
+           etotal2    -1.0719698068E+00
+           etotal3    -1.0847711611E+00
+           etotal4    -1.0947672022E+00
+           etotal5    -1.1024550352E+00
+           etotal6    -1.1082397355E+00
+           etotal7    -1.1124515924E+00
+           etotal8    -1.1153599391E+00
+           etotal9    -1.1171843464E+00
+           etotal10   -1.1181037489E+00
+           etotal11   -1.1182639350E+00
+           etotal12   -1.1177837211E+00
+           etotal13   -1.1167600633E+00
+           etotal14   -1.1152722975E+00
+           etotal15   -1.1133856613E+00
+           etotal16   -1.1111542144E+00
+           etotal17   -1.1086232522E+00
+           etotal18   -1.1058312878E+00
+           etotal19   -1.1028116615E+00
+           etotal20   -1.0995938277E+00
+           etotal21   -1.0962043631E+00
 
 You might try plot to these data:
 
-![EOS plot](base1_assets/Plot1.jpg)
+![EOS plot](base1_assets/Plot1.png)
 
-The minimum of energy in the above list is clearly between dataset 11 and 12, that is:
+The minimum of energy in the above list is clearly between dataset 10 and 11, that is:
 
-         xcart11 -7.5000000000E-01  0.0000000000E+00  0.0000000000E+00
-                  7.5000000000E-01  0.0000000000E+00  0.0000000000E+00
-         xcart12 -7.7500000000E-01  0.0000000000E+00  0.0000000000E+00
-                  7.7500000000E-01  0.0000000000E+00  0.0000000000E+00
+            xcart10   -7.2500000000E-01  0.0000000000E+00  0.0000000000E+00
+                       7.2500000000E-01  0.0000000000E+00  0.0000000000E+00
+            xcart11   -7.5000000000E-01  0.0000000000E+00  0.0000000000E+00
+                       7.5000000000E-01  0.0000000000E+00  0.0000000000E+00
 
-corresponding to a distance of H atoms between 1.5 Bohr and 1.55 Bohr.
-The forces vanish also between 1.5 Bohr and 1.55 Bohr:
+corresponding to a distance of H atoms between 1.45 Bohr and 1.50 Bohr.
+The forces change sign also between datasets 10 and 11:
 
-         fcart11 -5.4945071285E-03  0.0000000000E+00  0.0000000000E+00
-                  5.4945071285E-03  0.0000000000E+00  0.0000000000E+00
-         fcart12  6.9603067838E-03  0.0000000000E+00  0.0000000000E+00
-                 -6.9603067838E-03  0.0000000000E+00  0.0000000000E+00
+            fcart10   -1.0358194799E-02 -0.0000000000E+00 -0.0000000000E+00
+                       1.0358194799E-02 -0.0000000000E+00 -0.0000000000E+00
+            fcart11    3.5571726338E-03 -0.0000000000E+00 -0.0000000000E+00
+                      -3.5571726338E-03 -0.0000000000E+00 -0.0000000000E+00
 
-From these two values, using a linear interpolation, one get the optimal value of 1.522 Bohr.
+From these two values, using a linear interpolation, one get the optimal value of 1.4872 Bohr.
 Note that *the number of SCF cycles drops from 6 to 5 when the wavefunctions are read from the previous dataset*.
 
 ## Computation of the interatomic distance (method 2)
 
 The other methodology is based on an automatic computation of the minimum.
 There are different algorithms to do that. See the input variable [[ionmov]], with values 2, 7, 15, and 22.
-In the present case, with only one degree of freedom to be optimized, the best choice is *ionmov* 22.
+In the present case, with only one degree of freedom to be optimized, the best choice is [[ionmov]] 22.
 
 You have also to define the maximal number of time steps for this optimization.
 Set the input variable [[ntime]] to 10, it will be largely enough.
 For the stopping criterion [[tolmxf]], use the reasonable value of 5.0d-4 Ha/Bohr.
 This defines the force threshold to consider that the geometry is converged.
-The code will stop if the residual forces are below that value before reaching *ntime*.
+The code will stop if the residual forces are below that value before reaching [[ntime]].
 
 It is also worth to change the stopping criterion for the SCF cycle, in order
 to be sure that the forces generated for each trial interatomic distance are
 sufficiently converged. Indeed, the value used for [[toldfe]], namely 1.0d-6,
 might be sufficient for total energy calculations, but definitely not for the
-accurate computation of other properties. So, change [[toldfe]] in [[toldff]],
-and set the latter input variable to ten times smaller than [[tolmxf]].
-The input file *tbase1_3.in* is an example of file that will do the job
+accurate computation of other properties. So, change [[toldfe]] in [[tolrff]],
+and set the latter input variable to 0.1.
+The input file *tbase1_3.abi* is an example of file that will do the job
 
 {% dialog tests/tutorial/Input/tbase1_3.in %}
 
-while *tbase1_3.out* is an example of output file:
+while *tbase1_3.abo* is an example of output file:
 
 {% dialog tests/tutorial/Refs/tbase1_3.out %}
 
 So, you run the code with your input file (a few seconds), examine quietly this file (which is much smaller
-than the *tbase1_2.out* file), and get some significant output data gathered in the final echo of variables:
+than the *tbase1_2.abo* file), and get some significant output data gathered in the final echo of variables:
 
         etotal   -1.1058360644E+00
          fcart    1.8270533893E-04  0.0000000000E+00  0.0000000000E+00
@@ -585,7 +555,7 @@ than the *tbase1_2.out* file), and get some significant output data gathered in 
                   7.6091015760E-01  0.0000000000E+00  0.0000000000E+00
 
 According to these data (see [[xcart]]), the optimal interatomic distance is
-about 1.522 Bohr, in good agreement with the estimation of *tbase1_2.out*.
+about 1.522 Bohr, in good agreement with the estimation of *tbase1_2.abo*.
 If you have time (this is to be done at home), you might try to change the
 stopping criteria, and redo the calculation, to see the level of convergence
 of the interatomic distance.
@@ -615,11 +585,10 @@ The input variable [[prtden]] must be set to 1.
 To understand correctly the content of the [[prtden]] description, it is worth to read a much
 more detailed description of the *files* file, in [[help:abinit#files-file|section 4]] of the abinit_help file.
 
-The input file *tbase1_4.in* is an example of input file for a run that will print a density.
+The input file *tbase1_4.abi* is an example of input file for a run that will print a density.
 
 {% dialog tests/tutorial/Input/tbase1_4.in %}
 
-If you decide to use this file, do not forget to change the file names in *tbase1_x.files*.
 The run will take a few seconds.
 
 The density will be output in the *tbase1_xo_DEN* file. Try to edit it...
@@ -682,15 +651,15 @@ the above-mentioned difference in the same box, for the same energy cut-off, and
 for a location in the box that is similar to the molecule case (although the
 latter might not be so important).
 
-The input file *tbase1_5.in* is an example of file that will do the job,
+The input file *tbase1_5.abi* is an example of file that will do the job,
 
 {% dialog tests/tutorial/Input/tbase1_5.in %}
 
-while *tbase1_5.out* is an example of output file.
+while *tbase1_5.abo* is an example of output file.
 
 {% dialog tests/tutorial/Refs/tbase1_5.out %}
 
-If you decide to use the *tbase1_5.in file*, do not forget to
+If you decide to use the *tbase1_5.abi file*, do not forget to
 change the file names in the *tbase1_x.files* file.
 The run lasts a few seconds.
 

@@ -50,9 +50,6 @@ diemac 2.0        # Although this is not mandatory, it is worth to
                   # Here, we follow the prescriptions for molecules
                   # in a big box
 
-#Definition of the output file : uncomment the next line to modify the default .abo suffix
-#output_file  "tbase1_4.out"
-
 ##############################################################
 # This section is used only for regression testing of ABINIT #
 ##############################################################

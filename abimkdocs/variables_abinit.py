@@ -21585,7 +21585,7 @@ Variable(
     abivarname="pseudos",
     varset="files",
     vartype="string",
-    topics=['Control_useful'],
+    topics=['Control_basic'],
     dimensions="scalar",
     defaultval="",
     mnemonics="PSEUDOpotentialS",

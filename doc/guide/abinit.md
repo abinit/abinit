@@ -18,14 +18,14 @@ advanced users only.
 ## 1 How to run the code?
 
 The main executable file is called abinit. Supposing that the "input" file is
-called abi_in, and that the executable is placed in your working directory,
+called run.abi, and that the executable is placed in your working directory,
 abinit is run interactively (in Unix) with the command
 
-    abinit abi_in >& log
+    abinit run.abi >& log
   
 or, in the background, with the command
 
-    abinit abi_in >& log &
+    abinit run.abi >& log &
 
 where standard out and standard error are piped to the log file called "log"
 (piping the standard error, thanks to the '&' sign placed after '>' is
@@ -34,13 +34,17 @@ ABINIT, but to other sources, like disk full problem...). It is also possible
 to dissociate the standard error file from the standard output file with the
 command
 
-    abinit abi_in > log 2> err &
+    abinit run.abi > log 2> err &
 
 or even more explicitly 
 
-    abinit run.in > run.log 2> run.err &
+    abinit run.abi > run.log 2> run.err &
 
-Actually, the user can specify any names he/she wishes for any of these files. Variations of the
+Actually, the user can specify any names he/she wishes for any of these files. 
+The suffix .abi is the most usual for the abinit input file, likewise the suffix .abo for the main output file.
+Nevertheless, the names of all input/output/temporary abinit files can also be tuned. See e.g. [[output_file]] or [[topic:Control]]. 
+
+Variations of the
 above commands could be needed, depending on the flavor of Unix that is used
 on the platform that is considered for running the code.  
 If you do not underderstand the syntax above, which is standard Unix, please get familiarized with Unix before continuing.
@@ -207,19 +211,12 @@ where geometry.inc gives the crystalline structure in the Abinit format:
 <a id="files-file"></a>
 ### 3.2 File names in ABINIT
 
-Note: This section should be updated ! It does not yest take into account the suppression of the "files" file.
+File names in ABINIT are either given automatically by ABINIT, or build from
+different input variables, like [[output_file]], [[pseudos]], [[indata_prefix]], [[outdata_prefix]]
+or [[tmpdata_prefix]].
 
-As mentioned in section 1 (you might read it again if needed), the "files"
-file contains the file names or root names needed to build file names. These
-are listed below: there are 5 names or root names for input, output and
-temporaries, and then a list of pseudopotentials (one per line). These names
-may be provided from unit 05 interactively during the run but are more
-typically provided by piping from a file in Unix (the "files" file).
+**[[output_file]]**
 
-**ab_in**
-Filename of file containing the input data, described in the preceding sections.
-
-**ab_out**
 Filename of the main file in which formatted output will be placed (the main
 output file). Error messages and other diagnostics will NOT be placed in this
 file, but sent to unit 06 (terminal or log file); the unit 06 output can be
@@ -228,9 +225,17 @@ both unit 06 and to the main output file. The unit 06 output is intended to be
 discarded if the run completes successfully, with the main output file keeping
 the record of the run in a nicer looking format.
 
-**abi**
+**[[pseudos]]**
+
+Give filenames of the different pseudopotential input files. The pseudopotential data files
+are formatted. There must be as many filenames provided sequentially here as
+there are types of atoms in the system, and the order in which the names are
+given establishes the identity of the atoms in the unit cell, as listed in [[typat]].
+
+**abi or [[indata_prefix]]**
+
 The other files READ by the code will have a name that is constructed from the
-root "abi". This apply to optionally read wavefunction, density or potential
+root "abi" or another root defined by [[indata_prefix]]. This apply to optionally read wavefunction, density or potential
 files. In the multi-dataset mode, this root will be complemented by **_DS**
 and the dataset index. The list of possible input files, with their name
 created from the root 'abi', is the following (a similar list exist when
@@ -265,9 +270,11 @@ filename of file containing an approximate hessian, for eventual
 (re)initialisation of Broyden minimisation. See brdmin.F90 routine. The use of
 [[restartxf]] is preferred.
 
-**abo**
-Except "ab_out" and "log", the other files WRITTEN by the code will have a
-name that is constructed from the root "abo". This apply to optionally written
+**abo or [[outdata_prefix]]**
+
+Except [[output_file]] and "log", the other files WRITTEN by the code will have a
+name that is constructed from the root "abo" or [[outdata_prefix]]. 
+This applies to optionally written
 wavefunction, density, potential, or density of states files. In the multi-
 dataset mode, this root will be complemented by **_DS** and the dataset
 index. Also in the multi-dataset mode, the root "abo" can be used to build the
@@ -351,21 +358,15 @@ the SCF calculation. The value of x will be A, B, C, and D. Then, x will be 1,
 value of x will be 0 for that call. Then, the value of x is 1, 2, 3... in
 agreement with the value of itime (see the keyword [[ntime]])
 
-**tmp**
+**tmp or [[tmpdata_prefix]]**
+
 The temporary files created by the codes will have a name that is constructed
-from the root " **tmp** ". tmp should usually be chosen such as to give access
+from the root " **tmp** " or [[tmpdata_prefix]]. tmp should usually be chosen such as to give access
 to a disk of the machine that is running the job, not a remote (NFS) disk.
 Under Unix, the name might be something like `/tmp/user_name/temp`. As an
 example, **tmp_STATUS**
 gives the status of advancement of the calculation, and is updated very
 frequently
-
-**psp1**
-filename of first pseudopotential input file. The pseudopotential data files
-are formatted. There must be as many filenames provided sequentially here as
-there are types of atoms in the system, and the order in which the names are
-given establishes the identity of the atoms in the unit cell. (psp2, psp3, ...)
-
 
 
 <a id="parameters"></a>
@@ -387,7 +388,7 @@ The **characteristics** can be one of the following:
 -   **LENGTH**
 -   **MAGNETIC FIELD**
 
-#### Physical information
+#### **Physical information**
 
 The **ENERGY**, **LENGTH** and **MAGNETIC FIELD** characteristics indicate
 that the physical meaning of the variable is known by ABINIT, so that ABINIT
@@ -442,7 +443,7 @@ The initial atomic positions can be input in Bohr or Angstrom through
 [[xcart]] (possibly use the Angstrom unit), or
 even in reduced coordinates, through [[xred]].
 
-#### Flow information
+#### **Flow information**
 
 Most of the variables can be used in the multi-dataset mode (see section [3.3](#multidatasets)),
 but those that must have a unique value throughout all the datasets are
@@ -464,7 +465,7 @@ velocities, the cell shape, and the occupation numbers. Their echo, after the
 run has proceeded, will of course differ from their input value. They are
 signaled by the indication **EVOLVING**.
 
-#### Other information
+#### **Other information**
 
 **DEVELOP** refers to input variables that are not used in production
 runs, but have been introduced during development time, of a feature that is
@@ -797,24 +798,19 @@ details.
 
 The code reports:
 
-  * the real and reciprocal space translation vectors ( _Note_: the definition of the reciprocal vector is such that Ri.Gj= deltaij)
-  * the volume of the unit cell
-  * the ratio between linear dimension of the FFT box and the sphere of plane waves, called boxcut
-
-It must be above 2 for exact treatment of convolutions by FFT. 
-[[ngfft]] has been automatically chosen to give a boxcut value larger than 2, but not much
-larger, since more CPU time is needed for larger FFT grids;
-
-  * the code also mention that for the same FFT grid you might treat (slightly) larger [[ecut]] 
-    (so, with a rather small increase of CPU time) 
-
-  * the heading for each pseudopotential which has been input 
-
-  * from the inwffil subroutine, a description of the wavefunction initialization 
-  (random number initialization or input from a disk file), that is, a report 
-  of the number of planewaves (npw) in the basis at each k point
-
-  * from the setup2 subroutine, the average number of planewaves over all k points is reported in two forms, 
+  * The real and reciprocal space translation vectors ( _Note_: the definition of the reciprocal vector is such that $R_i.G_j= \delta_{ij}$).
+  * The volume of the unit cell.
+  * The ratio between linear dimension of the FFT box and the sphere of plane waves, called boxcut.
+    It must be above 2 for exact treatment of convolutions by FFT. 
+    [[ngfft]] has been automatically chosen to give a boxcut value larger than 2, but not much
+    larger, since more CPU time is needed for larger FFT grids.
+  * The code also mention that for the same FFT grid you might treat (slightly) larger [[ecut]] 
+    (so, with a rather small increase of CPU time). 
+  * The heading for each pseudopotential which has been input.
+  * From the inwffil subroutine, a description of the wavefunction initialization 
+    (random number initialization or input from a disk file), that is, a report 
+    of the number of planewaves (npw) in the basis at each k point
+  * From the setup2 subroutine, the average number of planewaves over all k points is reported in two forms, 
   arithmetic average and geometric average. 
 
 Until here, the output of a ground-state computation is identical to the one
@@ -823,22 +819,21 @@ especially [[help:respfn#6.2|section 6.2]].
 
 Next the code reports information for each SCF iteration:
 
-  * the iteration number 
-  * the (pseudo) total energy (Etot) in Hartree [This is not the total energy of the system, 
+  * The iteration number.
+  * The (pseudo) total energy (Etot) in Hartree [This is not the total energy of the system, 
     since the pseudopotential approximation has been made: a constant energy (in the frozen-core approximation) 
     should be added to the present pseudo total energy in order to obtain a total energy, 
     that includes the contributions from the core electrons. Since only differences of total energy matter 
     (except is extremely rare cases), one can work with this pseudo energy like if it were the true total energy, 
     except that the missing constant depends on the pseudopotential that has been used. 
     Thus one has to perform differences of pseudo energies between simulations that use the same pseudopotentials]. 
-  * the change in Etot since last iteration (deltaE) 
-  * the maximum squared residual residm over all bands and k points 
+  * The change in Etot since last iteration (deltaE).
+  * The maximum squared residual residm over all bands and k points 
     (residm - the residual measures the quality of the wavefunction convergence) 
-  * the squared residual of the potential in the SCF procedure (vres2) 
-  * the maximum change in the gradients of Etot with respect to fractional coordinates (diffor, in Hartree) 
-  * the rms value of the gradients of Etot with respect to fractional coordinates (maxfor, in Hartree).  
+  * The squared residual of the potential in the SCF procedure (vres2).
+  * The maximum change in the gradients of Etot with respect to fractional coordinates (diffor, in Hartree).
+  * The rms value of the gradients of Etot with respect to fractional coordinates (maxfor, in Hartree).  
     The latter two are directly related to forces on each atom.
-
   * Then comes an assessment of the SCF convergence: the criterion for fulfillment of the SCF criterion 
     (defined by [[toldfe]], [[toldff]], [[tolwfr]] or [[tolvrs]]) might be satisfied or not... 
   * Then the stresses are reported. 
