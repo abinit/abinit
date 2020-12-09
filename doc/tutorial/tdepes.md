@@ -517,10 +517,10 @@ After possibly modifying [[tests/tutorespfn/Input/tdepes_3.files]] to account fo
 
 This is a significantly longer ABINIT run (still less than one minute), also producing many files.
 
-When the run is finished, copy the file [[tests/tutorespfn/Input/tdepes_3_temperature.abi]] in the
+When the run is finished, copy the file [[tests/tutorespfn/Input/tdepes_3_temperature.in]] in the
 working directory (if not yet done) and launch the python script with:
 
-    ./temperature_final.py < tdepes_3_temperature.abi
+    ./temperature_final.py < tdepes_3_temperature.in
 
 {% dialog tests/tutorespfn/Input/tdepes_3.files %}
 
