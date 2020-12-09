@@ -3206,90 +3206,90 @@ class AbinitTestSuite(object):
             assert need_cpp_vars is None, ("need_cpp_vars argument is not expected with test_list.")
             self.tests = tuple(test_list)
 
-    def git_rename(self):
+    #def git_rename(self):
 
-        import subprocess
-        seen = set()
-        def rename(test):
-            #print(test, type(test))
-            if test.inp_fname in seen: return
-            seen.add(test.inp_fname)
+    #    import subprocess
+    #    seen = set()
+    #    def rename(test):
+    #        #print(test, type(test))
+    #        if test.inp_fname in seen: return
+    #        seen.add(test.inp_fname)
 
-            root, ext = os.path.splitext(test.inp_fname)
-            #assert ext == ".in"
-            new = root + ".abi"
-            inbase = os.path.basename(root)
-            cmd = f"git mv {test.inp_fname} {new}"
+    #        root, ext = os.path.splitext(test.inp_fname)
+    #        #assert ext == ".in"
+    #        new = root + ".abi"
+    #        inbase = os.path.basename(root)
+    #        cmd = f"git mv {test.inp_fname} {new}"
 
-            #print("cmd", cmd)
-            #subprocess.run(cmd, shell=True, check=True)
-            #call(cmd)
-            #print("inp_fname", test.inp_fname)
+    #        #print("cmd", cmd)
+    #        #subprocess.run(cmd, shell=True, check=True)
+    #        #call(cmd)
+    #        #print("inp_fname", test.inp_fname)
 
-            # Rename ref files
-            old_new = []
-            for f in test.files_to_test:
-                root, ext = os.path.splitext(test.inp_fname)
-                if not f.name.endswith(".out"): continue
-                if f.name == inbase + ".out" or "MPI" in f.name:
-                    old_ref = os.path.join(test.ref_dir, f.name)
-                    new, ext = os.path.splitext(old_ref)
-                    new = new + ".abo"
-                    cmd = f"git mv {old_ref} {new}"
-                    print(cmd)
-                    if os.path.exists(old_ref) and not os.path.exists(new):
-                        subprocess.run(cmd, shell=True, check=True)
-                    if not os.path.exists(old_ref):
-                        print("Warning. unexistent:", old_ref)
-                    old_new.append((os.path.basename(old_ref), os.path.basename(new)))
+    #        # Rename ref files
+    #        old_new = []
+    #        for f in test.files_to_test:
+    #            root, ext = os.path.splitext(test.inp_fname)
+    #            if not f.name.endswith(".out"): continue
+    #            if f.name == inbase + ".out" or "MPI" in f.name:
+    #                old_ref = os.path.join(test.ref_dir, f.name)
+    #                new, ext = os.path.splitext(old_ref)
+    #                new = new + ".abo"
+    #                cmd = f"git mv {old_ref} {new}"
+    #                print(cmd)
+    #                if os.path.exists(old_ref) and not os.path.exists(new):
+    #                    subprocess.run(cmd, shell=True, check=True)
+    #                if not os.path.exists(old_ref):
+    #                    print("Warning. unexistent:", old_ref)
+    #                old_new.append((os.path.basename(old_ref), os.path.basename(new)))
 
-                else:
-                    continue
-                    #print("strange f.name", f.name)
+    #            else:
+    #                continue
+    #                #print("strange f.name", f.name)
 
-            # Change names in TEST_INFO section
-            if old_new:
-                with open(test.inp_fname, "rt") as fh:
-                    s = fh.read()
-                    for old, new in old_new:
-                        print("replacing`", old, "`with:`", new, "`in:", test.inp_fname)
-                        s = s.replace(old, new)
-                #print(s)
-                with open(test.inp_fname, "wt") as fh:
-                    fh.write(s)
+    #        # Change names in TEST_INFO section
+    #        if old_new:
+    #            with open(test.inp_fname, "rt") as fh:
+    #                s = fh.read()
+    #                for old, new in old_new:
+    #                    print("replacing`", old, "`with:`", new, "`in:", test.inp_fname)
+    #                    s = s.replace(old, new)
+    #            #print(s)
+    #            with open(test.inp_fname, "wt") as fh:
+    #                fh.write(s)
 
-        def rename_chain(chain):
-            old_new = []
-            for test in chain:
-                print(test)
-                root, ext = os.path.splitext(test.inp_fname)
-                #assert ext == ".abi"
-                old = os.path.basename(root + ".in")
-                new = os.path.basename(root + ".abi")
-                #inbase = os.path.basename(root)
-                #cmd = f"git mv {test.inp_fname} {new}"
-                old_new.append((old, new))
+    #    def rename_chain(chain):
+    #        old_new = []
+    #        for test in chain:
+    #            print(test)
+    #            root, ext = os.path.splitext(test.inp_fname)
+    #            #assert ext == ".abi"
+    #            old = os.path.basename(root + ".in")
+    #            new = os.path.basename(root + ".abi")
+    #            #inbase = os.path.basename(root)
+    #            #cmd = f"git mv {test.inp_fname} {new}"
+    #            old_new.append((old, new))
 
-            # Change names in TEST_INFO section
-            if old_new:
-                for test in chain:
-                    with open(test.inp_fname, "rt") as fh:
-                        s = fh.read()
-                        for old, new in old_new:
-                            print("replacing test_chain`", old, "`with:`", new, "`in:", test.inp_fname)
-                            s = s.replace(old, new)
-                    #print(s)
-                    with open(test.inp_fname, "wt") as fh:
-                        fh.write(s)
+    #        # Change names in TEST_INFO section
+    #        if old_new:
+    #            for test in chain:
+    #                with open(test.inp_fname, "rt") as fh:
+    #                    s = fh.read()
+    #                    for old, new in old_new:
+    #                        print("replacing test_chain`", old, "`with:`", new, "`in:", test.inp_fname)
+    #                        s = s.replace(old, new)
+    #                #print(s)
+    #                with open(test.inp_fname, "wt") as fh:
+    #                    fh.write(s)
 
-        for test in self:
-            if isinstance(test, ChainOfTests):
-                #print("Skipping test chain")
-                #rename_chain(test)
-                for t in test:
-                    rename(t)
-            else:
-                rename(test)
+    #    for test in self:
+    #        if isinstance(test, ChainOfTests):
+    #            #print("Skipping test chain")
+    #            #rename_chain(test)
+    #            for t in test:
+    #                rename(t)
+    #        else:
+    #            rename(test)
 
     def __str__(self):
         return "\n".join(str(t) for t in self.tests)
