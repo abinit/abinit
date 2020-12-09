@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  7 Dec 2020.
-- ( at 20h57 )
+.Starting date : Wed  9 Dec 2020.
+- ( at 13h05 )
   
 - input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33-t34-t35/t34.in
 - output file    -> t34.out
@@ -381,7 +381,7 @@ meta: {optdriver: 4, gwcalctyp: 21, }
     5        4        45.387        54.242         8.855        -3.407         0.000       -12.327         2.999         3.063
     5        5        45.387        54.255         8.868        -3.394         0.000       -12.327         2.999         3.063
     5        6        52.444        59.766         7.323        -1.136         0.000        -8.415        -1.839        -1.884
-    5        7        52.444        59.776         7.333        -1.127         0.000        -8.415        -1.839        -1.884
+    5        7        52.444        59.776         7.332        -1.127         0.000        -8.415        -1.839        -1.884
     5        8        53.932        60.595         6.663        -0.778         0.000        -7.371        -3.392        -3.462
   -----------------------------------------------------------------------------------------------------------------------------
   k-point  band      eik^GS        eik^new     Delta eik         K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
@@ -589,10 +589,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.2
++Overall time at end (sec) : cpu=          2.1  wall=          2.1

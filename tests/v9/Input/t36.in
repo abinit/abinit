@@ -13,6 +13,7 @@ optdriver2     3       # Screening calculation
 getwfk2       -1       # Obtain WFK file from previous dataset
 nband2         8       # Bands to be used in the screening calculation
 ecuteps2       3       # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
+inclvkb2       0       # For some reason we need this to ensure INTEL and GNU compilers give the same result! WARNING!
 nfreqim2      40       # Number of freqs (w') in Imag axis used in Gauss-Legendre quadrature integration of Sigma_c(iw) = G(iw,iw') W(iw') dw'
 ############
 # Dataset 3
