@@ -362,7 +362,7 @@ subroutine ipi_pred(ab_mover, hist, itime, ntime, zDEBUG, iexit, comm_cell)
    call stress_voigt_to_mat(strten, sigma)
    ! Well it's a symmetric tensor.
    ! TODO: Check volume
-   sigma = transpose(sigma) * ucvol
+   sigma = -ucvol * transpose(sigma)
    call writebuffer_dv(socket, sigma, 9)
 
    ! Note: i-pi can also receive an arbitrary string, that will be printed
