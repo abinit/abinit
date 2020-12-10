@@ -1,0 +1,21 @@
+t31.ddb.out
+DDB for GaAs, 2.0Ha, 2SP in the IBZ. For testing purposes only.
+3
+t30o_DS4_DDB
+t30o_DS6_DDB
+t30o_DS8_DDB
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t30.abi, t31.abi, t32.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t31.ddb.out, tolnlines = 21, tolabs = 5.6e-1, tolrel = 3.0e-10
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = mrgddb input file.
+#%%<END TEST_INFO>

@@ -1,0 +1,39 @@
+&FILES
+ ddkfile_1 = 'toptic_1o_DS4_1WF7',
+ ddkfile_2 = 'toptic_1o_DS5_1WF8',
+ ddkfile_3 = 'toptic_1o_DS6_1WF9',
+ wfkfile = 'toptic_1o_DS3_WFK'
+/
+&PARAMETERS
+ broadening = 0.002,
+ domega = 0.0003,
+ maxomega = 0.3,
+ scissor = 0.000,
+ tolerance = 0.002
+/
+&COMPUTATIONS
+ num_lin_comp = 1,
+ lin_comp = 11,
+ num_nonlin_comp = 2,
+ nonlin_comp = 123,222,
+ num_linel_comp = 0,
+ num_nonlin2_comp = 0,
+/
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = optic
+#%% test_chain = toptic_1.abi, toptic_2.abi
+#%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
+#%% [files]
+#%% files_to_test = 
+#%%   toptic_2_0001_0001-linopt.out,        tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy;
+#%%   toptic_2_0001_0002_0003-ChiTotRe.out, tolnlines= 16, tolabs=  7.000e-04, tolrel=  7.000e-04, fld_options = -easy;
+#%%   toptic_2_0001_0002_0003-ChiTotIm.out, tolnlines= 16, tolabs=  4.000e-04, tolrel=  2.000e-04, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = S. Sharma, X. Gonze
+#%% keywords = 
+#%% description = Input file for optic code. 
+#%%<END TEST_INFO>

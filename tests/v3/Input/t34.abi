@@ -1,0 +1,119 @@
+# Fake H crystal.
+# Test orthorhombic spacegroups
+
+ndtset 75
+
+spgroup1   38   spgroupma1   192   natom1   8
+spgroup2   38   spgroupma2   193   natom2   8
+spgroup3   38   spgroupma3   194   natom3   8
+spgroup4   39   spgroupma4   200   natom4   8
+spgroup5   39   spgroupma5   201   natom5   8
+spgroup6   39   spgroupma6   202   natom6   8
+spgroup7   40   spgroupma7   208   natom7   8
+spgroup8   40   spgroupma8   209   natom8   8
+spgroup9   40   spgroupma9   210   natom9   8
+spgroup10   41   spgroupma10   216   natom10   8
+spgroup11   41   spgroupma11   217   natom11   8
+spgroup12   41   spgroupma12   218   natom12   8
+spgroup13   42   spgroupma13   223   natom13   8
+spgroup14   43   spgroupma14   228   natom14   8
+spgroup15   44   spgroupma15   233   natom15   8
+spgroup16   44   spgroupma16   234   natom16   8
+spgroup17   45   spgroupma17   239   natom17   8
+spgroup18   45   spgroupma18   240   natom18   8
+spgroup19   46   spgroupma19   246   natom19   8
+spgroup20   46   spgroupma20   247   natom20   8
+spgroup21   46   spgroupma21   248   natom21   8
+spgroup22   47   spgroupma22   254   natom22  16
+spgroup23   47   spgroupma23   255   natom23  16
+spgroup24   47   spgroupma24   256   natom24  16
+spgroup25   48   spgroupma25   262   natom25  16
+spgroup26   48   spgroupma26   263   natom26  16
+spgroup27   48   spgroupma27   264   natom27  16
+spgroup28   49   spgroupma28   272   natom28  16
+spgroup29   49   spgroupma29   273   natom29  16
+spgroup30   49   spgroupma30   274   natom30  16
+spgroup31   49   spgroupma31   275   natom31  16
+spgroup32   49   spgroupma32   276   natom32  16
+spgroup33   50   spgroupma33   284   natom33  16
+spgroup34   50   spgroupma34   285   natom34  16
+spgroup35   50   spgroupma35   286   natom35  16
+spgroup36   50   spgroupma36   287   natom36  16
+spgroup37   50   spgroupma37   288   natom37  16
+spgroup38   51   spgroupma38   298   natom38  16
+spgroup39   51   spgroupma39   299   natom39  16
+spgroup40   51   spgroupma40   300   natom40  16
+spgroup41   51   spgroupma41   301   natom41  16
+spgroup42   51   spgroupma42   302   natom42  16
+spgroup43   51   spgroupma43   303   natom43  16
+spgroup44   51   spgroupma44   304   natom44  16
+spgroup45   52   spgroupma45   314   natom45  16
+spgroup46   52   spgroupma46   315   natom46  16
+spgroup47   52   spgroupma47   316   natom47  16
+spgroup48   52   spgroupma48   317   natom48  16
+spgroup49   52   spgroupma49   318   natom49  16
+spgroup50   52   spgroupma50   319   natom50  16
+spgroup51   52   spgroupma51   320   natom51  16
+spgroup52   53   spgroupma52   330   natom52  16
+spgroup53   53   spgroupma53   331   natom53  16
+spgroup54   53   spgroupma54   332   natom54  16
+spgroup55   53   spgroupma55   333   natom55  16
+spgroup56   53   spgroupma56   334   natom56  16
+spgroup57   53   spgroupma57   335   natom57  16
+spgroup58   53   spgroupma58   336   natom58  16
+spgroup59   54   spgroupma59   346   natom59  16
+spgroup60   54   spgroupma60   347   natom60  16
+spgroup61   54   spgroupma61   348   natom61  16
+spgroup62   54   spgroupma62   349   natom62  16
+spgroup63   54   spgroupma63   350   natom63  16
+spgroup64   54   spgroupma64   351   natom64  16
+spgroup65   54   spgroupma65   352   natom65  16
+spgroup66   55   spgroupma66   360   natom66  16
+spgroup67   55   spgroupma67   361   natom67  16
+spgroup68   55   spgroupma68   362   natom68  16
+spgroup69   55   spgroupma69   363   natom69  16
+spgroup70   55   spgroupma70   364   natom70  16
+spgroup71   56   spgroupma71   372   natom71  16
+spgroup72   56   spgroupma72   373   natom72  16
+spgroup73   56   spgroupma73   374   natom73  16
+spgroup74   56   spgroupma74   375   natom74  16
+spgroup75   56   spgroupma75   376   natom75  16
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+                   # and allow the recognition of space group
+acell 7 8 9
+angdeg  90 90 90
+ntypat 1
+znucl 1
+natrd 1
+xred 0.17 0.15 0.11
+spinat 0.0 0.0 1.0
+typat 1
+ecut 1
+  kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t34.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H based fake crystals : magnetic groups, Shubnikov type IV
+#%%   Test the generation and recognition of the
+#%%   orthorhombic space groups (part II)
+#%%<END TEST_INFO>

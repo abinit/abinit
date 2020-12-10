@@ -1,0 +1,65 @@
+# Fake H crystal.
+# Test tetragonal spacegroups
+
+ndtset 68
+
+spgroup: 75
+spgroup+ 1
+
+#This is for spgroup 75 to 122
+# wyckoff multiplicity 4
+natom1 12    natom2 12   natom3 12   natom4 12   natom5  12
+natom6 12    natom7 12   natom8 12
+
+# wyckoff multiplicity 8
+ natom9 24   natom10  24   natom11 24    natom12 24   natom13 24 
+natom14 24   natom15  24   natom16 24    natom17 24   natom18 24 
+natom19 24   natom20  24   natom21 24    natom22 24   natom23 24 
+natom24 24   natom25  24   natom26 24    natom27 24   natom28 24 
+natom29 24   natom30  24   natom31 24    natom32 24   natom33 24 
+natom34 24   natom35  24   natom36 24    natom37 24   natom38 24 
+natom39 24   natom40  24   natom41 24    natom42 24   natom43 24 
+natom44 24   natom45  24   natom46 24    natom47 24   natom48 24
+
+# wyckoff multiplicity 16
+natom   48   # this is for spgroup 123 to 142
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+                   # and allow the recognition of space group
+acell 7 7 9
+angdeg  90 90 90
+ntypat 1
+znucl 1
+natrd 3
+xred 0.17 0.15 0.11
+0.734 0.467 0.66
+0.44  0.824 0.31415
+typat *1
+ecut 1
+kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t27.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H based fake crystals.
+#%%   Test the generation and recognition of the
+#%%   tetragonal space groups, from spgroup 75 to 142.
+#%%<END TEST_INFO>

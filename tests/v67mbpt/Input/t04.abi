@@ -1,0 +1,148 @@
+# GW calculation for C in the diamond structure
+# Dataset 1: ground state calculation
+# Dataset 2: calculation of the WFK file
+# Dataset 3: calculation of the screening for two frequencies (will be used in t537)
+# Dataset 3: calculation of the screening for six frequencies (will be used in t537)
+#
+ndtset   4
+gwpara   2
+enunit   1
+symsigma 0
+
+# Dataset1: usual self-consistent ground-state calculation
+# Definition of the k-point grid
+ngkpt1    4 4 4
+nshiftk1 4
+shiftk1  0.5 0.5 0.5  # This grid is the most economical
+         0.5 0.0 0.0
+         0.0 0.5 0.0
+         0.0 0.0 0.5
+prtden1 1         # Print out density
+tolvrs1  1.0d-10
+
+# Dataset2: calculation of WFK file
+# Definition of k-points
+ngkpt2    2 2 2
+nshiftk2  4
+shiftk2  0.0 0.0 0.0  # This grid contains the Gamma point
+         0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+istwfk2   *1           # Option needed for Gamma
+iscf2    -2             # Non self-consistent calculation
+getden2  -1             # Read previous density file
+nband2     20
+tolwfr2  1.0d-10
+
+# Dataset3: Calculation of the screening (epsilon^-1 matrix)
+optdriver3  3        # Screening calculation
+ngkpt3    2 2 2
+nshiftk3  4
+shiftk3  0.0 0.0 0.0  # This grid contains the Gamma point
+         0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+istwfk3   *1        # Option needed for Gamma
+getwfk3     2       # Obtain WFK file from previous dataset
+nband3      20      # Bands to be used in the screening calculation
+ecuteps3    4.0     # Dimension of the screening matrix
+inclvkb3    2
+prtsuscep3  1
+
+# Definition of k-points
+optdriver4  4
+gwcalctyp4  28
+getscr4    -1
+getwfk4     2
+ngkpt4    2 2 2
+nshiftk4  4
+shiftk4   0.0 0.0 0.0  # This grid contains the Gamma point
+          0.0 0.5 0.5
+          0.5 0.0 0.5
+          0.5 0.5 0.0
+istwfk4    *1           # Option needed for Gamma
+
+gw_icutcoul4  3  # old deprecated value of icutcoul, only used for legacy
+
+
+nband4     20     # Bands to be used in the Self-Energy calculation
+ecuteps4    4.0
+ecutsigx4   4.0    # Dimension of the G sum in Sigma_x
+                   # (the dimension in Sigma_c is controlled by ecuteps)
+
+nkptgw4     6               # number of k-point where to calculate the GW correction
+kptgw4
+-2.50000000E-01 -2.50000000E-01  0.00000000E+00
+-2.50000000E-01  2.50000000E-01  0.00000000E+00
+ 5.00000000E-01  5.00000000E-01  0.00000000E+00
+-2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 5.00000000E-01  0.00000000E+00  0.00000000E+00
+ 0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+bdgw       1  8  # calculate GW corrections for bands from 4 to 5
+           1  8
+           1  8
+           1  8
+           1  8
+           1  8
+
+# Definition of the unit cell: fcc
+acell 3*6.7406530878521345  #Same parameters as Shiskin
+rprim  0.0  0.5  0.5        #FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1
+znucl   6
+
+# Definition of the atoms
+natom 2           # There are two atoms
+typat  1 1
+xred              # Reduced coordinate of atoms
+       0.0   0.0   0.0
+       0.25  0.25  0.25
+
+# Definition of the planewave basis set (at convergence 16 Rydberg 8 Hartree)
+ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
+ecutwfn 8.0
+
+# Definition of the SCF procedure
+nstep   250        # Maximal number of SCF cycles
+diemac  12.0      # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t04.abi, t05.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t04.abo, tolnlines = 5, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options =  -medium
+#%% [shell]
+#%% post_commands = 
+#%%  ww_cp t04o_DS2_WFK t05i_DS1_WFK;
+#%%  ww_cp t04o_DS2_WFK t05i_DS2_WFK;
+#%%  ww_cp t04o_DS2_WFK t05i_DS3_WFK;
+#%%  ww_cp t04o_DS3_SCR t05i_DS1_SCR;
+#%%  ww_cp t04o_DS3_SCR t05i_DS3_SCR;
+#%%  ww_cp t04o_DS3_SUS t05i_DS2_SUS;
+#%%  ww_cp t04o_DS4_QPS t05i_DS3_QPS
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GW
+#%% description = 
+#%%  Carbon in diamond structure. Chained GW calculation: The first run produces the WFK, the SCR, the SUSC
+#%%  and the QPS file. These file are subsequently read and used in t537 using irdwfk, irdscr, irdsuscep and irdqps
+#%%  In the second dataset of t85, the screened interaction W is approximated using the test-electron
+#%%  expression with the TDDFT ALDA kernel (gwgamma==1).
+#%%<END TEST_INFO>

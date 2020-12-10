@@ -1,0 +1,25 @@
+t58_out_DDB
+LiF; Very rough 2x2x2 special point grid; low ecut.
+3
+t57o_DS4_DDB
+t57o_DS5_DDB
+t57o_DS6_DDB
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
+#%% [files]
+#%% files_to_test =
+#%%   t58.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [shell]
+#%% post_commands = 
+#%%  ww_cp t58_out_DDB t60o_DS20_DDB;
+#%%  ww_cp t58_out_DDB t61o_DS20_DDB;
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = Merge the DDB files produced in t57.abi
+#%%<END TEST_INFO>

@@ -1,0 +1,94 @@
+# He BCC fake solid, conventional cell, testing bdeigrf
+
+ndtset 5
+
+#Dataset 1 : ground state density
+
+tolvrs1   1.0d-18      # SCF stopping criterion
+nqpt1       0
+ieig2rf1    0
+smdelta1    0
+rfphon1     0
+getwfk1     0          # Use GS wave functions from dataset1
+
+nqpt        1
+ieig2rf     1
+bdeigrf     8
+smdelta     1
+getwfk      1          # Use GS wave functions from dataset1
+kptopt      3          # Need full k-point set for finite-Q response
+rfphon      1          # Do phonon response
+rfatpol     1 2        # Treat displacements of all atoms
+rfdir       1 1 1      # Do all directions (symmetry will be used)
+tolvrs      1.0d-8     # This default is active for sets 3-10
+
+
+
+#Dataset 2-5 : phonon frequencies and band corrections
+qpt2   0.0 0.0 0.0
+qpt3   0.0 0.5 0.5
+qpt4   0.5 0.0 0.5
+qpt5   0.5 0.5 0.0
+
+#########################################################################
+#COMMON VARIABLES
+#########################################################################
+#Definition of the unit cell and ecut,
+acell   3*4.3
+ecut 8
+
+#Definition of the cell
+   nsym 1                # No symetries
+   natom  2
+   xred     0.0 0.0 0.0
+            0.5 0.5 0.5
+   nband  8
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 2           # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Hydrogen.
+
+#Definition of the atoms
+typat 2*1           # For the first dataset, both numbers will be read,
+                  # while for the second dataset, only one number will be read
+
+#Definition of the k-point grid
+ ngkpt 1 1 1
+ nshiftk 4
+ shiftk 0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+        0.5 0.5 0.5
+
+#Definition of the SCF procedure
+nstep 40          # Maximal number of SCF cycles
+diemac 2.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02he.fakesmooth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t54.abi, t55.abi, t56.abi, t57.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t54.abo, tolnlines = 26, tolabs = 2.e-4, tolrel = 0.5, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   He BCC conventional cell. Fake smooth pseudopotential.
+#%%   For testing the electron-phonon modification of the electronic structure.
+#%%   To be compared with the results of tests 50 to 59.
+#%%   Use a FCC grid of k (shifted) and q (non-shifted) points.
+#%%   No imaginary frequences for the phonons with this choice.
+#%%   Computation of the electronic eigenvalues as well as phonon eigenfrequencies,
+#%%   and corresponding ingredients for the computation of the electron-phonon effect, in the
+#%%   next tests 55-57.
+#%%<END TEST_INFO>

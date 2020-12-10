@@ -1,0 +1,22 @@
+teph_2.ddb.out
+Total ddb for Al FCC system
+3
+teph_1o_DS2_DDB
+teph_1o_DS3_DDB
+teph_1o_DS4_DDB
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain =  teph_1.abi, teph_2.abi, teph_3.abi, teph_4.abi, teph_5.abi, teph_6.abi
+#%% [files]
+#%% files_to_test = 
+#%%   teph_2.ddb.out, tolnlines=  4, tolabs=  6.000e-08, tolrel=  4.000e-04, fld_options=-medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Verstraete 
+#%% keywords = NC, DFPT, EPH_OLD
+#%% description =  Input file for anaddb
+#%%<END TEST_INFO>

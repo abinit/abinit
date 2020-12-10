@@ -1,0 +1,80 @@
+#################################################################
+# Input file for the positron tutorial                          #
+#    Doppler spectrum calculation within PAW                    #
+#                                                               #
+#              Si, 2 atoms in the box                           #
+#################################################################
+
+  positron -10    ! Electron/positron GS calculation
+                  ! Automatic electron-positron loop has to be switched on in Doppler calculations
+                  ! to have both electron and positron wavefunctions in memory
+
+  posnstep  2     ! We simulate a delocalized positron, so we only perform two steps of electon-positron calculations.
+                  ! It means that the electronic wavefunction is not affected by the positron.
+  posdoppler 1    ! Activation of Doppler broadening calculation
+
+  ixcpositron  1  ! We are using the Boronski and Nieminen parametrization
+
+# Common input parameters
+  ! Unit cell
+    acell   3*5.43 angstrom
+    rprim   0.0 0.5 0.5
+            0.5 0.0 0.5
+            0.5 0.5 0.0
+
+    natom  2
+    ntypat  1
+    typat 2*1
+    znucl 14
+    xred  0.0   0.0   0.0
+          0.25 0.25 0.25
+
+  ! K-points and occupations
+  ! In Doppler calculation we need to have a uniform 
+  ! grid in the momentum space. Symmetries are not used,
+  ! so the full grid needs to be specified.
+
+    kptopt 0
+    istwfk *1
+    nkpt 8   ! This corresponds to a 2x2x2 grid, denser grids may be needed to get converged spectra
+    kpt
+    0 0 0
+    0 0 0.5
+    0 0.5 0
+    0.5 0 0
+    0 0.5 0.5
+    0.5 0 0.5
+    0.5 0.5 0
+    0.5 0.5 0.5 
+
+    occopt 1
+    nband 6
+
+    posocc 1.0   ! Occupation number for the positron (should be set <1 for bulk calculation with a small cell).
+                 ! Here the zero positron density limit is used, so results do not depend on posocc.
+
+  ! Convergence parameters
+    ecut 8. pawecutdg 15.
+    iscf 17
+    nstep 50 tolvrs 1.d-8
+
+!   Miscelaneous
+    prtwf 0 prteig 0           ! To save disk space
+    optforces 0 optstress 0    ! Not relevant here
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si.LDA-PW-paw.abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   tpositron_5.abo, tolnlines= 5, tolabs= 2.6e-2, tolrel= 3.8e-2, fld_options= -easy
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = J. Wiktor
+#%% keywords = POSITRON,PAW
+#%% description = Fifth step of the tutorial on electron-positron annihilation
+#%%<END TEST_INFO>

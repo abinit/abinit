@@ -1,0 +1,64 @@
+# Silicon diatomic molecule for test calculations
+# Exp bond=4.244 bohr; freq=511 cm^-1 (?)
+# Binggeli reports that large box (18 on side) needed to get physical answers.
+# Allow relaxation.
+ acell 12 8 8
+ diemac 1.0d0
+ diemix 0.333333333333d0
+ ecut 7.0
+ enunit 2
+ intxc 1
+ ionmov 4
+ iscf 5
+ istwfk 1
+ kptopt 0
+
+ kpt   3*0
+ natom  2 nband 5 3
+ nkpt 1
+ nline 3    nsppol 2
+ nstep 12
+ nsym 1
+ ntime 10
+ ntypat  1
+ occ 8*1
+ occopt 2
+ prtvol 10
+ rprim 1 0 0  0 1 0  0 0 1
+ tolmxf 1.0d-5
+ toldff 1.0d-5
+ typat  2*1
+ wtk  1
+ xcart -2.122 0 0 2.122 0 0
+ znucl  14.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t50.abo, tolnlines = 4, tolabs = 1.800e-10, tolrel = 3.000e-06
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Si2 molecule, spin-polarized
+#%%   Same as test 45, but use densfor_pred=3 instead of densfor_pred=1, and iscf=7 instead of iscf=2.
+#%%   Si2 molecule, spin-polarized. Same as test 45, but use densfor_pred=3 instead of densfor_pred=1.
+#%%   Cannot be executed in parallel:
+#%%         --- !ERROR
+#%%         message: |
+#%%         the number of bands in the spin up case must be equal to
+#%%         the number of bands in the spin down case.
+#%%         This is not the case for the k point number : 1 
+#%%         The number of bands spin up and down are : 5 3 Action : change nband, or use the sequential
+#%%         version of ABINIT.
+#%%         src_file: chkinp.F90
+#%%         src_line: 1181
+#%%         ...
+#%%<END TEST_INFO>

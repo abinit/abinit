@@ -1,0 +1,72 @@
+#Test linear chain of atoms
+#Two identical psps (Si+Si), but different mixing coefficients
+
+ ndtset 2
+
+ densty  1.1    ! This is needed to have exactly the same initialisation as previous tests
+ ntypalch    1            # This pseudo-atom is alchemical
+ mixalch1    0.2   0.8
+ mixalch2    0.5   0.5
+
+ znucl       14.0  14.0   # znucl(npsp) : twice Silicon
+
+#Ground state
+ nqpt 0
+
+#Common data
+    npsp   2            # Two pseudopotentials to be read
+  ntypat   1            # Only one type of pseudo-atom
+   acell   3*10.00
+     amu   1.0d0
+  diemac   1.5
+    ecut   1.20
+     ixc   3
+  kptopt   0
+     kpt   0.00000   0.00000  -0.37500
+           0.00000   0.00000  -0.12500
+           0.00000   0.00000   0.12500
+           0.00000   0.00000   0.37500
+   natom   2
+   nband   4
+   ngfft   3*16
+    nkpt   4
+   nstep   30
+    nsym   1
+  occopt   1
+  prtden   1
+   rprim   1.0  0.0  0.0
+           0.0  1.0  0.0
+           0.0  0.0  1.0
+  symrel   1  0  0
+           0  1  0
+           0  0  1
+    xred   0.0  0.0 -0.15
+           0.0  0.0  0.15
+   tnons   3*0.0
+   typat   1 1
+  tolwfr   1.e-22
+     wtk   4*0.25
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.Hamann_mod, 14si.Hamann_mod"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t94.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Linear chain of X2 molecules (2 atoms per unit cell),
+#%%   using alchemical atoms, GS only.
+#%%   The first psp is Si, the second one is Si, the
+#%%   mixing coefficients are 0.2 and 0.8 , then, in a second
+#%%   dataset, they are 0.5 and 0.5 .
+#%%   Should give same numerical results as the previous test.
+#%% topics = AtomTypes
+#%%<END TEST_INFO>

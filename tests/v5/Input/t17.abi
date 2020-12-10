@@ -1,0 +1,66 @@
+# ========================================================================
+# Rhombohedral Bi treated as a semiconductor
+# 2x2x2 K grid ; low cut-off for test
+#
+# Test for Abinit: PAW + spin-orbit (zero-magnetization and non-collinear)
+#
+# Datasets 4 and 5 test spnorbscl and pawcpxocc developpement variables
+#
+#                                                                M.T. 2009
+# ========================================================================
+
+# === Datasets
+ndtset 5
+nspden1 1  nspinor1 1  pawspnorb1 0                ! no magnetism, no spin-orbit
+nspden2 1  nspinor2 2  pawspnorb2 1                ! spin-orbit, zero-magnetization
+nspden3 4  nspinor3 2  pawspnorb3 1                ! spin-orbit, non-collinear magnetism
+nspden4 1  nspinor4 2  pawspnorb4 1 spnorbscl4 0.5 ! spin-orbit, zero-magn, apply only half of SO
+nspden5 1  nspinor5 2  pawspnorb5 1 pawcpxocc5 1   ! spin-orbit, zero-magn, use real occ. matrix
+prtwf1  1 getwfk 1 getwfk1 0
+
+# === Structure and cell
+natom 2 ntypat 1 typat 2*1
+znucl  83.
+spinat 0 0 1.2   0 1.1 0
+xred   3*0.231d0
+       3*-0.231d0
+acell  3*9.
+angdeg 3*57.25
+nband 32 nband1 16
+
+# === SCF cycle options
+nstep 20  tolvrs 1.d-7
+ecut 5. pawecutdg 10.
+
+# === K-points and syms
+kptopt1 1  kptopt 4
+ngkpt 2 2 2
+
+# === Other options
+prtden 0  prteig 0  prtwf 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "83bi.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t17.abo, tolnlines = 7, tolabs = 1.100e-02, tolrel = 1.001e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW, SOC
+#%% description = 
+#%%   Bi A7 structure (2 atoms per unit cell),
+#%%   using PAW, within LDA.
+#%%   Fixed cell dimensions. Treated as a semi-conductor
+#%%   Test the spin-orbit coupling
+#%%   - with zero magnetization      (nspden=1, nspinor=2)
+#%%   - with non-collinear magnetism (nspden=4, nspinor=2)
+#%%   Also tests spnorbscl and pawcpxocc variables reserved to exp. users.
+#%% topics = spinpolarisation, PAW
+#%%<END TEST_INFO>

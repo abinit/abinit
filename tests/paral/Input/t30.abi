@@ -1,0 +1,56 @@
+#Test chebfi
+
+ istwfk 1
+ npband 2 npkpt 1 npfft 2
+ wfoptalg 1
+ np_slk 2
+ 
+ ngfft 18 18 18
+ ngfftdg 36 36 36
+
+ occopt 1 
+ kptopt 0
+ nkpt 1 toldfe 1.0d-10 
+ nsppol 2    spinmagntarget 0.0d0
+ ixc 1
+
+ ecut 15. pawecutdg 50
+ diemac 12.0d0  enunit 2
+ nstep 4
+ acell 3*7.0
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ chksymtnons 0
+ znucl 6
+ nband 12 occ 4*2 8*0
+ ntypat 1 typat 1 1  natom 2
+
+ paral_kgb 1
+ iomode 0    # Only for testing purposes 
+ use_gemm_nonlop 1 # test nonlop with BLAS
+ fftalg 402
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = ubu_intel_16.0_mpich, ubu_intel_15.0_mpich
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t30_MPI4.abo, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2
+#%% [extra_info]
+#%% keywords = PAW
+#%% authors = A. Levitt
+#%% description = 
+#%%    Chebyshev, C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
+#%%    Also test gemm_nonlop
+#%% topics = parallelism
+#%%<END TEST_INFO>

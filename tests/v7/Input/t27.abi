@@ -1,0 +1,99 @@
+# _== Convergency and starting
+# DATASET 1: LDA 
+# DATASET 2: LDA+DMFT
+ndtset 2
+jdtset 1 2
+prtvol    4
+pawprtvol 3
+getwfk -1
+
+##### CONVERGENCE PARAMETERS
+nstep1   30
+nstep2   1
+ecut      16 # low cutoff !
+pawecutdg 60
+tolvrs 1.0d-7
+nband     23
+occopt 3 tsmear 0.0036749 
+#npulayit 30
+
+##### PHYSICAL PARAMETERS
+nspinor 1
+nsppol  2
+nspden  2
+natom 5 ntypat 3 typat 1 2 3 3 3 
+znucl  23.0 38.0 8.0
+# V Sr O*3
+xred 0.00 0.00 0.00
+     0.50 0.50 0.50 
+     0.50 0.00 0.00 
+     0.00 0.50 0.00 
+     0.00 0.00 0.50 
+acell   3*7.2605
+rprim 1.0 0.0 0.0
+      0.0 1.0 0.0
+      0.0 0.0 1.0 
+
+# == Points k and symetries
+kptopt 4
+kptrlatt 3 0 0 0 3 0 0 0 3 # insufficient nb of k-points.
+nshiftk 4
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+istwfk *1
+
+# == LDA+DMFT
+usedmft1 0
+usedmft2 1
+dmftbandi 21 # t2g bands only
+dmftbandf 23 # t2g bands only
+dmft_nwlo 100
+dmft_nwli 100000
+dmft_iter 1
+dmftcheck 0  
+dmft_rslf 0
+dmft_mxsf 0.7
+dmft_dc 1
+dmft_t2g 1   # special value for t2g only calculation.
+# For historical purposes only, do not use outside of tests
+dmft_occnd_imag 0
+
+# == CTQMC
+dmft_solv 5 # CTQMC
+dmftqmc_l 50
+dmftqmc_n 1.d6
+dmftqmc_therm 10000
+
+
+# == DFT+U
+usepawu     1  #  For density matrix printout.
+dmatpuopt  1   # The density matrix: the simplest expression.
+lpawu  2 -1 -1
+upawu1  0.00  0.0  0.0  eV
+upawu2  3.1333333333333333  0.0  0.0  eV
+f4of2_sla3  0.0  0.0  0.0 
+jpawu2  0.7583333333333333  0.0  0.0  eV
+
+## Case_150            tolnlines=   10   tolabs=  2.e-4       tolrel= 1.e-6
+##150 seq psp1=23v.paw psp2=38sr.paw psp3=8o.2.paw opt=-medium DS3AT=Gtau.dat
+##%%                  t27o_DS2_atom_01_Gtau_01.dat,  tolnlines =0, tolabs =0.0e-00, tolrel = 0.0e-00, fld_options=-medium
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.2.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%                  t27.abo,  tolnlines =2, tolabs =1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = B. Amadon, J. Bieder 
+#%% keywords = DMFT, CTQMC
+#%% description = Test CT-QMC within DMFT for VSrO3 NSCF over density
+#%% topics = DMFT
+#%%<END TEST_INFO>

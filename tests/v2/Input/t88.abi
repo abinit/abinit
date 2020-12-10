@@ -1,0 +1,64 @@
+# Basic test for geometry optimization for the water molecule
+# using different methods
+
+ndtset  6
+
+ionmov1 0   ! Ground state
+ionmov2 1   ! Molecular Dynamics
+ionmov3 2   ! Broyden
+ionmov4 3   ! Broyden
+ionmov5 8   ! Nose
+ionmov6 9   ! Langevin
+
+getwfk2 1
+getwfk3 1
+getwfk4 1
+getwfk5 1
+getwfk6 1
+
+friction  0.0015         ! Friction coefficient
+delayperm 200            ! try to commute every 200 steps (no effect here)
+signperm  1              ! imc=1 favor alternation in permutation
+mdtemp   300  10         ! initial  and final temp
+vis       50
+
+acell  3*20              ! cell size
+dtion  100
+ecut   10
+
+natom  3
+nstep  25
+ntypat 2
+toldff 1.0d-5
+typat  1 1 2
+znucl  1 8
+ntime  10                ! 10 MD steps
+
+xcart  
+   2.45E+00  2.34E-01  0.0E+00
+   2.34E-01  2.45E+00  0.0E+00
+   3.14E-01  3.14E-01  0.0E+00
+
+#natfix 1
+#iatfix 3
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc, PseudosTM_pwteter/8o.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t88.abo, tolnlines = 50, tolabs = 3.000e-6, tolrel = 6.0e-3, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Basic test of geometry optimization for water
+#%%   First computing the ground state of a close configuration
+#%%   Uses 5 different methods to find the relaxed positions
+#%% topics = MolecularDynamics, GeoOpt
+#%%<END TEST_INFO>

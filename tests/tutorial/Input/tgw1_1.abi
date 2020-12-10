@@ -1,0 +1,121 @@
+# Crystalline silicon
+# Calculation of the GW corrections
+# Dataset 1: ground state calculation to get the density 
+# Dataset 2: NSCF run to produce the WFK file for 10 k-points in IBZ
+# Dataset 3: calculation of the screening (epsilon^-1 matrix for W)
+# Dataset 4: calculation of the Self-Energy matrix elements (GW corrections)
+
+ndtset      4
+
+############
+# Dataset 1
+############
+# SCF-GS run 
+nband1  6
+tolvrs1 1.0e-10
+
+############
+# Dataset 2
+############
+# Definition of parameters for the calculation of the WFK file
+nband2      40       # Number of (occ and empty) bands to be computed
+nbdbuf2      5
+iscf2       -2
+getden2     -1
+tolwfr2  1.0d-18     # Will stop when this tolerance is achieved 
+
+############
+# Dataset 3
+############
+# Calculation of the screening (epsilon^-1 matrix)
+optdriver3  3        # Screening calculation
+getwfk3     -1       # Obtain WFK file from previous dataset
+nband3      17       # Bands to be used in the screening calculation
+ecuteps3    3.6      # Cut-off energy of the planewave set to represent the dielectric matrix. 
+                     # It is important to adjust this parameter.
+ppmfrq3    16.7 eV   # Imaginary frequency where to calculate the screening
+
+############
+# Dataset 4
+############
+# Calculation of the Self-Energy matrix elements (GW corrections)
+optdriver4  4        # Self-Energy calculation
+getwfk4     -2       # Obtain WFK file from dataset 1
+getscr4     -1       # Obtain SCR file from previous dataset
+nband4      30       # Bands to be used in the Self-Energy calculation
+ecutsigx4    8.0     # Dimension of the G sum in Sigma_x. 
+                     # (the dimension in Sigma_c is controlled by ecuteps)
+
+nkptgw4      1       # number of k-point where to calculate the GW correction
+kptgw4               # k-points in reduced coordinates
+   0.000    0.000    0.000
+bdgw4       4  5     # calculate GW corrections for bands from 4 to 5
+
+
+
+# Data common to the three different datasets
+
+# Definition of the unit cell: fcc
+acell  3*10.217        # This is equivalent to   10.217 10.217 10.217
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5   
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1         # There is only one type of atom
+znucl 14          # The keyword "znucl" refers to the atomic number of the 
+                  # possible type(s) of atom. The pseudopotential(s) 
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Silicon.
+                         
+# Definition of the atoms
+natom 2           # There are two atoms
+typat  1 1        # They both are of type 1, that is, Silicon.
+xred              # Reduced coordinate of atoms
+      0.0  0.0  0.0
+      0.25 0.25 0.25
+
+
+# Definition of the k-point grid
+ngkpt   2 2 2  
+nshiftk 4
+shiftk  0.0 0.0 0.0  # These shifts will be the same for all grids
+        0.0 0.5 0.5
+        0.5 0.0 0.5
+        0.5 0.5 0.0
+istwfk  *1         # This is mandatory in all the GW steps.
+
+# Definition of the planewave basis set (at convergence 16 Rydberg 8 Hartree)
+ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
+
+# Definition of the SCF procedure
+nstep   20        # Maximal number of SCF cycles
+#toldfe  1.0d-6    # Will stop when this tolerance is achieved on total energy
+diemac  12.0      # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tgw1_1.abo, tolnlines= 10, tolabs=  0.03, tolrel=  1.500e-01
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = GW 
+#%% description = 
+#%%   Crystalline silicon
+#%%   Calculation of the GW corrections
+#%%   Dataset 1: ground state calculation and calculation of the WFK file for 10 k-points in IBZ
+#%%   Dataset 2: calculation of the screening (epsilon^-1 matrix for W)
+#%%   Dataset 3: calculation of the Self-Energy matrix elements (GW corrections)
+#%%<END TEST_INFO>

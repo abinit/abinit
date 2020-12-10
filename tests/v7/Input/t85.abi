@@ -1,0 +1,90 @@
+# Preparatory run for E-PH calculations.
+# The sequence of datasets makes the ground states and
+# all of the independent perturbations of the single Al atom 
+# for the irreducible qpoints in a 4x4x4 grid.
+# Note that the q-point grid must be a sub-grid of the k-point grid (here 8x8x8)
+
+ndtset 9
+prtpot 1
+nstep  50
+#nsppol 2
+
+# Common data
+ecut   6.0
+nband  5
+occopt 7    # include metallic occupation function with a small smearing
+tsmear 0.04
+
+# The kpoint grid is minimalistic to keep the calculation manageable.
+# Use a centered grid for the kpoints
+ngkpt        8 8 8 
+kptopt       3
+nshiftk      1
+shiftk       0.0 0.0 0.0
+
+# DATASET 1 : make ground state wavefunctions and density
+tolwfr1  1.0d-14
+rfphon1  0       # for DS1 do _not_ do perturbation
+nqpt1    0       # for DS1 do _not_ do perturbation
+prtwf1   1       # need GS wavefunctions for further runs
+getwfk1  0       # Change default
+kptopt1  1       # Use symmetries to produce GS-WFK
+
+# Phonon calculation with 4x4x4
+qpt2      0.00000000E+00  0.00000000E+00  0.00000000E+00
+qpt3      2.50000000E-01  0.00000000E+00  0.00000000E+00
+qpt4      5.00000000E-01  0.00000000E+00  0.00000000E+00
+qpt5      2.50000000E-01  2.50000000E-01  0.00000000E+00
+qpt6      5.00000000E-01  2.50000000E-01  0.00000000E+00
+qpt7     -2.50000000E-01  2.50000000E-01  0.00000000E+00
+qpt8      5.00000000E-01  5.00000000E-01  0.00000000E+00
+qpt9     -2.50000000E-01  5.00000000E-01  2.50000000E-01
+
+# general data for all phonon calculations:
+nqpt    1        # 1 qpoint at a time
+getwfk  1        # all other datasets get WFK from DS1
+prtwf   0
+rfatpol 1 1      # all atoms are perturbed
+rfdir   1 1 1    # all directions of perturbation
+rfphon  1
+tolvrs  1e-7
+
+# Geometry
+acell 3*7.5
+rprim
+  0.0 0.5 0.5
+  0.5 0.0 0.5
+  0.5 0.5 0.0
+
+natom  1
+typat  1
+xred   0.00 0.00 0.00
+ntypat 1
+znucl  13
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al-psval.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t85.abo, tolnlines= 50, tolabs=3.000e-02, tolrel=6.000e-03, fld_options= -easy
+#%% [shell]
+#%% post_commands =
+#%%  ww_cp t85o_DS1_WFK t88o_DS20_WFK;
+#%%  ww_cp t85o_DS1_DEN t89o_DS20_DEN;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Giantomassi 
+#%% keywords = NC, DFPT, EPH
+#%% description = 
+#%%   Preparatory run for E-PH calculations.
+#%%   The sequence of datasets makes the ground states and
+#%%   all of the independent perturbations of the single Al atom 
+#%%   for the irreducible qpoints in a 4x4x4 grid.
+#%%   Note that the q-point grid must be a sub-grid of the k-point grid (here 8x8x8)
+#%%<END TEST_INFO>

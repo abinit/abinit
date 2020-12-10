@@ -1,0 +1,29 @@
+t12o_DS1_WFK     # WF file
+1                # 1st k point
+5                # 5th band
+1                # Look for a GW QPS file
+t12o_DS3_QPS     # QPS file
+6.0              # Perform angular momentum decomposition
+14               # cube file created
+t13              # Root for the output name
+0                # This is to leave
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = cut3d
+#%% test_chain = t12.abi, t13.abi
+#%% [files]
+#%% files_to_test = 
+#####%%  t13.out,      tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  -easy;
+#%%  t13_k1_b5, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  -easy 
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = F. Bruneval
+#%% keywords = GW
+#%% description = 
+#%%   FCC Argon
+#%%   cut3d analysis and output of a cube file of a QPscGW conduction state. The previous WFK and QPS
+#%%   files are read.
+#%%<END TEST_INFO>
