@@ -1,0 +1,64 @@
+# Magnesium atom. acell much too small.
+# Excited states computation
+
+ ndtset 2   getden -1   getwfk -1
+
+ nband1   1
+ prtden1  1
+
+ iscf2   -1
+ nband2  10
+
+ kptopt 0
+
+ nkpt  1    kptnrm  4
+     kpt  0 0 0
+     wtk  1
+
+ acell 17.999   18   18.001
+ boxcenter 3*0
+ diemac 1.0d0   diemix 0.5d0
+ ecut  3.5
+
+ ixc 7
+
+ natom  1
+
+ nstep 20
+ nsym 8  ntypat  1
+ occopt 1
+ rprim 1 0 0  0 1 0  0 0 1
+ symrel  1  0  0   0  1  0   0  0  1
+        -1  0  0   0  1  0   0  0  1
+         1  0  0   0 -1  0   0  0  1
+        -1  0  0   0 -1  0   0  0  1
+         1  0  0   0  1  0   0  0 -1
+        -1  0  0   0  1  0   0  0 -1
+         1  0  0   0 -1  0   0  0 -1
+        -1  0  0   0 -1  0   0  0 -1
+ tnons 24*0
+ tolwfr 1.0d-16
+ typat  1
+ xcart  0 0 0 Angstrom
+ znucl  12.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/12mg.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t70.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC, TDDFT
+#%% authors = Unknown
+#%% description = 
+#%%   Same as test 69, but with another xc functional (ixc=7, PW92 LSD)
+#%%   With the values acell 18, ecut 3.5, nband2 10, the present
+#%%   test generates KS diff=3.46eV, TDLDA(1S1P)=4.45eV, TDLDA(1S3P)=2.84eV
+#%% topics = TDDFT
+#%%<END TEST_INFO>

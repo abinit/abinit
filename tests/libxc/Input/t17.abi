@@ -1,0 +1,77 @@
+# He atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
+# Not accurate, only portability check.
+
+ndtset 18
+
+# (S)LDAs X + different correlations
+ixc1  -1022
+ixc2  -1023
+ixc3  -1024
+
+# GGAs : different exchanges + LYP correlation
+ixc4  -139131
+ixc5  -140131
+ixc6  -141131
+ixc7  -142131
+ixc8  -144131
+ixc9  -145131
+ixc10 -149131
+ixc11 -183131
+ixc12 -184131
+
+# GGAs : Becke 88 exchange + different correlations
+ixc13 -106143
+ixc14 -106147
+ixc15 -106148
+ixc16 -106186
+
+# GGAs : combined XC functionals
+ixc17  -146
+ixc18  -170
+
+#Common data
+acell 3*5
+diemac 1.0d0
+diemix 0.5d0
+ecut 50
+
+kptopt 0
+kpt 3*0.25
+natom 1
+nband 1
+nkpt 1
+nline 1
+nstep 1
+#nstep 15
+
+ntypat 1
+tolwfr 1.0d-14
+typat 1
+znucl 2
+xred 3*0
+
+#Avoid to print densities and wavefunctions
+prtden 0
+prtwf  0
+prteig 0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02he.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t17.abo, tolnlines = 10, tolabs = 1.1e-1, tolrel = 8.0e-5, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Isolated Helium atom
+#%%   Test functionals from libXC 1.1 that were untested before ABINIT v6.12 (libxc 1.0.0.1 was used).
+#%%   This is to check the portability for different platform.
+#%%   Extremely quick (nstep=1, nline=1). Less than 5 secs to test 18 functionals ...
+#%%<END TEST_INFO>

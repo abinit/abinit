@@ -1,0 +1,75 @@
+# -------------------------------------------------------------------
+# h-BN - Test of Van der Waals dispersion potential with Becke-
+# Jonhson damping (DFT-D3(BJ)) on elastic constants
+# Test on distorted hexagonal boron nitride (to get non-zero internal
+# strains)
+# DATASET 1: ground-state
+# DATASET 2: computation of the elastic constants and internal strains 
+# by DFPT
+# --------------------------------------------------------------------
+
+  ndtset  2
+  ecut 5 # Must be increased for convergence purposes
+  ecutsm 0.5
+  dilatmx 1.05
+  ixc 11
+# DATASET 1: ground-state computation
+  kptopt1   1             
+  tolwfr1   1.0d-24
+# DATASET 2: elastic constants and internal strains       
+  rfphon2   1      
+  rfatpol2   1 2          
+   rfdir2   1 1 1         
+    nqpt2   1
+     qpt2   0.0 0.0 0.0  
+  rfstrs2   3
+  getwfk2   1            
+  kptopt2   2            
+  tolvrs2   1.0d-16
+
+acell 4.7407935029E+00  4.7407935029E+00  6.408898878
+angdeg 90 90 120
+
+nband 6
+nbdbuf 2
+ntypat  2
+znucl 5 7
+natom 2
+typat  1 2
+xred
+0.0 0.0  0.24
+1/3 2/3 0.75
+
+ngkpt   2 2 1 # Must be increased for convergence purpose
+nshiftk 1
+shiftk  0.0 0.0 0.5
+diemac 12.0
+
+#vdW DFT-D input variables
+vdw_xc 7 # Activate DFT-D3(BJ)
+vdw_tol 1d-8 # Tolerance on the pair-wise term (1d-12 is safer for convergence purposes)
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "B-q3, PseudosHGH_pwteter/7n.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t99.abo, tolnlines = 8, tolabs = 1.001e-04, tolrel = 5.0e-04, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = B. VAN TROEYE
+#%% keywords = DFPT, ELASTIC, VDW, DFT-D3(BJ)
+#%% description = 
+#%%   Computation of the elastic constants and internal strains for
+#%%   distorded h-BN (to get non-zero internal strains)
+#%%   vdW-DFT-D3 corrections with Becke-Jonhson damping (DFT-D3(BJ))
+#%%   Only the pair-wise is computed (3-body term not implemented)
+#%%   In this test the following properties are thus tested: contribution
+#%%   to the energy and to the stress of DFT-D3(BJ) as well as 
+#%%   the contribution to the elastic constants and internal strains
+#%% topics = vdw
+#%%<END TEST_INFO>

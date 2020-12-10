@@ -1,0 +1,44 @@
+ecut 3 # may need to increase this to get portable results
+
+# slightly displace first atom from equilibrium
+xcart
+0.1002 0 0.05
+2.5 2.5 2.5
+ chksymtnons 0
+
+# this turns on the use of delocalized internals for geometry relaxation
+# Broyden algorithm on top
+ionmov 10
+tolmxf 1.e-6
+ntime 2
+
+natom 2
+typat 1 1
+ntypat 1
+znucl 14
+toldfe 1.e-6
+acell 3*10
+rprim
+0.0 0.5 0.5
+0.5 0.0 0.5
+0.5 0.5 0.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t23.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 63
+#%% [extra_info]
+#%% authors = MJ. Verstraete
+#%% keywords = 
+#%% description = 
+#%%   Delocalized internals test. Si diamond bulk with displaced atom
+#%%   Unconverged in all variables 
+#%%<END TEST_INFO>

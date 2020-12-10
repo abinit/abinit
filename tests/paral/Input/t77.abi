@@ -1,0 +1,105 @@
+# Molecular SiH4 in GWLS (G0W0 with Lanczos basis and Sternheimer equations)
+# There are 3 datasets
+# 1: Calculation of the Ground State density
+# 2: Calculation of the Ground State wavefunctions
+# 3: Calculation of the Self-Energy matrix element <gwls_band_index|\Sigma(gw_freqsp)|gwls_band_index>
+
+ndtset 3
+
+### Specific variables
+
+ # Ground state calculation (density)
+ toldfe1 1d-10
+ paral_kgb1 0              # Parallel ground state calculations don't work for molecules (the minimisation algorithm becomes unstable).
+ 
+ # Ground state calculation (wavefunctions)
+ tolwfr2  1d-25
+ getden2 1
+ iscf2 -2
+ paral_kgb2 0
+ 
+ # GWLS calculation for the HOMO
+ tolwfr3  1d-25            # This is the precision to which the Sternheimer eqs. are solved in GWLS.
+ getden3 1
+ getwfk3 2
+ optdriver3 66             # This is the optdriver triggering a GWLS calculation.
+
+ gwls_band_index3 4        # This is the band for which the matrix element of the Self-energy is requested : <gwls_band_index|\Sigma(gw_freqsp)|gwls_band_index>
+ gw_customnfreqsp3 1       # This is the number if frequencies at which the matrix element of the Self-energy is requested.
+ gw_freqsp3 -0.5558150504  # These are the frequencies at which the matrix element of the Self-energy is requested.
+ gwls_stern_kmax3 8  # This controls the convergence with respect to the size of the dielectric matrix.
+ gwls_kmax_complement3 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
+ gw_icutcoul3 0              # For molecules, the coulomb potential needs to be spherically truncated.
+ rcut3 9.0                 # The spherical truncation has this radius. 
+
+ prtwf3 0                  # By default, WFs would be printed with mpiio. However, the NAG compiler (on petrus) takes forever to do so. Since these WFs are totally unuseful and this is not a mpiio test, printing WFs is disabled. 
+ prtden3 0                 # Same reason as WFs.
+ gwls_recycle3 1           # The writing to file (gwls_recycle3 2) is more desirable as it saves a lot of RAM on production runs, but petrus + NAG 5.3.1 + OpenMPI 1.6.2 cause a BUG with writing / reading unformatted fortran files. For the time being, we won't test this, then.
+
+### Common variables
+
+# Other parameters
+ istwfk  *1                # GWLS doesn't support time reversal symetry.      
+ nline 100                 # GWLS linear equation solver may require many steps at problematic frequencies.
+
+# Number of bands
+# NOTE : The last band must be higher in energy that the higher gw_customnfreqsp requested by the user.
+ nband 10
+
+# Parallelisation : GWLS supports parallelism over bands and FFTs (from the ground state implementation),
+# but FFT parallelism tends to have poor efficiency in GWLS.
+# The optimum is usually to set the highest possible npband.
+ paral_kgb 1
+ npfft 2
+ npband 2
+
+# Cutoff energy
+ ecut 1.0
+
+# Definition of the unit cell
+acell  3*18
+rprim  1.0  0.0  0.0   
+       0.0  1.0  0.0
+       0.0  0.0  1.0
+
+# Definition of the atom types
+ntypat  2
+znucl 14 1
+
+# Definition of the atomic structure
+natom 5        
+typat 1 2 2 2 2 
+xcart
+ 0.00000000000000  0.00000000000000  0.00000000000000
+ 1.63281519635864  1.63281519635864  1.63281519635864
+-1.63281519635864 -1.63281519635864  1.63281519635864
+ 1.63281519635864 -1.63281519635864 -1.63281519635864
+-1.63281519635864  1.63281519635864 -1.63281519635864
+
+# BZ sampling for GW.
+ kptopt  1         # Option for the automatic generation of k points,
+ nkpt    1
+ ngkpt   1 1 1
+ nshiftk 1
+ shiftk  0.0 0.0 0.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/14si.pspgth, PseudosGTH_pwteter/01h.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t77_MPI4.abo, tolnlines=   20, tolabs = 1.0e-4, tolrel = 1.0e-4, fld_options =  -ridiculous;
+#%% [extra_info]
+#%% authors = J. Laflamme Janssen
+#%% keywords = GW, GWLS
+#%% description = 
+#%%  Molecular SiH4 in GWLS (G0W0 with Lanczos basis and Sternheimer equations)
+#%% topics = GWls
+#%%<END TEST_INFO>

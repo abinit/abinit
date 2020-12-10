@@ -1,0 +1,68 @@
+#   ----------------------------------------
+#   -     Input file for Abinit            -
+#   - Ca, simple cubic , 2 special k-point -
+#   -     Testing GS paw energy with lobpcg -
+#   ----------------------------------------
+
+# 1-PAW options:
+# ---------------------
+  pawecutdg 15.
+  pawmixdg  1
+
+# 2-Options for output:
+# ---------------------
+  prtdos 0 prtwf 0  enunit 2
+
+# 3-Parameters governing the convergence:
+# ---------------------------------------
+  nnsclo 1
+  ecut 3.  nband 6  nline 10  ntime 5  nstep 25
+  toldfe 1.d-8
+
+# 4-Options for the choice of calculation:
+# ----------------------------------------
+  ixc 7  occopt 7  tsmear 0.02
+  densfor_pred 0  intxc 0  fftalg 400
+  optcell 0  ionmov 0
+  so_psp 1
+  ortalg 1
+  wfoptalg 4
+  nbdblock 2
+
+# 5-Definition of the unit cell:
+# ------------------------------
+  acell 3.0 3.5 4.0
+  rprim  1.4  0.0  0.0
+         0.0  1.4  0.0
+         0.0  0.0  1.4
+  natom 1  ntypat 1
+  typat 1  znucl 20.
+  xred 0.00 0.00 0.00
+  nsym 1
+
+# 6-Definition of K-points :
+# --------------------------
+  kptopt 0
+  nkpt 2
+  kpt 0 0 0
+      0.3  0.3 0.3
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "20ca.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t94.abo, tolnlines = 0, tolabs = 2.089e-10, tolrel = 2.000e-02
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = PAW 
+#%% description = 
+#%%   Test of Ca, simple cubic , 2  k-point.
+#%%   Testing GS  PAW  energy and lobpcg algorithm.
+#%% topics = PAW
+#%%<END TEST_INFO>

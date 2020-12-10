@@ -1,0 +1,102 @@
+# Aluminum molecule, treated with varying occupation numbers
+# Compare finite differences to analytical derivatives
+# Do not use a very high precision for the finite differences
+
+ ndtset 5
+
+#GS at k
+  prtden1  1
+#GS at k+q
+  getden2  1
+  getwfk2  1
+    iscf2  -2
+    nqpt2  1
+     qpt2  0.0 0.0 0.5
+  tolwfr2  1.0d-26
+
+#Specific to the RF dataset
+  rfphon3  1
+ rfatpol3  2 2
+   rfdir3  1 0 0
+    nqpt3  1
+     qpt3  0.0 0.0 0.5
+  getwfk3  1
+  getwfq3  2
+  diemix3  0.35
+  diemac3  1.0
+  toldfe3  1.0d-10
+   nstep3  10
+
+#Computation in a doubled cell, with exactly same atomic positions
+#This should give exactly twice the total energy of dataset #1
+   acell4 11 11 32
+    xred4 0.0 0.0 -0.090     0.0 0.0 0.090
+          0.0 0.0  0.410     0.0 0.0 0.590
+   natom4 4
+   nband4 10
+    nkpt4 1
+    typat4 1 1 1 1
+     kpt4 0.0 0.0 0.0
+     wtk4 1.0
+
+#Computation in a doubled cell, with slightly disturbed positions
+   acell5 11 11 32
+  getwfk5 4
+    xred5 0.0 0.0 -0.090     0.0001  0.0 0.090
+          0.0 0.0  0.410    -0.0001  0.0 0.590
+   natom5 4
+   nband5 10
+    nkpt5 1
+    typat5 1 1 1 1
+     kpt5 0.0 0.0 0.0
+     wtk5 1.0
+
+#Common data
+ acell 11 11 16
+ amu 1.0d0
+ diemac 1.0d0
+ diemix 0.333333333333d0
+ ecut 2.5
+ ixc   1
+ kpt   3*0.0  0.0 0.0 0.5
+ natom  2
+ nband 5
+ nbdbuf 0
+ kptopt 0
+ nkpt 2
+ nstep 40
+ nsym 1
+ ntypat  1
+ occopt 4
+ rprim 1 0 0  0 1 0  0 0 1
+ tolvrs 1.d-20
+ tsmear 0.08
+ typat  1 1
+ wtk  2*0.5
+ xred   0.0 0.0 -0.180   0.0 0.0  0.180
+ znucl 13.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t36.abo, tolnlines = 0, tolabs = 3.450e-08, tolrel = 1.001e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC, DFPT
+#%% authors = Unknown
+#%% description = 
+#%%   Al2 molecule in a big box. Treat 8 bands, occupied using occopt=4.
+#%%   For a metallic occopt, the frozen-phonon (finite-difference) approach
+#%%   is strictly equivalent to the RF approach only at q/=Gamma.
+#%%   Here, computes the result at q=(0 0 1/2).
+#%%   With delta(xred)=0.0001 (DATASET 5), one gets 
+#%%   delta(etot)/delta(xred)=0.42807994 .
+#%%   The direct computation of 2DTE at the target geometry
+#%%   gives 0.428080350 .
+#%%<END TEST_INFO>

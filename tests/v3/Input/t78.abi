@@ -1,0 +1,114 @@
+#------------------------#
+# INPUT FILE FOR ABINIT  #
+# Al - fcc - gamma       #
+#------------------------#
+#
+# - Options for link
+#--------------------
+ ndtset 5
+#
+# - Options for output
+#----------------------
+ enunit 2
+ prtvol 1
+#
+# - Parameters governing the convergence
+#----------------------------------------
+ ecut   6.
+ nband 20
+ occopt 3
+ tsmear 0.0002
+#
+# - Options for the choice of calculations
+#-----------------------------------------
+ ixc   1
+ nstep 30
+#
+# SC run
+ toldfe1 1.d-10
+ nqpt1   0
+ prtden1 1
+ npulayit1 1  #This allows to find the minimum
+#
+# NSC run
+ iscf2 -2
+ tolwfr2 1.0d-22
+ nqpt2 0
+ getden2 1
+ getwfk2 1
+#
+# ddk response function
+ iscf3 -3
+ tolwfr3 1.0d-22
+ nqpt3 1
+ qpt3 0.0d0 0.0d0 0.0d0
+ rfdir3 1 0 0
+ rfelfd3 2
+ getwfk3 2
+
+# ddk response function
+ iscf4 -3
+ tolwfr4 1.0d-22
+ nqpt4 1
+ qpt4 0.0d0 0.0d0 0.0d0
+ rfdir4 0 1 0
+ rfelfd4 2
+ getwfk4 2
+
+
+# ddk response function
+ iscf5 -3
+ tolwfr5 1.0d-22
+ nqpt5 1
+ qpt5 0.0d0 0.0d0 0.0d0
+ rfdir5 0 0 1
+ rfelfd5 2
+ getwfk5 2
+
+#
+# - Definition of special k-points
+#----------------------------------
+ kptopt 0
+ nkpt 1
+ kpt 0.0 0.0 0.0
+ wtk 1.0
+ kptnrm 1
+#
+# - Definition of the unit cell
+#--------------------------------
+ acell 3*7.6557
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ natom 1
+ ntypat 1
+ typat 1
+ znucl 13.
+ xred 0.0 0.0 0.0
+ amu 26.98
+#
+# - Symmetries of the lattice
+#
+ nsym 1
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/13al.3.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t78.abi, t79.abi
+#%% [files]
+#%% files_to_test = t78.abo, tolnlines=  3, tolabs=  3.000e-07, tolrel=  4.000e-04, fld_options=-medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC, DFPT
+#%% authors = V. Recoules
+#%% description = 
+#%%   Aluminum FCC. Only one k point. Preparation of the conductivity test number 79.
+#%%   Of course, 1 k point is much to small to allow to get the correct conductivity, 
+#%%   but it is for testing purposes only.
+#%%<END TEST_INFO>

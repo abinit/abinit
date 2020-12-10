@@ -1,0 +1,50 @@
+# Silicon diatomic molecule for test calculations
+# Exp bond=4.244 bohr; freq=511 cm^-1 (?)
+# Binggeli reports that large box (18 on side) needed to get physical answers.
+ acell 10 6 6
+ diemac 1.0d0   
+ diemix 0.333333333333d0
+ ecut 7.0
+ enunit 2
+ intxc  1
+ isecur -2
+ kptopt 0
+ kpt   3*0
+ natom  2 nband 5 3
+ nkpt 1
+ nsppol 2
+ nstep 25 
+ nsym 1
+ ntypat  1
+ occ 8*1
+ occopt 2
+ prtden 1
+ rprim 1 0 0  0 1 0  0 0 1
+ tolwfr 1.0d-13
+ typat  2*1 
+ wtk  1
+ xcart -2.122 0 0 2.122 0 0
+ znucl  14.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t17.abi, t19.abi, t20.abi, t21.abi, t23.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t17.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [shell]
+#%% post_commands = 
+#%%   ww_cp t17o_WFK t23i_WFK;
+#%%   ww_cp t17o_DEN t23i_DEN
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Si2 molecule, static, spin-polarized.  Write t17o_DEN (prtden=1).
+#%%<END TEST_INFO>

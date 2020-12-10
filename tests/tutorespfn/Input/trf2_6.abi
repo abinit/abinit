@@ -1,0 +1,41 @@
+#Input file for 'band2eps.' This data layout must be used, line-by-line.
+    #number of atoms in a cell :
+natom 2
+    #minimum value, maximum value and number of tics of the vertical axe :
+min 0.0 max 400.0 ngrad 8
+    #Units : 1 for cm-1, 2 for THz :
+cunit 1
+    #Number of lines :
+nlines 7
+    #Description of the points in q space :
+qpoint_name gamma  K  X  gamma  L  X  W  L  
+    #Number of q points for each line :
+nqline 10  10  10  10  10  10  11
+    #Scale factor for each line :
+scale 1.06066017  0.35355339  1.0  0.86602540  0.86602540  0.5  0.70710678
+    #COLOR DEFINITION :
+    #put 1 in place of the atom you want to be colored in 
+    #red
+red 0 0
+    #green
+green 0 0
+    #blue
+blue 0 0
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = band2eps
+#%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
+#%% no_check = yes
+#%% [files]
+### the tests have been disabled
+##%% files_to_test = 
+##%%   trf2_6.out.eps, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = 
+#%% description = Input file for 'band2eps.' This data layout must be used, line-by-line.
+#%%<END TEST_INFO>

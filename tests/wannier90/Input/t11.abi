@@ -1,0 +1,72 @@
+
+     ndtset  2   
+
+     acell    12.5   12.5   12.5 
+     rprim      0.00   0.50   0.50
+                0.50   0.00   0.50
+                0.50   0.50   0.00
+     natom      1
+      xred      0.00   0.00   0.00
+    ntypat      1
+     typat      1      
+     znucl     18.00
+
+     chksymbreak 0
+# Plane wave basis
+      ecut      15.00               
+      ecutsm    0.5
+# kpoint grid
+     ngkpt      2 2 2               #grid of 2x2x2 kpoints
+                                    #this is too low, you can increase it
+   nshiftk      1                   #just one shift is supported by wannier90 
+    shiftk      0.00   0.00   0.00  #no shift
+
+# Self-consistent run to get the density
+     nstep1  100                  
+    tolvrs1   1.00d-11 #Tolerance for convergence
+     nband1   5
+    prtden1   1
+    diemac  4.0     #Preconditioner for scf
+    kptopt1   1
+    istwfk1   8*1     #Controls the form of the wavefunctions
+
+# Second: Wannier90
+     iscf2 -2   #nscf run
+    nstep2 0      #just read the old wave functions
+   tolwfr2 1.e-10 #dummy here
+   getwfk2 -1   
+   getden2 -1   # Usual file handling data
+  prtwant2 2   # Call to Wannier90
+    nband2 4  
+   istwfk2 8*1 #Controls the form of the wavefunctions
+   kptopt2 3   # Option for the automatic generation of k points
+w90prtunk2 0   #Prints UNK files (for plotting the Wannier functions)
+w90iniprj2 2
+     ixc -102
+    vdw_xc 10        # Silvestrellis's approach to evaluate vdW energy
+vdw_nfrag -1     # Just one fragment in unit cell, in this case one Ar atom with 4 MLWFs
+vdw_typfrag 1  
+vdw_supercell2 2 2 2  # Supercell composed of 64 unit cells 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "18ar.revpbe"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_LIBXC
+#%% [files]
+#%% files_to_test = 
+#%%   t11.abo, tolnlines = 9, tolabs = 2.0e-4, tolrel = 1.1, fld_options = -medium
+#%% [shell] 
+#%% pre_commands = iw_cp t11_w90.win w90.win
+#%% [paral_info]
+#%% nprocs_to_test = 
+#%% max_nprocs = 3
+#%% [extra_info]
+#%% authors = C. Espejo, Y. Pouillon
+#%% keywords = 
+#%% description = 
+#%%   Argon FCC. Test the approach of Silvestrelli to access van der Waals interactions.
+#%% topics = vdw, Wannier
+#%%<END TEST_INFO>

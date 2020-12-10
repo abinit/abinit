@@ -1,0 +1,99 @@
+#   Si in diamond structure; 2 special points; low ecut.
+#   Cell optimisation, very low cut-off, still meaningfull.
+
+# DATASET configuration
+#----------------------
+ ndtset 2
+
+# Atomic Structure
+#-----------------
+ acell   3*10.40d0
+ natom   2
+ ntypat  1
+ rprim    0 .5 .5
+         .5  0 .5
+         .5 .5  0
+ typat  1 1
+ xred  3*0.00d0
+       3*0.25d0
+ znucl 14
+
+# Structure Optimization
+#-----------------------
+ ionmov 2
+ ntime 4
+ optcell 1
+ dilatmx 1.01
+ strfact 100.
+ tolmxf 1.0d-4
+
+# Other Variables
+#----------------
+ getcell -1
+
+ ecut: 2.0
+ ecut+ 0.2
+
+ ecutsm 0.5
+ intxc 1
+ diemac 12.0d0
+ enunit 2
+ kptopt 0
+ kpt   1 1 1
+       1 2 2
+ kptnrm 4
+ nband 4
+ nkpt  2
+ nline 3
+ nstep 10
+ nsym  24
+ occopt  1
+ symrel
+  1  0  0   0  1  0   0  0  1
+  0  1 -1   1  0 -1   0  0 -1
+  0 -1  1   0 -1  0   1 -1  0
+ -1  0  0  -1  0  1  -1  1  0
+  0  1  0   0  0  1   1  0  0
+  1  0 -1   0  0 -1   0  1 -1
+  0 -1  0   1 -1  0   0 -1  1
+ -1  0  1  -1  1  0  -1  0  0
+  0  0  1   1  0  0   0  1  0
+  0  0 -1   0  1 -1   1  0 -1
+  1 -1  0   0 -1  1   0 -1  0
+ -1  1  0  -1  0  0  -1  0  1
+  1  0 -1   0  1 -1   0  0 -1
+  0  1  0   1  0  0   0  0  1
+ -1  0  1  -1  0  0  -1  1  0
+  0 -1  0   0 -1  1   1 -1  0
+ -1  1  0  -1  0  1  -1  0  0
+  1 -1  0   0 -1  0   0 -1  1
+  0  0 -1   1  0 -1   0  1 -1
+  0  0  1   0  1  0   1  0  0
+  0 -1  1   1 -1  0   0 -1  0
+ -1  0  0  -1  1  0  -1  0  1
+  1  0  0   0  0  1   0  1  0
+  0  1 -1   0  0 -1   1  0 -1
+ tnons 72*0.0
+ toldfe 1.0d-10
+ wtk   1 3
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t78.abo, tolnlines = 2, tolabs = 6.0e-8, tolrel = 2.0e-10
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   2 special k point Si in 2-atom diamond unit cell.
+#%%   Optimization of unit cell volume (optcell=1).
+#%%   Use 2 datasets, and the variable getcell.
+#%% topics = GeoOpt
+#%%<END TEST_INFO>

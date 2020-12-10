@@ -1,0 +1,109 @@
+# Crystalline silicon
+# Calculation of the GW corrections
+# Dataset 1: ground state calculation 
+# Dataset 2: calculation of the WFK file for only Gamma point
+# Dataset 3: calculation of the screening (epsilon^-1 matrix for W)
+
+ndtset   3
+
+# BZ sampling for GW.
+ngkpt   1 1 1
+nshiftk 1
+shiftk  0.0 0.0 0.0
+istwfk  *1            # Option needed for special k-points like Gamma 
+
+# Dataset1: usual self-consistent ground-state calculation
+# Definition of the k-point grid
+kptopt1  1            # Option for the automatic generation of k points,
+ngkpt1   4 4 4  
+nshiftk1 4
+shiftk1  0.5 0.5 0.5  # These shifts will be the same for all grids
+         0.5 0.0 0.0
+         0.0 0.5 0.0
+         0.0 0.0 0.5
+istwfk1  10*1            
+toldfe1  1.0d-6    # Will stop when this tolerance is achieved on total energy
+
+# Dataset2: calculation of WFK file
+# Definition of the SCF procedure
+iscf2    -2             # Non self-consistent calculation
+getden2  -1             # Read previous density file
+tolwfr2  1.0d-16        # Still get it converged
+nband2   260
+nbdbuf2   40
+
+# Dataset3: Calculation of the screening (epsilon^-1 matrix)
+optdriver3  3
+getwfk3     -1
+nband3      25
+ecuteps3    6.0
+ppmfrq3    16.7 eV
+
+
+# Definition of the unit cell: fcc
+acell  3*10.217        # This is equivalent to   10.217 10.217 10.217
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1         # There is only one type of atom
+znucl 14          # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Silicon.
+
+# Definition of the atoms
+natom 2           # There are two atoms
+typat  1 1        # They both are of type 1, that is, Silicon.
+xred              # Reduced coordinate of atoms
+      0.0  0.0  0.0
+      0.25 0.25 0.25
+
+# Definition of the planewave basis set (at convergence 16 Rydberg 8 Hartree)
+ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
+
+# Definition of the SCF procedure
+nstep   20        # Maximal number of SCF cycles
+diemac  12.0      # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tgw1_2.abi, tgw1_3.abi, tgw1_4.abi, tgw1_5.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tgw1_2.abo, tolnlines= 70, tolabs=  1.010e-03, tolrel=  1.000e+00
+#%% [shell] 
+#%% post_commands = 
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_3o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_3o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_4o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_4o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_5o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_5o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_6o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_6o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_7o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_7o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_8o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_8o_DS3_SCR;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords =  GW
+#%% description = 
+#%%    Crystalline silicon
+#%%    Calculation of the GW corrections
+#%%    Dataset 1: ground state calculation 
+#%%    Dataset 2: calculation of the WFK file for only Gamma point
+#%%    Dataset 3: calculation of the screening (epsilon^-1 matrix for W)
+#%%<END TEST_INFO>

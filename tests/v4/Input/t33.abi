@@ -1,0 +1,78 @@
+#Driver
+
+atom  1  # The basin of attraction of Oxygen atom will be examined
+crit  2  # determine the critical points
+surf  1  # build the Bader surface
+gpsurf 1  # output for GNUplot
+irho  1   # drives the integration of the Bader charge
+
+#Parameter
+
+# nsa 2  #  one might gain a bit of cpu time
+# nsb 2  #  by using these values, smaller than the default
+# nsc 2
+
+inpt 50      # This value is suitable
+ntheta 8    # This value is much too small
+nphi 4       # This value is much too small
+thetamax   3.14159265358  # These two variables define a quadrant
+phimax   1.57079632679    #
+  maxatd 10.9   # The starting atoms within this distance are sufficient
+  maxcpd 8.0
+  lgrad2 1.0d-4  # Such loose criteria are needed to catch all the CPs.
+  lstep2 1.0d-4  #
+  dpclim 5.0d-2  # Because the ecut is quite low, the finite elements
+                 # are quite large. So, it might be that ONE critical point
+                 # is seen on TWO finite elements, while being at a larger
+                 # distance that the default value of dpclim
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = aim
+#%% test_chain = t32.abi, t33.abi, t34.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t33.out, tolnlines = 19, tolabs = 2.000e-03, tolrel = 2.000e-04, fld_options = -medium
+#%% psp_files = DensityCore_pw/08-O.8.fc, DensityCore_pw/12-Mg.8.fc
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   MgO molecule, Bader analysis.
+#%%   Examine the Oxygen atom only.
+#%%   Determine 2 bonding critical points (only !),
+#%%   8 ring critical points, and 8 cage critical points.
+#%%   (In agreement with Euler's relation : #BCP-#RCP+#CCP=2)
+#%%   The ecut that was used in test case 32 is quite
+#%%   low, so that the accuracy of the critical points is not
+#%%   too good. Especially, symmetries are broken at the level
+#%%   of 0.0003.
+#%%   Get 2 core electrons, 6.8043 valence electrons.
+#%%   The nucleus charge is +8. The Oxygen atom-in-molecule
+#%%   has a net charge of -0.8043.
+#%%   Additional explanation about the weak number of BCP
+#%%   for oxygen. One might expect the O atom to be connected
+#%%   through the other O atoms in neighbouring cells (x and y
+#%%   directions - hence 4 BCPs in these directions), but
+#%%   one sees that the only existing BCPs
+#%%   are towards the Mg atoms. This is surprising, but correct ! Indeed,
+#%%   the density at the middle of the segment between two O atoms
+#%%   along x (or y) is LOWER than the density at the
+#%%   middle of the segment between two Mg atoms along x (or y).
+#%%   Indeed, although the O atoms attract electrons from the Mg
+#%%   atoms, they become negatively charged, and the potential,
+#%%   in DISTANT regions of the molecule, is lower (so more
+#%%   attractive) on the side
+#%%   of the Mg atoms than on the side of the O atoms !
+#%%   This means that the tail of the density extends further
+#%%   in the x-y plane containing the Mg atoms, than in the
+#%%   x-y plane containing the O atoms. So, the middle of the
+#%%   segment connecting the O atoms actually belongs to the
+#%%   Mg basin of attraction, and is close to a Cage Critical Point
+#%%   shared by Oxygen and Magnesium atoms. By contrast, the
+#%%   middle of the segment connecting the Mg atoms is, as expected,
+#%%   close to a Bond Critical Point.
+#%% topics = Bader
+#%%<END TEST_INFO>
