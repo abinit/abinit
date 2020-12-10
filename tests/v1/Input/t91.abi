@@ -1,0 +1,80 @@
+# Crazy Si cell with 4 atoms. Orthorhombic unit cell
+# Used to test the generation of symmetry matrices from
+# input spatial group
+
+ ndtset 3
+
+# No use of the symmetry analyser
+   nsym1    4
+ symrel1  1  0  0   0  1  0   0  0  1
+         -1  0  0   0  1  0   0  0  1
+          1  0  0   0 -1  0   0  0  1
+         -1  0  0   0 -1  0   0  0  1
+   typat1 4*1
+   xred1  .1 .2 .3
+          .9 .2 .3
+          .1 .8 .3
+          .9 .8 .3
+
+# Use analsym : start from asymmetric unit cell,
+# use space group number to generate symmetry operations and
+# full set of atoms
+ spgroup2  25
+ spgaxor2  1
+ spgorig2  1
+   natrd2  1
+    typat2  1*1
+    xred2  .1 .2 .3
+
+# Use analsym : gives full unit cell as well as
+# space group number, and performs check.
+ spgroup3  25
+ spgaxor3  1
+ spgorig3  1
+    typat3  4*1
+    xred3  .1 .2 .3
+           .9 .2 .3
+           .1 .8 .3
+           .9 .8 .3
+
+#Common data
+ acell 3*10.26311
+ diemac 12.d0
+ ecut 1.0
+ enunit 2
+ intxc 1
+ kptopt 0
+ kpt   1 1 1 -1 1 1 1 -1 1 1 1 -1 kptnrm 4
+ natom  4 nband 8
+ nkpt  4
+ nline 1
+ nstep 1
+ ntypat  1
+ occopt  1
+ prtvol 10
+ rprim   1 0 0 0 1 0 0 0 1
+ tolwfr 1.0d-13
+ wtk   4*1
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/14si.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t91.abo ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Crazy 4-atom Si cell. Test the symmetrizer.
+#%%   Dataset 1 : Full set of symmetries and full set of atoms, 
+#%%   Dataset 2 : Spatial group index is given, with an irreducible set of atoms
+#%%   Dataset 3 : Spatial group index is given, with a full set of atoms,
+#%%   and checks are performed.
+#%%<END TEST_INFO>

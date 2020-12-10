@@ -1,0 +1,2901 @@
+
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h26 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t77/t77.in
+- output file    -> t77.out
+- root for input  files -> t77i
+- root for output files -> t77o
+
+
+ DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       4
+     lnmax =       4     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           9        mffmem =           1         mkmem =           2
+       mpw =         150          nfft =        4096          nkpt =           2
+================================================================================
+P This job should need less than                       2.206 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2.
+     intxc =       0    ionmov =       0      iscf =      -2    lmnmax =       4
+     lnmax =       4     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =          16
+       mpw =         150          nfft =        4096          nkpt =          16
+================================================================================
+P This job should need less than                       1.998 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  3 (RF).
+     intxc =       0      iscf =       7    lmnmax =       4     lnmax =       4
+     mgfft =      16  mpssoang =       3    mqgrid =    3001     natom =       2
+  nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
+      nsym =      48    n1xccc =    2501    ntypat =       2    occopt =       1
+   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =          16
+-   mkqmem =          16        mk1mem =          16           mpw =         150
+      nfft =        4096          nkpt =          16
+================================================================================
+P This job should need less than                       2.831 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  4 (RF).
+     intxc =       0      iscf =       7    lmnmax =       4     lnmax =       4
+     mgfft =      16  mpssoang =       3    mqgrid =    3001     natom =       2
+  nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
+      nsym =      48    n1xccc =    2501    ntypat =       2    occopt =       1
+   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =          16
+-   mkqmem =          16        mk1mem =          16           mpw =         150
+      nfft =        4096          nkpt =          16
+================================================================================
+P This job should need less than                       2.831 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      1.0334455587E+01  1.0334455587E+01  1.0334455587E+01 Bohr
+              amu      1.37327000E+02  1.59994000E+01
+           diemac      1.20000000E+01
+             ecut      5.00000000E+00 Hartree
+-          fftalg         312
+           getddk1          0
+           getddk2          0
+           getddk3          3
+           getddk4          3
+           getden1          0
+           getden2         -1
+           getden3          0
+           getden4          0
+           getwfk1          0
+           getwfk2         -1
+           getwfk3          2
+           getwfk4          2
+             iscf1          7
+             iscf2         -2
+             iscf3          7
+             iscf4          7
+              ixc           3
+           jdtset        1    2    3    4
+              kpt1    -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+              kpt2    -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       5.00000000E-01  5.00000000E-01  2.50000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       5.00000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  2.50000000E-01
+                       0.00000000E+00 -2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  0.00000000E+00  2.50000000E-01
+              kpt3    -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       5.00000000E-01  5.00000000E-01  2.50000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       5.00000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  2.50000000E-01
+                       0.00000000E+00 -2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  0.00000000E+00  2.50000000E-01
+              kpt4    -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       5.00000000E-01  5.00000000E-01  2.50000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       5.00000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  2.50000000E-01
+                       0.00000000E+00 -2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  0.00000000E+00  2.50000000E-01
+           kptopt1          1
+           kptopt2          2
+           kptopt3          2
+           kptopt4          2
+         kptrlatt        2   -2    2     -2    2    2     -2   -2    2
+          kptrlen      2.06689112E+01
+P           mkmem1          2
+P           mkmem2         16
+P           mkmem3         16
+P           mkmem4         16
+P          mkqmem1          2
+P          mkqmem2         16
+P          mkqmem3         16
+P          mkqmem4         16
+P          mk1mem1          2
+P          mk1mem2         16
+P          mk1mem3         16
+P          mk1mem4         16
+            natom           2
+            nband1          9
+            nband2          8
+            nband3          8
+            nband4          8
+           ndtset           4
+            ngfft          16      16      16
+             nkpt1          2
+             nkpt2         16
+             nkpt3         16
+             nkpt4         16
+            nstep         100
+             nsym          48
+           ntypat           2
+              occ1     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000
+        optdriver1          0
+        optdriver2          0
+        optdriver3          1
+        optdriver4          1
+           prtbbb           1
+          rfatpol1          1       1
+          rfatpol2          1       1
+          rfatpol3          1       1
+          rfatpol4          1       2
+            rfdir1          0       0       0
+            rfdir2          0       0       0
+            rfdir3          1       1       1
+            rfdir4          1       1       1
+           rfelfd1          0
+           rfelfd2          0
+           rfelfd3          2
+           rfelfd4          3
+           rfphon1          0
+           rfphon2          0
+           rfphon3          0
+           rfphon4          1
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          spgroup         225
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+           toldfe1     1.00000000E-10 Hartree
+           toldfe2     0.00000000E+00 Hartree
+           toldfe3     0.00000000E+00 Hartree
+           toldfe4     1.00000000E-10 Hartree
+           tolwfr1     0.00000000E+00
+           tolwfr2     1.00000000E-20
+           tolwfr3     1.00000000E-20
+           tolwfr4     0.00000000E+00
+            typat      1  2
+              wtk1       0.75000    0.25000
+              wtk2       0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250
+              wtk3       0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250
+              wtk4       0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.7343791799E+00  2.7343791799E+00  2.7343791799E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.1672277935E+00  5.1672277935E+00  5.1672277935E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+            znucl       56.00000    8.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   3.
+
+ chkinp: Checking input parameters for consistency, jdtset=   4.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 2, mband: 9, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1672278  5.1672278  G(1)= -0.0967637  0.0967637  0.0967637
+ R(2)=  5.1672278  0.0000000  5.1672278  G(2)=  0.0967637 -0.0967637  0.0967637
+ R(3)=  5.1672278  5.1672278  0.0000000  G(3)=  0.0967637  0.0967637 -0.0967637
+ Unit cell volume ucvol=  2.7593248E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.17519
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/56ba.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/56ba.psp_mod
+- Barium.ion 5s2.5p6.6s0.5d0 rcs=rcp=rcd=1.7 ecut=22/28
+- 56.00000  10.00000    940000                znucl, zion, pspdat
+    4    3    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   0.000   0.000    2   1.6965489        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1   0.000   0.000    2   1.6965489        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    2   0.000   0.000    0   1.6965489        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+  pspatm : epsatm=   43.25917021
+         --- l  ekb(1:nproj) -->
+             0   -9.646692   27.266828
+             1   -6.938476   21.148499
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.psp_mod
+- 1.65bohr 35 hartree exncc psp for oxygen with core 19 june 1992
+-  8.00000   6.00000    920619                znucl, zion, pspdat
+    4    3    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   0.000   0.000    2   1.6491622        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1   0.000   0.000    0   1.6491622        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1.00000000000000    0.95000909444395    0.44408665956870   rchrg,fchrg,qchrg
+  pspatm : epsatm=    1.15255884
+         --- l  ekb(1:nproj) -->
+             0    7.721978   -1.904542
+ pspatm: atomic psp has been read  and splines computed
+
+   7.10587665E+02                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are     146.250     146.234
+
+================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -38.515552947404    -3.852E+01 4.378E-03 2.644E+02
+ ETOT  2  -38.974862315076    -4.593E-01 8.873E-04 1.448E+02
+ ETOT  3  -39.290601170898    -3.157E-01 5.253E-03 1.794E+00
+ ETOT  4  -39.296089907126    -5.489E-03 9.738E-05 3.711E-01
+ ETOT  5  -39.297051758684    -9.619E-04 1.003E-05 1.882E-03
+ ETOT  6  -39.297056202338    -4.444E-06 3.736E-08 1.132E-05
+ ETOT  7  -39.297056234416    -3.208E-08 1.731E-09 5.275E-08
+ ETOT  8  -39.297056234480    -6.397E-11 3.550E-11 7.183E-09
+ ETOT  9  -39.297056234499    -1.899E-11 2.410E-12 1.055E-10
+
+ At SCF step    9, etot is converged : 
+  for the second time, diff in etot=  1.899E-11 < toldfe=  1.000E-10
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  5.23917073E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  5.23917073E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  5.23917073E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1672278,   5.1672278, ]
+- [  5.1672278,   0.0000000,   5.1672278, ]
+- [  5.1672278,   5.1672278,   0.0000000, ]
+lattice_lengths: [   7.30756,    7.30756,    7.30756, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7593248E+02
+convergence: {deltae: -1.899E-11, res2:  1.055E-10, residm:  2.410E-12, diffor: null, }
+etotal    :  -3.92970562E+01
+entropy   :   0.00000000E+00
+fermie    :   2.00057737E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.23917073E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.23917073E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.23917073E-03, ]
+pressure_GPa:  -1.5414E+02
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ba]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01,  O]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          4.98737792
+    2        2.00000          5.46690550
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   20.653E-14; max=  24.103E-13
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.500000000000      0.500000000000      0.500000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      2.73437917991299     2.73437917991299     2.73437917991299
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales= 10.334455587000 10.334455587000 10.334455587000 bohr
+              =  5.468758359826  5.468758359826  5.468758359826 angstroms
+ prteigrs : about to open file t77o_DS1_EIG
+ Fermi (or HOMO) energy (hartree) =   0.20006   Average Vxc (hartree)=  -0.39124
+ Eigenvalues (hartree) for nkpt=   2  k points:
+ kpt#   1, nband=  9, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.86949   -0.63494   -0.19899   -0.17406   -0.16281    0.17584    0.18766    0.20006
+   0.33198
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.24524501794812E+01
+hartree             :  4.11090926744813E+00
+xc                  : -6.92381014686430E+00
+Ewald energy        : -3.64948681578368E+01
+psp_core            :  2.57522302062507E+00
+local_psp           : -1.72437497143040E+01
+non_local_psp       :  2.22678931695191E+00
+total_energy        : -3.92970562344989E+01
+total_energy_eV     : -1.06932728176495E+03
+band_energy         : -2.96504606519726E+00
+...
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  5.23917073E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  5.23917073E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  5.23917073E-03  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.5414E+02 GPa]
+- sigma(1 1)=  1.54141699E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.54141699E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.54141699E+02  sigma(2 1)=  0.00000000E+00
+
+================================================================================
+== DATASET  2 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 16, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1672278  5.1672278  G(1)= -0.0967637  0.0967637  0.0967637
+ R(2)=  5.1672278  0.0000000  5.1672278  G(2)=  0.0967637 -0.0967637  0.0967637
+ R(3)=  5.1672278  5.1672278  0.0000000  G(3)=  0.0967637  0.0967637 -0.0967637
+ Unit cell volume ucvol=  2.7593248E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.17519
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t77o_DS1_WFK
+
+================================================================================
+ prteigrs : about to open file t77o_DS2_EIG
+ Non-SCF case, kpt    1 ( -0.25000  0.50000  0.00000), residuals and eigenvalues=
+  3.88E-21  9.63E-21  6.45E-21  5.20E-22  1.54E-21  3.25E-21  2.91E-21  5.72E-21
+ -8.6949E-01 -6.3494E-01 -1.9899E-01 -1.7406E-01 -1.6281E-01  1.7584E-01
+  1.8766E-01  2.0006E-01
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1672278,   5.1672278, ]
+- [  5.1672278,   0.0000000,   5.1672278, ]
+- [  5.1672278,   5.1672278,   0.0000000, ]
+lattice_lengths: [   7.30756,    7.30756,    7.30756, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7593248E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.631E-21, diffor:  0.000E+00, }
+etotal    :  -3.92970562E+01
+entropy   :   0.00000000E+00
+fermie    :   2.00057737E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ba]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01,  O]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          4.98737792
+    2        2.00000          5.46690550
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   36.165E-22; max=  96.312E-22
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.500000000000      0.500000000000      0.500000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      2.73437917991299     2.73437917991299     2.73437917991299
+ length scales= 10.334455587000 10.334455587000 10.334455587000 bohr
+              =  5.468758359826  5.468758359826  5.468758359826 angstroms
+ prteigrs : about to open file t77o_DS2_EIG
+ Eigenvalues (hartree) for nkpt=  16  k points:
+ kpt#   1, nband=  8, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.86949   -0.63494   -0.19899   -0.17406   -0.16281    0.17584    0.18766    0.20006
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+================================================================================
+== DATASET  3 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 16, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ mkfilename : getddk/=0, take file _1WF from output of DATASET   3.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1672278  5.1672278  G(1)= -0.0967637  0.0967637  0.0967637
+ R(2)=  5.1672278  0.0000000  5.1672278  G(2)=  0.0967637 -0.0967637  0.0967637
+ R(3)=  5.1672278  5.1672278  0.0000000  G(3)=  0.0967637  0.0967637 -0.0967637
+ Unit cell volume ucvol=  2.7593248E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.17519
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t77o_DS2_WFK
+
+ ==>  initialize data related to q vector <== 
+
+ The list of irreducible perturbations for this q vector is:
+    1)    idir= 1    ipert=   3
+    2)    idir= 2    ipert=   3
+    3)    idir= 3    ipert=   3
+
+================================================================================
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : derivative vs k along direction   1
+
+ dfpt_looppert : COMMENT -
+  In a d/dk calculation, iscf is set to -3 automatically.
+ The set of symmetries contains only one element for this perturbation.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t77o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -15.451593761573     -1.545E+01 3.625E-02 0.000E+00
+ ETOT  2  -15.468106728679     -1.651E-02 4.477E-04 0.000E+00
+ ETOT  3  -15.468243747279     -1.370E-04 1.964E-06 0.000E+00
+ ETOT  4  -15.468245470468     -1.723E-06 6.653E-08 0.000E+00
+ ETOT  5  -15.468245494482     -2.401E-08 3.329E-10 0.000E+00
+ ETOT  6  -15.468245494830     -3.477E-10 1.313E-11 0.000E+00
+ ETOT  7  -15.468245494835     -5.164E-12 6.752E-14 0.000E+00
+ ETOT  8  -15.468245494835     -8.171E-14 2.801E-15 0.000E+00
+ ETOT  9  -15.468245494835      5.329E-15 1.469E-17 0.000E+00
+ ETOT 10  -15.468245494835      1.776E-15 6.232E-19 0.000E+00
+ ETOT 11  -15.468245494835      1.776E-15 9.893E-21 0.000E+00
+
+ At SCF step   11   max residual=  9.89E-21 < tolwfr=  1.00E-20 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   42.324E-22; max=  98.933E-22
+ dfpt_looppert : ek2=    3.5485895017E+01
+          f-sum rule ratio=    8.2265810901E-01
+ prteigrs : about to open file t77t_1WF1_EIG
+ Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
+  (in case of degenerate eigenvalues, averaged derivative)
+ kpt#   1, nband=  8, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.00358   -0.02673    0.09975    0.06782    0.08905   -0.25415   -0.29869   -0.35028
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+ Eight components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   3.15838021E+01 eigvalue=  -1.76124385E+00  local=  -1.54955536E+01
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+     kin1=  -2.91927593E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.14124076E+00   enl1=  -1.74373170E+00
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -1.54682455E+01
+  No Ewald or frozen-wf contrib.: the relaxation energy is the total one
+ 2DEtotal=   -0.1546824549E+02 Ha. Also 2DEtotal=   -0.420912365801E+03 eV
+    (  non-var. 2DEtotal :   -1.5468245495E+01 Ha)
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : derivative vs k along direction   2
+ The set of symmetries contains only one element for this perturbation.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t77o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -15.451598239028     -1.545E+01 3.625E-02 0.000E+00
+ ETOT  2  -15.468106748427     -1.651E-02 4.477E-04 0.000E+00
+ ETOT  3  -15.468243747143     -1.370E-04 1.964E-06 0.000E+00
+ ETOT  4  -15.468245470290     -1.723E-06 6.653E-08 0.000E+00
+ ETOT  5  -15.468245494305     -2.401E-08 3.329E-10 0.000E+00
+ ETOT  6  -15.468245494653     -3.477E-10 1.313E-11 0.000E+00
+ ETOT  7  -15.468245494658     -5.169E-12 6.752E-14 0.000E+00
+ ETOT  8  -15.468245494658     -5.684E-14 2.801E-15 0.000E+00
+ ETOT  9  -15.468245494658     -1.421E-14 1.469E-17 0.000E+00
+ ETOT 10  -15.468245494658      1.776E-15 6.232E-19 0.000E+00
+ ETOT 11  -15.468245494658     -1.776E-15 9.763E-21 0.000E+00
+
+ At SCF step   11   max residual=  9.76E-21 < tolwfr=  1.00E-20 =>converged.
+-open ddk wf file :t77o_DS3_1WF7
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   41.850E-22; max=  97.629E-22
+ dfpt_looppert : ek2=    3.5485895017E+01
+          f-sum rule ratio=    8.2265810900E-01
+ prteigrs : about to open file t77t_1WF1_EIG
+ Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
+  (in case of degenerate eigenvalues, averaged derivative)
+ kpt#   1, nband=  8, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.00876   -0.01287    0.04011    0.05983   -0.03578    0.14868    0.20384   -0.13787
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+ Eight components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   3.15838021E+01 eigvalue=  -1.76124385E+00  local=  -1.54955536E+01
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+     kin1=  -2.91927593E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.14124076E+00   enl1=  -1.74373170E+00
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -1.54682455E+01
+  No Ewald or frozen-wf contrib.: the relaxation energy is the total one
+ 2DEtotal=   -0.1546824549E+02 Ha. Also 2DEtotal=   -0.420912365796E+03 eV
+    (  non-var. 2DEtotal :   -1.5468245494E+01 Ha)
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : derivative vs k along direction   3
+ The set of symmetries contains only one element for this perturbation.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t77o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -15.451593757605     -1.545E+01 3.625E-02 0.000E+00
+ ETOT  2  -15.468106728316     -1.651E-02 4.477E-04 0.000E+00
+ ETOT  3  -15.468243746925     -1.370E-04 1.964E-06 0.000E+00
+ ETOT  4  -15.468245470114     -1.723E-06 6.653E-08 0.000E+00
+ ETOT  5  -15.468245494129     -2.401E-08 3.329E-10 0.000E+00
+ ETOT  6  -15.468245494476     -3.477E-10 1.313E-11 0.000E+00
+ ETOT  7  -15.468245494482     -5.169E-12 6.752E-14 0.000E+00
+ ETOT  8  -15.468245494482     -8.349E-14 2.801E-15 0.000E+00
+ ETOT  9  -15.468245494482      8.882E-15 1.469E-17 0.000E+00
+ ETOT 10  -15.468245494482      8.882E-15 6.232E-19 0.000E+00
+ ETOT 11  -15.468245494482     -7.105E-15 9.879E-21 0.000E+00
+
+ At SCF step   11   max residual=  9.88E-21 < tolwfr=  1.00E-20 =>converged.
+-open ddk wf file :t77o_DS3_1WF7
+-open ddk wf file :t77o_DS3_1WF8
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   42.319E-22; max=  98.793E-22
+ dfpt_looppert : ek2=    3.5485895017E+01
+          f-sum rule ratio=    8.2265810899E-01
+ prteigrs : about to open file t77t_1WF1_EIG
+ Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
+  (in case of degenerate eigenvalues, averaged derivative)
+ kpt#   1, nband=  8, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+   0.00617    0.01980   -0.06993   -0.06382   -0.02664    0.05273    0.04742    0.24407
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+ Eight components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   3.15838021E+01 eigvalue=  -1.76124385E+00  local=  -1.54955536E+01
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+     kin1=  -2.91927593E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.14124076E+00   enl1=  -1.74373170E+00
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -1.54682455E+01
+  No Ewald or frozen-wf contrib.: the relaxation energy is the total one
+ 2DEtotal=   -0.1546824549E+02 Ha. Also 2DEtotal=   -0.420912365791E+03 eV
+    (  non-var. 2DEtotal :   -1.5468245494E+01 Ha)
+================================================================================
+
+ ---- first-order wavefunction calculations are completed ----
+
+
+ Band by band decomposition of the localisation tensor (bohr^2)
+
+ Localisation tensor (bohr^2) for band     1,    1 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1       0.4220788894    0.0000000000
+     1        2      -0.0000000000   -0.0000000000
+     1        3      -0.0000000000   -0.0000000000
+     2        1      -0.0000000000    0.0000000000
+     2        2       0.4220788894    0.0000000000
+     2        3       0.0000000000   -0.0000000000
+     3        1      -0.0000000000    0.0000000000
+     3        2       0.0000000000    0.0000000000
+     3        3       0.4220788894    0.0000000000
+
+ Localisation tensor (bohr^2) for band     1,    2 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0432083177   -0.0000000000
+     1        2       0.0000000000    0.0000000000
+     1        3       0.0000000000   -0.0000000000
+     2        1       0.0000000000   -0.0000000000
+     2        2      -0.0432083177    0.0000000000
+     2        3      -0.0000000000   -0.0000000000
+     3        1       0.0000000000    0.0000000000
+     3        2      -0.0000000000    0.0000000000
+     3        3      -0.0432083177    0.0000000000
+
+ Localisation tensor (bohr^2) for band     1,    3 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0227887103    0.0000000000
+     1        2       0.0000000000   -0.0000000000
+     1        3       0.0000000000    0.0000000000
+     2        1       0.0000000000    0.0000000000
+     2        2      -0.0227887103    0.0000000000
+     2        3      -0.0000000000   -0.0000000000
+     3        1       0.0000000000   -0.0000000000
+     3        2      -0.0000000000    0.0000000000
+     3        3      -0.0227887103   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     1,    4 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0149679601   -0.0000000000
+     1        2      -0.0006936915    0.0000000095
+     1        3      -0.0000001474   -0.0000000008
+     2        1      -0.0006936915   -0.0000000095
+     2        2      -0.0146755492    0.0000000000
+     2        3       0.0006934736   -0.0000000061
+     3        1      -0.0000001474    0.0000000008
+     3        2       0.0006934736    0.0000000061
+     3        3      -0.0143831941   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     1,    5 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0126164000   -0.0000000000
+     1        2       0.0006936915   -0.0000000095
+     1        3       0.0000001474    0.0000000008
+     2        1       0.0006936915    0.0000000095
+     2        2      -0.0129088109    0.0000000000
+     2        3      -0.0006934736    0.0000000061
+     3        1       0.0000001474   -0.0000000008
+     3        2      -0.0006934736   -0.0000000061
+     3        3      -0.0132011660    0.0000000000
+
+ Localisation tensor (bohr^2) for band     1,    6 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0923142021    0.0000000000
+     1        2      -0.0000000000   -0.0000000000
+     1        3       0.0000000000    0.0000000000
+     2        1      -0.0000000000    0.0000000000
+     2        2      -0.0923142020   -0.0000000000
+     2        3       0.0000000000    0.0000000000
+     3        1       0.0000000000   -0.0000000000
+     3        2       0.0000000000   -0.0000000000
+     3        3      -0.0923142019   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     1,    7 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1090690500    0.0000000000
+     1        2      -0.0154956025   -0.0000002338
+     1        3      -0.0000008208   -0.0000000651
+     2        1      -0.0154956025    0.0000002338
+     2        2      -0.1002916673   -0.0000000000
+     2        3       0.0154872715    0.0000003889
+     3        1      -0.0000008208    0.0000000651
+     3        2       0.0154872715   -0.0000003889
+     3        3      -0.0915241823    0.0000000000
+
+ Localisation tensor (bohr^2) for band     1,    8 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0811875654   -0.0000000000
+     1        2       0.0154956025    0.0000002338
+     1        3       0.0000008208    0.0000000651
+     2        1       0.0154956025   -0.0000002338
+     2        2      -0.0899649481   -0.0000000000
+     2        3      -0.0154872715   -0.0000003889
+     3        1       0.0000008208   -0.0000000651
+     3        2      -0.0154872715    0.0000003889
+     3        3      -0.0987324332   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     2,    1 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0432083177    0.0000000000
+     1        2       0.0000000000   -0.0000000000
+     1        3      -0.0000000000    0.0000000000
+     2        1       0.0000000000    0.0000000000
+     2        2      -0.0432083177    0.0000000000
+     2        3      -0.0000000000    0.0000000000
+     3        1      -0.0000000000   -0.0000000000
+     3        2      -0.0000000000   -0.0000000000
+     3        3      -0.0432083177    0.0000000000
+
+ Localisation tensor (bohr^2) for band     2,    2 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1       1.0512665440    0.0000000000
+     1        2      -0.0000000000    0.0000000000
+     1        3       0.0000000000    0.0000000000
+     2        1      -0.0000000000   -0.0000000000
+     2        2       1.0512665440    0.0000000000
+     2        3       0.0000000000    0.0000000000
+     3        1       0.0000000000   -0.0000000000
+     3        2       0.0000000000   -0.0000000000
+     3        3       1.0512665440    0.0000000000
+
+ Localisation tensor (bohr^2) for band     2,    3 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.3711388777    0.0000000000
+     1        2      -0.0000000000    0.0000000000
+     1        3      -0.0000000000   -0.0000000000
+     2        1      -0.0000000000   -0.0000000000
+     2        2      -0.3711388777   -0.0000000000
+     2        3       0.0000000000    0.0000000000
+     3        1      -0.0000000000    0.0000000000
+     3        2       0.0000000000   -0.0000000000
+     3        3      -0.3711388776   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     2,    4 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.3353093860   -0.0000000000
+     1        2      -0.0433073359    0.0000005927
+     1        3      -0.0000092027   -0.0000000528
+     2        1      -0.0433073359   -0.0000005927
+     2        2      -0.3170540970    0.0000000000
+     2        3       0.0432937340   -0.0000003802
+     3        1      -0.0000092027    0.0000000528
+     3        2       0.0432937340    0.0000003802
+     3        3      -0.2988022961    0.0000000000
+
+ Localisation tensor (bohr^2) for band     2,    5 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.2828865256   -0.0000000000
+     1        2       0.0433073359   -0.0000005927
+     1        3       0.0000092027    0.0000000528
+     2        1       0.0433073359    0.0000005927
+     2        2      -0.3011418147    0.0000000000
+     2        3      -0.0432937341    0.0000003802
+     3        1       0.0000092027   -0.0000000528
+     3        2      -0.0432937341   -0.0000003802
+     3        3      -0.3193936156   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     2,    6 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0007125514   -0.0000000000
+     1        2      -0.0000000000    0.0000000000
+     1        3       0.0000000000    0.0000000000
+     2        1      -0.0000000000   -0.0000000000
+     2        2      -0.0007125514   -0.0000000000
+     2        3       0.0000000000    0.0000000000
+     3        1       0.0000000000   -0.0000000000
+     3        2       0.0000000000   -0.0000000000
+     3        3      -0.0007125514   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     2,    7 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0007954633    0.0000000000
+     1        2      -0.0003525121   -0.0000000053
+     1        3      -0.0000000187   -0.0000000015
+     2        1      -0.0003525121    0.0000000053
+     2        2      -0.0005957851   -0.0000000000
+     2        3       0.0003523226    0.0000000088
+     3        1      -0.0000000187    0.0000000015
+     3        2       0.0003523226   -0.0000000088
+     3        3      -0.0003963321    0.0000000000
+
+ Localisation tensor (bohr^2) for band     2,    8 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0021513037   -0.0000000000
+     1        2       0.0003525121    0.0000000053
+     1        3       0.0000000187    0.0000000015
+     2        1       0.0003525121   -0.0000000053
+     2        2      -0.0023509818    0.0000000000
+     2        3      -0.0003523226   -0.0000000088
+     3        1       0.0000000187   -0.0000000015
+     3        2      -0.0003523226    0.0000000088
+     3        3      -0.0025504349   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     3,    1 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0227887103    0.0000000000
+     1        2       0.0000000000    0.0000000000
+     1        3       0.0000000000   -0.0000000000
+     2        1       0.0000000000   -0.0000000000
+     2        2      -0.0227887103    0.0000000000
+     2        3      -0.0000000000    0.0000000000
+     3        1       0.0000000000    0.0000000000
+     3        2      -0.0000000000   -0.0000000000
+     3        3      -0.0227887103   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     3,    2 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.3711388777   -0.0000000000
+     1        2      -0.0000000000   -0.0000000000
+     1        3      -0.0000000000    0.0000000000
+     2        1      -0.0000000000    0.0000000000
+     2        2      -0.3711388777    0.0000000000
+     2        3       0.0000000000   -0.0000000000
+     3        1      -0.0000000000   -0.0000000000
+     3        2       0.0000000000    0.0000000000
+     3        3      -0.3711388776   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     3,    3 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1       6.3001136844    0.0000000000
+     1        2       0.0000000007   -0.0000000000
+     1        3      -0.0000000000   -0.0000000000
+     2        1       0.0000000007    0.0000000000
+     2        2       6.3001136849    0.0000000000
+     2        3      -0.0000000007   -0.0000000000
+     3        1      -0.0000000000    0.0000000000
+     3        2      -0.0000000007    0.0000000000
+     3        3       6.3001136854   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     3,    4 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -4.9370335926   -0.0000000000
+     1        2      -0.0012897995    0.0000000177
+     1        3      -0.0000002741   -0.0000000016
+     2        1      -0.0012897995   -0.0000000177
+     2        2      -4.9364899059    0.0000000000
+     2        3       0.0012893944   -0.0000000113
+     3        1      -0.0000002741    0.0000000016
+     3        2       0.0012893944    0.0000000113
+     3        3      -4.9359463230    0.0000000000
+
+ Localisation tensor (bohr^2) for band     3,    5 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0210350611    0.0000000000
+     1        2       0.0012897988   -0.0000000177
+     1        3       0.0000002741    0.0000000016
+     2        1       0.0012897988    0.0000000177
+     2        2      -0.0215787484    0.0000000000
+     2        3      -0.0012893937    0.0000000113
+     3        1       0.0000002741   -0.0000000016
+     3        2      -0.0012893937   -0.0000000113
+     3        3      -0.0221223318   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     3,    6 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0659349504   -0.0000000000
+     1        2       0.0000000000    0.0000000000
+     1        3       0.0000000000   -0.0000000000
+     2        1       0.0000000000   -0.0000000000
+     2        2      -0.0659349504    0.0000000000
+     2        3      -0.0000000000    0.0000000000
+     3        1       0.0000000000    0.0000000000
+     3        2      -0.0000000000   -0.0000000000
+     3        3      -0.0659349504   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     3,    7 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0802131935    0.0000000000
+     1        2      -0.0288816324   -0.0000004357
+     1        3      -0.0000015298   -0.0000001214
+     2        1      -0.0288816324    0.0000004357
+     2        2      -0.0638533816    0.0000000000
+     2        3       0.0288661045    0.0000007248
+     3        1      -0.0000015298    0.0000001214
+     3        2       0.0288661045   -0.0000007248
+     3        3      -0.0475120176   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     3,    8 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1785579683   -0.0000000000
+     1        2       0.0288816324    0.0000004357
+     1        3       0.0000015298    0.0000001214
+     2        1       0.0288816324   -0.0000004357
+     2        2      -0.1949177802    0.0000000000
+     2        3      -0.0288661045   -0.0000007248
+     3        1       0.0000015298   -0.0000001214
+     3        2      -0.0288661045    0.0000007248
+     3        3      -0.2112591442   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     4,    1 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0149679601   -0.0000000000
+     1        2      -0.0006936915   -0.0000000095
+     1        3      -0.0000001474    0.0000000008
+     2        1      -0.0006936915    0.0000000095
+     2        2      -0.0146755492    0.0000000000
+     2        3       0.0006934736    0.0000000061
+     3        1      -0.0000001474   -0.0000000008
+     3        2       0.0006934736   -0.0000000061
+     3        3      -0.0143831941    0.0000000000
+
+ Localisation tensor (bohr^2) for band     4,    2 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.3353093860    0.0000000000
+     1        2      -0.0433073359   -0.0000005927
+     1        3      -0.0000092027    0.0000000528
+     2        1      -0.0433073359    0.0000005927
+     2        2      -0.3170540970    0.0000000000
+     2        3       0.0432937340    0.0000003802
+     3        1      -0.0000092027   -0.0000000528
+     3        2       0.0432937340   -0.0000003802
+     3        3      -0.2988022961   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     4,    3 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -4.9370335926   -0.0000000000
+     1        2      -0.0012897995   -0.0000000177
+     1        3      -0.0000002741    0.0000000016
+     2        1      -0.0012897995    0.0000000177
+     2        2      -4.9364899059   -0.0000000000
+     2        3       0.0012893944    0.0000000113
+     3        1      -0.0000002741   -0.0000000016
+     3        2       0.0012893944   -0.0000000113
+     3        3      -4.9359463230    0.0000000000
+
+ Localisation tensor (bohr^2) for band     4,    4 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      34.8765331630   -0.0000000000
+     1        2       0.1399124665    0.0000001872
+     1        3       0.0000297311   -0.0000000167
+     2        1       0.1399124665   -0.0000001872
+     2        2      34.8044090733    0.0000000000
+     2        3      -0.1398685233   -0.0000001201
+     3        1       0.0000297311    0.0000000167
+     3        2      -0.1398685233    0.0000001201
+     3        3      34.7322987647    0.0000000000
+
+ Localisation tensor (bohr^2) for band     4,    5 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1     -28.1106980312   -0.0000000000
+     1        2      -0.0000000107    0.0000000000
+     1        3      -0.0000000000    0.0000000000
+     2        1      -0.0000000107   -0.0000000000
+     2        2     -28.1106980252   -0.0000000000
+     2        3       0.0000000107    0.0000000000
+     3        1      -0.0000000000   -0.0000000000
+     3        2       0.0000000107   -0.0000000000
+     3        3     -28.1106980192    0.0000000000
+
+ Localisation tensor (bohr^2) for band     4,    6 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1873253719    0.0000000000
+     1        2      -0.0779905936   -0.0000010673
+     1        3      -0.0000165728    0.0000000952
+     2        1      -0.0779905936    0.0000010673
+     2        2      -0.1544500911    0.0000000000
+     2        3       0.0779660985    0.0000006847
+     3        1      -0.0000165728   -0.0000000952
+     3        2       0.0779660985   -0.0000006847
+     3        3      -0.1215810919    0.0000000000
+
+ Localisation tensor (bohr^2) for band     4,    7 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.3215523610    0.0000000000
+     1        2       0.0567894092    0.0000004696
+     1        3       0.0292123696    0.0000008250
+     2        1       0.0567894092   -0.0000004696
+     2        2      -0.2482645328    0.0000000000
+     2        3      -0.0072185023    0.0000005266
+     3        1       0.0292123696   -0.0000008250
+     3        2      -0.0072185023   -0.0000005266
+     3        3      -0.2586563554   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     4,    8 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1333860594    0.0000000000
+     1        2      -0.0237678237    0.0000005182
+     1        3      -0.0292053526   -0.0000009131
+     2        1      -0.0237678237   -0.0000005182
+     2        2      -0.1788347896    0.0000000000
+     2        3      -0.0257927119   -0.0000011603
+     3        1      -0.0292053526    0.0000009131
+     3        2      -0.0257927119    0.0000011603
+     3        3      -0.1406091883    0.0000000000
+
+ Localisation tensor (bohr^2) for band     5,    1 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0126164000   -0.0000000000
+     1        2       0.0006936915    0.0000000095
+     1        3       0.0000001474   -0.0000000008
+     2        1       0.0006936915   -0.0000000095
+     2        2      -0.0129088109   -0.0000000000
+     2        3      -0.0006934736   -0.0000000061
+     3        1       0.0000001474    0.0000000008
+     3        2      -0.0006934736    0.0000000061
+     3        3      -0.0132011660    0.0000000000
+
+ Localisation tensor (bohr^2) for band     5,    2 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.2828865256   -0.0000000000
+     1        2       0.0433073359    0.0000005927
+     1        3       0.0000092027   -0.0000000528
+     2        1       0.0433073359   -0.0000005927
+     2        2      -0.3011418147   -0.0000000000
+     2        3      -0.0432937341   -0.0000003802
+     3        1       0.0000092027    0.0000000528
+     3        2      -0.0432937341    0.0000003802
+     3        3      -0.3193936156    0.0000000000
+
+ Localisation tensor (bohr^2) for band     5,    3 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0210350611   -0.0000000000
+     1        2       0.0012897988    0.0000000177
+     1        3       0.0000002741   -0.0000000016
+     2        1       0.0012897988   -0.0000000177
+     2        2      -0.0215787484   -0.0000000000
+     2        3      -0.0012893937   -0.0000000113
+     3        1       0.0000002741    0.0000000016
+     3        2      -0.0012893937    0.0000000113
+     3        3      -0.0221223318    0.0000000000
+
+ Localisation tensor (bohr^2) for band     5,    4 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1     -28.1106980312    0.0000000000
+     1        2      -0.0000000107   -0.0000000000
+     1        3      -0.0000000000   -0.0000000000
+     2        1      -0.0000000107    0.0000000000
+     2        2     -28.1106980252    0.0000000000
+     2        3       0.0000000107   -0.0000000000
+     3        1      -0.0000000000    0.0000000000
+     3        2       0.0000000107    0.0000000000
+     3        3     -28.1106980192    0.0000000000
+
+ Localisation tensor (bohr^2) for band     5,    5 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      30.0818810955    0.0000000000
+     1        2      -0.1399124444   -0.0000001872
+     1        3      -0.0000297311    0.0000000167
+     2        1      -0.1399124444    0.0000001872
+     2        2      30.1540051738   -0.0000000000
+     2        3       0.1398685012    0.0000001201
+     3        1      -0.0000297311   -0.0000000167
+     3        2       0.1398685012   -0.0000001201
+     3        3      30.2261154711    0.0000000000
+
+ Localisation tensor (bohr^2) for band     5,    6 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.5350623287   -0.0000000000
+     1        2       0.0779905936    0.0000010673
+     1        3       0.0000165728   -0.0000000952
+     2        1       0.0779905936   -0.0000010673
+     2        2      -0.5679376092    0.0000000000
+     2        3      -0.0779660985   -0.0000006847
+     3        1       0.0000165728    0.0000000952
+     3        2      -0.0779660985    0.0000006847
+     3        3      -0.6008066081   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     5,    7 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1987121198    0.0000000000
+     1        2      -0.0258036468    0.0000005522
+     1        3      -0.0292107283   -0.0000005404
+     2        1      -0.0258036468   -0.0000005522
+     2        2      -0.2368965832   -0.0000000000
+     2        3      -0.0237506010   -0.0000022265
+     3        1      -0.0292107283    0.0000005404
+     3        2      -0.0237506010    0.0000022265
+     3        3      -0.1914409794   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     5,    8 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0768804911   -0.0000000000
+     1        2      -0.0072179387   -0.0000015400
+     1        3       0.0292037113    0.0000006285
+     2        1      -0.0072179387    0.0000015400
+     2        2      -0.0665351260   -0.0000000000
+     2        3       0.0567618152    0.0000028602
+     3        1       0.0292037113   -0.0000006285
+     3        2       0.0567618152   -0.0000028602
+     3        3      -0.1398245088   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     6,    1 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0923142021    0.0000000000
+     1        2      -0.0000000000    0.0000000000
+     1        3       0.0000000000   -0.0000000000
+     2        1      -0.0000000000   -0.0000000000
+     2        2      -0.0923142020    0.0000000000
+     2        3       0.0000000000   -0.0000000000
+     3        1       0.0000000000    0.0000000000
+     3        2       0.0000000000    0.0000000000
+     3        3      -0.0923142019   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     6,    2 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0007125514    0.0000000000
+     1        2      -0.0000000000   -0.0000000000
+     1        3       0.0000000000   -0.0000000000
+     2        1      -0.0000000000    0.0000000000
+     2        2      -0.0007125514    0.0000000000
+     2        3       0.0000000000   -0.0000000000
+     3        1       0.0000000000    0.0000000000
+     3        2       0.0000000000    0.0000000000
+     3        3      -0.0007125514   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     6,    3 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0659349504   -0.0000000000
+     1        2       0.0000000000   -0.0000000000
+     1        3       0.0000000000    0.0000000000
+     2        1       0.0000000000    0.0000000000
+     2        2      -0.0659349504   -0.0000000000
+     2        3      -0.0000000000   -0.0000000000
+     3        1       0.0000000000   -0.0000000000
+     3        2      -0.0000000000    0.0000000000
+     3        3      -0.0659349504   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     6,    4 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1873253719   -0.0000000000
+     1        2      -0.0779905936    0.0000010673
+     1        3      -0.0000165728   -0.0000000952
+     2        1      -0.0779905936   -0.0000010673
+     2        2      -0.1544500911   -0.0000000000
+     2        3       0.0779660985   -0.0000006847
+     3        1      -0.0000165728    0.0000000952
+     3        2       0.0779660985    0.0000006847
+     3        3      -0.1215810919    0.0000000000
+
+ Localisation tensor (bohr^2) for band     6,    5 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.5350623287    0.0000000000
+     1        2       0.0779905936   -0.0000010673
+     1        3       0.0000165728    0.0000000952
+     2        1       0.0779905936    0.0000010673
+     2        2      -0.5679376092    0.0000000000
+     2        3      -0.0779660985    0.0000006847
+     3        1       0.0000165728   -0.0000000952
+     3        2      -0.0779660985   -0.0000006847
+     3        3      -0.6008066081   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     6,    6 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1     246.0154474126    0.0000000000
+     1        2       0.0000001186   -0.0000000000
+     1        3       0.0000000000   -0.0000000000
+     2        1       0.0000001186    0.0000000000
+     2        2     246.0154472653   -0.0000000000
+     2        3      -0.0000001185    0.0000000000
+     3        1       0.0000000000    0.0000000000
+     3        2      -0.0000001185   -0.0000000000
+     3        3     246.0154471182   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     6,    7 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1    -197.9721043778    0.0000000000
+     1        2     -37.4233731395   -0.0005645623
+     1        3      -0.0019822860   -0.0001572553
+     2        1     -37.4233731395    0.0005645623
+     2        2    -176.7738793594    0.0000000000
+     2        3      37.4032527497    0.0009392181
+     3        1      -0.0019822860    0.0001572553
+     3        2      37.4032527497   -0.0009392181
+     3        3    -155.5995580526   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     6,    8 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1     -46.1068460437    0.0000000000
+     1        2      37.4233730209    0.0005645623
+     1        3       0.0019822860    0.0001572553
+     2        1      37.4233730209   -0.0005645623
+     2        2     -67.3050709154    0.0000000000
+     2        3     -37.4032526312   -0.0009392181
+     3        1       0.0019822860   -0.0001572553
+     3        2     -37.4032526312    0.0009392181
+     3        3     -88.4793920756    0.0000000000
+
+ Localisation tensor (bohr^2) for band     7,    1 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1090690500    0.0000000000
+     1        2      -0.0154956025    0.0000002338
+     1        3      -0.0000008208    0.0000000651
+     2        1      -0.0154956025   -0.0000002338
+     2        2      -0.1002916673   -0.0000000000
+     2        3       0.0154872715   -0.0000003889
+     3        1      -0.0000008208   -0.0000000651
+     3        2       0.0154872715    0.0000003889
+     3        3      -0.0915241823    0.0000000000
+
+ Localisation tensor (bohr^2) for band     7,    2 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0007954633   -0.0000000000
+     1        2      -0.0003525121    0.0000000053
+     1        3      -0.0000000187    0.0000000015
+     2        1      -0.0003525121   -0.0000000053
+     2        2      -0.0005957851    0.0000000000
+     2        3       0.0003523226   -0.0000000088
+     3        1      -0.0000000187   -0.0000000015
+     3        2       0.0003523226    0.0000000088
+     3        3      -0.0003963321    0.0000000000
+
+ Localisation tensor (bohr^2) for band     7,    3 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0802131935    0.0000000000
+     1        2      -0.0288816324    0.0000004357
+     1        3      -0.0000015298    0.0000001214
+     2        1      -0.0288816324   -0.0000004357
+     2        2      -0.0638533816    0.0000000000
+     2        3       0.0288661045   -0.0000007248
+     3        1      -0.0000015298   -0.0000001214
+     3        2       0.0288661045    0.0000007248
+     3        3      -0.0475120176    0.0000000000
+
+ Localisation tensor (bohr^2) for band     7,    4 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.3215523610   -0.0000000000
+     1        2       0.0567894092   -0.0000004696
+     1        3       0.0292123696   -0.0000008250
+     2        1       0.0567894092    0.0000004696
+     2        2      -0.2482645328   -0.0000000000
+     2        3      -0.0072185023   -0.0000005266
+     3        1       0.0292123696    0.0000008250
+     3        2      -0.0072185023    0.0000005266
+     3        3      -0.2586563554   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     7,    5 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1987121198   -0.0000000000
+     1        2      -0.0258036468   -0.0000005522
+     1        3      -0.0292107283    0.0000005404
+     2        1      -0.0258036468    0.0000005522
+     2        2      -0.2368965832   -0.0000000000
+     2        3      -0.0237506010    0.0000022265
+     3        1      -0.0292107283   -0.0000005404
+     3        2      -0.0237506010   -0.0000022265
+     3        3      -0.1914409794    0.0000000000
+
+ Localisation tensor (bohr^2) for band     7,    6 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1    -197.9721043778    0.0000000000
+     1        2     -37.4233731395    0.0005645623
+     1        3      -0.0019822860    0.0001572553
+     2        1     -37.4233731395   -0.0005645623
+     2        2    -176.7738793594    0.0000000000
+     2        3      37.4032527497   -0.0009392181
+     3        1      -0.0019822860   -0.0001572553
+     3        2      37.4032527497    0.0009392181
+     3        3    -155.5995580526   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     7,    7 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1     209.6975231908   -0.0000000000
+     1        2      37.4953716684    0.0005636781
+     1        3       0.0019860997    0.0001570090
+     2        1      37.4953716684   -0.0005636781
+     2        2     188.3913944360   -0.0000000000
+     2        3     -37.4752125693   -0.0009377471
+     3        1       0.0019860997   -0.0001570090
+     3        2     -37.4752125693    0.0009377471
+     3        3     167.1092910683    0.0000000000
+
+ Localisation tensor (bohr^2) for band     7,    8 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -9.0778045868    0.0000000000
+     1        2       0.0000000048    0.0000000000
+     1        3      -0.0000000000   -0.0000000000
+     2        1       0.0000000048   -0.0000000000
+     2        2      -9.0778045980   -0.0000000000
+     2        3      -0.0000000047   -0.0000000000
+     3        1      -0.0000000000    0.0000000000
+     3        2      -0.0000000047    0.0000000000
+     3        3      -9.0778046091    0.0000000000
+
+ Localisation tensor (bohr^2) for band     8,    1 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0811875654    0.0000000000
+     1        2       0.0154956025   -0.0000002338
+     1        3       0.0000008208   -0.0000000651
+     2        1       0.0154956025    0.0000002338
+     2        2      -0.0899649481   -0.0000000000
+     2        3      -0.0154872715    0.0000003889
+     3        1       0.0000008208    0.0000000651
+     3        2      -0.0154872715   -0.0000003889
+     3        3      -0.0987324332   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     8,    2 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0021513037   -0.0000000000
+     1        2       0.0003525121   -0.0000000053
+     1        3       0.0000000187   -0.0000000015
+     2        1       0.0003525121    0.0000000053
+     2        2      -0.0023509818   -0.0000000000
+     2        3      -0.0003523226    0.0000000088
+     3        1       0.0000000187    0.0000000015
+     3        2      -0.0003523226   -0.0000000088
+     3        3      -0.0025504349   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     8,    3 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1785579683   -0.0000000000
+     1        2       0.0288816324   -0.0000004357
+     1        3       0.0000015298   -0.0000001214
+     2        1       0.0288816324    0.0000004357
+     2        2      -0.1949177802   -0.0000000000
+     2        3      -0.0288661045    0.0000007248
+     3        1       0.0000015298    0.0000001214
+     3        2      -0.0288661045   -0.0000007248
+     3        3      -0.2112591442   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     8,    4 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.1333860594   -0.0000000000
+     1        2      -0.0237678237   -0.0000005182
+     1        3      -0.0292053526    0.0000009131
+     2        1      -0.0237678237    0.0000005182
+     2        2      -0.1788347896    0.0000000000
+     2        3      -0.0257927119    0.0000011603
+     3        1      -0.0292053526   -0.0000009131
+     3        2      -0.0257927119   -0.0000011603
+     3        3      -0.1406091883   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     8,    5 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -0.0768804911   -0.0000000000
+     1        2      -0.0072179387    0.0000015400
+     1        3       0.0292037113   -0.0000006285
+     2        1      -0.0072179387   -0.0000015400
+     2        2      -0.0665351260   -0.0000000000
+     2        3       0.0567618152   -0.0000028602
+     3        1       0.0292037113    0.0000006285
+     3        2       0.0567618152    0.0000028602
+     3        3      -0.1398245088   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     8,    6 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1     -46.1068460437   -0.0000000000
+     1        2      37.4233730209   -0.0005645623
+     1        3       0.0019822860   -0.0001572553
+     2        1      37.4233730209    0.0005645623
+     2        2     -67.3050709154   -0.0000000000
+     2        3     -37.4032526312    0.0009392181
+     3        1       0.0019822860    0.0001572553
+     3        2     -37.4032526312   -0.0009392181
+     3        3     -88.4793920756    0.0000000000
+
+ Localisation tensor (bohr^2) for band     8,    7 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      -9.0778045868    0.0000000000
+     1        2       0.0000000048   -0.0000000000
+     1        3      -0.0000000000    0.0000000000
+     2        1       0.0000000048    0.0000000000
+     2        2      -9.0778045980    0.0000000000
+     2        3      -0.0000000047    0.0000000000
+     3        1      -0.0000000000   -0.0000000000
+     3        2      -0.0000000047   -0.0000000000
+     3        3      -9.0778046091   -0.0000000000
+
+ Localisation tensor (bohr^2) for band     8,    8 in cartesian coordinates
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1      57.2080406084    0.0000000000
+     1        2     -37.4953715593   -0.0005636781
+     1        3      -0.0019860997   -0.0001570090
+     2        1     -37.4953715593    0.0005636781
+     2        2      78.5141692393   -0.0000000000
+     2        3      37.4752124603    0.0009377471
+     3        1      -0.0019860997    0.0001570090
+     3        2      37.4752124603   -0.0009377471
+     3        3      99.7962724832    0.0000000000
+
+ Total localisation tensor (bohr^2) in cartesian coordinates
+  WARNING : still subject to testing - especially symmetries.
+      direction              matrix element
+   alpha     beta       real part   imaginary part
+     1        1       0.8635373608   -0.0000000000
+     1        2      -0.0000000000   -0.0000000000
+     1        3       0.0000000000   -0.0000000000
+     2        1      -0.0000000000    0.0000000000
+     2        2       0.8635373608   -0.0000000000
+     2        3       0.0000000000   -0.0000000000
+     3        1       0.0000000000    0.0000000000
+     3        2       0.0000000000    0.0000000000
+     3        3       0.8635373608    0.0000000000
+
+ respfn : d/dk was computed, but no 2DTE, so no DDB output.
+
+================================================================================
+== DATASET  4 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 16, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 150, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ mkfilename : getddk/=0, take file _1WF from output of DATASET   3.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1672278  5.1672278  G(1)= -0.0967637  0.0967637  0.0967637
+ R(2)=  5.1672278  0.0000000  5.1672278  G(2)=  0.0967637 -0.0967637  0.0967637
+ R(3)=  5.1672278  5.1672278  0.0000000  G(3)=  0.0967637  0.0967637 -0.0967637
+ Unit cell volume ucvol=  2.7593248E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.17519
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t77o_DS2_WFK
+
+ ==>  initialize data related to q vector <== 
+
+ The list of irreducible perturbations for this q vector is:
+    1)    idir= 1    ipert=   1
+    2)    idir= 1    ipert=   2
+    3)    idir= 1    ipert=   4
+
+================================================================================
+
+ The perturbation idir=   2  ipert=   1 is
+ symmetric of a previously calculated perturbation.
+ So, its SCF calculation is not needed.
+
+
+ The perturbation idir=   3  ipert=   1 is
+ symmetric of a previously calculated perturbation.
+ So, its SCF calculation is not needed.
+
+
+ The perturbation idir=   2  ipert=   2 is
+ symmetric of a previously calculated perturbation.
+ So, its SCF calculation is not needed.
+
+
+ The perturbation idir=   3  ipert=   2 is
+ symmetric of a previously calculated perturbation.
+ So, its SCF calculation is not needed.
+
+
+ The perturbation idir=   2  ipert=   4 is
+ symmetric of a previously calculated perturbation.
+ So, its SCF calculation is not needed.
+
+
+ The perturbation idir=   3  ipert=   4 is
+ symmetric of a previously calculated perturbation.
+ So, its SCF calculation is not needed.
+
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : displacement of atom   1   along direction   1
+ Found     4 symmetries that leave the perturbation invariant.
+ symkpt : the number of k-points, thanks to the symmetries,
+ is reduced to     6 .
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t77o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   129.32375177938     -4.432E+02 9.984E-01 3.351E+04
+ ETOT  2   9.2654313110401     -1.201E+02 3.044E-01 9.712E+02
+ ETOT  3   4.7357817765807     -4.530E+00 4.860E-03 9.519E+00
+ ETOT  4   4.7113142006482     -2.447E-02 3.201E-05 3.746E-02
+ ETOT  5   4.7111709450959     -1.433E-04 5.063E-07 1.130E-03
+ ETOT  6   4.7111667167643     -4.228E-06 2.139E-08 3.129E-05
+ ETOT  7   4.7111666201969     -9.657E-08 5.482E-10 2.537E-07
+ ETOT  8   4.7111666190073     -1.190E-09 2.159E-12 2.441E-09
+ ETOT  9   4.7111666189959     -1.148E-11 1.086E-13 6.323E-12
+ ETOT 10   4.7111666189957     -2.274E-13 8.238E-16 2.445E-13
+
+ At SCF step   10, etot is converged : 
+  for the second time, diff in etot=  2.274E-13 < toldfe=  1.000E-10
+-open ddk wf file :t77o_DS3_1WF7
+-open ddk wf file :t77o_DS3_1WF8
+-open ddk wf file :t77o_DS3_1WF9
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   67.015E-18; max=  82.382E-17
+
+ Thirteen components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   4.71491566E+02 eigvalue=   4.52641368E+01  local=  -4.06668248E+02
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   5.40504358E+01  Hartree=   1.23821440E+02     xc=  -4.15430725E+01
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   3.75491833E+02   enl1=  -1.18976575E+03
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -5.67857656E+02
+ 10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
+ fr.local=  -7.27634545E+01 fr.nonlo=   5.96693544E+02  Ewald=   4.86387329E+01
+ 13,14 Frozen wf xc core corrections (1) and (2)
+ frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
+ Resulting in :
+ 2DEtotal=    0.4711166619E+01 Ha. Also 2DEtotal=    0.128197363298E+03 eV
+    (2DErelax=   -5.6785765566E+02 Ha. 2DEnonrelax=    5.7256882227E+02 Ha)
+    (  non-var. 2DEtotal :    4.7111667322E+00 Ha)
+
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : displacement of atom   2   along direction   1
+ Found     4 symmetries that leave the perturbation invariant.
+ symkpt : the number of k-points, thanks to the symmetries,
+ is reduced to     6 .
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t77o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   301.98220194300     -2.764E+02 1.979E+00 5.507E+04
+ ETOT  2   80.742102132980     -2.212E+02 6.370E-01 1.134E+03
+ ETOT  3   75.069915905549     -5.672E+00 7.126E-03 5.319E+00
+ ETOT  4   75.051743672712     -1.817E-02 1.675E-04 9.825E-02
+ ETOT  5   75.051383814200     -3.599E-04 2.853E-06 9.913E-04
+ ETOT  6   75.051379407748     -4.406E-06 3.888E-08 6.110E-05
+ ETOT  7   75.051379183207     -2.245E-07 4.014E-10 1.345E-07
+ ETOT  8   75.051379182358     -8.483E-10 1.370E-11 3.535E-09
+ ETOT  9   75.051379182335     -2.319E-11 1.596E-13 8.350E-11
+ ETOT 10   75.051379182335     -3.979E-13 3.109E-15 4.697E-12
+
+ At SCF step   10, etot is converged : 
+  for the second time, diff in etot=  3.979E-13 < toldfe=  1.000E-10
+-open ddk wf file :t77o_DS3_1WF7
+-open ddk wf file :t77o_DS3_1WF8
+-open ddk wf file :t77o_DS3_1WF9
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   26.365E-17; max=  31.091E-16
+
+ Thirteen components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   4.94598929E+02 eigvalue=  -1.54308087E+01  local=  -1.76413783E+02
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =  -1.14471260E+03  Hartree=   2.32471918E+02     xc=  -5.17449376E+01
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.98932082E+01   enl1=   1.37963551E+02
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -5.03374528E+02
+ 10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
+ fr.local=   5.26024901E+02 fr.nonlo=  -7.07575364E+01  Ewald=   4.86387329E+01
+ 13,14 Frozen wf xc core corrections (1) and (2)
+ frxc 1  =  -1.40267351E+01  frxc 2 =   8.85465447E+01
+ Resulting in :
+ 2DEtotal=    0.7505137918E+02 Ha. Also 2DEtotal=    0.204225188815E+04 eV
+    (2DErelax=   -5.0337452800E+02 Ha. 2DEnonrelax=    5.7842590718E+02 Ha)
+    (  non-var. 2DEtotal :    7.5051380681E+01 Ha)
+
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : homogeneous electric field along direction   1
+ The set of symmetries contains only one element for this perturbation.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t77o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t77o_DS3_1WF7
+
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -64.935586523849     -6.494E+01 6.210E-01 1.524E+03
+ ETOT  2  -72.241139324947     -7.306E+00 1.621E-02 3.014E+01
+ ETOT  3  -72.416176511811     -1.750E-01 1.884E-04 3.417E-01
+ ETOT  4  -72.417260884900     -1.084E-03 2.722E-06 7.786E-03
+ ETOT  5  -72.417283189951     -2.231E-05 8.214E-08 1.634E-04
+ ETOT  6  -72.417283659775     -4.698E-07 9.839E-10 8.625E-07
+ ETOT  7  -72.417283664052     -4.277E-09 6.188E-11 4.321E-09
+ ETOT  8  -72.417283664096     -4.404E-11 5.246E-13 1.523E-10
+ ETOT  9  -72.417283664097     -9.663E-13 1.203E-14 2.013E-12
+
+ At SCF step    9, etot is converged : 
+  for the second time, diff in etot=  9.663E-13 < toldfe=  1.000E-10
+-open ddk wf file :t77o_DS3_1WF7
+-open ddk wf file :t77o_DS3_1WF8
+-open ddk wf file :t77o_DS3_1WF9
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   93.079E-17; max=  12.029E-15
+
+ Seven components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   2.06358563E+02 eigvalue=  -4.24360270E+01  local=  -1.03358954E+02
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+    dotwf=  -1.44834568E+02  Hartree=   1.24390474E+01     xc=  -5.22855161E+00
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   4.64320608E+00   enl1=   0.00000000E+00
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -7.24172837E+01
+  No Ewald or frozen-wf contrib.: the relaxation energy is the total one
+ 2DEtotal=   -0.7241728366E+02 Ha. Also 2DEtotal=   -0.197057450388E+04 eV
+    (  non-var. 2DEtotal :   -7.2417283990E+01 Ha)
+================================================================================
+
+ ---- first-order wavefunction calculations are completed ----
+
+
+ ==> Compute Derivative Database <==
+  
+  2nd-order matrix (non-cartesian coordinates, masses not included,
+   asr not included )
+     j1       j2             matrix element
+  dir pert dir pert     real part     imaginary part
+  
+   1    1   1    1         4.7111667322         0.0000000000
+   1    1   2    1         2.3555833661         0.0000000000
+   1    1   3    1         2.3555833661         0.0000000000
+   1    1   1    2        -4.6516658957         0.0000000000
+   1    1   2    2        -2.3258329478         0.0000000000
+   1    1   3    2        -2.3258329478         0.0000000000
+   1    1   1    4       -40.8852961424         0.0000000000
+   1    1   2    4         0.0000000000         0.0000000000
+   1    1   3    4        -0.0000000000         0.0000000000
+  
+   2    1   1    1         2.3555833661         0.0000000000
+   2    1   2    1         4.7111667322         0.0000000000
+   2    1   3    1         2.3555833661         0.0000000000
+   2    1   1    2        -2.3258329478         0.0000000000
+   2    1   2    2        -4.6516658957         0.0000000000
+   2    1   3    2        -2.3258329478         0.0000000000
+   2    1   1    4         0.0000000000         0.0000000000
+   2    1   2    4       -40.8852961424         0.0000000000
+   2    1   3    4        -0.0000000000         0.0000000000
+  
+   3    1   1    1         2.3555833661         0.0000000000
+   3    1   2    1         2.3555833661         0.0000000000
+   3    1   3    1         4.7111667322         0.0000000000
+   3    1   1    2        -2.3258329478         0.0000000000
+   3    1   2    2        -2.3258329478         0.0000000000
+   3    1   3    2        -4.6516658957         0.0000000000
+   3    1   1    4         0.0000000000         0.0000000000
+   3    1   2    4         0.0000000000         0.0000000000
+   3    1   3    4       -40.8852961424         0.0000000000
+  
+   1    2   1    1        -4.6516661679         0.0000000000
+   1    2   2    1        -2.3258330840         0.0000000000
+   1    2   3    1        -2.3258330840         0.0000000000
+   1    2   1    2        75.0513806812         0.0000000000
+   1    2   2    2        37.5256903406         0.0000000000
+   1    2   3    2        37.5256903406         0.0000000000
+   1    2   1    4       -41.8247013980         0.0000000000
+   1    2   2    4        -0.0000000000         0.0000000000
+   1    2   3    4         0.0000000000         0.0000000000
+  
+   2    2   1    1        -2.3258330840         0.0000000000
+   2    2   2    1        -4.6516661679         0.0000000000
+   2    2   3    1        -2.3258330840         0.0000000000
+   2    2   1    2        37.5256903406         0.0000000000
+   2    2   2    2        75.0513806812         0.0000000000
+   2    2   3    2        37.5256903406         0.0000000000
+   2    2   1    4         0.0000000000         0.0000000000
+   2    2   2    4       -41.8247013980         0.0000000000
+   2    2   3    4         0.0000000000         0.0000000000
+  
+   3    2   1    1        -2.3258330840         0.0000000000
+   3    2   2    1        -2.3258330840         0.0000000000
+   3    2   3    1        -4.6516661679         0.0000000000
+   3    2   1    2        37.5256903406         0.0000000000
+   3    2   2    2        37.5256903406         0.0000000000
+   3    2   3    2        75.0513806812         0.0000000000
+   3    2   1    4         0.0000000000         0.0000000000
+   3    2   2    4         0.0000000000         0.0000000000
+   3    2   3    4       -41.8247013980         0.0000000000
+  
+   1    4   1    1       -40.8852953390         0.0000000000
+   1    4   2    1         0.0000000000         0.0000000000
+   1    4   3    1         0.0000000000         0.0000000000
+   1    4   1    2       -41.8247013328         0.0000000000
+   1    4   2    2         0.0000000000         0.0000000000
+   1    4   3    2         0.0000000000         0.0000000000
+   1    4   1    4       -72.4172839899         0.0000000000
+   1    4   2    4        24.1390946633         0.0000000000
+   1    4   3    4        24.1390946633         0.0000000000
+  
+   2    4   1    1        -0.0000000000         0.0000000000
+   2    4   2    1       -40.8852953390         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   2    4   1    2        -0.0000000000         0.0000000000
+   2    4   2    2       -41.8247013328         0.0000000000
+   2    4   3    2        -0.0000000000         0.0000000000
+   2    4   1    4        24.1390946633         0.0000000000
+   2    4   2    4       -72.4172839899         0.0000000000
+   2    4   3    4        24.1390946633         0.0000000000
+  
+   3    4   1    1        -0.0000000000         0.0000000000
+   3    4   2    1        -0.0000000000         0.0000000000
+   3    4   3    1       -40.8852953390         0.0000000000
+   3    4   1    2        -0.0000000000         0.0000000000
+   3    4   2    2        -0.0000000000         0.0000000000
+   3    4   3    2       -41.8247013328         0.0000000000
+   3    4   1    4        24.1390946633         0.0000000000
+   3    4   2    4        24.1390946633         0.0000000000
+   3    4   3    4       -72.4172839899         0.0000000000
+  
+  
+  Dynamical matrix, in cartesian coordinates,
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    1   1    1         0.0882232929         0.0000000000
+   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
+   1    1   1    2        -0.0871090552         0.0000000000
+   1    1   2    2        -0.0000000000         0.0000000000
+   1    1   3    2         0.0000000000         0.0000000000
+  
+   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   2    1         0.0882232929         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   1    2        -0.0000000000         0.0000000000
+   2    1   2    2        -0.0871090552         0.0000000000
+   2    1   3    2         0.0000000000         0.0000000000
+  
+   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
+   3    1   3    1         0.0882232929         0.0000000000
+   3    1   1    2         0.0000000000         0.0000000000
+   3    1   2    2        -0.0000000000         0.0000000000
+   3    1   3    2        -0.0871090552         0.0000000000
+  
+   1    2   1    1        -0.0871090603         0.0000000000
+   1    2   2    1        -0.0000000000         0.0000000000
+   1    2   3    1         0.0000000000         0.0000000000
+   1    2   1    2         1.4054437723         0.0000000000
+   1    2   2    2         0.0000000000         0.0000000000
+   1    2   3    2         0.0000000000         0.0000000000
+  
+   2    2   1    1        -0.0000000000         0.0000000000
+   2    2   2    1        -0.0871090603         0.0000000000
+   2    2   3    1        -0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
+   2    2   2    2         1.4054437723         0.0000000000
+   2    2   3    2         0.0000000000         0.0000000000
+  
+   3    2   1    1         0.0000000000         0.0000000000
+   3    2   2    1        -0.0000000000         0.0000000000
+   3    2   3    1        -0.0871090603         0.0000000000
+   3    2   1    2         0.0000000000         0.0000000000
+   3    2   2    2         0.0000000000         0.0000000000
+   3    2   3    2         1.4054437723         0.0000000000
+  
+  Dielectric tensor, in cartesian coordinates,
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4         3.9740173191        -0.0000000000
+   1    4   2    4        -0.0000000000        -0.0000000000
+   1    4   3    4        -0.0000000000        -0.0000000000
+  
+   2    4   1    4        -0.0000000000        -0.0000000000
+   2    4   2    4         3.9740173191        -0.0000000000
+   2    4   3    4        -0.0000000000        -0.0000000000
+  
+   3    4   1    4        -0.0000000000        -0.0000000000
+   3    4   2    4        -0.0000000000        -0.0000000000
+   3    4   3    4         3.9740173191        -0.0000000000
+
+ Band by band decomposition of the dielectric tensor
+  
+  Vacuum polarization
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4         1.0000000000         0.0000000000
+   1    4   2    4         0.0000000000         0.0000000000
+   1    4   3    4         0.0000000000         0.0000000000
+  
+   2    4   1    4         0.0000000000         0.0000000000
+   2    4   2    4         1.0000000000         0.0000000000
+   2    4   3    4         0.0000000000         0.0000000000
+  
+   3    4   1    4         0.0000000000         0.0000000000
+   3    4   2    4         0.0000000000         0.0000000000
+   3    4   3    4         1.0000000000         0.0000000000
+  
+  Dielectric tensor, in cartesian coordinates, for band           1
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4        -0.0405762218        -0.0000000000
+   1    4   2    4        -0.0000000000        -0.0000000000
+   1    4   3    4        -0.0000000000        -0.0000000000
+  
+   2    4   1    4        -0.0000000000        -0.0000000000
+   2    4   2    4        -0.0405762218        -0.0000000000
+   2    4   3    4        -0.0000000000        -0.0000000000
+  
+   3    4   1    4        -0.0000000000        -0.0000000000
+   3    4   2    4        -0.0000000000        -0.0000000000
+   3    4   3    4        -0.0405762218        -0.0000000000
+  
+  Dielectric tensor, in cartesian coordinates, for band           2
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4        -0.1417375696        -0.0000000000
+   1    4   2    4        -0.0000000000        -0.0000000000
+   1    4   3    4        -0.0000000000        -0.0000000000
+  
+   2    4   1    4        -0.0000000000        -0.0000000000
+   2    4   2    4        -0.1417375696        -0.0000000000
+   2    4   3    4        -0.0000000000        -0.0000000000
+  
+   3    4   1    4        -0.0000000000        -0.0000000000
+   3    4   2    4        -0.0000000000        -0.0000000000
+   3    4   3    4        -0.1417375696        -0.0000000000
+  
+  Dielectric tensor, in cartesian coordinates, for band           3
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4         0.1290074752        -0.0000000000
+   1    4   2    4         0.0000000000        -0.0000000000
+   1    4   3    4         0.0000000000        -0.0000000000
+  
+   2    4   1    4         0.0000000000        -0.0000000000
+   2    4   2    4         0.1290074752        -0.0000000000
+   2    4   3    4         0.0000000000        -0.0000000000
+  
+   3    4   1    4         0.0000000000        -0.0000000000
+   3    4   2    4         0.0000000000        -0.0000000000
+   3    4   3    4         0.1290074752        -0.0000000000
+  
+  Dielectric tensor, in cartesian coordinates, for band           4
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4         0.0996830114        -0.0000000000
+   1    4   2    4        -0.0000000000        -0.0000000000
+   1    4   3    4        -0.0000000000        -0.0000000000
+  
+   2    4   1    4        -0.0000000000        -0.0000000000
+   2    4   2    4         0.0996830114        -0.0000000000
+   2    4   3    4         0.0000000000        -0.0000000000
+  
+   3    4   1    4        -0.0000000000        -0.0000000000
+   3    4   2    4        -0.0000000000        -0.0000000000
+   3    4   3    4         0.0996830114        -0.0000000000
+  
+  Dielectric tensor, in cartesian coordinates, for band           5
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4         0.4095989459        -0.0000000000
+   1    4   2    4        -0.0000000000        -0.0000000000
+   1    4   3    4        -0.0000000000        -0.0000000000
+  
+   2    4   1    4        -0.0000000000        -0.0000000000
+   2    4   2    4         0.4095989459        -0.0000000000
+   2    4   3    4        -0.0000000000        -0.0000000000
+  
+   3    4   1    4        -0.0000000000        -0.0000000000
+   3    4   2    4        -0.0000000000        -0.0000000000
+   3    4   3    4         0.4095989459        -0.0000000000
+  
+  Dielectric tensor, in cartesian coordinates, for band           6
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4         0.1415514756        -0.0000000000
+   1    4   2    4        -0.0000000000        -0.0000000000
+   1    4   3    4        -0.0000000000        -0.0000000000
+  
+   2    4   1    4        -0.0000000000        -0.0000000000
+   2    4   2    4         0.1415514756        -0.0000000000
+   2    4   3    4        -0.0000000000        -0.0000000000
+  
+   3    4   1    4        -0.0000000000        -0.0000000000
+   3    4   2    4        -0.0000000000        -0.0000000000
+   3    4   3    4         0.1415514756        -0.0000000000
+  
+  Dielectric tensor, in cartesian coordinates, for band           7
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4         2.1363255721        -0.0000000000
+   1    4   2    4        -0.0000000000        -0.0000000000
+   1    4   3    4        -0.0000000000        -0.0000000000
+  
+   2    4   1    4        -0.0000000000        -0.0000000000
+   2    4   2    4         2.1363255721        -0.0000000000
+   2    4   3    4        -0.0000000000        -0.0000000000
+  
+   3    4   1    4        -0.0000000000        -0.0000000000
+   3    4   2    4        -0.0000000000        -0.0000000000
+   3    4   3    4         2.1363255721        -0.0000000000
+  
+  Dielectric tensor, in cartesian coordinates, for band           8
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    4         0.2401646304        -0.0000000000
+   1    4   2    4         0.0000000000        -0.0000000000
+   1    4   3    4         0.0000000000        -0.0000000000
+  
+   2    4   1    4         0.0000000000        -0.0000000000
+   2    4   2    4         0.2401646304        -0.0000000000
+   2    4   3    4         0.0000000000        -0.0000000000
+  
+   3    4   1    4         0.0000000000        -0.0000000000
+   3    4   2    4         0.0000000000        -0.0000000000
+   3    4   3    4         0.2401646304        -0.0000000000
+  
+  Effective charges, in cartesian coordinates,
+  (from electric field response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    1   1    4         3.4929030192         0.0000000000
+   2    1   1    4         0.0000000000         0.0000000000
+   3    1   1    4        -0.0000000000         0.0000000000
+   1    2   1    4        -0.6566079708         0.0000000000
+   2    2   1    4        -0.0000000000         0.0000000000
+   3    2   1    4         0.0000000000         0.0000000000
+  
+   1    1   2    4        -0.0000000000         0.0000000000
+   2    1   2    4         3.4929030192         0.0000000000
+   3    1   2    4         0.0000000000         0.0000000000
+   1    2   2    4        -0.0000000000         0.0000000000
+   2    2   2    4        -0.6566079708         0.0000000000
+   3    2   2    4         0.0000000000         0.0000000000
+  
+   1    1   3    4        -0.0000000000         0.0000000000
+   2    1   3    4         0.0000000000         0.0000000000
+   3    1   3    4         3.4929030192         0.0000000000
+   1    2   3    4        -0.0000000000         0.0000000000
+   2    2   3    4         0.0000000000         0.0000000000
+   3    2   3    4        -0.6566079708         0.0000000000
+  
+  Effective charges, in cartesian coordinates,
+  (from phonon response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1         3.4929031470         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1        -0.0000000000         0.0000000000
+   2    4   2    1         3.4929031470         0.0000000000
+   3    4   2    1        -0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1         3.4929031470         0.0000000000
+  
+   1    4   1    2        -0.6566079605         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2        -0.6566079605         0.0000000000
+   3    4   2    2        -0.0000000000         0.0000000000
+  
+   1    4   3    2        -0.0000000000         0.0000000000
+   2    4   3    2        -0.0000000000         0.0000000000
+   3    4   3    2        -0.6566079605         0.0000000000
+  
+  
+  
+ Band by band decomposition of the Born effective charges
+  
+ Ionic charges in cartesian coordinates
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1        10.0000000000         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1        10.0000000000         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1        10.0000000000         0.0000000000
+  
+   1    4   1    2         6.0000000000         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2         6.0000000000         0.0000000000
+   3    4   2    2         0.0000000000         0.0000000000
+  
+   1    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
+   3    4   3    2         6.0000000000         0.0000000000
+  
+  Effective charges, in cartesian coordinates, for band           1
+  (from phonon response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1         0.1004258939         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1         0.1004258939         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1         0.1004258939         0.0000000000
+  
+   1    4   1    2        -1.9244308354         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2        -1.9244308354         0.0000000000
+   3    4   2    2         0.0000000000         0.0000000000
+  
+   1    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
+   3    4   3    2        -1.9244308354         0.0000000000
+  
+  Effective charges, in cartesian coordinates, for band           2
+  (from phonon response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1        -1.9152498564         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1        -1.9152498564         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1        -1.9152498564         0.0000000000
+  
+   1    4   1    2         0.1369076178         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2         0.1369076178         0.0000000000
+   3    4   2    2         0.0000000000         0.0000000000
+  
+   1    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
+   3    4   3    2         0.1369076178         0.0000000000
+  
+  Effective charges, in cartesian coordinates, for band           3
+  (from phonon response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1        -1.1105666820         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1        -1.1105666820         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1        -1.1105666820         0.0000000000
+  
+   1    4   1    2        -0.7165496084         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2        -0.7165496084         0.0000000000
+   3    4   2    2         0.0000000000         0.0000000000
+  
+   1    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
+   3    4   3    2        -0.7165496084         0.0000000000
+  
+  Effective charges, in cartesian coordinates, for band           4
+  (from phonon response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1        -2.4345256206         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1        -2.4345256206         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1        -2.4345256206         0.0000000000
+  
+   1    4   1    2        -0.3242347654         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2        -0.3242347654         0.0000000000
+   3    4   2    2         0.0000000000         0.0000000000
+  
+   1    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
+   3    4   3    2        -0.3242347654         0.0000000000
+  
+  Effective charges, in cartesian coordinates, for band           5
+  (from phonon response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1        -2.8863074751         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1        -2.8863074751         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1        -2.8863074751         0.0000000000
+  
+   1    4   1    2         1.5932954810         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2         1.5932954810         0.0000000000
+   3    4   2    2         0.0000000000         0.0000000000
+  
+   1    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
+   3    4   3    2         1.5932954810         0.0000000000
+  
+  Effective charges, in cartesian coordinates, for band           6
+  (from phonon response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1       176.5298821908         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1       176.5298821908         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1       176.5298821908         0.0000000000
+  
+   1    4   1    2      -185.8842816819         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2      -185.8842816819         0.0000000000
+   3    4   2    2         0.0000000000         0.0000000000
+  
+   1    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
+   3    4   3    2      -185.8842816819         0.0000000000
+  
+  Effective charges, in cartesian coordinates, for band           7
+  (from phonon response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1       -95.6124301411         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1       -95.6124301411         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1       -95.6124301411         0.0000000000
+  
+   1    4   1    2        99.5282390475         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2        99.5282390475         0.0000000000
+   3    4   2    2         0.0000000000         0.0000000000
+  
+   1    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
+   3    4   3    2        99.5282390475         0.0000000000
+  
+  Effective charges, in cartesian coordinates, for band           8
+  (from phonon response) 
+   if specified in the inputs, asr has been imposed
+     j1       j2             matrix element
+  dir pert dir pert     real part    imaginary part
+  
+   1    4   1    1       -79.1783251482         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
+   3    4   1    1         0.0000000000         0.0000000000
+  
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1       -79.1783251482         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
+  
+   1    4   3    1         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1       -79.1783251482         0.0000000000
+  
+   1    4   1    2        80.9344467718         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
+   3    4   1    2         0.0000000000         0.0000000000
+  
+   1    4   2    2         0.0000000000         0.0000000000
+   2    4   2    2        80.9344467718         0.0000000000
+   3    4   2    2         0.0000000000         0.0000000000
+  
+   1    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
+   3    4   3    2        80.9344467718         0.0000000000
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   5.750731E-04  5.750731E-04  5.750731E-04  6.943408E-03  6.943408E-03
+   6.943408E-03
+ Phonon frequencies in cm-1    :
+-  1.262139E+02  1.262139E+02  1.262139E+02  1.523902E+03  1.523902E+03
+-  1.523902E+03
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  1.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   5.750731E-04  5.750731E-04  9.348006E-04  6.943408E-03  6.943408E-03
+   6.956701E-03
+ Phonon frequencies in cm-1    :
+-  1.262139E+02  1.262139E+02  2.051650E+02  1.523902E+03  1.523902E+03
+-  1.526819E+03
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  0.00000  1.00000  0.00000
+ Phonon energies in Hartree :
+   5.750731E-04  5.750731E-04  9.348006E-04  6.943408E-03  6.943408E-03
+   6.956701E-03
+ Phonon frequencies in cm-1    :
+-  1.262139E+02  1.262139E+02  2.051650E+02  1.523902E+03  1.523902E+03
+-  1.526819E+03
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  0.00000  0.00000  1.00000
+ Phonon energies in Hartree :
+   5.750731E-04  5.750731E-04  9.348006E-04  6.943408E-03  6.943408E-03
+   6.956701E-03
+ Phonon frequencies in cm-1    :
+-  1.262139E+02  1.262139E+02  2.051650E+02  1.523902E+03  1.523902E+03
+-  1.526819E+03
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.0334455587E+01  1.0334455587E+01  1.0334455587E+01 Bohr
+              amu      1.37327000E+02  1.59994000E+01
+           diemac      1.20000000E+01
+             ecut      5.00000000E+00 Hartree
+           etotal1    -3.9297056234E+01
+           etotal3    -1.5468245494E+01
+           etotal4    -7.2417283664E+01
+            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         312
+           getddk1          0
+           getddk2          0
+           getddk3          3
+           getddk4          3
+           getden1          0
+           getden2         -1
+           getden3          0
+           getden4          0
+           getwfk1          0
+           getwfk2         -1
+           getwfk3          2
+           getwfk4          2
+             iscf1          7
+             iscf2         -2
+             iscf3          7
+             iscf4          7
+              ixc           3
+           jdtset        1    2    3    4
+              kpt1    -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+              kpt2    -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       5.00000000E-01  5.00000000E-01  2.50000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       5.00000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  2.50000000E-01
+                       0.00000000E+00 -2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  0.00000000E+00  2.50000000E-01
+              kpt3    -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       5.00000000E-01  5.00000000E-01  2.50000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       5.00000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  2.50000000E-01
+                       0.00000000E+00 -2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  0.00000000E+00  2.50000000E-01
+              kpt4    -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       5.00000000E-01  5.00000000E-01  2.50000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       0.00000000E+00 -2.50000000E-01  0.00000000E+00
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       5.00000000E-01 -2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  2.50000000E-01
+                       0.00000000E+00 -2.50000000E-01  5.00000000E-01
+                       0.00000000E+00  0.00000000E+00  2.50000000E-01
+           kptopt1          1
+           kptopt2          2
+           kptopt3          2
+           kptopt4          2
+         kptrlatt        2   -2    2     -2    2    2     -2   -2    2
+          kptrlen      2.06689112E+01
+P           mkmem1          2
+P           mkmem2         16
+P           mkmem3         16
+P           mkmem4         16
+P          mkqmem1          2
+P          mkqmem2         16
+P          mkqmem3         16
+P          mkqmem4         16
+P          mk1mem1          2
+P          mk1mem2         16
+P          mk1mem3         16
+P          mk1mem4         16
+            natom           2
+            nband1          9
+            nband2          8
+            nband3          8
+            nband4          8
+           ndtset           4
+            ngfft          16      16      16
+             nkpt1          2
+             nkpt2         16
+             nkpt3         16
+             nkpt4         16
+            nstep         100
+             nsym          48
+           ntypat           2
+              occ1     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000
+        optdriver1          0
+        optdriver2          0
+        optdriver3          1
+        optdriver4          1
+           prtbbb           1
+          rfatpol1          1       1
+          rfatpol2          1       1
+          rfatpol3          1       1
+          rfatpol4          1       2
+            rfdir1          0       0       0
+            rfdir2          0       0       0
+            rfdir3          1       1       1
+            rfdir4          1       1       1
+           rfelfd1          0
+           rfelfd2          0
+           rfelfd3          2
+           rfelfd4          3
+           rfphon1          0
+           rfphon2          0
+           rfphon3          0
+           rfphon4          1
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          spgroup         225
+           strten1     5.2391707296E-03  5.2391707296E-03  5.2391707296E-03
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+           toldfe1     1.00000000E-10 Hartree
+           toldfe2     0.00000000E+00 Hartree
+           toldfe3     0.00000000E+00 Hartree
+           toldfe4     1.00000000E-10 Hartree
+           tolwfr1     0.00000000E+00
+           tolwfr2     1.00000000E-20
+           tolwfr3     1.00000000E-20
+           tolwfr4     0.00000000E+00
+            typat      1  2
+              wtk1       0.75000    0.25000
+              wtk2       0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250
+              wtk3       0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250
+              wtk4       0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
+                         0.06250    0.06250    0.06250    0.06250
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.7343791799E+00  2.7343791799E+00  2.7343791799E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.1672277935E+00  5.1672277935E+00  5.1672277935E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+            znucl       56.00000    8.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [4] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [5] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.7
+
+================================================================================
+
+ Calculation completed.
+.Delivered   5 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.6  wall=          5.7

@@ -1,0 +1,2422 @@
+
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h37 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t87-t88-t89/t88.in
+- output file    -> t88.out
+- root for input  files -> t88i
+- root for output files -> t88o
+
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+
+ DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  5 (RF).
+     intxc =       0      iscf =       7    lmnmax =       8     lnmax =       4
+     mgfft =      15  mpssoang =       2    mqgrid =    3001     natom =       2
+  nloc_mem =       2    nspden =       2   nspinor =       1    nsppol =       2
+      nsym =       1    n1xccc =       1    ntypat =       2    occopt =       1
+   xclevel =       1
+-    mband =          12        mffmem =           1         mkmem =           8
+-   mkqmem =           8        mk1mem =           8           mpw =          95
+      nfft =        3375          nkpt =           8
+================================================================================
+P This job should need less than                       2.589 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
+================================================================================
+
+
+ DATASET    6 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  6 (RF).
+     intxc =       0      iscf =       7    lmnmax =       8     lnmax =       4
+     mgfft =      15  mpssoang =       2    mqgrid =    3001     natom =       2
+  nloc_mem =       2    nspden =       2   nspinor =       1    nsppol =       2
+      nsym =       1    n1xccc =       1    ntypat =       2    occopt =       1
+   xclevel =       1
+-    mband =          12        mffmem =           1         mkmem =           8
+-   mkqmem =           8        mk1mem =           8           mpw =          95
+      nfft =        3375          nkpt =           8
+================================================================================
+P This job should need less than                       2.589 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
+================================================================================
+
+
+ DATASET    7 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  7.
+     intxc =       0    ionmov =       0      iscf =      17    lmnmax =       8
+     lnmax =       4     mgfft =      15  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       2    nspden =       2   nspinor =       1
+    nsppol =       2      nsym =       1    n1xccc =       1    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =          12        mffmem =           1         mkmem =           8
+       mpw =          95          nfft =        3375          nkpt =           8
+ PAW method is used; the additional fine FFT grid is defined by:
+   mgfftf=        18    nfftf =      5832
+================================================================================
+P This job should need less than                       4.433 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
+              amu      2.69815390E+01  7.49215900E+01
+  d3e_pert1_atpol5          1       1
+  d3e_pert1_atpol6          1       1
+  d3e_pert1_atpol7          1       2
+    d3e_pert1_dir5          0       0       0
+    d3e_pert1_dir6          0       0       0
+    d3e_pert1_dir7          1       1       1
+   d3e_pert1_elfd5          0
+   d3e_pert1_elfd6          0
+   d3e_pert1_elfd7          1
+   d3e_pert1_phon5          0
+   d3e_pert1_phon6          0
+   d3e_pert1_phon7          1
+    d3e_pert2_dir5          0       0       0
+    d3e_pert2_dir6          0       0       0
+    d3e_pert2_dir7          1       1       1
+   d3e_pert2_elfd5          0
+   d3e_pert2_elfd6          0
+   d3e_pert2_elfd7          1
+    d3e_pert3_dir5          0       0       0
+    d3e_pert3_dir6          0       0       0
+    d3e_pert3_dir7          1       1       1
+   d3e_pert3_elfd5          0
+   d3e_pert3_elfd6          0
+   d3e_pert3_elfd7          1
+             ecut      3.50000000E+00 Hartree
+-          fftalg         312
+           getddk           3
+         getdelfd5          0
+         getdelfd6          4
+         getdelfd7          0
+          getdkdk5          0
+          getdkdk6          5
+          getdkdk7          0
+          getdkde5          0
+          getdkde6          0
+          getdkde7          6
+           getden           2
+           getwfk           2
+          get1den5          0
+          get1den6          4
+          get1den7          4
+           get1wf5          0
+           get1wf6          0
+           get1wf7          4
+             iscf5          7
+             iscf6          7
+             iscf7         17
+              ixc           7
+           jdtset        5    6    7
+              kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+           kptopt           3
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      1.50472323E+01
+P           mkmem           8
+P          mkqmem           8
+P          mk1mem           8
+            natom           2
+            nband          12
+           ndtset           3
+            ngfft          15      15      15
+          ngfftdg          18      18      18
+             nkpt           8
+            nline5        100
+            nline6        100
+            nline7          4
+           nspden           2
+           nsppol           2
+            nstep5          1
+            nstep6          1
+            nstep7        100
+             nsym           1
+           ntypat           2
+              occ      1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+        optdriver5          1
+        optdriver6          1
+        optdriver7          5
+        pawecutdg      7.00000000E+00 Hartree
+         pawxcdev           0
+          prepanl5          1
+          prepanl6          1
+          prepanl7          0
+            rfdir5          1       1       1
+            rfdir6          1       1       1
+            rfdir7          0       0       0
+         rf2_dkdk5          1
+         rf2_dkdk6          0
+         rf2_dkdk7          0
+         rf2_dkde5          0
+         rf2_dkde6          1
+         rf2_dkde7          0
+    rf2_pert1_dir5          1       1       1
+    rf2_pert1_dir6          1       1       1
+    rf2_pert1_dir7          0       0       0
+    rf2_pert2_dir5          1       1       1
+    rf2_pert2_dir6          1       1       1
+    rf2_pert2_dir7          0       0       0
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          spgroup           1
+   spinmagntarget      0.00000000E+00
+           tolwfr5     1.00000000E-20
+           tolwfr6     1.00000000E-18
+           tolwfr7     1.00000000E-18
+            typat      1  2
+          usepead5          1
+          usepead6          1
+          usepead7          0
+           useylm           1
+              wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.4076113748E+00  1.4076113748E+00  1.4076113748E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.6600000000E+00  2.6600000000E+00  2.6600000000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       13.00000   33.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   5.
+ This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
+ in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
+ Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
+ In the former case, it is advantageous to use nsppol=1 and nspden=1,
+ while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   6.
+ This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
+ in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
+ Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
+ In the former case, it is advantageous to use nsppol=1 and nspden=1,
+ while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   7.
+ This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
+ in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
+ Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
+ In the former case, it is advantageous to use nsppol=1 and nspden=1,
+ while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.
+
+================================================================================
+== DATASET  5 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 8, mband: 12, nsppol: 2, nspinor: 1, nspden: 2, mpw: 95, }
+cutoff_energies: {ecut:   3.5, pawecutdg:   7.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ mkfilename : getddk/=0, take file _1WF from output of DATASET   3.
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   2.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3200000  5.3200000  G(1)= -0.0939850  0.0939850  0.0939850
+ R(2)=  5.3200000  0.0000000  5.3200000  G(2)=  0.0939850 -0.0939850  0.0939850
+ R(3)=  5.3200000  5.3200000  0.0000000  G(3)=  0.0939850  0.0939850 -0.0939850
+ Unit cell volume ucvol=  3.0113754E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ Coarse grid specifications (used for wave-functions):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
+         ecut(hartree)=      3.500   => boxcut(ratio)=   2.22079
+
+ getcut : COMMENT -
+  Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
+  is sufficient for exact treatment of convolution.
+  Such a large boxcut is a waste : you could raise ecut
+  e.g. ecut=    4.315406 Hartrees makes boxcut=2
+
+
+ Fine grid specifications (used for densities):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
+         ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+ Pseudopotential format is: paw10
+ basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
+ Spheres core radius: rc_sph= 1.90363307
+ 1 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=2001 , AA= 0.46377E-03 BB= 0.60291E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions =  1.60786206
+ mmax= 2001
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid 1
+ Radial grid used for (t)core density is grid 1
+ Radial grid used for Vloc is grid 1
+ Radial grid used for pseudo valence density is grid 1
+ Mesh size for Vloc has been set to 1771 to avoid numerical noise.
+ Compensation charge density is not taken into account in XC energy/potential
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+ Pseudopotential format is: paw10
+ basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
+ Spheres core radius: rc_sph= 2.10391912
+ 1 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1500 , AA= 0.25579E-03 BB= 0.84411E-02
+ Shapefunction is BESSEL type: shapef(r,l)=aa(1,l)*jl(q(1,l)*r)+aa(2,l)*jl(q(2,l)*r)
+ Radius for shape functions =  1.80731519
+ mmax= 1500
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid 1
+ Radial grid used for (t)core density is grid 1
+ Radial grid used for Vloc is grid 1
+ Radial grid used for pseudo valence density is grid 1
+ Mesh size for Vloc has been set to 1335 to avoid numerical noise.
+ Compensation charge density is not taken into account in XC energy/potential
+ pspatm: atomic psp has been read  and splines computed
+
+   2.52339172E+02                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+
+ ==>  initialize data related to q vector <== 
+
+ The list of irreducible perturbations for this q vector is:
+
+================================================================================
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k, idir1 = 1 idir2 = 1
+
+ dfpt_looppert : COMMENT -
+  In this case, iscf is set to -3 automatically.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF7
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   1445.7566278310      1.446E+03 5.252E-21 0.000E+00
+
+ At SCF step    1   max residual=  5.25E-21 < tolwfr=  1.00E-20 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   72.030E-23; max=  52.517E-22
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   3.87044605E+03 eigvalue=  -1.39531509E+02  local=  -3.41588562E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   3.06076263E+02   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k, idir1 = 2 idir2 = 2
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF8
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   1445.7566278170      1.446E+03 5.252E-21 0.000E+00
+
+ At SCF step    1   max residual=  5.25E-21 < tolwfr=  1.00E-20 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   65.173E-23; max=  52.517E-22
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   3.87044605E+03 eigvalue=  -1.39531509E+02  local=  -3.41588562E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   3.06076263E+02   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k, idir1 = 3 idir2 = 3
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF9
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   1445.7566278021      1.446E+03 5.252E-21 0.000E+00
+
+ At SCF step    1   max residual=  5.25E-21 < tolwfr=  1.00E-20 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   71.487E-23; max=  52.517E-22
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   3.87044605E+03 eigvalue=  -1.39531509E+02  local=  -3.41588562E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   3.06076263E+02   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k, idir1 = 2 idir2 = 3
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF9
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   817.18443525582      8.172E+02 8.607E-21 0.000E+00
+
+ At SCF step    1   max residual=  8.61E-21 < tolwfr=  1.00E-20 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   95.719E-23; max=  86.073E-22
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   1.90290879E+03 eigvalue=  -7.84591511E+01  local=  -1.65589198E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.10489500E+02   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k, idir1 = 1 idir2 = 3
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF9
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   817.18443526811      8.172E+02 8.607E-21 0.000E+00
+
+ At SCF step    1   max residual=  8.61E-21 < tolwfr=  1.00E-20 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   10.310E-22; max=  86.073E-22
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   1.90290879E+03 eigvalue=  -7.84591511E+01  local=  -1.65589198E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.10489500E+02   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k, idir1 = 1 idir2 = 2
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF8
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   817.18443528132      8.172E+02 8.607E-21 0.000E+00
+
+ At SCF step    1   max residual=  8.61E-21 < tolwfr=  1.00E-20 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   95.040E-23; max=  86.073E-22
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   1.90290879E+03 eigvalue=  -7.84591511E+01  local=  -1.65589198E+03
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.10489500E+02   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
+================================================================================
+
+ ---- first-order wavefunction calculations are completed ----
+
+
+ respfn : d/dk was computed, but no 2DTE, so no DDB output.
+
+================================================================================
+== DATASET  6 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 8, mband: 12, nsppol: 2, nspinor: 1, nspden: 2, mpw: 95, }
+cutoff_energies: {ecut:   3.5, pawecutdg:   7.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ mkfilename : getddk/=0, take file _1WF from output of DATASET   3.
+
+ mkfilename : getdelfd/=0, take file _1WF from output of DATASET   4.
+
+ mkfilename : getdkdk/=0, take file _1WF from output of DATASET   5.
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   2.
+
+ mkfilename : get1den/=0, take file _DEN from output of DATASET   4.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3200000  5.3200000  G(1)= -0.0939850  0.0939850  0.0939850
+ R(2)=  5.3200000  0.0000000  5.3200000  G(2)=  0.0939850 -0.0939850  0.0939850
+ R(3)=  5.3200000  5.3200000  0.0000000  G(3)=  0.0939850  0.0939850 -0.0939850
+ Unit cell volume ucvol=  3.0113754E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ Coarse grid specifications (used for wave-functions):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
+         ecut(hartree)=      3.500   => boxcut(ratio)=   2.22079
+
+ getcut : COMMENT -
+  Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
+  is sufficient for exact treatment of convolution.
+  Such a large boxcut is a waste : you could raise ecut
+  e.g. ecut=    4.315406 Hartrees makes boxcut=2
+
+
+ Fine grid specifications (used for densities):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
+         ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+
+ ==>  initialize data related to q vector <== 
+
+ The list of irreducible perturbations for this q vector is:
+
+================================================================================
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k (idir1 =1) and Efield (idir2 =1)
+
+ dfpt_looppert : COMMENT -
+  In this case, iscf is set to -3 automatically.
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS5_1WF25
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS4_1WF10
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF7
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -25131.460078494     -2.513E+04 4.934E-19 0.000E+00
+
+ At SCF step    1   max residual=  4.93E-19 < tolwfr=  1.00E-18 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   65.770E-21; max=  49.344E-20
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   7.40598850E+04 eigvalue=  -5.78974090E+02  local=  -7.23057680E+04
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   2.41338737E+04   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.83470556E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k (idir1 =2) and Efield (idir2 =2)
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS5_1WF26
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS4_1WF11
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF8
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -25131.460079467     -2.513E+04 4.934E-19 0.000E+00
+
+ At SCF step    1   max residual=  4.93E-19 < tolwfr=  1.00E-18 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   65.781E-21; max=  49.344E-20
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   7.40598850E+04 eigvalue=  -5.78974091E+02  local=  -7.23057680E+04
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   2.41338737E+04   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.83470556E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k (idir1 =3) and Efield (idir2 =3)
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS5_1WF27
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS4_1WF12
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF9
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -25131.460080259     -2.513E+04 9.694E-19 0.000E+00
+
+ At SCF step    1   max residual=  9.69E-19 < tolwfr=  1.00E-18 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   85.653E-21; max=  96.935E-20
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   7.40598850E+04 eigvalue=  -5.78974091E+02  local=  -7.23057680E+04
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   2.41338737E+04   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.83470556E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k (idir1 =2) and Efield (idir2 =3)
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS5_1WF28
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS4_1WF12
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF9
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -5473.8704686069     -5.474E+03 6.318E-19 0.000E+00
+
+ At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   83.212E-21; max=  63.175E-20
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   7.49475440E+04 eigvalue=  -4.76149365E+03  local=  -7.42401644E+04
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.81146698E+04   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.83470556E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k (idir1 =1) and Efield (idir2 =3)
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS5_1WF29
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS4_1WF12
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF9
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -5473.8704689993     -5.474E+03 6.318E-19 0.000E+00
+
+ At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   83.433E-21; max=  63.175E-20
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   7.49475440E+04 eigvalue=  -4.76149365E+03  local=  -7.42401644E+04
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.81146698E+04   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.83470556E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k (idir1 =1) and Efield (idir2 =2)
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS5_1WF30
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS4_1WF11
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF8
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -5473.8704689467     -5.474E+03 6.318E-19 0.000E+00
+
+ At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   80.918E-21; max=  63.175E-20
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   7.49475440E+04 eigvalue=  -4.76149365E+03  local=  -7.42401644E+04
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.81146698E+04   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.83470556E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k (idir1 =3) and Efield (idir2 =2)
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS5_1WF28
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS4_1WF11
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF9
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF8
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -5473.8704679298     -5.474E+03 6.318E-19 0.000E+00
+
+ At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   80.874E-21; max=  63.175E-20
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   7.49475440E+04 eigvalue=  -4.76149365E+03  local=  -7.42401644E+04
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.81146698E+04   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.83470556E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k (idir1 =3) and Efield (idir2 =1)
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS5_1WF29
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS4_1WF10
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF9
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF7
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -5473.8704678575     -5.474E+03 6.318E-19 0.000E+00
+
+ At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   83.390E-21; max=  63.175E-20
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   7.49475440E+04 eigvalue=  -4.76149365E+03  local=  -7.42401644E+04
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.81146698E+04   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.83470556E+00
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
+ Perturbation : 2nd derivative wrt k (idir1 =2) and Efield (idir2 =1)
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS5_1WF30
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS4_1WF10
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF8
+- dfpt_looppert: read the DDK wavefunctions from file: t88o_DS3_1WF7
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-18, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -5473.8704683650     -5.474E+03 6.318E-19 0.000E+00
+
+ At SCF step    1   max residual=  6.32E-19 < tolwfr=  1.00E-18 =>converged.
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   83.180E-21; max=  63.175E-20
+
+ Two components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   7.49475440E+04 eigvalue=  -4.76149365E+03  local=  -7.42401644E+04
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =   0.00000000E+00  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   1.81146698E+04   enl1=   0.00000000E+00
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.83470556E+00
+================================================================================
+
+ ---- first-order wavefunction calculations are completed ----
+
+
+ respfn : d/dk was computed, but no 2DTE, so no DDB output.
+
+================================================================================
+== DATASET  7 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 2, nkpt: 8, mband: 12, nsppol: 2, nspinor: 1, nspden: 2, mpw: 95, }
+cutoff_energies: {ecut:   3.5, pawecutdg:   7.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 5, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ mkfilename : get1wf/=0, take file _1WF from output of DATASET   4.
+
+ mkfilename : getddk/=0, take file _1WF from output of DATASET   3.
+
+ mkfilename : getdkde/=0, take file _1WF from output of DATASET   6.
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   2.
+
+ mkfilename : get1den/=0, take file _DEN from output of DATASET   4.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+
+NONLINEAR : PEAD=0, full DFPT computation of third order derivatives
+
+ The list of irreducible elements of the Raman and non-linear
+ optical susceptibility tensors is:
+
+            i1pert  i1dir   i2pert  i2dir   i3pert  i3dir
+     1)       1       1       4       1       4       1
+     2)       1       1       4       1       4       2
+     3)       1       1       4       1       4       3
+     4)       1       1       4       2       4       1
+     5)       1       1       4       2       4       2
+     6)       1       1       4       2       4       3
+     7)       1       1       4       3       4       1
+     8)       1       1       4       3       4       2
+     9)       1       1       4       3       4       3
+    10)       1       2       4       1       4       1
+    11)       1       2       4       1       4       2
+    12)       1       2       4       1       4       3
+    13)       1       2       4       2       4       1
+    14)       1       2       4       2       4       2
+    15)       1       2       4       2       4       3
+    16)       1       2       4       3       4       1
+    17)       1       2       4       3       4       2
+    18)       1       2       4       3       4       3
+    19)       1       3       4       1       4       1
+    20)       1       3       4       1       4       2
+    21)       1       3       4       1       4       3
+    22)       1       3       4       2       4       1
+    23)       1       3       4       2       4       2
+    24)       1       3       4       2       4       3
+    25)       1       3       4       3       4       1
+    26)       1       3       4       3       4       2
+    27)       1       3       4       3       4       3
+    28)       2       1       4       1       4       1
+    29)       2       1       4       1       4       2
+    30)       2       1       4       1       4       3
+    31)       2       1       4       2       4       1
+    32)       2       1       4       2       4       2
+    33)       2       1       4       2       4       3
+    34)       2       1       4       3       4       1
+    35)       2       1       4       3       4       2
+    36)       2       1       4       3       4       3
+    37)       2       2       4       1       4       1
+    38)       2       2       4       1       4       2
+    39)       2       2       4       1       4       3
+    40)       2       2       4       2       4       1
+    41)       2       2       4       2       4       2
+    42)       2       2       4       2       4       3
+    43)       2       2       4       3       4       1
+    44)       2       2       4       3       4       2
+    45)       2       2       4       3       4       3
+    46)       2       3       4       1       4       1
+    47)       2       3       4       1       4       2
+    48)       2       3       4       1       4       3
+    49)       2       3       4       2       4       1
+    50)       2       3       4       2       4       2
+    51)       2       3       4       2       4       3
+    52)       2       3       4       3       4       1
+    53)       2       3       4       3       4       2
+    54)       2       3       4       3       4       3
+    55)       4       1       1       1       4       1
+    56)       4       1       1       1       4       2
+    57)       4       1       1       1       4       3
+    58)       4       1       1       2       4       1
+    59)       4       1       1       2       4       2
+    60)       4       1       1       2       4       3
+    61)       4       1       1       3       4       1
+    62)       4       1       1       3       4       2
+    63)       4       1       1       3       4       3
+    64)       4       1       2       1       4       1
+    65)       4       1       2       1       4       2
+    66)       4       1       2       1       4       3
+    67)       4       1       2       2       4       1
+    68)       4       1       2       2       4       2
+    69)       4       1       2       2       4       3
+    70)       4       1       2       3       4       1
+    71)       4       1       2       3       4       2
+    72)       4       1       2       3       4       3
+    73)       4       1       4       1       4       1
+    74)       4       1       4       1       4       2
+    75)       4       1       4       1       4       3
+    76)       4       1       4       2       4       1
+    77)       4       1       4       2       4       2
+    78)       4       1       4       2       4       3
+    79)       4       1       4       3       4       1
+    80)       4       1       4       3       4       2
+    81)       4       1       4       3       4       3
+    82)       4       2       1       1       4       2
+    83)       4       2       1       1       4       3
+    84)       4       2       1       2       4       2
+    85)       4       2       1       2       4       3
+    86)       4       2       1       3       4       2
+    87)       4       2       1       3       4       3
+    88)       4       2       2       1       4       2
+    89)       4       2       2       1       4       3
+    90)       4       2       2       2       4       2
+    91)       4       2       2       2       4       3
+    92)       4       2       2       3       4       2
+    93)       4       2       2       3       4       3
+    94)       4       2       4       1       4       2
+    95)       4       2       4       1       4       3
+    96)       4       2       4       2       4       2
+    97)       4       2       4       2       4       3
+    98)       4       2       4       3       4       2
+    99)       4       2       4       3       4       3
+   100)       4       3       1       1       4       3
+   101)       4       3       1       2       4       3
+   102)       4       3       1       3       4       3
+   103)       4       3       2       1       4       3
+   104)       4       3       2       2       4       3
+   105)       4       3       2       3       4       3
+   106)       4       3       4       1       4       3
+   107)       4       3       4       2       4       3
+   108)       4       3       4       3       4       3
+
+
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3200000  5.3200000  G(1)= -0.0939850  0.0939850  0.0939850
+ R(2)=  5.3200000  0.0000000  5.3200000  G(2)=  0.0939850 -0.0939850  0.0939850
+ R(3)=  5.3200000  5.3200000  0.0000000  G(3)=  0.0939850  0.0939850 -0.0939850
+ Unit cell volume ucvol=  3.0113754E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ Coarse grid specifications (used for wave-functions):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
+         ecut(hartree)=      3.500   => boxcut(ratio)=   2.22079
+
+ getcut : COMMENT -
+  Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
+  is sufficient for exact treatment of convolution.
+  Such a large boxcut is a waste : you could raise ecut
+  e.g. ecut=    4.315406 Hartrees makes boxcut=2
+
+
+ Fine grid specifications (used for densities):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
+         ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t88o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF34
+
+NONLINEAR :  perts :  1.1 /  4.1 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+
+NONLINEAR :  perts :  1.1 /  4.2 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+
+NONLINEAR :  perts :  1.1 /  4.3 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+
+NONLINEAR :  perts :  1.1 /  4.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF35
+
+NONLINEAR :  perts :  1.1 /  4.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+
+NONLINEAR :  perts :  1.1 /  4.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+
+NONLINEAR :  perts :  1.1 /  4.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+
+NONLINEAR :  perts :  1.1 /  4.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF36
+
+NONLINEAR :  perts :  1.1 /  4.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF34
+
+NONLINEAR :  perts :  1.2 /  4.1 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+
+NONLINEAR :  perts :  1.2 /  4.2 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+
+NONLINEAR :  perts :  1.2 /  4.3 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+
+NONLINEAR :  perts :  1.2 /  4.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF35
+
+NONLINEAR :  perts :  1.2 /  4.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+
+NONLINEAR :  perts :  1.2 /  4.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+
+NONLINEAR :  perts :  1.2 /  4.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+
+NONLINEAR :  perts :  1.2 /  4.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF36
+
+NONLINEAR :  perts :  1.2 /  4.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF34
+
+NONLINEAR :  perts :  1.3 /  4.1 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+
+NONLINEAR :  perts :  1.3 /  4.2 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+
+NONLINEAR :  perts :  1.3 /  4.3 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+
+NONLINEAR :  perts :  1.3 /  4.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF35
+
+NONLINEAR :  perts :  1.3 /  4.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+
+NONLINEAR :  perts :  1.3 /  4.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+
+NONLINEAR :  perts :  1.3 /  4.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+
+NONLINEAR :  perts :  1.3 /  4.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF36
+
+NONLINEAR :  perts :  1.3 /  4.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF4
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF34
+
+NONLINEAR :  perts :  2.1 /  4.1 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+
+NONLINEAR :  perts :  2.1 /  4.2 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+
+NONLINEAR :  perts :  2.1 /  4.3 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+
+NONLINEAR :  perts :  2.1 /  4.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF35
+
+NONLINEAR :  perts :  2.1 /  4.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+
+NONLINEAR :  perts :  2.1 /  4.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+
+NONLINEAR :  perts :  2.1 /  4.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+
+NONLINEAR :  perts :  2.1 /  4.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF36
+
+NONLINEAR :  perts :  2.1 /  4.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF5
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF34
+
+NONLINEAR :  perts :  2.2 /  4.1 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+
+NONLINEAR :  perts :  2.2 /  4.2 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+
+NONLINEAR :  perts :  2.2 /  4.3 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+
+NONLINEAR :  perts :  2.2 /  4.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF35
+
+NONLINEAR :  perts :  2.2 /  4.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+
+NONLINEAR :  perts :  2.2 /  4.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+
+NONLINEAR :  perts :  2.2 /  4.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+
+NONLINEAR :  perts :  2.2 /  4.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF36
+
+NONLINEAR :  perts :  2.2 /  4.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF6
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF34
+
+NONLINEAR :  perts :  2.3 /  4.1 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+
+NONLINEAR :  perts :  2.3 /  4.2 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+
+NONLINEAR :  perts :  2.3 /  4.3 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+
+NONLINEAR :  perts :  2.3 /  4.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF35
+
+NONLINEAR :  perts :  2.3 /  4.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+
+NONLINEAR :  perts :  2.3 /  4.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+
+NONLINEAR :  perts :  2.3 /  4.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+
+NONLINEAR :  perts :  2.3 /  4.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF36
+
+NONLINEAR :  perts :  2.3 /  4.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF1
+
+NONLINEAR :  perts :  4.1 /  1.1 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF2
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF2
+
+NONLINEAR :  perts :  4.1 /  1.2 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF3
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF3
+
+NONLINEAR :  perts :  4.1 /  1.3 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF4
+
+NONLINEAR :  perts :  4.1 /  2.1 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF5
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF5
+
+NONLINEAR :  perts :  4.1 /  2.2 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF6
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF6
+
+NONLINEAR :  perts :  4.1 /  2.3 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF34
+
+NONLINEAR :  perts :  4.1 /  4.1 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF42
+
+NONLINEAR :  perts :  4.1 /  4.2 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF41
+
+NONLINEAR :  perts :  4.1 /  4.3 /  4.1
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF1
+
+NONLINEAR :  perts :  4.1 /  1.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF2
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF2
+
+NONLINEAR :  perts :  4.1 /  1.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF3
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF3
+
+NONLINEAR :  perts :  4.1 /  1.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF4
+
+NONLINEAR :  perts :  4.1 /  2.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF5
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF5
+
+NONLINEAR :  perts :  4.1 /  2.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF6
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF6
+
+NONLINEAR :  perts :  4.1 /  2.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+
+NONLINEAR :  perts :  4.1 /  4.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF35
+
+NONLINEAR :  perts :  4.1 /  4.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+
+NONLINEAR :  perts :  4.1 /  4.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF1
+
+NONLINEAR :  perts :  4.1 /  1.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF2
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF2
+
+NONLINEAR :  perts :  4.1 /  1.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF3
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF3
+
+NONLINEAR :  perts :  4.1 /  1.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF4
+
+NONLINEAR :  perts :  4.1 /  2.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF5
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF5
+
+NONLINEAR :  perts :  4.1 /  2.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF6
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF6
+
+NONLINEAR :  perts :  4.1 /  2.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+
+NONLINEAR :  perts :  4.1 /  4.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+
+NONLINEAR :  perts :  4.1 /  4.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF36
+
+NONLINEAR :  perts :  4.1 /  4.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF1
+
+NONLINEAR :  perts :  4.2 /  1.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF2
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF2
+
+NONLINEAR :  perts :  4.2 /  1.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF3
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF3
+
+NONLINEAR :  perts :  4.2 /  1.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF4
+
+NONLINEAR :  perts :  4.2 /  2.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF5
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF5
+
+NONLINEAR :  perts :  4.2 /  2.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF6
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF6
+
+NONLINEAR :  perts :  4.2 /  2.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF39
+
+NONLINEAR :  perts :  4.2 /  4.1 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF35
+
+NONLINEAR :  perts :  4.2 /  4.2 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF40
+
+NONLINEAR :  perts :  4.2 /  4.3 /  4.2
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF1
+
+NONLINEAR :  perts :  4.2 /  1.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF2
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF2
+
+NONLINEAR :  perts :  4.2 /  1.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF3
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF3
+
+NONLINEAR :  perts :  4.2 /  1.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF4
+
+NONLINEAR :  perts :  4.2 /  2.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF5
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF5
+
+NONLINEAR :  perts :  4.2 /  2.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF6
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF6
+
+NONLINEAR :  perts :  4.2 /  2.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+
+NONLINEAR :  perts :  4.2 /  4.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+
+NONLINEAR :  perts :  4.2 /  4.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF36
+
+NONLINEAR :  perts :  4.2 /  4.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF1
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF1
+
+NONLINEAR :  perts :  4.3 /  1.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF2
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF2
+
+NONLINEAR :  perts :  4.3 /  1.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF3
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF3
+
+NONLINEAR :  perts :  4.3 /  1.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF4
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF4
+
+NONLINEAR :  perts :  4.3 /  2.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF5
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF5
+
+NONLINEAR :  perts :  4.3 /  2.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF6
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF6
+
+NONLINEAR :  perts :  4.3 /  2.3 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF10
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF7
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF38
+
+NONLINEAR :  perts :  4.3 /  4.1 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF11
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF8
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF37
+
+NONLINEAR :  perts :  4.3 /  4.2 /  4.3
+-inwffil : will read wavefunctions from disk file t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS4_1WF12
+-dfptnl_loop : read the wavefunctions from file: t88o_DS3_1WF9
+-dfptnl_loop : read the wavefunctions from file: t88o_DS6_1WF36
+
+NONLINEAR :  perts :  4.3 /  4.3 /  4.3
+
+ --- Third order energy calculation completed --- 
+
+
+ Matrix of third-order derivatives (reduced coordinates)
+ before computing the permutations of the perturbations
+
+     j1       j2       j3              matrix element
+  dir pert dir pert dir pert           real part           imaginary part
+   1    1   1    4   1    4        -98.0975672521         -0.0000000000
+   1    1   1    4   2    4         42.1597598497         -0.0000000000
+   1    1   1    4   3    4         42.1597598583          0.0000000000
+   1    1   2    4   1    4         40.6735816620         -0.0000000000
+   1    1   2    4   2    4        -47.3331420113          0.0000000000
+   1    1   2    4   3    4          1.1545315304         -0.0000000000
+   1    1   3    4   1    4         40.6735816728          0.0000000000
+   1    1   3    4   2    4          1.1545315299         -0.0000000000
+   1    1   3    4   3    4        -47.3331420217         -0.0000000000
+   2    1   1    4   1    4        -47.3331420192         -0.0000000000
+   2    1   1    4   2    4         40.6735816658          0.0000000000
+   2    1   1    4   3    4          1.1545315349         -0.0000000000
+   2    1   2    4   1    4         42.1597598536          0.0000000000
+   2    1   2    4   2    4        -98.0975672520         -0.0000000000
+   2    1   2    4   3    4         42.1597598526          0.0000000000
+   2    1   3    4   1    4          1.1545315360         -0.0000000000
+   2    1   3    4   2    4         40.6735816657          0.0000000000
+   2    1   3    4   3    4        -47.3331420207         -0.0000000000
+   3    1   1    4   1    4        -47.3331420129          0.0000000000
+   3    1   1    4   2    4          1.1545315297         -0.0000000000
+   3    1   1    4   3    4         40.6735816663          0.0000000000
+   3    1   2    4   1    4          1.1545315310         -0.0000000000
+   3    1   2    4   2    4        -47.3331420176          0.0000000000
+   3    1   2    4   3    4         40.6735816681         -0.0000000000
+   3    1   3    4   1    4         42.1597598540          0.0000000000
+   3    1   3    4   2    4         42.1597598570         -0.0000000000
+   3    1   3    4   3    4        -98.0975672595         -0.0000000000
+   1    2   1    4   1    4        113.8995126642         -0.0000000000
+   1    2   1    4   2    4        -62.4250433887         -0.0000000000
+   1    2   1    4   3    4        -62.4250434000          0.0000000000
+   1    2   2    4   1    4        -55.1886024836         -0.0000000000
+   1    2   2    4   2    4         97.2537069970          0.0000000000
+   1    2   2    4   3    4        -22.2248846311         -0.0000000000
+   1    2   3    4   1    4        -55.1886024956          0.0000000000
+   1    2   3    4   2    4        -22.2248846313         -0.0000000000
+   1    2   3    4   3    4         97.2537070100         -0.0000000000
+   2    2   1    4   1    4         97.2537070049         -0.0000000000
+   2    2   1    4   2    4        -55.1886024888          0.0000000000
+   2    2   1    4   3    4        -22.2248846344         -0.0000000000
+   2    2   2    4   1    4        -62.4250433960          0.0000000000
+   2    2   2    4   2    4        113.8995126664         -0.0000000000
+   2    2   2    4   3    4        -62.4250433943          0.0000000000
+   2    2   3    4   1    4        -22.2248846348         -0.0000000000
+   2    2   3    4   2    4        -55.1886024893          0.0000000000
+   2    2   3    4   3    4         97.2537070085         -0.0000000000
+   3    2   1    4   1    4         97.2537069998          0.0000000000
+   3    2   1    4   2    4        -22.2248846280         -0.0000000000
+   3    2   1    4   3    4        -55.1886024907         -0.0000000000
+   3    2   2    4   1    4        -22.2248846284         -0.0000000000
+   3    2   2    4   2    4         97.2537070076          0.0000000000
+   3    2   2    4   3    4        -55.1886024955         -0.0000000000
+   3    2   3    4   1    4        -62.4250433982         -0.0000000000
+   3    2   3    4   2    4        -62.4250434022         -0.0000000000
+   3    2   3    4   3    4        113.8995126790          0.0000000000
+   1    4   1    1   1    4       -101.5345662993         -0.0000000000
+   1    4   1    1   2    4         53.0632449789         -0.0000000000
+   1    4   1    1   3    4         53.0632449889          0.0000000000
+   1    4   2    1   1    4        128.5665107091         -0.0000000000
+   1    4   2    1   2    4         53.0632449811         -0.0000000000
+   1    4   2    1   3    4       -183.7268668660         -0.0000000000
+   1    4   3    1   1    4        128.5665107198         -0.0000000000
+   1    4   3    1   2    4       -183.7268668726         -0.0000000000
+   1    4   3    1   3    4         53.0632449789          0.0000000000
+   1    4   1    2   1    4        135.4313965430          0.0000000000
+   1    4   1    2   2    4        -68.8921855461         -0.0000000000
+   1    4   1    2   3    4        -68.8921855562          0.0000000000
+   1    4   2    2   1    4       -132.7677947746          0.0000000000
+   1    4   2    2   2    4        -68.8921855506         -0.0000000000
+   1    4   2    2   3    4        199.9958844529         -0.0000000000
+   1    4   3    2   1    4       -132.7677947851          0.0000000000
+   1    4   3    2   2    4        199.9958844614          0.0000000000
+   1    4   3    2   3    4        -68.8921855505         -0.0000000000
+   1    4   1    4   1    1        -98.0975672521         -0.0000000000
+   1    4   1    4   2    1        -47.3331420192         -0.0000000000
+   1    4   1    4   3    1        -47.3331420129          0.0000000000
+   1    4   1    4   1    2        113.8995126642         -0.0000000000
+   1    4   1    4   2    2         97.2537070049         -0.0000000000
+   1    4   1    4   3    2         97.2537069998          0.0000000000
+   1    4   1    4   1    4        822.2810768448          0.0000000000
+   1    4   1    4   2    4       -305.0349825162          0.0000000000
+   1    4   1    4   3    4       -305.0349824363         -0.0000000000
+   1    4   2    4   1    1         40.6735816620         -0.0000000000
+   1    4   2    4   2    1         42.1597598536          0.0000000000
+   1    4   2    4   3    1          1.1545315310         -0.0000000000
+   1    4   2    4   1    2        -55.1886024836         -0.0000000000
+   1    4   2    4   2    2        -62.4250433960          0.0000000000
+   1    4   2    4   3    2        -22.2248846284         -0.0000000000
+   1    4   2    4   1    4       -340.1487551000          0.0000000000
+   1    4   2    4   2    4       -486.7518547641         -0.0000000000
+   1    4   2    4   3    4        712.0698584067          0.0000000000
+   1    4   3    4   1    1         40.6735816728          0.0000000000
+   1    4   3    4   2    1          1.1545315360         -0.0000000000
+   1    4   3    4   3    1         42.1597598540          0.0000000000
+   1    4   3    4   1    2        -55.1886024956          0.0000000000
+   1    4   3    4   2    2        -22.2248846348         -0.0000000000
+   1    4   3    4   3    2        -62.4250433982         -0.0000000000
+   1    4   3    4   1    4       -340.1487550302         -0.0000000000
+   1    4   3    4   2    4        712.0698584107          0.0000000000
+   1    4   3    4   3    4       -486.7518548337          0.0000000000
+   2    4   1    1   1    4         53.0632449789         -0.0000000000
+   2    4   1    1   2    4        128.5665107154         -0.0000000000
+   2    4   1    1   3    4       -183.7268668692          0.0000000000
+   2    4   2    1   1    4         53.0632449811         -0.0000000000
+   2    4   2    1   2    4       -101.5345662950         -0.0000000000
+   2    4   2    1   3    4         53.0632449830          0.0000000000
+   2    4   3    1   1    4       -183.7268668726         -0.0000000000
+   2    4   3    1   2    4        128.5665107142         -0.0000000000
+   2    4   3    1   3    4         53.0632449844         -0.0000000000
+   2    4   1    2   1    4        -68.8921855461         -0.0000000000
+   2    4   1    2   2    4       -132.7677947831          0.0000000000
+   2    4   1    2   3    4        199.9958844561         -0.0000000000
+   2    4   2    2   1    4        -68.8921855506         -0.0000000000
+   2    4   2    2   2    4        135.4313965409          0.0000000000
+   2    4   2    2   3    4        -68.8921855501         -0.0000000000
+   2    4   3    2   1    4        199.9958844614          0.0000000000
+   2    4   3    2   2    4       -132.7677947834          0.0000000000
+   2    4   3    2   3    4        -68.8921855524          0.0000000000
+   2    4   1    4   1    1         42.1597598497         -0.0000000000
+   2    4   1    4   2    1         40.6735816658          0.0000000000
+   2    4   1    4   3    1          1.1545315297         -0.0000000000
+   2    4   1    4   1    2        -62.4250433887         -0.0000000000
+   2    4   1    4   2    2        -55.1886024888          0.0000000000
+   2    4   1    4   3    2        -22.2248846280         -0.0000000000
+   2    4   1    4   1    4       -305.0349825162          0.0000000000
+   2    4   1    4   2    4       -340.1487549817         -0.0000000000
+   2    4   1    4   3    4        712.0698583906          0.0000000000
+   2    4   2    4   1    1        -47.3331420113          0.0000000000
+   2    4   2    4   2    1        -98.0975672520         -0.0000000000
+   2    4   2    4   3    1        -47.3331420176          0.0000000000
+   2    4   2    4   1    2         97.2537069970          0.0000000000
+   2    4   2    4   2    2        113.8995126664         -0.0000000000
+   2    4   2    4   3    2         97.2537070076          0.0000000000
+   2    4   2    4   1    4       -486.7518547641         -0.0000000000
+   2    4   2    4   2    4        822.2810768362          0.0000000001
+   2    4   2    4   3    4       -305.0349825193         -0.0000000000
+   2    4   3    4   1    1          1.1545315299         -0.0000000000
+   2    4   3    4   2    1         40.6735816657          0.0000000000
+   2    4   3    4   3    1         42.1597598570         -0.0000000000
+   2    4   3    4   1    2        -22.2248846313         -0.0000000000
+   2    4   3    4   2    2        -55.1886024893          0.0000000000
+   2    4   3    4   3    2        -62.4250434022         -0.0000000000
+   2    4   3    4   1    4        712.0698584107          0.0000000000
+   2    4   3    4   2    4       -340.1487551204         -0.0000000001
+   2    4   3    4   3    4       -486.7518547563          0.0000000000
+   3    4   1    1   1    4         53.0632449889          0.0000000000
+   3    4   1    1   2    4       -183.7268668692          0.0000000000
+   3    4   1    1   3    4        128.5665107066         -0.0000000000
+   3    4   2    1   1    4       -183.7268668660         -0.0000000000
+   3    4   2    1   2    4         53.0632449830          0.0000000000
+   3    4   2    1   3    4        128.5665107094         -0.0000000000
+   3    4   3    1   1    4         53.0632449789          0.0000000000
+   3    4   3    1   2    4         53.0632449844         -0.0000000000
+   3    4   3    1   3    4       -101.5345662955         -0.0000000000
+   3    4   1    2   1    4        -68.8921855562          0.0000000000
+   3    4   1    2   2    4        199.9958844561         -0.0000000000
+   3    4   1    2   3    4       -132.7677947748          0.0000000000
+   3    4   2    2   1    4        199.9958844529         -0.0000000000
+   3    4   2    2   2    4        -68.8921855501         -0.0000000000
+   3    4   2    2   3    4       -132.7677947781         -0.0000000000
+   3    4   3    2   1    4        -68.8921855505         -0.0000000000
+   3    4   3    2   2    4        -68.8921855524          0.0000000000
+   3    4   3    2   3    4        135.4313965443         -0.0000000000
+   3    4   1    4   1    1         42.1597598583          0.0000000000
+   3    4   1    4   2    1          1.1545315349         -0.0000000000
+   3    4   1    4   3    1         40.6735816663          0.0000000000
+   3    4   1    4   1    2        -62.4250434000          0.0000000000
+   3    4   1    4   2    2        -22.2248846344         -0.0000000000
+   3    4   1    4   3    2        -55.1886024907         -0.0000000000
+   3    4   1    4   1    4       -305.0349824363         -0.0000000000
+   3    4   1    4   2    4        712.0698583906          0.0000000000
+   3    4   1    4   3    4       -340.1487550464          0.0000000000
+   3    4   2    4   1    1          1.1545315304         -0.0000000000
+   3    4   2    4   2    1         42.1597598526          0.0000000000
+   3    4   2    4   3    1         40.6735816681         -0.0000000000
+   3    4   2    4   1    2        -22.2248846311         -0.0000000000
+   3    4   2    4   2    2        -62.4250433943          0.0000000000
+   3    4   2    4   3    2        -55.1886024955         -0.0000000000
+   3    4   2    4   1    4        712.0698584067          0.0000000000
+   3    4   2    4   2    4       -305.0349825193         -0.0000000000
+   3    4   2    4   3    4       -340.1487549855          0.0000000000
+   3    4   3    4   1    1        -47.3331420217         -0.0000000000
+   3    4   3    4   2    1        -47.3331420207         -0.0000000000
+   3    4   3    4   3    1        -98.0975672595         -0.0000000000
+   3    4   3    4   1    2         97.2537070100         -0.0000000000
+   3    4   3    4   2    2         97.2537070085         -0.0000000000
+   3    4   3    4   3    2        113.8995126790          0.0000000000
+   3    4   3    4   1    4       -486.7518548337          0.0000000000
+   3    4   3    4   2    4       -486.7518547563          0.0000000000
+   3    4   3    4   3    4        822.2810767598         -0.0000000000
+ 
+
+  Non-linear optical susceptibility tensor d (pm/V)
+  in cartesian coordinates
+   i1dir  i2dir  i3dir             d
+      1      1      1         45.760360573
+      1      1      2        -13.162994170
+      1      1      3        -22.114292236
+      1      2      1        -13.162994170
+      1      2      2        -22.114292233
+      1      2      3         62.047237850
+      1      3      1        -22.114292236
+      1      3      2         62.047237850
+      1      3      3        -31.065590309
+      2      1      1        -13.162994170
+      2      1      2        -22.114292233
+      2      1      3         62.047237850
+      2      2      1        -22.114292233
+      2      2      2         45.760360570
+      2      2      3        -31.065590311
+      2      3      1         62.047237850
+      2      3      2        -31.065590311
+      2      3      3        -40.016888371
+      3      1      1        -22.114292236
+      3      1      2         62.047237850
+      3      1      3        -31.065590309
+      3      2      1         62.047237850
+      3      2      2        -31.065590311
+      3      2      3        -40.016888371
+      3      3      1        -31.065590309
+      3      3      2        -40.016888371
+      3      3      3         45.760360566
+ 
+
+  First-order change in the electronic dielectric 
+  susceptibility tensor (Bohr^-1)
+  induced by an atomic displacement
+   atom  displacement
+    1          1       -0.139153808        0.092789774        0.092789774
+                        0.092789774        0.132026396       -0.204014886
+                        0.092789774       -0.204014886        0.132026396
+    1          2        0.132026396        0.092789774       -0.204014886
+                        0.092789774       -0.139153808        0.092789774
+                       -0.204014886        0.092789774        0.132026396
+    1          3        0.132026396       -0.204014886        0.092789774
+                       -0.204014886        0.132026396        0.092789774
+                        0.092789774        0.092789774       -0.139153808
+
+    2          1        0.147965927       -0.065228875       -0.065228875
+                       -0.065228875       -0.194468029        0.204601643
+                       -0.065228875        0.204601643       -0.194468029
+    2          2       -0.194468029       -0.065228875        0.204601643
+                       -0.065228875        0.147965927       -0.065228875
+                        0.204601643       -0.065228875       -0.194468029
+    2          3       -0.194468029        0.204601643       -0.065228875
+                        0.204601643       -0.194468029       -0.065228875
+                       -0.065228875       -0.065228875        0.147965927
+
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
+              amu      2.69815390E+01  7.49215900E+01
+  d3e_pert1_atpol5          1       1
+  d3e_pert1_atpol6          1       1
+  d3e_pert1_atpol7          1       2
+    d3e_pert1_dir5          0       0       0
+    d3e_pert1_dir6          0       0       0
+    d3e_pert1_dir7          1       1       1
+   d3e_pert1_elfd5          0
+   d3e_pert1_elfd6          0
+   d3e_pert1_elfd7          1
+   d3e_pert1_phon5          0
+   d3e_pert1_phon6          0
+   d3e_pert1_phon7          1
+    d3e_pert2_dir5          0       0       0
+    d3e_pert2_dir6          0       0       0
+    d3e_pert2_dir7          1       1       1
+   d3e_pert2_elfd5          0
+   d3e_pert2_elfd6          0
+   d3e_pert2_elfd7          1
+    d3e_pert3_dir5          0       0       0
+    d3e_pert3_dir6          0       0       0
+    d3e_pert3_dir7          1       1       1
+   d3e_pert3_elfd5          0
+   d3e_pert3_elfd6          0
+   d3e_pert3_elfd7          1
+             ecut      3.50000000E+00 Hartree
+           etotal5     8.1718443528E+02
+           etotal6    -5.4738704684E+03
+           etotal7     0.0000000000E+00
+            fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         312
+           getddk           3
+         getdelfd5          0
+         getdelfd6          4
+         getdelfd7          0
+          getdkdk5          0
+          getdkdk6          5
+          getdkdk7          0
+          getdkde5          0
+          getdkde6          0
+          getdkde7          6
+           getden           2
+           getwfk           2
+          get1den5          0
+          get1den6          4
+          get1den7          4
+           get1wf5          0
+           get1wf6          0
+           get1wf7          4
+             iscf5          7
+             iscf6          7
+             iscf7         17
+              ixc           7
+           jdtset        5    6    7
+              kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+           kptopt           3
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      1.50472323E+01
+P           mkmem           8
+P          mkqmem           8
+P          mk1mem           8
+            natom           2
+            nband          12
+           ndtset           3
+            ngfft          15      15      15
+          ngfftdg          18      18      18
+             nkpt           8
+            nline5        100
+            nline6        100
+            nline7          4
+           nspden           2
+           nsppol           2
+            nstep5          1
+            nstep6          1
+            nstep7        100
+             nsym           1
+           ntypat           2
+              occ      1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       1.000000  1.000000  1.000000  1.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+        optdriver5          1
+        optdriver6          1
+        optdriver7          5
+        pawecutdg      7.00000000E+00 Hartree
+         pawxcdev           0
+          prepanl5          1
+          prepanl6          1
+          prepanl7          0
+            rfdir5          1       1       1
+            rfdir6          1       1       1
+            rfdir7          0       0       0
+         rf2_dkdk5          1
+         rf2_dkdk6          0
+         rf2_dkdk7          0
+         rf2_dkde5          0
+         rf2_dkde6          1
+         rf2_dkde7          0
+    rf2_pert1_dir5          1       1       1
+    rf2_pert1_dir6          1       1       1
+    rf2_pert1_dir7          0       0       0
+    rf2_pert2_dir5          1       1       1
+    rf2_pert2_dir6          1       1       1
+    rf2_pert2_dir7          0       0       0
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          spgroup           1
+   spinmagntarget      0.00000000E+00
+           strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           tolwfr5     1.00000000E-20
+           tolwfr6     1.00000000E-18
+           tolwfr7     1.00000000E-18
+            typat      1  2
+          usepead5          1
+          usepead6          1
+          usepead7          0
+           useylm           1
+              wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.4076113748E+00  1.4076113748E+00  1.4076113748E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.6600000000E+00  2.6600000000E+00  2.6600000000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       13.00000   33.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] Nonlinear optical susceptibilities, Raman efficiencies, and electrooptic tensors
+- from first principles density functional theory.
+- M. Veithen, X. Gonze, and Ph. Ghosez, Phys. Rev. B 71, 125107 (2005).
+- Comment: to be cited for non-linear response calculations, with optdriver=5.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#veithen2005
+-
+- [2] Projector augmented-wave approach to density-functional perturbation theory.
+- C. Audouze, F. Jollet, M. Torrent and X. Gonze, Phys. Rev. B 73, 235101 (2006).
+- Comparison between projector augmented-wave and ultrasoft pseudopotential formalisms
+- at the density-functional perturbation theory level.
+- C. Audouze, F. Jollet, M. Torrent and X. Gonze, Phys. Rev. B 78, 035105 (2008).
+- Comment: to be cited in case the computation of response function with PAW, i.e. (rfphon=1 or rfelfd=1) and usepaw=1.
+- Strong suggestion to cite these papers.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#audouze2006,
+- and https://docs.abinit.org/theory/bibliography/#audouze2008
+-
+- [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
+- M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
+-
+- [4] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [5] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [6] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- Proc.   0 individual time (sec): cpu=         23.1  wall=         23.2
+
+================================================================================
+
+ Calculation completed.
+.Delivered   2 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=         23.1  wall=         23.2

@@ -1,0 +1,88 @@
+ndtset 2
+
+####################################################################
+# Dataset 1 : ground state density
+####################################################################
+
+nqpt1    0    #Cancel default
+ieig2rf1 0
+getwfk1  0
+rfphon1  0
+kptopt1   1
+tolvrs1   1.0d-8      # SCF stopping criterion
+
+####################################################################
+# Dataset 2-37 : phonon frequencies and band corrections
+####################################################################
+
+ qpt2    0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+nqpt      1
+ieig2rf   1
+smdelta   1
+esmear    0.005
+getwfk    1          # Use GS wave functions from dataset1
+kptopt    3          # Need full k-point set for finite-Q response
+rfphon    1          # Do phonon response
+rfatpol   1 2        # Treat displacements of all atoms
+rfdir     1 1 1      # Do all directions (symmetry will be used)
+tolvrs    1.0d-4     # This default is active for sets 3-10
+
+#####################################################################
+# COMMON VARIABLES
+#####################################################################
+
+nsym 1
+
+#Definition de la grille des points k
+ngkpt 2 2 2
+nshiftk 4
+shiftk  0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+
+
+#Definition de la base d'ondes planes
+ecut 5
+ecutsm 0.5
+
+#definition de la cellule primitive
+acell   3*5.397917890425 angstrom
+rprim   0.0  0.5  0.5
+        0.5  0.0  0.5
+        0.5  0.5  0.0
+
+#definition du systeme
+
+natom 2
+ntypat 1
+znucl 14           # Si = 14
+typat 1 1
+xred 0.0  0.0  0.0
+     1/4  1/4  1/4
+
+#methode de calcul
+nstep 20
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t60.abo, tolnlines = 6, tolabs = 1.1e-5, tolrel = 5.0e-5, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 16
+#%% [extra_info]
+#%% authors = P. Boulanger
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Crystalline Silicon
+#%%   Test the smearing parameter ESMEAR of the imaginary second order eigenvalues
+#%%   for Q-point (0 0 0), contained in the EIGI2D files. Parameters are far from
+#%%   convergence, nband=5 and nkpt=16.
+#%%<END TEST_INFO>

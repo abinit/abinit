@@ -1,0 +1,72 @@
+# Rhombohedral Bi treated as a semiconductor
+# 2x2x2 grid, automatically generated, unlike with
+# Test_v3#2 . Should give exactly the same results.
+# Execute only datasets 8 and 10.
+
+ ndtset 2
+ jdtset 8 10
+
+#Dataset 8 : GS with spin-orbit
+ tolvrs8  1.0d-20
+ kptopt8  1
+
+#Dataset 10 : RF with spin-orbit
+ nqpt10     1
+ qpt10      3*0.0d0
+ rfphon10   1
+ getwfk10   8
+ kptopt10   2
+ toldfe10   1.1d-12
+  nstep10   15
+
+#Common data
+ acell 3*9.0d0
+ angdeg 3*57.25d0
+ ecut  2.0d0
+ natom  2
+ nband  10
+ ngkpt  2 2 2
+ nspinor 2
+ nstep 20
+ ntypat  1
+ rfatpol   1 1
+ rfdir     1 0 0
+ typat  1 1
+ xred  3*0.231d0
+       3*-0.231d0
+ znucl 83.d0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t14.abo, tolnlines = 6, tolabs = 2.000e-01, tolrel = 3.000e-01, fld_options = -easy 
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%     Bi A7 structure (2 atoms per unit cell),
+#%%     using the HGH pseudopotential, within LDA.
+#%%     Fixed cell dimensions. Treated as a semi-conductor
+#%%     Test the response to atomic displacements,
+#%%     with spin-orbit. Should give the same answer
+#%%     than test 2, except that the k point grid is now
+#%%     defined automatically.
+#%%     Dataset 8 : frozen-phonon with spin-orbit
+#%%     Dataset 10 : RF with spin-orbit.
+#%%     The agreement is as good as without
+#%%     spin-orbit ! Frozen-phonon 2DTE=2.48156,
+#%%     RF 2DTE=2.48156 .
+#%%     Warning : the output file of this test 
+#%%     is machine-dependent, although the final
+#%%     result is not. This is because the
+#%%     degeneracy of the GS wavefunctions with
+#%%     different spin orientation has not been broken.
+#%%<END TEST_INFO>

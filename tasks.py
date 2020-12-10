@@ -291,6 +291,38 @@ def vimt(ctx, tagname):
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
+
+@task
+def diff2(ctx, filename="run.abo"):
+    """
+    Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
+    """
+    vimdiff = "vimdiff"
+    if which("mvimdiff") is not None: vimdiff = "mvimdiff"
+    files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
+    if not files: return
+    cmd = "%s %s %s" % (vimdiff, filename, files[-1])
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
+
+@task
+def diff3(ctx, filename="run.abo"):
+    """
+    Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
+    """
+    vimdiff = "vimdiff"
+    if which("mvimdiff") is not None: vimdiff = "vimdiff"
+    files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
+    if not files: return
+    if len(files) > 2:
+        cmd = "%s %s %s %s" % (vimdiff, filename, files[-2], files[-1])
+    else:
+        cmd = "%s %s %s" % (vimdiff, filename, files[-1])
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
+
 #@task
 #def gdb(ctx, input_name, exec_name="abinit", run_make=False):
 #    """

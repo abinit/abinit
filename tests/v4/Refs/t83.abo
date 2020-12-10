@@ -1,0 +1,120 @@
+
+.Version 9.3.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ANADDB comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h27 )
+  
+
+================================================================================
+
+ -outvars_anaddb: echo values of input variables ----------------------
+
+ Flags :
+     elaflag         5
+   instrflag         1
+ Miscellaneous information :
+         asr         1
+      chneut         0
+
+================================================================================
+
+ read the DDB information and perform some checks
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.2552686  5.1011170  5.1075000  G(1)= -0.1031811  0.1031811  0.0978953
+ R(2)=  5.1011170  0.2552686  5.1075000  G(2)=  0.1031811 -0.1031811  0.0978953
+ R(3)=  5.0863376  5.0863376  0.0000000  G(3)=  0.0983026  0.0983026 -0.1030928
+ Unit cell volume ucvol=  2.5177545E+02 bohr^3
+ Angles (23,13,12)=  5.83745143E+01  5.83745143E+01  5.66387016E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Calculation of the internal-strain  tensor
+
+
+ Force-response internal strain tensor(Unit:Hartree/bohr)
+
+ Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
+  1  x    -0.0269361  -0.0030570  -0.0156363   0.2282618  -0.0284905  -0.0109707
+  1  y    -0.0030570  -0.0269361  -0.0156363  -0.0284905   0.2282618  -0.0109707
+  1  z    -0.0161261  -0.0161261  -0.0445683  -0.0234247  -0.0234247   0.2209638
+  2  x     0.0269361   0.0030570   0.0156363  -0.2282618   0.0284905   0.0109707
+  2  y     0.0030570   0.0269361   0.0156363   0.0284905  -0.2282618   0.0109707
+  2  z     0.0161261   0.0161261   0.0445683   0.0234247   0.0234247  -0.2209638
+
+ Displacement-response internal strain tensor (Unit:Bohr)
+
+ Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
+  1  x    -0.0886242  -0.0125124  -0.0539932   0.7400221  -0.0783447  -0.0263620
+  1  y    -0.0125124  -0.0886242  -0.0539932  -0.0783447   0.7400221  -0.0263620
+  1  z    -0.0528632  -0.0528632  -0.1437425  -0.0656745  -0.0656745   0.7045718
+  2  x     0.0886242   0.0125124   0.0539932  -0.7400221   0.0783447   0.0263620
+  2  y     0.0125124   0.0886242   0.0539932   0.0783447  -0.7400221   0.0263620
+  2  z     0.0528632   0.0528632   0.1437425   0.0656745   0.0656745  -0.7045718
+
+================================================================================
+
+ Calculation of the elastic and compliances tensor (Voigt notation)
+
+
+ Elastic Tensor (relaxed ion) (unit:10^2GP):
+  (at fixed electric field boundary condition)
+
+   1.9432698   0.8738860   0.7778011   0.0275893  -0.0011642  -0.0118224
+   0.8738860   1.9432698   0.7778011  -0.0011642   0.0275893  -0.0118224
+   0.7778011   0.7778011   2.1233360  -0.0158555  -0.0158555   0.0527766
+   0.0275893  -0.0011643  -0.0158555   0.8476145   0.0372312   0.0217147
+  -0.0011643   0.0275893  -0.0158555   0.0372312   0.8476145   0.0217147
+  -0.0118224  -0.0118224   0.0527766   0.0217147   0.0217147   0.8893923
+
+ Compliance Tensor (relaxed ion)  (unit: 10^-2GP^-1):
+  (at fixed electric field boundary condition)
+
+   0.6908853  -0.2451257  -0.1638368  -0.0265933   0.0066177   0.0161351
+  -0.2451257   0.6908853  -0.1638368   0.0066177  -0.0265933   0.0161351
+  -0.1638368  -0.1638368   0.5922355   0.0164941   0.0164941  -0.0403043
+  -0.0265933   0.0066177   0.0164941   1.1839546  -0.0512079  -0.0289006
+   0.0066177  -0.0265933   0.0164941  -0.0512079   1.1839546  -0.0289006
+   0.0161351   0.0161351  -0.0403044  -0.0289006  -0.0289006   1.1285950
+
+ Elastic Tensor (relaxed ion with stress corrected) (unit:10^2GP)
+  (at fixed electric field boundary condition)
+
+   1.9789624   0.9095786   0.7824888   0.0065631  -0.0221904  -0.0518064
+   0.9095786   1.9789624   0.7824888  -0.0221904   0.0065631  -0.0518064
+   0.8134937   0.8134937   2.1280237  -0.0368817  -0.0368817   0.0127926
+   0.0275893  -0.0011643  -0.0158555   0.8476145   0.0372312   0.0217147
+  -0.0011643   0.0275893  -0.0158555   0.0372312   0.8476145   0.0217147
+  -0.0118224  -0.0118224   0.0527766   0.0217147   0.0217147   0.8893923
+
+ Compliance Tensor (relaxed ion with stress correction) (unit: 10^-2(GP)^-1):
+  (at fixed electric field boundary condition)
+
+   0.6867696  -0.2492413  -0.1616292  -0.0201656   0.0130454   0.0279843
+  -0.2492413   0.6867696  -0.1616292   0.0130454  -0.0201656   0.0279843
+  -0.1676990  -0.1676990   0.5943072   0.0225261   0.0225261  -0.0291848
+  -0.0265425   0.0066685   0.0164669   1.1838752  -0.0512873  -0.0290469
+   0.0066685  -0.0265425   0.0164669  -0.0512873   1.1838752  -0.0290469
+   0.0162524   0.0162524  -0.0403673  -0.0290838  -0.0290838   1.1282574
+-
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+
+================================================================================
+
++Total cpu time      0.022  and wall time      0.023 sec
+
+ anaddb : the run completed succesfully.

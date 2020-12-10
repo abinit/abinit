@@ -250,7 +250,7 @@ ABI_DEALLOCATE(xcart)
 !  Set the abinit dataset for mover with fake values
 !  Scalar
    dtset%dmft_entropy = 0
-   dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations
+   dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics information
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
    dtset%dilatmx = 1.5  ! DILATation : MaXimal value
    dtset%chkdilatmx = 0 ! No check on dilatmx is needed in multibilint

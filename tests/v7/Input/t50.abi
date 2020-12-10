@@ -1,0 +1,113 @@
+#   C in diamond structure; Very rough  2x2x2  special point grid; low ecut.
+#   Only 3 q-points
+
+ ndtset 7
+
+# First compute the corse k-grid that must be commensurable with the q-grid.
+ prtwf1      1
+ prtden1     1
+ 
+ ngkpt2    4 4 4
+ getwfk2    -1
+ getden2    -1
+ iscf2      -2
+
+# Then make the temperature dependent calculation
+# 1) Non self-consistent calculation with an arbitrary q point 
+ getden3     1
+ iscf3      -2
+ nqpt3       1
+ iqpt3       1
+
+# 2) Computation at an other q point
+ getwfk4     1
+ getwfq4     3
+ getwfkfine4 2
+ nqpt4       1
+ iqpt4       1
+ ieig2rf4    1
+ smdelta4    1
+ rfphon4     1 
+ rfatpol4    1 2 
+ rfdir4      1 1 1
+
+# Then re-do it for the two last q-points
+ getden5     1
+ iscf5      -2
+ nqpt5       1
+ iqpt5       2
+
+ getwfk6     1
+ getwfq6     5
+ getwfkfine6 2
+ nqpt6       1
+ iqpt6       2
+ ieig2rf6    1
+ smdelta6    1
+ rfphon6     1
+ rfatpol6    1 2 
+ rfdir6      1 1 1
+
+ getden7     1
+ iscf7      -2
+ nqpt7       1
+ iqpt7       3
+
+#Size-dependent parameters
+ acell 3*6.70346805
+ rprim 0 .5 .5 .5 0 .5 .5 .5 0
+ natom 2
+ typat 1 1
+ xred 3*0.0 3*0.25
+ nband 8
+
+ ngkpt    2 2 2
+ nshiftk  1
+ shiftk   0.0 0.0 0.0
+ kptopt   3
+ ngqpt    2 2 2
+ qptopt   1
+ nshiftq  1
+ shiftq   0.0 0.0 0.0
+ elph2_imagden 0.1 eV
+ rfasr   1
+# Miscellaneous
+ ntypat  1
+ znucl 6
+ diemac 6.0d0
+ ecut 20
+ ecutsm 0.5
+ enunit 2
+ nstep 30
+ nsym 1
+ tolwfr 1.0d-16
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi, t54.abi
+#%% [shell] 
+#%% post_commands = 
+#%%  ww_cp t50o_DS2_WFK t51i_DS1_WFK;
+#%%  ww_cp t50o_DS7_WFQ t51i_DS1_WFQ;
+#%%  ww_cp t50o_DS1_WFK t51o_DS99_WFK;
+#%% [files]
+#%% files_to_test = 
+#%%   t50.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 2.0e-4, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = S. Ponc\'e 
+#%% keywords = NC, DFPT, EPH_OLD
+#%% description = 
+#%%  Diamond.
+#%%  Test temperature-dependent of the electronic structure, with
+#%%  reduction of the number of q points to be computed, thanks to thmflag=7 .
+#%%  The temperature-dependent shifts must be averaged over degenerate states.
+#%%  This temperature-dependent calculation make use of a k-point interpolation to speed up
+#%%  the convergence study with respect to the q-points integration. Two q-points are computed.
+#%% topics = TDepES
+#%%<END TEST_INFO>

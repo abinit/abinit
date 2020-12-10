@@ -1,0 +1,109 @@
+###################################################################
+## Automatic test for ABINIT:                                    ##
+## determine U from change of occupation on atoms upon potential ##
+##  shift on atom 1                                              ##
+## Fe bcc structure - ferromagnetic PAW                 DJA 2010 ##
+###################################################################
+ 
+# 2 atomic supercell
+      acell  3*5.42
+    chkprim  0                  # 0: do not check if uc primitive
+      rprim  1.00 0.00 0.00
+             0.00 1.00 0.00
+             0.00 0.00 1.00
+     nsppol  2        
+
+#Definition of the atom types
+     ntypat  1
+      znucl  26
+
+#Definition of the atoms
+      natom  2
+      typat  2*1               # atomic types
+       xred
+             0.0 0.0 0.0
+             0.5 0.5 0.5
+       ecut  8                   # Energy cutoff
+  pawecutdg  40                  # pawecutdg > 2*ecut
+      nband  25                  # Fe_2 minband=17
+
+#Definition of the k-point grid
+     kptopt  1                    # 1:  automatic generation of k points
+      ngkpt  3 3 3                # n x n x n
+    nshiftk  1
+     shiftk  0.5 0.5 0.5
+
+#Smearing
+     occopt  4
+     tsmear  0.05 eV
+
+#DFT+U
+    usepawu  1                    # 1 at lim dble cnt / 2 rnd m fld dle cnt
+      lpawu  2                    # ang moments corrrected
+       nsym  48                   # nsym&symrel: break cubic symmetry of crystal: allow 
+                                  # individual ionicoccupations
+     symrel   1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+             -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+             -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+              1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+              0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+              0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+              0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+              0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+              0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+              0  0 -1   1  0  0   0 -1  0       0  0  1  -1  0  0   0  1  0
+              0  0 -1  -1  0  0   0  1  0       0  0  1   1  0  0   0 -1  0
+              0  0  1  -1  0  0   0 -1  0       0  0 -1   1  0  0   0  1  0
+              1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+             -1  0  0   0  0  1   0 -1  0       1  0  0   0  0 -1   0  1  0
+             -1  0  0   0  0 -1   0  1  0       1  0  0   0  0  1   0 -1  0
+              1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0  1   0  1  0
+              0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+              0 -1  0   0  0  1  -1  0  0       0  1  0   0  0 -1   1  0  0
+              0 -1  0   0  0 -1   1  0  0       0  1  0   0  0  1  -1  0  0
+              0  1  0   0  0 -1  -1  0  0       0 -1  0   0  0  1   1  0  0
+              0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+              0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
+              0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
+              0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
+    pawujat  1                    # default, the atom on which U is determined
+     pawujv  0.1 eV               # default, size of the potential shift
+   macro_uj  1                    # activate determination of U
+   pawujrad  2.66866              # optional, radius ASA-sphere to which U should be extrapolated 
+
+#Only to accelerate test
+     irdwfk  1                    # default for macro_uj = 1                     
+ #    nline  2 
+ #   nnsclo  2
+     tolvrs  10d-9                # default for macro_uj = 1
+ 
+ 
+#Save disk space 
+     prteig  0
+      prtwf  0
+     prtden  0
+
+#PAW atomic data
+     indata_prefix = "tudet_1.o"
+
+     pp_dirpath "$ABI_PSPDIR"
+     pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tudet_1.abi, tudet_2.abi, tudet_3.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tudet_2.abo, tolnlines=  4, tolabs=  8.000e-03, tolrel=  6.500e-01, fld_options = -easy
+#%% output_file = "tudet_2.abo"
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D.J. Adams
+#%% keywords = PAW, DFTU
+#%% description = 
+#%%  Fe bcc structure - ferromagnetic PAW 
+#%%  determine U from change of occupation on atoms upon potential
+#%%  shift on atom 1                                              
+#%%<END TEST_INFO>

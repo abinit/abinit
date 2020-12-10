@@ -1,0 +1,45 @@
+##############################################################################
+#Test for multibinit, read the ddb and generate the effective potential into XML file
+# Generate coefficients for the anharmonic part and run the fit process
+##############################################################################
+energy_reference = -173.52217240339399
+prt_model = 2
+
+dipdip = 0
+dipdip_prt = 1
+ncell = 2 2 2
+
+#---------------------------------------------------------------
+#Inputs for the fitted coefficients
+#---------------------------------------------------------------
+fit_coeff = 1
+fit_rangePower = 3 3
+fit_cutoff = 5.4
+fit_ncoeff = 2
+fit_SPCoupling = 1
+fit_SPC_maxS = 2
+fit_anhaStrain = 1 
+fit_iatom = 0 
+fit_EFS = 1 1 1 
+sel_EFS = 1 1 1
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% need_cpp_vars = HAVE_NETCDF
+#%% input_ddb = t103_ddb.in
+#%% md_hist = t103_HIST
+#%% [files]
+#%% files_to_test = 
+#%%   t103.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t103_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t103_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = A. Martin, M.M. Schmitt
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   Read ddb and HIST, fit the anharmonic part on energies and generate effective potential
+#%% topics = FitProcess,LatticeModel
+#%%<END TEST_INFO>

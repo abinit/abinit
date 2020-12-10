@@ -36,7 +36,6 @@
 
 subroutine abi_dpotrf(uplo,n,a,lda,info)
 
- implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda
@@ -72,8 +71,6 @@ end subroutine abi_dpotrf
 
 subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
 
- implicit none
-
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n
@@ -100,8 +97,6 @@ end subroutine abi_zpotrf_2d
 !! SOURCE
 
 subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
@@ -151,7 +146,6 @@ end subroutine abi_d2zpotrf
 
 subroutine abi_zpotrf(uplo,n,a,lda,info)
 
- implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: lda,n

@@ -450,7 +450,7 @@ end subroutine dfpt_mkvxc
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (see below)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  nhat1(cplex*nfft,2*nhat1dim)= -PAW only- 1st-order compensation density

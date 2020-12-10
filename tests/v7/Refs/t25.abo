@@ -1,0 +1,958 @@
+
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h31 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t23-t24-t25/t25.in
+- output file    -> t25.out
+- root for input  files -> t25i
+- root for output files -> t25o
+
+
+ DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  5.
+     intxc =       0    ionmov =       0      iscf =      17    lmnmax =      22
+     lnmax =       8     mgfft =      10  mpssoang =       3    mqgrid =     100
+     natom =       5  nloc_mem =       2    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       1    n1xccc =       1    ntypat =       3
+    occopt =       3   xclevel =       1
+-    mband =          27        mffmem =           1         mkmem =           8
+       mpw =          60          nfft =        1000          nkpt =           8
+ PAW method is used; the additional fine FFT grid is defined by:
+   mgfftf=        16    nfftf =      4096
+================================================================================
+P This job should need less than                       5.174 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
+              amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
+        dmatpuopt           1
+             ecut      2.00000000E+00 Hartree
+         ecutsigx      2.00000000E+00 Hartree
+          ecutwfn      2.00000000E+00 Hartree
+-          fftalg         312
+        freqspmax      3.67493254E-02 Hartree
+        f4of2_sla      0.00000000E+00  0.00000000E+00  0.00000000E+00
+        gwcalctyp           2
+           irdscr           1
+           irdwfk           1
+           istwfk        1    1    1    1    1    1    1    1
+              ixc           7
+           jdtset        5
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  5.00000000E-01
+                       5.00000000E-01  5.00000000E-01  5.00000000E-01
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      1.45210000E+01
+          kssform           3
+            lpawu           2      -1      -1
+P           mkmem           8
+           mqgrid         100
+         mqgriddg         100
+            natom           5
+            nband          27
+           ndtset           1
+          nfreqsp           1
+            ngfft          10      10      10
+          ngfftdg          16      16      16
+             nkpt           8
+            nline           5
+           nnsclo           2
+          npwsigx          57
+           npwwfn          57
+            nstep          15
+             nsym           1
+           ntypat           3
+              occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+           occopt           3
+        optdriver           4
+        pawecutdg      5.00000000E+00 Hartree
+   plowan_compute          10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it5       0    0    0
+     plowan_iatom5       1
+       plowan_nbl5       1
+     plowan_lcalc5       2
+  plowan_projcalc5      -2
+          ppmodel           3
+          spgroup           1
+           tolvrs      1.00000000E-10
+           tsmear      3.67490000E-03 Hartree
+            typat      1  2  3  3  3
+            ucrpa           1
+          usepawu           1
+           useylm           1
+              wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.9210455615E+00  1.9210455615E+00  1.9210455615E+00
+                       1.9210455615E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  1.9210455615E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.9210455615E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       3.6302500000E+00  3.6302500000E+00  3.6302500000E+00
+                       3.6302500000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  3.6302500000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  3.6302500000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  5.0000000000E-01  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  5.0000000000E-01
+            znucl       23.00000   38.00000    8.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   5.
+
+================================================================================
+== DATASET  5 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 5, nkpt: 8, mband: 27, nsppol: 1, nspinor: 1, nspden: 1, mpw: 60, }
+cutoff_energies: {ecut:   2.0, pawecutdg:   5.0, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.67490000E-03, }
+meta: {optdriver: 4, gwcalctyp: 2, }
+...
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+ SIGMA: Calculation of the GW corrections 
+
+ Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
+ Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
+
+ cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0) 
+
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
+ R(2)=  0.0000000  7.2605000  0.0000000  G(2)=  0.0000000  0.1377316  0.0000000
+ R(3)=  0.0000000  0.0000000  7.2605000  G(3)=  0.0000000  0.0000000  0.1377316
+ Unit cell volume ucvol=  3.8273624E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/23v.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/23v.paw
+- Paw atomic data for element V - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
+- 23.00000  13.00000  20070917                znucl, zion, pspdat
+    7    7    2    0      1505   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ Pseudopotential format is: paw3
+ basis_size (lnmax)=  8 (lmn_size= 22), orbitals=   0   0   0   1   1   1   2   2
+ Spheres core radius: rc_sph= 2.35000000
+ 3 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1505 , AA= 0.26380E-03 BB= 0.60673E-02
+  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1500 , AA= 0.26380E-03 BB= 0.60673E-02
+  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1738 , AA= 0.26380E-03 BB= 0.60673E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions =  2.00701120
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid  2
+ Radial grid used for (t)core density is grid 1
+ Radial grid used for Vloc is grid 3
+ Compensation charge density is taken into account in XC energy/potential
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/38sr.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/38sr.paw
+- Paw atomic data for element Sr - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
+- 38.00000  10.00000  20070917                znucl, zion, pspdat
+    7    7    2    0      1068   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ Pseudopotential format is: paw3
+ basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
+ Spheres core radius: rc_sph= 1.92519986
+ 4 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1068 , AA= 0.22443E-03 BB= 0.85283E-02
+  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1063 , AA= 0.22443E-03 BB= 0.85283E-02
+  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=1134 , AA= 0.22443E-03 BB= 0.85283E-02
+  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=1256 , AA= 0.22443E-03 BB= 0.85283E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions =  1.81361893
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid  2
+ Radial grid used for (t)core density is grid 3
+ Radial grid used for Vloc is grid 4
+ Compensation charge density is taken into account in XC energy/potential
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.paw
+- Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
+-  8.00000   6.00000  20040423                znucl, zion, pspdat
+    7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ Pseudopotential format is: paw2
+ basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
+ Spheres core radius: rc_sph= 1.41000000
+ 2 radial meshes are used:
+  - mesh 1: r(i)=AA*exp(BB*(i-2)), size= 350 , AA= 0.72362E-05 BB= 0.35000E-01
+  - mesh 2: r(i)=step*(i-1), size= 566 , step= 0.25000E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions = sphere core radius
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid  2
+ Radial grid used for (t)core density is grid 1
+ Radial grid used for Vloc is grid 1
+ Compensation charge density is taken into account in XC energy/potential
+ pspatm: atomic psp has been read  and splines computed
+
+   2.50191820E+03                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     0.00000000E+00  5.00000000E-01  0.00000000E+00       0.12500
+     4)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.12500
+     5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
+     6)     5.00000000E-01  0.00000000E+00  5.00000000E-01       0.12500
+     7)     0.00000000E+00  5.00000000E-01  5.00000000E-01       0.12500
+     8)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.12500
+
+ Together with  1 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for screening function ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     0.00000000E+00  5.00000000E-01  0.00000000E+00       0.12500
+     4)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.12500
+     5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
+     6)     5.00000000E-01  0.00000000E+00  5.00000000E-01       0.12500
+     7)     0.00000000E+00  5.00000000E-01  5.00000000E-01       0.12500
+     8)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.12500
+
+ Together with  1 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =     9x    9x    9
+          total number of points  =          729
+
+
+
+ ******************************************
+ DFT+U Method used: FLL
+ ******************************************
+
+ =======================================================================
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
+     (it is assumed that the wavefunction for the first reference 
+             energy in PAW atomic data is an atomic eigenvalue)
+
+ Max value of the radius in atomic data file   =      2.4224
+ Max value of the mesh   in atomic data file   =   1505
+ PAW radius is                                 =      2.3500
+ PAW value of the mesh for integration is      =   1500
+ Integral of atomic wavefunction until rpaw    =      0.8685
+
+ For an atomic wfn truncated at rmax =      2.4224
+     The norm of the wfn is                    =      0.8798
+     The bare interaction (no renormalization) =     15.8151 eV
+     The bare interaction (for a renorm. wfn ) =     20.4327 eV
+   ( WARNING: The radial mesh in the atomic data file is cut at  2.42
+   Use XML atomic data files to compute the bare Coulomb interaction
+   on a true normalized atomic wavefunction )
+
+ For an atomic wfn truncated at rmax =      2.3500
+     The norm of the wfn is                    =      0.8685
+     The bare interaction (no renormalization) =     15.7021 eV
+     The bare interaction (for a renorm. wfn ) =     20.8160 eV
+ =======================================================================
+
+ ==================================== 
+ ==== Info on PAW TABulated data ==== 
+ ==================================== 
+
+
+  ******************************
+  **** Atom type    1 ****
+  ******************************
+  Number of (n,l) elements .......................    8
+  Number of (l,m,n) elements .....................   22
+  Number of (i,j) elements (packed form) .........   36
+  Max L+1 leading to non-zero Gaunt ..............    5
+  Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
+  lmn2_size ......................................  253
+  lmnmix_sz ......................................  253
+  Size of radial mesh ............................ 1505
+  Size of radial mesh for partial waves........... 1505
+  Size of radial mesh for [pseudo] core density... 1505
+  Size of radial mesh for [pseudo] kin core density   0
+  Size of radial mesh for pseudo valence density..    0
+  No of Q-points for tcorespl/tvalespl/tcoretauspl  100
+  No of Q-points for the radial shape functions ..    0
+  Radial shape function type .....................    2
+  shape_lambda ...................................   -1
+  Use pseudized core density .....................    0
+  Option for the use of hat density in XC terms ..    1
+  Use DFT+U ......................................    1
+  L on which U is applied ........................    2
+  Use Local Exact exchange .......................    0
+  Number of (i,j) elements for PAW+U or EXX .....    3
+  Number of projectors on which U or EXX acts ....    2
+  Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
+  Has kij   ......................................    0
+  Has tproj ......................................    0
+  Has tvale ......................................    0
+  Has coretau ....................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
+  Has nabla ......................................    0
+  Has nablaphi ...................................    0
+  Has shapefuncg .................................    0
+  Has wvl ........................................    0
+  beta ............................................ -2.88421672E+01
+  1/q d(tNcore(q))/dq for q=0 .....................  0.00000000E+00
+  d^2(tNcore(q))/dq^2 for q=0 .....................  0.00000000E+00
+  1/q d(tNvale(q))/dq for q=0 .....................  0.00000000E+00
+  XC energy for the core density .................. -3.29033209E+01
+  Radius of the PAW sphere ........................  2.35000000E+00
+  Compensation charge radius (if >rshp, g(r)=0) ...  2.00701120E+00
+  Sigma parameter in gaussian shape function ......  1.00000000E+99
+  Value of the U parameter [eV] ...................  0.00000000E+00
+  Value of the J parameter [eV] ...................  0.00000000E+00
+
+  ******************************
+  **** Atom type    2 ****
+  ******************************
+  Number of (n,l) elements .......................    6
+  Number of (l,m,n) elements .....................   18
+  Number of (i,j) elements (packed form) .........   21
+  Max L+1 leading to non-zero Gaunt ..............    5
+  Max L+1 leading to non-zero Gaunt (pawlcutd) ...    5
+  lmn2_size ......................................  171
+  lmnmix_sz ......................................  171
+  Size of radial mesh ............................ 1068
+  Size of radial mesh for partial waves........... 1068
+  Size of radial mesh for [pseudo] core density... 1068
+  Size of radial mesh for [pseudo] kin core density   0
+  Size of radial mesh for pseudo valence density..    0
+  No of Q-points for tcorespl/tvalespl/tcoretauspl  100
+  No of Q-points for the radial shape functions ..    0
+  Radial shape function type .....................    2
+  shape_lambda ...................................   -1
+  Use pseudized core density .....................    1
+  Option for the use of hat density in XC terms ..    1
+  Use DFT+U ......................................    0
+  Use Local Exact exchange .......................    0
+  Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
+  Has kij   ......................................    0
+  Has tproj ......................................    0
+  Has tvale ......................................    0
+  Has coretau ....................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
+  Has nabla ......................................    0
+  Has nablaphi ...................................    0
+  Has shapefuncg .................................    0
+  Has wvl ........................................    0
+  beta ............................................ -1.87106531E+01
+  1/q d(tNcore(q))/dq for q=0 ..................... -1.42360757E+00
+  d^2(tNcore(q))/dq^2 for q=0 .....................  1.00000000E+00
+  1/q d(tNvale(q))/dq for q=0 .....................  0.00000000E+00
+  XC energy for the core density .................. -9.52267377E+01
+  Radius of the PAW sphere ........................  1.92519986E+00
+  Compensation charge radius (if >rshp, g(r)=0) ...  1.81361893E+00
+  Sigma parameter in gaussian shape function ......  1.00000000E+99
+
+  ******************************
+  **** Atom type    3 ****
+  ******************************
+  Number of (n,l) elements .......................    4
+  Number of (l,m,n) elements .....................    8
+  Number of (i,j) elements (packed form) .........   10
+  Max L+1 leading to non-zero Gaunt ..............    3
+  Max L+1 leading to non-zero Gaunt (pawlcutd) ...    3
+  lmn2_size ......................................   36
+  lmnmix_sz ......................................   36
+  Size of radial mesh ............................  350
+  Size of radial mesh for partial waves...........  350
+  Size of radial mesh for [pseudo] core density...  350
+  Size of radial mesh for [pseudo] kin core density   0
+  Size of radial mesh for pseudo valence density..    0
+  No of Q-points for tcorespl/tvalespl/tcoretauspl  100
+  No of Q-points for the radial shape functions ..    0
+  Radial shape function type .....................    2
+  shape_lambda ...................................   -1
+  Use pseudized core density .....................    1
+  Option for the use of hat density in XC terms ..    1
+  Use DFT+U ......................................    0
+  Use Local Exact exchange .......................    0
+  Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
+  Has kij   ......................................    0
+  Has tproj ......................................    0
+  Has tvale ......................................    0
+  Has coretau ....................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
+  Has nabla ......................................    0
+  Has nablaphi ...................................    0
+  Has shapefuncg .................................    0
+  Has wvl ........................................    0
+  beta ............................................ -9.16767837E+00
+  1/q d(tNcore(q))/dq for q=0 ..................... -4.39028038E-03
+  d^2(tNcore(q))/dq^2 for q=0 .....................  1.00000000E+00
+  1/q d(tNvale(q))/dq for q=0 .....................  0.00000000E+00
+  XC energy for the core density .................. -4.21978264E+00
+  Radius of the PAW sphere ........................  1.41000013E+00
+  Compensation charge radius (if >rshp, g(r)=0) ...  1.41000013E+00
+  Sigma parameter in gaussian shape function ......  1.00000000E+99
+
+ PAW TEST:
+ ==== Compensation charge inside spheres ============
+ The following values must be close...
+ Compensation charge over spherical meshes =      4.289884207073041
+ Compensation charge over fine fft grid    =      4.286717782916903
+
+
+ Total number of electrons per unit cell =   36.4441 (Spherical mesh),   36.4409 (FFT mesh)
+ average of density, n =  0.095220
+ r_s =    1.3585
+ omega_plasma =   29.7659 [eV]
+
+
+ ==== Results concerning PAW augmentation regions ====
+
+ Total pseudopotential strength Dij (hartree):
+ Atom #  1
+  -2.11118   0.53376  -3.17290   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.53376   0.15944  -1.50117   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -3.17290  -1.50117  15.91034   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.79762   0.00000   0.00000   0.21362   0.00000   0.00000  -0.23824   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.79762   0.00000   0.00000   0.21362   0.00000   0.00000  -0.23824   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -1.79762   0.00000   0.00000   0.21362   0.00000   0.00000  -0.23824 ...
+   0.00000   0.00000   0.00000   0.21362   0.00000   0.00000   0.02323   0.00000   0.00000  -0.12328   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.21362   0.00000   0.00000   0.02323   0.00000   0.00000  -0.12328   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.21362   0.00000   0.00000   0.02323   0.00000   0.00000  -0.12328 ...
+   0.00000   0.00000   0.00000  -0.23824   0.00000   0.00000  -0.12328   0.00000   0.00000   1.98259   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.23824   0.00000   0.00000  -0.12328   0.00000   0.00000   1.98259   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.23824   0.00000   0.00000  -0.12328   0.00000   0.00000   1.98259 ...
+   ...  only 12  components have been written...
+ Atom #  5
+   0.18685   0.00998   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00998   0.11596   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000  -0.88204   0.00000   0.00000   0.07054   0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.88510   0.00000   0.00000   0.06835   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.88204   0.00000   0.00000   0.07054
+   0.00000   0.00000   0.07054   0.00000   0.00000  -1.28703   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.06835   0.00000   0.00000  -1.28981   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.07054   0.00000   0.00000  -1.28703
+
+
+ Augmentation waves occupancies Rhoij:
+ Atom #  1
+   1.99000  -0.10694  -0.00120   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.10694   2.51089   0.02728   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00120   0.02728   0.00064   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   1.97991   0.00000   0.00000   0.16892   0.00000   0.00000  -0.12925   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   1.97991   0.00000   0.00000   0.16892   0.00000   0.00000  -0.12925   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   1.97991   0.00000   0.00000   0.16892   0.00000   0.00000  -0.12925 ...
+   0.00000  -0.00000   0.00000   0.16892   0.00000   0.00000   3.84626   0.00000   0.00000   0.02091   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.16892   0.00000   0.00000   3.84626   0.00000   0.00000   0.02091   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.16892   0.00000   0.00000   3.84626   0.00000   0.00000   0.02091 ...
+   0.00000   0.00000   0.00000  -0.12925   0.00000   0.00000   0.02091   0.00000   0.00000   0.01047   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.12925   0.00000   0.00000   0.02091   0.00000   0.00000   0.01047   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.12925   0.00000   0.00000   0.02091   0.00000   0.00000   0.01047 ...
+   ...  only 12  components have been written...
+ Atom #  5
+   1.68323   0.10827   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.10827   0.00765   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.51307   0.00000   0.00000   0.13325   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.54213   0.00000   0.00000   0.14111   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.51307   0.00000   0.00000   0.13325
+   0.00000   0.00000   0.13325   0.00000   0.00000   0.03469   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.14111   0.00000   0.00000   0.03693   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.13325   0.00000   0.00000   0.03469
+
+ "PAW+U" part of augmentation waves occupancies Rhoij:
+ Atom #  1 - L=2 ONLY
+   0.17981   0.00000   0.00000   0.00000   0.00000   0.11746   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.17981   0.00000   0.00000   0.00000   0.00000   0.11746   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.61073   0.00000   0.00000   0.00000   0.00000   0.17778   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.17981   0.00000   0.00000   0.00000   0.00000   0.11746   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.61073   0.00000   0.00000   0.00000   0.00000   0.17778
+   0.11746   0.00000   0.00000   0.00000   0.00000   0.08793   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.11746   0.00000   0.00000   0.00000   0.00000   0.08793   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.17778   0.00000   0.00000   0.00000   0.00000   0.27708   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.11746   0.00000   0.00000   0.00000   0.00000   0.08793   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.17778   0.00000   0.00000   0.00000   0.00000   0.27708
+
+ ---------- DFT+U DATA --------------------------------------------------- 
+
+ ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
+
+
+ == Occupation matrix for correlated orbitals:
+
+ Up component only...
+     0.05331    0.00000    0.00000    0.00000    0.00000
+     0.00000    0.05331    0.00000    0.00000    0.00000
+     0.00000    0.00000    0.21006    0.00000    0.00000
+     0.00000    0.00000    0.00000    0.05331    0.00000
+     0.00000    0.00000    0.00000    0.00000    0.21006
+
+
+
+ cRPA calculations using wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
+ 
+==== Calculation of the screened interaction ====
+
+ Read K and Q mesh
+ Read l and bands from wanbz          21          25           5
+
+
+ ==Calculation of the bare interaction  V m==
+ 
+==Definition of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
+
+  Diagonal bare interaction
+   1  4.836
+   2  4.836
+   3  5.081
+   4  4.836
+   5  5.081
+
+  U'=U(m1,m2,m1,m2) for the bare interaction
+ -      1      2      3      4      5
+   1  4.836  4.812  4.868  4.812  4.878
+   2  4.812  4.836  4.876  4.812  4.871
+   3  4.868  4.876  5.081  4.876  5.033
+   4  4.812  4.812  4.876  4.836  4.871
+   5  4.878  4.871  5.033  4.871  5.081
+
+  Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    4.8835   -0.0000
+
+ (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=    4.9342    0.0000)
+
+  Hund coupling J=U(m1,m1,m2,m2) for the bare interaction
+ -      1      2      3      4      5
+   1  4.836  0.012  0.012  0.012  0.003
+   2  0.012  4.836  0.006  0.012  0.010
+   3  0.012  0.006  5.081  0.005  0.027
+   4  0.012  0.012  0.005  4.836  0.010
+   5  0.003  0.010  0.027  0.010  5.081
+
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0237    0.0000
+
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
+ -      1      2      3      4      5
+   1  4.836  0.012  0.012  0.012  0.003
+   2  0.012  4.836  0.006  0.012  0.010
+   3  0.012  0.006  5.081  0.005  0.027
+   4  0.012  0.012  0.005  4.836  0.010
+   5  0.003  0.010  0.027  0.010  5.081
+
+
+
+ == Calculation of the screened interaction on the correlated orbital U m ==
+ 
+ = Start loop over frequency
+
+ --- For frequency w =   1  -------------
+
+
+  Diagonal cRPA interaction
+   1  0.101
+   2  0.100
+   3  0.225
+   4  0.101
+   5  0.225
+
+  U'=U(m1,m2,m1,m2) for the cRPA interaction
+ -      1      2      3      4      5
+   1  0.101  0.084  0.110  0.084  0.120
+   2  0.084  0.100  0.117  0.084  0.113
+   3  0.110  0.117  0.225  0.117  0.188
+   4  0.084  0.084  0.117  0.101  0.113
+   5  0.120  0.113  0.188  0.113  0.225
+
+  Hubbard cRPA interaction for w =  1, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    0.1204    0.0000
+
+  (Hubbard cRPA interaction for w =   1, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    0.1505    0.0000)
+
+  Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
+ -      1      2      3      4      5
+   1  0.101  0.010  0.011  0.010  0.003
+   2  0.010  0.100  0.005  0.010  0.009
+   3  0.011  0.005  0.225  0.004  0.021
+   4  0.010  0.010  0.004  0.101  0.009
+   5  0.003  0.009  0.021  0.009  0.225
+
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.0167    0.0000
+
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ -      1      2      3      4      5
+   1  0.101  0.010  0.011  0.010  0.003
+   2  0.010  0.100  0.005  0.010  0.009
+   3  0.011  0.005  0.225  0.004  0.021
+   4  0.010  0.010  0.004  0.101  0.009
+   5  0.003  0.009  0.021  0.009  0.225
+ 
+==Reminder of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
+ 
+  -------------------------------------------------------------
+            Average U and J as a function of frequency
+   -------------------------------------------------------------
+         omega           U(omega)            J(omega)
+        0.000      0.1204    0.0000      0.0167    0.0000
+   -------------------------------------------------------------
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
+              amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
+        dmatpuopt           1
+             ecut      2.00000000E+00 Hartree
+         ecutsigx      2.00000000E+00 Hartree
+          ecutwfn      2.00000000E+00 Hartree
+           etotal5     0.0000000000E+00
+            fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         312
+        freqspmax      3.67493254E-02 Hartree
+        f4of2_sla      0.00000000E+00  0.00000000E+00  0.00000000E+00
+        gwcalctyp           2
+           irdscr           1
+           irdwfk           1
+           istwfk        1    1    1    1    1    1    1    1
+              ixc           7
+           jdtset        5
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  5.00000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  5.00000000E-01
+                       0.00000000E+00  5.00000000E-01  5.00000000E-01
+                       5.00000000E-01  5.00000000E-01  5.00000000E-01
+         kptrlatt        2    0    0      0    2    0      0    0    2
+          kptrlen      1.45210000E+01
+          kssform           3
+            lpawu           2      -1      -1
+P           mkmem           8
+           mqgrid         100
+         mqgriddg         100
+            natom           5
+            nband          27
+           ndtset           1
+          nfreqsp           1
+            ngfft          10      10      10
+          ngfftdg          16      16      16
+             nkpt           8
+            nline           5
+           nnsclo           2
+          npwsigx          57
+           npwwfn          57
+            nstep          15
+             nsym           1
+           ntypat           3
+              occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+           occopt           3
+        optdriver           4
+        pawecutdg      5.00000000E+00 Hartree
+   plowan_compute          10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it5       0    0    0
+     plowan_iatom5       1
+       plowan_nbl5       1
+     plowan_lcalc5       2
+  plowan_projcalc5      -2
+          ppmodel           3
+          spgroup           1
+           strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           tolvrs      1.00000000E-10
+           tsmear      3.67490000E-03 Hartree
+            typat      1  2  3  3  3
+            ucrpa           1
+          usepawu           1
+           useylm           1
+              wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
+                         0.12500    0.12500
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.9210455615E+00  1.9210455615E+00  1.9210455615E+00
+                       1.9210455615E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  1.9210455615E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.9210455615E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       3.6302500000E+00  3.6302500000E+00  3.6302500000E+00
+                       3.6302500000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  3.6302500000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  3.6302500000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  5.0000000000E-01  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  5.0000000000E-01
+            znucl       23.00000   38.00000    8.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] Screened Coulomb interaction calculations: cRPA implementation and applications 
+- to dynamical screening and self-consistency in uranium dioxide and cerium
+- B. Amadon, T. Applencourt and F. Bruneval  Phys. Rev. B 89, 125110 (2014).
+- Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2014
+-
+- [2] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
+- B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
+- Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
+-
+- [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
+- M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
+-
+- [4] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [5] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [6] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.0
+
+================================================================================
+
+ Calculation completed.
+.Delivered  11 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.0  wall=          3.0

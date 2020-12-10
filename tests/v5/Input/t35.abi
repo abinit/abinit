@@ -1,0 +1,72 @@
+# Crystalline stishovite : computation of the total energy
+# test of EFG using full PAW and also simple point charge model
+#
+
+#Specific to ground state calculation
+
+ecut 10    # Use ecut 20 for converged results
+pawecutdg 50
+
+prtpot 0
+prtden 0
+prtvhxc 0
+prtwf 0
+prteig 0
+
+prtefg 3 # this value computes EFG using PAW and also point charge model
+
+quadmom 0.00 -0.0261 # quad moments of Si-29 and O-17 in barns
+ptcharge 4.0 -2.0 # ionic charges of silicon and oxygen at the 1st-year chemistry level
+
+toldfe 1.0D-4 eV
+
+
+#######################################################################
+#Common input variables
+
+#Definition of the unit cell
+acell 4.1593 4.1593 2.6613 angstrom
+
+# kspace grid
+kptopt 1
+ngkpt 2 2 4 # Use ngkpt 4 4 6 for converged results
+
+#Definition of the atom types
+ntypat 2               # There are two types of atom
+znucl 14 8            # The keyword "znucl" refers to the atomic number of the
+
+#Definition of the atoms
+natom 6                #
+typat 1 1 2 2 2 2 # Si = 1, O = 2
+
+xred
+ 0.0 0.0 0.0
+ 0.5 0.5 0.5
+ 0.3063 0.3063 0.0
+ -0.3063 -0.3063 0.0
+ 0.1937 0.8063 0.5
+ 0.8063 0.1937 0.5
+
+nstep 50               # Maximal number of SCF cycles
+diemac 3.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.lda, o_ps.736.lda"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t35.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = 
+#%% description = 
+#%%   Stishovite, high-pressure polymorph of SiO2. LDA.
+#%%   Computation of the electric field gradient at each site using both PAW and
+#%%   a simple point charge model. Coded and contributed by J. Zwanziger.
+#%% topics = EFG
+#%%<END TEST_INFO>

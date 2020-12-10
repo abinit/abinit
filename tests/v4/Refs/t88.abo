@@ -1,0 +1,1977 @@
+
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h27 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t88/t88.in
+- output file    -> t88.out
+- root for input  files -> t88i
+- root for output files -> t88o
+
+
+ DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          35        mffmem =           1         mkmem =           8
+       mpw =         200          nfft =        5832          nkpt =           8
+================================================================================
+P This job should need less than                       3.148 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.856 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+================================================================================
+
+
+ DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          10        mffmem =           1         mkmem =           8
+       mpw =         200          nfft =        5832          nkpt =           8
+================================================================================
+P This job should need less than                       2.477 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.246 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+================================================================================
+
+
+ DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  3.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          10        mffmem =           1         mkmem =           8
+       mpw =         200          nfft =        5832          nkpt =           8
+================================================================================
+P This job should need less than                       2.477 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.246 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+================================================================================
+
+
+ DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  4.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          10        mffmem =           1         mkmem =           8
+       mpw =         200          nfft =        5832          nkpt =           8
+================================================================================
+P This job should need less than                       2.477 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.246 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+================================================================================
+
+
+ DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  5.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          10        mffmem =           1         mkmem =           8
+       mpw =         200          nfft =        5832          nkpt =           8
+================================================================================
+P This job should need less than                       2.477 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.246 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      1.0263000000E+01  1.0263000000E+01  1.0263000000E+01 Bohr
+              amu      2.80855000E+01
+             awtr1          1
+             awtr2          0
+             awtr3          1
+             awtr4          0
+             awtr5          1
+             bdgw           1       8       1       8       1       8       1       8
+                            1       8       1       8       1       8       1       8
+             ecut      6.00000000E+00 Hartree
+          ecuteps      1.49923969E+00 Hartree
+         ecutsigx      1.49923969E+00 Hartree
+          ecutwfn      6.00000000E+00 Hartree
+           enunit           2
+-          fftalg         312
+           getqps1          0
+           getqps2          0
+           getqps3          0
+           getqps4          3
+           getqps5          3
+           getscr1          0
+           getscr2          0
+           getscr3          2
+           getscr4          0
+           getscr5          4
+           getwfk1          0
+           getwfk2          1
+           getwfk3          1
+           getwfk4          1
+           getwfk5          1
+        gwcalctyp1          0
+        gwcalctyp2         28
+        gwcalctyp3         28
+        gwcalctyp4         28
+        gwcalctyp5         28
+-          gwpara           1
+      gw_icutcoul1          6
+      gw_icutcoul2          6
+      gw_icutcoul3          3
+      gw_icutcoul4          6
+      gw_icutcoul5          3
+           istwfk        1    0    1    0    0    0    1    0
+           jdtset        1    2    3    4    5
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+            kptgw      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+         kptrlatt        4    0    0      0    4    0      0    0    4
+          kptrlen      2.90281476E+01
+P           mkmem           8
+            natom           2
+            nband1         35
+            nband2         10
+            nband3         10
+            nband4         10
+            nband5         10
+           nbdbuf1          5
+           nbdbuf2          0
+           nbdbuf3          0
+           nbdbuf4          0
+           nbdbuf5          0
+           ndtset           5
+            ngfft          18      18      18
+             nkpt           8
+           nkptgw           8
+           npweps1          0
+           npweps2         27
+           npweps3         27
+           npweps4         27
+           npweps5         27
+          npwsigx1          0
+          npwsigx2         27
+          npwsigx3         27
+          npwsigx4         27
+          npwsigx5         27
+           npwwfn1          0
+           npwwfn2        181
+           npwwfn3        181
+           npwwfn4        181
+           npwwfn5        181
+            nstep         100
+             nsym          24
+           ntypat           1
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+        optdriver1          0
+        optdriver2          3
+        optdriver3          4
+        optdriver4          3
+        optdriver5          4
+         rhoqpmix      5.00000000E-01
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         227
+           symchi1       1
+           symchi2       0
+           symchi3       1
+           symchi4       0
+           symchi5       1
+        symmorphi           0
+           symrel      1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+         symsigma        0
+           tolwfr1     1.00000000E-10
+           tolwfr2     0.00000000E+00
+           tolwfr3     0.00000000E+00
+           tolwfr4     0.00000000E+00
+           tolwfr5     0.00000000E+00
+            typat      1  1
+              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
+                         0.04688    0.09375
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.3577364229E+00  1.3577364229E+00  1.3577364229E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5657500000E+00  2.5657500000E+00  2.5657500000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       14.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   3.
+
+ chkinp: Checking input parameters for consistency, jdtset=   4.
+
+ chkinp: Checking input parameters for consistency, jdtset=   5.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 8, mband: 35, nsppol: 1, nspinor: 1, nspden: 1, mpw: 200, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1315000  5.1315000  G(1)= -0.0974374  0.0974374  0.0974374
+ R(2)=  5.1315000  0.0000000  5.1315000  G(2)=  0.0974374 -0.0974374  0.0974374
+ R(3)=  5.1315000  5.1315000  0.0000000  G(3)=  0.0974374  0.0974374 -0.0974374
+ Unit cell volume ucvol=  2.7024832E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
+         ecut(hartree)=      6.000   => boxcut(ratio)=   2.25636
+
+ getcut : COMMENT -
+  Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
+  is sufficient for exact treatment of convolution.
+  Such a large boxcut is a waste : you could raise ecut
+  e.g. ecut=    7.636752 Hartrees makes boxcut=2
+
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+-  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
+- 14.00000   4.00000    940714                znucl, zion, pspdat
+    1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   5.907  14.692    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1   2.617   4.181    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
+  pspatm : epsatm=    1.43386982
+         --- l  ekb(1:nproj) -->
+             0    3.287949
+             1    1.849886
+ pspatm: atomic psp has been read  and splines computed
+
+   2.29419171E+01                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
+
+================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-10, }
+...
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.8533754518124    -8.853E+00 2.905E-03 4.333E+00
+ ETOT  2  -8.8580366447480    -4.661E-03 3.152E-07 1.873E-01
+ ETOT  3  -8.8581684403963    -1.318E-04 1.965E-05 3.868E-03
+ ETOT  4  -8.8581701361460    -1.696E-06 6.078E-07 1.008E-05
+ ETOT  5  -8.8581701420546    -5.909E-09 2.150E-09 1.441E-08
+ ETOT  6  -8.8581701420636    -9.027E-12 9.865E-11 8.078E-10
+
+ At SCF step    6   max residual=  9.87E-11 < tolwfr=  1.00E-10 =>converged.
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  9.91716345E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  9.91716345E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  9.91716345E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1315000,   5.1315000, ]
+- [  5.1315000,   0.0000000,   5.1315000, ]
+- [  5.1315000,   5.1315000,   0.0000000, ]
+lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7024832E+02
+convergence: {deltae: -9.027E-12, res2:  8.078E-10, residm:  9.865E-11, diffor: null, }
+etotal    :  -8.85817014E+00
+entropy   :   0.00000000E+00
+fermie    :   2.14966266E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  9.91716345E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.91716345E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   9.91716345E-05, ]
+pressure_GPa:  -2.9177E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          1.68057869
+    2        2.00000          1.81337721
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   32.210E-13; max=  98.654E-12
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.35773642293979     1.35773642293979     1.35773642293979
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales= 10.263000000000 10.263000000000 10.263000000000 bohr
+              =  5.430945691759  5.430945691759  5.430945691759 angstroms
+ prteigrs : about to open file t88o_DS1_EIG
+ Fermi (or HOMO) energy (hartree) =   0.21497   Average Vxc (hartree)=  -0.35216
+ Eigenvalues (hartree) for nkpt=   8  k points:
+ kpt#   1, nband= 35, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.22646    0.21497    0.21497    0.21497    0.30762    0.30762    0.30762    0.32949
+   0.49316    0.50913    0.50913    0.62361    0.62361    0.62361    0.76334    1.08297
+   1.08297    1.08297    1.13598    1.13598    1.14805    1.14805    1.14805    1.29629
+   1.29629    1.29629    1.50416    1.55347    1.55347    1.55347    1.67906    1.67906
+   1.72737    1.72771    1.72936
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+ Fermi (or HOMO) energy (eV) =   5.84953   Average Vxc (eV)=  -9.58281
+ Eigenvalues (   eV  ) for nkpt=   8  k points:
+ kpt#   1, nband= 35, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -6.16233    5.84953    5.84953    5.84953    8.37088    8.37088    8.37088    8.96590
+  13.41946   13.85410   13.85410   16.96919   16.96919   16.96919   20.77165   29.46922
+  29.46922   29.46922   30.91150   30.91150   31.23993   31.23993   31.23993   35.27390
+  35.27390   35.27390   40.93028   42.27207   42.27207   42.27207   45.68956   45.68956
+  47.00416   47.01347   47.05815
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.01335504635617E+00
+hartree             :  5.52776004577691E-01
+xc                  : -3.53505956962221E+00
+Ewald energy        : -8.39800922793230E+00
+psp_core            :  8.48919894711432E-02
+local_psp           : -2.49365835381228E+00
+non_local_psp       :  1.91753396889818E+00
+total_energy        : -8.85817014206361E+00
+total_energy_eV     : -2.41043068032884E+02
+band_energy         :  2.24819432353198E-01
+...
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  9.91716345E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  9.91716345E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  9.91716345E-05  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.9177E+00 GPa]
+- sigma(1 1)=  2.91772973E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.91772973E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.91772973E+00  sigma(2 1)=  0.00000000E+00
+
+================================================================================
+== DATASET  2 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 8, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 200, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 28, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ SCREENING: Calculation of the susceptibility and dielectric matrices 
+
+ Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
+ Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1315000  5.1315000  G(1)= -0.0974374  0.0974374  0.0974374
+ R(2)=  5.1315000  0.0000000  5.1315000  G(2)=  0.0974374 -0.0974374  0.0974374
+ R(3)=  5.1315000  5.1315000  0.0000000  G(3)=  0.0974374  0.0974374 -0.0974374
+ Unit cell volume ucvol=  2.7024832E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 24 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for the screening function ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 24 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =    15x   15x   15
+          total number of points  =         3375
+
+
+ rdqps: reading QP wavefunctions of the previous step 
+        looking for file t88i_DS2_QPS
+ file not found, 1st iteration initialized with KS eigenelements 
+
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.029602
+ r_s =    2.0054
+ omega_plasma =   16.5966 [eV]
+
+
+ calculating chi0 at frequencies [eV] :
+  1    0.000000E+00    0.000000E+00
+  2    0.000000E+00    1.659660E+01
+
+
+--------------------------------------------------------------------------------
+  q-point number  1        q = ( 0.000000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+
+    2   0.000 -11.874  -0.152  -0.173  -0.131   0.000  -0.000  -0.000  -0.000
+       -0.000   0.000   0.000   0.000   0.000  -5.042  -0.204  -0.225  -0.183
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+
+    2   0.000  -3.226   0.066   0.062   0.070   0.000  -0.000  -0.000  -0.000
+       -0.000  -0.000   0.000   0.000   0.000  -1.120  -0.047  -0.051  -0.044
+
+ For q-point:  0.000010 0.000020 0.000030
+  dielectric constant =  24.1935
+  dielectric constant without local fields =  25.7883
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     17.79  [%]
+  Heads and wings of the symmetrical epsilon^-1(G,G') 
+
+   Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+      0.041   0.004  -0.012   0.012  -0.004  -0.004   0.012  -0.012   0.004
+      0.000   0.004  -0.012   0.012  -0.004   0.004  -0.012   0.012  -0.004
+       1       2       3       4       5       6       7       8       9
+      0.041   0.004  -0.012   0.012  -0.004  -0.004   0.012  -0.012   0.004
+      0.000  -0.004   0.012  -0.012   0.004  -0.004   0.012  -0.012   0.004
+
+
+   Upper and lower wings at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+      0.490   0.007  -0.022   0.022  -0.007  -0.007   0.022  -0.022   0.007
+     -0.000   0.007  -0.022   0.022  -0.007   0.007  -0.022   0.022  -0.007
+       1       2       3       4       5       6       7       8       9
+      0.490   0.007  -0.022   0.022  -0.007  -0.007   0.022  -0.022   0.007
+     -0.000  -0.007   0.022  -0.022   0.007  -0.007   0.022  -0.022   0.007
+
+
+
+
+--------------------------------------------------------------------------------
+  q-point number  2        q = ( 0.250000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -8.430  -1.488  -0.946  -0.949  -0.943   2.443  -1.813  -1.802  -1.823
+        0.000  -1.488  -0.946  -0.949  -0.943  -2.443   1.813   1.802   1.823
+
+    2  -1.488  -9.908  -0.522  -0.526  -0.519   0.000  -0.000  -0.000  -0.000
+        1.488   0.000  -0.000  -0.000  -0.000  -4.421   0.117   0.106   0.129
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -1.039  -0.371  -0.071  -0.072  -0.070   0.376  -0.265  -0.263  -0.267
+       -0.000  -0.371  -0.071  -0.072  -0.070  -0.376   0.265   0.263   0.267
+
+    2  -0.371  -2.674   0.021   0.021   0.022   0.000  -0.000  -0.000  -0.000
+        0.371  -0.000  -0.000  -0.000  -0.000  -1.062   0.018   0.016   0.021
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     67.20  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  3        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -13.004  -1.616  -1.991  -1.994  -1.988   3.015  -2.167  -2.152  -2.182
+        0.000  -1.616  -1.991  -1.994  -1.988  -3.015   2.167   2.152   2.182
+
+    2  -1.616  -7.588   0.262   0.261   0.264   0.000  -0.000  -0.000  -0.000
+        1.616   0.000  -0.000  -0.000  -0.000  -4.010   0.275   0.267   0.283
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -2.777  -0.521  -0.380  -0.380  -0.379   0.550  -0.492  -0.488  -0.495
+        0.000  -0.521  -0.380  -0.380  -0.379  -0.550   0.492   0.488   0.495
+
+    2  -0.521  -1.886   0.067   0.067   0.068   0.000  -0.000  -0.000  -0.000
+        0.521  -0.000   0.000   0.000   0.000  -0.817   0.015   0.013   0.016
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     45.40  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  4        q = ( 0.250000, 0.250000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -10.719  -2.124  -0.250  -0.250  -2.124  -0.250  -2.124  -2.124  -0.250
+        0.000  -2.124  -0.250  -0.250  -2.124   0.250   2.124   2.124   0.250
+
+    2  -2.124 -10.614  -0.449  -0.470  -0.572   0.000  -0.000  -0.000  -0.000
+        2.124   0.000  -0.000  -0.000  -0.000  -3.450   0.261   0.257  -0.217
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -1.326  -0.355   0.020   0.020  -0.355   0.020  -0.355  -0.355   0.020
+        0.000  -0.355   0.020   0.020  -0.355  -0.020   0.355   0.355  -0.020
+
+    2  -0.355  -2.771   0.021   0.015   0.020   0.000  -0.000  -0.000  -0.000
+        0.355  -0.000  -0.000  -0.000   0.000  -0.920   0.011   0.010  -0.009
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     61.51  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  5        q = ( 0.500000, 0.250000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -15.037  -2.039  -1.665  -1.670  -2.347   0.379  -2.441  -2.438  -1.604
+        0.000  -2.039  -1.665  -1.670  -2.347  -0.379   2.441   2.438   1.604
+
+    2  -2.039  -8.257  -0.032  -0.037  -0.033   0.000  -0.000  -0.000  -0.000
+        2.039   0.000  -0.000  -0.000   0.000  -3.192   0.365   0.362  -0.002
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -2.646  -0.501  -0.232  -0.233  -0.488   0.221  -0.489  -0.488  -0.413
+       -0.000  -0.501  -0.232  -0.233  -0.488  -0.221   0.489   0.488   0.413
+
+    2  -0.501  -2.069   0.039   0.038   0.075   0.000  -0.000  -0.000  -0.000
+        0.501  -0.000   0.000   0.000   0.000  -0.765   0.005   0.004   0.021
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     42.68  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  6        q = (-0.250000, 0.250000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -13.941   0.233  -2.243  -2.237  -2.067  -2.067  -2.237  -2.243   0.233
+        0.000   0.233  -2.243  -2.237  -2.067   2.067   2.237   2.243  -0.233
+
+    2   0.233 -14.788   0.880   0.860  -0.125   0.000  -0.000  -0.000   0.000
+       -0.233   0.000   0.000   0.000   0.000  -3.307  -0.080  -0.079  -1.796
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -2.189   0.177  -0.382  -0.380  -0.471  -0.471  -0.380  -0.382   0.177
+        0.000   0.177  -0.382  -0.380  -0.471   0.471   0.380   0.382  -0.177
+
+    2   0.177  -3.360   0.108   0.101   0.024   0.000  -0.000  -0.000   0.000
+       -0.177   0.000   0.000   0.000   0.000  -0.832  -0.077  -0.077  -0.185
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     47.73  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  7        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -15.569  -2.334  -1.350  -1.350  -2.334  -1.350  -2.334  -2.334  -1.350
+        0.000  -2.334  -1.350  -1.350  -2.334   1.350   2.334   2.334   1.350
+
+    2  -2.334  -8.516   0.040   0.020   0.060   0.000  -0.000  -0.000  -0.000
+        2.334   0.000  -0.000  -0.000  -0.000  -2.154   0.355   0.354  -0.175
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.172  -0.531  -0.306  -0.306  -0.531  -0.306  -0.531  -0.531  -0.306
+        0.000  -0.531  -0.306  -0.306  -0.531   0.306   0.531   0.531   0.306
+
+    2  -0.531  -2.103   0.014   0.008   0.088  -0.000  -0.000  -0.000  -0.000
+        0.531  -0.000  -0.000  -0.000   0.000  -0.498  -0.006  -0.006   0.002
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    7 :     39.54  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  8        q = (-0.250000, 0.500000, 0.250000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -16.131  -1.564  -2.347  -2.098  -2.057  -2.057  -2.098  -2.347  -1.564
+        0.000  -1.564  -2.347  -2.098  -2.057   2.057   2.098   2.347   1.564
+
+    2  -1.564 -16.090  -0.163   1.835  -0.241  -0.000  -0.000  -0.000   0.000
+        1.564   0.000   0.000   0.000   0.000  -2.361   0.000   0.111   0.000
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.293  -0.165  -0.531  -0.482  -0.503  -0.503  -0.482  -0.531  -0.165
+        0.000  -0.165  -0.531  -0.482  -0.503   0.503   0.482   0.531   0.165
+
+    2  -0.165  -3.278  -0.077   0.161   0.026  -0.000  -0.000  -0.000   0.000
+        0.165   0.000   0.000  -0.000  -0.000  -0.461  -0.000  -0.027  -0.000
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    8 :     38.56  [%]
+
+================================================================================
+== DATASET  3 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 8, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 200, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 28, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getscr/=0, take file _SCR from output of DATASET   2.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ SIGMA: Calculation of the GW corrections 
+
+ Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
+ Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1315000  5.1315000  G(1)= -0.0974374  0.0974374  0.0974374
+ R(2)=  5.1315000  0.0000000  5.1315000  G(2)=  0.0974374 -0.0974374  0.0974374
+ R(3)=  5.1315000  5.1315000  0.0000000  G(3)=  0.0974374  0.0974374 -0.0974374
+ Unit cell volume ucvol=  2.7024832E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 24 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for screening function ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 24 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =    15x   15x   15
+          total number of points  =         3375
+
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.029602
+ r_s =    2.0054
+ omega_plasma =   16.5966 [eV]
+
+
+ rdqps: reading QP wavefunctions of the previous step 
+        looking for file t88i_DS3_QPS
+ file not found, 1st iteration initialized with KS eigenelements 
+
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.029602
+ r_s =    2.0054
+ omega_plasma =   16.5966 [eV]
+
+
+--------------------------------------------------------------------------------
+
+ QP results after the unitary transformation in the KS subspace: 
+
+  Number of electrons    =    8.0000
+
+  QP Band energy    [Ha] =  2.24819432353198E-01
+  QP Hartree energy [Ha] =  5.52776004577691E-01
+
+--------------------------------------------------------------------------------
+
+ === KS Band Gaps ===
+  >>>> For spin  1
+   Minimum direct gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
+ SIGMA fundamental parameters:
+ MODEL GW with PLASMON POLE MODEL  1
+ number of plane-waves for SigmaX                   27
+ number of plane-waves for SigmaC and W             27
+ number of plane-waves for wavefunctions           181
+ number of bands                                    10
+ number of independent spin polarizations            1
+ number of spinorial components                      1
+ number of k-points in IBZ                           8
+ number of q-points in IBZ                           8
+ number of symmetry operations                      24
+ number of k-points in BZ                           64
+ number of q-points in BZ                           64
+ number of frequencies for dSigma/dE                 1
+ frequency step for dSigma/dE [eV]                0.00
+ number of omega for Sigma on real axis              0
+ max omega for Sigma on real axis  [eV]           0.00
+ zcut for avoiding poles [eV]                     0.10
+
+ EPSILON^-1 parameters (SCR file):
+ dimension of the eps^-1 matrix on file             27
+ dimension of the eps^-1 matrix used                27
+ number of plane-waves for wavefunctions           181
+ number of bands                                    10
+ number of q-points in IBZ                           8
+ number of frequencies                               2
+ number of real frequencies                          1
+ number of imag frequencies                          1
+
+ matrix elements of self-energy operator (all in [eV])
+
+ Self-Consistent on Energies and Wavefunctions
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.521
+QP_gap     :    3.282
+Delta_QP_KS:    0.761
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -6.162   -10.405    -6.162     4.243   -16.870     9.457     1.000     0.000    -7.413     2.993    -3.170    -3.170
+        2     5.850   -11.214     5.850    17.063   -11.903     2.345     1.000     0.000    -9.558     1.655     7.505     7.501
+        3     5.850   -11.214     5.850    17.063   -11.906     2.346     1.000     0.000    -9.559     1.654     7.504     7.503
+        4     5.850   -11.214     5.850    17.063   -11.908     2.347     1.000     0.000    -9.561     1.653     7.502     7.506
+        5     8.371   -10.022     8.371    18.392    -5.193    -2.415     1.000     0.000    -7.608     2.413    10.784    10.784
+        6     8.371   -10.022     8.371    18.392    -5.193    -2.415     1.000     0.000    -7.608     2.413    10.784    10.785
+        7     8.371   -10.022     8.371    18.392    -5.193    -2.415     1.000     0.000    -7.608     2.413    10.784    10.785
+        8     8.966   -10.782     8.966    19.748    -5.175    -2.797     1.000     0.000    -7.972     2.810    11.776    11.777
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
+kpoint     : [   0.250,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.662
+QP_gap     :    3.593
+Delta_QP_KS:    0.931
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -5.353   -10.474    -5.353     5.120   -16.599     7.971     1.000     0.000    -8.627     1.846    -3.507    -3.510
+        2     1.876   -10.593     1.876    12.469   -12.953     3.342     1.000     0.000    -9.611     0.981     2.858     2.856
+        3     5.070   -10.991     5.070    16.060   -11.961     2.417     1.000     0.000    -9.544     1.447     6.517     6.505
+        4     5.070   -10.991     5.070    16.060   -11.979     2.425     1.000     0.000    -9.554     1.437     6.506     6.517
+        5     7.732   -10.081     7.732    17.813    -5.275    -2.438     1.000     0.000    -7.713     2.368    10.100    10.101
+        6     9.336   -10.066     9.336    19.401    -4.936    -2.575     1.000     0.000    -7.511     2.555    11.891    11.884
+        7     9.336   -10.066     9.336    19.401    -4.923    -2.571     1.000     0.000    -7.494     2.572    11.907    11.914
+        8    12.525   -10.390    12.525    22.915    -4.113    -3.007     1.000     0.000    -7.120     3.270    15.795    15.798
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
+kpoint     : [   0.500,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.634
+QP_gap     :    3.595
+Delta_QP_KS:    0.961
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -3.787   -10.756    -3.787     6.969   -16.208     6.961     1.000     0.000    -9.247     1.509    -2.278    -2.279
+        2    -1.195   -10.164    -1.195     8.969   -14.181     4.804     1.000     0.000    -9.377     0.787    -0.408    -0.411
+        3     4.621   -10.966     4.621    15.587   -12.252     2.609     1.000     0.000    -9.643     1.323     5.944     5.944
+        4     4.621   -10.966     4.621    15.587   -12.258     2.616     1.000     0.000    -9.643     1.323     5.944     5.944
+        5     7.255   -10.073     7.255    17.328    -5.409    -2.380     1.000     0.000    -7.789     2.284     9.539     9.543
+        6     9.185    -9.673     9.185    18.858    -4.577    -2.632     1.000     0.000    -7.209     2.464    11.650    11.649
+        7     9.185    -9.673     9.185    18.858    -4.582    -2.627     1.000     0.000    -7.209     2.464    11.649    11.650
+        8    13.330    -7.980    13.330    21.310    -2.096    -3.291     1.000     0.000    -5.387     2.593    15.923    15.924
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
+kpoint     : [   0.250,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    2.980
+QP_gap     :    3.805
+Delta_QP_KS:    0.825
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -5.067   -10.487    -5.067     5.420   -16.492     8.319     1.000     0.000    -8.173     2.313    -2.753    -2.757
+        2     2.327   -11.068     2.327    13.395   -13.194     3.278     1.000     0.000    -9.916     1.152     3.479     3.478
+        3     3.915   -10.655     3.915    14.570   -12.110     2.663     1.000     0.000    -9.447     1.208     5.123     5.123
+        4     3.915   -10.655     3.915    14.570   -12.106     2.663     1.000     0.000    -9.442     1.213     5.128     5.127
+        5     6.895    -9.413     6.895    16.308    -5.083    -2.292     1.000     0.000    -7.375     2.038     8.933     8.938
+        6     8.905    -9.218     8.905    18.122    -4.175    -2.673     1.000     0.000    -6.848     2.370    11.275    11.276
+        7    11.603   -10.546    11.603    22.149    -4.633    -2.897     1.000     0.000    -7.530     3.016    14.619    14.619
+        8    11.603   -10.546    11.603    22.149    -4.633    -2.895     1.000     0.000    -7.528     3.018    14.621    14.622
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
+kpoint     : [   0.500,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    3.683
+QP_gap     :    4.634
+Delta_QP_KS:    0.951
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -3.421   -10.699    -3.421     7.277   -15.965     6.534     1.000     0.000    -9.431     1.268    -2.154    -2.156
+        2    -0.573   -10.672    -0.573    10.098   -14.449     4.640     1.000     0.000    -9.808     0.864     0.290     0.285
+        3     2.242   -10.190     2.242    12.432   -12.194     2.963     1.000     0.000    -9.231     0.959     3.201     3.203
+        4     3.596   -10.651     3.596    14.246   -12.329     2.808     1.000     0.000    -9.521     1.129     4.725     4.725
+        5     7.279    -9.273     7.279    16.552    -4.768    -2.424     1.000     0.000    -7.193     2.080     9.359     9.360
+        6    10.247    -9.646    10.247    19.893    -4.274    -2.771     1.000     0.000    -7.045     2.601    12.847    12.848
+        7    11.488   -10.359    11.488    21.847    -4.503    -2.929     1.000     0.000    -7.432     2.927    14.415    14.419
+        8    11.780   -10.087    11.780    21.866    -4.177    -3.034     1.000     0.000    -7.211     2.876    14.655    14.656
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
+kpoint     : [  -0.250,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    3.721
+QP_gap     :    4.741
+Delta_QP_KS:    1.020
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -4.104   -10.611    -4.104     6.507   -16.196     7.120     1.000     0.000    -9.076     1.535    -2.569    -2.572
+        2     0.328   -10.801     0.328    11.129   -14.049     4.208     1.000     0.000    -9.841     0.960     1.288     1.286
+        3     2.018   -10.037     2.018    12.054   -12.126     3.010     1.000     0.000    -9.116     0.920     2.938     2.939
+        4     4.488   -10.876     4.488    15.364   -12.086     2.542     1.000     0.000    -9.544     1.331     5.819     5.819
+        5     8.209    -9.605     8.209    17.814    -4.716    -2.538     1.000     0.000    -7.253     2.352    10.560    10.556
+        6    10.603   -10.096    10.603    20.699    -4.404    -3.018     1.000     0.000    -7.422     2.675    13.277    13.277
+        7    10.924   -10.206    10.924    21.130    -4.833    -2.551     1.000     0.000    -7.384     2.822    13.747    13.749
+        8    11.813    -9.875    11.813    21.688    -3.841    -3.135     1.000     0.000    -6.976     2.899    14.712    14.719
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
+kpoint     : [   0.500,    0.500,    0.000, ]
+spin       : 1
+KS_gap     :    3.519
+QP_gap     :    4.431
+Delta_QP_KS:    0.912
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -1.997   -10.756    -1.997     8.759   -15.310     5.520     1.000     0.000    -9.790     0.966    -1.031    -1.038
+        2    -1.997   -10.756    -1.997     8.759   -15.310     5.520     1.000     0.000    -9.790     0.966    -1.031    -1.028
+        3     2.939   -10.534     2.939    13.473   -12.586     3.038     1.000     0.000    -9.547     0.987     3.926     3.925
+        4     2.939   -10.534     2.939    13.473   -12.586     3.038     1.000     0.000    -9.547     0.987     3.926     3.926
+        5     6.458    -9.062     6.458    15.520    -4.816    -2.347     1.000     0.000    -7.163     1.899     8.357     8.358
+        6     6.458    -9.062     6.458    15.520    -4.816    -2.347     1.000     0.000    -7.163     1.899     8.357     8.360
+        7    15.778   -10.536    15.778    26.314    -3.067    -4.173     1.000     0.000    -7.241     3.295    19.073    19.073
+        8    15.778   -10.536    15.778    26.314    -3.067    -4.174     1.000     0.000    -7.241     3.295    19.073    19.073
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
+kpoint     : [  -0.250,    0.500,    0.250, ]
+spin       : 1
+KS_gap     :    8.176
+QP_gap     :    9.780
+Delta_QP_KS:    1.604
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -1.837   -10.874    -1.837     9.038   -15.357     5.489     1.000     0.000    -9.868     1.006    -0.831    -0.846
+        2    -1.837   -10.874    -1.837     9.038   -15.357     5.489     1.000     0.000    -9.868     1.006    -0.831    -0.818
+        3     1.909    -9.965     1.909    11.874   -12.137     3.037     1.000     0.000    -9.101     0.864     2.773     2.763
+        4     1.909    -9.965     1.909    11.874   -12.137     3.037     1.000     0.000    -9.101     0.864     2.773     2.782
+        5    10.086    -9.596    10.086    19.682    -4.500    -2.629     1.000     0.000    -7.128     2.468    12.554    12.538
+        6    10.086    -9.596    10.086    19.682    -4.500    -2.629     1.000     0.000    -7.128     2.468    12.554    12.569
+        7    10.742   -10.044    10.742    20.786    -4.248    -3.057     1.000     0.000    -7.305     2.739    13.482    13.470
+        8    10.742   -10.044    10.742    20.786    -4.248    -3.057     1.000     0.000    -7.305     2.739    13.482    13.497
+...
+
+
+ New Fermi energy :        2.915025E-01 Ha ,    7.932187E+00 eV
+ New Exchange energy :    -2.005591E+00 Ha ,   -5.457489E+01 eV
+
+ === QP Band Gaps ===
+  >>>> For spin  1
+   Minimum direct gap =   3.2781 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.8525 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
+
+ writing QP data on file : t88o_DS3_QPS
+
+ Convergence of QP corrections
+ >>>>> For spin  1 <<<<<
+.  kptgw no:  1; Maximum DeltaE = (   2.993  -0.083) for band index:  1
+.  kptgw no:  2; Maximum DeltaE = (   3.270   0.001) for band index:  8
+.  kptgw no:  3; Maximum DeltaE = (   2.593   0.005) for band index:  8
+.  kptgw no:  4; Maximum DeltaE = (   3.018   0.001) for band index:  8
+.  kptgw no:  5; Maximum DeltaE = (   2.927   0.000) for band index:  7
+.  kptgw no:  6; Maximum DeltaE = (   2.899  -0.002) for band index:  8
+.  kptgw no:  7; Maximum DeltaE = (   3.295  -0.013) for band index:  7
+.  kptgw no:  8; Maximum DeltaE = (   2.739  -0.001) for band index:  7
+
+================================================================================
+== DATASET  4 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 8, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 200, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 28, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getqps/=0, take file _QPS from output of DATASET   3.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ SCREENING: Calculation of the susceptibility and dielectric matrices 
+
+ Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
+ Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1315000  5.1315000  G(1)= -0.0974374  0.0974374  0.0974374
+ R(2)=  5.1315000  0.0000000  5.1315000  G(2)=  0.0974374 -0.0974374  0.0974374
+ R(3)=  5.1315000  5.1315000  0.0000000  G(3)=  0.0974374  0.0974374 -0.0974374
+ Unit cell volume ucvol=  2.7024832E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 24 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for the screening function ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 24 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =    15x   15x   15
+          total number of points  =         3375
+
+
+ rdqps: reading QP wavefunctions of the previous step 
+        looking for file t88o_DS3_QPS
+ Number of iteration(s) already performed:    1
+
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.029602
+ r_s =    2.0054
+ omega_plasma =   16.5966 [eV]
+
+
+ calculating chi0 at frequencies [eV] :
+  1    0.000000E+00    0.000000E+00
+  2    0.000000E+00    1.659660E+01
+
+
+--------------------------------------------------------------------------------
+  q-point number  1        q = ( 0.000000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+
+    2   0.000 -10.931  -0.031  -0.058  -0.003  -0.001   0.000   0.000   0.000
+       -0.000   0.000  -0.000  -0.000  -0.000  -4.396  -0.161  -0.187  -0.133
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
+        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+
+    2   0.000  -3.329   0.041   0.038   0.044  -0.000   0.000   0.000   0.000
+       -0.000  -0.001   0.000   0.000  -0.000  -1.145  -0.067  -0.071  -0.063
+
+ For q-point:  0.000010 0.000020 0.000030
+  dielectric constant =  11.9934
+  dielectric constant without local fields =  12.7429
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     18.82  [%]
+  Heads and wings of the symmetrical epsilon^-1(G,G') 
+
+   Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+      0.083   0.006  -0.017   0.017  -0.006  -0.006   0.017  -0.017   0.006
+      0.000   0.006  -0.017   0.017  -0.006   0.006  -0.017   0.017  -0.006
+       1       2       3       4       5       6       7       8       9
+      0.083   0.006  -0.017   0.017  -0.006  -0.006   0.017  -0.017   0.006
+      0.000  -0.006   0.017  -0.017   0.006  -0.006   0.017  -0.017   0.006
+
+
+   Upper and lower wings at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+      0.552   0.008  -0.024   0.024  -0.008  -0.008   0.024  -0.024   0.008
+     -0.000   0.008  -0.024   0.024  -0.008   0.008  -0.024   0.024  -0.008
+       1       2       3       4       5       6       7       8       9
+      0.552   0.008  -0.024   0.024  -0.008  -0.008   0.024  -0.024   0.008
+     -0.000  -0.008   0.024  -0.024   0.008  -0.008   0.024  -0.024   0.008
+
+
+
+
+--------------------------------------------------------------------------------
+  q-point number  2        q = ( 0.250000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -7.092  -1.409  -0.753  -0.758  -0.747   2.126  -1.566  -1.552  -1.579
+        0.000  -1.409  -0.753  -0.758  -0.747  -2.126   1.566   1.552   1.579
+
+    2  -1.409  -9.159  -0.370  -0.374  -0.365  -0.000  -0.000  -0.000  -0.000
+        1.409   0.000   0.000   0.000   0.000  -3.887   0.130   0.116   0.146
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -1.168  -0.375  -0.096  -0.097  -0.096   0.391  -0.284  -0.282  -0.286
+       -0.000  -0.375  -0.096  -0.097  -0.096  -0.391   0.284   0.282   0.286
+
+    2  -0.375  -2.762   0.001   0.001   0.002  -0.000   0.000  -0.000   0.001
+        0.375  -0.001   0.000   0.000  -0.000  -1.085   0.005   0.003   0.008
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     78.84  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  3        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -11.583  -1.583  -1.725  -1.730  -1.718   2.669  -1.972  -1.955  -1.993
+        0.000  -1.582  -1.725  -1.730  -1.718  -2.670   1.972   1.955   1.993
+
+    2  -1.583  -6.787   0.215   0.214   0.218   0.000  -0.000  -0.000  -0.000
+        1.582   0.000  -0.000  -0.000  -0.000  -3.375   0.231   0.221   0.243
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -2.938  -0.519  -0.416  -0.417  -0.416   0.565  -0.503  -0.500  -0.507
+       -0.001  -0.519  -0.417  -0.418  -0.416  -0.565   0.503   0.500   0.506
+
+    2  -0.519  -1.960   0.071   0.070   0.071  -0.000   0.000  -0.000   0.000
+        0.519  -0.001   0.000   0.000  -0.000  -0.856   0.010   0.008   0.013
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     50.17  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  4        q = ( 0.250000, 0.250000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -8.978  -1.842  -0.189  -0.189  -1.843  -0.191  -1.844  -1.844  -0.191
+        0.000  -1.843  -0.189  -0.189  -1.843   0.191   1.844   1.844   0.191
+
+    2  -1.842  -9.670  -0.318  -0.344  -0.441  -0.000  -0.000  -0.000   0.000
+        1.843   0.000   0.000   0.000   0.000  -3.053   0.204   0.200  -0.125
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -1.494  -0.376   0.002   0.002  -0.376   0.002  -0.376  -0.376   0.001
+        0.000  -0.376   0.002   0.002  -0.376  -0.002   0.376   0.376  -0.002
+
+    2  -0.376  -2.872  -0.001  -0.006   0.007  -0.000   0.000  -0.000   0.000
+        0.376  -0.000   0.000   0.000  -0.000  -0.927   0.004   0.003  -0.023
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     72.18  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  5        q = ( 0.500000, 0.250000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -12.971  -1.882  -1.408  -1.414  -2.051   0.430  -2.163  -2.159  -1.496
+        0.000  -1.882  -1.408  -1.414  -2.052  -0.430   2.163   2.159   1.496
+
+    2  -1.882  -7.415  -0.028  -0.033   0.012  -0.000  -0.000  -0.000  -0.000
+        1.882   0.000   0.000   0.000  -0.000  -2.723   0.293   0.290   0.016
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -2.857  -0.510  -0.271  -0.272  -0.517   0.199  -0.507  -0.507  -0.435
+        0.000  -0.510  -0.272  -0.273  -0.518  -0.200   0.508   0.507   0.434
+
+    2  -0.510  -2.150   0.034   0.033   0.077  -0.000   0.000  -0.000   0.000
+        0.510  -0.001   0.000   0.000  -0.000  -0.787   0.003   0.003   0.015
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     47.46  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  6        q = (-0.250000, 0.250000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -11.940   0.304  -1.933  -1.923  -1.908  -1.908  -1.924  -1.933   0.304
+        0.000   0.305  -1.933  -1.923  -1.908   1.908   1.925   1.933  -0.304
+
+    2   0.304 -13.139   0.812   0.789  -0.070  -0.000   0.000   0.000   0.000
+       -0.305   0.000  -0.000  -0.000  -0.000  -2.862  -0.082  -0.081  -1.442
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -2.392   0.156  -0.414  -0.412  -0.481  -0.480  -0.411  -0.413   0.155
+        0.002   0.155  -0.413  -0.411  -0.480   0.481   0.412   0.414  -0.155
+
+    2   0.156  -3.527   0.093   0.086   0.008  -0.000   0.000   0.000   0.000
+       -0.155   0.001  -0.000  -0.000  -0.000  -0.850  -0.081  -0.081  -0.223
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     53.88  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  7        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -13.647  -2.102  -1.228  -1.228  -2.104  -1.229  -2.105  -2.107  -1.228
+        0.000  -2.102  -1.228  -1.228  -2.104   1.229   2.105   2.107   1.228
+
+    2  -2.102  -7.626   0.021  -0.002   0.089   0.000  -0.000  -0.000   0.000
+        2.102   0.000   0.000   0.000  -0.000  -1.770   0.274   0.273  -0.097
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.373  -0.542  -0.338  -0.338  -0.543  -0.337  -0.542  -0.543  -0.338
+        0.003  -0.542  -0.337  -0.337  -0.543   0.338   0.543   0.543   0.338
+
+    2  -0.542  -2.182   0.009   0.003   0.092   0.000   0.000  -0.000   0.000
+        0.542  -0.000   0.000   0.000  -0.000  -0.514  -0.008  -0.009  -0.002
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    7 :     43.54  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  8        q = (-0.250000, 0.500000, 0.250000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -14.167  -1.291  -2.074  -1.879  -1.878  -1.878  -1.879  -2.073  -1.290
+        0.000  -1.291  -2.074  -1.879  -1.878   1.878   1.879   2.074   1.290
+
+    2  -1.291 -14.110  -0.153   1.595  -0.200  -0.000   0.000   0.000  -0.000
+        1.291   0.000  -0.000  -0.000  -0.000  -1.922   0.001   0.095   0.002
+
+  chi0(G,G') at the    2 th omega   0.0000  16.5966 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -3.495  -0.207  -0.554  -0.509  -0.513  -0.513  -0.507  -0.552  -0.207
+        0.004  -0.207  -0.552  -0.508  -0.513   0.513   0.509   0.554   0.207
+
+    2  -0.207  -3.476  -0.094   0.157   0.022   0.000   0.000   0.000  -0.000
+        0.207   0.002   0.000  -0.000  -0.000  -0.484  -0.000  -0.028   0.000
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    8 :     42.34  [%]
+
+================================================================================
+== DATASET  5 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 8, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 200, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 28, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
+
+ mkfilename : getscr/=0, take file _SCR from output of DATASET   4.
+
+ mkfilename : getqps/=0, take file _QPS from output of DATASET   3.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ SIGMA: Calculation of the GW corrections 
+
+ Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
+ Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1315000  5.1315000  G(1)= -0.0974374  0.0974374  0.0974374
+ R(2)=  5.1315000  0.0000000  5.1315000  G(2)=  0.0974374 -0.0974374  0.0974374
+ R(3)=  5.1315000  5.1315000  0.0000000  G(3)=  0.0974374  0.0974374 -0.0974374
+ Unit cell volume ucvol=  2.7024832E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 24 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for screening function ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 24 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =    15x   15x   15
+          total number of points  =         3375
+
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.029602
+ r_s =    2.0054
+ omega_plasma =   16.5966 [eV]
+
+
+ rdqps: reading QP wavefunctions of the previous step 
+        looking for file t88o_DS3_QPS
+ Number of iteration(s) already performed:    1
+
+ Number of electrons calculated from density =    8.0000; Expected =    8.0000
+ average of density, n =  0.029602
+ r_s =    2.0054
+ omega_plasma =   16.5966 [eV]
+
+
+--------------------------------------------------------------------------------
+
+ QP results after the unitary transformation in the KS subspace: 
+
+  Number of electrons    =    8.0000
+
+  QP Band energy    [Ha] =  5.70266663738595E-01
+  QP Hartree energy [Ha] =  5.47434049221019E-01
+
+--------------------------------------------------------------------------------
+
+ === KS Band Gaps ===
+  >>>> For spin  1
+   Minimum direct gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
+ SIGMA fundamental parameters:
+ MODEL GW with PLASMON POLE MODEL  1
+ number of plane-waves for SigmaX                   27
+ number of plane-waves for SigmaC and W             27
+ number of plane-waves for wavefunctions           181
+ number of bands                                    10
+ number of independent spin polarizations            1
+ number of spinorial components                      1
+ number of k-points in IBZ                           8
+ number of q-points in IBZ                           8
+ number of symmetry operations                      24
+ number of k-points in BZ                           64
+ number of q-points in BZ                           64
+ number of frequencies for dSigma/dE                 1
+ frequency step for dSigma/dE [eV]                0.00
+ number of omega for Sigma on real axis              0
+ max omega for Sigma on real axis  [eV]           0.00
+ zcut for avoiding poles [eV]                     0.10
+
+ EPSILON^-1 parameters (SCR file):
+ dimension of the eps^-1 matrix on file             27
+ dimension of the eps^-1 matrix used                27
+ number of plane-waves for wavefunctions           181
+ number of bands                                    10
+ number of q-points in IBZ                           8
+ number of frequencies                               2
+ number of real frequencies                          1
+ number of imag frequencies                          1
+
+ matrix elements of self-energy operator (all in [eV])
+
+ Self-Consistent on Energies and Wavefunctions
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    3.278
+QP_gap     :    3.409
+Delta_QP_KS:    0.131
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -6.162   -10.405    -3.170     4.227   -16.869     6.869     1.000     0.000   -10.000    -2.603    -5.773    -5.773
+        2     5.850   -11.214     7.501    17.037   -11.858     2.200     1.000     0.000    -9.659    -0.122     7.379     7.378
+        3     5.850   -11.214     7.503    17.037   -11.861     2.202     1.000     0.000    -9.659    -0.125     7.379     7.379
+        4     5.850   -11.214     7.506    17.037   -11.859     2.201     1.000     0.000    -9.658    -0.126     7.380     7.380
+        5     8.371   -10.022    10.784    18.382    -5.223    -2.371     1.000     0.000    -7.593     0.005    10.789    10.789
+        6     8.371   -10.022    10.785    18.382    -5.217    -2.374     1.000     0.000    -7.591     0.007    10.791    10.791
+        7     8.371   -10.022    10.785    18.382    -5.216    -2.373     1.000     0.000    -7.589     0.008    10.793    10.793
+        8     8.966   -10.782    11.777    19.721    -5.105    -2.843     1.000     0.000    -7.947    -0.004    11.773    11.773
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
+kpoint     : [   0.250,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    3.584
+QP_gap     :    3.711
+Delta_QP_KS:    0.127
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -5.353   -10.474    -3.510     5.083   -16.561     7.132     1.000     0.000    -9.430    -0.837    -4.347    -4.349
+        2     1.876   -10.593     2.856    12.430   -12.899     3.240     1.000     0.000    -9.659    -0.085     2.771     2.772
+        3     5.070   -10.991     6.505    16.034   -11.946     2.314     1.000     0.000    -9.631    -0.103     6.402     6.402
+        4     5.070   -10.991     6.517    16.040   -11.936     2.307     1.000     0.000    -9.629    -0.106     6.411     6.411
+        5     7.732   -10.081    10.101    17.820    -5.298    -2.400     1.000     0.000    -7.699     0.021    10.122    10.122
+        6     9.336   -10.066    11.884    19.388    -4.954    -2.555     1.000     0.000    -7.509    -0.005    11.879    11.879
+        7     9.336   -10.066    11.914    19.395    -4.944    -2.544     1.000     0.000    -7.488    -0.007    11.907    11.907
+        8    12.525   -10.390    15.798    22.916    -4.107    -3.071     1.000     0.000    -7.178    -0.060    15.738    15.738
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
+kpoint     : [   0.500,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    3.598
+QP_gap     :    3.729
+Delta_QP_KS:    0.131
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -3.787   -10.756    -2.279     6.937   -16.157     6.221     1.000     0.000    -9.936    -0.720    -2.999    -2.999
+        2    -1.195   -10.164    -0.411     8.920   -14.143     4.659     1.000     0.000    -9.484    -0.153    -0.564    -0.564
+        3     4.621   -10.966     5.944    15.565   -12.232     2.515     1.000     0.000    -9.717    -0.097     5.847     5.847
+        4     4.621   -10.966     5.944    15.565   -12.229     2.511     1.000     0.000    -9.718    -0.097     5.847     5.848
+        5     7.255   -10.073     9.543    17.350    -5.427    -2.347     1.000     0.000    -7.774     0.034     9.576     9.576
+        6     9.185    -9.673    11.649    18.853    -4.615    -2.596     1.000     0.000    -7.210    -0.006    11.643    11.642
+        7     9.185    -9.673    11.650    18.853    -4.605    -2.605     1.000     0.000    -7.211    -0.008    11.642    11.643
+        8    13.330    -7.980    15.924    21.335    -2.145    -3.197     1.000     0.000    -5.342     0.069    15.993    15.993
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
+kpoint     : [   0.250,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    3.810
+QP_gap     :    3.935
+Delta_QP_KS:    0.124
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -5.067   -10.487    -2.757     5.377   -16.446     6.581     1.000     0.000    -9.866    -1.731    -4.488    -4.490
+        2     2.327   -11.068     3.478    13.368   -13.128     3.142     1.000     0.000    -9.986    -0.096     3.382     3.382
+        3     3.915   -10.655     5.123    14.542   -12.079     2.567     1.000     0.000    -9.512    -0.092     5.030     5.030
+        4     3.915   -10.655     5.127    14.542   -12.075     2.567     1.000     0.000    -9.508    -0.093     5.034     5.034
+        5     6.895    -9.413     8.938    16.331    -5.145    -2.216     1.000     0.000    -7.362     0.031     8.969     8.970
+        6     8.905    -9.218    11.276    18.124    -4.199    -2.636     1.000     0.000    -6.835     0.013    11.289    11.289
+        7    11.603   -10.546    14.619    22.141    -4.651    -2.914     1.000     0.000    -7.565    -0.043    14.576    14.576
+        8    11.603   -10.546    14.622    22.141    -4.649    -2.913     1.000     0.000    -7.562    -0.043    14.580    14.580
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
+kpoint     : [   0.500,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    4.635
+QP_gap     :    4.763
+Delta_QP_KS:    0.128
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -3.421   -10.699    -2.156     7.242   -15.917     5.990     1.000     0.000    -9.927    -0.529    -2.684    -2.685
+        2    -0.573   -10.672     0.285    10.041   -14.371     4.474     1.000     0.000    -9.897    -0.141     0.144     0.144
+        3     2.242   -10.190     3.203    12.426   -12.211     2.909     1.000     0.000    -9.301    -0.078     3.125     3.125
+        4     3.596   -10.651     4.725    14.223   -12.312     2.724     1.000     0.000    -9.589    -0.090     4.635     4.635
+        5     7.279    -9.273     9.360    16.550    -4.795    -2.358     1.000     0.000    -7.153     0.038     9.397     9.397
+        6    10.247    -9.646    12.848    19.904    -4.323    -2.748     1.000     0.000    -7.071    -0.014    12.833    12.834
+        7    11.488   -10.359    14.419    21.859    -4.507    -2.979     1.000     0.000    -7.486    -0.045    14.374    14.374
+        8    11.780   -10.087    14.656    21.860    -4.195    -3.029     1.000     0.000    -7.224    -0.020    14.636    14.636
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
+kpoint     : [  -0.250,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    4.737
+QP_gap     :    4.857
+Delta_QP_KS:    0.120
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -4.104   -10.611    -2.572     6.464   -16.142     6.369     1.000     0.000    -9.773    -0.737    -3.310    -3.310
+        2     0.328   -10.801     1.286    11.090   -13.988     4.048     1.000     0.000    -9.940    -0.135     1.151     1.151
+        3     2.018   -10.037     2.939    12.039   -12.133     2.954     1.000     0.000    -9.179    -0.079     2.860     2.860
+        4     4.488   -10.876     5.819    15.342   -12.070     2.446     1.000     0.000    -9.624    -0.101     5.719     5.719
+        5     8.209    -9.605    10.556    17.777    -4.712    -2.488     1.000     0.000    -7.201     0.019    10.576    10.576
+        6    10.603   -10.096    13.277    20.688    -4.417    -2.996     1.000     0.000    -7.413    -0.002    13.275    13.275
+        7    10.924   -10.206    13.749    21.146    -4.867    -2.562     1.000     0.000    -7.428    -0.031    13.718    13.718
+        8    11.813    -9.875    14.719    21.726    -3.872    -3.150     1.000     0.000    -7.022    -0.015    14.704    14.704
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
+kpoint     : [   0.500,    0.500,    0.000, ]
+spin       : 1
+KS_gap     :    4.433
+QP_gap     :    4.562
+Delta_QP_KS:    0.129
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -1.997   -10.756    -1.038     8.719   -15.259     5.272     1.000     0.000    -9.987    -0.230    -1.268    -1.268
+        2    -1.997   -10.756    -1.028     8.719   -15.244     5.263     1.000     0.000    -9.981    -0.234    -1.262    -1.262
+        3     2.939   -10.534     3.925    13.456   -12.583     2.971     1.000     0.000    -9.612    -0.080     3.845     3.845
+        4     2.939   -10.534     3.926    13.456   -12.583     2.971     1.000     0.000    -9.612    -0.081     3.845     3.845
+        5     6.458    -9.062     8.358    15.540    -4.873    -2.260     1.000     0.000    -7.133     0.048     8.407     8.407
+        6     6.458    -9.062     8.360    15.540    -4.872    -2.260     1.000     0.000    -7.132     0.048     8.408     8.408
+        7    15.778   -10.536    19.073    26.295    -3.060    -4.295     1.000     0.000    -7.355    -0.133    18.940    18.940
+        8    15.778   -10.536    19.073    26.295    -3.061    -4.294     1.000     0.000    -7.355    -0.133    18.940    18.940
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
+kpoint     : [  -0.250,    0.500,    0.250, ]
+spin       : 1
+KS_gap     :    9.756
+QP_gap     :    9.841
+Delta_QP_KS:    0.085
+data: !SigmaeeData |
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -1.837   -10.874    -0.846     9.010   -15.325     5.230     1.000     0.000   -10.095    -0.240    -1.085    -1.085
+        2    -1.837   -10.874    -0.818     9.010   -15.289     5.212     1.000     0.000   -10.077    -0.249    -1.067    -1.067
+        3     1.909    -9.965     2.763    11.841   -12.140     2.989     1.000     0.000    -9.151    -0.073     2.689     2.689
+        4     1.909    -9.965     2.782    11.844   -12.124     2.984     1.000     0.000    -9.140    -0.077     2.705     2.704
+        5    10.086    -9.596    12.538    19.697    -4.561    -2.590     1.000     0.000    -7.151     0.008    12.546    12.546
+        6    10.086    -9.596    12.569    19.702    -4.537    -2.594     1.000     0.000    -7.130     0.003    12.572    12.572
+        7    10.742   -10.044    13.470    20.780    -4.261    -3.066     1.000     0.000    -7.327    -0.017    13.453    13.453
+        8    10.742   -10.044    13.497    20.779    -4.231    -3.067     1.000     0.000    -7.298    -0.016    13.481    13.481
+...
+
+
+ New Fermi energy :        2.900708E-01 Ha ,    7.893228E+00 eV
+ New Exchange energy :    -2.000715E+00 Ha ,   -5.444221E+01 eV
+
+ === QP Band Gaps ===
+  >>>> For spin  1
+   Minimum direct gap =   3.4094 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.0272 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
+
+ writing QP data on file : t88o_DS5_QPS
+
+ Convergence of QP corrections
+ >>>>> For spin  1 <<<<<
+.  kptgw no:  1; Maximum DeltaE = (  -2.603  -0.018) for band index:  1
+.  kptgw no:  2; Maximum DeltaE = (  -0.837   0.172) for band index:  1
+.  kptgw no:  3; Maximum DeltaE = (  -0.720   0.005) for band index:  1
+.  kptgw no:  4; Maximum DeltaE = (  -1.731   0.130) for band index:  1
+.  kptgw no:  5; Maximum DeltaE = (  -0.529   0.045) for band index:  1
+.  kptgw no:  6; Maximum DeltaE = (  -0.737   0.070) for band index:  1
+.  kptgw no:  7; Maximum DeltaE = (  -0.234  -0.005) for band index:  2
+.  kptgw no:  8; Maximum DeltaE = (  -0.249  -0.005) for band index:  2
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.0263000000E+01  1.0263000000E+01  1.0263000000E+01 Bohr
+              amu      2.80855000E+01
+             awtr1          1
+             awtr2          0
+             awtr3          1
+             awtr4          0
+             awtr5          1
+             bdgw           1       8       1       8       1       8       1       8
+                            1       8       1       8       1       8       1       8
+             ecut      6.00000000E+00 Hartree
+          ecuteps      1.49923969E+00 Hartree
+         ecutsigx      1.49923969E+00 Hartree
+          ecutwfn      6.00000000E+00 Hartree
+           enunit           2
+           etotal1    -8.8581701421E+00
+           etotal2     0.0000000000E+00
+           etotal3     0.0000000000E+00
+           etotal4     0.0000000000E+00
+           etotal5     0.0000000000E+00
+            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         312
+           getqps1          0
+           getqps2          0
+           getqps3          0
+           getqps4          3
+           getqps5          3
+           getscr1          0
+           getscr2          0
+           getscr3          2
+           getscr4          0
+           getscr5          4
+           getwfk1          0
+           getwfk2          1
+           getwfk3          1
+           getwfk4          1
+           getwfk5          1
+        gwcalctyp1          0
+        gwcalctyp2         28
+        gwcalctyp3         28
+        gwcalctyp4         28
+        gwcalctyp5         28
+-          gwpara           1
+      gw_icutcoul1          6
+      gw_icutcoul2          6
+      gw_icutcoul3          3
+      gw_icutcoul4          6
+      gw_icutcoul5          3
+           istwfk        1    0    1    0    0    0    1    0
+           jdtset        1    2    3    4    5
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+            kptgw      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+         kptrlatt        4    0    0      0    4    0      0    0    4
+          kptrlen      2.90281476E+01
+P           mkmem           8
+            natom           2
+            nband1         35
+            nband2         10
+            nband3         10
+            nband4         10
+            nband5         10
+           nbdbuf1          5
+           nbdbuf2          0
+           nbdbuf3          0
+           nbdbuf4          0
+           nbdbuf5          0
+           ndtset           5
+            ngfft          18      18      18
+             nkpt           8
+           nkptgw           8
+           npweps1          0
+           npweps2         27
+           npweps3         27
+           npweps4         27
+           npweps5         27
+          npwsigx1          0
+          npwsigx2         27
+          npwsigx3         27
+          npwsigx4         27
+          npwsigx5         27
+           npwwfn1          0
+           npwwfn2        181
+           npwwfn3        181
+           npwwfn4        181
+           npwwfn5        181
+            nstep         100
+             nsym          24
+           ntypat           1
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+        optdriver1          0
+        optdriver2          3
+        optdriver3          4
+        optdriver4          3
+        optdriver5          4
+         rhoqpmix      5.00000000E-01
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         227
+           strten1     9.9171634471E-05  9.9171634471E-05  9.9171634471E-05
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symchi1       1
+           symchi2       0
+           symchi3       1
+           symchi4       0
+           symchi5       1
+        symmorphi           0
+           symrel      1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+         symsigma        0
+           tolwfr1     1.00000000E-10
+           tolwfr2     0.00000000E+00
+           tolwfr3     0.00000000E+00
+           tolwfr4     0.00000000E+00
+           tolwfr5     0.00000000E+00
+            typat      1  1
+              wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
+                         0.04688    0.09375
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.3577364229E+00  1.3577364229E+00  1.3577364229E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5657500000E+00  2.5657500000E+00  2.5657500000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       14.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] Effect of self-consistency on quasiparticles in solids
+- F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).
+- Comment: in case gwcalctyp >= 10.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bruneval2006
+-
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [4] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- And optionally:
+-
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Comment: the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
+-
+- Proc.   0 individual time (sec): cpu=         15.0  wall=         15.1
+
+================================================================================
+
+ Calculation completed.
+.Delivered   9 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.0  wall=         15.1

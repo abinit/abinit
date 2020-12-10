@@ -1,0 +1,56 @@
+!Input file for the anaddb code. Analysis of the PbZrO3 DDB
+
+!Flags
+ dieflag   2     ! 2=> electronic dielectric tensor only
+ ifcflag   1     ! Interatomic force constant flag
+
+!Interatomic force constant info
+  dipdip  1      ! Dipole-dipole interaction treatment
+  ifcana  1      ! Analysis of the IFCs
+  ifcout 21      ! Number of IFC's written in the output, per atom
+  natifc  2      ! Number of atoms in the cell for which ifc's are analysed
+   atifc  2 3    ! List of atoms
+
+!Wavevector grid number 1 (coarse grid, from DDB)
+  brav   -1      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+  ngqpt   2  2  2   ! Monkhorst-Pack indices
+  nqshft  4         ! number of q-points in repeated basic q-cell
+  q1shft   0.0  0.0  0.0
+           0.0  0.5  0.5
+           0.5  0.0  0.5
+           0.5  0.5  0.0
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+  nph1l    7      ! number of phonons in list 1
+  qph1l    0.0    0.0    0.0       1.0   ! (G point)
+           0.5    0.0    0.0       1.0   ! (X point)
+           0.0    0.5    0.5       1.0   ! (M point)
+           0.5    0.5    0.5       1.0   ! (R point)
+           0.125  0.125  0.125     1.0   ! (1/4 along the Gamma-R line)
+           0.25   0.25   0.25      1.0   ! (1/2 along the Gamma-R line)
+           0.375  0.375  0.375     1.0   ! (3/4 along the Gamma-R line)
+
+!Wavevector list number 2 (Gamma point only, with limiting direction
+!           in cartesian coordinates. )
+  nph2l  1         ! number of phonons in list 2
+  qph2l  0.0 0.0 1.0    0.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% [files]
+#%% files_to_test = 
+#%%   t25.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% extra_inputs = t25.ddb.in.gz
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Analyze a DDB for PbZrO3. It is also a ABO3 compound, like
+#%%   BaTiO3 (see tests 18 to 21), but the DDB contains the q-wavevectors
+#%%   on a 2x2x2 FCC grid, finer than those tested for BaTiO3.
+#%%   Output : analysis of IFCs, as well as a few phonon frequencies.
+#%% topics = PhononBands
+#%%<END TEST_INFO>

@@ -60,13 +60,13 @@ contains
 !!  dtset <type(dataset_type)>=internal variables used by wavelets, describing
 !!   | wvl_internal=desciption of the wavelet box.
 !!   | natom=number of atoms.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  proj <type(wvl_projector_type)>=projectors informations for wavelets.
+!!  proj <type(wvl_projector_type)>=projectors information for wavelets.
 !!   | keys=its access keys for compact storage.
 !!
 !! SIDE EFFECTS
@@ -110,7 +110,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
 ! *********************************************************************
 
 #if defined HAVE_BIGDFT
-!Consistency checks, are all pseudo true GTH pseudo with geometric informations?
+!Consistency checks, are all pseudo true GTH pseudo with geometric information?
  do idata = 1, psps%npsp, 1
    if (.not. psps%gth_params%set(idata)) then
      write(message, '(a,a,a,a,I0,a,a,a)' ) ch10,&
@@ -122,7 +122,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
    if (.not. psps%gth_params%hasGeometry(idata)) then
      write(message, '(a,a,a,a,a,a)' ) ch10,&
 &     ' wvl_projectors_set :  consistency checks failed,', ch10, &
-&     '  the given GTH parameters has no geometry informations.', ch10, &
+&     '  the given GTH parameters has no geometry information.', ch10, &
 &     '  Upgrade your input pseudo files to GTH with geometric informatoins.'
      MSG_ERROR(message)
    end if
@@ -172,7 +172,7 @@ end subroutine wvl_projectors_set
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  proj <type(wvl_projectors_type)>=projectors informations in a wavelet basis.
+!!  proj <type(wvl_projectors_type)>=projectors information in a wavelet basis.
 !!
 !! PARENTS
 !!      m_gstate,m_wvl_wfsinp

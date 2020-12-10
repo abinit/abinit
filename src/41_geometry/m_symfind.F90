@@ -536,12 +536,12 @@ contains
      if(trialok==1)then
        nsym=nsym+1
        if(nsym>msym)then
-         write(message,'(3a,i0,4a)')&
-&         'The number of symmetries (including non-symmorphic translations)',ch10,&
-&         'is larger than maxnsym=',msym,ch10,&
-&         'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
-&         'or at least smaller than the present one.'
-         MSG_ERROR(message)
+         write(message,'(a,i0,2a,i0,4a)')&
+         'The number of symmetries (including non-symmorphic translations) is:', nsym, ch10,&
+         'is larger than maxnsym: ',msym,ch10,&
+         'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
+         'or at least smaller than the present one.'
+        MSG_ERROR(message)
        end if
        ntrial=ntrial+1
        symrel(:,:,nsym)=ptsymrel(:,:,isym)
@@ -1339,7 +1339,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 !ENDDEBUG
 
 !Treat cases in which the space group cannot be identified on the
-!basis of n_axes one need additional informations
+!basis of n_axes one need additional information
  if(brvltt==1)then
 !  If the bravais lattice is primitive
    if(nsymconv==4)then
@@ -1453,7 +1453,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
      if(abs(vect(1,2)-vect(1,3))>tol8 .or. &
 &     abs(vect(2,1)-vect(2,3))>tol8 .or. &
 &     abs(vect(3,1)-vect(3,2))>tol8) additional_info=2
-   end if ! additional informations are needed
+   end if ! additional information are needed
  end if ! brvltt==1
 
  if (brvltt==0 .or. brvltt==1) then ! Primitive

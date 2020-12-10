@@ -1,0 +1,24 @@
+t64o_DVDB
+4
+t62o_DS3_POT1
+t62o_DS4_POT1  
+t62o_DS5_POT2
+t62o_DS6_POT1
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgdv
+#%% test_chain = t62.abi, t63.abi, t64.abi, t65.abi
+#%% [files]
+#%% files_to_test =
+#%%   t64.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [shell]
+#%% post_commands = 
+#%%  ww_cp t64o_DVDB t65o_DS20_DVDB
+#%% [extra_info]
+#%% authors = O. Nadeau
+#%% keywords = NC, DFPT, EPH
+#%% description = Merge the DFPT POT files produced in t62.abi
+#%%<END TEST_INFO>

@@ -1,0 +1,3243 @@
+
+.Version 9.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h23 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.in
+- output file    -> teph4mob_6.out
+- root for input  files -> teph4mob_6i
+- root for output files -> teph4mob_6o
+
+
+ DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       3
+     lnmax =       3     mgfft =       8  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
+    occopt =       3   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =         413
+       mpw =          79          nfft =         512          nkpt =         413
+================================================================================
+P This job should need less than                       6.683 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+================================================================================
+
+
+ DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       3
+     lnmax =       3     mgfft =       8  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
+    occopt =       3   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =         413
+       mpw =          79          nfft =         512          nkpt =         413
+================================================================================
+P This job should need less than                       6.683 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+================================================================================
+
+
+ DATASET    3 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  3.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       3
+     lnmax =       3     mgfft =       8  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
+    occopt =       3   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =         413
+       mpw =          79          nfft =         512          nkpt =         413
+================================================================================
+P This job should need less than                       6.683 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+================================================================================
+
+
+ DATASET    4 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  4.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       3
+     lnmax =       3     mgfft =       8  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
+    occopt =       3   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =         413
+       mpw =          79          nfft =         512          nkpt =         413
+================================================================================
+P This job should need less than                       6.683 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+================================================================================
+
+
+ DATASET    5 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  5.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       3
+     lnmax =       3     mgfft =       8  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
+    occopt =       3   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =         413
+       mpw =          79          nfft =         512          nkpt =         413
+================================================================================
+P This job should need less than                       6.683 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+================================================================================
+
+
+ DATASET    6 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  6.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       3
+     lnmax =       3     mgfft =       8  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
+    occopt =       3   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =         413
+       mpw =          79          nfft =         512          nkpt =         413
+================================================================================
+P This job should need less than                       6.683 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
+              amu      2.69815390E+01  7.49215900E+01
+        boxcutmin      1.10000000E+00
+        ddb_ngqpt        4    4    4
+             ecut      3.00000000E+00 Hartree
+      eph_extrael      4.42475831E-08
+   eph_ngqpt_fine       24   24   24
+         eph_task          -4
+-          fftalg         312
+           istwfk        2    0    0    0    0    0    0    0    0    0
+                         0    0    3    0    0    0    0    0    0    0
+                         0    0    0    0    0    0    0    0    0    0
+                         0    0    0    0    0    0    0    0    0    0
+                         0    0    0    0    0    0    0    0    0    0
+                       outvar_i_n : Printing only first  50 k-points.
+              ixc           7
+           jdtset        1    2    3    4    5    6
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       4.16666667E-02  0.00000000E+00  0.00000000E+00
+                       8.33333333E-02  0.00000000E+00  0.00000000E+00
+                       1.25000000E-01  0.00000000E+00  0.00000000E+00
+                       1.66666667E-01  0.00000000E+00  0.00000000E+00
+                       2.08333333E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       2.91666667E-01  0.00000000E+00  0.00000000E+00
+                       3.33333333E-01  0.00000000E+00  0.00000000E+00
+                       3.75000000E-01  0.00000000E+00  0.00000000E+00
+                       4.16666667E-01  0.00000000E+00  0.00000000E+00
+                       4.58333333E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       4.16666667E-02  4.16666667E-02  0.00000000E+00
+                       8.33333333E-02  4.16666667E-02  0.00000000E+00
+                       1.25000000E-01  4.16666667E-02  0.00000000E+00
+                       1.66666667E-01  4.16666667E-02  0.00000000E+00
+                       2.08333333E-01  4.16666667E-02  0.00000000E+00
+                       2.50000000E-01  4.16666667E-02  0.00000000E+00
+                       2.91666667E-01  4.16666667E-02  0.00000000E+00
+                       3.33333333E-01  4.16666667E-02  0.00000000E+00
+                       3.75000000E-01  4.16666667E-02  0.00000000E+00
+                       4.16666667E-01  4.16666667E-02  0.00000000E+00
+                       4.58333333E-01  4.16666667E-02  0.00000000E+00
+                       5.00000000E-01  4.16666667E-02  0.00000000E+00
+                      -4.58333333E-01  4.16666667E-02  0.00000000E+00
+                      -4.16666667E-01  4.16666667E-02  0.00000000E+00
+                      -3.75000000E-01  4.16666667E-02  0.00000000E+00
+                      -3.33333333E-01  4.16666667E-02  0.00000000E+00
+                      -2.91666667E-01  4.16666667E-02  0.00000000E+00
+                      -2.50000000E-01  4.16666667E-02  0.00000000E+00
+                      -2.08333333E-01  4.16666667E-02  0.00000000E+00
+                      -1.66666667E-01  4.16666667E-02  0.00000000E+00
+                      -1.25000000E-01  4.16666667E-02  0.00000000E+00
+                      -8.33333333E-02  4.16666667E-02  0.00000000E+00
+                      -4.16666667E-02  4.16666667E-02  0.00000000E+00
+                       8.33333333E-02  8.33333333E-02  0.00000000E+00
+                       1.25000000E-01  8.33333333E-02  0.00000000E+00
+                       1.66666667E-01  8.33333333E-02  0.00000000E+00
+                       2.08333333E-01  8.33333333E-02  0.00000000E+00
+                       2.50000000E-01  8.33333333E-02  0.00000000E+00
+                       2.91666667E-01  8.33333333E-02  0.00000000E+00
+                       3.33333333E-01  8.33333333E-02  0.00000000E+00
+                       3.75000000E-01  8.33333333E-02  0.00000000E+00
+                       4.16666667E-01  8.33333333E-02  0.00000000E+00
+                       4.58333333E-01  8.33333333E-02  0.00000000E+00
+                       5.00000000E-01  8.33333333E-02  0.00000000E+00
+                      -4.58333333E-01  8.33333333E-02  0.00000000E+00
+                      -4.16666667E-01  8.33333333E-02  0.00000000E+00
+                      -3.75000000E-01  8.33333333E-02  0.00000000E+00
+                       outvar_i_n : Printing only first  50 k-points.
+         kptrlatt       24    0    0      0   24    0      0    0   24
+          kptrlen      1.80057671E+02
+          mixprec        1
+P           mkmem         413
+            natom           2
+            nband           8
+           ndtset           6
+            ngfft           8       8       8
+             nkpt         413
+             nsym          24
+           ntypat           2
+              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       prtocc : prtvol=0, do not print more k-points.
+           occopt           3
+        optdriver           7
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+     sigma_erange1     0.00000000E+00  3.67493254E-03 Hartree
+     sigma_erange2     0.00000000E+00  4.40991905E-03 Hartree
+     sigma_erange3     0.00000000E+00  5.14490556E-03 Hartree
+     sigma_erange4     0.00000000E+00  5.87989206E-03 Hartree
+     sigma_erange5     0.00000000E+00  6.61487857E-03 Hartree
+     sigma_erange6     0.00000000E+00  7.34986508E-03 Hartree
+          spgroup         216
+           symrel      1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+            typat      1  2
+              wtk        0.00007    0.00058    0.00058    0.00058    0.00058    0.00058
+                         0.00058    0.00058    0.00058    0.00058    0.00058    0.00058
+                         0.00029    0.00043    0.00174    0.00174    0.00174    0.00174
+                         0.00174    0.00174    0.00174    0.00174    0.00174    0.00174
+                         0.00174    0.00174    0.00174    0.00174    0.00174    0.00174
+                         0.00174    0.00174    0.00174    0.00174    0.00174    0.00087
+                         0.00043    0.00174    0.00174    0.00174    0.00174    0.00174
+                         0.00174    0.00174    0.00174    0.00174    0.00174    0.00174
+                         0.00174    0.00174
+                       outvars : Printing only first  50 k-points.
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.4036425458E+00  1.4036425458E+00  1.4036425458E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.6525000000E+00  2.6525000000E+00  2.6525000000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       13.00000   33.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   3.
+
+ chkinp: Checking input parameters for consistency, jdtset=   4.
+
+ chkinp: Checking input parameters for consistency, jdtset=   5.
+
+ chkinp: Checking input parameters for consistency, jdtset=   6.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 413, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
+
+ mkfilename: getwfk from: teph4mob_4o_DS2_WFK
+
+ mkfilename: getddb from: teph4mob_2_DDB
+
+ mkfilename: getdvdb from: teph4mob_3_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+- Reading GS states from WFK file: teph4mob_4o_DS2_WFK
+- Reading DDB from file: teph4mob_2_DDB
+- Reading DVDB from file: teph4mob_3_DVDB
+
+
+
+ Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
+   From WFK file: occopt = 1, tsmear =       0.010000
+   From input:    occopt = 3, tsmear =       0.010000
+
+ Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
+ Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.022872        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.022872        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.022872        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.115792E+00   -1.150854E-16   -1.153161E-16
+         1         2   -1.150854E-16    2.115792E+00    1.148547E-16
+         1         3    1.150854E-16    1.150854E-16    2.115792E+00
+         2         1   -2.115792E+00    1.150854E-16    1.153161E-16
+         2         2    1.150854E-16   -2.115792E+00   -1.148547E-16
+         2         3   -1.150854E-16   -1.150854E-16   -2.115792E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
+- Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       64
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
+  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+ 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
+ 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
+ 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
+ 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
+ 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+ 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
+ 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
+ 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
+ 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
+ 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+ 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+ 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
+ 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
+ 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+ 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
+ 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
+ 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
+ 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
+ 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
+ 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
+ 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
+ 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+ 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+ 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+ 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
+-                                   =           3.6604 [km/s]
+
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999191E+01 (THz)
+-Debye temperature from partial sums:     0.3081110008E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4mob_6o_DS1_PHDOS.nc
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
+- 13.00000   3.00000    981214                znucl, zion, pspdat
+    6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+  No XC core correction.
+  1.024700          amesh (Hamman grid)
+  pspatm : epsatm=    1.36305739
+         --- l  ekb(1:nproj) -->
+             0    1.768744
+             1    0.900554
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+-  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
+- 33.00000   5.00000    940714                znucl, zion, pspdat
+    1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   4.772  10.829    1   2.5306160        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1   2.745   5.580    0   2.5306160        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    2.05731715564010    0.36322996461007    2.76014815959125   rchrg,fchrg,qchrg
+  pspatm : epsatm=   27.20579911
+         --- l  ekb(1:nproj) -->
+             0    0.838751
+ pspatm: atomic psp has been read  and splines computed
+
+   2.28550852E+02                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.521     1.165     0.004
+  64.0     0.006     3.475     1.118     0.051
+ 123.0     0.011     3.428     1.071     0.098
+ 182.0     0.016     3.379     1.023     0.146
+ 241.0     0.021     3.328     0.972     0.197
+ 300.0     0.026     3.274     0.918     0.251
+
+
+
+ Number of bands in e-ph self-energy sum: 1
+ From bsum_start: 5 to bsum_stop: 5
+ Symsigma: 1 Timrev: 1
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ eph_phwinfact:  1.10
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [4, 4, 4]
+ Q-mesh used for self-energy integration [ngqpt]: [24, 24, 24]
+ Number of q-points in the IBZ: 413
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
+ Number of k-points for self-energy corrections: 3
+ sigma_erange:  0.000  0.100  (eV)
+ Including all final {mk+q} states inside energy window: [3.470 3.664 ] [eV]
+ List of k-points for self-energy corrections:
+   1     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
+   2     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
+   3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 413 of 413
+P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
+ Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
+================================================================================
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
+ 
+ 
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  36509.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  11039.7    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2811.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    940.8    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    472.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    295.2    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    487.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    412.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    316.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    222.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    158.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    119.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  39519.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   9124.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4150.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2492.0    0.000
+============================================================================================
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: teph4mob_6o_DS1_SIGEPH.nc
+
+
+
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 47
+ From emin:   2.4 to emax:   3.6 (eV)
+ Number of k-points in the IBZ: 413
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
+
+ Transport (RTA) calculation results:
+
+ Cartesian component of SERTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.54            0.00
+          123.00        0.10E+16        0.00E+00          355.38            0.00
+          182.00        0.10E+16        0.00E+00          435.25            0.00
+          241.00        0.10E+16        0.00E+00          433.92            0.00
+          300.00        0.10E+16        0.25E+05          379.16            0.00
+
+
+ Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.54            0.00
+          123.00        0.10E+16        0.00E+00          355.38            0.00
+          182.00        0.10E+16        0.00E+00          435.25            0.00
+          241.00        0.10E+16        0.00E+00          433.92            0.00
+          300.00        0.10E+16        0.25E+05          379.16            0.00
+
+
+ Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.54            0.00
+          123.00        0.10E+16        0.00E+00          355.38            0.00
+          182.00        0.10E+16        0.00E+00          435.25            0.00
+          241.00        0.10E+16        0.00E+00          433.92            0.00
+          300.00        0.10E+16        0.25E+05          379.16            0.00
+
+
+
+
+ Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.49            0.00
+          123.00        0.10E+16        0.00E+00          374.08            0.00
+          182.00        0.10E+16        0.00E+00          470.50            0.00
+          241.00        0.10E+16        0.00E+00          469.67            0.00
+          300.00        0.10E+16        0.25E+05          411.46            0.00
+
+
+ Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.49            0.00
+          123.00        0.10E+16        0.00E+00          374.08            0.00
+          182.00        0.10E+16        0.00E+00          470.50            0.00
+          241.00        0.10E+16        0.00E+00          469.67            0.00
+          300.00        0.10E+16        0.25E+05          411.46            0.00
+
+
+ Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.49            0.00
+          123.00        0.10E+16        0.00E+00          374.08            0.00
+          182.00        0.10E+16        0.00E+00          470.50            0.00
+          241.00        0.10E+16        0.00E+00          469.67            0.00
+          300.00        0.10E+16        0.25E+05          411.46            0.00
+
+
+
+
+
+- Writing RTA transport results to: teph4mob_6o_DS1_RTA.nc
+
+================================================================================
+== DATASET  2 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 413, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
+
+ mkfilename: getwfk from: teph4mob_4o_DS2_WFK
+
+ mkfilename: getddb from: teph4mob_2_DDB
+
+ mkfilename: getdvdb from: teph4mob_3_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+- Reading GS states from WFK file: teph4mob_4o_DS2_WFK
+- Reading DDB from file: teph4mob_2_DDB
+- Reading DVDB from file: teph4mob_3_DVDB
+
+
+
+ Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
+   From WFK file: occopt = 1, tsmear =       0.010000
+   From input:    occopt = 3, tsmear =       0.010000
+
+ Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
+ Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.022872        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.022872        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.022872        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.115792E+00   -1.150854E-16   -1.153161E-16
+         1         2   -1.150854E-16    2.115792E+00    1.148547E-16
+         1         3    1.150854E-16    1.150854E-16    2.115792E+00
+         2         1   -2.115792E+00    1.150854E-16    1.153161E-16
+         2         2    1.150854E-16   -2.115792E+00   -1.148547E-16
+         2         3   -1.150854E-16   -1.150854E-16   -2.115792E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
+- Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       64
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
+  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+ 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
+ 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
+ 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
+ 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
+ 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+ 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
+ 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
+ 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
+ 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
+ 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+ 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+ 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
+ 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
+ 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+ 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
+ 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
+ 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
+ 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
+ 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
+ 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
+ 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
+ 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+ 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+ 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+ 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
+-                                   =           3.6604 [km/s]
+
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999191E+01 (THz)
+-Debye temperature from partial sums:     0.3081110008E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4mob_6o_DS2_PHDOS.nc
+--------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.521     1.165     0.004
+  64.0     0.006     3.475     1.118     0.051
+ 123.0     0.011     3.428     1.071     0.098
+ 182.0     0.016     3.379     1.023     0.146
+ 241.0     0.021     3.328     0.972     0.197
+ 300.0     0.026     3.274     0.918     0.251
+
+
+
+ Number of bands in e-ph self-energy sum: 1
+ From bsum_start: 5 to bsum_stop: 5
+ Symsigma: 1 Timrev: 1
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ eph_phwinfact:  1.10
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [4, 4, 4]
+ Q-mesh used for self-energy integration [ngqpt]: [24, 24, 24]
+ Number of q-points in the IBZ: 413
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
+ Number of k-points for self-energy corrections: 3
+ sigma_erange:  0.000  0.120  (eV)
+ Including all final {mk+q} states inside energy window: [3.470 3.664 ] [eV]
+ List of k-points for self-energy corrections:
+   1     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
+   2     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
+   3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 413 of 413
+P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
+ Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
+================================================================================
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
+ 
+ 
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  36509.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  11039.7    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2811.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    940.8    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    472.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    295.2    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    487.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    412.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    316.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    222.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    158.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    119.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  39519.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   9124.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4150.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2492.0    0.000
+============================================================================================
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: teph4mob_6o_DS2_SIGEPH.nc
+
+
+
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 48
+ From emin:   2.4 to emax:   3.6 (eV)
+ Number of k-points in the IBZ: 413
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
+
+ Transport (RTA) calculation results:
+
+ Cartesian component of SERTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.54            0.00
+          123.00        0.10E+16        0.00E+00          355.38            0.00
+          182.00        0.10E+16        0.00E+00          435.25            0.00
+          241.00        0.10E+16        0.00E+00          433.92            0.00
+          300.00        0.10E+16        0.25E+05          379.16            0.00
+
+
+ Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.54            0.00
+          123.00        0.10E+16        0.00E+00          355.38            0.00
+          182.00        0.10E+16        0.00E+00          435.25            0.00
+          241.00        0.10E+16        0.00E+00          433.92            0.00
+          300.00        0.10E+16        0.25E+05          379.16            0.00
+
+
+ Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.54            0.00
+          123.00        0.10E+16        0.00E+00          355.38            0.00
+          182.00        0.10E+16        0.00E+00          435.25            0.00
+          241.00        0.10E+16        0.00E+00          433.92            0.00
+          300.00        0.10E+16        0.25E+05          379.16            0.00
+
+
+
+
+ Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.49            0.00
+          123.00        0.10E+16        0.00E+00          374.08            0.00
+          182.00        0.10E+16        0.00E+00          470.50            0.00
+          241.00        0.10E+16        0.00E+00          469.67            0.00
+          300.00        0.10E+16        0.25E+05          411.46            0.00
+
+
+ Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.49            0.00
+          123.00        0.10E+16        0.00E+00          374.08            0.00
+          182.00        0.10E+16        0.00E+00          470.50            0.00
+          241.00        0.10E+16        0.00E+00          469.67            0.00
+          300.00        0.10E+16        0.25E+05          411.46            0.00
+
+
+ Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.49            0.00
+          123.00        0.10E+16        0.00E+00          374.08            0.00
+          182.00        0.10E+16        0.00E+00          470.50            0.00
+          241.00        0.10E+16        0.00E+00          469.67            0.00
+          300.00        0.10E+16        0.25E+05          411.46            0.00
+
+
+
+
+
+- Writing RTA transport results to: teph4mob_6o_DS2_RTA.nc
+
+================================================================================
+== DATASET  3 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 413, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
+
+ mkfilename: getwfk from: teph4mob_4o_DS2_WFK
+
+ mkfilename: getddb from: teph4mob_2_DDB
+
+ mkfilename: getdvdb from: teph4mob_3_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+- Reading GS states from WFK file: teph4mob_4o_DS2_WFK
+- Reading DDB from file: teph4mob_2_DDB
+- Reading DVDB from file: teph4mob_3_DVDB
+
+
+
+ Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
+   From WFK file: occopt = 1, tsmear =       0.010000
+   From input:    occopt = 3, tsmear =       0.010000
+
+ Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
+ Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.022872        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.022872        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.022872        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.115792E+00   -1.150854E-16   -1.153161E-16
+         1         2   -1.150854E-16    2.115792E+00    1.148547E-16
+         1         3    1.150854E-16    1.150854E-16    2.115792E+00
+         2         1   -2.115792E+00    1.150854E-16    1.153161E-16
+         2         2    1.150854E-16   -2.115792E+00   -1.148547E-16
+         2         3   -1.150854E-16   -1.150854E-16   -2.115792E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
+- Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       64
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
+  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+ 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
+ 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
+ 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
+ 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
+ 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+ 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
+ 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
+ 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
+ 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
+ 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+ 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+ 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
+ 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
+ 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+ 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
+ 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
+ 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
+ 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
+ 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
+ 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
+ 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
+ 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+ 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+ 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+ 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
+-                                   =           3.6604 [km/s]
+
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999191E+01 (THz)
+-Debye temperature from partial sums:     0.3081110008E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4mob_6o_DS3_PHDOS.nc
+--------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.521     1.165     0.004
+  64.0     0.006     3.475     1.118     0.051
+ 123.0     0.011     3.428     1.071     0.098
+ 182.0     0.016     3.379     1.023     0.146
+ 241.0     0.021     3.328     0.972     0.197
+ 300.0     0.026     3.274     0.918     0.251
+
+
+
+ Number of bands in e-ph self-energy sum: 1
+ From bsum_start: 5 to bsum_stop: 5
+ Symsigma: 1 Timrev: 1
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ eph_phwinfact:  1.10
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [4, 4, 4]
+ Q-mesh used for self-energy integration [ngqpt]: [24, 24, 24]
+ Number of q-points in the IBZ: 413
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
+ Number of k-points for self-energy corrections: 3
+ sigma_erange:  0.000  0.140  (eV)
+ Including all final {mk+q} states inside energy window: [3.470 3.664 ] [eV]
+ List of k-points for self-energy corrections:
+   1     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
+   2     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
+   3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 413 of 413
+P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
+ Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
+================================================================================
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
+ 
+ 
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  36509.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  11039.7    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2811.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    940.8    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    472.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    295.2    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    487.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    412.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    316.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    222.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    158.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    119.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  39519.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   9124.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4150.1    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2492.0    0.000
+============================================================================================
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: teph4mob_6o_DS3_SIGEPH.nc
+
+
+
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 48
+ From emin:   2.4 to emax:   3.6 (eV)
+ Number of k-points in the IBZ: 413
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
+
+ Transport (RTA) calculation results:
+
+ Cartesian component of SERTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.54            0.00
+          123.00        0.10E+16        0.00E+00          355.38            0.00
+          182.00        0.10E+16        0.00E+00          435.25            0.00
+          241.00        0.10E+16        0.00E+00          433.92            0.00
+          300.00        0.10E+16        0.25E+05          379.16            0.00
+
+
+ Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.54            0.00
+          123.00        0.10E+16        0.00E+00          355.38            0.00
+          182.00        0.10E+16        0.00E+00          435.25            0.00
+          241.00        0.10E+16        0.00E+00          433.92            0.00
+          300.00        0.10E+16        0.25E+05          379.16            0.00
+
+
+ Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.54            0.00
+          123.00        0.10E+16        0.00E+00          355.38            0.00
+          182.00        0.10E+16        0.00E+00          435.25            0.00
+          241.00        0.10E+16        0.00E+00          433.92            0.00
+          300.00        0.10E+16        0.25E+05          379.16            0.00
+
+
+
+
+ Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.49            0.00
+          123.00        0.10E+16        0.00E+00          374.08            0.00
+          182.00        0.10E+16        0.00E+00          470.50            0.00
+          241.00        0.10E+16        0.00E+00          469.67            0.00
+          300.00        0.10E+16        0.25E+05          411.46            0.00
+
+
+ Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.49            0.00
+          123.00        0.10E+16        0.00E+00          374.08            0.00
+          182.00        0.10E+16        0.00E+00          470.50            0.00
+          241.00        0.10E+16        0.00E+00          469.67            0.00
+          300.00        0.10E+16        0.25E+05          411.46            0.00
+
+
+ Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           39.49            0.00
+          123.00        0.10E+16        0.00E+00          374.08            0.00
+          182.00        0.10E+16        0.00E+00          470.50            0.00
+          241.00        0.10E+16        0.00E+00          469.67            0.00
+          300.00        0.10E+16        0.25E+05          411.46            0.00
+
+
+
+
+
+- Writing RTA transport results to: teph4mob_6o_DS3_RTA.nc
+
+================================================================================
+== DATASET  4 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 413, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
+
+ mkfilename: getwfk from: teph4mob_4o_DS2_WFK
+
+ mkfilename: getddb from: teph4mob_2_DDB
+
+ mkfilename: getdvdb from: teph4mob_3_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+- Reading GS states from WFK file: teph4mob_4o_DS2_WFK
+- Reading DDB from file: teph4mob_2_DDB
+- Reading DVDB from file: teph4mob_3_DVDB
+
+
+
+ Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
+   From WFK file: occopt = 1, tsmear =       0.010000
+   From input:    occopt = 3, tsmear =       0.010000
+
+ Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
+ Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.022872        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.022872        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.022872        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.115792E+00   -1.150854E-16   -1.153161E-16
+         1         2   -1.150854E-16    2.115792E+00    1.148547E-16
+         1         3    1.150854E-16    1.150854E-16    2.115792E+00
+         2         1   -2.115792E+00    1.150854E-16    1.153161E-16
+         2         2    1.150854E-16   -2.115792E+00   -1.148547E-16
+         2         3   -1.150854E-16   -1.150854E-16   -2.115792E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
+- Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       64
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
+  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+ 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
+ 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
+ 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
+ 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
+ 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+ 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
+ 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
+ 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
+ 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
+ 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+ 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+ 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
+ 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
+ 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+ 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
+ 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
+ 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
+ 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
+ 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
+ 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
+ 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
+ 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+ 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+ 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+ 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
+-                                   =           3.6604 [km/s]
+
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999191E+01 (THz)
+-Debye temperature from partial sums:     0.3081110008E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4mob_6o_DS4_PHDOS.nc
+--------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.521     1.165     0.004
+  64.0     0.006     3.475     1.118     0.051
+ 123.0     0.011     3.428     1.071     0.098
+ 182.0     0.016     3.379     1.023     0.146
+ 241.0     0.021     3.328     0.972     0.197
+ 300.0     0.026     3.274     0.918     0.251
+
+
+
+ Number of bands in e-ph self-energy sum: 1
+ From bsum_start: 5 to bsum_stop: 5
+ Symsigma: 1 Timrev: 1
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ eph_phwinfact:  1.10
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [4, 4, 4]
+ Q-mesh used for self-energy integration [ngqpt]: [24, 24, 24]
+ Number of q-points in the IBZ: 413
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
+ Number of k-points for self-energy corrections: 5
+ sigma_erange:  0.000  0.160  (eV)
+ Including all final {mk+q} states inside energy window: [3.470 3.729 ] [eV]
+ List of k-points for self-energy corrections:
+   1     1  [ 4.1667E-01,  4.1667E-01,  0.0000E+00]   5    5
+   2     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
+   3     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
+   4     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+   5     1  [-4.5833E-01,  5.0000E-01,  4.1667E-02]   5    5
+
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 413 of 413
+P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 5 of 5
+
+ Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
+================================================================================
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
+ 
+ 
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     90.7    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     86.8    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     78.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.005     68.3    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     58.1    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     49.6    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  35995.2    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  10915.9    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2781.4    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    931.2    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    467.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    292.3    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    483.5    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    407.9    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    312.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    218.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    155.4    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    116.3    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  39108.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   9029.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4106.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2466.1    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.005     60.8    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     58.5    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     54.5    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     48.5    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.008     42.3    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.009     36.8    0.000
+============================================================================================
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: teph4mob_6o_DS4_SIGEPH.nc
+
+
+
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 49
+ From emin:   2.4 to emax:   3.7 (eV)
+ Number of k-points in the IBZ: 413
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
+
+ Transport (RTA) calculation results:
+
+ Cartesian component of SERTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.08            0.00
+          123.00        0.10E+16        0.00E+00          351.58            0.00
+          182.00        0.10E+16        0.00E+00          430.49            0.00
+          241.00        0.10E+16        0.00E+00          431.01            0.00
+          300.00        0.10E+16        0.25E+05          381.17            0.00
+
+
+ Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.08            0.00
+          123.00        0.10E+16        0.00E+00          351.58            0.00
+          182.00        0.10E+16        0.00E+00          430.49            0.00
+          241.00        0.10E+16        0.00E+00          431.01            0.00
+          300.00        0.10E+16        0.25E+05          381.17            0.00
+
+
+ Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.08            0.00
+          123.00        0.10E+16        0.00E+00          351.58            0.00
+          182.00        0.10E+16        0.00E+00          430.49            0.00
+          241.00        0.10E+16        0.00E+00          431.01            0.00
+          300.00        0.10E+16        0.25E+05          381.17            0.00
+
+
+
+
+ Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           38.97            0.00
+          123.00        0.10E+16        0.00E+00          369.66            0.00
+          182.00        0.10E+16        0.00E+00          466.53            0.00
+          241.00        0.10E+16        0.00E+00          469.62            0.00
+          300.00        0.10E+16        0.25E+05          417.61            0.00
+
+
+ Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           38.97            0.00
+          123.00        0.10E+16        0.00E+00          369.66            0.00
+          182.00        0.10E+16        0.00E+00          466.53            0.00
+          241.00        0.10E+16        0.00E+00          469.62            0.00
+          300.00        0.10E+16        0.25E+05          417.61            0.00
+
+
+ Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           38.97            0.00
+          123.00        0.10E+16        0.00E+00          369.66            0.00
+          182.00        0.10E+16        0.00E+00          466.53            0.00
+          241.00        0.10E+16        0.00E+00          469.62            0.00
+          300.00        0.10E+16        0.25E+05          417.61            0.00
+
+
+
+
+
+- Writing RTA transport results to: teph4mob_6o_DS4_RTA.nc
+
+================================================================================
+== DATASET  5 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 413, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
+
+ mkfilename: getwfk from: teph4mob_4o_DS2_WFK
+
+ mkfilename: getddb from: teph4mob_2_DDB
+
+ mkfilename: getdvdb from: teph4mob_3_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+- Reading GS states from WFK file: teph4mob_4o_DS2_WFK
+- Reading DDB from file: teph4mob_2_DDB
+- Reading DVDB from file: teph4mob_3_DVDB
+
+
+
+ Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
+   From WFK file: occopt = 1, tsmear =       0.010000
+   From input:    occopt = 3, tsmear =       0.010000
+
+ Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
+ Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.022872        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.022872        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.022872        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.115792E+00   -1.150854E-16   -1.153161E-16
+         1         2   -1.150854E-16    2.115792E+00    1.148547E-16
+         1         3    1.150854E-16    1.150854E-16    2.115792E+00
+         2         1   -2.115792E+00    1.150854E-16    1.153161E-16
+         2         2    1.150854E-16   -2.115792E+00   -1.148547E-16
+         2         3   -1.150854E-16   -1.150854E-16   -2.115792E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
+- Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       64
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
+  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+ 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
+ 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
+ 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
+ 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
+ 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+ 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
+ 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
+ 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
+ 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
+ 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+ 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+ 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
+ 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
+ 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+ 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
+ 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
+ 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
+ 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
+ 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
+ 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
+ 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
+ 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+ 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+ 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+ 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
+-                                   =           3.6604 [km/s]
+
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999191E+01 (THz)
+-Debye temperature from partial sums:     0.3081110008E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4mob_6o_DS5_PHDOS.nc
+--------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.521     1.165     0.004
+  64.0     0.006     3.475     1.118     0.051
+ 123.0     0.011     3.428     1.071     0.098
+ 182.0     0.016     3.379     1.023     0.146
+ 241.0     0.021     3.328     0.972     0.197
+ 300.0     0.026     3.274     0.918     0.251
+
+
+
+ Number of bands in e-ph self-energy sum: 1
+ From bsum_start: 5 to bsum_stop: 5
+ Symsigma: 1 Timrev: 1
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ eph_phwinfact:  1.10
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [4, 4, 4]
+ Q-mesh used for self-energy integration [ngqpt]: [24, 24, 24]
+ Number of q-points in the IBZ: 413
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
+ Number of k-points for self-energy corrections: 6
+ sigma_erange:  0.000  0.180  (eV)
+ Including all final {mk+q} states inside energy window: [3.470 3.733 ] [eV]
+ List of k-points for self-energy corrections:
+   1     1  [ 4.1667E-01,  4.1667E-01,  0.0000E+00]   5    5
+   2     1  [ 4.5833E-01,  4.1667E-01,  0.0000E+00]   5    5
+   3     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
+   4     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
+   5     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+   6     1  [-4.5833E-01,  5.0000E-01,  4.1667E-02]   5    5
+
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 413 of 413
+P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 6 of 6
+
+ Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
+================================================================================
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
+ 
+ 
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     89.7    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     85.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     77.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.005     67.1    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     56.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     48.4    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.004     73.5    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.005     70.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.005     64.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.006     56.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.007     47.9    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.008     41.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  35995.2    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  10913.4    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2773.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    927.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    465.2    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    290.9    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    483.3    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    407.4    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    311.3    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    216.9    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    153.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    114.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  39108.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   9029.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4106.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2466.1    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.005     60.3    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     57.9    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     53.8    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     47.7    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.008     41.4    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.009     35.9    0.000
+============================================================================================
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: teph4mob_6o_DS5_SIGEPH.nc
+
+
+
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 50
+ From emin:   2.4 to emax:   3.7 (eV)
+ Number of k-points in the IBZ: 413
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
+
+ Transport (RTA) calculation results:
+
+ Cartesian component of SERTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.07            0.00
+          123.00        0.10E+16        0.00E+00          350.53            0.00
+          182.00        0.10E+16        0.00E+00          428.74            0.00
+          241.00        0.10E+16        0.00E+00          430.95            0.00
+          300.00        0.10E+16        0.25E+05          385.33            0.00
+
+
+ Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.07            0.00
+          123.00        0.10E+16        0.00E+00          350.53            0.00
+          182.00        0.10E+16        0.00E+00          428.74            0.00
+          241.00        0.10E+16        0.00E+00          430.95            0.00
+          300.00        0.10E+16        0.25E+05          385.33            0.00
+
+
+ Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.07            0.00
+          123.00        0.10E+16        0.00E+00          350.53            0.00
+          182.00        0.10E+16        0.00E+00          428.74            0.00
+          241.00        0.10E+16        0.00E+00          430.95            0.00
+          300.00        0.10E+16        0.25E+05          385.33            0.00
+
+
+
+
+ Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           38.96            0.00
+          123.00        0.10E+16        0.00E+00          368.84            0.00
+          182.00        0.10E+16        0.00E+00          465.64            0.00
+          241.00        0.10E+16        0.00E+00          471.54            0.00
+          300.00        0.10E+16        0.25E+05          424.64            0.00
+
+
+ Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           38.96            0.00
+          123.00        0.10E+16        0.00E+00          368.84            0.00
+          182.00        0.10E+16        0.00E+00          465.64            0.00
+          241.00        0.10E+16        0.00E+00          471.54            0.00
+          300.00        0.10E+16        0.25E+05          424.64            0.00
+
+
+ Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           38.96            0.00
+          123.00        0.10E+16        0.00E+00          368.84            0.00
+          182.00        0.10E+16        0.00E+00          465.64            0.00
+          241.00        0.10E+16        0.00E+00          471.54            0.00
+          300.00        0.10E+16        0.25E+05          424.64            0.00
+
+
+
+
+
+- Writing RTA transport results to: teph4mob_6o_DS5_RTA.nc
+
+================================================================================
+== DATASET  6 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 413, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
+
+ mkfilename: getwfk from: teph4mob_4o_DS2_WFK
+
+ mkfilename: getddb from: teph4mob_2_DDB
+
+ mkfilename: getdvdb from: teph4mob_3_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+- Reading GS states from WFK file: teph4mob_4o_DS2_WFK
+- Reading DDB from file: teph4mob_2_DDB
+- Reading DVDB from file: teph4mob_3_DVDB
+
+
+
+ Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
+   From WFK file: occopt = 1, tsmear =       0.010000
+   From input:    occopt = 3, tsmear =       0.010000
+
+ Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
+ Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.022872        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.022872        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.022872        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.115792E+00   -1.150854E-16   -1.153161E-16
+         1         2   -1.150854E-16    2.115792E+00    1.148547E-16
+         1         3    1.150854E-16    1.150854E-16    2.115792E+00
+         2         1   -2.115792E+00    1.150854E-16    1.153161E-16
+         2         2    1.150854E-16   -2.115792E+00   -1.148547E-16
+         2         3   -1.150854E-16   -1.150854E-16   -2.115792E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
+- Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       64
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
+  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+ 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
+ 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
+ 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
+ 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
+ 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+ 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
+ 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
+ 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
+ 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
+ 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+ 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+ 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
+ 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
+ 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+ 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
+ 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
+ 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
+ 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
+ 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
+ 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
+ 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
+ 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+ 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+ 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+ 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
+-                                   =           3.6604 [km/s]
+
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999191E+01 (THz)
+-Debye temperature from partial sums:     0.3081110008E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4mob_6o_DS6_PHDOS.nc
+--------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.521     1.165     0.004
+  64.0     0.006     3.475     1.118     0.051
+ 123.0     0.011     3.428     1.071     0.098
+ 182.0     0.016     3.379     1.023     0.146
+ 241.0     0.021     3.328     0.972     0.197
+ 300.0     0.026     3.274     0.918     0.251
+
+
+
+ Number of bands in e-ph self-energy sum: 1
+ From bsum_start: 5 to bsum_stop: 5
+ Symsigma: 1 Timrev: 1
+ Method for q-space integration:  Tetrahedron method
+ Tolerance for integration weights <     1.000000E-12     1.000000E-12
+ eph_phwinfact:  1.10
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [4, 4, 4]
+ Q-mesh used for self-energy integration [ngqpt]: [24, 24, 24]
+ Number of q-points in the IBZ: 413
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
+ Number of k-points for self-energy corrections: 6
+ sigma_erange:  0.000  0.200  (eV)
+ Including all final {mk+q} states inside energy window: [3.470 3.733 ] [eV]
+ List of k-points for self-energy corrections:
+   1     1  [ 4.1667E-01,  4.1667E-01,  0.0000E+00]   5    5
+   2     1  [ 4.5833E-01,  4.1667E-01,  0.0000E+00]   5    5
+   3     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
+   4     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
+   5     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+   6     1  [-4.5833E-01,  5.0000E-01,  4.1667E-02]   5    5
+
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 413 of 413
+P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 6 of 6
+
+ Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
+================================================================================
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
+ 
+ 
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     89.7    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     85.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.004     77.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.005     67.1    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     56.9    0.000
+============================================================================================
+K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     48.4    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.004     73.5    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.005     70.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.005     64.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.006     56.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.007     47.9    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.677    0.008     41.1    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  35995.2    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000  10913.4    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000   2773.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.000    927.3    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    465.2    0.000
+============================================================================================
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.573    0.001    290.9    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    483.3    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    407.4    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.001    311.3    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    216.9    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.002    153.7    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.608    0.003    114.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000 999999.0    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000  39108.6    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   9029.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   4106.8    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.525    0.000   2466.1    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.521
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.005     60.3    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:   64.0 [K], mu_e:    3.475
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     57.9    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  123.0 [K], mu_e:    3.428
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.006     53.8    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  182.0 [K], mu_e:    3.379
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.007     47.7    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  241.0 [K], mu_e:    3.328
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.008     41.4    0.000
+============================================================================================
+K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   5   3.673    0.009     35.9    0.000
+============================================================================================
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: teph4mob_6o_DS6_SIGEPH.nc
+
+
+
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 51
+ From emin:   2.4 to emax:   3.7 (eV)
+ Number of k-points in the IBZ: 413
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
+
+ Transport (RTA) calculation results:
+
+ Cartesian component of SERTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.07            0.00
+          123.00        0.10E+16        0.00E+00          350.53            0.00
+          182.00        0.10E+16        0.00E+00          428.74            0.00
+          241.00        0.10E+16        0.00E+00          430.95            0.00
+          300.00        0.10E+16        0.25E+05          385.33            0.00
+
+
+ Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.07            0.00
+          123.00        0.10E+16        0.00E+00          350.53            0.00
+          182.00        0.10E+16        0.00E+00          428.74            0.00
+          241.00        0.10E+16        0.00E+00          430.95            0.00
+          300.00        0.10E+16        0.25E+05          385.33            0.00
+
+
+ Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           40.07            0.00
+          123.00        0.10E+16        0.00E+00          350.53            0.00
+          182.00        0.10E+16        0.00E+00          428.74            0.00
+          241.00        0.10E+16        0.00E+00          430.95            0.00
+          300.00        0.10E+16        0.25E+05          385.33            0.00
+
+
+
+
+ Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           38.96            0.00
+          123.00        0.10E+16        0.00E+00          368.84            0.00
+          182.00        0.10E+16        0.00E+00          465.64            0.00
+          241.00        0.10E+16        0.00E+00          471.54            0.00
+          300.00        0.10E+16        0.25E+05          424.64            0.00
+
+
+ Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           38.96            0.00
+          123.00        0.10E+16        0.00E+00          368.84            0.00
+          182.00        0.10E+16        0.00E+00          465.64            0.00
+          241.00        0.10E+16        0.00E+00          471.54            0.00
+          300.00        0.10E+16        0.25E+05          424.64            0.00
+
+
+ Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.10E+16        0.00E+00            0.00            0.00
+           64.00        0.10E+16        0.00E+00           38.96            0.00
+          123.00        0.10E+16        0.00E+00          368.84            0.00
+          182.00        0.10E+16        0.00E+00          465.64            0.00
+          241.00        0.10E+16        0.00E+00          471.54            0.00
+          300.00        0.10E+16        0.25E+05          424.64            0.00
+
+
+
+
+
+- Writing RTA transport results to: teph4mob_6o_DS6_RTA.nc
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
+              amu      2.69815390E+01  7.49215900E+01
+        boxcutmin      1.10000000E+00
+        ddb_ngqpt        4    4    4
+             ecut      3.00000000E+00 Hartree
+      eph_extrael      4.42475831E-08
+   eph_ngqpt_fine       24   24   24
+         eph_task          -4
+           etotal1     0.0000000000E+00
+           etotal2     0.0000000000E+00
+           etotal3     0.0000000000E+00
+           etotal4     0.0000000000E+00
+           etotal5     0.0000000000E+00
+           etotal6     0.0000000000E+00
+            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         312
+              ixc           7
+           jdtset        1    2    3    4    5    6
+         kptrlatt       24    0    0      0   24    0      0    0   24
+          kptrlen      1.80057671E+02
+          mixprec        1
+P           mkmem         413
+            natom           2
+            nband           8
+           ndtset           6
+            ngfft           8       8       8
+             nkpt         413
+             nsym          24
+           ntypat           2
+              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       prtocc : prtvol=0, do not print more k-points.
+           occopt           3
+        optdriver           7
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+     sigma_erange1     0.00000000E+00  3.67493254E-03 Hartree
+     sigma_erange2     0.00000000E+00  4.40991905E-03 Hartree
+     sigma_erange3     0.00000000E+00  5.14490556E-03 Hartree
+     sigma_erange4     0.00000000E+00  5.87989206E-03 Hartree
+     sigma_erange5     0.00000000E+00  6.61487857E-03 Hartree
+     sigma_erange6     0.00000000E+00  7.34986508E-03 Hartree
+          spgroup         216
+           strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symrel      1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+            typat      1  2
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.4036425458E+00  1.4036425458E+00  1.4036425458E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.6525000000E+00  2.6525000000E+00  2.6525000000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       13.00000   33.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- using density-functional theory.
+- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- Comment: Some pseudopotential generated using the FHI code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
+-
+- [3] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [4] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- And optionally:
+-
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Comment: the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
+-
+- Proc.   0 individual time (sec): cpu=         47.9  wall=         48.4
+
+================================================================================
+
+ Calculation completed.
+.Delivered  20 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=         47.9  wall=         48.4

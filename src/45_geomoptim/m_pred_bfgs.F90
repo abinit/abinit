@@ -99,8 +99,6 @@ contains
 
 subroutine pred_bfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
 type(abimover),intent(in)       :: ab_mover
@@ -595,8 +593,6 @@ end subroutine pred_bfgs
 !! SOURCE
 
 subroutine pred_lbfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars

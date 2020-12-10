@@ -1,0 +1,79 @@
+# Crystalline aluminum : computation of the total energy
+#
+# Determination of the surface energy of aluminum :
+# convergence with respect to the number of vacuum layers.
+
+ndtset 2
+
+#Definition of the unit cell
+acell  3*7.50559090E+00  # Lattice parameters of bulk aluminum
+rprim1 0.5 -0.5  0.0     
+       0.5  0.5  0.0    
+       0.0  0.0  2.5    
+rprim2 0.5 -0.5  0.0    
+       0.5  0.5  0.0    
+       0.0  0.0  3.0    
+
+
+#Definition of occupation numbers
+occopt 4
+tsmear 0.04
+
+#Definition of the k-point grid 
+ngkpt  4 4 1  
+nshiftk 2
+shiftk  0.5 0.0 0.0
+        0.0 0.5 0.0
+
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 13          # The keyword "znucl" refers to the atomic number of the 
+                  # possible type(s) of atom. The pseudopotential(s) 
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Aluminum
+                         
+
+#Definition of the atoms
+natom 3           # Three atoms per cell: three aluminum layers and some vacuum
+typat 3*1         # These atoms are of type 1, that is, Aluminum
+xcart             
+   3*0.0             # Triplet giving the CARTESIAN coordinates of atom 1.
+   0.0  2*3.75279545 # Triplet giving the CARTESIAN coordinates of atom 2.
+   2*0.0  7.5055909  # Triplet giving the CARTESIAN coordinates of atom 3.
+ 
+#The relaxation
+ionmov 2
+tolmxf 5.0d-4
+ntime 10
+
+#Exchange-correlation functional
+ixc 1             # LDA Teter Pade parametrization
+
+#Definition of the planewave basis set
+ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the SCF procedure
+nstep 6           # Maximal number of SCF cycles
+toldff 5.0d-5     
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tbase4_6.abo, tolnlines=  0, tolabs=  1.010e-06, tolrel=  3.000e-04, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Crystalline aluminum : computation of the total energy
+#%%  
+#%%   Determination of the surface energy of aluminum :
+#%%   convergence with respect to the number of vacuum layers.
+#%%<END TEST_INFO>

@@ -103,7 +103,7 @@ contains
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  npwarr(nkpt)=number of planewaves and boundary planewaves at each k
 !!  occ(mband*nkpt*nsppol)=
 !!          occupation numbers for each band (usually 2.0) at each k point
@@ -117,8 +117,8 @@ contains
 !!  rprimd(3,3)=dimensional real space primitive translations
 !!  tim_mkrho=timing code of the calling routine(can be set to 0 if not attributed)
 !!  ucvol=unit cell volume (Bohr**3)
-!!  wvl_den <type(wvl_denspot_type)>=density informations for wavelets
-!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets
+!!  wvl_den <type(wvl_denspot_type)>=density information for wavelets
+!!  wvl_wfs <type(wvl_projector_type)>=wavefunctions information for wavelets
 !!
 !! OUTPUT
 !! rhog(2,nfft)=total electron density in G space
@@ -785,7 +785,7 @@ end subroutine mkrho
 !! gsqcut=cutoff G**2 for included G s in fft box (larger sphere).
 !! izero=if 1, unbalanced components of rho(g) have to be set to zero
 !! mgfft=maximum size of 1D FFTs
-!! mpi_enreg=informations about mpi parallelization
+!! mpi_enreg=information about mpi parallelization
 !! mqgrid=number of grid pts in q array for n^AT(q) spline.
 !! natom=number of atoms in cell.
 !! nattyp(ntypat)=number of atoms of each type in cell.

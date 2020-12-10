@@ -570,7 +570,7 @@ end subroutine mkcore
 !! INPUTS
 !!  atindx1(natom)=index table for atoms, inverse of atindx
 !!  icoulomb= periodic treatment of Hartree potential: 0=periodic, 1=free BC, 2=surface BC
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  nspden=number of spin-density components

@@ -1,0 +1,258 @@
+
+.Version 9.3.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ANADDB comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h34 )
+  
+
+================================================================================
+
+ -outvars_anaddb: echo values of input variables ----------------------
+
+ Flags :
+     ifcflag         1
+ Miscellaneous information :
+         asr         2
+ Interatomic Force Constants Inputs :
+      dipdip         1
+      dipqua         0
+      quadqu         0
+      ifcana         0
+      ifcout         0
+ Description of grid 1 :
+        brav         1
+       ngqpt         7         7         7
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ Phonon DOS information :
+   dosdeltae  4.55633525E-06
+    dossmear  2.27816763E-05
+ Description of grid 2 (Fourier interp. or BZ sampling):
+      ng2qpt        10        10        10
+      ngrids         4
+      q2shft         0.00000000E+00  0.00000000E+00  0.00000000E+00
+ Second list of wavevector (cart. coord.) :
+       nph2l         3
+       qph2l
+                     3.83564741E-02 -1.44499921E-01 -7.84758465E-02    0.000E+00
+                     7.67129481E-02  0.00000000E+00  1.18970700E-02    0.000E+00
+                     2.61860039E-02 -9.86502435E-02 -1.68848763E-01    0.000E+00
+
+================================================================================
+
+ read the DDB information and perform some checks
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)= 12.3168655 -3.2694241  0.0000000  G(1)=  0.0405947 -0.1529321 -0.0830553
+ R(2)= 12.3168655  3.2694241  0.0000000  G(2)=  0.0405947  0.1529321 -0.0830553
+ R(3)= 11.4490201  0.0000000  5.5959134  G(3)=  0.0000000  0.0000000  0.1787018
+ Unit cell volume ucvol=  4.5068432E+02 bohr^3
+ Angles (23,13,12)=  2.97318683E+01  2.97318683E+01  2.97318683E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.000193        0.000000
+       1               2       -0.000000        0.000000
+       1               3        0.000222        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.001626        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000222        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.001592        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.710113E+00   -7.919866E-17    9.734351E-02
+         1         2    5.924980E-16    1.082437E+00   -1.063635E-17
+         1         3    9.734351E-02    2.943168E-17    1.097534E+00
+         2         1    2.538139E+00    4.493450E-17   -2.510906E-01
+         2         2   -6.146472E-16    4.157185E+00    2.406454E-17
+         2         3   -2.510906E-01    1.186702E-16    4.118245E+00
+         3         1   -2.124126E+00    1.713208E-17    7.687354E-02
+         3         2    1.107460E-17   -2.619811E+00   -6.714094E-18
+         3         3    7.687354E-02   -7.405092E-17   -2.607889E+00
+         4         1   -2.124126E+00    1.713208E-17    7.687354E-02
+         4         2    1.107460E-17   -2.619811E+00   -6.714094E-18
+         4         3    7.687354E-02   -7.405092E-17   -2.607889E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+
+================================================================================
+
+ Calculation of the interatomic forces 
+
+-begin at tcpu      0.059  and twall      0.060 sec
+       Homogeneous q point set in the B.Z.
+ Grid q points  :      343
+ greater than 80, so only write 20 of them
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   1.42857143E-01  0.00000000E+00  0.00000000E+00
+  3)   2.85714286E-01  0.00000000E+00  0.00000000E+00
+  4)   4.28571429E-01  0.00000000E+00  0.00000000E+00
+  5)  -4.28571429E-01  0.00000000E+00  0.00000000E+00
+  6)  -2.85714286E-01  0.00000000E+00  0.00000000E+00
+  7)  -1.42857143E-01  0.00000000E+00  0.00000000E+00
+  8)   0.00000000E+00  1.42857143E-01  0.00000000E+00
+  9)   1.42857143E-01  1.42857143E-01  0.00000000E+00
+ 10)   2.85714286E-01  1.42857143E-01  0.00000000E+00
+ 11)   4.28571429E-01  1.42857143E-01  0.00000000E+00
+ 12)  -4.28571429E-01  1.42857143E-01  0.00000000E+00
+ 13)  -2.85714286E-01  1.42857143E-01  0.00000000E+00
+ 14)  -1.42857143E-01  1.42857143E-01  0.00000000E+00
+ 15)   0.00000000E+00  2.85714286E-01  0.00000000E+00
+ 16)   1.42857143E-01  2.85714286E-01  0.00000000E+00
+ 17)   2.85714286E-01  2.85714286E-01  0.00000000E+00
+ 18)   4.28571429E-01  2.85714286E-01  0.00000000E+00
+ 19)  -4.28571429E-01  2.85714286E-01  0.00000000E+00
+ 20)  -2.85714286E-01  2.85714286E-01  0.00000000E+00
+
+ The interatomic forces have been obtained
+
+================================================================================
+
+ Calculation of phonon density of states 
+
+ Average speed of sound partial sums:     0.1486395487E-02 (at units)
+-                                   =           3.2518 [km/s]
+
+ Debye frequency from partial sums:     0.7556613653E-03 (Ha)
+-                                 =     0.4972012935E+01 (THz)
+-Debye temperature from partial sums:     0.2386187031E+03 (K)
+
+ Average speed of sound:     0.2136901345E-02 (at units) 
+-                      =           4.6749 [km/s]
+
+ Debye frequency from DOS:     0.1086368872E-02 (Ha) 
+-                        =     0.7147963798E+01 (THz)
+-Debye temperature from DOS:     0.3430477503E+03 (K)
+
+
+================================================================================
+
+ Treat the first list of vectors 
+
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  3.433910E-04  3.433910E-04
+   6.900011E-04  1.121977E-03  1.121977E-03  1.587075E-03  1.587075E-03
+   1.610802E-03  2.131989E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  7.536561E+01  7.536561E+01
+-  1.514377E+02  2.462455E+02  2.462455E+02  3.483226E+02  3.483226E+02
+-  3.535302E+02  4.679175E+02
+
+ Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
+ Symmetry characters of vibration mode #   1
+       degenerate with vibration modes #   2 to    3
+  3.0 -3.0  1.0 -1.0 -0.0 -0.0  1.0 -1.0 -0.0  0.0  1.0 -1.0
+ Symmetry characters of vibration mode #   4
+        degenerate with vibration mode #   5
+  2.0 -2.0  0.0 -0.0 -1.0  1.0  0.0 -0.0 -1.0  1.0  0.0  0.0
+ Symmetry characters of vibration mode #   6
+  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0
+ Symmetry characters of vibration mode #   7
+        degenerate with vibration mode #   8
+  2.0 -2.0  0.0 -0.0 -1.0  1.0 -0.0  0.0 -1.0  1.0 -0.0  0.0
+ Symmetry characters of vibration mode #   9
+        degenerate with vibration mode #  10
+  2.0  2.0 -0.0 -0.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  0.0  0.0
+ Symmetry characters of vibration mode #  11
+  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0
+ Symmetry characters of vibration mode #  12
+  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+
+  Phonon wavevector (reduced coordinates) :  0.25000  0.00000  0.00000
+ Phonon energies in Hartree :
+   2.962432E-04  3.063400E-04  4.628342E-04  5.327633E-04  7.011442E-04
+   8.572773E-04  1.227321E-03  1.338899E-03  1.541901E-03  1.694968E-03
+   1.845707E-03  2.303123E-03
+ Phonon frequencies in cm-1    :
+-  6.501786E+01  6.723387E+01  1.015804E+02  1.169280E+02  1.538834E+02
+-  1.881506E+02  2.693657E+02  2.938544E+02  3.384081E+02  3.720024E+02
+-  4.050858E+02  5.054771E+02
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
+ Phonon energies in Hartree :
+   3.496778E-04  4.481775E-04  5.754190E-04  6.727184E-04  6.845065E-04
+   1.156963E-03  1.356445E-03  1.432453E-03  1.469467E-03  1.542879E-03
+   1.717662E-03  2.193050E-03
+ Phonon frequencies in cm-1    :
+-  7.674541E+01  9.836359E+01  1.262899E+02  1.476446E+02  1.502318E+02
+-  2.539239E+02  2.977052E+02  3.143871E+02  3.225107E+02  3.386229E+02
+-  3.769832E+02  4.813189E+02
+
+================================================================================
+
+ Treat the second list of vectors 
+
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  0.22716 -0.85579 -0.46477
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  3.433910E-04  3.506457E-04
+   6.915281E-04  1.121977E-03  1.587075E-03  1.587075E-03  1.603722E-03
+   2.131989E-03  2.332203E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  7.536561E+01  7.695783E+01
+-  1.517729E+02  2.462455E+02  3.483226E+02  3.483226E+02  3.519764E+02
+-  4.679175E+02  5.118594E+02
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  0.98819  0.00000  0.15325
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  3.433910E-04  3.433910E-04
+   8.670526E-04  1.121977E-03  1.121977E-03  1.587075E-03  1.587075E-03
+   2.131989E-03  2.285953E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  7.536561E+01  7.536561E+01
+-  1.902961E+02  2.462455E+02  2.462455E+02  3.483226E+02  3.483226E+02
+-  4.679175E+02  5.017088E+02
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  0.13272 -0.50000 -0.85579
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  3.433910E-04  3.507671E-04
+   6.900011E-04  1.121977E-03  1.587075E-03  1.587075E-03  1.610802E-03
+   2.131989E-03  2.333575E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  7.536561E+01  7.698448E+01
+-  1.514377E+02  2.462455E+02  3.483226E+02  3.483226E+02  3.535302E+02
+-  4.679175E+02  5.121605E+02
+-
+- Proc.   0 individual time (sec): cpu=          7.9  wall=          8.0
+
+================================================================================
+
++Total cpu time      7.940  and wall time      7.965 sec
+
+ anaddb : the run completed succesfully.

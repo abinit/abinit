@@ -1,0 +1,97 @@
+# He atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
+# Not accurate, only portability check.
+
+ndtset 44
+
+# (S)LDAs X + different correlations
+ixc1  -1002
+ixc2  -1003
+ixc3  -1004
+ixc4  -1005
+ixc5  -1006
+ixc6  -1007
+ixc7  -1008
+ixc8  -1009
+ixc9  -1010
+ixc10 -1011
+ixc11 -1012
+ixc12 -1013
+ixc13 -1014
+ixc14 -1017
+#Teter XC functional form
+ixc15 -0020
+
+# GGAs : Becke 88 exchange + different correlations
+ixc16 -106130
+ixc17 -106131
+ixc18 -106132
+ixc19 -106133
+ixc20 -106134
+ixc21 -106135
+ixc22 -106136
+#ixc -106137 change in libxc v4
+
+# GGAs : different exchanges + LYP correlation
+ixc23 -101131
+ixc24 -102131
+ixc25 -103131
+ixc26 -104131
+ixc27 -105131
+#ixc  -106131 already treated, see dataset 17
+ixc28 -107131
+ixc29 -108131
+ixc30 -109131
+ixc31 -110131
+ixc32 -111131
+ixc33 -112131
+ixc34 -113131
+ixc35 -114131
+ixc36 -115131
+ixc37 -116131
+ixc38 -117131
+ixc39 -118131
+ixc40 -119131
+ixc41 -120131
+ixc42 -121131
+ixc43 -122131
+ixc44 -123131
+
+#Common data
+acell 3*5
+diemac 1.0d0
+diemix 0.5d0
+ecut 50
+
+kptopt 0
+kpt 3*0.25
+natom 1
+nband 1
+nkpt 1
+nline 1 
+nstep 1
+ntypat 1
+tolwfr 1.0d-14
+typat 1 
+znucl 2
+xred 3*0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02he.bare"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t04.abo, tolnlines = 38, tolabs = 1.1e-2, tolrel = 3.0e-6, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Isolated Helium atom
+#%%   Test functionals from libXC that were present in ABINITv5 (LDAs and GGAs). 
+#%%   This is to check the portability for different platform.
+#%%   Extremely quick (nstep=1, nline=1). Less than 15 secs to test 45 functionals ...
+#%%<END TEST_INFO>

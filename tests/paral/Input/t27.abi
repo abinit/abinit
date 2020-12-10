@@ -1,0 +1,59 @@
+#  Test the parallelisation with one processor unoccupied (because nkpt=3)
+#   To keep this behavior paral_kgb is set to 0 to avoid
+# automatic parallelisation to find a better choice...
+#  Vary the number of setps between the first dataset and the second one.
+ paral_kgb 0
+
+ istwfk 30*1
+ pawmixdg 1
+ ngfft 18 18 18
+ ngfftdg 36 36 36
+
+ occopt 7 tsmear 0.001
+ kptopt 0
+ kpt     -2.50000000E-01  5.00000000E-01  0.00000000E+00
+         -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+         -2.50000000E-01  0.00000000E+00  0.00000000E+00
+ nkpt 3
+ ionmov 3 ntime 3 toldff 1.0d-7 tolmxf 1.0d-5
+ optcell 1 ecutsm 0.5 dilatmx 1.1 
+ ixc 1
+ ecut 15. pawecutdg 50
+ diemac 12.0d0  enunit 2
+ ndtset 2
+ nstep1 7
+ nstep2 6
+ acell 3*7.0
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ chksymtnons 0
+ znucl 6
+ nband 12 occ 4*2 8*0
+ ntypat 1 typat 1 1  natom 2
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t27_MPI4.abo, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options= -easy
+#%% [extra_info]
+#%% keywords = PAW 
+#%% authors = Unknown
+#%% description = 
+#%%   C-diamond, Bulk, 2 atoms, with PAW.
+#%%   Test of ground state with different occs(7 and 0),
+#%%   and also ionmov 2. Only with 4 procs.
+#%%   test the automatic parallelisation when a processor is unoccupied.
+#%%<END TEST_INFO>

@@ -1026,7 +1026,7 @@ end subroutine eltxccore
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space (bohr**-1)
 !!  gsqcut=cutoff on G^2 based on ecut
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimensioned number of q grid points for local psp spline
 !!  natom=number of atoms in unit cell
 !!  nattyp(ntypat)=number of atoms of each type
@@ -1727,7 +1727,7 @@ end subroutine dfpt_eltfrkin
 !!  gsqcut =Fourier cutoff on G^2 for "large sphere" of radius double
 !!   that of the basis sphere--appropriate for charge density rho(G),
 !!   Hartree potential, and pseudopotentials
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft =(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
 !!    see ~abinit/doc/variables/vargs.htm#ngfft

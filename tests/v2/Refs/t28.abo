@@ -1,0 +1,731 @@
+
+.Version 9.3.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2020 ABINIT group . 
+ ANADDB comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Tue 10 Nov 2020.
+- ( at 22h25 )
+  
+
+================================================================================
+
+ -outvars_anaddb: echo values of input variables ----------------------
+
+ Flags :
+     ifcflag         1
+ Miscellaneous information :
+      enunit         2
+         asr         1
+      chneut         0
+ Interatomic Force Constants Inputs :
+      dipdip         0
+      dipqua         0
+      quadqu         0
+      ifcana         1
+      ifcout        20
+      natifc         1
+       atifc         1
+ Description of grid 1 :
+        brav         2
+       ngqpt         4         4         4
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ First list of wavevector (reduced coord.) :
+       nph1l        17
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
+                     1.00000000E-01  1.00000000E-01  0.00000000E+00    1.000E+00
+                     2.00000000E-01  2.00000000E-01  0.00000000E+00    1.000E+00
+                     3.00000000E-01  3.00000000E-01  0.00000000E+00    1.000E+00
+                     4.00000000E-01  4.00000000E-01  0.00000000E+00    1.000E+00
+                     5.00000000E-01  5.00000000E-01  0.00000000E+00    1.000E+00
+                     4.29000000E-01  4.29000000E-01  8.58000000E-01    1.000E+00
+                     3.58000000E-01  3.58000000E-01  7.16000000E-01    1.000E+00
+                     2.86000000E-01  2.86000000E-01  5.72000000E-01    1.000E+00
+                     2.15000000E-01  2.15000000E-01  4.30000000E-01    1.000E+00
+                     1.43000000E-01  1.43000000E-01  2.86000000E-01    1.000E+00
+                     7.20000000E-02  7.20000000E-02  1.44000000E-01    1.000E+00
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
+                     1.25000000E-01  1.25000000E-01  1.25000000E-01    1.000E+00
+                     2.50000000E-01  2.50000000E-01  2.50000000E-01    1.000E+00
+                     3.75000000E-01  3.75000000E-01  3.75000000E-01    1.000E+00
+                     5.00000000E-01  5.00000000E-01  5.00000000E-01    1.000E+00
+
+================================================================================
+
+ read the DDB information and perform some checks
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8000000  3.8000000  G(1)= -0.1315789  0.1315789  0.1315789
+ R(2)=  3.8000000  0.0000000  3.8000000  G(2)=  0.1315789 -0.1315789  0.1315789
+ R(3)=  3.8000000  3.8000000  0.0000000  G(3)=  0.1315789  0.1315789 -0.1315789
+ Unit cell volume ucvol=  1.0974400E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Calculation of the interatomic forces 
+
+-begin at tcpu      0.036  and twall      0.037 sec
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       32
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+  3)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  4)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+  5)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+  6)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+  7)   2.50000000E-01 -2.50000000E-01 -1.11022302E-16
+  8)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  9)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 10)  -2.50000000E-01  2.50000000E-01 -1.11022302E-16
+ 11)  -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
+ 12)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+ 13)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 14)   2.50000000E-01  7.50000000E-01  5.00000000E-01
+ 15)   2.50000000E-01 -1.11022302E-16 -2.50000000E-01
+ 16)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 17)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 18)   5.00000000E-01 -1.11022302E-16 -1.11022302E-16
+ 19)   7.50000000E-01  2.50000000E-01  5.00000000E-01
+ 20)  -1.11022302E-16  2.50000000E-01 -2.50000000E-01
+ 21)  -1.11022302E-16  5.00000000E-01 -1.11022302E-16
+ 22)  -1.11022302E-16 -1.11022302E-16 -5.00000000E-01
+ 23)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 24)   5.00000000E-01  7.50000000E-01  2.50000000E-01
+ 25)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 26)   7.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 28)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 29)  -2.50000000E-01 -1.11022302E-16  2.50000000E-01
+ 30)  -2.50000000E-01 -5.00000000E-01 -2.50000000E-01
+ 31)  -1.11022302E-16 -2.50000000E-01  2.50000000E-01
+ 32)  -5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+
+ Analysis of interatomic force constants 
+
+ column 1 is related to the displacement
+        of the generic atom along x,    
+ column 2 is related to the displacement
+        of the generic atom along y,    
+ column 3 is related to the displacement
+        of the generic atom along z,    
+
+ generic atom number   1
+ with cartesian coordinates  0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+ Third atom defining local coordinates : 
+     ib =    1   irpt =   13
+
+   1 interaction with atom     1 cell      40
+ with coordinates     0.000000E+00    0.000000E+00    0.000000E+00
+ and distance     0.000000E+00
+   0.02041  0.00000  0.00000
+   0.00000  0.02041  0.00000
+   0.00000  0.00000  0.02041
+  Trace           0.06122
+ Transformation to local coordinates 
+ First  local vector :        0.000000        0.707107       -0.707107
+ Second local vector :       -0.816497       -0.408248       -0.408248
+ Third  local vector :       -0.577350        0.577350        0.577350
+   0.02041  0.00000  0.00000
+   0.00000  0.02041  0.00000
+   0.00000  0.00000  0.02041
+
+   2 interaction with atom     1 cell       8
+ with coordinates    -3.800000E+00   -3.800000E+00    0.000000E+00
+ and distance     5.374012E+00
+  -0.00297 -0.00385  0.00000
+  -0.00385 -0.00297  0.00000
+   0.00000  0.00000  0.00158
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :       -0.707107       -0.707107        0.000000
+ Second local vector :        0.707107       -0.707107        0.000000
+ Third  local vector :        0.000000        0.000000        1.000000
+  -0.00682  0.00000  0.00000
+   0.00000  0.00089  0.00000
+   0.00000  0.00000  0.00158
+
+   3 interaction with atom     1 cell      13
+ with coordinates    -3.800000E+00    0.000000E+00   -3.800000E+00
+ and distance     5.374012E+00
+  -0.00297  0.00000 -0.00385
+   0.00000  0.00158  0.00000
+  -0.00385  0.00000 -0.00297
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :       -0.707107        0.000000       -0.707107
+ Second local vector :        0.707107        0.000000       -0.707107
+ Third  local vector :        0.000000       -1.000000       -0.000000
+  -0.00682  0.00000  0.00000
+   0.00000  0.00089  0.00000
+   0.00000  0.00000  0.00158
+
+   4 interaction with atom     1 cell      17
+ with coordinates    -3.800000E+00    0.000000E+00    3.800000E+00
+ and distance     5.374012E+00
+  -0.00297  0.00000  0.00385
+   0.00000  0.00158  0.00000
+   0.00385  0.00000 -0.00297
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :       -0.707107        0.000000        0.707107
+ Second local vector :        0.707107        0.000000        0.707107
+ Third  local vector :        0.000000        1.000000       -0.000000
+  -0.00682  0.00000  0.00000
+   0.00000  0.00089  0.00000
+   0.00000  0.00000  0.00158
+
+   5 interaction with atom     1 cell      18
+ with coordinates    -3.800000E+00    3.800000E+00    0.000000E+00
+ and distance     5.374012E+00
+  -0.00297  0.00385  0.00000
+   0.00385 -0.00297  0.00000
+   0.00000  0.00000  0.00158
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :       -0.707107        0.707107        0.000000
+ Second local vector :        0.707107        0.707107        0.000000
+ Third  local vector :        0.000000        0.000000       -1.000000
+  -0.00682  0.00000  0.00000
+   0.00000  0.00089  0.00000
+   0.00000  0.00000  0.00158
+
+   6 interaction with atom     1 cell      27
+ with coordinates     0.000000E+00   -3.800000E+00   -3.800000E+00
+ and distance     5.374012E+00
+   0.00158  0.00000  0.00000
+   0.00000 -0.00297 -0.00385
+   0.00000 -0.00385 -0.00297
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :        0.000000       -0.707107       -0.707107
+ Second local vector :        1.000000        0.000000        0.000000
+ Third  local vector :        0.000000       -0.707107        0.707107
+  -0.00682  0.00000  0.00000
+   0.00000  0.00158  0.00000
+   0.00000  0.00000  0.00089
+
+   7 interaction with atom     1 cell      31
+ with coordinates     0.000000E+00   -3.800000E+00    3.800000E+00
+ and distance     5.374012E+00
+   0.00158  0.00000  0.00000
+   0.00000 -0.00297  0.00385
+   0.00000  0.00385 -0.00297
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :        0.000000       -0.707107        0.707107
+ Second local vector :        1.000000        0.000000        0.000000
+ Third  local vector :       -0.000000        0.707107        0.707107
+  -0.00682  0.00000  0.00000
+   0.00000  0.00158  0.00000
+   0.00000  0.00000  0.00089
+
+   8 interaction with atom     1 cell      33
+ with coordinates     3.800000E+00   -3.800000E+00    0.000000E+00
+ and distance     5.374012E+00
+  -0.00297  0.00385  0.00000
+   0.00385 -0.00297  0.00000
+   0.00000  0.00000  0.00158
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :        0.707107       -0.707107        0.000000
+ Second local vector :        0.707107        0.707107        0.000000
+ Third  local vector :       -0.000000        0.000000        1.000000
+  -0.00682  0.00000  0.00000
+   0.00000  0.00089  0.00000
+   0.00000  0.00000  0.00158
+
+   9 interaction with atom     1 cell      37
+ with coordinates     0.000000E+00    3.800000E+00   -3.800000E+00
+ and distance     5.374012E+00
+   0.00158  0.00000  0.00000
+   0.00000 -0.00297  0.00385
+   0.00000  0.00385 -0.00297
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :        0.000000        0.707107       -0.707107
+ Second local vector :        1.000000        0.000000        0.000000
+ Third  local vector :        0.000000       -0.707107       -0.707107
+  -0.00682  0.00000  0.00000
+   0.00000  0.00158  0.00000
+   0.00000  0.00000  0.00089
+
+  10 interaction with atom     1 cell      38
+ with coordinates     3.800000E+00    0.000000E+00   -3.800000E+00
+ and distance     5.374012E+00
+  -0.00297  0.00000  0.00385
+   0.00000  0.00158  0.00000
+   0.00385  0.00000 -0.00297
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :        0.707107        0.000000       -0.707107
+ Second local vector :        0.707107        0.000000        0.707107
+ Third  local vector :        0.000000       -1.000000        0.000000
+  -0.00682  0.00000  0.00000
+   0.00000  0.00089  0.00000
+   0.00000  0.00000  0.00158
+
+  11 interaction with atom     1 cell      41
+ with coordinates     0.000000E+00    3.800000E+00    3.800000E+00
+ and distance     5.374012E+00
+   0.00158  0.00000  0.00000
+   0.00000 -0.00297 -0.00385
+   0.00000 -0.00385 -0.00297
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :        0.000000        0.707107        0.707107
+ Second local vector :        1.000000        0.000000        0.000000
+ Third  local vector :        0.000000        0.707107       -0.707107
+  -0.00682  0.00000  0.00000
+   0.00000  0.00158  0.00000
+   0.00000  0.00000  0.00089
+
+  12 interaction with atom     1 cell      42
+ with coordinates     3.800000E+00    0.000000E+00    3.800000E+00
+ and distance     5.374012E+00
+  -0.00297  0.00000 -0.00385
+   0.00000  0.00158  0.00000
+  -0.00385  0.00000 -0.00297
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :        0.707107        0.000000        0.707107
+ Second local vector :        0.707107        0.000000       -0.707107
+ Third  local vector :       -0.000000        1.000000        0.000000
+  -0.00682  0.00000  0.00000
+   0.00000  0.00089  0.00000
+   0.00000  0.00000  0.00158
+
+  13 interaction with atom     1 cell      43
+ with coordinates     3.800000E+00    3.800000E+00    0.000000E+00
+ and distance     5.374012E+00
+  -0.00297 -0.00385  0.00000
+  -0.00385 -0.00297  0.00000
+   0.00000  0.00000  0.00158
+  Trace          -0.00436
+ Transformation to local coordinates 
+ First  local vector :        0.707107        0.707107        0.000000
+ Second local vector :        0.707107       -0.707107        0.000000
+ Third  local vector :        0.000000        0.000000       -1.000000
+  -0.00682  0.00000  0.00000
+   0.00000  0.00089  0.00000
+   0.00000  0.00000  0.00158
+
+  14 interaction with atom     1 cell      15
+ with coordinates    -7.600000E+00    0.000000E+00    0.000000E+00
+ and distance     7.600000E+00
+  -0.00082  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00167
+  Trace          -0.00417
+ Transformation to local coordinates 
+ First  local vector :       -1.000000        0.000000        0.000000
+ Second local vector :        0.000000        1.000000        0.000000
+ Third  local vector :        0.000000        0.000000       -1.000000
+  -0.00082  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00167
+
+  15 interaction with atom     1 cell      30
+ with coordinates     0.000000E+00   -7.600000E+00    0.000000E+00
+ and distance     7.600000E+00
+  -0.00167  0.00000  0.00000
+   0.00000 -0.00082  0.00000
+   0.00000  0.00000 -0.00167
+  Trace          -0.00417
+ Transformation to local coordinates 
+ First  local vector :        0.000000       -1.000000        0.000000
+ Second local vector :        1.000000        0.000000        0.000000
+ Third  local vector :       -0.000000        0.000000        1.000000
+  -0.00082  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00167
+
+  16 interaction with atom     1 cell      36
+ with coordinates     0.000000E+00    0.000000E+00   -7.600000E+00
+ and distance     7.600000E+00
+  -0.00167  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00082
+  Trace          -0.00417
+ Transformation to local coordinates 
+ First  local vector :        0.000000        0.000000       -1.000000
+ Second local vector :        1.000000        0.000000        0.000000
+ Third  local vector :        0.000000       -1.000000        0.000000
+  -0.00082  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00167
+
+  17 interaction with atom     1 cell      44
+ with coordinates     0.000000E+00    0.000000E+00    7.600000E+00
+ and distance     7.600000E+00
+  -0.00167  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00082
+  Trace          -0.00417
+ Transformation to local coordinates 
+ First  local vector :        0.000000        0.000000        1.000000
+ Second local vector :        1.000000        0.000000        0.000000
+ Third  local vector :        0.000000        1.000000        0.000000
+  -0.00082  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00167
+
+  18 interaction with atom     1 cell      48
+ with coordinates     0.000000E+00    7.600000E+00    0.000000E+00
+ and distance     7.600000E+00
+  -0.00167  0.00000  0.00000
+   0.00000 -0.00082  0.00000
+   0.00000  0.00000 -0.00167
+  Trace          -0.00417
+ Transformation to local coordinates 
+ First  local vector :        0.000000        1.000000        0.000000
+ Second local vector :        1.000000        0.000000        0.000000
+ Third  local vector :        0.000000        0.000000       -1.000000
+  -0.00082  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00167
+
+  19 interaction with atom     1 cell      58
+ with coordinates     7.600000E+00    0.000000E+00    0.000000E+00
+ and distance     7.600000E+00
+  -0.00082  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00167
+  Trace          -0.00417
+ Transformation to local coordinates 
+ First  local vector :        1.000000        0.000000        0.000000
+ Second local vector :        0.000000        1.000000        0.000000
+ Third  local vector :        0.000000        0.000000        1.000000
+  -0.00082  0.00000  0.00000
+   0.00000 -0.00167  0.00000
+   0.00000  0.00000 -0.00167
+
+  20 interaction with atom     1 cell       2
+ with coordinates    -7.600000E+00   -3.800000E+00   -3.800000E+00
+ and distance     9.308061E+00
+   0.00186  0.00000  0.00000
+   0.00000 -0.00159  0.00144
+   0.00000  0.00144 -0.00159
+  Trace          -0.00132
+ Transformation to local coordinates 
+ First  local vector :       -0.816497       -0.408248       -0.408248
+ Second local vector :       -0.577350        0.577350        0.577350
+ Third  local vector :       -0.000000        0.707107       -0.707107
+   0.00119  0.00095  0.00000
+   0.00095  0.00052  0.00000
+   0.00000  0.00000 -0.00303
+
+================================================================================
+
+ Treat the first list of vectors 
+
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00
+ Phonon energies in meV     :
+-  0.000000E+00  0.000000E+00  0.000000E+00
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00
+ Phonon frequencies in Thz     :
+-  0.000000E+00  0.000000E+00  0.000000E+00
+ Phonon energies in Kelvin  :
+-  0.000000E+00  0.000000E+00  0.000000E+00
+
+ Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
+ Symmetry characters of vibration mode #   1
+       degenerate with vibration modes #   2 to    3
+  3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+
+  Phonon wavevector (reduced coordinates) :  0.10000  0.10000  0.00000
+ Phonon energies in Hartree :
+  -3.011784E-04  1.682704E-04  1.682704E-04
+ Phonon energies in meV     :
+- -8.195480E+00  4.578870E+00  4.578870E+00
+ Phonon frequencies in cm-1    :
+- -6.610101E+01  3.693108E+01  3.693108E+01
+ Phonon frequencies in Thz     :
+- -1.981659E+00  1.107166E+00  1.107166E+00
+ Phonon energies in Kelvin  :
+- -9.510449E+01  5.313553E+01  5.313553E+01
+ Speed of sound for this q and mode:
+   in atomic units:    -0.1821493042E-02
+   in units km/s:             -3.98486
+ Partial Debye temperature for this q and mode:
+   in atomic units:    -0.1482919536E-02
+   in SI units K  :           -468.26840
+
+ Speed of sound for this q and mode:
+   in atomic units:     0.1017680515E-02
+   in units km/s:              2.22637
+ Partial Debye temperature for this q and mode:
+   in atomic units:     0.8285172009E-03
+   in SI units K  :            261.62473
+
+ Speed of sound for this q and mode:
+   in atomic units:     0.1017680515E-02
+   in units km/s:              2.22637
+ Partial Debye temperature for this q and mode:
+   in atomic units:     0.8285172009E-03
+   in SI units K  :            261.62473
+
+
+  Phonon wavevector (reduced coordinates) :  0.20000  0.20000  0.00000
+ Phonon energies in Hartree :
+  -2.152872E-04  2.955852E-04  2.955852E-04
+ Phonon energies in meV     :
+- -5.858264E+00  8.043283E+00  8.043283E+00
+ Phonon frequencies in cm-1    :
+- -4.725009E+01  6.487346E+01  6.487346E+01
+ Phonon frequencies in Thz     :
+- -1.416522E+00  1.944857E+00  1.944857E+00
+ Phonon energies in Kelvin  :
+- -6.798225E+01  9.333832E+01  9.333832E+01
+
+  Phonon wavevector (reduced coordinates) :  0.30000  0.30000  0.00000
+ Phonon energies in Hartree :
+   3.608601E-04  3.608601E-04  7.564114E-04
+ Phonon energies in meV     :
+-  9.819502E+00  9.819502E+00  2.058300E+01
+ Phonon frequencies in cm-1    :
+-  7.919963E+01  7.919963E+01  1.660131E+02
+ Phonon frequencies in Thz     :
+-  2.374345E+00  2.374345E+00  4.976948E+00
+ Phonon energies in Kelvin  :
+-  1.139505E+02  1.139505E+02  2.388555E+02
+
+  Phonon wavevector (reduced coordinates) :  0.40000  0.40000  0.00000
+ Phonon energies in Hartree :
+   3.748280E-04  3.748280E-04  1.236351E-03
+ Phonon energies in meV     :
+-  1.019959E+01  1.019959E+01  3.364282E+01
+ Phonon frequencies in cm-1    :
+-  8.226523E+01  8.226523E+01  2.713476E+02
+ Phonon frequencies in Thz     :
+-  2.466250E+00  2.466250E+00  8.134798E+00
+ Phonon energies in Kelvin  :
+-  1.183612E+02  1.183612E+02  3.904082E+02
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
+ Phonon energies in Hartree :
+   3.723754E-04  3.723754E-04  1.414754E-03
+ Phonon energies in meV     :
+-  1.013285E+01  1.013285E+01  3.849743E+01
+ Phonon frequencies in cm-1    :
+-  8.172696E+01  8.172696E+01  3.105027E+02
+ Phonon frequencies in Thz     :
+-  2.450113E+00  2.450113E+00  9.308637E+00
+ Phonon energies in Kelvin  :
+-  1.175867E+02  1.175867E+02  4.467436E+02
+
+  Phonon wavevector (reduced coordinates) :  0.42900  0.42900  0.85800
+ Phonon energies in Hartree :
+   3.379288E-04  3.791046E-04  1.229913E-03
+ Phonon energies in meV     :
+-  9.195510E+00  1.031596E+01  3.346764E+01
+ Phonon frequencies in cm-1    :
+-  7.416679E+01  8.320385E+01  2.699347E+02
+ Phonon frequencies in Thz     :
+-  2.223465E+00  2.494389E+00  8.092440E+00
+ Phonon energies in Kelvin  :
+-  1.067093E+02  1.197116E+02  3.883754E+02
+
+  Phonon wavevector (reduced coordinates) :  0.35800  0.35800  0.71600
+ Phonon energies in Hartree :
+   4.030052E-04  5.084552E-04  9.054353E-04
+ Phonon energies in meV     :
+-  1.096633E+01  1.383577E+01  2.463815E+01
+ Phonon frequencies in cm-1    :
+-  8.844942E+01  1.115930E+02  1.987201E+02
+ Phonon frequencies in Thz     :
+-  2.651647E+00  3.345474E+00  5.957478E+00
+ Phonon energies in Kelvin  :
+-  1.272588E+02  1.605572E+02  2.859135E+02
+
+  Phonon wavevector (reduced coordinates) :  0.28600  0.28600  0.57200
+ Phonon energies in Hartree :
+   5.339302E-04  6.600805E-04  8.529085E-04
+ Phonon energies in meV     :
+-  1.452898E+01  1.796170E+01  2.320882E+01
+ Phonon frequencies in cm-1    :
+-  1.171841E+02  1.448709E+02  1.871918E+02
+ Phonon frequencies in Thz     :
+-  3.513092E+00  4.343121E+00  5.611868E+00
+ Phonon energies in Kelvin  :
+-  1.686016E+02  2.084367E+02  2.693269E+02
+
+  Phonon wavevector (reduced coordinates) :  0.21500  0.21500  0.43000
+ Phonon energies in Hartree :
+   4.682110E-04  6.085033E-04  8.499696E-04
+ Phonon energies in meV     :
+-  1.274067E+01  1.655822E+01  2.312885E+01
+ Phonon frequencies in cm-1    :
+-  1.027604E+02  1.335510E+02  1.865468E+02
+ Phonon frequencies in Thz     :
+-  3.080680E+00  4.003760E+00  5.592531E+00
+ Phonon energies in Kelvin  :
+-  1.478492E+02  1.921499E+02  2.683988E+02
+
+  Phonon wavevector (reduced coordinates) :  0.14300  0.14300  0.28600
+ Phonon energies in Hartree :
+   1.039663E-04  3.284737E-04  5.974364E-04
+ Phonon energies in meV     :
+-  2.829068E+00  8.938224E+00  1.625707E+01
+ Phonon frequencies in cm-1    :
+-  2.281798E+01  7.209164E+01  1.311221E+02
+ Phonon frequencies in Thz     :
+-  6.840657E-01  2.161253E+00  3.930943E+00
+ Phonon energies in Kelvin  :
+-  3.282993E+01  1.037237E+02  1.886553E+02
+
+  Phonon wavevector (reduced coordinates) :  0.07200  0.07200  0.14400
+ Phonon energies in Hartree :
+  -2.023519E-04 -1.031608E-04  2.384845E-04
+ Phonon energies in meV     :
+- -5.506276E+00 -2.807149E+00  6.489492E+00
+ Phonon frequencies in cm-1    :
+- -4.441111E+01 -2.264119E+01  5.234129E+01
+ Phonon frequencies in Thz     :
+- -1.331412E+00 -6.787657E-01  1.569152E+00
+ Phonon energies in Kelvin  :
+- -6.389760E+01 -3.257558E+01  7.530735E+01
+ Speed of sound for this q and mode:
+   in atomic units:    -0.1201886756E-02
+   in units km/s:             -2.62936
+ Partial Debye temperature for this q and mode:
+   in atomic units:    -0.9784837548E-03
+   in SI units K  :           -308.98037
+
+ Speed of sound for this q and mode:
+   in atomic units:    -0.6127327852E-03
+   in units km/s:             -1.34047
+ Partial Debye temperature for this q and mode:
+   in atomic units:    -0.4988399059E-03
+   in SI units K  :           -157.52100
+
+ Speed of sound for this q and mode:
+   in atomic units:     0.1416499208E-02
+   in units km/s:              3.09886
+ Partial Debye temperature for this q and mode:
+   in atomic units:     0.1153204707E-02
+   in SI units K  :            364.15281
+
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00
+ Phonon energies in meV     :
+-  0.000000E+00  0.000000E+00  0.000000E+00
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00
+ Phonon frequencies in Thz     :
+-  0.000000E+00  0.000000E+00  0.000000E+00
+ Phonon energies in Kelvin  :
+-  0.000000E+00  0.000000E+00  0.000000E+00
+
+ Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
+ Symmetry characters of vibration mode #   1
+       degenerate with vibration modes #   2 to    3
+  3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+
+  Phonon wavevector (reduced coordinates) :  0.12500  0.12500  0.12500
+ Phonon energies in Hartree :
+  -1.076937E-04 -1.076937E-04  2.310889E-04
+ Phonon energies in meV     :
+- -2.930494E+00 -2.930494E+00  6.288249E+00
+ Phonon frequencies in cm-1    :
+- -2.363603E+01 -2.363603E+01  5.071815E+01
+ Phonon frequencies in Thz     :
+- -7.085905E-01 -7.085905E-01  1.520492E+00
+ Phonon energies in Kelvin  :
+- -3.400694E+01 -3.400694E+01  7.297201E+01
+ Speed of sound for this q and mode:
+   in atomic units:    -0.6016630731E-03
+   in units km/s:             -1.31625
+ Partial Debye temperature for this q and mode:
+   in atomic units:    -0.4898277977E-03
+   in SI units K  :           -154.67520
+
+ Speed of sound for this q and mode:
+   in atomic units:    -0.6016630731E-03
+   in units km/s:             -1.31625
+ Partial Debye temperature for this q and mode:
+   in atomic units:    -0.4898277977E-03
+   in SI units K  :           -154.67520
+
+ Speed of sound for this q and mode:
+   in atomic units:     0.1291047325E-02
+   in units km/s:              2.82441
+ Partial Debye temperature for this q and mode:
+   in atomic units:     0.1051071433E-02
+   in SI units K  :            331.90171
+
+
+  Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.25000
+ Phonon energies in Hartree :
+   2.845939E-04  2.845939E-04  7.426404E-04
+ Phonon energies in meV     :
+-  7.744193E+00  7.744193E+00  2.020827E+01
+ Phonon frequencies in cm-1    :
+-  6.246113E+01  6.246113E+01  1.629907E+02
+ Phonon frequencies in Thz     :
+-  1.872538E+00  1.872538E+00  4.886339E+00
+ Phonon energies in Kelvin  :
+-  8.986753E+01  8.986753E+01  2.345070E+02
+
+  Phonon wavevector (reduced coordinates) :  0.37500  0.37500  0.37500
+ Phonon energies in Hartree :
+   4.149971E-04  4.149971E-04  1.183146E-03
+ Phonon energies in meV     :
+-  1.129264E+01  1.129264E+01  3.219504E+01
+ Phonon frequencies in cm-1    :
+-  9.108133E+01  9.108133E+01  2.596705E+02
+ Phonon frequencies in Thz     :
+-  2.730549E+00  2.730549E+00  7.784726E+00
+ Phonon energies in Kelvin  :
+-  1.310455E+02  1.310455E+02  3.736075E+02
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
+ Phonon energies in Hartree :
+   3.990763E-04  3.990763E-04  1.342923E-03
+ Phonon energies in meV     :
+-  1.085942E+01  1.085942E+01  3.654280E+01
+ Phonon frequencies in cm-1    :
+-  8.758713E+01  8.758713E+01  2.947376E+02
+ Phonon frequencies in Thz     :
+-  2.625796E+00  2.625796E+00  8.836011E+00
+ Phonon energies in Kelvin  :
+-  1.260182E+02  1.260182E+02  4.240611E+02
+-
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+
+================================================================================
+
++Total cpu time      0.051  and wall time      0.053 sec
+
+ anaddb : the run completed succesfully.
