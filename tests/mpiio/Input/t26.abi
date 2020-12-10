@@ -1,0 +1,123 @@
+# Exercise IO routines in parallel with different combination 
+# of parameters in the GS eigensolvers.
+
+ngfft 24 24 24
+ngfftdg 36 36 36
+getwfk -1
+paral_kgb 1
+
+#pw_unbal_thresh 10  # Activate load balancing procedure
+                     # This test has been deactivated because it's not portable
+                     # and prevent us from testing the MPI-IO part
+
+# Test the prt* variables used in outscf.
+prtden 1
+prtpot 1 
+prtgeo 1 
+#prtstm 1
+prt1dm 1
+prtvha 1
+prtvhxc 1
+prtvxc 1
+prtnabla 1
+#prtefg 1
+prtvpsp 1
+prtvclmb 1
+prtfc 1
+#prtkden 1
+#prtelf 1
+#prtgden 1
+#prtlden 1
+natsph 1
+iatsph 2
+
+ndtset 6
+
+# Dataset 1
+# Output the GS WFK with MPI-FFT.
+npband1 1 npkpt1 2 npfft1 2
+prtdos1 3
+
+# Dataset 2
+# Read the previous GS WFK. Use MPI-FFT but with different number of procs
+npband2 1 npkpt2 1 npfft2 4
+prtdos2 3
+
+# Dataset 3
+# Read the previous GS WFK in band-only mode.
+npband3 4 npkpt3 1 npfft3 1
+
+# Dataset 4
+# Read the previous DEN file in band-fft mode
+getwfk4 0
+getden4 -1
+npband4 2 npkpt4 1 npfft4 2
+nstep4 5  #   Improves the portability of the test
+
+# Dataset 5
+# Read previous WFK file with the simple band-by-band CG solver.
+paral_kgb5 0 
+iomode5 0  # CG with MPI-IO is buggy!
+prtdos5 3
+
+# Dtaset 6
+# Read previous WFK file and DEN file with interpolation of rhor(r)
+ngfftdg6 48 48 48
+getden6 -1
+npband6 1 npkpt6 1 npfft6 4
+getwfk6 1
+
+# SCF parameters
+ecut 15. 
+nband 12 
+pawecutdg 50
+diemac 12.0d0  
+
+occopt 7  
+tsmear 0.001
+kptrlatt 4 0 0 0 4 0 0 0 4
+nshiftk 4 
+shiftk 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+tolwfr 1d-20
+
+# Unit cell
+acell 3*7.0
+rprim 0.0 0.5 0.5
+      0.5 0.0 0.5
+      0.5 0.5 0.0
+xred 0.0  0.0  0.0
+     0.25 0.25 0.25
+znucl 6
+
+ntypat 1 
+typat  1 1  
+natom 2
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
+# This test is disabled on abiref_gnu_9.2_openmpi, because a problem with SIGFPE is triggered inside the MPI layer (MPI_ALLREDUCE) when input arrays are not initialized with zeros.
+# MPI_SUM may overflow depending on the (random) memory chunks returned by C malloc. See several Gitlab comments from Matteo about this problem.
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = abiref_gnu_9.2_openmpi
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test=t26_MPI4.abo, tolnlines=11, tolabs=2.0e-7, tolrel=1.0;
+#%%    t26_MPI4o_DS1_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%%    t26_MPI4o_DS2_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%%    t26_MPI4o_DS5_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%% [extra_info]
+#%% keywords = PAW
+#%% authors = M. Giantomassi
+#%% description = 
+#%%   C-diamond, Bulk, 2 atoms, with PAW.
+#%%   Test the IO routines with paral_kgb in [1, 0] and different combinations
+#%%   of parameters (npfft, npband, npkpt). 
+#%%   Test the plane wave load balancing procedure (pw_unbal_thresh).
+#%%   Test also the computation of PJDOS.
+#%%<END TEST_INFO>

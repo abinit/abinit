@@ -1,0 +1,82 @@
+#Test the capability to correct inaccurate rprim or angdeg values
+
+ ndtset 28
+ udtset 7 4
+
+tolsym?1   1.0d-8     # With this stringent value of tolsym, a lower symmetry Bravais lattice is recognized, rprim is not corrected
+tolsym?2   2.0d-5     # With this tolsym, the higher symmetry Bravais lattice is never recognized,
+                      # still more symmetries are recognized than with tol8, and  rprim is corrected accordingly
+tolsym?3   5.0d-5     # With this tolsym, the higher symmetry Bravais lattice is not always recognized, 
+                      # still more symmetries are recognized than with tol8, and  rprim is corrected accordingly
+tolsym?4   1.0d-4     # With this value of tolsym, an higher symmetry Bravais lattice is recognized, and then rprim is corrected
+
+# Fix a simple cubic lattice
+acell1?   5.0001 5.0000 4.9999
+angdeg1?  90.001 90.000 89.999
+
+# Fix a FCC lattice
+acell2?   5.0001 5.0000 4.9999
+rprim2?   0.00001  1.00002  1.00003
+          1.00004  0.00005  1.00006
+          1.00007  1.00008  0.00009
+
+# Fix a BCC lattice
+acell3?   5.0001 5.0000 4.9999
+rprim3?  -1.00001  1.00002  1.00003
+          1.00004 -1.00005  1.00006
+          1.00007  1.00008 -1.00009
+
+# Fix a hexagonal lattice
+acell4?   7.0000 5.0000 5.0001
+angdeg4?  120.001 90.001 89.999
+
+# Fix a rhombohedral lattice
+acell5?   5.0001 5.0000 4.9999
+angdeg5?  80.0001 80.000 79.9999
+
+# Fix a BCT lattice
+acell6?   5.748 7.206 7.206 
+angdeg6? 80.846 66.493 66.493   # These angles are very approximate, yielding a monoclinic Bravais lattice
+
+# Fix a monoclinic lattice
+acell7?   8.001 5.000 6.000
+angdeg7?  90.001 89.999 60.001
+
+
+#This is largely irrelevant ...
+ntypat 1
+typat 1
+znucl 6
+natom 1
+xred 0.0 0.0 0.0
+
+ecut 2
+nline 1
+nstep 2
+tolwfr 1.e-8
+
+#Automatic generation of the k points
+#ngkpt 3*1
+#shiftk 3*0.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t13.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 6
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Fake body-centered tetragonal crystal
+#%%   This test checks the capability of ABINIT to identify and correct inaccurate primitive vectors
+#%%   using the tolsym input variable.
+#%%<END TEST_INFO>
+
+

@@ -1,0 +1,54 @@
+# He atom in GGA C09x
+
+acell 3*5
+diemac 1.0d0
+diemix 0.5d0
+ecut 200
+
+ixc 24
+
+ kptopt 0
+kpt 3*0.25
+natom 1
+nband 1
+nkpt 1
+nline 3
+nstep 6
+nsym 8
+ntypat 1
+prtvol 10
+rprim 1 0 0 0 1 0 0 0 1
+symrel  1  0  0   0  1  0   0  0  1
+       -1  0  0   0  1  0   0  0  1
+        1  0  0   0 -1  0   0  0  1
+       -1  0  0   0 -1  0   0  0  1
+        1  0  0   0  1  0   0  0 -1
+       -1  0  0   0  1  0   0  0 -1
+        1  0  0   0 -1  0   0  0 -1
+       -1  0  0   0 -1  0   0  0 -1
+tnons 24*0
+tolwfr 1.0d-14
+typat 1
+wtk 1 znucl 2
+xred 3*0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02He.revPBEx.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t13.abo, tolnlines = 0, tolabs = 1.0e-6, tolrel = 1.0e-4, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Isolated Helium atom.
+#%%   Treated with GGA C09x exchange functional (ixc=24).
+#%%   The total energy is -2.7881 Ha.
+#%%   Test taken from v1/t10.in.
+#%%<END TEST_INFO>

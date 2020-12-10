@@ -1,0 +1,194 @@
+# FCC Al
+# Perform the computation of 6 dynamical matrices, to be used
+# in the next run to get the full phonon band structure of Al.
+# Use minimal ecut and nkpt.
+# In order to obtain the DDB of test 29, one should
+# uncomment the lines indicated as 'test 29', and uncomment
+# those identified as 'test 26'
+
+ ndtset 13
+#ndtset 1
+#jdtset 5
+
+ nbdbuf 2
+
+#Input that is common to most datasets, but not all
+  getden 1
+  getwfk 2
+  kptopt 3
+    nkpt 32   # test 26
+#   nkpt 864  # test 29
+    nqpt 1
+
+#Dataset 1 : SCF
+
+  getden1  0
+  getwfk1  0
+  kptopt1  1
+    nkpt1  2   # test 26
+#   nkpt1  28  # test 29
+    nqpt1  0
+  prtden1  1
+  tolvrs1  1.0d-13
+
+#Dataset 2 : non-SCF for all k points
+
+  getwfk2  1
+    iscf2 -2
+    nqpt2  0
+  tolwfr2  1.0d-22
+
+
+#Dataset 3 : non-SCF at q=1/4 1/4 0
+
+    iscf3 -2
+     qpt3  0.25d0 0.25d0 0.0d0
+  tolwfr3  1.0d-22
+
+#Dataset 4 : RF at q=1/4 1/4 0
+
+  getwfq4  3
+     qpt4  0.25d0 0.25d0 0.0d0
+ rfatpol4  1 1
+   rfdir4  1 1 1
+  rfphon4  1
+  tolvrs4  1.0d-10
+
+#Dataset 5 : RF at q=0 0 0   (this is always needed for IFCs)
+
+     qpt5  0.0 0.0 0.0
+ rfatpol5  1 1
+   rfdir5  1 1 1
+  rfphon5  1
+  tolvrs5  1.0d-10
+#  frzfermi5 1   should only be used for testing purposes
+
+#Dataset 6 : non-SCF at q=1/2 1/2 0
+
+    iscf6 -2
+     qpt6  0.5d0 0.5d0 0.0d0
+  tolwfr6  1.0d-22
+
+#Dataset 7 : RF at q=1/2 1/2 0
+
+  getwfq7  6
+     qpt7  0.5d0 0.5d0 0.0d0
+ rfatpol7  1 1
+   rfdir7  1 1 1
+  rfphon7  1
+  tolvrs7  1.0d-10
+
+#Dataset 8 : non-SCF at q=1/2 0 0
+
+    iscf8 -2
+     qpt8  0.5d0 0.0d0 0.0d0
+  tolwfr8  1.0d-22
+
+#Dataset 9 : RF at q=1/2 0 0
+
+  getwfq9  8
+     qpt9  0.5d0 0.0d0 0.0d0
+ rfatpol9  1 1
+   rfdir9  1 1 1
+  rfphon9  1
+  tolvrs9  1.0d-10
+
+#Dataset 10 : non-SCF at q=1/2 1/4 1/4
+
+    iscf10 -2
+     qpt10  0.5d0 0.25d0 0.25d0
+  tolwfr10  1.0d-22
+
+#Dataset 11 : RF at q=1/2 1/4 1/4
+
+  getwfq11  10
+     qpt11  0.5d0 0.25d0 0.25d0
+ rfatpol11  1 1
+   rfdir11  1 1 1
+  rfphon11  1
+  tolvrs11  1.0d-10
+
+#Dataset 12 : non-SCF at q=1/2 -1/4 1/4
+
+    iscf12 -2
+     qpt12  0.5d0 -0.25d0 0.25d0
+  tolwfr12  1.0d-22
+
+#Dataset 13 : RF at q=1/2 -1/4 1/4
+
+  getwfq13  12
+     qpt13  0.5d0 -0.25d0 0.25d0
+ rfatpol13  1 1
+   rfdir13  1 1 1
+  rfphon13  1
+  tolvrs13  1.0d-10
+
+
+#Common data
+
+ ngkpt  2 2 2     # test 26
+#ngkpt  4 4 4
+#ngkpt  6 6 6    # test 29
+
+ ecut 2.5  # test 26
+#ecut 8.0  # test 29
+
+ acell 3*7.60  # test 26
+#acell 3*7.50  # test 29
+
+ amu 26.96
+ enunit 2
+ ixc   1
+ natom  1
+#nband 4 is enough for the ground state properties (determination of the density,
+#but not for accurate RF properties). In particular, in order
+#to obtain a small breaking of the acoustic sum rule (on the order of 1 cm-1),
+#with tsmear=0.04, nband 6  is needed.
+ nband 4
+
+ ngfft 3*12  # test 26    this is to avoid any boxcut < 2, however, not mandatory
+#ngfft 3*16   # test 29    this is to avoid any boxcut < 2, however, not mandatory
+
+ nstep 30
+ ntypat  1
+ occopt 4
+  tsmear 0.04 # to ensure good portability of the test
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+
+ typat  1
+ xred  0.0 0.0 0.0
+ znucl 13.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t26.abi, t27.abi, t28.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t26.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% keywords = NC, DFPT
+#%% authors = Unknown
+#%% description = 
+#%%   Generate first-order responses for FCC Aluminum.
+#%%   Very low cut-off, to keep CPU the lowest possible
+#%%   Aim at a regular sampling of phonon wavevectors, needed to
+#%%   interpolate the dynamical matrix over the whole Brillouin Zone,
+#%%   in test 28. The chosen grid (too coarse, though) is
+#%%   (0 0 0), (1/4 1/4 0), (1/2 1/2 0), (1/2 0 0),
+#%%   (1/2 1/4 1/4), (1/2 -1/4 1/4)  (in reduced coordinates).
+#%%   The ecut and nkpt parameters are really too low (see test 28), 
+#%%   but parameters suitable for physical results (see test 29) 
+#%%   are also provided in the input files.
+#%%<END TEST_INFO>

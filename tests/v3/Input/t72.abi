@@ -1,0 +1,86 @@
+# H compressed simple cubic, metallic.
+# Large smearing width
+# GGA
+
+ ndtset 4
+ ixc 11
+
+# Defaults for phonon calculations
+    nqpt   1
+  rfphon   1
+ rfatpol   1 1
+   rfdir   0 1 0
+
+
+#DATASET 1 : SC run with 4 kpoints
+  getwfk1  0
+    nqpt1  0
+  rfphon1  0
+  kptopt1  1
+  tolwfr1  1.0d-22
+
+#DATASET 2 : RF at Gamma
+     qpt2   0.0d0 0.0d0 0.0d0
+  rfphon2   1
+  toldfe2   1.0d-10
+
+#DATASET 3 : RF at 1/2 0 0
+     qpt3   0.5d0 0.0d0 0.0d0
+  rfphon3   1
+  toldfe3   1.0d-10
+
+#DATASET 4 : RF at 1/4 0 0
+     qpt4   0.25d0 0.0d0 0.0d0
+  rfphon4   1
+  toldfe4   1.0d-10
+
+#Common data
+ acell  3*2.60
+
+ ntypat 1
+ znucl 1.0
+ natom 1
+ typat  1
+ xred 0.0 0.0 0.0
+
+ nstep 20
+
+ ecut 20.0
+
+ nband  3
+ nbdbuf 1
+ getwfk 1
+
+ kptopt 3
+ occopt 7
+ tsmear 0.2
+
+ ngkpt  4 4 4
+ shiftk
+   0.5 0.5 0.5
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t72.abo, tolnlines = 0, tolabs = 1.810e-11, tolrel = 1.000e-10
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   H, compressed simple cubic, to test accurately RF in the GGA
+#%%   with non-zero q. Similar to Tv2#90, except for GGA.
+#%%   No linear XC core correction.
+#%%   The total energy of the 1-atom cell is -0.56144810109 Ha
+#%%   The 2DTE with respect to a q(0 0 0) phonon is 4.3E-6 .
+#%%   The 2DTE with respect to a transverse q(1/2 0 0) phonon
+#%%   is  2.076817E-02 . The 2DTE with respect to a transverse
+#%%   q(1/4 0 0) phonon is 1.105266E-02.
+#%%<END TEST_INFO>

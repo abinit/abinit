@@ -1,0 +1,135 @@
+# Linear and nonlinear response calculation for AlAs
+# Perturbations: electric fields & atomic displacements
+# (M. Veithen, 21.4.2005)
+# adapted for single data set mode by JWZ, 05.05.2011
+
+#Definition of lattice parameters
+#********************************
+   acell       3*10.53
+   rprim       0.0 0.5 0.5
+               0.5 0.0 0.5
+               0.5 0.5 0.0
+
+#Definition of atomic positions and types
+#*************************************
+   natom       2
+   ntypat      2
+   znucl       13 33
+   typat       1 2
+   xred        0    0    0
+               0.25 0.25 0.25
+   ixc         3
+
+#Parameters of the SCF cycles
+#****************************
+   nstep       100
+
+
+#Plane wave basis and k-point grid
+#*********************************
+   ecut        2.8
+   ecutsm      0.5
+   dilatmx     1.05
+   ngkpt       6 6 6
+   nshiftk     4
+   shiftk      0.5 0.5 0.5
+               0.5 0.0 0.0
+               0.0 0.5 0.0
+               0.0 0.0 0.5
+
+#ndtset 5     jdtset 1 2 3 4 5
+
+#DATASET1 : scf calculation: GS WF in the BZ
+#********************************************
+#   prtden    1
+#   kptopt    1
+#   toldfe    1.0d-12
+
+#DATASET2 : non scf calculation: GS WF in the whole BZ
+#*****************************************************
+#   irdden    1
+#   kptopt    2
+#     iscf   -2
+#   irdwfk    1
+#   tolwfr    1.0d-22
+#    nband    4
+
+
+#DATASET3 : ddk on the MP grid of k-points
+#*****************************************
+#   irdwfk    1
+#    rfdir    1 1 1
+#   rfelfd    2
+#   tolwfr    1.0d-22
+#    nband    4
+#   kptopt    2
+
+#DATASET4 : ddE on the MP grid of k-points
+#*****************************************
+   prtden    1
+   irdwfk    1
+   irdddk    1
+    rfdir    1 1 1
+   rfphon    1
+  rfatpol    1 2
+   tolvrs    1.0d-12
+   rfelfd    3
+    nband    4
+   kptopt    2
+  prepanl    1
+
+#DATASET5 : 3DTE calculation
+#********** *****************
+#   getden5    1
+#  get1den5    4
+#   getwfk5    2
+#   get1wf5    4
+#    nband5    4
+#   kptopt5    2
+#optdriver5    5
+#  d3e_pert1_elfd5    1
+#  d3e_pert1_phon5    1
+# d3e_pert1_atpol5    1 2
+#   d3e_pert1_dir5    1 1 1
+#  d3e_pert2_elfd5    1
+#   d3e_pert2_dir5    1 1 1
+#  d3e_pert3_elfd5    1
+#   d3e_pert3_dir5    1 1 1
+
+nbdbuf 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tnlo_7.abi, tnlo_8.abi, tnlo_9.abi, tnlo_10.abi, tnlo_11.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tnlo_10.abo, tolnlines=  9, tolabs=  8.0e-07, tolrel=  6.0e-05
+#%% [shell]
+#%% post_commands = 
+#%%   ww_mv tnlo_10i_WFK tnlo_11i_WFK;
+#%%   ww_mv tnlo_10o_1WF1 tnlo_11i_1WF1;
+#%%   ww_mv tnlo_10o_1WF4 tnlo_11i_1WF4;
+#%%   ww_mv tnlo_10o_1WF10 tnlo_11i_1WF10;
+#%%   ww_mv tnlo_10o_1WF11 tnlo_11i_1WF11;
+#%%   ww_mv tnlo_10o_1WF12 tnlo_11i_1WF12;
+#%%   ww_mv tnlo_10i_DEN tnlo_11i_DEN;
+#%%   ww_mv tnlo_10o_DEN1 tnlo_11i_DEN1;
+#%%   ww_mv tnlo_10o_DEN4 tnlo_11i_DEN4;
+#%%   ww_mv tnlo_10o_DEN10 tnlo_11i_DEN10;
+#%%   ww_mv tnlo_10o_DEN11 tnlo_11i_DEN11;
+#%%   ww_mv tnlo_10o_DEN12 tnlo_11i_DEN12;
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Veithen
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Linear and nonlinear response calculation for AlAs
+#%%   Perturbations: electric fields & atomic displacements
+#%%   adapted for single data set mode by JWZ, 05.05.2011
+#%%<END TEST_INFO>

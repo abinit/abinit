@@ -1,0 +1,95 @@
+# A crystal of Al with 4 atoms per unitary cell
+# First a Ground state calculation, the isothermal
+# MD code is tested under several conditions for
+# optcell
+
+ ndtset 6
+ nband  9
+
+# 1. Ground State
+ ionmov1 0
+
+# 2. Full cell deformation (optcell=2)
+ optcell2 2
+ qmass2   3*10
+
+# 3. Homogeneus deformation (optcell=1)
+ optcell3 1
+ qmass3   3*10
+
+# 4. No cell deformation (optcell=0)
+ optcell4 0
+ qmass4   1 1 1
+
+# 5. Full cell deformation (optcell=2)
+ optcell5 2
+ qmass5   3*10
+ bmass5   20
+
+# 6. Homgeneus deformation (optcell=1)
+ optcell6 1
+ qmass6   3*10
+ bmass6   20
+
+# FOR ALL DATASETS
+ ionmov    13
+ getwfk    -1
+ toldfe    1e-10
+
+ acell     3*7.0
+ tsmear1   0.002
+ occopt    3
+ ecut      10
+ enunit    2
+ intxc     1
+ nline     5
+ nstep     13
+ nsym      0
+ rprim     1.01  0.00  0.00
+           0.00  1.00  0.02
+           0.03  0.00  1.00
+ chkprim   0
+ natom     4
+ typat     4*1
+ xred      3*0.00
+           0.000  0.490  0.496
+           0.502  0.000  0.501
+           0.504  0.510  0.000
+ znucl     13.0
+
+ kptopt    0
+ nkpt      1
+#ngkpt     2 2 2     #convergence better than 0.002 Hartree
+ strtarget 6*0.0
+ mdtemp    500 500
+ ecutsm    0.5
+ dilatmx   1.5
+ chkdilatmx   0
+ dtion     0.05
+ ntime     9
+ nnos 3
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t01.abo, tolnlines = 2, tolabs = 2.100e-10, tolrel = 3.000e-10
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown 
+#%% keywords = 
+#%% description = 
+#%%   This is a test, in the norm conserving case, of the Molecular Dynamics flag
+#%%   ionmov==13. With the values of optcell=0, 1, 2 (isothermal (0) , isothermal/isenthalpic
+#%%   with homogeneous cell deformations (1) or full cell deformations (2).)
+#%%   This is the reversible integrator of Martyna, Tuckerman, Tobias and Klein.
+#%%   (Mol. Phys., 1996, p 1117).
+#%%   XG20090912 : Why is the result of dataset 1 and dataset 4 equivalent, while
+#%%   the bmass varies by a factor of 2 ?
+#%% topics = MolecularDynamics
+#%%<END TEST_INFO>

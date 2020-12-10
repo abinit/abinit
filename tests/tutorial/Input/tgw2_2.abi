@@ -1,0 +1,74 @@
+# Crystalline aluminum : 
+# create the screening file
+
+#Parameter for the screening calculation
+optdriver    3
+gwcalctyp    2
+nband       30
+ecuteps     4.0
+ecutwfn     4.0
+
+nfreqim      4
+nfreqre     10
+freqremax    1.
+
+#Definition of occupation numbers
+occopt 3
+tsmear 0.05
+
+#Definition of the unit cell
+acell 3*7.652
+
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5 
+       0.5  0.5  0.0
+
+#Definition of the atom types
+ntypat 1     
+znucl 13    
+
+#Definition of the atoms
+natom 1  
+typat 1  
+xred  0.0  0.0  0.0  
+
+#Definition of the planewave basis set
+ecut  8.0
+
+#Definition of the k-point grid
+ngkpt        4 4 4
+nshiftk      1      
+shiftk       0.  0.  0. 
+istwfk       *1
+
+#Definition of the SCF procedure
+nstep       50          
+toldfe      1.0d-8     
+                  
+prtvol     5
+enunit     1
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tgw2_1.abi, tgw2_2.abi, tgw2_3.abi, tgw2_4.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tgw2_2.abo, tolnlines= 32, tolabs=  1.1e-02, tolrel=  4.0e-01 
+#%% [shell]
+#%% post_commands = 
+#%%   ww_cp tgw2_2o_SCR tgw2_3i_SCR;
+#%%   ww_cp tgw2_2o_SCR tgw2_4i_SCR
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = F. Bruneval
+#%% keywords = GW
+#%% description = 
+#%%   Crystalline aluminum: 
+#%%   create the screening file
+#%%<END TEST_INFO>

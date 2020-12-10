@@ -1,0 +1,80 @@
+#   Mo surface 5 layers + 3 of vacuum ; 1 special points
+
+ acell 2*6.04    24.16
+ diecut 2.5
+ diegap 0.1d0
+ dielam 1.0d0
+ diemix 0.5d0
+ ecut 3.5
+ enunit 2
+ intxc 1
+ iprcel 28
+ irdwfk 0
+ iscf 2
+ ixc 0
+ kptopt 0
+
+ nkpt        1
+ kpt   1 1 1
+ kptnrm     4
+ wtk  1
+ natom  5 nband 20
+ nline 4
+ nstep 25
+ nsym 8  ntypat  1
+ occopt  4
+ prtvol 10
+ rprim   1.0 0.0 0.0   0.0 1.0 0.0   0.0 0.0 1.0
+ symrel
+       1  0  0    0  1  0    0  0  1
+       0  1  0    1  0  0    0  0  1
+       1  0  0    0 -1  0    0  0  1
+       0  1  0   -1  0  0    0  0  1
+      -1  0  0    0  1  0    0  0  1
+       0 -1  0    1  0  0    0  0  1
+      -1  0  0    0 -1  0    0  0  1
+       0 -1  0   -1  0  0    0  0  1
+
+ tnons  24*0.0d0
+ tolvrs  1.0d-10
+ tsmear 0.04
+ typat  5*1
+ xred  0.0 0.0 0.001
+
+       0.5 0.5 0.125
+       0.0 0.0 0.25
+
+       0.5 0.5 -0.125
+       0.0 0.0 -0.25
+
+ znucl 42.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/42mo.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t55.abi, t56.abi
+#%% [files]
+#%% files_to_test = 
+#%%  t55.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Molybdenum slab : 5 layers of Mo + 3 layers of vacuum, ixc=0 .
+#%%   Central layer is slightly displaced, to break the symmetry.
+#%%   Metallic occupation numbers.
+#%%   Only 20 bands, while at least 15 are needed.
+#%%   Use iscf=2, start with default metallic preconditioner, 
+#%%   damped (diemix=0.5d0). A factor of 2 is gained
+#%%   at each iteration. Then evaluate RPA matrix eigenvalues
+#%%   using the extrapolation, and including the metallic correction. 
+#%%   Largest are 3.2541E+01  1.2089E+01  6.1305E+00 .
+#%%   Then, uses the dielectric matrix preconditioning to converge.
+#%%   No damping is needed.
+#%%   A factor of about 10 is gained at each iteration on average.
+#%%<END TEST_INFO>

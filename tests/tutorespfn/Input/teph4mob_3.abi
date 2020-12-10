@@ -1,0 +1,46 @@
+teph4mob_3_DVDB
+29
+teph4mob_1o_DS3_POT1
+teph4mob_1o_DS3_POT4
+teph4mob_1o_DS3_POT10
+teph4mob_1o_DS4_POT1
+teph4mob_1o_DS4_POT2
+teph4mob_1o_DS4_POT4
+teph4mob_1o_DS4_POT5
+teph4mob_1o_DS5_POT1
+teph4mob_1o_DS5_POT2
+teph4mob_1o_DS5_POT4
+teph4mob_1o_DS5_POT5
+teph4mob_1o_DS6_POT1
+teph4mob_1o_DS6_POT4
+teph4mob_1o_DS7_POT1
+teph4mob_1o_DS7_POT2
+teph4mob_1o_DS7_POT3
+teph4mob_1o_DS7_POT4
+teph4mob_1o_DS7_POT5
+teph4mob_1o_DS7_POT6
+teph4mob_1o_DS8_POT1
+teph4mob_1o_DS8_POT3
+teph4mob_1o_DS8_POT4
+teph4mob_1o_DS8_POT6
+teph4mob_1o_DS9_POT1
+teph4mob_1o_DS9_POT4
+teph4mob_1o_DS10_POT1
+teph4mob_1o_DS10_POT2
+teph4mob_1o_DS10_POT4
+teph4mob_1o_DS10_POT5
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgdv
+#%% test_chain =  teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi
+#%% [files]
+#%% files_to_test = 
+#%%   teph4mob_3.stdout, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = G. Brunin, M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = Merge DFPT potentials to generate DVDB database.
+#%%<END TEST_INFO>

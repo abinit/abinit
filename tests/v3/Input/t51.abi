@@ -1,0 +1,69 @@
+# Run bcc Fe for a fixed lattice constant with a constrained spin moment
+
+ndtset 1
+spinmagntarget 0.50
+
+getwfk -1
+
+nband 6
+
+# Spin-polarized calculation
+ nsppol 2
+ spinat 0.0 0.0 3.0
+
+ixc 11
+
+# Unit cell parameters
+ acell 3*5.4235
+ rprim -0.5  0.5  0.5
+        0.5 -0.5  0.5
+        0.5  0.5 -0.5
+
+# Chemical cell type
+ ntypat 1
+ znucl 26.0
+ natom 1
+ typat  1
+ xred 0.0 0.0 0.0
+
+# Stop before convergence, for speed
+ nstep 15
+ toldfe 1.0d-8
+
+# PW cutoff
+ ecut 18.0
+
+# Fermi-Dirac occupation numbers
+ occopt 3
+ tsmear 0.0073
+
+# Automatic generation of k-points
+ kptopt 1
+ ngkpt  4 4 4
+ nshiftk 2
+ shiftk
+   0.25  0.25  0.25
+  -0.25 -0.25 -0.25
+
+diemac 1.0
+diemix 0.5
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t51.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 16
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Fe BCC crystal.
+#%%   Constraint the magnetic moment, using the input variable spinmagntarget.
+#%% topics = spinpolarisation
+#%%<END TEST_INFO>

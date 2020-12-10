@@ -1,0 +1,27 @@
+# General informations
+#**********************
+   rfmeth  1
+   chneut  2
+
+# Flags
+#*******
+   elaflag  3
+ piezoflag  3
+ instrflag  1
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% test_chain = tffield_2.abi, tffield_3.abi
+#%% input_ddb = tffield_2o_DS3_DDB
+#%% [files]
+#%% files_to_test = 
+#%%   tffield_3.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Veithen, P. Ghosez
+#%% keywords = 
+#%% description = Anaddb input file.
+#%%<END TEST_INFO>

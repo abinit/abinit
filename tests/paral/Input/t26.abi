@@ -1,0 +1,94 @@
+ ngfft 18 18 18
+ ngfftdg 36 36 36
+ ndtset 9
+
+ occopt1 0
+ nkpt1 1 istwfk1 1 toldfe1 1.0d-10
+
+ occopt2 7 tsmear2 0.001
+ nkpt2 1 istwfk2 1 toldfe2 1.0d-10
+
+ occopt3 0
+ kptopt3 1 kptrlatt3 2 0 0 0 2 0 0 0 2 istwfk3 30*1
+ nshiftk3 4 shiftk3 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+ toldfe3 1.0d-10
+
+ occopt4 7 tsmear4 0.001
+ kptopt4 1 kptrlatt4 2 0 0 0 2 0 0 0 2 istwfk4 30*1
+ nshiftk4 4 shiftk4 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+ toldfe4 1.0d-10
+
+ occopt5 0
+ nkpt5 1 istwfk5 1
+ ionmov5 3 ntime5 3 toldff5 1.0d-6 tolmxf5 1.0d-5
+ iscf5 7  # Mixing on the potential
+ nline5 6
+
+ occopt6 7 tsmear6 0.001
+ nkpt6 1 istwfk6 1
+ ionmov6 3 ntime6 3 toldff6 1.0d-6 tolmxf6 1.0d-5
+ nline6 6
+
+ occopt7 0
+ kptopt7 1 kptrlatt7 2 0 0 0 2 0 0 0 2 istwfk7 30*1
+ nshiftk7 4 shiftk7 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+ ionmov7 3 ntime7 3 toldff7 1.0d-8 tolmxf7 1.0d-5
+ optcell7 1 ecutsm7 0.5 dilatmx7 1.1 nline7 6
+
+ occopt8 7 tsmear8 0.001
+ kptopt8 1 kptrlatt8 2 0 0 0 2 0 0 0 2 istwfk8 30*1
+ nshiftk8 4 shiftk8 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+ ionmov8 3 ntime8 3 toldff8 1.0d-8 tolmxf8 1.0d-5
+ optcell8 1 ecutsm8 0.5 dilatmx8 1.1 nline8 6
+
+ occopt9 1
+ nkpt9 1 istwfk9 1 toldfe9 1.0d-10 
+ nsppol9 2
+ spinmagntarget9 0.0d0
+ ixc9 1
+
+ nstep 5    # For testing purpose only
+ ecut 16. pawecutdg 50. diemac 12.0d0  enunit 2
+ ixc 2
+ acell 3*7.0
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ chksymtnons 0
+ znucl 6
+ kptopt 0
+ nband 12 occ 4*2 8*0
+ ntypat 1 typat 1 1  natom 2
+ timopt 0
+
+ iomode 0   # Only for testing purposes 
+ fftalg 401 #only for testing purpose
+
+ autoparal 1
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t26_MPI4.abo, tolnlines=   100,   tolabs=  1.01e-1,      tolrel= 9.0e-1, fld_options = -ridiculous
+#%% [extra_info]
+#%% keywords = PAW
+#%% authors = Unknown
+#%% description = 
+#%%    C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
+#%%    Test of ground state with different occs(7 and 0),
+#%%    and also ionmov 2. Only with 4 procs.
+#%%    Same of test R:test the automatic parallelisation
+#%% topics = parallelism
+#%%<END TEST_INFO>

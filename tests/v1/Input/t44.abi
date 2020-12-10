@@ -1,0 +1,64 @@
+# 8-atom Si cube, low ecut, k=(111)/4 (no symm) for relaxation tests.
+# forces are completely nutty with k=0
+
+ natfix 7
+ iatfix 8 7 6 5 4 3 2
+
+ acell 3*10.26311
+ diemac 12.0d0
+ ecut 2.99
+ enunit 2
+
+ intxc 1
+ ionmov 4
+ densfor_pred 1
+ iprcfc 1
+ iscf 2
+
+ kptopt 0
+ kpt   1 1 1 -1 1 1 1 -1 1 1 1 -1
+ kptnrm 4
+ natom  8
+ nband 16
+ nkpt  4
+ nline 3
+ nstep 80
+ nsym 1
+ ntime 10
+ ntypat  1
+ occ 16*2.0d0 occopt  0
+ rprim   1 0 0 0 1 0 0 0 1
+   xred        .001000000000       .000000000000       .000000000000
+               .250000000000       .250000000000       .250000000000
+               .000000000000       .500000000000       .500000000000
+               .250000000000       .750000000000       .750000000000
+               .500000000000       .000000000000       .500000000000
+               .750000000000       .250000000000       .750000000000
+               .500000000000       .500000000000       .000000000000
+               .750000000000       .750000000000       .250000000000
+ tolmxf 1.0d-5
+ toldff 1.0d-6
+ typat  8*1
+ wtk   4*1
+ znucl 14
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t44.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Test the option ionmov=4. 8-atom Si cube, non spin-polarized.
+#%%   Same test as number 22a of fast, except for the change
+#%%   of ionmov, no reading of wavefunctions, iscf to 2, and different
+#%%   tolerance criteria.
+#%% topics = GeoOpt
+#%%<END TEST_INFO>

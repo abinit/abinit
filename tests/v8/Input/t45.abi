@@ -1,0 +1,67 @@
+# Calculation of Gruneisen parameters.
+prtvol 1
+ngqpt 8 8 8  # Ab-initio q-mesh
+ifcflag 1
+
+# DDB files obtained by relaxing the structure for different volumes.
+gruns_nddbs 3
+gruns_ddbs 
+  "t45_Mg2Si_k666_q888_-0.01_DDB"
+  "t45_Mg2Si_k666_q888_DDB"
+  "t45_Mg2Si_k666_q888_0.01_DDB"
+
+asr 1
+dipdip 1
+chneut 0
+#dipdip 0
+vs_qrad_tolkms 0.001 0.2
+#vs_qrad_tolkms 0.001 0.3
+#vs_qrad_tolkms 0.01 0.05
+
+# Q-mesh for DOSes
+#prtdos 2
+#ng2qpt 8 8 8
+ng2qpt 16 16 16
+#ng2qpt 24 24 24
+#ng2qpt 32 32 32
+#ng2qpt 40 40 40
+
+# Q-path
+nqpath 5
+ndivsm 10
+qpath 
+0.     0.     0.
+0.5    0.     0.5  
+0.5    0.25   0.75 
+0.375  0.375  0.75 
+0.     0.     0.   
+#0.5    0.5    0.5  
+#0.625  0.25   0.625
+#0.5    0.25   0.75 
+#0.5    0.5    0.5  
+#0.375  0.375  0.75 
+#0.625  0.25   0.625
+#0.5    0.     0.5  
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = t45_Mg2Si_k666_q888_DDB
+#%% [shell]
+#%% pre_commands = 
+#%%   iw_cp t45_Mg2Si_k666_q888_-0.01_DDB t45_Mg2Si_k666_q888_-0.01_DDB;
+#%%   iw_cp t45_Mg2Si_k666_q888_DDB t45_Mg2Si_k666_q888_DDB;
+#%%   iw_cp t45_Mg2Si_k666_q888_0.01_DDB t45_Mg2Si_k666_q888_0.01_DDB
+#%% [files]
+#%% files_to_test = 
+#%%   t45.abo, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
+#%%   t45.abo_GRUNS_DOS, tolnlines = 33, tolabs = 6.0e-02, tolrel = 8.0e-2, fld_options= -ridiculous;
+#%%   t45.abo_GRUNS_QPATH, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options= -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 24
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = Gruneisen
+#%% description = 
+#%%   Calculation of Gruneisen parameters.
+#%%<END TEST_INFO>

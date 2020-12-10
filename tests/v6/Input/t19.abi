@@ -1,0 +1,34 @@
+surf 1
+crit 2
+atom 1
+gpsurf 1
+irho 1
+ivol 1
+inpt 10
+ntheta 4
+nphi 4
+atrad 1.0
+radstp 0.03
+ratmin 0.80
+maxatd 10.0
+maxcpd 10.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = aim
+#%% test_chain = t18.abi, t19.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t19.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% psp_files = DensityCore_pw/01-H.8.fc, DensityCore_pw/53-I.8.fc
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   HI 8 molecule per cell, the cell is triclinic.
+#%%   Bader analysis for the first atom.
+#%%   Previously, there was a bug, not active when the cell has symmetric axes.
+#%% topics = Bader
+#%%<END TEST_INFO>

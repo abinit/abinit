@@ -1,0 +1,52 @@
+# FCC Fe (ferromagnetic for fun) with four atoms per cell
+# Distorted with a A1 phonon, so as to keep the symmetry ...
+# Only one k point in the IBZ
+# Test the parallelism over the spins 
+
+  tolvrs  1.0d-13
+   ngkpt  2 2 2    
+
+ ecut 30
+ acell 3*7.00  
+
+ ixc    1
+ natom  4 
+ nband 40
+ nline 5
+ nsppol 2
+ spinat 0.0 0.0 3.0
+        0.0 0.0 3.0
+        0.0 0.0 3.0
+        0.0 0.0 3.0
+ nstep 5
+ ntypat  1
+ occopt 7
+ shiftk 0.5 0.5 0.5
+ typat  4*1
+ xred  0.01 0.01 0.01
+       0.49 0.49 0.01
+       0.49 0.01 0.49
+       0.01 0.49 0.49
+ znucl 26.0
+
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/26fe.8.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = tbasepar_2.abo, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   FCC Fe (ferromagnetic for fun) with four atoms per cell
+#%%   Distorted with a A1 phonon, so as to keep the symmetry ...
+#%%   Only one k point in the IBZ
+#%%   Test the parallelism over the spins 
+#%%<END TEST_INFO>

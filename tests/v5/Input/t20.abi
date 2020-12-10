@@ -1,0 +1,115 @@
+#### This is a GGA+U calculation for NiO.
+# Test of prtdos=3 and pawfatbnd=2
+###########################################
+
+# === SCF cycle options
+nstep 40  tolvrs 1.d-10
+ecut 10. pawecutdg 20.
+diemix 0.9 iscf 17 npulayit 5
+ndtset 2
+
+# === This is antiferro
+nsppol 1  nspden 2
+
+# === Structure and cell
+natom 4 ntypat 2 typat 1 1 2 2
+spinat 0 0 1  0 0  -1  0 0 0  0 0  0
+znucl  28.0 8.0
+xred 0 0 0
+    0.0 0.0 0.5
+    0.5 0.5 0.25
+    0.5 0.5 0.75
+acell   3*7.92
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1.0 1.0 0.0
+nband  30
+occopt 7 tsmear 5.0d-3
+
+# === K-points and syms
+kptopt1 1
+kptrlatt1 2 0 0 0 2 0 0 0 2
+chksymbreak 0
+nsym1 0
+prtdos1 3
+
+# === Print partial DOS
+pawprtdos1 2
+natsph1 4
+iatsph1 1 2 3 4
+
+# === The band structure with fatbands.
+iscf2    -2
+getden2  -1
+kptopt2  -3
+nband2   30
+ndivk2   5 5 5
+
+kptbounds2  0.0  0.0  0.0
+            0.5  0.0  0.0
+            0.0  0.5  0.5
+            1.0  1.0  1.0
+tolwfr2  1.0d-12
+
+pawfatbnd2 2
+natsph2 4
+iatsph2 1 2 3 4
+
+
+# === DFT+U options
+
+usepawu  1          # Activate PAW+U
+lpawu   2 -1        # Applied on d electrons of Nickel
+upawu  0.30   0.0   # Value of U parameter
+jpawu  0.0350 0.0   # Value of J parameter
+dmatpuopt  1   # choose expression of the density matrix
+
+usedmatpu1 10        # An initial density matrix is given (below)
+                    # and kept constant during 10 SCF steps
+
+dmatpawu1            # The initial density matrix
+                    # Be careful of the dimensions:
+                    #  * +U is applied on d electrons: 5x5 matrixes are required
+                    #  * max(nsppol,nspinor)=1: only 1 matrix per atom is required
+                    #  * +U is applied for 2 (nickel) atoms
+     # Ni atom 1 (spin up only, spin-down deduced by antiferro symmetry)
+     1.00000    0.00000    0.00000    0.00000    0.00000
+     0.00000    1.00000    0.00000    0.00000    0.00000
+     0.00000    0.00000    1.00000    0.00000    0.00000
+     0.00000    0.00000    0.00000    1.00000    0.00000
+     0.00000    0.00000    0.00000    0.00000    1.00000
+     # Ni atom 2 (spin up only, spin-down deduced by antiferro symmetry)
+     1.00000    0.00000    0.00000    0.00000    0.00000
+     0.00000    1.00000    0.00000    0.00000    0.00000
+     0.00000    0.00000    0.00000    0.00000    0.00000
+     0.00000    0.00000    0.00000    1.00000    0.00000
+     0.00000    0.00000    0.00000    0.00000    0.00000
+
+# === Other options
+prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t20.abo,                                tolnlines = 9, tolabs = 5.410e-02, tolrel = 4.000e-02, fld_options = -easy;
+#%%   t20o_DS2_FATBANDS_at0001_Ni_is1_l2_m+0, tolnlines = 5, tolabs = 1.001e-04, tolrel = 1.100e-03, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 3
+#%% [extra_info]
+#%% authors = B. Amadon
+#%% keywords = PAW, DFTU
+#%% description = 
+#%%   NiO antiferromagnetic. Test of prtfatbnd==2
+#%%   2 Ni and 2 O atoms in an fcc supercell.
+#%%   The cut-offs are unrealistic.
+#%%   The aim of this test is to verify:
+#%%   * Computation of band structure in PAW+U
+#%%   * Calculation of partial DOS (diffs of partial DOS is not done)
+#%%   * Calculation of Fatbands (diff of a fatband file is done)
+#%% topics = PAW, DFT+U, ElecBandStructure
+#%%<END TEST_INFO>
