@@ -222,7 +222,7 @@ subroutine pawxc_xcpositron_local()
 
 ! *************************************************************************
 
- ABI_BUG(msg)
+ LIBPAW_BUG(msg)
 
 end subroutine pawxc_xcpositron_local
 !!***
@@ -687,7 +687,7 @@ subroutine pawxc_mkdenpos_local()
    end if  ! option
  else
    msg='nspden>2 not allowed !'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if ! End choice between non-spin polarized and spin-polarized.
 
  if (numneg>0) then
@@ -696,7 +696,7 @@ subroutine pawxc_mkdenpos_local()
 &     'Density went too small (lower than xc_denpos) at',numneg,' points',ch10,&
 &     'and was set to xc_denpos=',xc_denpos,'.  Lowest was ',worst,'.',ch10,&
 &     'Likely due to too low boxcut or too low ecut for','pseudopotential core charge.'
-     ABI_WARNING(msg)
+     LIBPAW_WARNING(msg)
    end if
    iwarn=iwarn+1
  end if
@@ -986,47 +986,47 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !Compatibility tests
  if(nspden==4.and.nk3xc>0) then
    msg='K3xc for nspden=4 not implemented!'
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(nk3xc>0.and.nkxc_updn==0) then
    msg='nkxc must be non-zero if nk3xc is!'
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(nspden==4.and.xclevel==2) then
    msg='GGA/mGGA for nspden=4 not implemented!'
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(pawang%angl_size==0) then
    msg='pawang%angl_size=0!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(.not.allocated(pawang%ylmr)) then
    msg='pawang%ylmr must be allocated!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(xclevel==2.and.(.not.allocated(pawang%ylmrgr))) then
    msg='pawang%ylmrgr must be allocated!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(option==4.or.option==5) then
    if (pawang%angl_size/=1) then
      msg='When option=4 or 5, pawang%angl_size must be 1!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if (pawang%ylm_size/=1) then
      msg='When option=4 or 5, pawang%ylm_size must be 1!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if (abs(pawang%anginit(1,1)-one)>tol12.or.abs(pawang%anginit(2,1))>tol12.or. &
 &   abs(pawang%anginit(3,1))>tol12) then
      msg='When option=4 or 5, pawang%anginit must be (1 0 0)!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
  if (option/=1.and.option/=5) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3,4, nrad must be greater than pawrad%int_meshsz!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1051,7 +1051,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 
  if (xclevel==0.or.ixc==0) then
    msg='Note that no xc is applied (ixc=0).'
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
 
  else
 
@@ -1087,14 +1087,14 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        with_taur=.true. ; tau_=> taur
        if (size(taur)/=nrad*lm_size*nspden) then
          msg='wrong size for taur!'
-         ABI_BUG(msg)
+         LIBPAW_BUG(msg)
        end if
      end if
      if (present(vxctau)) then
        need_vxctau=.true. ; vxctau_ => vxctau
        if (size(vxctau)/=nrad*pawang%angl_size*nspden) then
          msg='wrong size for vxctau!'
-         ABI_BUG(msg)
+         LIBPAW_BUG(msg)
        end if
      else if (option==0.or.option==2) then
        !Need to compute vxctau temporarily
@@ -1105,7 +1105,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        usecoretau=usecore
        if (size(coretau)/=nrad) then
          msg='wrong size for coretau!'
-         ABI_BUG(msg)
+         LIBPAW_BUG(msg)
        end if
      end if
    end if
@@ -1349,7 +1349,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
          end if
        else
          msg='MetaGGA ixc=34 is not yet allowed with a core kinetic energy density!'
-         ABI_ERROR(msg)
+         LIBPAW_ERROR(msg)
        end if
      end if
 
@@ -1850,24 +1850,24 @@ subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselec
 !----- Check options
  if(ixcpositron==3.or.ixcpositron==31) then
    msg='GGA is not implemented (use pawxcdev/=0)!'
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(calctype/=1.and.calctype/=2) then
    msg='Invalid value for calctype!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(pawang%angl_size==0) then
    msg='pawang%angl_size=0!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(.not.allocated(pawang%ylmr)) then
    msg='pawang%ylmr must be allocated!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (option/=1) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3,4, nrad must be greater than pawrad%int_meshsz!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1887,7 +1887,7 @@ subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselec
 
  if (ixcpositron==0) then ! No xc at all is applied (usually for testing)
    msg = 'Note that no xc is applied (ixcpositron=0). Returning'
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -2186,35 +2186,35 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
  if(option<0.or.option>3) then
    msg='wrong option!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(option/=3) then
    call pawxc_get_nkxc(nkxc_cur,nspden,xclevel)
    if (nkxc/=nkxc_cur) then
      msg='Wrong dimension for array kxc!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if(xclevel==2.and.nspden==4) then
      msg='PAW non-collinear magnetism not compatible with GGA!'
-     ABI_ERROR(msg)
+     LIBPAW_ERROR(msg)
    end if
  end if
  if(pawang%angl_size==0) then
    msg='pawang%angl_size=0!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(.not.allocated(pawang%ylmr)) then
    msg='pawang%ylmr must be allocated!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(xclevel==2.and.(.not.allocated(pawang%ylmrgr))) then
    msg='pawang%ylmrgr must be allocated!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (option/=1) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2, nrad must be greater than pawrad%int_meshsz!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -2236,7 +2236,7 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 !Special case: no XC applied
  if (ixc==0.or.(nkxc==0.and.option/=3)) then
    msg='Note that no xc is applied (ixc=0). Returning'
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -3008,15 +3008,15 @@ end subroutine pawxc_dfpt
    write(msg, '(a,a,a,i0)' )&
 &   'Only non-spin-polarised or collinear spin-densities are allowed,',ch10,&
 &   'while the argument nspden=',nspden
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(nkxc>3)then
    msg='nkxc>3 not allowed (GGA)!'
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(nrad>pawrad%mesh_size)then
    msg='nrad > mesh size!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Compute sizes of arrays and flags
@@ -3282,11 +3282,11 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
    write(msg, '(a,a,a,i0)' )&
 &   'Only non-spin-polarised or collinear spin-densities are allowed,',ch10,&
 &   'while the argument nspden=',nspden
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(nrad>pawrad%mesh_size)then
    msg='nrad > mesh size!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Compute sizes of arrays and flags
@@ -3585,7 +3585,7 @@ end subroutine pawxcsph_dfpt
 
  if(nrad>pawrad%mesh_size)then
    msg='nrad > mesh size!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Need gradient of density for GGA
@@ -3707,11 +3707,11 @@ end subroutine pawxcsphpositron
 
  if(nsums/=1.and.nsums/=3) then
    msg='nsums must be 1 or 3!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(pawang%gnt_option==0) then
    msg='pawang%gnt_option=0!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  if (option>=1) then
@@ -4107,16 +4107,16 @@ end subroutine pawxcsphpositron
 
  if(nkxc>3) then
    msg='Kxc not implemented for GGA! Use pawxcdev 0 '
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(nkxc>0.and.nspden==4) then
    msg='Kxc not implemented for non-collinear magnetism!'
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if (option/=1.and.option/=5) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3,4, nrad must be greater than pawrad%int_meshsz!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -4139,7 +4139,7 @@ end subroutine pawxcsphpositron
 
  if (xclevel==0.or.ixc==0) then ! No xc at all is applied (usually for testing)
    msg='Note that no xc is applied (ixc=0). Returning'
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -4904,23 +4904,23 @@ end subroutine pawxcsphpositron
 
  if(option<0.or.option>3) then
    msg='wrong option!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(option/=3) then
    call pawxc_get_nkxc(nkxc_cur,nspden,xclevel)
    if(nkxc/=nkxc_cur) then
      msg='Wrong size for kxc array!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
  if(nspden==4.and.option/=3) then
    msg='nspden=4 not implemented (for vxc)!'
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if (option/=1) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3, nrad must be greater than pawrad%int_meshsz!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -4942,7 +4942,7 @@ end subroutine pawxcsphpositron
 !Special case: no XC applied
  if (ixc==0.or.(nkxc==0.and.option/=3)) then
    msg='Note that no xc is applied (ixc=0). Returning'
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -5248,12 +5248,12 @@ subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmsele
 !----- Check options
  if(calctype/=1.and.calctype/=2) then
    msg='Invalid value for calctype'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (option/=1) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3,4, nrad must be greater than pawrad%int_meshsz!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -5273,7 +5273,7 @@ subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmsele
 
  if (ixcpositron==0) then ! No xc at all is applied (usually for testing)
    msg='Note that no xc is applied (ixc=0). Returning'
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -5801,7 +5801,7 @@ end subroutine pawxcmpositron
 #else
  write(msg,'(5a)') 'libPAW XC driving routine only implemented in the following cases:',ch10, &
 &                  ' - ABINIT',ch10,' - libXC'
- ABI_BUG(msg)
+ LIBPAW_BUG(msg)
 #endif
 
  if (.false.) write(std_out,*) el_temp
@@ -5838,7 +5838,7 @@ subroutine pawxc_drivexc_abinit()
  if (usekden==1) test_args=(test_args.and.present(tau).and.present(vxctau))
  if (.not.test_args) then
    msg='missing mandatory arguments in pawxc_drivexc_wrapper'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  if (uselaplacian==1.or.usekden==1) then
@@ -5908,37 +5908,37 @@ subroutine pawxc_drivexc_libxc()
 !Check the compatibility of input arguments
  if (ixc>=0) then
    msg='ixc argument should be negative!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (ixc/=libxc_functionals_ixc()) then
    msg='The value of ixc differs from the one used to initialize the functional!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if ((order<1.and.order/=-2).or.order>4) then
    msg='The only allowed values for order are 1, 2, -2, or 3!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if ((order**2>1).and.(.not.present(dvxc))) then
    msg='The value of order is not compatible with the presence of the array dvxc!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if ((order==3).and.(.not.present(d2vxc))) then
    msg='The value of order is not compatible with the presence of the array d2vxc!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (libxc_functionals_isgga().or.libxc_functionals_ismgga()) then
    if ((.not.present(grho2)).or.(.not.present(vxcgrho)).or.&
 &      (usegradient==0).or.(nvxcgrho==0))  then
      write(msg,'(3a)') 'At least one of the functionals is a GGA,',ch10, &
 &      'but not all the necessary optional arguments are present.'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if (libxc_functionals_needs_laplacian()) then
      if ((.not.present(lrho)).or.(.not.present(vxclrho)).or.&
 &        (uselaplacian==0).or.(nvxclrho==0))  then
        write(msg,'(3a)') 'At least one of the functionals is a mGGA,',ch10, &
 &        'but not all the necessary optional arguments are present.'
-       ABI_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
    if (libxc_functionals_ismgga()) then
@@ -5946,13 +5946,13 @@ subroutine pawxc_drivexc_libxc()
 &        (usekden==0).or.(nvxctau==0))  then
        write(msg,'(3a)') 'At least one of the functionals is a mGGA,',ch10, &
 &        'but not all the necessary optional arguments are present.'
-       ABI_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
  end if
  if ((uselaplacian==1.or.usekden==1).and.(usegradient==0)) then
    msg='Laplacian or kinetic energy density needs gradient!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Call LibXC routines
@@ -6210,7 +6210,7 @@ end subroutine pawxc_rotate_back_mag
  call rotate_back_mag_dfpt(1,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,1)
 #else
  msg='[LIBPAW] Non-collinear DFPT not available (only in ABINIT)!'
- ABI_ERROR(msg)
+ LIBPAW_ERROR(msg)
 #endif
 
 end subroutine pawxc_rotate_back_mag_dfpt

@@ -128,15 +128,15 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !==========================================================
  if (size(rfgd)/=3*nfgd) then
    msg='rfgd array must be allocated at rfgd(3,nfgd)!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (pawtab%lcut_size>9) then
    msg='l_size>10 forbidden!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (pawtab%shape_type==1.and.pawtab%shape_lambda<2) then
    msg='Exponent lambda of gaussian shape function must be > 1!'
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
 !Initializations
@@ -1161,7 +1161,7 @@ subroutine pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,rcut,rfgd,rprimd,ucvol,xred, &
              nfgd=nfgd+1
              if (nfgd>ncmax) then
                msg='Number of fft points around atom exceeds max. allowed!'
-               ABI_BUG(msg)
+               LIBPAW_BUG(msg)
              end if
              rfgd_tmp(1,nfgd)=rx
              rfgd_tmp(2,nfgd)=ry
@@ -1421,7 +1421,7 @@ subroutine pawexpiqr(expiqr,gprimd,nfgd,qphon,rfgd,xred)
 
  if (size(rfgd)/=3*nfgd) then
    msg='rfgd array must be allocated!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  qne0=(qphon(1)**2+qphon(2)**2+qphon(3)**2>=1.d-15)

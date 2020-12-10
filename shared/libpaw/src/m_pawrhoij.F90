@@ -270,7 +270,7 @@ subroutine pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden,nspinor,nsppol,typat,&
  nrhoij=size(pawrhoij);natom=size(typat)
  if (nrhoij>natom) then
    msg=' wrong sizes (1) !'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Select lmn_size for each atom type
@@ -278,7 +278,7 @@ subroutine pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden,nspinor,nsppol,typat,&
    nn1=size(pawtab)
    if (maxval(typat)>nn1) then
      msg=' wrong sizes (2) !'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    LIBPAW_POINTER_ALLOCATE(lmn_size,(nn1))
    do itypat=1,nn1
@@ -288,12 +288,12 @@ subroutine pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden,nspinor,nsppol,typat,&
    nn1=size(lmnsize)
    if (maxval(typat)>nn1) then
      msg=' wrong sizes (3) !'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    lmn_size => lmnsize
  else
    msg=' one of the 2 arguments pawtab or lmnsize must be present !'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Set up parallelism over atoms
@@ -610,7 +610,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
        pawrhoij_out => pawrhoij_cpy
      else
        msg=' nrhoij_out should be equal to my_natom !'
-       ABI_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    else                            ! Parallelism: the copy operation is a gather
      call get_my_natom(my_comm_atom,my_nrhoij,nrhoij_out)
@@ -636,7 +636,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
        end if
      else
        msg=' nrhoij_in should be equal to my_natom!'
-       ABI_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
  end if
@@ -677,7 +677,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
      pawrhoij_out(irhoij)%nrhoijsel=nselect+0
 !    if (pawrhoij_out(irhoij)%itypat/=pawrhoij_in(jrhoij)%itypat) then
 !    write(unit=msg,fmt='(a,i3,a)') 'Type of atom ',jrhoij,' is different (dont copy it) !'
-!    ABI_COMMENT(msg)
+!    LIBPAW_COMMENT(msg)
 !    end if
 
 !    Optional pointer: non-zero elements of rhoij
@@ -1291,12 +1291,12 @@ end subroutine pawrhoij_copy
  if (master==-1) then
    if (nrhoij_out/=nrhoij_in_sum) then
      msg='Wrong sizes sum[nrhoij_ij]/=nrhoij_out !'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  else
    if (me_atom==master.and.nrhoij_out/=nrhoij_in_sum) then
      msg='(2) pawrhoij_gathered wrongly allocated !'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1418,7 +1418,7 @@ end subroutine pawrhoij_copy
 !Check
  if ((indx_int-1/=buf_int_size).or.(indx_dp-1/=buf_dp_size)) then
    write(msg,*) 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Communicate (1 gather for integers, 1 gather for reals)
@@ -1541,7 +1541,7 @@ end subroutine pawrhoij_copy
    end do
    if ((indx_int/=1+buf_int_size_all).or.(indx_dp/=1+buf_dp_size_all)) then
      write(msg,*) 'Wrong buffer sizes: buf_int_size_all=',buf_int_size_all,' buf_dp_size_all=',buf_dp_size_all
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1619,7 +1619,7 @@ end subroutine pawrhoij_gather
    paral_atom=(nproc_atom>1)
    if (my_comm_atom/=mpicomm.and.nproc_atom/=1) then
      msg='wrong comm_atom communicator !'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1644,7 +1644,7 @@ end subroutine pawrhoij_gather
  end if
  if (me==master.and.nrhoij_in/=nrhoij_out_all) then
    msg='pawrhoij_in or pawrhoij_out wrongly allocated!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Retrieve table(s) of atoms (if necessary)
@@ -1717,7 +1717,7 @@ end subroutine pawrhoij_gather
    end do
    if (buf_int_size_all/=sum(count_int).or.buf_dp_size_all/=sum(count_dp)) then
      msg='(1) Wrong buffer sizes !'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    buf_int_size=count_int(me_atom+1)
    buf_dp_size =count_dp(me_atom+1)
@@ -1816,7 +1816,7 @@ end subroutine pawrhoij_gather
 ! Check
   if ((indx_int-1/=buf_int_size_all).or.(indx_dp-1/=buf_dp_size_all)) then
     msg='(2) Wrong buffer sizes !'
-    ABI_BUG(msg)
+    LIBPAW_BUG(msg)
   end if
  end if ! me=master
 
@@ -1908,7 +1908,7 @@ end subroutine pawrhoij_gather
 !Check
  if ((indx_int/=1+buf_int_size).or.(indx_dp/=1+buf_dp_size)) then
    msg='(3) Wrong buffer sizes !'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Free memory
@@ -2369,12 +2369,12 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
  if (present(mpi_atmtab)) then
    if (.not.associated(mpi_atmtab)) then
      msg='mpi_atmtab not associated (pawrhoij_io)'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    my_atmtab=>mpi_atmtab
  else if (my_natom/=natom) then
    msg='my_natom /=natom, mpi_atmtab should be in argument (pawrhoij_io)'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  iomode = fort_binary
@@ -2385,13 +2385,13 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
    case ("NETCDF")
      iomode = netcdf_io
    case default
-     ABI_ERROR("Wrong form: "//trim(form))
+     LIBPAW_ERROR("Wrong form: "//trim(form))
    end select
  end if
 
 #ifndef LIBPAW_HAVE_NETCDF
  if (iomode == netcdf_io) then
-   ABI_ERROR("iomode == netcdf_io but netcdf library is missing.")
+   LIBPAW_ERROR("iomode == netcdf_io but netcdf library is missing.")
  end if
 #endif
  ncid = unitfi
@@ -2408,7 +2408,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          read(unitfi,*) ((nsel44(ispden,iatom),ispden=1,nspden_in),iatom=1,natom)
 #ifdef LIBPAW_HAVE_NETCDF
        else if (iomode == netcdf_io) then
-         ABI_ERROR("header in 44-56 not compatible with Netcdf")
+         LIBPAW_ERROR("header in 44-56 not compatible with Netcdf")
 #endif
        end if
        call pawrhoij_alloc(pawrhoij,1,nspden_in,nspinor_in,nsppol_in,typat,lmnsize=nlmn_type)
@@ -2552,7 +2552,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          NCF_CHECK(nf90_def_var(ncid, "rhoijp_atoms", NF90_DOUBLE, bufsize_id, buffer_id))
        else
          ! This happens in v5[40] and bsize == 0 corresponds to NC_UNLIMITED
-         ABI_COMMENT("All rhoij entries are zero. No netcdf entry produced")
+         LIBPAW_COMMENT("All rhoij entries are zero. No netcdf entry produced")
        end if
 
        ! Write nsel56
@@ -2724,7 +2724,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 
    case default
      msg='Wrong rdwr_mode'//TRIM(rdwr_mode)
-     ABI_ERROR(msg)
+     LIBPAW_ERROR(msg)
 
  end select
 
@@ -3285,7 +3285,7 @@ subroutine pawrhoij_inquire_dim(cplex,cpxocc,nspden,qpt,spnorb, &
    qphase_rhoij=1
    if (present(cplex).and.present(qpt)) then
      msg='only one argument cplex or qpt should be passed!'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if (present(cplex)) qphase_rhoij=merge(1,2,cplex==1)
    if (present(qpt)) then
@@ -3381,7 +3381,7 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
 
  if (my_l_only>=0.and.(.not.present(indlmn))) then
    msg='pawrhoij_print_rhoij: l_only>=0 and indlmn not present!'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Title
@@ -3621,7 +3621,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 &      (choice==3.and.ngrhoij/=6).or.(choice==23.and.ngrhoij/=9).or. &
 &      (choice==4.and.ngrhoij/=6).or.(choice==24.and.ngrhoij/=9) ) then
      msg='Inconsistency between variables choice and ngrhoij !'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -3643,7 +3643,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
    if (present(qphon)) then
      if (any(abs(qphon(1:3))>tol8).and.(.not.has_qphase)) then
        msg='Should have qphase=2 for a non-zero q!'
-       ABI_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
  end if
@@ -3673,19 +3673,19 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
    if (nrhoij>0) then
      if (choice>2.and.pawrhoij(1)%nspden==4) then
        msg='For the time being, choice>2 is not compatible with nspden=4 !'
-       ABI_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
 
 !  Symetry matrixes must be in memory
    if (pawang%nsym==0) then
      msg='pawang%zarot must be allocated !'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
    if (has_qphase.and.choice>1) then
      msg='choice>1 not compatible with q-phase !'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
 !  Several inits/allocations
@@ -4247,7 +4247,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 
    if (antiferro) then
      msg=' In the antiferromagnetic case, nsym cannot be 1'
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
    if (optrhoij==1) then
@@ -4431,7 +4431,7 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
    jrhoij= atm_indx_recv(iatom_tot)
    if (jrhoij==-1)  then
      msg="Error in pawrhoij_isendreceive_getbuffer atom not found"
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    pawrhoij1=>pawrhoij(jrhoij)
 
@@ -4506,7 +4506,7 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
  end do !irhoij_send
  if ((indx_int/=1+buf_int_size).or.(indx_dp/=1+buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 end subroutine pawrhoij_isendreceive_getbuffer
@@ -4577,7 +4577,7 @@ subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,
    irhoij=atm_indx_send(iatom_tot)
    if (irhoij == -1) then
      msg="Error in pawrhoij_isendreceive_fillbuffer atom not found"
-     ABI_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    pawrhoij1=>pawrhoij(irhoij)
    cplex    =pawrhoij1%cplex_rhoij
@@ -4681,7 +4681,7 @@ subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,
 !Check
  if ((indx_int-1/=buf_int_size).or.(indx_dp-1/=buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 end subroutine pawrhoij_isendreceive_fillbuffer

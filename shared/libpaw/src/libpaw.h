@@ -38,6 +38,11 @@
 #  define USE_MSG_HANDLING use m_errors, only : msg_hndl, netcdf_check; use m_abicore
 #  undef  HAVE_YAML
 
+#  define LIBPAW_COMMENT(msg) ABI_COMMENT(msg)
+#  define LIBPAW_WARNING(msg) ABI_WARNING(msg)
+#  define LIBPAW_ERROR(msg)   ABI_ERROR(msg)
+#  define LIBPAW_BUG(msg)     ABI_BUG(msg)
+
 /* Allocation/deallocation with memory profiling */
 #  define USE_MEMORY_PROFILING use m_profiling_abi
 /* Use this to allocate/deallocate basic-type arrays with sizes */
@@ -88,10 +93,10 @@
 
 /* Messages, errors */
 #  define USE_MSG_HANDLING use m_libpaw_tools, only : wrtout => libpaw_wrtout, libpaw_msg_hndl
-#  define ABI_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
-#  define ABI_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
-#  define ABI_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
-#  define ABI_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
+#  define LIBPAW_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
+#  define LIBPAW_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
+#  define LIBPAW_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
+#  define LIBPAW_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
 /*BigDFT should accept long lines...*/
 /*#define ABI_ERROR(msg) call libpaw_msg_hndl(msg,"ERROR","PERS",__FILE__,__LINE__)*/
 #  define HAVE_YAML
@@ -142,10 +147,10 @@
 
 /* Messages, errors */
 #  define USE_MSG_HANDLING use m_libpaw_tools, only : wrtout => libpaw_wrtout, libpaw_msg_hndl
-#  define ABI_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
-#  define ABI_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
-#  define ABI_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
-#  define ABI_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
+#  define LIBPAW_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
+#  define LIBPAW_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
+#  define LIBPAW_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
+#  define LIBPAW_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
 #  undef  HAVE_YAML
 
 /* Allocation/deallocation */

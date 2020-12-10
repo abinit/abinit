@@ -374,28 +374,28 @@ select case(name)
          value = getValue(attributes,"symbol")
          if (value == "" ) then
            msg="Cannot determine atomic symbol"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%atom%symbol = trim(value)
 
          value = getValue(attributes,"Z") 
          if (value == "" ) then
            msg="Cannot determine znucl"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) paw_setuploc%atom%znucl
 
          value = getValue(attributes,"core")
          if (value == "" ) then
            msg="Cannot determine zion"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) paw_setuploc%atom%zion
 
          value = getValue(attributes,"valence")
          if (value == "" ) then
            msg="Cannot determine zval"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) paw_setuploc%atom%zval
 
@@ -405,14 +405,14 @@ select case(name)
          value = getValue(attributes,"type")
          if (value == "" ) then
            msg="Cannot determine xc-functional-type"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%xc_functional%functionaltype = trim(value)
 
          value = getValue(attributes,"name")
          if (value == "" ) then
            msg="Cannot determine xc-functional-name "
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%xc_functional%name= trim(value)
 
@@ -431,7 +431,7 @@ select case(name)
          value = getValue(attributes,"rpaw")
          if (value == "" ) then
            msg="Cannot determine rpaw"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) paw_setuploc%rpaw
 
@@ -455,7 +455,7 @@ select case(name)
          value = getValue(attributes,"l")
          if (value == "" ) then
            msg="Cannot determine l"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) valstate(ival)%ll
          if(valstate(ival)%ll>lmax) lmax=valstate(ival)%ll
@@ -470,14 +470,14 @@ select case(name)
          value = getValue(attributes,"rc")
          if (value == "" ) then
            msg="Cannot determine rc"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) valstate(ival)%rc
 
          value = getValue(attributes,"e")
          if (value == "" ) then
            msg="Cannot determine e"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) valstate(ival)%ee
 
@@ -522,14 +522,14 @@ select case(name)
          value = getValue(attributes,"istart")
          if (value == "" ) then
            msg="Cannot determine istart"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) grids(igrid)%istart
 
          value = getValue(attributes,"iend")
          if (value == "" ) then
            msg="Cannot determine iend"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) grids(igrid)%iend
 
@@ -566,7 +566,7 @@ select case(name)
          if (value == "" ) then
            if(paw_setuploc%shape_function%gtype /="num") then
               msg="Cannot determine rc"
-              ABI_ERROR(msg)
+              LIBPAW_ERROR(msg)
            end if
          else
            read(unit=value,fmt=*) paw_setuploc%shape_function%rc
@@ -590,7 +590,7 @@ select case(name)
          value = getValue(attributes,"state")
          if (value == "" ) then
            msg="Cannot determine pseudo_partial_wave state"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%pseudo_partial_wave(ipswf)%state=trim(value)
 
@@ -615,7 +615,7 @@ select case(name)
 
          value = getValue(attributes,"state")
          if (value == "" ) then
-           ABI_ERROR("Cannot determine ae_partial_wave state")
+           LIBPAW_ERROR("Cannot determine ae_partial_wave state")
          end if
          paw_setuploc%ae_partial_wave(iaewf)%state=trim(value)
 
@@ -641,7 +641,7 @@ select case(name)
          value = getValue(attributes,"state")
          if (value == "" ) then
            msg="Cannot determine projector_function state"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%projector_function(iproj)%state=trim(value)
 
@@ -667,7 +667,7 @@ select case(name)
          value = getValue(attributes,"state")
          if (value == "" ) then
            msg="Cannot determine projector_fit state"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%projector_fit(iprojfit)%state=trim(value)
 
@@ -679,14 +679,14 @@ select case(name)
          value = getValue(attributes,"factor")
          if (value == "" ) then
            msg="Cannot determine gaussian factor"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(value(2:100), *) paw_setuploc%projector_fit(iprojfit)%factors(1, igauss)
          read(value(index(value, ',') + 1:100), *) paw_setuploc%projector_fit(iprojfit)%factors(2, igauss)
          value = getValue(attributes,"exponent")
          if (value == "" ) then
            msg="Cannot determine gaussian exponent"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(value(2:100), *) paw_setuploc%projector_fit(iprojfit)%expos(1, igauss)
          read(value(index(value, ',') + 1:100), *) paw_setuploc%projector_fit(iprojfit)%expos(2, igauss)
@@ -933,7 +933,7 @@ select case(name)
         in_valenceStates = .false.
         if(ival>50) then
           msg="ival>50"
-          ABI_ERROR(msg)
+          LIBPAW_ERROR(msg)
         end if
         if(ival>0)then
           LIBPAW_DATATYPE_ALLOCATE(paw_setuploc%valence_states%state,(ival))
@@ -957,7 +957,7 @@ select case(name)
       case ("paw_setup")
         if(igrid>10) then
           msg="igrid>10"
-          ABI_ERROR(msg)
+          LIBPAW_ERROR(msg)
         end if
         LIBPAW_DATATYPE_ALLOCATE(paw_setuploc%radial_grid,(igrid))
         paw_setuploc%radial_grid(igrid)%tread=.true.
@@ -973,7 +973,7 @@ select case(name)
         end do
         if(ishpf>10) then
           msg="ishpf>7"
-          ABI_ERROR(msg)
+          LIBPAW_ERROR(msg)
         end if
         LIBPAW_ALLOCATE(paw_setuploc%shape_function%data,(mesh_size,ishpf))
         do ii=1,ishpf
@@ -1094,14 +1094,14 @@ if (in_data) then
 
   if ((ndata+ntokens)>size(x)) then 
     msg="data array full"
-    ABI_ERROR(msg)
+    LIBPAW_ERROR(msg)
   end if
 
 ! Take the string and turn it into useful reals
   read(unit=str(1:last_pos),fmt=*,iostat=status) x(ndata+1:ndata+ntokens)
   if (status/=0) then
     msg="real conversion error"
-    ABI_ERROR(msg)
+    LIBPAW_ERROR(msg)
   end if
   ndata=ndata+ntokens
 
@@ -1706,7 +1706,7 @@ end subroutine paw_setup_copy
          if (ival>50) then
            close(funit)
            msg="Error in rdpawps1xml: basis size too large (>50)!"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
          if (strg == "" ) then 
@@ -1827,7 +1827,7 @@ end subroutine paw_setup_copy
      if(igrid>10)then
        close(funit)
        msg="igrid>10"
-       ABI_ERROR(msg)
+       LIBPAW_ERROR(msg)
      end if
      cycle
    end if
@@ -1881,7 +1881,7 @@ end subroutine paw_setup_copy
          else
            write(msg,'(a,a,a)')"the grids and the states must be read before the shapefunction",ch10,&
 &           "Action: Modify your XML PAW data file"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
        end if
      end if
@@ -2066,7 +2066,7 @@ end subroutine paw_setup_copy
          if (ival>50) then
            close(funit)
            msg="Error in rdpawps1xml: basis size too large (>50)!"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
          if (strg == "" ) then 
@@ -2187,7 +2187,7 @@ end subroutine paw_setup_copy
      if(igrid>10)then
        close(funit)
        msg="igrid>10"
-       ABI_ERROR(msg)
+       LIBPAW_ERROR(msg)
      end if
      cycle
    end if
@@ -2241,7 +2241,7 @@ end subroutine paw_setup_copy
          else
            write(msg,'(a,a,a)')"the grids and the states must be read before the shapefunction",ch10,&
 &           "Action: Modify your XML PAW data file"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
        end if
      end if
@@ -2254,7 +2254,7 @@ end subroutine paw_setup_copy
  if(igrid==0.or.ival==0) then
    write(msg,'(a,a,a)')"the grids and the states must be read before the shapefunction",ch10,&
 &   "Action: Modify your XML PAW data file"
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(ishpf>0)then
    LIBPAW_ALLOCATE(paw_setup%shape_function%data,(mesh_size,ishpf))
@@ -2701,24 +2701,24 @@ end subroutine paw_setup_copy
 
  if (.not.paw_setup%atom%tread) then
    msg="ATOM SYMBOL not found !"
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
  end if
  if (.not.paw_setup%valence_states%tread) then
    msg="VALENCE STATES not found!"
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
  end if
  if (.not.paw_setup%xc_functional%tread) then
    msg="EXCHANGE/CORRELATION not found !"
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
  end if
  if (.not.paw_setup%shape_function%tread) then
    msg="SHAPE FUNCTION TYPE not found !"
-   ABI_WARNING(msg)
+   LIBPAW_WARNING(msg)
  end if
 
  if (.not.found) then
    msg="Aborting now"
-   ABI_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  
  end subroutine rdpawpsxml
@@ -2814,7 +2814,7 @@ end subroutine paw_setup_copy
          if (icor>50) then
            close(funit)
            msg="basis size too large (>50)!"
-           ABI_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
          if (strg == "" ) then 
@@ -2938,7 +2938,7 @@ end subroutine paw_setup_copy
      if(igrid>10)then
        close(funit) 
        msg="igrid>10"
-       ABI_ERROR(msg)
+       LIBPAW_ERROR(msg)
      end if
      found=.true.
      cycle
@@ -2968,7 +2968,7 @@ end subroutine paw_setup_copy
          write(msg, '(3a)' )&
 &         '  the grid r=a*i/(1-b*i) is not implemented in ABINIT !',ch10,&
 &         '  Action: check your psp file.'
-         ABI_ERROR(msg)
+         LIBPAW_ERROR(msg)
        case("r=a*i/(n-i)")
          mesh_shift(imsh)=0
          radmesh(imsh)%mesh_type=5
@@ -2992,7 +2992,7 @@ end subroutine paw_setup_copy
          write(msg, '(3a)' )&
 &       '  the grid r=(i/n+a)^5/a-a^4 is not implemented in ABINIT !',ch10,&
 &       '  Action: check your psp file.'
-         ABI_ERROR(msg)
+         LIBPAW_ERROR(msg)
      end select
    end do
  end if

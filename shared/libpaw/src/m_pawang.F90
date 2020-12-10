@@ -443,7 +443,7 @@ subroutine pawang_lsylm(pawang)
 
  if (pawang%use_ls_ylm==0) then
    msg='  ls_ylm pointer is not allocated !'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Initialization
@@ -663,7 +663,7 @@ subroutine pawang_lsylm(pawang)
    write(msg, '(a,i4,a,a,i4)' ) &
 &   '  anginit%npoints =',npoints,ch10,&
 &   '        angl_size =',pawang%angl_size
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 end subroutine initang

@@ -112,7 +112,7 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
    write(msg,'(3a)')&
 &   'Not designed for angular momentum greater than 3 ',ch10,&
 &   'Modification in the table defined in routine setnabla_ylm is required.'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Integration of the angular part: all angular integrals have been computed 
@@ -287,17 +287,17 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
    write(msg,'(3a)')&
 &   'Not designed for angular momentum greater than 3 ',ch10,&
 &   'Modification in the table defined in routine setnabla_ylm is required.'
-   ABI_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !if (mesh_size_cor/=pawrad(1)%mesh_size) then
 !  write(msg,'(a)') 'Wrong mesh_size_cor value (1)!'
-!  ABI_BUG(msg)
+!  LIBPAW_BUG(msg)
 !end if
 !if (any(mesh_size_cor/=pawtab(:)%mesh_size)) then
 !  write(msg,'(3a)') 'Wrong mesh_size_cor value (2)!',ch10,&
 !&                    'Should have only one type of atom.'
-!  ABI_ERROR(msg)
+!  LIBPAW_ERROR(msg)
 !end if
 
 !Integration of the angular part: all angular integrals have been computed
