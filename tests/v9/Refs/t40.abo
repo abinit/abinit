@@ -17,8 +17,8 @@
 .Starting date : Thu 10 Dec 2020.
 - ( at 15h11 )
   
-- input  file    -> /home/bruneval/devel/abinit/tests/Test_suite/v9_t40/t40.in
-- output file    -> t40.out
+- input  file    -> /home/bruneval/devel/abinit/tests/Test_suite/v9_t40/t40.abi
+- output file    -> t40.abo
 - root for input  files -> t40i
 - root for output files -> t40o
 
