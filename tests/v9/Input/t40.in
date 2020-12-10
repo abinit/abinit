@@ -1,0 +1,78 @@
+# Crystalline silicon calculation of Chi with inclvkb=2
+# Dataset 1:  ground state calculation for 6 k-points in IBZ
+# Dataset 2:  calculation of the screening for imaginary freqs (20 purely imaginary)
+#
+
+ndtset      2
+gwpara      2
+
+ecut      12.0
+ecutwfn    12.0
+ecutsigx   3.0
+ecuteps    3.0
+
+# Definition of parameters for the calculation of the KSS file
+nband1      35       # Number of (occ and empty) bands to be computed
+nbdbuf1     5
+tolwfr1     1.0d-10
+
+# Calculation of the screening (epsilon^-1 matrix) with spectral method
+optdriver2  3        # Screening calculation
+getwfk2     1
+symchi2     1
+awtr2       1
+inclvkb2    2
+nband2      25
+
+
+# Data common to the three different datasets
+# Definition of the unit cell: fcc
+acell  3*10.217
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1
+znucl 14
+
+# Definition of the atoms
+natom 2
+typat  1 1
+xred
+      0.0  0.0  0.0
+      0.25 0.25 0.25
+
+# Definition of the k-point grid
+ngkpt   2 2 2
+nshiftk 4
+shiftk
+        0.0 0.0 0.0
+        0.0 0.5 0.5
+        0.5 0.0 0.5
+        0.5 0.5 0.0
+
+istwfk  *1         # This is mandatory in all the GW steps.
+
+# Definition of the SCF procedure
+nstep   500       # Maximal number of SCF cycles
+diemac  12.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t40.out, tolnlines = 15, tolabs = 1.100e-03, tolrel = 3.000e-01
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = F. Bruneval, M. Rodriguez-Mayorga
+#%% keywords = NC, GW
+#%% description = 
+#%%   Silicon
+#%%   check numerical stability of Chi0 with inclvkb=2 
+#%%<END TEST_INFO>
